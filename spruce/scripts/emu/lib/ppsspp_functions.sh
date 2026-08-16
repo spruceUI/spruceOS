@@ -62,6 +62,17 @@ run_ppsspp() {
 			;;
 	esac
 
+	# Under BaseOS the Anbernic pad has no SDL gamecontroller mapping, so PPSSPP
+	# falls back to raw joystick indices and every button lands wrong (the same
+	# reason RetroArch needed an sdl2 autoconfig). Registering the mapping makes
+	# SDL_IsGameController true, so PPSSPP maps by button name and the shipped
+	# controls-*.ini works unchanged. Video also needs the mali driver, as on the
+	# PowerVR devices. Mapping GUID/indices verified on CubeXX; matches MustardOS.
+	if [ -n "$SPRUCE_BASEOS" ]; then
+		export SDL_VIDEODRIVER=mali
+		[ -n "$SDL_GAMECONTROLLER_MAP" ] && export SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+	fi
+
 	# accommodate both relative and absolute paths for PPSSPP bin location
 	case "$PSP_BIN" in
 		"/"*) PPSSPPSDL="$PSP_BIN" ;;

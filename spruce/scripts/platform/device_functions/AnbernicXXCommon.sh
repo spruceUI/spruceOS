@@ -49,6 +49,16 @@ send_virtual_key_L3() {
 
 
 has_lid() {
+    # BaseOS has no vendor partition, so board.ini is gone. Its build target is
+    # the same information: every clamshell target ends in "sp" (rg34xxsp,
+    # rg35xxsp, rgsp).
+    if [ -n "$SPRUCE_BASEOS" ]; then
+        case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+            *sp) return 0 ;;
+            *)   return 1 ;;
+        esac
+    fi
+
     BOARD="$(cat /mnt/vendor/oem/board.ini)"
     case "$BOARD" in
         *xxSP*) return 0 ;;
@@ -93,18 +103,77 @@ runtime_mounts_anbernic_34xxsp() {
     #mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     #mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
-    ln -s /usr/bin/python3 /usr/bin/MainUI
+    # Half of spruce finds the UI with `pgrep MainUI` / `killall MainUI`, so the
+    # interpreter has to carry that name. On stock that is a symlink to the
+    # system python; under BaseOS there is no system python, so alias the
+    # bundled one the same way Flip.sh does.
+    if [ -n "$SPRUCE_BASEOS" ]; then
+        MAINUI="/mnt/SDCARD/spruce/flip/bin/MainUI"
+        touch "$MAINUI"
+        # -o bind, not --bind: BaseOS is BusyBox and its mount does not take the
+        # util-linux long option stock Ubuntu accepted. A failed bind here is
+        # silent and leaves the empty mount point behind, so PyUI execs a 0-byte
+        # file and principal.sh spins forever on a blank screen. Verify, and fall
+        # back to a plain copy rather than trusting the mount.
+        mount -o bind /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI" 2>/dev/null
+        if [ ! -s "$MAINUI" ]; then
+            log_message "MainUI bind mount failed, copying interpreter instead"
+            umount "$MAINUI" 2>/dev/null
+            cp /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI"
+            chmod +x "$MAINUI"
+        fi
+    else
+        ln -s /usr/bin/python3 /usr/bin/MainUI
+    fi
 
-    mount --bind /mnt/vendor/deep/retro/retroarch-1.20 /mnt/sdcard/RetroArch/retroarch
+    # Stock lets us borrow Anbernic's own RetroArch assets off the vendor
+    # partition. BaseOS drops that partition; skip rather than fail the mount.
+    if [ -d /mnt/vendor/deep/retro/retroarch-1.20 ]; then
+        mount --bind /mnt/vendor/deep/retro/retroarch-1.20 /mnt/sdcard/RetroArch/retroarch
+    fi
 }
 
 device_init() {
+    # launch_startup_watchdogs runs every watchdog through /bin/bash. Stock
+    # Anbernic is Ubuntu and has one; BaseOS is BusyBox and does not, so the
+    # watchdogs would all fail silently and take the power and home buttons with
+    # them. Same static aarch64 bash the TrimUI devices drop in for this reason.
+    if [ ! -x /bin/bash ]; then
+        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
+        chmod +x /bin/bash 2>/dev/null
+    fi
+
     runtime_mounts_anbernic_34xxsp
 
-    {
-        sleep 10
-        /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
-    } &
+    [ -n "$SPRUCE_BASEOS" ] && add_spruce_ssh_user
+
+    # BaseOS composes its own adb gadget and binds the UDC during boot. Starting
+    # ours as well would leave two daemons fighting over one controller.
+    if [ -z "$SPRUCE_BASEOS" ]; then
+        {
+            sleep 10
+            /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
+        } &
+    fi
+}
+
+# BaseOS ships only a root user (its dropbear is root/root), so the fleet-standard
+# spruce/happygaming SSH login does not exist here. Rather than fight BaseOS's own
+# dropbear or edit its rootfs, bind-mount an augmented passwd/shadow that keeps
+# every existing line (root untouched) and adds a root-equivalent "spruce" user.
+# Ephemeral - re-applied each boot, gone on reboot, survives BaseOS updates.
+add_spruce_ssh_user() {
+    grep -q '^spruce:' /etc/passwd 2>/dev/null && return 0
+
+    SP_HASH='$6$spruceos00$.nwqRlVkLe.wmkXcEHXcu127ZFxpFQ.8JDbdh4CRd.FbF5biVcIl9qeE9T6QNAbbJaFKp3MLUwlaPUN0alXcl.'
+    cp /etc/passwd /tmp/spruce_passwd || return 0
+    cp /etc/shadow /tmp/spruce_shadow || return 0
+    echo 'spruce:x:0:0:spruce:/root:/bin/sh' >> /tmp/spruce_passwd
+    echo "spruce:${SP_HASH}:19000:0:99999:7:::" >> /tmp/spruce_shadow
+    chmod 644 /tmp/spruce_passwd
+    chmod 600 /tmp/spruce_shadow
+    mount -o bind /tmp/spruce_passwd /etc/passwd
+    mount -o bind /tmp/spruce_shadow /etc/shadow
 }
 
 set_event_arg_for_idlemon() {
@@ -209,7 +278,10 @@ get_volume_level() {
 
 
 send_menu_button_to_retroarch() {
-    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null; then
+    # Every RetroArch binary this device can launch has to be listed here or the
+    # home button silently does nothing in-game. ra64.h700 is the BaseOS default.
+    if pgrep "ra64.universal" >/dev/null || pgrep "ra32.universal" >/dev/null \
+       || pgrep "ra64.h700" >/dev/null || pgrep "ra32.h700" >/dev/null; then
         echo "MENU_TOGGLE" |  /lib/ld-linux-aarch64.so.1 /mnt/SDCARD/spruce/bin64/netcat -u -w0.1 127.0.0.1 55355
     fi
 }
@@ -240,12 +312,27 @@ setup_for_retroarch(){
     #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
     #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
 
-    if [ "$RA_BIN" = "ra32.universal" ]; then
-        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-        export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
-    else
-        export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
-    fi
+    # Match on the arch prefix rather than one exact filename: ra32.h700 is a
+    # 32-bit binary too, and the old equality test would have handed it the
+    # 64-bit core directory and no 32-bit library path at all.
+    case "$RA_BIN" in
+        ra32.*)
+            export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
+            if [ -n "$SPRUCE_BASEOS" ]; then
+                # BaseOS has no /usr/lib32 - its harvest carries only the armhf
+                # loader and libc (enough for the vendor bluetooth binary). The
+                # rest of the 32-bit closure ships with spruce; see the
+                # PROVENANCE note in spruce/h700/lib32.
+                export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
+            else
+                # Stock Anbernic is Ubuntu with a full 32-bit multilib.
+                export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
+            fi
+            ;;
+        *)
+            export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
+            ;;
+    esac
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
