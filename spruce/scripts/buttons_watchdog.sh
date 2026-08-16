@@ -185,7 +185,7 @@ getevent $EVENTS | while read line; do
             SS_B3_DOWN=false
         ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
-            kill $PID_DOWN 2&> /dev/null
+            [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
             PID_DOWN=""
             [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
             PID_UP=""
@@ -197,11 +197,11 @@ getevent $EVENTS | while read line; do
             PID_DOWN=$!
         ;;
         *"key $B_VOLDOWN 0"*) # VOLUMEDOWN key up
-            kill $PID_DOWN 2&> /dev/null
+            [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
             PID_DOWN=""
         ;;
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
-            kill $PID_UP 2&> /dev/null
+            [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
             PID_UP=""
             [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
             PID_DOWN=""
@@ -213,7 +213,7 @@ getevent $EVENTS | while read line; do
             PID_UP=$!
         ;;
         *"key $B_VOLUP 0"*) # VOLUMEUP key up
-            kill $PID_UP 2&> /dev/null
+            [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
             PID_UP=""
         ;;
         *"key $B_HOME 1"*) # Home Button Pressed
