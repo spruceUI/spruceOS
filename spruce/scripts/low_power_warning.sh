@@ -73,7 +73,19 @@ init_battery_log() {
 
 hard_shutdown() {
     CAPACITY=$1
-    if [ "$CAPACITY" -le 1 ]; then
+    if [ "$CAPACITY" -le 1 ] 2>/dev/null; then
+        sleep 1
+        CONFIRM=$(device_get_battery_percent)
+        case "$CONFIRM" in
+            ''|*[!0-9]*)
+                log_message "low_power_warning: unreadable battery confirm sample '$CONFIRM'; skipping forced shutdown"
+                return 0
+                ;;
+        esac
+        if [ "$CONFIRM" -gt 1 ]; then
+            log_message "low_power_warning: battery read $CAPACITY%% not confirmed (re-read $CONFIRM%%); skipping forced shutdown"
+            return 0
+        fi
         flag_add "forced_shutdown" --tmp
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         exit
