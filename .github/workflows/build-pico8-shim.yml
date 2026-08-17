@@ -1,0 +1,54 @@
+name: Build PICO-8 SDL sensor shim
+
+# Builds Emu/PICO8/src/sdl_sensor_shim.c for aarch64 and uploads it as an
+# artifact. Manual only - the source changes about never, and the result is
+# committed to Emu/PICO8/lib-h700/ rather than fetched at runtime.
+#
+# It exists so the shipped .so is reproducible from the source next to it,
+# instead of being a binary someone has to take on trust.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install aarch64 cross compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
+
+      - name: Build
+        run: |
+          mkdir -p out
+          aarch64-linux-gnu-gcc -shared -fPIC -O2 \
+            -o out/libsdl_sensor_shim.so \
+            Emu/PICO8/src/sdl_sensor_shim.c -ldl
+          aarch64-linux-gnu-strip out/libsdl_sensor_shim.so
+
+      - name: Verify
+        run: |
+          echo "=== file ==="
+          file out/libsdl_sensor_shim.so
+          echo "=== exported symbols (must be SDL_Init and SDL_InitSubSystem) ==="
+          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so
+          echo "=== NEEDED ==="
+          aarch64-linux-gnu-readelf -d out/libsdl_sensor_shim.so | grep NEEDED
+          echo "=== glibc version floor (must stay well under the 2.35 BaseOS harvests) ==="
+          aarch64-linux-gnu-readelf -V out/libsdl_sensor_shim.so | grep -o 'GLIBC_2\.[0-9]*' | sort -uV | tail -3
+          # A shim that does not export SDL_Init cannot possibly work, and the
+          # failure would look like "PICO-8 still crashes" rather than a build
+          # error, so fail here instead.
+          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so | grep -q ' T SDL_Init$' \
+            || { echo "FATAL: SDL_Init not exported"; exit 1; }
+          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so | grep -q ' T SDL_InitSubSystem$' \
+            || { echo "FATAL: SDL_InitSubSystem not exported"; exit 1; }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libsdl_sensor_shim
+          path: out/libsdl_sensor_shim.so
+          if-no-files-found: error

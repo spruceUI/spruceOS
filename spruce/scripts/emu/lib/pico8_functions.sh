@@ -65,6 +65,50 @@ run_pico8() {
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
+	elif [ "${PLATFORM#Anbernic}" != "$PLATFORM" ]; then
+		PICO8_BINARY="pico8_64"
+
+		if [ -n "$SPRUCE_BASEOS" ]; then
+			# dll-mali's SDL2 lists only "mali dummy offscreen", so naming mali
+			# saves a probe and stops a future SDL2 picking something else.
+			export SDL_VIDEODRIVER=mali
+
+			# PICO-8 asks SDL_Init for the sensor subsystem, which dll-mali is
+			# not built with, and SDL_Init is all-or-nothing - so it dies with
+			# "FATAL ERROR: Unable to initialize SDL" before drawing anything.
+			# Probed subsystem by subsystem on a CubeXX: TIMER, AUDIO, VIDEO,
+			# JOYSTICK, HAPTIC, GAMECONTROLLER and EVENTS all initialise and
+			# only SENSOR fails, so masking that one bit is the whole fix. The
+			# shim does exactly that and nothing else; source sits beside it in
+			# Emu/PICO8/src.
+			#
+			# The alternative was the stock Anbernic SDL2, which does have
+			# sensors - but it finds zero joysticks under BaseOS with udev on,
+			# with udev disabled, and with SDL_JOYSTICK_DEVICE naming the node.
+			# dll-mali finds the pad because it carries NextUI's H700 joystick
+			# classification patch, which exists because these pads report no
+			# ABS_X/ABS_Y for stock heuristics to latch onto.
+			[ -f "$HOME/lib-h700/libsdl_sensor_shim.so" ] && \
+				export LD_PRELOAD="$HOME/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
+
+			# None of the shipped sdl_controllers.* profiles cover
+			# ANBERNIC-keys, so without this PICO-8 would see the pad but have
+			# no GameController mapping for it. Same handoff ppsspp_functions.sh
+			# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
+			[ -n "$SDL_GAMECONTROLLER_MAP" ] && export SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+		fi
+
+		# The RG28XX mounts its panel turned, exactly like the A30 - both report
+		# DISPLAY_ROTATION 270 with the same 640x480 geometry - so it needs the
+		# same transform. Keyed on the rotation rather than the model so the rest
+		# of the line, which is all 0, keeps the upright setting.
+		if [ "$DISPLAY_ROTATION" = "270" ]; then
+			sed 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+		else
+			sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+		fi
+		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+
 	else
 		PICO8_BINARY="pico8_64"
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
@@ -111,6 +155,13 @@ load_pico8_control_profile() {
 			;;
 		"Pixel2")
 			export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+			;;
+		"Anbernic"*)
+			# Nothing to add. Under BaseOS the SDL2 PICO-8 needs is the
+			# mali-fbdev build in dll-mali, which AnbernicXXCommon.cfg already
+			# has on LD_LIBRARY_PATH; run_pico8 preloads a shim so its missing
+			# sensor subsystem does not abort startup. On stock the system SDL2
+			# is used, as before.
 			;;
 	esac
 
