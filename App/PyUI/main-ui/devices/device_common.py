@@ -678,11 +678,21 @@ class DeviceCommon(AbstractDevice):
         # Need to test 1 at a time to ensure it works
         return False
     
-    def get_selected_emulator(self, menu_options: dict, device_name: str):
+    def get_device_names(self):
+        """Every name this device answers to in a config "devices" list.
+
+        Almost every device answers to exactly one - its model name. A
+        family whose models share a hardware platform overrides this to
+        report a family token alongside the model name, so a single config
+        entry covers the whole line and a new model needs no config edits.
+        """
+        return [self.get_device_name()]
+
+    def get_selected_emulator(self, menu_options: dict):
         for key, option in menu_options.items():
             if key.startswith("Emulator"):
                 devices = option.get("devices", [])
-                if device_name in devices:
+                if any(name in devices for name in self.get_device_names()):
                     return option.get("selected")
         if menu_options.get("Emulator"):
             return menu_options["Emulator"].get("selected")

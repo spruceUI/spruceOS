@@ -149,13 +149,11 @@ class RomsMenuCommon(ABC):
     def _build_rom_list(self, verify_system=True):
         rom_list = self._get_rom_list()
 
-        current_device = Device.get_device().get_device_name()
-
         filtered_roms = []
         for rom_info_ui_entry in rom_list:
             if(verify_system and rom_info_ui_entry.game_system.game_system_config):
                 devices = rom_info_ui_entry.game_system.game_system_config.get_devices()
-                supported_device = not devices or current_device in devices
+                supported_device = Device.supports_device(devices)
                 if supported_device:
                     filtered_roms.append(rom_info_ui_entry)
             else:

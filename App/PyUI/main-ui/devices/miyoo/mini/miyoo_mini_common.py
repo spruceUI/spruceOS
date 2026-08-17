@@ -915,7 +915,7 @@ class MiyooMiniCommon(MiyooDevice):
         else:
             from controller.controller import Controller
             menu_options = rom_info.game_system.game_system_config.get_menu_options()
-            selected_core = self.get_selected_emulator(menu_options, self.device_name)
+            selected_core = self.get_selected_emulator(menu_options)
             if(selected_core is None):
                 Display.display_message("No core found", 2_000)
                 return

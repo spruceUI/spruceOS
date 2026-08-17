@@ -119,7 +119,7 @@ class SettingsMenu(ABC):
                 Language.menu_option_description(option.get('description'))
             )
             devices = option.get('devices')
-            supported_device = not devices or Device.get_device().get_device_name() in devices
+            supported_device = Device.supports_device(devices)
             if(supported_device):
                 selected_value = CfwSystemConfig.get_selected_value(category,name)
                 type = option.get('type')

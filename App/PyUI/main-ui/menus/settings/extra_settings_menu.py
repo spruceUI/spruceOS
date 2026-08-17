@@ -220,7 +220,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
             contains_entry_for_device = False
             for name, option in menu_options.items():
                 devices = option.get('devices')
-                supported_device = not devices or Device.get_device().get_device_name() in devices
+                supported_device = Device.supports_device(devices)
                 if(supported_device):
                     contains_entry_for_device = True
                     break

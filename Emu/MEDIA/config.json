@@ -15,9 +15,7 @@
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
-        "ANBERNIC_RG34XXSP",
-        "ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480",
+        "ANBERNIC_RGXX",
         "MIYOO_MINI",
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
@@ -50,8 +48,7 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX"
       ],
       "options": [
         "gvu",

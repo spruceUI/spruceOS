@@ -39,13 +39,40 @@ from utils.py_ui_config import PyUiConfig
 
 from devices.device_common import DeviceCommon
 
+# Family token every Anbernic RG XX model answers to in addition to its own
+# model name. The XX line is one hardware platform in every way that decides
+# whether an app or a setting is offered - same H700 SoC, same controls, same
+# userland - so app and emulator configs name this rather than listing each
+# model. Models still differ in panel and layout; that stays with the per-model
+# classes below (screen_width/screen_height/screen_rotation) and the per-model
+# platform cfgs on the shell side.
+ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
+
+
 #/mnt/vendor/ctrl/dmenu_ln
 class AnbernicXXCommon(DeviceCommon):
-    def __init__(self, main_ui_mode): 
-        self.device_name = "ANBERNIC_RG34XXSP"
+    def __init__(self, main_ui_mode):
+        # device_name is set by the subclass before it calls up here. This used
+        # to assign "ANBERNIC_RG34XXSP" unconditionally, which ran *after* the
+        # subclass and so made every XX model report itself as an RG34XXSP - no
+        # config "devices" list could tell the models apart.
         script_dir = Path(__file__).resolve().parent
-        default_cfg_path = script_dir / 'anbernic-rg34xxsp-system.json'
-        system_cfg_path = "/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json"
+        default_cfg_path = script_dir / 'anbernic-xx-system-default.json'
+        # Per model, not shared: this file holds panel calibration (brightness,
+        # contrast, saturation, hue) and the XX models do not share a panel.
+        system_cfg_name = self.device_name.lower().replace('_', '-') + '-system.json'
+        system_cfg_path = "/mnt/SDCARD/Saves/" + system_cfg_name
+
+        # Every XX model used to share the RG34XXSP file. On a card that
+        # predates the split the model's own file does not exist yet, so seed
+        # it from the shared one rather than from the shipped default - that
+        # default carries "vol": 0, which is right for a fresh install but
+        # would silence a device that was working a moment ago. The RG34XXSP
+        # keeps the shared filename, so for it this is always a no-op.
+        legacy_cfg_path = Path("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json")
+        if not self._is_usable_config(system_cfg_path) and self._is_usable_config(legacy_cfg_path):
+            default_cfg_path = legacy_cfg_path
+
         self._load_system_config(system_cfg_path, default_cfg_path)
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
         self.game_utils = MiyooTrimGameSystemUtils()
@@ -80,6 +107,16 @@ class AnbernicXXCommon(DeviceCommon):
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+
+    @staticmethod
+    def _is_usable_config(path):
+        # Same test ConfigCopier.ensure_config applies before deciding a config
+        # needs seeding, so the two agree about what counts as "already there".
+        try:
+            path = Path(path)
+            return path.exists() and path.stat().st_size > 0
+        except OSError:
+            return False
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -145,7 +182,7 @@ class AnbernicXXCommon(DeviceCommon):
         else:
             from controller.controller import Controller
             menu_options = rom_info.game_system.game_system_config.get_menu_options()
-            selected_core = self.get_selected_emulator(menu_options, self.device_name)
+            selected_core = self.get_selected_emulator(menu_options)
             if(selected_core is None):
                 Display.display_message("No core found", 2_000)
                 return
@@ -425,7 +462,12 @@ class AnbernicXXCommon(DeviceCommon):
 
     def get_device_name(self):
         return self.device_name
-    
+
+    def get_device_names(self):
+        # Model name first so anything reading the first entry still gets the
+        # specific device; the family token is what configs are written against.
+        return [self.device_name, ANBERNIC_XX_FAMILY]
+
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
