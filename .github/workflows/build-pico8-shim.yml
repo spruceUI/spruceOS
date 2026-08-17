@@ -16,36 +16,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install aarch64 cross compiler
+      - name: Install clang and lld
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends gcc-aarch64-linux-gnu
+          sudo apt-get install -y --no-install-recommends clang lld llvm
 
       - name: Build
+        # Same recipe the committed binary was built with. clang cross-compiles
+        # to aarch64 without a separate toolchain, and -nostdlib leaves dlsym
+        # undefined so it resolves from the process at load time - which is what
+        # an LD_PRELOAD shim wants anyway. The result has no NEEDED entries and
+        # no glibc version requirements, so there is nothing in it to go stale.
         run: |
           mkdir -p out
-          aarch64-linux-gnu-gcc -shared -fPIC -O2 \
+          clang --target=aarch64-linux-gnu -fuse-ld=lld -shared -fPIC -nostdlib -O2 \
             -o out/libsdl_sensor_shim.so \
-            Emu/PICO8/src/sdl_sensor_shim.c -ldl
-          aarch64-linux-gnu-strip out/libsdl_sensor_shim.so
+            Emu/PICO8/src/sdl_sensor_shim.c
+          llvm-strip out/libsdl_sensor_shim.so
 
       - name: Verify
         run: |
           echo "=== file ==="
           file out/libsdl_sensor_shim.so
-          echo "=== exported symbols (must be SDL_Init and SDL_InitSubSystem) ==="
-          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so
-          echo "=== NEEDED ==="
-          aarch64-linux-gnu-readelf -d out/libsdl_sensor_shim.so | grep NEEDED
-          echo "=== glibc version floor (must stay well under the 2.35 BaseOS harvests) ==="
-          aarch64-linux-gnu-readelf -V out/libsdl_sensor_shim.so | grep -o 'GLIBC_2\.[0-9]*' | sort -uV | tail -3
-          # A shim that does not export SDL_Init cannot possibly work, and the
-          # failure would look like "PICO-8 still crashes" rather than a build
-          # error, so fail here instead.
-          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so | grep -q ' T SDL_Init$' \
-            || { echo "FATAL: SDL_Init not exported"; exit 1; }
-          aarch64-linux-gnu-nm -D --defined-only out/libsdl_sensor_shim.so | grep -q ' T SDL_InitSubSystem$' \
-            || { echo "FATAL: SDL_InitSubSystem not exported"; exit 1; }
+          echo "=== dynamic symbols ==="
+          llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so
+          echo "=== NEEDED (expected: none) ==="
+          llvm-readelf -d out/libsdl_sensor_shim.so | grep NEEDED || echo "  none"
+          # A shim that does not export these cannot work, and the failure would
+          # look like "PICO-8 still crashes" rather than a build error, so fail
+          # here instead.
+          for sym in SDL_Init SDL_InitSubSystem; do
+            llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so \
+              | awk -v s="$sym" '$7!="UND" && $4=="FUNC" && $8==s {found=1} END{exit !found}' \
+              || { echo "FATAL: $sym not exported"; exit 1; }
+          done
+          # dlsym must stay undefined - if it got linked in statically the
+          # RTLD_NEXT lookup would not reach the real SDL2.
+          llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so \
+            | awk '$7=="UND" && $8=="dlsym" {found=1} END{exit !found}' \
+            || { echo "FATAL: dlsym is not an undefined symbol"; exit 1; }
+          echo "all checks passed"
 
       - uses: actions/upload-artifact@v4
         with:
