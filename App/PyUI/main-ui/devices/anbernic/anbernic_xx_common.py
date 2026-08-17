@@ -53,22 +53,23 @@ ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
         # device_name is set by the subclass before it calls up here. This used
-        # to assign "ANBERNIC_RG34XXSP" unconditionally, which ran *after* the
-        # subclass and so made every XX model report itself as an RG34XXSP - no
-        # config "devices" list could tell the models apart.
+        # to assign a model name unconditionally, which ran *after* the subclass
+        # and so made every XX model report itself as that one model - no config
+        # "devices" list could tell the models apart.
         script_dir = Path(__file__).resolve().parent
-        default_cfg_path = script_dir / 'anbernic-xx-system-default.json'
-        # Per model, not shared: this file holds panel calibration (brightness,
-        # contrast, saturation, hue) and the XX models do not share a panel.
-        system_cfg_name = self.device_name.lower().replace('_', '-') + '-system.json'
-        system_cfg_path = "/mnt/SDCARD/Saves/" + system_cfg_name
+        default_cfg_path = script_dir / 'anbernic-rg-xx-system.json'
+        # Shared by the whole XX line on purpose. spruce is built around one card
+        # in many devices, so these settings should follow the card rather than
+        # stay behind on the device they were set on. The panels differ, so
+        # calibration tuned on one is only approximate on another - that is the
+        # accepted trade for settings that travel.
+        system_cfg_path = "/mnt/SDCARD/Saves/anbernic-rg-xx-system.json"
 
-        # Every XX model used to share the RG34XXSP file. On a card that
-        # predates the split the model's own file does not exist yet, so seed
-        # it from the shared one rather than from the shipped default - that
-        # default carries "vol": 0, which is right for a fresh install but
-        # would silence a device that was working a moment ago. The RG34XXSP
-        # keeps the shared filename, so for it this is always a no-op.
+        # This file was called anbernic-rg34xxsp-system.json until the rename, so
+        # on an existing card the new name does not exist yet. Seed it from the
+        # old one rather than from the shipped default: that default carries
+        # "vol": 0 and set_volume_to_config applies a literal zero, so seeding
+        # from it would leave every XX device silent after the update.
         legacy_cfg_path = Path("/mnt/SDCARD/Saves/anbernic-rg34xxsp-system.json")
         if not self._is_usable_config(system_cfg_path) and self._is_usable_config(legacy_cfg_path):
             default_cfg_path = legacy_cfg_path

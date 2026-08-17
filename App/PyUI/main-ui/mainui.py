@@ -102,9 +102,9 @@ def initialize_device(device, main_ui_mode):
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.a30.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
-    elif "ANBERNIC_RG34XXSP" == device:
-        from devices.anbernic.anbernic_rg34xxsp import AnbernicRG34xxSP
-        Device.init(AnbernicRG34xxSP(main_ui_mode))
+    elif "ANBERNIC_RGXX720480" == device:
+        from devices.anbernic.anbernic_xx_720_x_480 import Anbernic720x480
+        Device.init(Anbernic720x480(main_ui_mode))
     elif "ANBERNIC_RG28XX" == device:
         from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
         Device.init(AnbernicRG28xx(main_ui_mode))
