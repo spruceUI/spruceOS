@@ -63,6 +63,32 @@ case "$PLATFORM" in
             # way up by the time an app sees it. Note the shell-side
             # DISPLAY_ROTATION is still 270 for that model, which is a wider
             # inconsistency rather than something for this app to work around.
+            #
+            # vtree drives input through SDL_GameController and loads mappings
+            # with SDL_GameControllerAddMappingsFromRW from the path in
+            # config.ini, /usr/lib/gamecontrollerdb.txt. That file does not
+            # exist on BaseOS, and there is none beside the binary either, so
+            # the pad enumerated with no mapping and nothing responded. SDL also
+            # reads SDL_GAMECONTROLLERCONFIG at init, which covers it without
+            # shipping a database. Same handoff ppsspp_functions.sh and
+            # pico8_functions.sh already use; AnbernicXXCommon.cfg picks the map
+            # by BASEOS_TARGET, since every H700 pad reports the same GUID.
+            # The shared map names buttons by their printed label - a:b3 is the
+            # button marked A - which is what RetroArch and PPSSPP want, since
+            # A is confirm on a Nintendo layout. SDL's own convention is
+            # positional though: a is South, b East, x West, y North. vtree
+            # carries spruce's nintendo-button-labels patch and already swaps
+            # A<->B and X<->Y itself, so feeding it the label-named map made it
+            # correct twice and land back where it started: A and B swapped, and
+            # Y doing what X should. Hand it the positional form instead. Only
+            # the four face buttons move; shoulders, triggers, sticks and d-pad
+            # are unaffected.
+            if [ -n "$SDL_GAMECONTROLLER_MAP" ]; then
+                export SDL_GAMECONTROLLERCONFIG="$(printf '%s' "$SDL_GAMECONTROLLER_MAP" \
+                    | sed -e 's/a:\([^,]*\),b:\([^,]*\)/a:\2,b:\1/' \
+                          -e 's/x:\([^,]*\),y:\([^,]*\)/x:\2,y:\1/')"
+            fi
+
             ./vtree.aarch64 >"$HOME/log.txt" 2>&1
             sync
         else
