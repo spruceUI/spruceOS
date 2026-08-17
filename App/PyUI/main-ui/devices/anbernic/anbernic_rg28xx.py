@@ -19,4 +19,4 @@ class AnbernicRG28xx(AnbernicXXCommon):
         return 480
         
     def screen_rotation(self):
-        return 270
+        return 0
