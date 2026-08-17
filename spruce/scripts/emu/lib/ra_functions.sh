@@ -225,6 +225,55 @@ input_l_y_minus_axis = "-1"'
 	esac
 }
 
+# The 32-bit RetroArch needs a different joypad driver, so it needs its own
+# autoconfig. The 32-bit SDL2 we ship for BaseOS dlopens libudev and enumerates
+# nothing where no udevd runs - verified on a CubeXX, with and without
+# SDL_JOYSTICK_DISABLE_UDEV - while RetroArch's linuxraw driver reads the legacy
+# /dev/input/js0 and finds the pad as "ANBERNIC-keys".
+#
+# linuxraw numbers buttons in kernel order, matching neither the udev nor the
+# sdl2 profile, and linuxraw_joypad.c has no hat support at all, so the d-pad
+# binds as axes rather than h0. The stick-model numbers below are not guesses:
+# they were read straight out of the kernel's own joydev tables on a CubeXX with
+# JSIOCGBTNMAP and JSIOCGAXMAP, then matched to the evdev codes this line
+# reports in AnbernicXXCommon.cfg.
+#
+# The stickless numbers ARE derived rather than measured. Those models omit L3
+# (evdev 313) and R3 (316) and the four stick axes, and joydev assigns indices
+# in ascending evdev-code order, so everything above MENU shifts down by one and
+# the d-pad lands on axes 0/1. Worth checking on a stickless unit.
+write_baseos_ra_autoconfig_linuxraw() {
+	ac="$RA_DIR/.retroarch/autoconfig/linuxraw/ANBERNIC-keys.cfg"
+	mkdir -p "${ac%/*}" 2>/dev/null || return 0
+
+	# Shared across every model. RetroArch reports this pad as (0/0).
+	common='input_driver = "linuxraw"
+input_device = "ANBERNIC-keys"
+input_vendor_id = "0"
+input_product_id = "0"
+input_a_btn = "0"
+input_b_btn = "1"
+input_y_btn = "2"
+input_x_btn = "3"
+input_l_btn = "4"
+input_r_btn = "5"
+input_select_btn = "6"
+input_start_btn = "7"'
+
+	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+		rg34xxsp|rg35xxh|rg35xxpro|rg40xxh|rg40xxv|rgcubexx)
+			# Analog-stick models: L3/L2/R2/R3 at 9-12, sticks on axes 0-3,
+			# d-pad on axes 4/5.
+			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_r3_btn = "12"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
+			;;
+		*)
+			# Stickless models: no L3/R3 or sticks, so L2/R2 shift to 9/10 and
+			# the d-pad is the only axis pair.
+			printf '%s\ninput_l2_btn = "9"\ninput_r2_btn = "10"\ninput_left_axis = "-0"\ninput_right_axis = "+0"\ninput_up_axis = "-1"\ninput_down_axis = "+1"\n' "$common" > "$ac"
+			;;
+	esac
+}
+
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
@@ -281,9 +330,21 @@ run_retroarch() {
 
 	# BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
 	# Overlay the sdl2 input drivers on top without touching the shared cfg.
-	if [ -n "$SPRUCE_BASEOS" ] && [ -f "$RA_DIR/platform/retroarch-AnbernicRG_XX-baseos.cfg" ]; then
-		RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/retroarch-AnbernicRG_XX-baseos.cfg"
-		write_baseos_ra_autoconfig
+	# The 32-bit build gets its own overlay: its SDL2 cannot see the pad here,
+	# so it drives the joypad through linuxraw instead. One overlay either way,
+	# because only the last --appendconfig would win.
+	if [ -n "$SPRUCE_BASEOS" ]; then
+		case "$RA_BIN" in
+			ra32.*) baseos_overlay="retroarch-AnbernicRG_XX-baseos32.cfg" ;;
+			*)      baseos_overlay="retroarch-AnbernicRG_XX-baseos.cfg" ;;
+		esac
+		if [ -f "$RA_DIR/platform/$baseos_overlay" ]; then
+			RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/$baseos_overlay"
+			case "$RA_BIN" in
+				ra32.*) write_baseos_ra_autoconfig_linuxraw ;;
+				*)      write_baseos_ra_autoconfig ;;
+			esac
+		fi
 	fi
 
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
