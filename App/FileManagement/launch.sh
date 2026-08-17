@@ -47,8 +47,28 @@ case "$PLATFORM" in
         sync
         ;;
     "Anbernic"*)
-        cd "/mnt/vendor/bin/fileM"
-        /mnt/vendor/bin/fileM/dinguxCommand_en.dge
+        if [ -n "$SPRUCE_BASEOS" ]; then
+            # Stock borrows Anbernic's own DinguxCommander off the vendor
+            # partition. BaseOS replaces the userland and drops /mnt/vendor
+            # entirely, so that binary does not exist and this app was dead.
+            #
+            # vtree.aarch64 runs here as-is: all six of its NEEDED libraries
+            # resolve - libSDL2 from App/PyUI/dll-mali, libSDL2_ttf and
+            # libSDL2_image from the same directory, and libc/libm/loader from
+            # BaseOS's own harvest - and its glibc floor is 2.17, well under
+            # the 2.35 BaseOS keeps from the stock image.
+            #
+            # No --rotate, unlike the A30: PyUI reports screen_rotation 0 for
+            # the RG28XX under BaseOS, so the framebuffer is already the right
+            # way up by the time an app sees it. Note the shell-side
+            # DISPLAY_ROTATION is still 270 for that model, which is a wider
+            # inconsistency rather than something for this app to work around.
+            ./vtree.aarch64 >"$HOME/log.txt" 2>&1
+            sync
+        else
+            cd "/mnt/vendor/bin/fileM"
+            /mnt/vendor/bin/fileM/dinguxCommand_en.dge
+        fi
         ;;
     *)
         echo "File Management: unsupported PLATFORM=$PLATFORM" >&2
