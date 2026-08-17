@@ -73,6 +73,16 @@ run_pico8() {
 			# saves a probe and stops a future SDL2 picking something else.
 			export SDL_VIDEODRIVER=mali
 
+			# PICO-8 downloads through libcurl, or through wget when config.txt
+			# sets use_wget - which spruce ships as 1. BaseOS has no libcurl, so
+			# wget is the only path, and BaseOS's wget is busybox, which cannot
+			# do TLS: zero bytes for any https URL. Every cart fetch is https,
+			# so Splore browsed fine but no cart would ever load, failing with
+			# "could not connect to bbs". Put a curl-backed wget shim first on
+			# PATH - curl is present and statically linked with its own SSL.
+			# Scoped to this launch, so nothing else sees the shim.
+			[ -x "$EMU_DIR/bin/wget" ] && export PATH="$EMU_DIR/bin:$PATH"
+
 			# PICO-8 asks SDL_Init for the sensor subsystem, which dll-mali is
 			# not built with, and SDL_Init is all-or-nothing - so it dies with
 			# "FATAL ERROR: Unable to initialize SDL" before drawing anything.
