@@ -123,6 +123,11 @@ case "$SS_SHORTCUT" in
     "L2+R2+DOWN")
         SS_B3=$B_DOWN
         ;;
+    "MENU+SELECT")
+        SS_B1=$B_MENU
+        SS_B2=$B_SELECT
+        SS_B3="NULL"
+        ;;
     "Off")
         SS_B1="NULL"
         SS_B2="NULL"
@@ -133,6 +138,32 @@ esac
 SS_B1_DOWN=false
 SS_B2_DOWN=false
 SS_B3_DOWN=false
+
+SCREENSHOT_MENU_CONSUMED="/tmp/screenshot_menu_consumed"
+SS_MENU_CONSUME_ID=0
+rm -f "$SCREENSHOT_MENU_CONSUMED"
+
+mark_screenshot_menu_consumed() {
+    [ "$SS_SHORTCUT" = "MENU+SELECT" ] || return
+
+    SS_MENU_CONSUME_ID=$((SS_MENU_CONSUME_ID + 1))
+    printf '%s\n' "$$-$SS_MENU_CONSUME_ID" > "$SCREENSHOT_MENU_CONSUMED"
+}
+
+schedule_screenshot_menu_cleanup() {
+    [ "$SS_SHORTCUT" = "MENU+SELECT" ] || return
+    [ "$SS_B1_DOWN" = false ] || return
+    [ "$SS_B2_DOWN" = false ] || return
+    [ -e "$SCREENSHOT_MENU_CONSUMED" ] || return
+
+    SS_MENU_CONSUME_TOKEN="$(cat "$SCREENSHOT_MENU_CONSUMED" 2>/dev/null)"
+    (
+        sleep 1
+        if [ "$(cat "$SCREENSHOT_MENU_CONSUMED" 2>/dev/null)" = "$SS_MENU_CONSUME_TOKEN" ]; then
+            rm -f "$SCREENSHOT_MENU_CONSUMED"
+        fi
+    ) &
+}
 
 # scan all button input
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
@@ -159,21 +190,25 @@ getevent $EVENTS | while read line; do
         ;;
         *"key $SS_B1 1"*) # Screenshot key 1 down
             SS_B1_DOWN=true
-            if [ "$SS_B2_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
+            if [ "$SS_B2_DOWN" = true ] && { [ "$SS_B3" = "NULL" ] || [ "$SS_B3_DOWN" = true ]; }; then
+                mark_screenshot_menu_consumed
                 take_screenshot_bg &
             fi
         ;;
         *"key $SS_B1 0"*) # Screenshot key 1 up
             SS_B1_DOWN=false
+            schedule_screenshot_menu_cleanup
         ;;
         *"key $SS_B2 1"*) # Screenshot key 2 down
             SS_B2_DOWN=true
-            if [ "$SS_B1_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
+            if [ "$SS_B1_DOWN" = true ] && { [ "$SS_B3" = "NULL" ] || [ "$SS_B3_DOWN" = true ]; }; then
+                mark_screenshot_menu_consumed
                 take_screenshot_bg &
             fi
         ;;
         *"key $SS_B2 0"*) # Screenshot key 2 up
             SS_B2_DOWN=false
+            schedule_screenshot_menu_cleanup
         ;;
         *"key $SS_B3 1"*) # Screenshot key 3 down
             SS_B3_DOWN=true

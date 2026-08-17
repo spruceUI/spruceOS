@@ -256,7 +256,8 @@
                     "Off",
                     "L2+R2+Y",
                     "L2+R2+X",
-                    "L2+R2+DOWN"
+                    "L2+R2+DOWN",
+                    "MENU+SELECT"
                 ],
                 "selected": "L2+R2+Y"
             },
