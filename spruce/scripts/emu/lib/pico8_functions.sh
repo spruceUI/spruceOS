@@ -105,7 +105,7 @@ run_pico8() {
 			# ANBERNIC-keys, so without this PICO-8 would see the pad but have
 			# no GameController mapping for it. Same handoff ppsspp_functions.sh
 			# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
-			[ -n "$SDL_GAMECONTROLLER_MAP" ] && export SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+			export_sdl_gamecontroller_map
 		fi
 
 		# The RG28XX mounts its panel turned, exactly like the A30 - both report

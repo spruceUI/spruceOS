@@ -70,7 +70,7 @@ run_ppsspp() {
 	# PowerVR devices. Mapping GUID/indices verified on CubeXX; matches MustardOS.
 	if [ -n "$SPRUCE_BASEOS" ]; then
 		export SDL_VIDEODRIVER=mali
-		[ -n "$SDL_GAMECONTROLLER_MAP" ] && export SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+		export_sdl_gamecontroller_map
 	fi
 
 	# accommodate both relative and absolute paths for PPSSPP bin location

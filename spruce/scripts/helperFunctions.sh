@@ -1061,6 +1061,53 @@ extract_7z_with_progress() {
 }
 
 
+##### SDL GAMECONTROLLER MAPPING #####
+
+# Hand SDL a GameController mapping for the built-in pad.
+#
+# Nothing on BaseOS ships one. Every H700 Anbernic reports the same GUID and the
+# name "ANBERNIC-keys", so SDL cannot pick a per-model mapping by itself either -
+# AnbernicXXCommon.cfg selects the right one by BASEOS_TARGET and leaves it in
+# SDL_GAMECONTROLLER_MAP. Without it a pad enumerates as a plain joystick with
+# is_gamecontroller false, and anything driving input through SDL_GameController
+# silently does nothing: PPSSPP, PICO-8, vtree and gptokeyb have all hit this.
+#
+# There are two forms and picking the wrong one is not a failure, it is a
+# symmetric swap - A and B doing each other's job, Y doing what X should - which
+# is easy to misread as a broken mapping rather than the wrong convention:
+#
+#   (default)     label-named. "a" is the button *marked* A. What RetroArch and
+#                 PPSSPP want, since A is confirm on a Nintendo layout.
+#   positional    SDL's own convention: a South, b East, x West, y North. What
+#                 an app wants when it speaks raw SDL - gptokeyb's .gptk files -
+#                 or when it already applies its own Nintendo correction, as
+#                 vtree does with spruce's nintendo-button-labels patch.
+#
+# Only the four face buttons differ between the two; shoulders, triggers, stick
+# clicks and the d-pad are identical. Safe to call anywhere: it is a no-op when
+# SDL_GAMECONTROLLER_MAP is unset, which is every non-BaseOS device.
+#
+# Usage:
+#   export_sdl_gamecontroller_map              # label-named
+#   export_sdl_gamecontroller_map positional   # SDL convention
+export_sdl_gamecontroller_map() {
+    [ -n "$SDL_GAMECONTROLLER_MAP" ] || return 0
+
+    case "$1" in
+        positional)
+            SDL_GAMECONTROLLERCONFIG="$(printf '%s' "$SDL_GAMECONTROLLER_MAP" \
+                | sed -e 's/a:\([^,]*\),b:\([^,]*\)/a:\2,b:\1/' \
+                      -e 's/x:\([^,]*\),y:\([^,]*\)/x:\2,y:\1/')"
+            ;;
+        *)
+            SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+            ;;
+    esac
+
+    export SDL_GAMECONTROLLERCONFIG
+}
+
+
 ##### WIFI HANDLING #####
 
 disable_wifi() {
