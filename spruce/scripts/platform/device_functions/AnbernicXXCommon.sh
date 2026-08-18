@@ -13,6 +13,51 @@
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
+# The XX line has no rumble GPIO, so utils/rumble.sh's rumble_gpio is not usable
+# here - see RUMBLE_GPIO in AnbernicXXCommon.cfg. The motor is driven through
+# evdev force feedback on the pad, which is the Pixel2's approach, and this
+# keeps that call shape: rumble <device> <intensity> <duration-ms>.
+#
+# The magnitudes below are STARTING VALUES, not tuned ones. Measured on an RG SP:
+# 0x1000 at 200ms and 0x2000 at 150ms could not be felt at all, while 0x8000 and
+# 0xFFFF both could - so this motor has a floor somewhere above 0x2000, and the
+# Pixel2's Weak of 0x2000 would read as "rumble is broken" here. All three values
+# are therefore at or above a magnitude confirmed to work, so no setting can
+# silently do nothing.
+#
+# Duration was a poor intensity lever in testing - 50ms felt very weak and 150ms
+# normal, but 250ms was reported weaker than 150ms, so perceived strength does
+# not track on-time cleanly on this motor. Intensity is expressed through
+# magnitude instead, as on every other device. Retune freely: these are numbers
+# in a shell script and need no rebuild.
+vibrate() {
+    duration=150
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
+
+    # Arguments in any order, matching the other platforms.
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
+        esac
+        shift
+    done
+
+    case "$intensity" in
+        "Weak")   intensity=0x8000 ;;
+        "Medium") intensity=0xC000 ;;
+        "Strong") intensity=0xFFFF ;;
+    esac
+
+    [ -x /mnt/SDCARD/spruce/bin64/rumble ] || return 0
+    /mnt/SDCARD/spruce/bin64/rumble "$EVENT_PATH_READ_INPUTS_SPRUCE" "$intensity" "$duration"
+}
+
 get_config_path() {
     echo "$SYSTEM_JSON"
 }
