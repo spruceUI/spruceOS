@@ -5,6 +5,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
 
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
 SSH_SERVICE_NAME=$(get_ssh_service_name)
@@ -68,6 +69,14 @@ connect_services() {
 	done
 	rm -rf "$CONNECT_LOCK"
 	trap - EXIT INT TERM
+
+	# Before anything that speaks TLS. These devices have no battery-backed
+	# RTC, so a cold boot starts years in the past and every certificate reads
+	# as "not yet valid" - Syncthing, the update check and RetroAchievements
+	# all fail in ways that look like network faults. Returns immediately if
+	# the clock is already sane, and this is the first point where the network
+	# is known to be up.
+	sync_system_time
 
 	# Samba check
 	if [ "$samba_enabled" = "True" ]; then
