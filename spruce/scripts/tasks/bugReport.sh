@@ -158,6 +158,74 @@ dump_node() {
     echo
     echo "==== processes that apply those settings ===="
     ps 2>/dev/null | grep -iE "keymon|audioserver|MainUI|main$" | grep -v grep || echo "  none running"
+
+    # WiFi. spruce itself loads no driver and creates no interface - it assumes
+    # wlan0 exists and starts wpa_supplicant on it - so when a device finds no
+    # networks the cause is almost always below us: no driver bound, missing
+    # firmware, an interface under another name, or an rfkill block. This
+    # section is meant to tell those apart from a device with no SSH.
+    #
+    # NOTHING HERE MAY PRINT wpa_supplicant.conf. It holds pre-shared keys in
+    # the clear, and this file is packaged into the bug report users hand out.
+    # Only its existence and network count are reported.
+    echo
+    echo "==== wifi: interfaces ===="
+    echo "BASEOS_TARGET : $(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null || echo '<not baseos>')"
+    echo "/sys/class/net:"
+    ls -1 /sys/class/net 2>/dev/null | sed 's/^/  /' || echo "  <missing>"
+    for n in /sys/class/net/*/; do
+        [ -d "$n" ] || continue
+        i=$(basename "$n")
+        case "$i" in lo) continue ;; esac
+        echo "  $i: operstate=$(cat "$n/operstate" 2>/dev/null) address=$(cat "$n/address" 2>/dev/null)"
+        [ -e "$n/wireless" ] && echo "      (wireless)"
+        [ -e "$n/device/uevent" ] && sed 's/^/      /' "$n/device/uevent" 2>/dev/null
+    done
+
+    echo
+    echo "==== wifi: driver ===="
+    echo "loaded modules:"
+    lsmod 2>/dev/null | sed 's/^/  /' || echo "  <lsmod unavailable>"
+    echo "wifi firmware blobs present:"
+    find /lib/firmware /vendor/firmware /etc/firmware -iname '*8188*' -o -iname '*8821*' \
+         -o -iname '*8723*' -o -iname '*aic*' -o -iname '*rtl*' -o -iname '*wifi*' 2>/dev/null \
+         | head -30 | sed 's/^/  /' || true
+    echo "rfkill:"
+    rfkill list 2>/dev/null | sed 's/^/  /' || echo "  <rfkill unavailable>"
+
+    echo
+    echo "==== wifi: radio state ===="
+    for c in "iw dev" "iwconfig" "ifconfig -a"; do
+        if command -v "${c%% *}" >/dev/null 2>&1; then
+            echo "--- $c ---"
+            $c 2>&1 | sed 's/^/  /'
+        else
+            echo "--- $c --- <not installed>"
+        fi
+    done
+    if command -v iw >/dev/null 2>&1; then
+        echo "--- iw dev wlan0 scan (SSID lines only) ---"
+        iw dev wlan0 scan 2>&1 | grep -E '^\s*(SSID|BSS)' | head -20 | sed 's/^/  /' \
+            || echo "  <scan failed or no results>"
+    fi
+
+    echo
+    echo "==== wifi: spruce side ===="
+    echo "wifi flag in system json : $(jq -r '.wifi // "<absent>"' "$SYSTEM_JSON" 2>/dev/null || echo '<unreadable>')"
+    if [ -f "$WPA_SUPPLICANT_FILE" ]; then
+        # Count only. The file holds plaintext PSKs and must never be printed.
+        echo "wpa_supplicant.conf      : present, $(grep -c '^[[:space:]]*network=' "$WPA_SUPPLICANT_FILE" 2>/dev/null) network block(s)"
+    else
+        echo "wpa_supplicant.conf      : MISSING ($WPA_SUPPLICANT_FILE)"
+    fi
+    echo "running processes:"
+    ps 2>/dev/null | grep -iE "wpa_supplicant|dhclient|udhcpc|connman" | grep -v grep | sed 's/^/  /' \
+        || echo "  none running"
+
+    echo
+    echo "==== wifi: kernel log ===="
+    dmesg 2>/dev/null | grep -iE 'wlan|wifi|nl80211|cfg80211|firmware|8188|8821|8723|aic' \
+        | tail -40 | sed 's/^/  /' || echo "  <nothing matched>"
 } > "$device_state" 2>&1
 
 7zr a -spf2 "$output7z" \
