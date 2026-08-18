@@ -15,6 +15,7 @@
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 
 # Export for enabling SSL support in CURL
