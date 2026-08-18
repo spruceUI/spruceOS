@@ -316,6 +316,39 @@ class DeviceCommon(AbstractDevice):
                 Display.display_message(Language.label("startingIpAssignment", "Starting ip address assignment process"))
             self.start_udhcpc()
 
+    # spruce's networkservices.sh starts Samba, SSH, SFTPGo, Syncthing and the
+    # landing page, and syncs the clock, once the network is actually up. It runs
+    # from principal.sh at boot and again on every return to the menu from a game -
+    # but PyUI brings WiFi up through its own Python path, so turning WiFi on from
+    # the menu left all of that waiting for the next game exit. The clock is the
+    # worst of it: until it is set, every HTTPS request fails as "certificate not
+    # yet valid", because these devices have no battery-backed RTC.
+    #
+    # Safe to fire and forget. The script waits for the connection itself, so
+    # calling it before wlan0 has an address is fine; it holds a lock so a second
+    # copy exits immediately; and it skips services that are already running.
+    # Detached, because it blocks until the network appears.
+    NETWORK_SERVICES_SCRIPT = "/mnt/SDCARD/spruce/scripts/networkservices.sh"
+
+    def _run_network_services(self, *args):
+        if not os.path.exists(self.NETWORK_SERVICES_SCRIPT):
+            # Not a spruce userland (muOS, Rocknix) - nothing of ours to start.
+            return
+        try:
+            subprocess.Popen(
+                [self.NETWORK_SERVICES_SCRIPT, *args],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to launch networkservices.sh: {e}")
+
+    def start_network_services(self):
+        self._run_network_services()
+
+    def stop_network_services(self):
+        self._run_network_services("off")
+
 
     @throttle.limit_refresh(10)
     def get_ip_addr_text(self):

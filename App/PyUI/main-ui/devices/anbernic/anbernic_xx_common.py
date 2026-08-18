@@ -572,6 +572,7 @@ class AnbernicXXCommon(DeviceCommon):
     def disable_wifi(self):
         self.system_config.set_wifi(0)
         self.system_config.save_config()
+        self.stop_network_services()
         PyUiLogger.get_logger().info("Stopping WiFi Services")
         ProcessRunner.run(['killall', '-15', 'wpa_supplicant'])
         time.sleep(0.1)  
@@ -585,6 +586,9 @@ class AnbernicXXCommon(DeviceCommon):
     def enable_wifi(self):
         self.system_config.set_wifi(1)
         self.system_config.save_config()
+        # Before the "already running" return below, not after it - that path
+        # still means WiFi is on, and the services still need starting.
+        self.start_network_services()
         try:
             # Check if wpa_supplicant is running using ps -f
             result = self.get_running_processes()

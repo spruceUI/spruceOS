@@ -168,6 +168,7 @@ class MiyooTrimCommon():
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","down"])
         Device.get_device().stop_wifi_services()
+        Device.get_device().stop_network_services()
         Device.get_device().get_wifi_status.force_refresh()
         Device.get_device().get_ip_addr_text.force_refresh()
 
@@ -178,6 +179,7 @@ class MiyooTrimCommon():
         Device.get_device().system_config.save_config()
         ProcessRunner.run(["ifconfig","wlan0","up"])
         Device.get_device().start_wifi_services(foreground_call=True)
+        Device.get_device().start_network_services()
         Device.get_device().get_wifi_status.force_refresh()
         Device.get_device().get_ip_addr_text.force_refresh()
 
