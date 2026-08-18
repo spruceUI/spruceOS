@@ -105,5 +105,37 @@ else
     fi
 fi
 
+
+# Remove the E-Reader's old private copy of the SDL 1.2-era library set.
+#
+# App/PixelReader/libXX/ held libSDL_image-1.2, libSDL_ttf-2.0 and their
+# dependency closure for the Anbernic XX line, which has them in neither BaseOS
+# nor the stock Anbernic image. The Gallery links exactly the same set, so
+# rather than ship a second copy the libraries moved to spruce/h700/lib64 and
+# both apps now point there.
+#
+# The updater extracts over the existing card without removing files that are no
+# longer in the archive, so the old folder stays behind: ~10 MB of libraries
+# nothing loads any more. Nothing breaks if it survives -- both launchers name
+# the new path outright and never look in libXX -- so this is purely reclaiming
+# space.
+#
+# Deliberately narrow: only this one known-dead directory, matched in full. It
+# is not a general "clean up App/PixelReader" pass, because a wildcard there
+# could take out something a user put on their own card.
+OLD_LIB_DIR="/mnt/SDCARD/App/PixelReader/libXX"
+
+if [ ! -d "$OLD_LIB_DIR" ]; then
+    log_message "E-Reader libs: no $OLD_LIB_DIR to remove, nothing to do"
+elif [ -f "/mnt/SDCARD/spruce/h700/lib64/libSDL_image-1.2.so.0" ]; then
+    # Only remove it once the replacement is actually in place. If an update
+    # landed badly and spruce/h700/lib64 is missing, leaving the old copy alone
+    # keeps the E-Reader working rather than breaking it to save disk.
+    rm -rf "$OLD_LIB_DIR"
+    log_message "E-Reader libs: removed superseded $OLD_LIB_DIR (now spruce/h700/lib64)"
+else
+    log_message "E-Reader libs: kept $OLD_LIB_DIR -- spruce/h700/lib64 is missing"
+fi
+
 log_message "Upgrade to version $TARGET_VERSION completed successfully"
 exit 0
