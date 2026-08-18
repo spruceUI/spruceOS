@@ -15,10 +15,12 @@ else
 	# from their firmware; BaseOS has neither, and nor does the stock Anbernic
 	# image, so the loader failed before any code ran.
 	#
-	# They live in their own libXX/ rather than in libs/ deliberately: libs/ is
+	# They live in spruce/h700/lib64 rather than in libs/ deliberately: libs/ is
 	# on the path for every aarch64 device, so adding them there would shadow
 	# the firmware copies on Brick, Flip and SmartPro, where a version mismatch
-	# could break something that currently works.
+	# could break something that currently works. spruce/h700/lib64 is never on
+	# a global path - only the XX app launchers that need it prepend it - and
+	# the Gallery needs the same set, so the two share one copy.
 	#
 	# libwebp.so.6 comes along because this SDL_image links it and the libwebp
 	# spruce already ships is SONAME libwebp.so.7 - a different ABI, not a
@@ -26,7 +28,7 @@ else
 	# harvest, libpng16/libjpeg/libtiff from spruce/flip/lib.
 	case "$PLATFORM" in
 		"Anbernic"*)
-			export LD_LIBRARY_PATH=$(dirname "$0")/libXX:$LD_LIBRARY_PATH
+			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
 
 			# gptokeyb reads the pad through SDL_GameController, and without a
 			# mapping it sees a plain joystick and translates nothing - reader
@@ -103,8 +105,8 @@ else
 	# command rather than exported.
 	case "$PLATFORM" in
 		"Anbernic"*)
-			if [ -n "$SPRUCE_BASEOS" ] && [ -f "$(dirname "$0")/libXX/sdl2/libSDL2-2.0.so.0" ]; then
-				LD_LIBRARY_PATH="$(dirname "$0")/libXX/sdl2:$LD_LIBRARY_PATH" ./reader 2>log.txt
+			if [ -n "$SPRUCE_BASEOS" ] && [ -f /mnt/SDCARD/spruce/h700/lib64/sdl2/libSDL2-2.0.so.0 ]; then
+				LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./reader 2>log.txt
 			else
 				./reader 2>log.txt
 			fi
