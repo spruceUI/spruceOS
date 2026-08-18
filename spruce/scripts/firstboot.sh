@@ -134,7 +134,10 @@ run_firstboot_package_phase() {
     ADVMAME_DIR="/mnt/SDCARD/Emu/ARCADE"
     ADVMAME_7Z=""
     case "$PLATFORM" in
-        "Brick" | "BrickPro" | "SmartPro" | "SmartProS" | "Flip" | "Pixel2")
+        # Anbernic* is the whole XX line - every Anbernic platform we build for is
+        # H700 aarch64, which is what the shipped advmame binary is. A platform
+        # left out of this list simply skips AdvanceMAME and keeps its archive.
+        "Brick" | "BrickPro" | "SmartPro" | "SmartProS" | "Flip" | "Pixel2" | Anbernic*)
             ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
             ;;
     esac
@@ -173,11 +176,19 @@ run_firstboot_package_phase() {
     fi
     chmod +x "$SCUMMVM_DIR"/scummvm.64 "$SCUMMVM_DIR"/scummvm.a30 "$SCUMMVM_DIR"/scummvm.mini "$SCUMMVM_DIR"/fixjoy 2>/dev/null
 
+    # Only ever remove an archive we actually unpacked. This rm used to sit
+    # outside the guard, so a platform that skipped AdvanceMAME had the archive
+    # deleted without it ever being extracted - and the card may later move to a
+    # device that does want it. The scummvm_mini_plugins pair above is the shape
+    # to copy: extract and remove under the same condition.
     if [ -n "$ADVMAME_7Z" ] && [ -f "$ADVMAME_7Z" ]; then
-        run_firstboot_archive_extract "$ADVMAME_7Z" "$ADVMAME_DIR" /mnt/SDCARD/Saves/spruce/advmame_extract.log "AdvanceMAME"
+        if run_firstboot_archive_extract "$ADVMAME_7Z" "$ADVMAME_DIR" /mnt/SDCARD/Saves/spruce/advmame_extract.log "AdvanceMAME"; then
+            rm -f "$ADVMAME_7Z"
+        else
+            log_message "Firstboot: keeping $ADVMAME_7Z, extraction failed"
+        fi
     fi
 
-    rm -f "$ADVMAME_DIR"/advmame.7z
     chmod +x "$ADVMAME_DIR"/advmame 2>/dev/null
 
     log_firstboot_archive_status "PACKAGE_PHASE_STATUS" "package-phase" "complete" "completed=$FIRSTBOOT_ARCHIVE_COMPLETED"
