@@ -1134,6 +1134,21 @@ enable_wifi() {
     touch /tmp/wifion           2>/dev/null
     ifconfig wlan0 up           2>/dev/null
 
+    # wpa_supplicant refuses to start without its config file, and every start
+    # below passes -c without checking that the file is there. It fails in the
+    # background where nobody sees it, udhcpc starts anyway so the interface
+    # looks half alive, and the UI sits on "Scanning for networks..." forever -
+    # the scanner is only "wpa_cli scan", and wpa_cli has no daemon to ask.
+    #
+    # Seed the same two lines PyUI writes rather than assume something else
+    # created it. ctrl_interface is what wpa_cli connects to; update_config=1
+    # lets wpa_supplicant persist networks added from the UI.
+    if [ -n "$WPA_SUPPLICANT_FILE" ] && [ ! -f "$WPA_SUPPLICANT_FILE" ]; then
+        mkdir -p "$(dirname "$WPA_SUPPLICANT_FILE")" 2>/dev/null
+        printf 'ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n' > "$WPA_SUPPLICANT_FILE"
+        log_message "Created missing $WPA_SUPPLICANT_FILE"
+    fi
+
     # check if WPA supplicant needs to be started or restarted
     WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
     if [ -n "$WPA_PID" ]; then

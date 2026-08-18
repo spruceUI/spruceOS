@@ -105,6 +105,9 @@ class AnbernicXXCommon(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
 
         if(main_ui_mode):
+            # Same point in startup the Miyoo and TrimUI devices do this.
+            self.ensure_wpa_supplicant_conf()
+
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
@@ -130,7 +133,14 @@ class AnbernicXXCommon(DeviceCommon):
         pass #TODO
 
     def ensure_wpa_supplicant_conf(self):
-        pass
+        # Was a "pass" stub, and nothing called it either, so the file simply
+        # never appeared. wpa_supplicant is started with -c pointing at it and
+        # refuses to run without it; wpa_cli then has no ctrl socket to talk to,
+        # and the scanner - which is nothing but "wpa_cli scan" followed by
+        # "wpa_cli scan_results" - returns empty forever. The visible symptom is
+        # a device that sits on "Scanning for networks..." and never lists one,
+        # with no error anywhere, on any XX device that has never connected.
+        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
@@ -580,6 +590,12 @@ class AnbernicXXCommon(DeviceCommon):
             result = self.get_running_processes()
             if 'wpa_supplicant' in result.stdout:
                 return
+
+            # Also here, not just at startup: this is the call that actually
+            # consumes the file, and it has to survive the config being cleared
+            # or removed while the device is running - "Forget all WiFi
+            # networks" rewrites it, and a user can delete it off the card.
+            self.ensure_wpa_supplicant_conf()
 
             # If not running, start it in the background
             subprocess.Popen([
