@@ -1,4 +1,5 @@
 
+import subprocess
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
@@ -26,8 +27,19 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def change_sync_time_via_network_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            PyUiConfig.set_sync_time_via_network(
-                not PyUiConfig.sync_time_via_network())
+            enabled = not PyUiConfig.sync_time_via_network()
+            PyUiConfig.set_sync_time_via_network(enabled)
+            if enabled:
+                # Apply it here rather than leaving the clock wrong until the
+                # next game exit, which is when networkservices.sh would
+                # otherwise next run. Detached, because an NTP attempt can take
+                # many seconds and the menu must not freeze on it. The script
+                # re-reads the toggle and does nothing if the clock is already
+                # right, so a stray launch is harmless.
+                try:
+                    subprocess.Popen(["/mnt/SDCARD/spruce/scripts/syncTime.sh"])
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Failed to launch time sync: {e}")
 
 
     def change_am_pm_setting(self, input):
