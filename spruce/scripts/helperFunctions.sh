@@ -830,9 +830,43 @@ display_text_with_percentage_bar(){
     fi
 }
 
+# BaseOS ships busybox wget as /usr/bin/wget. It rejects every GNU long option
+# outright - --quiet, --no-check-certificate and --max-redirect each make it
+# print its usage block and exit non-zero - and even with busybox-safe flags it
+# cannot finish an HTTPS transfer, because there is no ssl_helper on the system:
+# it connects, prints "note: TLS certificate validation not implemented", then
+# writes nothing. The GNU wget we ship in spruce/bin64 is no escape either - on
+# BaseOS it will not load, for want of libpcre.so.1 and then libuuid.so.1.
+#
+# curl is present and working on every platform we ship, so it is the transport
+# here, with busybox-safe wget kept as a fallback. -k preserves the
+# --no-check-certificate behaviour these downloads have always had.
+download_url_to_file() {
+    # $1 = remote url, $2 = destination path
+    if command -v curl >/dev/null 2>&1; then
+        # -f so an HTTP error exits non-zero and leaves no file behind, which is
+        # what wget did and what every caller here assumes. curl's own message
+        # goes to the log rather than to stderr, where it would paint over the
+        # UI the calling app is drawing.
+        curl_error="$(curl -sSLk -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
+        curl_result=$?
+        [ "$curl_result" -ne 0 ] && log_message "download_url_to_file: curl failed for $1 - $curl_error"
+        return "$curl_result"
+    else
+        wget -q -O "$2" "$1"
+    fi
+}
+
 get_remote_filesize_bytes() {
     url="$1"
-    wget --spider --server-response --no-check-certificate "$url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    if command -v curl >/dev/null 2>&1; then
+        # Headers only, following redirects. A GitHub release asset 302s to a
+        # storage host, so several Content-Length lines come back and the last
+        # one belongs to the asset itself.
+        curl -sILk --connect-timeout 15 "$url" 2>/dev/null | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    else
+        wget -S --spider -q -O /dev/null "$url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    fi
 }
 
 download_and_display_progress() {
@@ -846,9 +880,15 @@ download_and_display_progress() {
         final_size_bytes="$(get_remote_filesize_bytes "$remote_url")"
     fi
 
+    download_url_to_file "$remote_url" "$local_path" &
+    download_pid=$!
+
 	{
 		sleep 0.1
-		while ps | grep '[w]get' >/dev/null; do
+		# Watch the transfer we started rather than asking whether any wget is
+		# running - that global match also caught unrelated downloads, and it
+		# stopped seeing this one at all once the transport was no longer wget.
+		while kill -0 "$download_pid" 2>/dev/null; do
 			current_size=$(ls -ln "$local_path" 2>/dev/null | awk '{print $5}')
 			[ -z "$current_size" ] && current_size=0
 			[ -z "$final_size_bytes" ] && final_size_bytes=1
@@ -860,7 +900,13 @@ download_and_display_progress() {
 			sleep 0.1
 		done 
 	} &
-	if ! wget --quiet --no-check-certificate --output-document="$local_path" "$remote_url"; then
+	progress_pid=$!
+
+	wait "$download_pid"
+	download_result=$?
+	wait "$progress_pid" 2>/dev/null
+
+	if [ "$download_result" -ne 0 ]; then
 		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null

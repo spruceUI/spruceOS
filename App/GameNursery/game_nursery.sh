@@ -76,7 +76,7 @@ download_nursery_assets() {
     mkdir -p "$CONFIG_DIR"
 
     log_and_display_message "Downloading game catalog..."
-    if ! wget --quiet --no-check-certificate --max-redirect=20 -O "$CONFIG_DIR/nursery_config" "$CONFIG_URL"; then
+    if ! download_url_to_file "$CONFIG_URL" "$CONFIG_DIR/nursery_config"; then
         log_and_display_message "Unable to download game catalog. Please try again later."
         rm -f "$CONFIG_DIR/nursery_config" 2>/dev/null
         sleep 3
@@ -85,13 +85,13 @@ download_nursery_assets() {
     log_message "Game Nursery: nursery_config downloaded successfully"
 
     log_and_display_message "Downloading system info..."
-    if ! wget --quiet --no-check-certificate --max-redirect=20 -O "$CONFIG_DIR/systems.json" "$SYSTEMS_URL"; then
+    if ! download_url_to_file "$SYSTEMS_URL" "$CONFIG_DIR/systems.json"; then
         log_message "Game Nursery: Failed to download systems.json (non-fatal)"
         rm -f "$CONFIG_DIR/systems.json" 2>/dev/null
     fi
 
     log_and_display_message "Downloading game artwork..."
-    if wget --quiet --no-check-certificate --max-redirect=20 -O "/tmp/boxart.7z" "$BOXART_URL"; then
+    if download_url_to_file "$BOXART_URL" "/tmp/boxart.7z"; then
         mkdir -p "$CONFIG_DIR/Imgs"
         cd "$CONFIG_DIR"
         if 7zr x -y -scsUTF-8 "/tmp/boxart.7z" >/dev/null 2>&1; then
