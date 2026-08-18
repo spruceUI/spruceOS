@@ -68,7 +68,7 @@ run_drastic_AnbernicRGXX() {
 run_drastic_AnbernicRGCubeXX() {
 	run_drastic_AnbernicRGXX
 }
-run_drastic_AnbernicRG34XXSP() {
+run_drastic_AnbernicXX720480() {
 	run_drastic_AnbernicRGXX
 }
 run_drastic_AnbernicRG28XX() {

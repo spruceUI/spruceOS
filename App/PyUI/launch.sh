@@ -130,7 +130,7 @@ case "$PLATFORM" in
 ############################################################
 # Anbernic RG34XXSP
 ############################################################
-    "AnbernicRG34XXSP" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
+    "AnbernicXX720480" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
         if [ -n "$SPRUCE_BASEOS" ]; then
             # BaseOS ships no SDL2 and no python: use the aarch64 pair we
             # already bundle. MainUI is the bind-mounted alias of python3.10 set
@@ -170,7 +170,7 @@ case "$PLATFORM" in
             PYUI_BIN=python3
         fi
 
-        if [ "$PLATFORM" = "AnbernicRG34XXSP" ]; then
+        if [ "$PLATFORM" = "AnbernicXX720480" ]; then
             DEVICE="ANBERNIC_RGXX720480"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"

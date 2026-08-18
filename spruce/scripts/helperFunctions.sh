@@ -52,7 +52,7 @@ case $INFO in
                 # off BASEOS_TARGET, not off this platform, and already lists
                 # rgsp as stickless. Its lid is handled too - has_lid() matches
                 # any target ending in "sp".
-                rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicRG34XXSP" ;;
+                rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicXX720480" ;;
                 *)               export PLATFORM="AnbernicXX640480" ;;
             esac
         else
@@ -63,7 +63,7 @@ case $INFO in
                     if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
                         export PLATFORM="AnbernicRGCubeXX"
                     else
-                        export PLATFORM="AnbernicRG34XXSP"
+                        export PLATFORM="AnbernicXX720480"
                     fi
                     ;;
                 *lcd_type=old*)
