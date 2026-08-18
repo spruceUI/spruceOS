@@ -44,7 +44,14 @@ case $INFO in
             case $BASEOS_TARGET in
                 rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
                 rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
-                rg34xx|rg34xxsp) export PLATFORM="AnbernicRG34XXSP" ;;
+                # The RG SP shares the 34XX panel - 720x480, 3:2 - so it joins
+                # this profile rather than the 640x480 one the catch-all would
+                # otherwise have given it. It has no analog sticks, but that is
+                # decided separately: the pad map in AnbernicXXCommon.cfg keys
+                # off BASEOS_TARGET, not off this platform, and already lists
+                # rgsp as stickless. Its lid is handled too - has_lid() matches
+                # any target ending in "sp".
+                rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicRG34XXSP" ;;
                 *)               export PLATFORM="AnbernicXX640480" ;;
             esac
         else
