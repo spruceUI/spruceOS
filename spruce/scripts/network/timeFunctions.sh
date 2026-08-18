@@ -152,9 +152,37 @@ time_sync_via_http() {
 	return 1
 }
 
+# The user's "Sync Time via Network" setting, from Time Settings in the UI.
+#
+# Deliberately fails OPEN. A missing file, absent key, unreadable JSON or no jq
+# all mean "sync", because the cost of wrongly syncing is a corrected clock,
+# while the cost of wrongly skipping is every HTTPS feature silently failing
+# with a certificate error - which is the bug this whole file exists to fix.
+# Only an explicit false turns it off.
+time_sync_is_enabled() {
+	_cfg=/mnt/SDCARD/App/PyUI/py-ui-config.json
+	[ -f "$_cfg" ] || return 0
+	command -v jq >/dev/null 2>&1 || return 0
+	# Note: no "// empty" here. jq's alternative operator fires on false as
+	# well as null, so it would turn an explicit false into "unset" and the
+	# setting could never be switched off. Read the value plainly instead - an
+	# absent key prints "null", a broken file prints nothing, and only a real
+	# false matches below.
+	[ "$(jq -r '.syncTimeViaNetwork' "$_cfg" 2>/dev/null)" = "false" ] && return 1
+	return 0
+}
+
 # Call once the network is actually up. Cheap and silent on a device whose
 # clock is already sane, which is every device with a working RTC.
 sync_system_time() {
+	if ! time_sync_is_enabled; then
+		# Left alone on purpose. Some games read the system clock, so a user
+		# may be holding it somewhere deliberately - correcting it behind their
+		# back would undo exactly what they set.
+		log_message "Time sync: turned off in Time Settings, leaving the clock alone" -v
+		return 0
+	fi
+
 	if clock_is_plausible; then
 		log_message "Time sync: clock already plausible, nothing to do" -v
 		return 0

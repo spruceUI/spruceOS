@@ -24,6 +24,12 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 not PyUiConfig.use_24_hour_clock())
 
 
+    def change_sync_time_via_network_setting(self, input):
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
+            PyUiConfig.set_sync_time_via_network(
+                not PyUiConfig.sync_time_via_network())
+
+
     def change_am_pm_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
             PyUiConfig.set_show_am_pm(
@@ -71,6 +77,24 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             )
         else:
             PyUiLogger.get_logger().info("Timezone setting not supported on this Device.get_device().")
+
+        # Only where there is a radio to sync over. Shown for every such device,
+        # not just the ones with no RTC, because it is the user's call: turning
+        # it off holds the clock wherever they set it, which is the point for
+        # anyone timing in-game events off it.
+        if(Device.get_device().supports_wifi()):
+            option_list.append(
+                GridOrListEntry(
+                    primary_text=Language.sync_time_via_network(),
+                    value_text="<    " +
+                    ("On" if PyUiConfig.sync_time_via_network() else "Off") + "    >",
+                    image_path=None,
+                    image_path_selected=None,
+                    description=None,
+                    icon=None,
+                    value=self.change_sync_time_via_network_setting
+                )
+            )
 
         option_list.append(
             GridOrListEntry(

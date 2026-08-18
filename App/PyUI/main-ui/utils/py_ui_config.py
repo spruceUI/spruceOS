@@ -116,6 +116,19 @@ class PyUiConfig:
         cls.save()
 
     @classmethod
+    def sync_time_via_network(cls):
+        # On by default: these handhelds have no battery-backed RTC, so without
+        # this a cold boot sits years in the past and every HTTPS request fails
+        # with "certificate is not yet valid". Off is a real choice though -
+        # some games read the clock, so a user may want it held where they set it.
+        return cls.get("syncTimeViaNetwork",True)
+
+    @classmethod
+    def set_sync_time_via_network(cls, value):
+        cls._data["syncTimeViaNetwork"] = value
+        cls.save()
+
+    @classmethod
     def show_am_pm(cls):
         return cls.get("showAmPm",True)
 
