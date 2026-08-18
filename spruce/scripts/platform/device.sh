@@ -185,6 +185,15 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
+# Which "first_boot_<key>" flag gates the firstboot lane for this device.
+# Unlike its neighbours here this is a real default, not a missing-function stub:
+# every platform needs a working value, and per-platform is the right answer for
+# all but the Anbernic XX family, which overrides it to share one flag across
+# models so moving a card between them does not re-run firstboot.
+get_firstboot_key() {
+    echo "$PLATFORM"
+}
+
 device_specific_wake_from_sleep() {
     log_message "Missing device_specific_wake_from_sleep function"
 }

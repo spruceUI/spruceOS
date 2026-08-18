@@ -7,7 +7,7 @@ FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
 
 start_pyui_message_writer
 
-flag_remove "first_boot_$PLATFORM"
+flag_remove "first_boot_$(get_firstboot_key)"
 log_message "Starting firstboot script on $PLATFORM"
 
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"

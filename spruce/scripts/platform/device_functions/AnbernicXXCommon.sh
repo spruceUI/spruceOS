@@ -62,6 +62,14 @@ get_config_path() {
     echo "$SYSTEM_JSON"
 }
 
+# One firstboot flag for the whole XX family rather than one per model. These
+# devices differ only in screen and shell, so a card moved from an RG SP to a
+# CubeXX has nothing left to set up - re-running the lane would only replay the
+# onboarding screens and re-extract packages it already extracted.
+get_firstboot_key() {
+    echo "AnbernicXX"
+}
+
 ###############################################################################
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
@@ -203,10 +211,14 @@ device_init() {
 }
 
 # BaseOS ships only a root user (its dropbear is root/root), so the fleet-standard
-# spruce/happygaming SSH login does not exist here. Rather than fight BaseOS's own
-# dropbear or edit its rootfs, bind-mount an augmented passwd/shadow that keeps
-# every existing line (root untouched) and adds a root-equivalent "spruce" user.
-# Ephemeral - re-applied each boot, gone on reboot, survives BaseOS updates.
+# spruce/happygaming SSH login does not exist here. Bind-mount an augmented
+# passwd/shadow that keeps every existing line (root untouched) and adds a
+# root-equivalent "spruce" user. Ephemeral - re-applied each boot, gone on reboot,
+# survives BaseOS updates.
+#
+# Still needed now that spruce's own dropbearmulti takes port 22 from BaseOS's
+# dropbear (see stop_foreign_ssh in sshFunctions.sh): both authenticate against
+# this same /etc/passwd, so the spruce user has to exist either way.
 add_spruce_ssh_user() {
     grep -q '^spruce:' /etc/passwd 2>/dev/null && return 0
 
