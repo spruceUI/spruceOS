@@ -19,13 +19,6 @@
 --- Ry ------------------------------------------------------------------------
 
 - RA cfg overhaul
-- fn buttons and switch branch
-    - y no work on tsps at all?
-    - test on tsp
-    - implement light toggle
-    - implement fan toggle
-    - merge
 - add trimui zram modules from bmdhacks
 - reset config tasks for more standalone emulators
 - add vibrate to XX devices
-- bug: powerbutton watchdog kills everything BUT RA... or does RA just immediately relaunch?

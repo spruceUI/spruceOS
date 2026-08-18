@@ -171,7 +171,7 @@ case "$PLATFORM" in
         fi
 
         if [ "$PLATFORM" = "AnbernicRG34XXSP" ]; then
-            DEVICE="ANBERNIC_RG34XXSP"
+            DEVICE="ANBERNIC_RGXX720480"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then

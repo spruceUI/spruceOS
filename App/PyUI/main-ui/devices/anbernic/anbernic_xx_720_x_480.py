@@ -3,9 +3,9 @@ import os
 
 
 #/mnt/vendor/ctrl/dmenu_ln
-class AnbernicRG34xxSP(AnbernicXXCommon):
+class Anbernic720x480(AnbernicXXCommon):
     def __init__(self, main_ui_mode):
-        self.device_name = "ANBERNIC_RG34XXSP"
+        self.device_name = "ANBERNIC_RGXX720480"
         super().__init__(main_ui_mode)
                        
     def screen_width(self):
