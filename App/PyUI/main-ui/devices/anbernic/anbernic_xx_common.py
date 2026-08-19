@@ -338,7 +338,13 @@ class AnbernicXXCommon(DeviceCommon):
         return True
     
     def get_roms_dir(self):
-        return "/mnt/union/ROMS/"
+        # /mnt/SDCARD/Roms/, as on every other spruce device. This used to return
+        # muOS's "/mnt/union/ROMS/", which is MuosDevice's path and does not exist
+        # under spruce - nothing mounts /mnt/union here. Everything keyed off this
+        # therefore looked in a directory that was not there: get_miyoo_games_file
+        # found no miyoogamelist.xml, so every name fell back to the raw filename,
+        # and the box art scraper and library searched the same empty path.
+        return "/mnt/SDCARD/Roms/"
     
     def output_screen_width(self):
         if(self.should_scale_screen()):
