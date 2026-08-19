@@ -212,15 +212,18 @@ input_l_x_minus_axis = "-0"
 input_l_y_plus_axis = "+1"
 input_l_y_minus_axis = "-1"'
 
+	# Name the stickless models and let everything else take the stick layout.
+	# Most of the XX line has sticks, so an unrecognised or future target is
+	# likelier to be right that way round than the reverse.
 	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-		rg34xxsp|rg35xxh|rg35xxpro|rg40xxh|rg40xxv|rgcubexx)
+		rg28xx|rg34xx|rg35xxplus|rg35xxsp|rgsp)
+			# Stickless models: no L3/R3 or right stick, L2/R2 stay at b12/b13.
+			printf '%s\ninput_l2_btn = "12"\ninput_r2_btn = "13"\n' "$common" > "$ac"
+			;;
+		*)
 			# Analog-stick models: L3/R3 take b12/b15, L2/R2 shift to b13/b14,
 			# and there is a right stick on axes 2/3.
 			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\ninput_r3_btn = "15"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\n' "$common" > "$ac"
-			;;
-		*)
-			# Stickless models: no L3/R3 or right stick, L2/R2 stay at b12/b13.
-			printf '%s\ninput_l2_btn = "12"\ninput_r2_btn = "13"\n' "$common" > "$ac"
 			;;
 	esac
 }
@@ -260,17 +263,54 @@ input_r_btn = "5"
 input_select_btn = "6"
 input_start_btn = "7"'
 
+	# Stickless models named; everything else, known or new, takes the stick
+	# layout. See write_baseos_ra_autoconfig for the reasoning.
 	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-		rg34xxsp|rg35xxh|rg35xxpro|rg40xxh|rg40xxv|rgcubexx)
+		rg28xx|rg34xx|rg35xxplus|rg35xxsp|rgsp)
+			# Stickless models: no L3/R3, so L2/R2 shift to 9/10.
+			#
+			# The d-pad is still axes 3 and 4, NOT 0 and 1. joydev numbers axes
+			# by ascending ABS code, and these pads report ABS_RX, ABS_RY,
+			# ABS_RZ, ABS_HAT0X, ABS_HAT0Y - so the hat lands at 3/4 with three
+			# unused axes ahead of it, rather than at 0/1 as you would expect
+			# from "no sticks means the d-pad is the only axis pair". Measured
+			# on an RG SP: axes=5, and only 3 and 4 ever move.
+			printf '%s\ninput_l2_btn = "9"\ninput_r2_btn = "10"\ninput_left_axis = "-3"\ninput_right_axis = "+3"\ninput_up_axis = "-4"\ninput_down_axis = "+4"\n' "$common" > "$ac"
+			;;
+		*)
 			# Analog-stick models: L3/L2/R2/R3 at 9-12, sticks on axes 0-3,
 			# d-pad on axes 4/5.
 			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_r3_btn = "12"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
 			;;
-		*)
-			# Stickless models: no L3/R3 or sticks, so L2/R2 shift to 9/10 and
-			# the d-pad is the only axis pair.
-			printf '%s\ninput_l2_btn = "9"\ninput_r2_btn = "10"\ninput_left_axis = "-0"\ninput_right_axis = "+0"\ninput_up_axis = "-1"\ninput_down_axis = "+1"\n' "$common" > "$ac"
-			;;
+	esac
+}
+
+# BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
+# Overlay the sdl2 input drivers on top without touching the shared cfg. The
+# 32-bit build gets its own overlay: its SDL2 cannot see the pad here, so it
+# drives the joypad through linuxraw instead. One overlay either way, because
+# only the last --appendconfig would win.
+#
+# Shared rather than inlined in run_retroarch because the standalone RetroArch
+# app launchers build their own command line and skipped all of this. The 32-bit
+# app was therefore launching with the universal cfg's sdl2 joypad driver, which
+# cannot see the pad on BaseOS - so it had no controls at all, while the same
+# binary launched with a game worked fine.
+#
+# Requires RA_BIN and RA_DIR; appends to RA_PARAMS.
+apply_baseos_ra_overlay() {
+	[ -n "$SPRUCE_BASEOS" ] || return 0
+
+	case "$RA_BIN" in
+		ra32.*) baseos_overlay="retroarch-AnbernicRG_XX-baseos32.cfg" ;;
+		*)      baseos_overlay="retroarch-AnbernicRG_XX-baseos.cfg" ;;
+	esac
+	[ -f "$RA_DIR/platform/$baseos_overlay" ] || return 0
+
+	RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/$baseos_overlay"
+	case "$RA_BIN" in
+		ra32.*) write_baseos_ra_autoconfig_linuxraw ;;
+		*)      write_baseos_ra_autoconfig ;;
 	esac
 }
 
@@ -328,24 +368,7 @@ run_retroarch() {
 			;;
 	esac
 
-	# BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
-	# Overlay the sdl2 input drivers on top without touching the shared cfg.
-	# The 32-bit build gets its own overlay: its SDL2 cannot see the pad here,
-	# so it drives the joypad through linuxraw instead. One overlay either way,
-	# because only the last --appendconfig would win.
-	if [ -n "$SPRUCE_BASEOS" ]; then
-		case "$RA_BIN" in
-			ra32.*) baseos_overlay="retroarch-AnbernicRG_XX-baseos32.cfg" ;;
-			*)      baseos_overlay="retroarch-AnbernicRG_XX-baseos.cfg" ;;
-		esac
-		if [ -f "$RA_DIR/platform/$baseos_overlay" ]; then
-			RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/$baseos_overlay"
-			case "$RA_BIN" in
-				ra32.*) write_baseos_ra_autoconfig_linuxraw ;;
-				*)      write_baseos_ra_autoconfig ;;
-			esac
-		fi
-	fi
+	apply_baseos_ra_overlay
 
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
