@@ -493,37 +493,66 @@ class AnbernicXXCommon(DeviceCommon):
         if(not self.is_wifi_enabled()):
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
+        # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
+        # /proc/net/wireless - the two sources every other device uses - so this
+        # threw "[Errno 2] No such file or directory: 'iw'" on every poll and
+        # returned zeroes, meaning the signal indicator has never worked on any
+        # XX device. wpa_supplicant is already running and wpa_cli is already a
+        # dependency of the scanner, so signal_poll costs nothing new. It reports:
+        #     RSSI=-43
+        #     LINKSPEED=434
+        #     NOISE=9999
+        #     FREQUENCY=5220
+        # NOISE is 9999 when the driver does not report it, which is the case
+        # here, so it is treated as unavailable rather than passed through.
         try:
-            result = subprocess.run(
-                ["iw", "dev", "wlan0", "link"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
+            result = ProcessRunner.run(
+                ["wpa_cli", "-i", "wlan0", "signal_poll"],
+                timeout=3,
+                print=False,
             )
-            output = result.stdout.strip()
+            output = result.stdout or ""
 
-            if "Not connected." in output or result.returncode != 0:
+            if result.returncode != 0 or "FAIL" in output:
                 return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
             signal_level = 0
-            link_quality = 0  # This won't be available directly via iw, unless you derive it
+            noise_level = 0
+            have_signal = False
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("RSSI="):
+                    try:
+                        signal_level = int(line.split("=", 1)[1])
+                        have_signal = True
+                    except ValueError:
+                        pass
+                elif line.startswith("NOISE="):
+                    try:
+                        noise = int(line.split("=", 1)[1])
+                    except ValueError:
+                        noise = 9999
+                    # 9999 is wpa_supplicant's "not reported" sentinel.
+                    if noise != 9999:
+                        noise_level = noise
 
-            # Extract signal level (in dBm)
-            signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
-            if signal_match:
-                signal_level = int(signal_match.group(1))
+            # No usable RSSI means unknown, not excellent. Falling through with
+            # signal_level still 0 would map to the top of the scale below, so a
+            # reading we could not parse would show as a full-strength signal.
+            if not have_signal:
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
-            # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
-            # Example rough mapping:
+            # Same dBm -> 0..70 mapping the other devices use, so the status bar
+            # thresholds behave identically across the fleet.
             if signal_level <= -100:
                 link_quality = 0
             elif signal_level >= -50:
                 link_quality = 70
             else:
-                link_quality = int((signal_level + 100) * 1.4)  # Maps -100..-50 dBm to 0..70
+                link_quality = int((signal_level + 100) * 1.4)
 
             return WiFiConnectionQualityInfo(
-                noise_level=0,  # Not available via `iw`
+                noise_level=noise_level,
                 signal_level=signal_level,
                 link_quality=link_quality
             )

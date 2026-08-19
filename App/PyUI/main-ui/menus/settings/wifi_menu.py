@@ -33,22 +33,6 @@ class WifiMenu:
             Device.get_device().enable_wifi()
 
 
-    @staticmethod
-    def _wpa_quote(value: str) -> str:
-        """Quote a value for wpa_supplicant.conf, escaping what would break it.
-
-        wpa_supplicant reads the whole file at startup and gives up on the first
-        parse error, so a single stray quote in one password takes the radio down
-        entirely - and the symptom is not "wrong password", it is the menu
-        scanning forever, because nothing is running to scan. The file lives in
-        Saves/ and no update replaces it, so that state is permanent until
-        something repairs it.
-
-        Backslashes first: escaping quotes first would then escape the very
-        backslashes this adds.
-        """
-        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
     def write_wpa_supplicant_conf(self, ssid: str, pw_line: str):
         file_path = Device.get_device().get_wpa_supplicant_conf_path()
 
@@ -82,10 +66,15 @@ class WifiMenu:
                     header_lines.append(line)
 
             # --- Build new network block ---
-            quoted_ssid = self._wpa_quote(ssid)
+            # Written raw, deliberately. wpa_supplicant takes everything between
+            # the first quote and the LAST quote on the line, verbatim - it does
+            # no backslash unescaping in plain quoted strings. Verified against
+            # the on-device wpa_supplicant: ssid="my"net" yields my"net, while
+            # ssid="my\"net" yields my\"net, backslash and all. So escaping here
+            # corrupts any SSID or password containing a quote or backslash.
             new_block = [
                 "network={\n",
-                f"    ssid={quoted_ssid}\n",
+                f'    ssid="{ssid}"\n',
                 f"    {pw_line}\n",
                 "}\n",
             ]
@@ -94,7 +83,7 @@ class WifiMenu:
             found = False
             for i, block in enumerate(networks):
                 for line in block:
-                    if f"ssid={quoted_ssid}" in line:
+                    if f'ssid="{ssid}"' in line:
                         networks[i] = new_block
                         found = True
                         break
@@ -135,7 +124,7 @@ class WifiMenu:
         if(net.requires_password()):
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
-                self.write_wpa_supplicant_conf(net.ssid, "psk=" + self._wpa_quote(password))
+                self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
                 Display.display_message(
                     Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
                     .replace("{ssid}", net.ssid)

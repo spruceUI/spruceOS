@@ -24,9 +24,12 @@ class WiFiNetwork:
 
 
 class WiFiScanner:
-    def __init__(self, interface="wlan0", delay=2):
+    def __init__(self, interface="wlan0", delay=2, busy_delay=8):
         self.interface = interface
         self.delay = delay
+        # Used instead of `delay` when wpa_supplicant refuses a scan because it
+        # is busy associating. See _scan_once_internal.
+        self.busy_delay = busy_delay
 
         # Thread state
         self._thread: threading.Thread | None = None
@@ -64,14 +67,33 @@ class WiFiScanner:
         log = PyUiLogger.get_logger()
 
         result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
-        if "Failed to connect to" in result.stderr:
+        if "Failed to connect to" in (result.stderr or ""):
             log.error("wlan0 seems broken, restarting and retrying")
             Device.get_device().wifi_error_detected()
-            time.sleep(15)
-            ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
+            self._stop_event.wait(15)
+            result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
 
-        # Let wpa_supplicant populate results
-        time.sleep(self.delay)
+        # wpa_supplicant answers FAIL-BUSY while it is associating, and asking
+        # again every couple of seconds is actively harmful: each scan takes the
+        # radio off-channel to sweep, starving the association it refused us for.
+        # That is how one saved network that is slow to join turns into a network
+        # list that never fills - it looks like scanning is broken when it is
+        # really the join being interrupted. Back off and let it finish.
+        #
+        # Its own association scans still populate scan_results, so keep reading
+        # those: the list fills from wpa_supplicant's work instead of ours.
+        busy = "FAIL-BUSY" in ((result.stdout or "") + (result.stderr or ""))
+        if busy:
+            log.info(
+                "wpa_supplicant is busy associating; backing off for "
+                f"{self.busy_delay}s and using its own scan results"
+            )
+
+        # Let wpa_supplicant populate results. Waiting on the stop event rather
+        # than sleeping keeps stop() responsive.
+        self._stop_event.wait(self.busy_delay if busy else self.delay)
+        if self._stop_event.is_set():
+            return
 
         result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan_results"])
         lines = result.stdout.strip().splitlines()
@@ -173,7 +195,14 @@ class WiFiScanner:
         ssid = None
         freq = None
         try:
-            result = ProcessRunner.run(["wpa_cli", "status"], timeout=0.5)
+            # 3s, not 0.5s. wpa_cli normally answers in under a millisecond, but
+            # while wpa_supplicant is scanning or associating it can take longer -
+            # exactly when the UI most wants to say what is going on. The old
+            # budget turned that into "Failed to get Wi-Fi details" and a blank
+            # status. Interface pinned to match the scan calls.
+            result = ProcessRunner.run(
+                ["wpa_cli", "-i", self.interface, "status"], timeout=3
+            )
             for line in result.stdout.splitlines():
                 if line.startswith("ssid="):
                     ssid = self._decode_ssid(line.split("=", 1)[1])

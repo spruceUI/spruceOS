@@ -143,14 +143,22 @@ class MiyooTrimCommon():
 
     @staticmethod
     def wpa_conf_problem(text):
-        """Describe why this wpa_supplicant.conf would not parse, or None if fine.
+        """Describe why this wpa_supplicant.conf is unusable, or None if fine.
 
         Deliberately conservative: a false positive costs the user every saved
-        network, so this only flags damage that would actually stop
-        wpa_supplicant from starting. Anything it does not understand is left
-        alone.
+        network, so this only flags damage that genuinely breaks things. Each
+        check below was verified against the wpa_supplicant on the device.
+
+        Notably absent: any check on quoting. wpa_supplicant takes everything
+        between the first quote and the LAST quote on the line, verbatim, with no
+        backslash unescaping - so ssid="my"net" is valid and yields my"net. An
+        earlier version of this flagged that as "unbalanced quotes" and moved the
+        user's perfectly good config aside, destroying their saved networks.
         """
         if not text.strip():
+            # wpa_supplicant itself accepts an empty file, but with no
+            # ctrl_interface there is no control socket, so wpa_cli cannot scan -
+            # which is the "scanning forever" symptom this is here to break.
             return "file is empty"
         if "ctrl_interface" not in text:
             return "no ctrl_interface line, so wpa_cli would have no socket to talk to"
@@ -168,25 +176,6 @@ class MiyooTrimCommon():
                 if depth < 0:
                     return f"stray closing brace on line {number}"
                 continue
-            if "=" not in line:
-                continue
-            value = line.split("=", 1)[1]
-            if not value.startswith('"'):
-                continue
-            # Count quotes that are not backslash-escaped. An odd number means
-            # the string never closes - which is what an unescaped quote inside
-            # a password or SSID produces.
-            quotes = 0
-            index = 0
-            while index < len(value):
-                if value[index] == "\\":
-                    index += 2
-                    continue
-                if value[index] == '"':
-                    quotes += 1
-                index += 1
-            if quotes % 2:
-                return f"unbalanced quotes on line {number}"
 
         if depth != 0:
             return "a network block is never closed"
