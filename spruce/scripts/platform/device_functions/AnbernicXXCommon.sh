@@ -198,7 +198,7 @@ device_init() {
 
     runtime_mounts_anbernic_34xxsp
 
-    [ -n "$SPRUCE_BASEOS" ] && add_spruce_ssh_user
+    [ -n "$SPRUCE_BASEOS" ] && add_spruce_system_user
 
     # BaseOS composes its own adb gadget and binds the UDC during boot. Starting
     # ours as well would leave two daemons fighting over one controller.
@@ -210,16 +210,24 @@ device_init() {
     fi
 }
 
-# BaseOS ships only a root user (its dropbear is root/root), so the fleet-standard
-# spruce/happygaming SSH login does not exist here. Bind-mount an augmented
-# passwd/shadow that keeps every existing line (root untouched) and adds a
-# root-equivalent "spruce" user. Ephemeral - re-applied each boot, gone on reboot,
-# survives BaseOS updates.
+# Create the spruce system account. BaseOS ships only a root user, so the
+# fleet-standard "spruce" account does not exist here - and /etc/passwd lives on
+# the BaseOS rootfs, which is not ours to edit. Bind-mount an augmented
+# passwd/shadow instead, keeping every existing line (root untouched) and adding
+# a root-equivalent "spruce" user. Ephemeral - re-applied each boot, gone on
+# reboot, survives BaseOS updates.
 #
-# Still needed now that spruce's own dropbearmulti takes port 22 from BaseOS's
-# dropbear (see stop_foreign_ssh in sshFunctions.sh): both authenticate against
-# this same /etc/passwd, so the spruce user has to exist either way.
-add_spruce_ssh_user() {
+# NOT just an SSH concern, despite where it started:
+#   - dropbear authenticates via /etc/passwd and /etc/shadow, so this is what
+#     makes spruce/happygaming work. That is true of spruce's own dropbearmulti
+#     just as it was of BaseOS's dropbear - taking port 22 off BaseOS
+#     (stop_foreign_ssh in sshFunctions.sh) changed the daemon, not where
+#     credentials are read from.
+#   - Samba needs it too: start_samba_process runs `smbpasswd -a spruce`, which
+#     attaches an SMB password to an *existing* Unix account and fails without one.
+# Removing this would leave root/root as the only login on the XX line and break
+# file sharing, so it is load-bearing rather than leftover scaffolding.
+add_spruce_system_user() {
     grep -q '^spruce:' /etc/passwd 2>/dev/null && return 0
 
     SP_HASH='$6$spruceos00$.nwqRlVkLe.wmkXcEHXcu127ZFxpFQ.8JDbdh4CRd.FbF5biVcIl9qeE9T6QNAbbJaFKp3MLUwlaPUN0alXcl.'
