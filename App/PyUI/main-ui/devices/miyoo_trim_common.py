@@ -142,19 +142,98 @@ class MiyooTrimCommon():
             PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
 
     @staticmethod
+    def wpa_conf_problem(text):
+        """Describe why this wpa_supplicant.conf would not parse, or None if fine.
+
+        Deliberately conservative: a false positive costs the user every saved
+        network, so this only flags damage that would actually stop
+        wpa_supplicant from starting. Anything it does not understand is left
+        alone.
+        """
+        if not text.strip():
+            return "file is empty"
+        if "ctrl_interface" not in text:
+            return "no ctrl_interface line, so wpa_cli would have no socket to talk to"
+
+        depth = 0
+        for number, raw in enumerate(text.splitlines(), 1):
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("network={"):
+                depth += 1
+                continue
+            if line == "}":
+                depth -= 1
+                if depth < 0:
+                    return f"stray closing brace on line {number}"
+                continue
+            if "=" not in line:
+                continue
+            value = line.split("=", 1)[1]
+            if not value.startswith('"'):
+                continue
+            # Count quotes that are not backslash-escaped. An odd number means
+            # the string never closes - which is what an unescaped quote inside
+            # a password or SSID produces.
+            quotes = 0
+            index = 0
+            while index < len(value):
+                if value[index] == "\\":
+                    index += 2
+                    continue
+                if value[index] == '"':
+                    quotes += 1
+                index += 1
+            if quotes % 2:
+                return f"unbalanced quotes on line {number}"
+
+        if depth != 0:
+            return "a network block is never closed"
+        return None
+
+    @staticmethod
     def ensure_wpa_supplicant_conf(wpa_supplicant_path):
+        # Existence is not enough. wpa_supplicant reads the whole file at startup
+        # and exits on the first parse error, so one malformed line takes the
+        # radio down completely - and the symptom is the menu scanning forever,
+        # not an error. Because this file lives in Saves/ and no update replaces
+        # it, a broken one used to stay broken through every nightly.
         try:
             conf_path = Path(wpa_supplicant_path)
-            
-            if not conf_path.exists():
-                conf_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure /userdata/cfg exists
-                conf_content = (
-                    "ctrl_interface=/var/run/wpa_supplicant\n"
-                    "update_config=1\n\n"
+            conf_content = (
+                "ctrl_interface=/var/run/wpa_supplicant\n"
+                "update_config=1\n\n"
+            )
+
+            if conf_path.exists():
+                problem = MiyooTrimCommon.wpa_conf_problem(
+                    conf_path.read_text(errors="replace")
                 )
-                with conf_path.open("w") as f:
-                    f.write(conf_content)
+                if problem is None:
+                    return
+                # Move it aside rather than delete it: the saved networks are
+                # the user's, and the file is the evidence for why this happened.
+                broken = conf_path.with_name(conf_path.name + ".broken")
+                try:
+                    conf_path.replace(broken)
+                    PyUiLogger.get_logger().error(
+                        f"wpa_supplicant.conf could not be parsed ({problem}); "
+                        f"kept it as {broken.name} and starting a fresh one. "
+                        "Saved networks will need re-entering."
+                    )
+                except OSError as e:
+                    PyUiLogger.get_logger().error(
+                        f"wpa_supplicant.conf is broken ({problem}) and could not "
+                        f"be moved aside: {e}"
+                    )
+                    return
+            else:
                 PyUiLogger.get_logger().info("Created missing wpa_supplicant.conf.")
+
+            conf_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure /userdata/cfg exists
+            with conf_path.open("w") as f:
+                f.write(conf_content)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error creating {wpa_supplicant_path}: {e}")
 
