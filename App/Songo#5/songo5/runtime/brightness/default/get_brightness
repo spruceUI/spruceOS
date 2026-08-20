@@ -1,7 +1,13 @@
 #!/bin/bash
 
 if [[ "$BL_TYPE" == "TYPE1" ]]; then
-  cat /sys/class/disp/disp/attr/sys | grep -oP 'backlight\(\s*\K\d+'
+  # grep -oP is GNU-only. Every TYPE1 device spruce runs on - TrimUI and the
+  # Anbernic XX line - has BusyBox grep, which has no -P and exits 2 printing
+  # its usage, so this read produced nothing and the caller silently fell back
+  # to a hard-coded 50. sed does the same job everywhere.
+  # The field is space-padded at narrow values - "backlight( 60)" - which is
+  # what the \s* in the original pattern was for.
+  sed -n 's/.*backlight( *\([0-9]*\)).*/\1/p' /sys/class/disp/disp/attr/sys | head -n 1
 elif [[ "$BL_TYPE" == "TYPE2" ]]; then
   cat $SYSFS_BL_BRIGHTNESS
 else
