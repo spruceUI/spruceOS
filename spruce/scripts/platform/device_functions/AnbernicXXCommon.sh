@@ -423,17 +423,21 @@ send_menu_button_to_retroarch() {
     fi
 }
 
-device_get_hw_epoch() {
-    # Capture the raw output
-    hw_output=$(hwclock 2>/dev/null)
-    
-    # If hw_output is empty, the command failed
-    [ -z "$hw_output" ] && return 1
-
-    # 'date' is smart enough to handle the ISO-8601 format 
-    # and even the sub-seconds automatically.
-    date -d "$hw_output" +%s 2>/dev/null
-}
+# device_get_hw_epoch is deliberately NOT overridden here - device.sh's generic
+# version is correct and this one was not. It assumed `date -d` could parse
+# hwclock's output, but hwclock emits ctime style:
+#
+#     Thu Aug 20 02:28:56 2026  0.000000 seconds
+#
+# not the ISO-8601 its comment claimed, and busybox `date -d` cannot read that.
+# It therefore returned an empty string on every call. That made save_sleep_info
+# log "ERROR: Unable to read hwclock" and fail, so device_enter_sleep returned
+# before ever calling trigger_device_sleep - the device never attempted to
+# suspend at all. Closing the lid looked like it did nothing, when in fact the
+# hall sensor, the lid watchdog and sleep_helper were all working correctly and
+# the sleep was aborting one step short of the suspend.
+#
+# device.sh splits the fields by hand for exactly this reason, and works here.
 
 device_lid_sensor_ready() {
     [ -e "/sys/class/power_supply/axp2202-battery/hallkey" ]
