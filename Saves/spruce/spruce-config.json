@@ -382,7 +382,7 @@
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "ANBERNIC_RGXX"],
                 "options": [
                     "Select",
                     "Start",

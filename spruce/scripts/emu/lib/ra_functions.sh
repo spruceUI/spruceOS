@@ -285,6 +285,67 @@ input_start_btn = "7"'
 	esac
 }
 
+# RetroArch's hotkey binds are RAW joypad button indices - unlike the player
+# binds, they do not go through the joypad autoconfig - so the one number in
+# AnbernicXXCommon.cfg cannot suit every driver this line runs.
+#
+# udev and linuxraw number this pad identically, so the stock image and the
+# 32-bit BaseOS build both take the shipped value. The 64-bit build drives the
+# pad through SDL2, which enumerates the volume and power keys on this node
+# before the pad's own buttons and so numbers everything three higher. Select is
+# 6 under udev and 9 under SDL2 - which is why the default landed on X for
+# anyone on BaseOS with the 64-bit build, the configuration most XX users have.
+#
+# The action binds carry the same offset, so they move too. Their shipped values
+# describe a coherent layout under udev numbering - menu on X, exit on A, load on
+# L1, save on R1, fps on Y, fast forward on R2, matching what every other spruce
+# device binds - and that is the layout reproduced here. Untranslated, the menu
+# landed on A and exit and fps fell on the volume keys, which are not on the pad.
+#
+# Read every number out of the sdl2 autoconfig RetroArch is about to load, by
+# name, so these cannot drift away from the player binds and so the triggers come
+# out right - the offset is not a flat +3 for them, since the stick-click binds
+# interleave. prepare_ra_config has already written the udev-numbered values;
+# this corrects them once the binary is known, which is why it lives here rather
+# than there.
+#
+# "Menu" and "Custom" are deliberately left alone: no model on this line has a
+# Menu button, and Custom exists so the user can bind it inside RetroArch.
+apply_xx_hotkey_for_driver() {
+	ac="$1"
+	[ -f "$ac" ] || return 0
+	[ -f "$PLATFORM_CFG" ] || return 0
+
+	_btn() { sed -n "s/^input_$2_btn = \"\([0-9]*\)\".*/\1/p" "$1" | head -n 1; }
+
+	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")" in
+		"Select") mod="$(_btn "$ac" select)"; modname="Select" ;;
+		"Start")  mod="$(_btn "$ac" start)";  modname="Start" ;;
+		*)        mod=""; modname="unchanged" ;;
+	esac
+
+	hk_a="$(_btn "$ac" a)"; hk_y="$(_btn "$ac" y)"; hk_x="$(_btn "$ac" x)"
+	hk_l="$(_btn "$ac" l)"; hk_r="$(_btn "$ac" r)"; hk_r2="$(_btn "$ac" r2)"
+
+	set --
+	[ -n "$mod"   ] && set -- "$@" -e "s|^input_enable_hotkey_btn = .*|input_enable_hotkey_btn = \"$mod\"|"
+	[ -n "$hk_a"  ] && set -- "$@" -e "s|^input_exit_emulator_btn = .*|input_exit_emulator_btn = \"$hk_a\"|"
+	[ -n "$hk_y"  ] && set -- "$@" -e "s|^input_fps_toggle_btn = .*|input_fps_toggle_btn = \"$hk_y\"|"
+	[ -n "$hk_x"  ] && set -- "$@" -e "s|^input_menu_toggle_btn = .*|input_menu_toggle_btn = \"$hk_x\"|"
+	[ -n "$hk_l"  ] && set -- "$@" -e "s|^input_load_state_btn = .*|input_load_state_btn = \"$hk_l\"|"
+	[ -n "$hk_r"  ] && set -- "$@" -e "s|^input_save_state_btn = .*|input_save_state_btn = \"$hk_r\"|"
+	[ -n "$hk_r2" ] && set -- "$@" -e "s|^input_toggle_fast_forward_btn = .*|input_toggle_fast_forward_btn = \"$hk_r2\"|"
+	[ $# -eq 0 ] && return 0
+
+	TMP_CFG="$(mktemp)"
+	if sed "$@" "$PLATFORM_CFG" > "$TMP_CFG"; then
+		mv "$TMP_CFG" "$PLATFORM_CFG"
+		log_message "ra hotkeys renumbered for sdl2: enable=$modname($mod) exit=$hk_a menu=$hk_x load=$hk_l save=$hk_r fps=$hk_y ff=$hk_r2" -v
+	else
+		rm -f "$TMP_CFG"
+	fi
+}
+
 # BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
 # Overlay the sdl2 input drivers on top without touching the shared cfg. The
 # 32-bit build gets its own overlay: its SDL2 cannot see the pad here, so it
@@ -309,8 +370,15 @@ apply_baseos_ra_overlay() {
 
 	RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/$baseos_overlay"
 	case "$RA_BIN" in
-		ra32.*) write_baseos_ra_autoconfig_linuxraw ;;
-		*)      write_baseos_ra_autoconfig ;;
+		ra32.*)
+			# linuxraw numbers the pad exactly as udev does, so the shipped
+			# RA_SELECT_VAL/RA_START_VAL already suit it - nothing to correct.
+			write_baseos_ra_autoconfig_linuxraw
+			;;
+		*)
+			write_baseos_ra_autoconfig
+			apply_xx_hotkey_for_driver "$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
+			;;
 	esac
 }
 
