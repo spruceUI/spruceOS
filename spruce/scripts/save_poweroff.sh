@@ -315,6 +315,18 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 ################### MAIN ######################
                   ########
 
+# BaseOS runs the frontend session from an inittab respawn entry, so killing
+# runtime.sh below only makes init start another one - and that fresh session
+# races this shutdown. It is not merely noise: its read_only_check sees the card
+# we just remounted read-only and runs `mount -o remount,rw` to "repair" it,
+# undoing the clean unmount seconds before the power command. Observed exactly
+# that - the respawned session logged two lines, went silent as the card went
+# read-only, and the next boot still reported a dirty filesystem.
+#
+# Raise a flag runtime.sh checks on startup so the respawned session exits at
+# once. It lives in /tmp, so a real boot never sees it.
+flag_add "shutting_down" --tmp
+
 blink_led_if_applicable
 device_prepare_for_poweroff
 log_activity_event "$(get_current_app)" "STOP"

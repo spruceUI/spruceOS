@@ -19,6 +19,14 @@ SPRUCE_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 export HOME="/mnt/SDCARD"
 
+# A shutdown is in progress and init respawned us. Leave immediately - before
+# rotate_logs, which would destroy the log of the shutdown, and long before
+# read_only_check, which would remount the card read-write and undo the clean
+# unmount save_poweroff.sh just performed.
+if flag_check "shutting_down"; then
+    exit 0
+fi
+
 rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"

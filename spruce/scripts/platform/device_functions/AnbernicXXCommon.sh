@@ -199,6 +199,7 @@ device_init() {
     runtime_mounts_anbernic_34xxsp
 
     [ -n "$SPRUCE_BASEOS" ] && add_spruce_system_user
+    [ -n "$SPRUCE_BASEOS" ] && shield_baseos_session
 
     # BaseOS composes its own adb gadget and binds the UDC during boot. Starting
     # ours as well would leave two daemons fighting over one controller.
@@ -207,6 +208,60 @@ device_init() {
             sleep 10
             /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
         } &
+    fi
+}
+
+# Stop BaseOS's respawned session from re-mounting the card during shutdown.
+#
+# /etc/inittab has `::respawn:/sbin/nextui-session`, so the moment save_poweroff
+# kills the frontend, init starts another one. That script's job includes
+# mounting the card if it finds it unmounted - its own comment says the retry
+# covers "hot re-insertion after an unmount" - and it cannot tell a deliberate
+# shutdown unmount from a yanked card:
+#
+#     mount -t vfat -o rw,utf8,noatime,shortname=mixed "$dev" "$SD"
+#
+# Mounting read-write sets the FAT dirty bit. So stage 2 would unmount the card
+# cleanly and a second later BaseOS would helpfully mount it straight back, and
+# every boot still opened with "Volume was not properly unmounted". Traced end to
+# end: clean umount OK, then a session start in the same second.
+#
+# Bind a shim over it that steps aside while a shutdown is in progress. Same
+# technique spruce already uses for /etc/passwd and MainUI, and ephemeral for the
+# same reason: nothing is written to BaseOS's rootfs, a BaseOS update can neither
+# inherit nor break it, and a reboot removes it entirely. If anything here fails
+# we simply leave BaseOS's own script in place.
+shield_baseos_session() {
+    [ -n "$SPRUCE_BASEOS" ] || return 0
+    [ -f /sbin/nextui-session ] || return 0
+    # Already shielded - device_init can run more than once, and binding twice
+    # stacks mounts. Match on the name alone: /sbin is a symlink to /usr/sbin
+    # here, and /proc/mounts reports the resolved path, so testing for the
+    # literal "/sbin/..." finds nothing and happily binds again.
+    grep -q "nextui-session" /proc/mounts 2>/dev/null && return 0
+
+    cp /sbin/nextui-session /tmp/nextui-session.real 2>/dev/null || return 0
+    chmod +x /tmp/nextui-session.real 2>/dev/null
+
+    cat > /tmp/nextui-session.shim <<'SHIM'
+#!/bin/sh
+# spruce shim over BaseOS's frontend session. Bind-mounted, never installed.
+# While a shutdown is in progress the real session must not run: it mounts the
+# SD card read-write when it finds it unmounted, which re-dirties the filesystem
+# save_poweroff.sh has just unmounted cleanly. The sleep keeps init's respawn
+# from becoming a hot loop for the few seconds before the power goes.
+if [ -e /tmp/shutting_down.lock ]; then
+    sleep 5
+    exit 0
+fi
+exec /tmp/nextui-session.real "$@"
+SHIM
+    chmod +x /tmp/nextui-session.shim 2>/dev/null
+
+    if mount -o bind /tmp/nextui-session.shim /sbin/nextui-session 2>/dev/null; then
+        log_message "Shielded BaseOS session script against shutdown remounts"
+    else
+        log_message "Could not shield BaseOS session script; card may be remounted during shutdown"
     fi
 }
 
@@ -286,6 +341,23 @@ device_get_battery_percent() {
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
+    #
+    # Stock Anbernic's userland unmounts the card properly. BaseOS does not, and
+    # cannot as sequenced: busybox init runs its ::shutdown: action - rcK, which
+    # does `umount -a -r` - BEFORE it kills anything, while a dozen processes are
+    # still executing from the card. The unmount always fails, and every boot
+    # opens with:
+    #
+    #   FAT-fs (mmcblk1p1): Volume was not properly unmounted.
+    #
+    # Returning false routes shutdown through unmount_all + save_poweroff_stage2,
+    # which copies itself to /tmp, drops the card from PATH and LD_LIBRARY_PATH,
+    # kills everything still holding it, and unmounts it properly.
+    #
+    # Safe here specifically because these are two-card devices: the rootfs is on
+    # TF1 (mmcblk0) and spruce is on TF2 (mmcblk1), so unmounting spruce's card
+    # cannot strand the OS - init, /bin and /usr/bin all keep running from TF1.
+    [ -n "$SPRUCE_BASEOS" ] && return 1
     return 0
 }
 
