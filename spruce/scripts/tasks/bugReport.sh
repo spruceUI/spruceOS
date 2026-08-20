@@ -234,6 +234,8 @@ dump_node() {
             -i'!/mnt/SDCARD/Saves/spruce/*.log' \
             -i'!/mnt/SDCARD/Saves/spruce/*.json' \
             -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*' \
+            -i'!/mnt/SDCARD/App/*/log.txt' \
+            -i'!/mnt/SDCARD/App/*/*/log.txt' \
             -i'!/mnt/SDCARD/spruce/spruce'
 
 log_message "Debug: Logs and configs saved to ${output7z}"

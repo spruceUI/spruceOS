@@ -12,8 +12,19 @@ runtime="sbc_4_3_rcv12"
 pck_filename="Songo5.pck"
 #gptk_filename="songo5.gptk"
 
-# Logging
-> "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
+# Logging.
+#
+# Process substitution needs /dev/fd, which BaseOS on the Anbernic XX line does
+# not have. bash then fails the redirect, prints "cannot open /dev/fd/63" - and
+# *continues*, with stdout still pointing wherever it did before. The result is
+# a zero-byte log.txt and every echo below thrown away, which is exactly the
+# state that hid the lid-suppression failure. Fall back to a plain redirect.
+> "$GAMEDIR/log.txt"
+if [ -e /dev/fd ]; then
+    exec > >(tee "$GAMEDIR/log.txt") 2>&1
+else
+    exec >> "$GAMEDIR/log.txt" 2>&1
+fi
 
 if [ -f /mnt/SDCARD/spruce/twig ]; then
 	GODOT_OPTS=${GODOT_OPTS//-f/}
@@ -32,6 +43,8 @@ fi
 # entirely - see device_lid_open in AnbernicXXCommon.sh - so check both.
 unmount_hall_overrides() {
     local TARGET MOUNTED
+    # Why the override was dropped, for the log: "app exit" or the signal name.
+    local REASON="${1:-app exit}"
     for TARGET in /sys/devices/platform/hall-mh248/hallvalue \
                   /sys/class/power_supply/axp2202-battery/hallkey; do
         [ -e "$TARGET" ] || continue
@@ -45,7 +58,8 @@ unmount_hall_overrides() {
 
         while grep -q " $MOUNTED " /proc/mounts 2>/dev/null; do
             if umount -l "$TARGET" 2>/dev/null; then
-                echo "Unmounted hallkey override: $TARGET"
+                echo "Unmounted hallkey override: $TARGET ($REASON)"
+                log_message "Songo: lid suppression released on $TARGET ($REASON)"
             else
                 echo "Failed to unmount: $TARGET"
                 break
@@ -77,6 +91,16 @@ unmount_hall_overrides() {
 # which reads like a missing file rather than a mangled argument. The same mount
 # from a hash-free path succeeds. This is the likeliest reason Songo's own
 # suppression never took effect here either.
+# A trap handler runs and then lets the script carry on - it does not exit. So a
+# stray SIGTERM here silently drops the lid override while Songo keeps playing,
+# and the lid starts suspending mid-song with nothing to show for it. Record the
+# signal itself, not just the unmount, so that case is identifiable after the
+# fact rather than inferred.
+on_hall_signal() {
+    log_message "Songo: caught $1 - releasing lid suppression, launch.sh keeps running"
+    unmount_hall_overrides "$1"
+}
+
 XX_HALL_NODE="/sys/class/power_supply/axp2202-battery/hallkey"
 XX_HALL_SRC="/tmp/songo_hall_override"
 case "$PLATFORM" in
@@ -84,12 +108,22 @@ case "$PLATFORM" in
         if [ -e "$XX_HALL_NODE" ] && [ -f "$GAMEDIR/runtime/hall_override/hallkey" ]; then
             # Clear anything a previous crash left behind before stacking a new one
             unmount_hall_overrides
-            cp "$GAMEDIR/runtime/hall_override/hallkey" "$XX_HALL_SRC" 2>/dev/null
-            if mount -o bind "$XX_HALL_SRC" "$XX_HALL_NODE" 2>/dev/null; then
+            if ! cp "$GAMEDIR/runtime/hall_override/hallkey" "$XX_HALL_SRC" 2>&1; then
+                log_message "Songo: could not stage hall override at $XX_HALL_SRC"
+            fi
+            # Keep mount's stderr, and mirror the outcome to spruce.log: this
+            # app's own log is the first thing to go missing when something is
+            # wrong with the launcher's stdout, and a silent failure here means
+            # the lid suspends mid-song with nothing to show for it.
+            MOUNT_ERR="$(mount -o bind "$XX_HALL_SRC" "$XX_HALL_NODE" 2>&1)"
+            if [ $? -eq 0 ]; then
                 echo "Lid suppressed for this session: $XX_HALL_NODE"
-                trap 'unmount_hall_overrides' INT TERM
+                log_message "Songo: lid suppressed via bind mount on $XX_HALL_NODE"
+                trap 'on_hall_signal SIGINT' INT
+                trap 'on_hall_signal SIGTERM' TERM
             else
-                echo "Could not suppress lid: bind mount failed"
+                echo "Could not suppress lid: bind mount failed: $MOUNT_ERR"
+                log_message "Songo: lid suppression FAILED: mount -o bind $XX_HALL_SRC $XX_HALL_NODE: $MOUNT_ERR"
             fi
         fi
         ;;
@@ -222,7 +256,7 @@ if [[ "$SONGO_CFW_NAME" != "NONE" ]]; then
 	sh "${GAMEDIR}/runtime/volume-indicator/teardown_vol_indicator" "${SONGO_CFW_NAME}"
 fi
 
-unmount_hall_overrides
+unmount_hall_overrides "app exit"
 
 # Might need to add this back in
 # pm_finish
