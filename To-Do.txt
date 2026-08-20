@@ -18,6 +18,7 @@
     
 --- Ry ------------------------------------------------------------------------
 
+- Add Jaguar emu
 - RA cfg overhaul
 - add trimui zram modules from bmdhacks
 - reset config tasks for more standalone emulators
