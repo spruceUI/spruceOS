@@ -361,6 +361,19 @@ device_system_handles_sdcard_unmount() {
     return 0
 }
 
+device_needs_strict_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    #
+    # The strict stage 2 path was written for this device and verified only
+    # here. It pairs with device_system_handles_sdcard_unmount above: the same
+    # BaseOS condition that routes shutdown through stage 2 is what makes the
+    # strict path necessary, since /mnt/SDCARD is a symlink there and the old
+    # cpuinfo guess matched no mount line at all.
+    [ -n "$SPRUCE_BASEOS" ] && return 0
+    return 1
+}
+
 set_volume() {
     new_vol="${1:-0}"        # default to mute
     SAVE_TO_CONFIG="${2:-true}"

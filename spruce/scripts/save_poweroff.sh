@@ -287,6 +287,14 @@ exec_shutdown_stage_2() {
         # doesn't load shared libraries from the SD card
         export PATH=/usr/bin:/usr/sbin:/bin:/sbin
         unset LD_LIBRARY_PATH
+        # Stage 2 runs from /tmp with the card gone, so it cannot source the
+        # device layer to ask this itself. Answer it here, while we still can,
+        # and hand the answer over in the environment.
+        if device_needs_strict_unmount; then
+            export SPRUCE_STRICT_UNMOUNT=1
+        else
+            export SPRUCE_STRICT_UNMOUNT=0
+        fi
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
@@ -325,7 +333,14 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 #
 # Raise a flag runtime.sh checks on startup so the respawned session exits at
 # once. It lives in /tmp, so a real boot never sees it.
-flag_add "shutting_down" --tmp
+#
+# Only where the strict path applies. Nothing else in the fleet respawns its
+# frontend from init, so the flag would never be read there - and a flag that is
+# never read is still a flag that can be left behind by an aborted shutdown and
+# make the next runtime.sh exit for no reason.
+if device_needs_strict_unmount; then
+    flag_add "shutting_down" --tmp
+fi
 
 blink_led_if_applicable
 device_prepare_for_poweroff

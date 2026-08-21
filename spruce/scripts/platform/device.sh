@@ -340,6 +340,23 @@ device_system_handles_sdcard_unmount() {
     return 0
 }
 
+device_needs_strict_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    #
+    # Whether save_poweroff_stage2.sh should take its strict unmount path:
+    # resolve the mount point from /proc/mounts rather than guessing it from
+    # cpuinfo, kill cwd/exe holders as well as fd holders, retry the umount, and
+    # escalate the power command if init does not act on it.
+    #
+    # That path exists for the Anbernic XX under BaseOS, where the old code
+    # matched nothing and unmounted nothing. Every other device already had a
+    # shutdown that worked, and stage 2 is the last thing that runs before the
+    # power is cut - the worst place in the tree to carry a change no one has
+    # tested on that hardware. So it is off by default and each device opts in.
+    return 1
+}
+
 device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently

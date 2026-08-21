@@ -16,6 +16,16 @@ for fd in $(ls /proc/$$/fd 2>/dev/null | grep -E '^[3-9][0-9]*$'); do
     eval "exec ${fd}>&-" 2>/dev/null
 done
 
+# Everything below that departs from the shutdown spruce shipped for years is
+# gated on this. save_poweroff.sh asks the device layer and hands the answer
+# over in the environment, because by the time this script runs the card is
+# about to go and the device functions are on it.
+#
+# Default off. This is the last script that runs before the power is cut: a
+# device that had a working shutdown keeps exactly the code it had, and opts in
+# only once someone has tested the strict path on that hardware.
+STRICT_UNMOUNT="${SPRUCE_STRICT_UNMOUNT:-0}"
+
 # ...and stdin/stdout/stderr, which that loop deliberately skips. They are
 # inherited too, and whatever launched the shutdown decides where they point -
 # the menu, the power button watchdog and an ssh session all differ. If any of
@@ -25,10 +35,21 @@ done
 # intermittent: it depended on how the shutdown was started, not on anything
 # this script does.
 #
-# Nothing here needs them: progress goes to the console via echo, which is
-# pointless once the frontend is dead, and every diagnostic writes to an
-# explicit path.
-exec </dev/null >/dev/null 2>&1
+# Nothing here needs them, but they must not simply be thrown away either: this
+# script sends the device to sleep for good, so if it goes wrong there is no
+# session left to ask and nothing on the card to read. Sending everything to
+# /dev/null made the whole shutdown unobservable - a report of "power off does
+# not work" could not be told apart from "the unmount failed" or "the kill loop
+# stalled".
+#
+# Log to a filesystem that is emphatically NOT the card: an open descriptor
+# there is precisely what makes the umount below fail. /data is a separate
+# partition under BaseOS and outlives the power cycle, so the next boot can fold
+# this into the spruce log and a bug report carries it; /tmp is the fallback and
+# at least survives long enough to be read over ssh.
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    exec </dev/null >/dev/null 2>&1
+fi
 echo 4
 # Where the card is actually mounted.
 #
@@ -72,8 +93,42 @@ resolve_sd_mountpoint() {
     esac
 }
 
-SD_MOUNTPOINT="$(resolve_sd_mountpoint)"
-echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    SD_MOUNTPOINT="$(resolve_sd_mountpoint)"
+
+    # Now that the card's real mount point is known, reopen stdout/stderr on a
+    # log file - chosen here rather than above precisely so it can be checked
+    # against the resolved path instead of a configured guess.
+    STAGE2_LOG=/tmp/save_poweroff_stage2.log
+    for _d in /data /mnt/data; do
+        case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
+        [ -d "$_d" ] || continue
+        if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
+            rm -f "$_d/.spruce_shutdown_write_test"
+            STAGE2_LOG="$_d/spruce_shutdown.log"
+            break
+        fi
+    done
+
+    # Truncate rather than append: one shutdown per file, so the next boot
+    # reports the shutdown that just happened and this cannot grow without bound.
+    exec >"$STAGE2_LOG" 2>&1
+    echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} ==="
+    echo "stage2: logging to $STAGE2_LOG"
+    echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
+else
+    # The original guess, unchanged. Correct on every device that was shipping
+    # this before the XX work: their configured mount point is not behind a
+    # symlink, so what cpuinfo returns is what /proc/mounts reports.
+    #
+    # Flip and TSPS have nonstandard mount points.
+    INFO=$(cat /proc/cpuinfo 2> /dev/null)
+    case $INFO in
+        *"TG5050"*)	 SD_MOUNTPOINT="/mnt/sdcard/mmcblk1p1"	;;
+        *"0xd05"*)   SD_MOUNTPOINT="/mnt/sdcard" ;;
+        *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
+    esac
+fi
 echo 5
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
@@ -95,13 +150,18 @@ for pidpath in /proc/[0-9]*; do
 
     holds_sd=0
 
-    # cwd and the running executable, neither of which appears under fd/
-    for link in "$pidpath/cwd" "$pidpath/exe"; do
-        target=$(readlink "$link" 2>/dev/null) || continue
-        case "$target" in
-            "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
-        esac
-    done
+    # cwd and the running executable, neither of which appears under fd/.
+    # Strict mode only: this kills strictly more processes than the original
+    # loop did, and on a device whose umount already succeeded that is risk
+    # with nothing to buy.
+    if [ "$STRICT_UNMOUNT" = "1" ]; then
+        for link in "$pidpath/cwd" "$pidpath/exe"; do
+            target=$(readlink "$link" 2>/dev/null) || continue
+            case "$target" in
+                "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
+            esac
+        done
+    fi
 
     # Then open file descriptors
     if [ "$holds_sd" -eq 0 ]; then
@@ -171,31 +231,97 @@ sync
 # The lazy fallback stays as the last resort so the power command is never
 # blocked, but it does NOT flush or mark the filesystem clean - it only detaches
 # the mount - so reaching it means the card is left dirty and we say so.
-umount_tries=0
-umount_ok=0
-while [ "$umount_tries" -lt 10 ]; do
-    if umount "$SD_MOUNTPOINT" 2>/dev/null; then
-        umount_ok=1
-        break
-    fi
-    umount_tries=$((umount_tries + 1))
-    sleep 0.3
-done
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    umount_tries=0
+    umount_ok=0
+    while [ "$umount_tries" -lt 10 ]; do
+        if umount "$SD_MOUNTPOINT" 2>/dev/null; then
+            umount_ok=1
+            break
+        fi
+        umount_tries=$((umount_tries + 1))
+        sleep 0.3
+    done
 
-if [ "$umount_ok" -eq 1 ]; then
-    echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
+    if [ "$umount_ok" -eq 1 ]; then
+        echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
+    else
+        echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
+        umount -l "$SD_MOUNTPOINT"
+    fi
 else
-    echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
-    umount -l "$SD_MOUNTPOINT"
+    # The original single attempt. Up to three seconds of retries is cheap
+    # insurance on a device that needs it and a delay on every shutdown for one
+    # that does not.
+    umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
 fi
 echo 13
 
-# MM v1-4 require reboot command to power off properly.
+# Cut the power, and do not take "maybe" for an answer.
+#
+# `poweroff` and `reboot` only signal init and return; init then runs its
+# ::shutdown: actions and calls reboot(2). If any part of that wedges, this
+# script has already remounted the card read-only and unmounted it, AND every
+# path that would normally undo that is deliberately switched off - the
+# shutting_down flag makes runtime.sh exit at startup, and the shim keeps
+# BaseOS's session from remounting the card. The device is then on, blank, and
+# unable to write to its own storage until the user holds the power button.
+# "Power off does not work" and "card stuck read-only" are the same failure
+# reported twice, so escalate rather than trust the first command.
+#
+# MM v1-4 require the reboot command to power off properly.
 if [ -d /customer/app ] && [ ! -e /customer/app/axp_test ]; then
-    reboot
+    WANT_REBOOT=1
 elif [ "$1" = "--reboot" ]; then
-    reboot
+    WANT_REBOOT=1
 else
-    poweroff
+    WANT_REBOOT=0
 fi
-echo 14
+
+if [ "$STRICT_UNMOUNT" != "1" ]; then
+    # The original: issue the command and let init take it from there. Every
+    # device on this branch has been powering off this way for years, and the
+    # escalation below is only worth its risk where the recovery it protects
+    # against - a card left read-only by a wedged init - is reachable.
+    if [ "$WANT_REBOOT" -eq 1 ]; then
+        reboot
+    else
+        poweroff
+    fi
+    echo 14
+    exit 0
+fi
+
+# sysrq is the last resort below and is commonly left disabled.
+echo 1 > /proc/sys/kernel/sysrq 2>/dev/null
+
+if [ "$WANT_REBOOT" -eq 1 ]; then
+    echo "stage2: rebooting"
+    reboot
+    sleep 10
+    echo "stage2: reboot did not take after 10s, forcing"
+    reboot -f
+    sleep 5
+    echo "stage2: reboot -f did not take, trying sysrq"
+    echo b > /proc/sysrq-trigger 2>/dev/null
+    sleep 5
+else
+    echo "stage2: powering off"
+    poweroff
+    sleep 10
+    echo "stage2: poweroff did not take after 10s, forcing"
+    poweroff -f
+    sleep 5
+    echo "stage2: poweroff -f did not take, trying sysrq"
+    echo o > /proc/sysrq-trigger 2>/dev/null
+    sleep 5
+fi
+
+# Still running. Recover rather than leave the user holding a device that cannot
+# write to its card: drop the shutdown flag so runtime.sh stops exiting at
+# startup and the shim steps aside on its next respawn, and put the card back
+# read-write ourselves in case the umount failed and only the remount took.
+echo "stage2: every power command failed - recovering so the card is not left read-only"
+mount -o remount,rw "$SD_MOUNTPOINT" 2>/dev/null
+rm -f /tmp/shutting_down.lock
+echo "stage2: recovery done, card should be writable again"
