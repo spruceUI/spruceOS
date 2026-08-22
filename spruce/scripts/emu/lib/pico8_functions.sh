@@ -68,45 +68,43 @@ run_pico8() {
 	elif [ "${PLATFORM#Anbernic}" != "$PLATFORM" ]; then
 		PICO8_BINARY="pico8_64"
 
-		if [ -n "$SPRUCE_BASEOS" ]; then
-			# dll-mali's SDL2 lists only "mali dummy offscreen", so naming mali
-			# saves a probe and stops a future SDL2 picking something else.
-			export SDL_VIDEODRIVER=mali
+		# dll-mali's SDL2 lists only "mali dummy offscreen", so naming mali
+		# saves a probe and stops a future SDL2 picking something else.
+		export SDL_VIDEODRIVER=mali
 
-			# PICO-8 downloads through libcurl, or through wget when config.txt
-			# sets use_wget - which spruce ships as 1. BaseOS has no libcurl, so
-			# wget is the only path, and BaseOS's wget is busybox, which cannot
-			# do TLS: zero bytes for any https URL. Every cart fetch is https,
-			# so Splore browsed fine but no cart would ever load, failing with
-			# "could not connect to bbs". Put a curl-backed wget shim first on
-			# PATH - curl is present and statically linked with its own SSL.
-			# Scoped to this launch, so nothing else sees the shim.
-			[ -x "$EMU_DIR/bin/wget" ] && export PATH="$EMU_DIR/bin:$PATH"
+		# PICO-8 downloads through libcurl, or through wget when config.txt
+		# sets use_wget - which spruce ships as 1. BaseOS has no libcurl, so
+		# wget is the only path, and BaseOS's wget is busybox, which cannot
+		# do TLS: zero bytes for any https URL. Every cart fetch is https,
+		# so Splore browsed fine but no cart would ever load, failing with
+		# "could not connect to bbs". Put a curl-backed wget shim first on
+		# PATH - curl is present and statically linked with its own SSL.
+		# Scoped to this launch, so nothing else sees the shim.
+		[ -x "$EMU_DIR/bin/wget" ] && export PATH="$EMU_DIR/bin:$PATH"
 
-			# PICO-8 asks SDL_Init for the sensor subsystem, which dll-mali is
-			# not built with, and SDL_Init is all-or-nothing - so it dies with
-			# "FATAL ERROR: Unable to initialize SDL" before drawing anything.
-			# Probed subsystem by subsystem on a CubeXX: TIMER, AUDIO, VIDEO,
-			# JOYSTICK, HAPTIC, GAMECONTROLLER and EVENTS all initialise and
-			# only SENSOR fails, so masking that one bit is the whole fix. The
-			# shim does exactly that and nothing else; source sits beside it in
-			# Emu/PICO8/src.
-			#
-			# The alternative was the stock Anbernic SDL2, which does have
-			# sensors - but it finds zero joysticks under BaseOS with udev on,
-			# with udev disabled, and with SDL_JOYSTICK_DEVICE naming the node.
-			# dll-mali finds the pad because it carries NextUI's H700 joystick
-			# classification patch, which exists because these pads report no
-			# ABS_X/ABS_Y for stock heuristics to latch onto.
-			[ -f "$HOME/lib-h700/libsdl_sensor_shim.so" ] && \
-				export LD_PRELOAD="$HOME/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
+		# PICO-8 asks SDL_Init for the sensor subsystem, which dll-mali is
+		# not built with, and SDL_Init is all-or-nothing - so it dies with
+		# "FATAL ERROR: Unable to initialize SDL" before drawing anything.
+		# Probed subsystem by subsystem on a CubeXX: TIMER, AUDIO, VIDEO,
+		# JOYSTICK, HAPTIC, GAMECONTROLLER and EVENTS all initialise and
+		# only SENSOR fails, so masking that one bit is the whole fix. The
+		# shim does exactly that and nothing else; source sits beside it in
+		# Emu/PICO8/src.
+		#
+		# The alternative was the stock Anbernic SDL2, which does have
+		# sensors - but it finds zero joysticks under BaseOS with udev on,
+		# with udev disabled, and with SDL_JOYSTICK_DEVICE naming the node.
+		# dll-mali finds the pad because it carries NextUI's H700 joystick
+		# classification patch, which exists because these pads report no
+		# ABS_X/ABS_Y for stock heuristics to latch onto.
+		[ -f "$HOME/lib-h700/libsdl_sensor_shim.so" ] && \
+			export LD_PRELOAD="$HOME/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
-			# None of the shipped sdl_controllers.* profiles cover
-			# ANBERNIC-keys, so without this PICO-8 would see the pad but have
-			# no GameController mapping for it. Same handoff ppsspp_functions.sh
-			# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
-			export_sdl_gamecontroller_map
-		fi
+		# None of the shipped sdl_controllers.* profiles cover
+		# ANBERNIC-keys, so without this PICO-8 would see the pad but have
+		# no GameController mapping for it. Same handoff ppsspp_functions.sh
+		# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
+		export_sdl_gamecontroller_map
 
 		# The RG28XX mounts its panel turned, exactly like the A30 - both report
 		# DISPLAY_ROTATION 270 with the same 640x480 geometry - so it needs the

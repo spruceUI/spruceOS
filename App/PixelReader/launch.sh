@@ -63,21 +63,19 @@ sleep 0.6
 # trusting the sleep above, since reader must not start before it exists.
 case "$PLATFORM" in
 	"Anbernic"*)
-		if [ -n "$SPRUCE_BASEOS" ]; then
-			i=0
-			while [ "$i" -lt 20 ]; do
-				for d in /sys/class/input/event*; do
-					[ -r "$d/device/name" ] || continue
-					if [ "$(cat "$d/device/name" 2>/dev/null)" = "Fake Keyboard" ]; then
-						export SDL_EVDEV_DEVICES="/dev/input/$(basename "$d")"
-						break
-					fi
-				done
-				[ -n "$SDL_EVDEV_DEVICES" ] && break
-				i=$((i + 1))
-				sleep 0.1
+		i=0
+		while [ "$i" -lt 20 ]; do
+			for d in /sys/class/input/event*; do
+				[ -r "$d/device/name" ] || continue
+				if [ "$(cat "$d/device/name" 2>/dev/null)" = "Fake Keyboard" ]; then
+					export SDL_EVDEV_DEVICES="/dev/input/$(basename "$d")"
+					break
+				fi
 			done
-		fi
+			[ -n "$SDL_EVDEV_DEVICES" ] && break
+			i=$((i + 1))
+			sleep 0.1
+		done
 		;;
 esac
 
@@ -105,11 +103,7 @@ else
 	# command rather than exported.
 	case "$PLATFORM" in
 		"Anbernic"*)
-			if [ -n "$SPRUCE_BASEOS" ] && [ -f /mnt/SDCARD/spruce/h700/lib64/sdl2/libSDL2-2.0.so.0 ]; then
-				LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./reader 2>log.txt
-			else
-				./reader 2>log.txt
-			fi
+			LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./reader 2>log.txt
 			;;
 		*)
 			./reader 2>log.txt
