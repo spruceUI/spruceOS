@@ -443,16 +443,7 @@ setup_for_retroarch(){
     case "$RA_BIN" in
         ra32.*)
             export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-            if [ -n "$SPRUCE_BASEOS" ]; then
-                # BaseOS has no /usr/lib32 - its harvest carries only the armhf
-                # loader and libc (enough for the vendor bluetooth binary). The
-                # rest of the 32-bit closure ships with spruce; see the
-                # PROVENANCE note in spruce/h700/lib32.
-                export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
-            else
-                # Stock Anbernic is Ubuntu with a full 32-bit multilib.
-                export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
-            fi
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
             ;;
         *)
             export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"
