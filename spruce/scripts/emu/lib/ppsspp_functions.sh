@@ -68,10 +68,8 @@ run_ppsspp() {
 	# SDL_IsGameController true, so PPSSPP maps by button name and the shipped
 	# controls-*.ini works unchanged. Video also needs the mali driver, as on the
 	# PowerVR devices. Mapping GUID/indices verified on CubeXX; matches MustardOS.
-	if [ -n "$SPRUCE_BASEOS" ]; then
-		export SDL_VIDEODRIVER=mali
-		export_sdl_gamecontroller_map
-	fi
+	export SDL_VIDEODRIVER=mali
+	export_sdl_gamecontroller_map
 
 	# accommodate both relative and absolute paths for PPSSPP bin location
 	case "$PSP_BIN" in
@@ -81,9 +79,9 @@ run_ppsspp() {
 
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	if [ -z "$ROM_FILE" ]; then
-		"$PPSSPPSDL" --fullscreen > $(emu_log_file) 2>&1
+		"$PPSSPPSDL" --fullscreen > "$(emu_log_file)" 2>&1
 	else
-		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > $(emu_log_file) 2>&1
+		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > "$(emu_log_file)" 2>&1
 	fi
 
 	umount "$PSP_SS_DIR"
