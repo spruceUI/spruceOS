@@ -1,0 +1,9 @@
+{
+    "label": "Video Player",
+    "icon": "icon.png",
+    "launch": "launch.sh",
+    "description": "Deprecated: use PyUI Video Player in Apps menu",
+    "hide": true,
+    "devices": ["TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+    "hideInSimpleMode": false
+}

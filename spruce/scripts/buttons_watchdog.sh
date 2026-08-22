@@ -39,7 +39,7 @@ nearest_system_brightness() {
     done
 }
 
-# Map the System Value to MainUI brightness level 
+# Map the System Value to MainUI brightness level
 get_brightness_level() {
     value=$(cat "$DEVICE_BRIGHTNESS_PATH")
     nearest=$(nearest_system_brightness "$value")
@@ -100,6 +100,43 @@ volume_up_bg() {
     done
 }
 
+run_dip_scene() {
+    state="$1"
+    echo "$(date '+%H:%M:%S') dip state $state" >> /tmp/buttons_watchdog_dip.log
+    [ -d /usr/trimui/scene ] || return 0
+
+    for scene in /usr/trimui/scene/*.sh; do
+        [ -f "$scene" ] || continue
+        echo "$(date '+%H:%M:%S') dip script $scene $state" >> /tmp/buttons_watchdog_dip.log
+        pkill -f "$(basename "$scene")" 2>/dev/null
+        sh "$scene" "$state" &
+    done
+}
+
+dip_switch_bg() {
+    gpio="/sys/class/gpio/gpio363/value"
+
+    if [ ! -f "$gpio" ]; then
+        echo 363 > /sys/class/gpio/export 2>/dev/null
+        echo -n in > /sys/class/gpio/gpio363/direction 2>/dev/null
+    fi
+
+    last=""
+    while true; do
+        if [ -f "$gpio" ]; then
+            current="$(cat "$gpio" 2>/dev/null)"
+            if [ -n "$last" ] && [ "$current" != "$last" ]; then
+                run_dip_scene "$current"
+            fi
+            last="$current"
+        fi
+        sleep 0.2
+    done
+}
+
+dip_switch_bg &
+DIP_WATCH_PID=$!
+
 take_screenshot_bg() {
     timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
@@ -138,6 +175,7 @@ SS_B3_DOWN=false
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
+    echo "$line" > /tmp/buttons_watchdog_last_event
     # first print event code to log file
     # handle hotkeys and volume buttons
     case $line in
@@ -156,6 +194,18 @@ getevent $EVENTS | while read line; do
             if [ "$START_DOWN" = true ] ; then
                 brightness_up
             fi
+        ;;
+        *"key $B_FN_LEFT 1"*) # Left Fn key down
+            fn_key_down left
+        ;;
+        *"key $B_FN_LEFT 0"*) # Left Fn key up
+            fn_key_up left
+        ;;
+        *"key $B_FN_RIGHT 1"*) # Right Fn key down
+            fn_key_down right
+        ;;
+        *"key $B_FN_RIGHT 0"*) # Right Fn key up
+            fn_key_up right
         ;;
         *"key $SS_B1 1"*) # Screenshot key 1 down
             SS_B1_DOWN=true
@@ -217,3 +267,5 @@ getevent $EVENTS | while read line; do
         ;;
     esac
 done
+
+kill "$DIP_WATCH_PID" 2>/dev/null

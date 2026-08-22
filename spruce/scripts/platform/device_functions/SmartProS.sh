@@ -108,6 +108,36 @@ set_volume() {
 
 }
 
+run_fn_config() {
+    config="$1"
+    echo "$(date '+%H:%M:%S') fn config $config" >> /tmp/buttons_watchdog_fn.log
+    [ -f "$config" ] || return 0
+
+    launch=$(jq -r '.launch // empty' "$config" 2>/dev/null)
+    echo "$(date '+%H:%M:%S') fn launch $launch" >> /tmp/buttons_watchdog_fn.log
+    [ -n "$launch" ] || return 0
+
+    case "$launch" in
+        */*) script="$launch" ;;
+        *) script="/mnt/SDCARD/App/fn_editor/$launch" ;;
+    esac
+
+    [ -f "$script" ] || return 0
+    echo "$(date '+%H:%M:%S') fn script $script" >> /tmp/buttons_watchdog_fn.log
+    sh "$script" &
+}
+
+fn_key_down() {
+    case "$1" in
+        left) run_fn_config "/usr/trimui/fnkeys/f1key.json" ;;
+        right) run_fn_config "/usr/trimui/fnkeys/f2key.json" ;;
+    esac
+}
+
+fn_key_up() {
+    :
+}
+
 
 get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
