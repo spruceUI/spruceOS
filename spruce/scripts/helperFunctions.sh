@@ -1169,13 +1169,88 @@ disable_wifi() {
     rm -f /tmp/wifion           2>/dev/null
     touch /tmp/wifioff          2>/dev/null
     killall -9 wpa_supplicant   2>/dev/null
-    killall -9 udhcpc           2>/dev/null
+    # Stop whichever client this device actually started. Naming udhcpc here
+    # only works for as long as every device uses udhcpc; a device that
+    # overrides device_start_dhcp_client would have been left with its client
+    # still holding the interface after "WiFi off".
+    device_stop_dhcp_client
     log_message "WiFi turned off"
     device_wifi_power_off
 }
 
+# Read the -c argument out of a running wpa_supplicant's cmdline. Accepts both
+# "-c /path" and "-cpath"; prints nothing if there is no -c.
+wpa_conf_path_of_pid() {
+    [ -n "$1" ] || return 0
+    tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | awk '
+        prev == "-c" { print; exit }
+        /^-c./       { sub(/^-c/, ""); print; exit }
+        { prev = $0 }
+    '
+}
+
+# Merge the network blocks of another wpa_supplicant.conf into ours, skipping
+# any SSID we already have. Used when taking the radio over from whatever
+# brought it up before us.
+#
+# Nothing here may log block contents: they hold pre-shared keys in the clear.
+# Only counts and paths are logged.
+import_wpa_networks_from() {
+    FOREIGN_CONF="$1"
+
+    [ -n "$FOREIGN_CONF" ] || return 0
+    [ -f "$FOREIGN_CONF" ] || return 0
+    [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
+    [ "$FOREIGN_CONF" = "$WPA_SUPPLICANT_FILE" ] && return 0
+
+    TMP_IMPORT="/tmp/wpa_import.$$"
+    awk -v ours="$WPA_SUPPLICANT_FILE" '
+        BEGIN {
+            while ((getline line < ours) > 0) {
+                if (line ~ /^[ \t]*ssid=/) {
+                    sub(/^[ \t]*ssid=/, "", line)
+                    have[line] = 1
+                }
+            }
+            close(ours)
+        }
+        # No brace in either regex: busybox awk parses an unescaped { as the
+        # start of an interval expression and rejects the whole pattern with
+        # "Invalid contents of {}". Matching "network=" is enough to open a
+        # block, and $1 == "}" closes one whatever the indentation.
+        /^[ \t]*network[ \t]*=/ { inblock = 1; n = 0; ssid = "" }
+        inblock {
+            buf[n++] = $0
+            if ($0 ~ /^[ \t]*ssid=/) { ssid = $0; sub(/^[ \t]*ssid=/, "", ssid) }
+            if ($1 == "}") {
+                inblock = 0
+                if (ssid != "" && !(ssid in have)) {
+                    have[ssid] = 1
+                    printf "\n"
+                    for (i = 0; i < n; i++) print buf[i]
+                }
+            }
+        }
+    ' "$FOREIGN_CONF" > "$TMP_IMPORT" 2>/dev/null
+
+    NEW_COUNT=$(grep -c '^[[:space:]]*network[[:space:]]*=' "$TMP_IMPORT" 2>/dev/null)
+    if [ "${NEW_COUNT:-0}" -gt 0 ]; then
+        cat "$TMP_IMPORT" >> "$WPA_SUPPLICANT_FILE"
+        log_message "Imported $NEW_COUNT network(s) from $FOREIGN_CONF"
+    else
+        log_message "No new networks to import from $FOREIGN_CONF"
+    fi
+    rm -f "$TMP_IMPORT"
+}
+
 enable_wifi() {
     device_wifi_power_on
+
+    # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
+    # not - the radio fails to enumerate and the interface is never created -
+    # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
+    # nothing. Give the device a chance to bring it back first.
+    device_ensure_wifi_interface
 
     rm -f /tmp/wifioff          2>/dev/null
     touch /tmp/wifion           2>/dev/null
@@ -1201,7 +1276,16 @@ enable_wifi() {
     if [ -n "$WPA_PID" ]; then
         WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
         if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-            log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
+            # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
+            # that is the OS underneath us, and it is very likely ASSOCIATED
+            # RIGHT NOW. spruce takes ownership here by design, but taking it by
+            # killing that process and starting ours against a config that may
+            # hold no networks at all just drops a working connection, and the
+            # user sees WiFi die a few seconds into boot for no reason.
+            #
+            # Carry its networks across first, then take over.
+            log_message "wpa_supplicant using wrong config; taking over with $WPA_SUPPLICANT_FILE"
+            import_wpa_networks_from "$(wpa_conf_path_of_pid "$WPA_PID")"
             kill -9 "$WPA_PID" 2>/dev/null
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
@@ -1213,7 +1297,7 @@ enable_wifi() {
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
         log_message "Launching wpa_supplicant"
     fi
-    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+    device_start_dhcp_client
     /mnt/SDCARD/spruce/scripts/networkservices.sh &
     log_message "WiFi turned on"
 

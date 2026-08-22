@@ -69,7 +69,7 @@ handle_network_services() {
 				ifconfig wlan0 down &
 			fi
 			killall wpa_supplicant
-			killall udhcpc
+			device_stop_dhcp_client
 		fi
 	fi
 }

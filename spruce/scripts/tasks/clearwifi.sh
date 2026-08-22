@@ -7,7 +7,7 @@ if [ -n "$WPA_SUPPLICANT_FILE" ] ; then
     ifconfig wlan0 down
     sleep 2  
     killall wpa_supplicant
-    killall udhcpc
+    device_stop_dhcp_client
 
     # Remove all networks
     echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" | tee "$WPA_SUPPLICANT_FILE" "${WPA_SUPPLICANT_FILE}.tmp"

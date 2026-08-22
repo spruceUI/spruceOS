@@ -224,8 +224,14 @@ dump_node() {
 
     echo
     echo "==== wifi: kernel log ===="
-    dmesg 2>/dev/null | grep -iE 'wlan|wifi|nl80211|cfg80211|firmware|8188|8821|8723|aic' \
-        | tail -40 | sed 's/^/  /' || echo "  <nothing matched>"
+    # mmc/sdio belong here as much as the driver names do. On SDIO parts the
+    # radio can fail below the driver - "mmc2: error -110 whilst initialising
+    # SDIO card" is the whole diagnosis, and the driver still reports a clean
+    # "module init ret=0" right before it. Without those patterns the single
+    # most useful line lands in some other section's dmesg tail by luck, or not
+    # at all, and the report looks like a driver that loaded fine.
+    dmesg 2>/dev/null | grep -iE 'wlan|wifi|nl80211|cfg80211|firmware|8188|8821|8723|aic|mmc[0-9]|sdio|sunxi-mmc' \
+        | tail -60 | sed 's/^/  /' || echo "  <nothing matched>"
 } > "$device_state" 2>&1
 
 7zr a -spf2 "$output7z" \
