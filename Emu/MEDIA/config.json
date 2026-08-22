@@ -11,6 +11,7 @@
       "launch": "/mnt/SDCARD/Emu/MEDIA/open_gvu_browser.sh",
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
@@ -48,6 +49,7 @@
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX"
       ],
       "options": [

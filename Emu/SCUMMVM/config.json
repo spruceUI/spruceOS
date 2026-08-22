@@ -11,6 +11,7 @@
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/open_scummvm_menu.sh",
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
@@ -28,6 +29,7 @@
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/scan_scummvm_game.sh",
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
@@ -45,6 +47,7 @@
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
@@ -101,6 +104,7 @@
       ],
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
