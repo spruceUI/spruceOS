@@ -2,7 +2,6 @@ from devices.anbernic.anbernic_xx_common import AnbernicXXCommon
 import os
 
 
-#/mnt/vendor/ctrl/dmenu_ln
 class Anbernic720x480(AnbernicXXCommon):
     def __init__(self, main_ui_mode):
         self.device_name = "ANBERNIC_RGXX720480"

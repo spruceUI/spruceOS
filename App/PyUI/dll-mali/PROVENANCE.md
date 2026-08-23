@@ -6,8 +6,7 @@ SDL2 and companion libraries used when spruce runs on **BaseOS**
 BaseOS has no libdrm/libgbm and no wayland, so our usual KMSDRM/wayland SDL2
 cannot reach the panel. This directory is a copy of `../dll` with the SDL2
 swapped for a **mali-fbdev** build and two extra dependencies added.
-`App/PyUI/launch.sh` prefers this directory over `../dll` when `SPRUCE_BASEOS`
-is set.
+`App/PyUI/launch.sh` prefers this directory over `../dll` on this device family.
 
 ## Contents that differ from ../dll
 

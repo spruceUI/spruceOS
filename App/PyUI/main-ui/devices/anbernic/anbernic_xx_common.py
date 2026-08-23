@@ -49,7 +49,6 @@ from devices.device_common import DeviceCommon
 ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
 
 
-#/mnt/vendor/ctrl/dmenu_ln
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
         # device_name is set by the subclass before it calls up here. This used

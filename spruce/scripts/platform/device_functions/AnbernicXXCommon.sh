@@ -102,20 +102,11 @@ send_virtual_key_L3() {
 
 
 has_lid() {
-    # BaseOS has no vendor partition, so board.ini is gone. Its build target is
-    # the same information: every clamshell target ends in "sp" (rg34xxsp,
-    # rg35xxsp, rgsp).
-    if [ -n "$SPRUCE_BASEOS" ]; then
-        case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-            *sp) return 0 ;;
-            *)   return 1 ;;
-        esac
-    fi
-
-    BOARD="$(cat /mnt/vendor/oem/board.ini)"
-    case "$BOARD" in
-        *xxSP*) return 0 ;;
-        *)    return 1 ;;
+    # BaseOS's build target names the model exactly, and every clamshell target
+    # in the line ends in "sp" (rg34xxsp, rg35xxsp, rgsp).
+    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+        *sp) return 0 ;;
+        *)   return 1 ;;
     esac
 }
 
@@ -157,40 +148,32 @@ runtime_mounts_anbernic_34xxsp() {
     #mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
 
     # Half of spruce finds the UI with `pgrep MainUI` / `killall MainUI`, so the
-    # interpreter has to carry that name. On stock that is a symlink to the
-    # system python; under BaseOS there is no system python, so alias the
-    # bundled one the same way Flip.sh does.
-    if [ -n "$SPRUCE_BASEOS" ]; then
-        MAINUI="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        touch "$MAINUI"
-        # -o bind, not --bind: BaseOS is BusyBox and its mount does not take the
-        # util-linux long option stock Ubuntu accepted. A failed bind here is
-        # silent and leaves the empty mount point behind, so PyUI execs a 0-byte
-        # file and principal.sh spins forever on a blank screen. Verify, and fall
-        # back to a plain copy rather than trusting the mount.
-        mount -o bind /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI" 2>/dev/null
-        if [ ! -s "$MAINUI" ]; then
-            log_message "MainUI bind mount failed, copying interpreter instead"
-            umount "$MAINUI" 2>/dev/null
-            cp /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI"
-            chmod +x "$MAINUI"
-        fi
-    else
-        ln -s /usr/bin/python3 /usr/bin/MainUI
-    fi
-
-    # Stock lets us borrow Anbernic's own RetroArch assets off the vendor
-    # partition. BaseOS drops that partition; skip rather than fail the mount.
-    if [ -d /mnt/vendor/deep/retro/retroarch-1.20 ]; then
-        mount --bind /mnt/vendor/deep/retro/retroarch-1.20 /mnt/sdcard/RetroArch/retroarch
+    # interpreter has to carry that name. BaseOS ships no system python, so
+    # alias the bundled one the same way Flip.sh does.
+    MAINUI="/mnt/SDCARD/spruce/flip/bin/MainUI"
+    touch "$MAINUI"
+    # -o bind, not --bind: BaseOS is BusyBox and its mount does not take the
+    # util-linux long option stock Ubuntu accepted. A failed bind here is
+    # silent and leaves the empty mount point behind, so PyUI execs a 0-byte
+    # file and principal.sh spins forever on a blank screen. Verify, and fall
+    # back to a plain copy rather than trusting the mount.
+    mount -o bind /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI" 2>/dev/null
+    if [ ! -s "$MAINUI" ]; then
+        log_message "MainUI bind mount failed, copying interpreter instead"
+        umount "$MAINUI" 2>/dev/null
+        cp /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI"
+        chmod +x "$MAINUI"
     fi
 }
 
-device_init() {
-    # launch_startup_watchdogs runs every watchdog through /bin/bash. Stock
-    # Anbernic is Ubuntu and has one; BaseOS is BusyBox and does not, so the
-    # watchdogs would all fail silently and take the power and home buttons with
-    # them. Same static aarch64 bash the TrimUI devices drop in for this reason.
+# Everything device_init does that is true of the whole XX line. Kept separate
+# because AnbernicRG28XX.sh needs its own device_init for the WiFi module and
+# would otherwise have to duplicate - and drift from - all of this.
+anbernic_xx_common_init() {
+    # launch_startup_watchdogs runs every watchdog through /bin/bash, and BaseOS
+    # is BusyBox with no bash at all, so without this the watchdogs fail
+    # silently and take the power, home and lid buttons with them. Same static
+    # aarch64 bash the TrimUI devices drop in for the same reason.
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
         chmod +x /bin/bash 2>/dev/null
@@ -198,17 +181,12 @@ device_init() {
 
     runtime_mounts_anbernic_34xxsp
 
-    [ -n "$SPRUCE_BASEOS" ] && add_spruce_system_user
-    [ -n "$SPRUCE_BASEOS" ] && shield_baseos_session
+    add_spruce_system_user
+    shield_baseos_session
+}
 
-    # BaseOS composes its own adb gadget and binds the UDC during boot. Starting
-    # ours as well would leave two daemons fighting over one controller.
-    if [ -z "$SPRUCE_BASEOS" ]; then
-        {
-            sleep 10
-            /mnt/SDCARD/anbernic_adbd/run_adbd.sh &
-        } &
-    fi
+device_init() {
+    anbernic_xx_common_init
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
@@ -232,7 +210,6 @@ device_init() {
 # inherit nor break it, and a reboot removes it entirely. If anything here fails
 # we simply leave BaseOS's own script in place.
 shield_baseos_session() {
-    [ -n "$SPRUCE_BASEOS" ] || return 0
     [ -f /sbin/nextui-session ] || return 0
     # Already shielded - device_init can run more than once, and binding twice
     # stacks mounts. Match on the name alone: /sbin is a symlink to /usr/sbin
@@ -342,11 +319,10 @@ device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
     #
-    # Stock Anbernic's userland unmounts the card properly. BaseOS does not, and
-    # cannot as sequenced: busybox init runs its ::shutdown: action - rcK, which
-    # does `umount -a -r` - BEFORE it kills anything, while a dozen processes are
-    # still executing from the card. The unmount always fails, and every boot
-    # opens with:
+    # BaseOS does not unmount the card, and cannot as sequenced: busybox init
+    # runs its ::shutdown: action - rcK, which does `umount -a -r` - BEFORE it
+    # kills anything, while a dozen processes are still executing from the card.
+    # The unmount always fails, and every boot opens with:
     #
     #   FAT-fs (mmcblk1p1): Volume was not properly unmounted.
     #
@@ -357,8 +333,7 @@ device_system_handles_sdcard_unmount() {
     # Safe here specifically because these are two-card devices: the rootfs is on
     # TF1 (mmcblk0) and spruce is on TF2 (mmcblk1), so unmounting spruce's card
     # cannot strand the OS - init, /bin and /usr/bin all keep running from TF1.
-    [ -n "$SPRUCE_BASEOS" ] && return 1
-    return 0
+    return 1
 }
 
 device_needs_strict_unmount() {
@@ -366,12 +341,11 @@ device_needs_strict_unmount() {
     # return non-zero = false
     #
     # The strict stage 2 path was written for this device and verified only
-    # here. It pairs with device_system_handles_sdcard_unmount above: the same
-    # BaseOS condition that routes shutdown through stage 2 is what makes the
-    # strict path necessary, since /mnt/SDCARD is a symlink there and the old
-    # cpuinfo guess matched no mount line at all.
-    [ -n "$SPRUCE_BASEOS" ] && return 0
-    return 1
+    # here. It pairs with device_system_handles_sdcard_unmount above: whatever
+    # routes shutdown through stage 2 is what makes the strict path necessary,
+    # since /mnt/SDCARD is a symlink here and the old cpuinfo guess matched no
+    # mount line at all.
+    return 0
 }
 
 set_volume() {
@@ -461,27 +435,17 @@ device_lid_open() {
 }
 
 setup_for_retroarch(){
-	#RA_DIR="/mnt/vendor/deep/retro"
-    #export RA_BIN="retroarch"
-    #export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-    #cp /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg /.config/retroarch/retroarch.cfg
-
     # Match on the arch prefix rather than one exact filename: ra32.h700 is a
     # 32-bit binary too, and the old equality test would have handed it the
     # 64-bit core directory and no 32-bit library path at all.
     case "$RA_BIN" in
         ra32.*)
             export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
-            if [ -n "$SPRUCE_BASEOS" ]; then
-                # BaseOS has no /usr/lib32 - its harvest carries only the armhf
-                # loader and libc (enough for the vendor bluetooth binary). The
-                # rest of the 32-bit closure ships with spruce; see the
-                # PROVENANCE note in spruce/h700/lib32.
-                export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
-            else
-                # Stock Anbernic is Ubuntu with a full 32-bit multilib.
-                export LD_LIBRARY_PATH="/usr/lib32:$LD_LIBRARY_PATH"
-            fi
+            # BaseOS has no /usr/lib32 - its harvest carries only the armhf
+            # loader and libc (enough for the vendor bluetooth binary). The rest
+            # of the 32-bit closure ships with spruce; see the PROVENANCE note
+            # in spruce/h700/lib32.
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib32:$LD_LIBRARY_PATH"
             ;;
         *)
             export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores64"

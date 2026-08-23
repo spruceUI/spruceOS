@@ -33,52 +33,33 @@ case $INFO in
     *0xd05*) export PLATFORM="Flip" ;;
     *0xd04*) export PLATFORM="Pixel2" ;;
     *0xd03*)
-        # BaseOS (github.com/pvaibhav/BaseOS) replaces the Anbernic stock userland,
-        # so /mnt/vendor/oem/board.ini does not exist there. It names the exact
-        # build target in /etc/baseos-release instead, which beats the lcd_type
-        # plus board.ini guesswork below - that cannot tell an RG34XX from an
-        # RG34XXSP, or an RG40XXV from an RG35XXH.
+        # The Allwinner H700 Anbernic line runs on BaseOS
+        # (github.com/pvaibhav/BaseOS) only - the Anbernic stock userland is no
+        # longer supported, and every path below it assumes BaseOS. BaseOS names
+        # the exact build target in /etc/baseos-release, which is strictly better
+        # than the old lcd_type + /mnt/vendor/oem/board.ini guesswork: that could
+        # not tell an RG34XX from an RG34XXSP, or an RG40XXV from an RG35XXH.
+        export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
 
-        if [ -n "$BASEOS_TARGET" ]; then
-            export SPRUCE_BASEOS=1
-            case $BASEOS_TARGET in
-                rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
-                rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
-                # The RG SP shares the 34XX panel - 720x480, 3:2 - so it joins
-                # this profile rather than the 640x480 one the catch-all would
-                # otherwise have given it. It has no analog sticks, but that is
-                # decided separately: the pad map in AnbernicXXCommon.cfg keys
-                # off BASEOS_TARGET, not off this platform, and already lists
-                # rgsp as stickless. Its lid is handled too - has_lid() matches
-                # any target ending in "sp".
-                rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicXX720480" ;;
-                *)               export PLATFORM="AnbernicXX640480" ;;
-            esac
-        else
-            CMDLINE=$(cat /proc/cmdline)
-
-            case $CMDLINE in
-                *lcd_type=boe*)
-                    if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
-                        export PLATFORM="AnbernicRGCubeXX"
-                    else
-                        export PLATFORM="AnbernicXX720480"
-                    fi
-                    ;;
-                *lcd_type=old*)
-                    #TODO handle cube?
-                    if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
-                        export PLATFORM="AnbernicRG28XX"
-                    else
-                        export PLATFORM="AnbernicXX640480"
-                    fi
-                    ;;
-                *)
-                    export PLATFORM="AnbernicXX640480"
-                    ;;
-            esac
-        fi
+        case $BASEOS_TARGET in
+            rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
+            rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
+            # The RG SP shares the 34XX panel - 720x480, 3:2 - so it joins
+            # this profile rather than the 640x480 one the catch-all would
+            # otherwise have given it. It has no analog sticks, but that is
+            # decided separately: the pad map in AnbernicXXCommon.cfg keys
+            # off BASEOS_TARGET, not off this platform, and already lists
+            # rgsp as stickless. Its lid is handled too - has_lid() matches
+            # any target ending in "sp".
+            rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicXX720480" ;;
+            # Also the empty case, which means /etc/baseos-release is missing -
+            # a stock image, or a BaseOS too old to name itself. Nothing here
+            # can work on stock, but leaving PLATFORM unset would fail at the
+            # `. $PLATFORM.cfg` below with no clue why, so take the most common
+            # profile in the line and let the failure happen somewhere legible.
+            *)               export PLATFORM="AnbernicXX640480" ;;
+        esac
         ;;
     *) 
         if [ -e /usr/magicx ]; then
