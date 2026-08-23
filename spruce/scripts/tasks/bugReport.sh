@@ -19,6 +19,36 @@ dump_node() {
     fi
 }
 
+# PRIVACY. This whole file is packaged into a 7z that users hand to strangers,
+# so the redactors are defined here rather than inside one section: every raw
+# dump in this script is a place a MAC or an address can escape, and the wifi
+# section is only the most obvious one. Pipe anything you do not control.
+#
+# redact_mac deliberately leaves 00:00:00:00:00:00 legible and tags it: a zeroed
+# MAC means the driver bound and firmware never loaded, and that fault signature
+# is indistinguishable from a healthy interface once redacted like any other.
+# Written without sed interval expressions - busybox 1.27.2 on the Brick does
+# not reliably support \{n\}.
+_HEX2='[0-9a-fA-F][0-9a-fA-F]'
+redact_mac() {
+    sed -e 's/00:00:00:00:00:00/@ZEROMAC@/g' \
+        -e "s/$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2/<mac-redacted>/g" \
+        -e 's/@ZEROMAC@/00:00:00:00:00:00 <ALL-ZERO>/g' 2>/dev/null
+}
+
+# A global IPv6 address, and the /64 prefix inside it, identify the user's
+# connection at least as precisely as a MAC and diagnose nothing on these
+# devices. Link-local (fe80::) and loopback (::1) are neither routable nor
+# identifying, so they survive - they are also the only two that ever say
+# anything useful here.
+# Line-wise, and the address token must contain TWO colons - "addr:" is three
+# hex characters followed by a colon, so a looser pattern eats the label and
+# prints "inet6 <redacted>r:". Learned from a real report.
+redact_ip6() {
+    sed -e '/inet6/{' -e '/fe80:/b' -e '/::1/b' \
+        -e 's/[0-9a-fA-F]*:[0-9a-fA-F]*:[0-9a-fA-F:]*/<ipv6-redacted>/' -e '}' 2>/dev/null
+}
+
 {
     echo "==== device ===="
     echo "date          : $(date)"
@@ -148,7 +178,11 @@ dump_node() {
 
     echo
     echo "==== kernel log tail (may show rejected display commands) ===="
-    dmesg 2>/dev/null | tail -40 || echo "  <unavailable>"
+    # Redacted like every other dump: the radio driver prints both the adapter
+    # MAC and the AP's address into the ring buffer during association, and
+    # this generic tail picks them up whether or not it is a wifi report.
+    _ktail=$(dmesg 2>/dev/null | tail -40)
+    if [ -n "$_ktail" ]; then echo "$_ktail" | redact_mac; else echo "  <unavailable>"; fi
 
     echo
     echo "==== config files the display settings write to ===="
@@ -176,18 +210,6 @@ dump_node() {
     # Counts, states and IDs only. redact_mac below is the backstop for command
     # output we do not control - always pipe through it rather than trusting a
     # tool not to print a MAC.
-
-    # Replace MAC addresses, but keep the all-zero case legible: a zeroed MAC
-    # means the driver bound and firmware never loaded, which is a real fault
-    # signature and is indistinguishable from a healthy one once redacted.
-    # Written without sed interval expressions - busybox 1.27.2 on the Brick
-    # does not reliably support \{n\}.
-    _HEX2='[0-9a-fA-F][0-9a-fA-F]'
-    redact_mac() {
-        sed -e 's/00:00:00:00:00:00/@ZEROMAC@/g' \
-            -e "s/$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2/<mac-redacted>/g" \
-            -e 's/@ZEROMAC@/00:00:00:00:00:00 <ALL-ZERO>/g' 2>/dev/null
-    }
 
     echo
     echo "==== wifi: interfaces ===="
@@ -221,15 +243,30 @@ dump_node() {
         # fails to insmod with nothing but "Invalid module format" in dmesg,
         # and spruce ships 8188eu.ko itself for the RG28XX - so this is our
         # file to get wrong, not the OS image's.
-        if command -v modinfo >/dev/null 2>&1; then
-            for k in /lib/modules/"$wifi_drv".ko /lib/modules/*/"$wifi_drv".ko \
-                     /mnt/SDCARD/spruce/h700/rg28xx/"$wifi_drv".ko; do
-                [ -f "$k" ] || continue
-                echo "  module file : $k"
-                echo "  vermagic    : $(modinfo -F vermagic "$k" 2>/dev/null)"
-                break
-            done
-        fi
+        #
+        # Read out of the .ko directly rather than with modinfo. BusyBox
+        # modinfo insists on /lib/modules/$(uname -r)/modules.dep before it
+        # will look at anything, BaseOS ships no such file, and it then FAILS
+        # WITH EXIT 0 - so the field silently came back empty on the one
+        # device family this check exists for. grep -a reads the string out of
+        # the module image and needs nothing but the file.
+        for k in /lib/modules/"$wifi_drv".ko /lib/modules/*/"$wifi_drv".ko \
+                 /mnt/SDCARD/spruce/h700/rg28xx/"$wifi_drv".ko; do
+            [ -f "$k" ] || continue
+            echo "  module file : $k"
+            _vm=$(grep -ao 'vermagic=[!-~ ]*' "$k" 2>/dev/null | head -1 | cut -d= -f2-)
+            [ -n "$_vm" ] || _vm=$(modinfo -F vermagic "$k" 2>/dev/null)
+            echo "  vermagic    : ${_vm:-<unreadable>}"
+            # Spelled out rather than left to the reader: this is the whole
+            # point of the field, and "Invalid module format" in dmesg is the
+            # only other clue the device gives.
+            case "$_vm" in
+                "$(uname -r 2>/dev/null)"*) echo "  vermagic vs kernel : match" ;;
+                "") ;;
+                *) echo "  vermagic vs kernel : MISMATCH - this module cannot load on $(uname -r 2>/dev/null)" ;;
+            esac
+            break
+        done
         echo "  running kernel : $(uname -r 2>/dev/null)"
         # Live module parameters. rtw_power_mgnt is documented upstream as the
         # cause of intermittent latency while the association stays healthy -
@@ -336,8 +373,12 @@ dump_node() {
         # from WPA3-SAE - a real source of association failures on these
         # drivers. Anything holding actual key material is a psk=/passphrase=
         # line, which this still catches.
+        #
+        # uuid is dropped too: wpa_supplicant derives it from the interface
+        # MAC, so it is a stable per-device identifier that survives redacting
+        # the MAC itself and links every report a unit ever files.
         wpa_cli -i "$_if" status 2>/dev/null \
-            | grep -viE '^(ssid|bssid|psk|passphrase|password)=' \
+            | grep -viE '^(ssid|bssid|psk|passphrase|password|uuid)=' \
             | redact_mac | sed 's/^/  /'
         wpa_cli -i "$_if" signal_poll 2>/dev/null | sed 's/^/  /'
         # Band, and whether this SSID is dual-band. A mixed-band AP advertises
@@ -375,7 +416,7 @@ SCANEOF
     fi
     if command -v ifconfig >/dev/null 2>&1; then
         echo "--- ifconfig -a ---"
-        ifconfig -a 2>&1 | redact_mac | sed 's/^/  /'
+        ifconfig -a 2>&1 | redact_mac | redact_ip6 | sed 's/^/  /'
     fi
 
     echo
