@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 import json
 import os
+import tempfile
 from pathlib import Path
 from typing import List, Tuple
 from devices.device import Device
@@ -65,41 +66,116 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def save_to_file(self):
+        # Write to a temp file and swap it in. open(..., 'w') truncates
+        # immediately, so a kill between the truncate and the dump leaves a
+        # zero byte file behind - and shutdown sends MainUI a SIGKILL, so that
+        # window is reachable. Same pattern as device_user_config.save_config.
+        tempname = None
         try:
-            with open(self.entries_file, 'w') as f:
+            dirpath = os.path.dirname(self.entries_file) or "."
+            # Named after the target so a stray temp left by a hard kill is
+            # identifiable in Saves/ rather than an anonymous tmpXXXXXX.
+            with tempfile.NamedTemporaryFile(
+                'w',
+                dir=dirpath,
+                prefix=os.path.basename(self.entries_file) + ".",
+                suffix=".tmp",
+                delete=False
+            ) as tmp:
+                tempname = tmp.name
                 json.dump(
                     [entry.__dict__ for entry in self._entries],
-                    f,
+                    tmp,
                     indent=4
                 )
+                tmp.flush()
+                os.fsync(tmp.fileno())
+            os.replace(tempname, self.entries_file)
+            tempname = None
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to save entries: {e}")
+        finally:
+            # Do not leave the temp file sitting in Saves/ if the swap failed.
+            if tempname is not None:
+                try:
+                    os.remove(tempname)
+                except OSError:
+                    pass
+
+    def _read_entries(self):
+        # Missing, empty and unparseable all mean "no list yet". They are
+        # returned as [] rather than raised, so load_from_file reaches
+        # save_to_file and rewrites the file - otherwise a zero byte file
+        # fails to parse on every boot and is never repaired.
+        if not os.path.exists(self.entries_file):
+            return []
+
+        try:
+            with open(self.entries_file, 'r') as f:
+                contents = f.read()
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"Unable to read {self.entries_file}: {e}")
+            return []
+
+        if not contents.strip():
+            PyUiLogger.get_logger().warning(
+                f"{self.entries_file} is empty, starting a new list"
+            )
+            return []
+
+        try:
+            data = json.loads(contents)
+        except ValueError as e:
+            # Unlike an empty file, this may still hold recoverable entries,
+            # so keep a copy rather than overwriting it. The shell side does
+            # the same in button_actions.sh:update_gameswitcher_json.
+            self._back_up_unreadable_file()
+            PyUiLogger.get_logger().error(
+                f"{self.entries_file} is not valid JSON ({e}), starting a new list"
+            )
+            return []
+
+        if not isinstance(data, list):
+            self._back_up_unreadable_file()
+            PyUiLogger.get_logger().error(
+                f"{self.entries_file} is not a list, starting a new list"
+            )
+            return []
+
+        return data
+
+    def _back_up_unreadable_file(self):
+        # One fixed suffix, not a timestamp: a repeatedly corrupted file should
+        # not accumulate backups in Saves/.
+        try:
+            os.replace(self.entries_file, self.entries_file + ".corrupt")
+        except OSError as e:
+            PyUiLogger.get_logger().error(
+                f"Unable to back up {self.entries_file}: {e}"
+            )
 
     def load_from_file(self):
         try:
-            if not os.path.exists(self.entries_file):
-                with open(self.entries_file, 'w') as f:
-                    json.dump([], f)
+            data = self._read_entries()
 
-            with open(self.entries_file, 'r') as f:
-                data = json.load(f)
-                validated_entries = []
-                for entry_data in data:
-                    entry = RomsListEntry(**entry_data)
-                    if os.path.exists(entry.rom_file_path):
-                        validated_entries.append(entry)
-                    else:
-                        PyUiLogger.get_logger().warning(
-                            f"ROM file not found, removing from list: {entry.rom_file_path}"
-                        )
+            validated_entries = []
+            for entry_data in data:
+                entry = RomsListEntry(**entry_data)
+                if os.path.exists(entry.rom_file_path):
+                    validated_entries.append(entry)
+                else:
+                    PyUiLogger.get_logger().warning(
+                        f"ROM file not found, removing from list: {entry.rom_file_path}"
+                    )
 
-                self._entries = validated_entries
-                self._entries_dict = {
-                    self._entry_key(entry.rom_file_path, entry.game_system_name): entry
-                    for entry in self._entries
-                }
+            self._entries = validated_entries
+            self._entries_dict = {
+                self._entry_key(entry.rom_file_path, entry.game_system_name): entry
+                for entry in self._entries
+            }
 
-            # Save back the validated list in case some entries were removed
+            # Save back the validated list in case some entries were removed,
+            # and to replace a file that could not be read.
             self.save_to_file()
 
         except Exception as e:
