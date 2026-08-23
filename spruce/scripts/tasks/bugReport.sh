@@ -31,7 +31,8 @@ dump_node() {
 # not reliably support \{n\}.
 _HEX2='[0-9a-fA-F][0-9a-fA-F]'
 redact_mac() {
-    sed -e 's/00:00:00:00:00:00/@ZEROMAC@/g' \
+    sed -e 's/00:00:00:00:00:00:00:00[0-9a-fA-F:]*/<all-zero-addr>/g' \
+        -e 's/00:00:00:00:00:00/@ZEROMAC@/g' \
         -e "s/$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2/<mac-redacted>/g" \
         -e 's/@ZEROMAC@/00:00:00:00:00:00 <ALL-ZERO>/g' 2>/dev/null
 }
@@ -219,7 +220,12 @@ redact_ip6() {
     for n in /sys/class/net/*/; do
         [ -d "$n" ] || continue
         i=$(basename "$n")
-        case "$i" in lo) continue ;; esac
+        # Kernel tunnel stubs: always present, always down, never the
+        # answer to a wifi question, and they crowd out the one interface
+        # that matters.
+        case "$i" in
+            lo|gre0|gretap0|erspan0|sit0|tunl0|ip_vti0|ip6_vti0|ip6tnl0|ip6gre0) continue ;;
+        esac
         echo "  $i: operstate=$(cat "$n/operstate" 2>/dev/null) address=$(cat "$n/address" 2>/dev/null | redact_mac)"
         [ -e "$n/wireless" ] && echo "      (wireless)"
         [ -L "$n/phy80211" ] && echo "      (has phy80211 - cfg80211 registered)"
@@ -415,8 +421,15 @@ SCANEOF
         fi
     fi
     if command -v ifconfig >/dev/null 2>&1; then
-        echo "--- ifconfig -a ---"
-        ifconfig -a 2>&1 | redact_mac | redact_ip6 | sed 's/^/  /'
+        if [ -n "$_if" ]; then
+            echo "--- ifconfig $_if ---"
+            ifconfig "$_if" 2>&1 | redact_mac | redact_ip6 | sed 's/^/  /'
+        else
+            # No wireless interface found - now the full listing is the point,
+            # since the interface may exist under a name we did not expect.
+            echo "--- ifconfig -a ---"
+            ifconfig -a 2>&1 | redact_mac | redact_ip6 | sed 's/^/  /'
+        fi
     fi
 
     echo
