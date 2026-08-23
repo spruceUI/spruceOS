@@ -459,7 +459,171 @@ setup_for_retroarch(){
     echo "$RA_BIN"
 }
 
-device_extra_wifi_setup(){
-    dhclient wlan0
-    log_message "Starting dhclient"
+# No device_extra_wifi_setup here on purpose.
+#
+# It used to run "dhclient wlan0" and log "Starting dhclient". There is no
+# dhclient on this platform - it is not in PATH and not anywhere on the
+# filesystem - so that call has never once succeeded. The log line printed
+# regardless, which is why the logs have always looked like a DHCP client was
+# being started here.
+#
+# What actually gets the address is the udhcpc that enable_wifi starts, so this
+# family uses the default device_start_dhcp_client/device_stop_dhcp_client. The
+# dead call is simply gone: with it removed, exactly one DHCP client runs on
+# wlan0 instead of one real one plus one imaginary one.
+
+##### WIFI RADIO POWER AND RECOVERY #####
+#
+# The RTL8821CS hangs off SDIO, and it sometimes fails to enumerate at boot:
+#
+#   RTW: module init ret=0                        <- driver is fine
+#   mmc2: error -110 whilst initialising SDIO card
+#   sunxi-mmc sdc1: clk 0Hz pm OFF vdd 0          <- host gives up, slot powered off
+#
+# Read those two lines and nothing else. A healthy init on this board also logs
+#
+#   sunxi-mmc sdc1: smc 2 p1 err, cmd 52, RTO !!
+#   sunxi-mmc sdc1: card claims to support voltages below defined range
+#
+# before going on to succeed with "mmc2: new ultra high speed DDR50 SDIO card",
+# so those two are the normal retry dance and mean nothing on their own. What
+# separates a failed boot from a good one is the -110 and the absence of the
+# "new ... SDIO card" line.
+#
+# When that happens there is no wlan0 at all, so every layer above - wpa
+# supplicant, DHCP, the WiFi menu - is dealing with an interface that does not
+# exist, and the device looks like it "lost WiFi until a reboot".
+#
+# Note what the log says: the driver loaded successfully. Reloading the module
+# alone therefore fixes nothing when the chip itself is wedged, which is why
+# rmmod/insmod appears to work only some of the time. The chip has to lose
+# power, and stay unpowered long enough to actually reset.
+#
+# The levers below are the real ones on this kernel, confirmed on device:
+#   - there is NO writable rail node: /sys/class/misc/sunxi-wlan exposes only
+#     dev and uevent, and /sys/class/regulator/regulator.16 (axp2202-cldo4) has
+#     a read-only state (mode 444). /sys/class/gpio does not exist, so regon
+#     GPIO 210 is not reachable from userspace either.
+#   - sunxi_wlan_set_power and sunxi_mmc_rescan_card are exported kernel
+#     symbols the 8821cs module calls, so unloading and reloading the module IS
+#     the rail cycle - the delay between the two is what matters.
+#   - SDC1_INSERT is the documented rescan trigger; reading it prints
+#     'Usage: "echo 1 > insert" to scan card'.
+#
+# sdc1 is mmc2 and carries no block device: the SD card is sdc2/mmc1
+# (mmcblk1p1) and eMMC is sdc0/mmc0. Nothing here can affect storage.
+
+WIFI_MODULE="8821cs"
+WIFI_MODULE_PATH="/lib/modules/8821cs.ko"
+SDC1_INSERT="/sys/devices/platform/soc/sdc1/sunxi_insert"
+# How long the rail stays down between unload and reload. Reloading the driver
+# is not what fixes a wedged chip - the chip losing power for long enough to
+# reset is - so this delay is the load-bearing part of the recovery, and a token
+# 1s is not reliably long enough.
+WIFI_RAIL_SETTLE=3
+
+wlan0_exists() {
+    [ -d /sys/class/net/wlan0 ]
+}
+
+# Wait up to $1 seconds for wlan0 to appear.
+wait_for_wlan0() {
+    _wfw_left="${1:-8}"
+    while [ "$_wfw_left" -gt 0 ]; do
+        wlan0_exists && return 0
+        sleep 1
+        _wfw_left=$((_wfw_left - 1))
+    done
+    wlan0_exists
+}
+
+device_wifi_power_off() {
+    # Unloading the driver is what drops the rail: 8821cs calls
+    # sunxi_wlan_set_power on the way out. There is no sysfs node that does it.
+    if lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
+        rmmod "$WIFI_MODULE" 2>/dev/null
+        log_message "WiFi radio powered down ($WIFI_MODULE unloaded)"
+    fi
+}
+
+device_wifi_power_on() {
+    if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
+        insmod "$WIFI_MODULE_PATH" 2>/dev/null
+        log_message "WiFi radio powered up ($WIFI_MODULE loaded)"
+    fi
+    wait_for_wlan0 8 >/dev/null 2>&1
+}
+
+# Bring wlan0 back when the chip failed to enumerate. Escalates: each step is
+# strictly more disruptive than the one before, and we stop the moment wlan0
+# shows up.
+device_ensure_wifi_interface() {
+    wlan0_exists && return 0
+
+    # Not there yet is not the same as broken. BaseOS loads 8821cs itself and
+    # then waits in the background for the asynchronous SDIO probe to create
+    # wlan0 - see the WiFi block in /etc/init.d/rcS, which gives it 40 quarter
+    # second turns, about ten seconds. spruce's enable_wifi runs early enough in
+    # boot to get here while that probe is still in flight, and tearing the
+    # driver down mid-probe would turn a boot that was about to come up fine
+    # into one that needs recovering.
+    #
+    # So let the normal path have its window before touching anything. This
+    # costs nothing on a healthy boot, where wlan0 already exists and the check
+    # above returned.
+    if wait_for_wlan0 12; then
+        log_message "wlan0 appeared on its own while the SDIO probe finished"
+        return 0
+    fi
+
+    log_message "wlan0 is missing - attempting WiFi radio recovery"
+
+    # 1. Ask the host to rescan. After a failed init the host powers the slot
+    #    off, so this alone can be enough if the chip has since recovered, and
+    #    it does not disturb the driver.
+    if [ -w "$SDC1_INSERT" ]; then
+        echo 1 > "$SDC1_INSERT" 2>/dev/null
+        if wait_for_wlan0 5; then
+            log_message "WiFi recovery: SDIO rescan brought wlan0 back"
+            return 0
+        fi
+    fi
+
+    # 2. Cycle the rail by unloading the driver, waiting long enough for the
+    #    chip to actually reset, then reloading and rescanning.
+    _wifi_try=1
+    while [ "$_wifi_try" -le 3 ]; do
+        log_message "WiFi recovery: rail cycle attempt $_wifi_try"
+        rmmod "$WIFI_MODULE" 2>/dev/null
+        sleep "$WIFI_RAIL_SETTLE"
+
+        # 3. From the second attempt on, also re-probe the sunxi-wlan platform
+        #    driver, which re-runs the regulator and regon GPIO setup rather
+        #    than just asking it for power again.
+        if [ "$_wifi_try" -ge 2 ] && [ -w /sys/bus/platform/drivers/sunxi-wlan/unbind ]; then
+            echo "soc@03000000:wlan" > /sys/bus/platform/drivers/sunxi-wlan/unbind 2>/dev/null
+            sleep 1
+            echo "soc@03000000:wlan" > /sys/bus/platform/drivers/sunxi-wlan/bind 2>/dev/null
+            sleep 1
+        fi
+
+        insmod "$WIFI_MODULE_PATH" 2>/dev/null
+        [ -w "$SDC1_INSERT" ] && echo 1 > "$SDC1_INSERT" 2>/dev/null
+
+        if wait_for_wlan0 8; then
+            log_message "WiFi recovery: wlan0 back after rail cycle attempt $_wifi_try"
+            return 0
+        fi
+        _wifi_try=$((_wifi_try + 1))
+    done
+
+    log_message "WiFi recovery: wlan0 still missing after $((_wifi_try - 1)) attempts, giving up"
+    return 1
+}
+
+# Leave the radio unpowered on the way to a shutdown or reboot, so the chip is
+# not carried into the next boot in a half-initialised state. This is the half
+# that stops the wedge being created, rather than recovering from it after.
+device_prepare_for_poweroff() {
+    device_wifi_power_off
 }

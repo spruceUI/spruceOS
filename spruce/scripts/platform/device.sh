@@ -329,8 +329,16 @@ device_wifi_power_on() {
     log_message "Missing device_wifi_power_on function" -v
 }
 
-device_wifi_power_off() { 
+device_wifi_power_off() {
     log_message "Missing device_wifi_power_off function" -v
+}
+
+# Give a device a chance to bring its wireless interface back when it is not
+# there. Default is to do nothing: on most devices the interface either exists
+# or the radio is genuinely absent, and only SDIO parts that fail to enumerate
+# need recovering.
+device_ensure_wifi_interface() {
+    return 0
 }
 
 device_system_handles_sdcard_unmount() {
@@ -397,7 +405,28 @@ device_get_hw_epoch() {
 }
 
 device_extra_wifi_setup() {
-    # Do these need to be unique per device? Don't have a way 
+    # Do these need to be unique per device? Don't have a way
     # to test currently
     log_message "Missing device_extra_wifi_setup function" -v
+}
+
+# Which DHCP client this device uses, and how to stop it.
+#
+# These exist because a device that needs a different client had nowhere to say
+# so: enable_wifi hardcoded udhcpc, and the only per-device hook was
+# device_extra_wifi_setup, which runs *in addition to* it rather than instead of
+# it. The Anbernic XX line used that hook to run "dhclient wlan0" - a binary
+# that is not installed on that platform - so it logged a DHCP client it never
+# actually started, on top of the udhcpc that was really doing the work.
+#
+# The default is the udhcpc invocation enable_wifi used to run inline, so every
+# device that does not override these behaves exactly as before. The "already
+# running" guard lives in the hook rather than the caller because the check is
+# client-specific.
+device_start_dhcp_client() {
+    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+}
+
+device_stop_dhcp_client() {
+    killall -9 udhcpc 2>/dev/null
 }
