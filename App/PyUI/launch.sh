@@ -128,16 +128,17 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Anbernic RG34XXSP
+# Anbernic RG XX line (Allwinner H700)
 ############################################################
     "AnbernicXX720480" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
-        # BaseOS ships no SDL2 and no python: use the aarch64 pair we
-        # already bundle. MainUI is the bind-mounted alias of python3.10 set
-        # up in device_init - spruce greps for that process name.
+        # BaseOS ships no SDL2 and no python: use the aarch64 pair we already
+        # bundle. MainUI is the bind-mounted alias of python3.10 set up in
+        # device_init - spruce greps for that process name.
+        #
         # Our usual SDL2 only speaks KMSDRM and wayland. BaseOS has neither
-        # libdrm/libgbm nor wayland - its mali blob is the fbdev winsys
-        # build - so that SDL2 falls back to the dummy driver and renders
-        # nowhere. Prefer a mali-fbdev SDL2 when one is staged alongside.
+        # libdrm/libgbm nor wayland - its mali blob is the fbdev winsys build -
+        # so that SDL2 falls back to the dummy driver and renders nowhere.
+        # Prefer a mali-fbdev SDL2 when one is staged alongside.
         PYUI_DLL=/mnt/SDCARD/App/PyUI/dll
         [ -f /mnt/SDCARD/App/PyUI/dll-mali/libSDL2-2.0.so.0 ] && PYUI_DLL=/mnt/SDCARD/App/PyUI/dll-mali
 
@@ -159,11 +160,6 @@ case "$PLATFORM" in
         case "$PYUI_DLL" in
             *dll-mali) export SDL_VIDEODRIVER=mali ;;
         esac
-
-        # Bring-up only: BaseOS support is not shippable yet and a silent
-        # PyUI is unfixable, so keep stderr. Drop this once it boots.
-        redirect_output=1
-
 
         if [ "$PLATFORM" = "AnbernicXX720480" ]; then
             DEVICE="ANBERNIC_RGXX720480"

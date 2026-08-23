@@ -3,14 +3,12 @@
 ## What this is
 
 The 32-bit library closure needed to run `ra32.h700` (and 32-bit libretro cores)
-on the Allwinner H700 Anbernic handhelds when they are running **BaseOS**
-(github.com/pvaibhav/BaseOS) rather than the stock Anbernic userland.
+on the Allwinner H700 Anbernic handhelds, which run **BaseOS**
+(github.com/pvaibhav/BaseOS).
 
 `setup_for_retroarch()` in
 `spruce/scripts/platform/device_functions/AnbernicXXCommon.sh` prepends this
-directory to `LD_LIBRARY_PATH` whenever `RA_BIN` is a `ra32.*` binary and
-`SPRUCE_BASEOS` is set. On stock images it is not used at all — stock is Ubuntu
-with a full 32-bit multilib in `/usr/lib32`.
+directory to `LD_LIBRARY_PATH` whenever `RA_BIN` is a `ra32.*` binary.
 
 ## Why spruce ships these rather than BaseOS
 

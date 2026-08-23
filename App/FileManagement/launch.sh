@@ -47,6 +47,13 @@ case "$PLATFORM" in
         sync
         ;;
     "Anbernic"*)
+        # Nothing on this device ships an SDL GameController mapping for
+        # "ANBERNIC-keys", so without one the pad enumerates and nothing
+        # responds. Positional rather than the default label-named form: vtree
+        # carries spruce's nintendo-button-labels patch and already swaps A<->B
+        # and X<->Y itself, so the label-named map corrected twice and landed
+        # back where it started. See export_sdl_gamecontroller_map in
+        # helperFunctions.sh for what the two forms mean.
         export_sdl_gamecontroller_map positional
         ./vtree.aarch64 >"$HOME/log.txt" 2>&1
         sync
