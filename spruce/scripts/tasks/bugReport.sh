@@ -162,12 +162,33 @@ dump_node() {
     # WiFi. spruce itself loads no driver and creates no interface - it assumes
     # wlan0 exists and starts wpa_supplicant on it - so when a device finds no
     # networks the cause is almost always below us: no driver bound, missing
-    # firmware, an interface under another name, or an rfkill block. This
-    # section is meant to tell those apart from a device with no SSH.
+    # firmware, an interface under another name, a radio that never enumerated
+    # on its bus, or an rfkill block. This section is meant to tell those apart
+    # from a device with no SSH.
     #
-    # NOTHING HERE MAY PRINT wpa_supplicant.conf. It holds pre-shared keys in
-    # the clear, and this file is packaged into the bug report users hand out.
-    # Only its existence and network count are reported.
+    # PRIVACY CONTRACT - this file is packaged into a 7z that users hand to
+    # strangers in a Discord thread. NOTHING here may print:
+    #   - wpa_supplicant.conf contents (plaintext PSKs)
+    #   - any SSID, ours or a neighbour's (home SSIDs carry surnames and unit
+    #     numbers; scan results carry every network in range)
+    #   - any MAC address (the device's own identifies the unit across reports;
+    #     a BSSID geolocates the user through public wardriving databases)
+    # Counts, states and IDs only. redact_mac below is the backstop for command
+    # output we do not control - always pipe through it rather than trusting a
+    # tool not to print a MAC.
+
+    # Replace MAC addresses, but keep the all-zero case legible: a zeroed MAC
+    # means the driver bound and firmware never loaded, which is a real fault
+    # signature and is indistinguishable from a healthy one once redacted.
+    # Written without sed interval expressions - busybox 1.27.2 on the Brick
+    # does not reliably support \{n\}.
+    _HEX2='[0-9a-fA-F][0-9a-fA-F]'
+    redact_mac() {
+        sed -e 's/00:00:00:00:00:00/@ZEROMAC@/g' \
+            -e "s/$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2:$_HEX2/<mac-redacted>/g" \
+            -e 's/@ZEROMAC@/00:00:00:00:00:00 <ALL-ZERO>/g' 2>/dev/null
+    }
+
     echo
     echo "==== wifi: interfaces ===="
     echo "BASEOS_TARGET : $(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null || echo '<not baseos>')"
@@ -177,50 +198,251 @@ dump_node() {
         [ -d "$n" ] || continue
         i=$(basename "$n")
         case "$i" in lo) continue ;; esac
-        echo "  $i: operstate=$(cat "$n/operstate" 2>/dev/null) address=$(cat "$n/address" 2>/dev/null)"
+        echo "  $i: operstate=$(cat "$n/operstate" 2>/dev/null) address=$(cat "$n/address" 2>/dev/null | redact_mac)"
         [ -e "$n/wireless" ] && echo "      (wireless)"
-        [ -e "$n/device/uevent" ] && sed 's/^/      /' "$n/device/uevent" 2>/dev/null
+        [ -L "$n/phy80211" ] && echo "      (has phy80211 - cfg80211 registered)"
+        [ -e "$n/device/uevent" ] && sed 's/^/      /' "$n/device/uevent" 2>/dev/null | redact_mac
     done
 
     echo
     echo "==== wifi: driver ===="
     echo "loaded modules:"
     lsmod 2>/dev/null | sed 's/^/  /' || echo "  <lsmod unavailable>"
+    # Discover the radio driver rather than naming it: the XX line alone spans
+    # 8821cs (SDIO) and 8188eu (USB), and hardcoding either reports a fault on
+    # the other.
+    wifi_drv=$(lsmod 2>/dev/null | awk 'NR>1{print $1}' \
+               | grep -iE '^(8821[a-z]*|8188[a-z]*|8723[a-z]*|aic[0-9a-z]*|rtl[0-9a-z_]*)$' | head -1)
+    echo "detected wifi module     : ${wifi_drv:-<none loaded>}"
+    if [ -n "$wifi_drv" ]; then
+        echo "  initstate : $(cat "/sys/module/$wifi_drv/initstate" 2>/dev/null)"
+        echo "  refcount  : $(awk -v m="$wifi_drv" '$1==m{print $3}' /proc/modules 2>/dev/null)"
+        # vermagic vs the running kernel. A module built for another kernel
+        # fails to insmod with nothing but "Invalid module format" in dmesg,
+        # and spruce ships 8188eu.ko itself for the RG28XX - so this is our
+        # file to get wrong, not the OS image's.
+        if command -v modinfo >/dev/null 2>&1; then
+            for k in /lib/modules/"$wifi_drv".ko /lib/modules/*/"$wifi_drv".ko \
+                     /mnt/SDCARD/spruce/h700/rg28xx/"$wifi_drv".ko; do
+                [ -f "$k" ] || continue
+                echo "  module file : $k"
+                echo "  vermagic    : $(modinfo -F vermagic "$k" 2>/dev/null)"
+                break
+            done
+        fi
+        echo "  running kernel : $(uname -r 2>/dev/null)"
+        # Live module parameters. rtw_power_mgnt is documented upstream as the
+        # cause of intermittent latency while the association stays healthy -
+        # reading its actual value beats assuming the default.
+        if [ -d "/sys/module/$wifi_drv/parameters" ]; then
+            echo "  parameters of interest:"
+            for prm in rtw_power_mgnt rtw_ips_mode rtw_lps_level rtw_country_code \
+                       rtw_channel_plan rtw_wifi_spec rtw_antdiv_cfg; do
+                p="/sys/module/$wifi_drv/parameters/$prm"
+                [ -r "$p" ] || continue
+                # Unset country_code reads back as raw bytes on this hardware,
+                # which makes the whole report register as binary and stops grep
+                # searching it - which is the first thing anyone tries.
+                echo "    $prm = $(tr -d '\000-\010\013\014\016-\037\177-\377' < "$p" 2>/dev/null | head -1)"
+            done
+        fi
+    fi
     echo "wifi firmware blobs present:"
     find /lib/firmware /vendor/firmware /etc/firmware -iname '*8188*' -o -iname '*8821*' \
          -o -iname '*8723*' -o -iname '*aic*' -o -iname '*rtl*' -o -iname '*wifi*' 2>/dev/null \
          | head -30 | sed 's/^/  /' || true
     echo "rfkill:"
+    # Type matters more than the listing: on sunxi the wlan rfkill IS the power
+    # control, so bluetooth having a switch while wlan has none is the mechanism
+    # behind "the radio was never switched on", not a cosmetic difference.
     rfkill list 2>/dev/null | sed 's/^/  /' || echo "  <rfkill unavailable>"
+    _rk_w=""; _rk_b=""; _rk_b_on=""
+    for r in /sys/class/rfkill/rfkill*; do
+        [ -d "$r" ] || continue
+        _t=$(cat "$r/type" 2>/dev/null); _s=$(cat "$r/soft" 2>/dev/null)
+        echo "  ${r##*/}: type=$_t soft=$_s hard=$(cat "$r/hard" 2>/dev/null)"
+        [ "$_t" = "wlan" ] && _rk_w=yes
+        [ "$_t" = "bluetooth" ] && { _rk_b=yes; [ "$_s" = "0" ] && _rk_b_on=yes; }
+    done
+    [ -n "$_rk_w" ] || echo "  NOTE: no wlan rfkill switch registered"
+
+    echo
+    echo "==== wifi: bus (sdio / mmc / sunxi) ===="
+    # Where "the driver loaded but nothing appeared" is settled. A loaded driver
+    # with an empty SDIO bus means the chip never answered - no userspace reload
+    # changes that. Empty everywhere is NORMAL on USB and non-sunxi radios
+    # (RG28XX is USB 8188eu, RK3566 and SigmaStar are not SDIO), so read this
+    # together with the detected module above rather than on its own.
+    echo "mmc hosts (controller name is the stable identity, not the index):"
+    _mmc=""
+    for h in /sys/class/mmc_host/mmc*; do
+        [ -d "$h" ] || continue
+        _mmc=yes
+        _hn=${h##*/}
+        _ctl=$(readlink -f "$h/device" 2>/dev/null | sed 's|.*/||')
+        _bound=""
+        for d in /sys/bus/mmc/devices/${_hn}:*; do [ -e "$d" ] && _bound="${d##*/}"; done
+        echo "  $_hn: controller=${_ctl:-?} bound=${_bound:-<none>}"
+    done
+    [ -n "$_mmc" ] || echo "  <no mmc hosts>"
+    echo "sdio devices (the radio appears here when it enumerates):"
+    _sdio=""
+    for d in /sys/bus/sdio/devices/*; do
+        [ -e "$d" ] || continue
+        _sdio=yes
+        echo "  ${d##*/}: vendor=$(cat "$d/vendor" 2>/dev/null) device=$(cat "$d/device" 2>/dev/null) class=$(cat "$d/class" 2>/dev/null)"
+        # 'auto' lets the card sleep, which reads as intermittent packet loss
+        # while the association itself stays up.
+        [ -r "$d/power/control" ] && echo "      power/control=$(cat "$d/power/control" 2>/dev/null)"
+    done
+    [ -n "$_sdio" ] || echo "  none enumerated"
+    if [ -n "$wifi_drv" ] && [ -z "$_sdio" ] && [ -d /sys/bus/sdio ]; then
+        echo "  NOTE: a wifi module is loaded and no SDIO device enumerated."
+        echo "        On an SDIO radio that means the chip never answered."
+        echo "        On a USB radio (8188eu) this is the expected state."
+    fi
+    echo "sunxi wlan platform node (owns the rail, the 32k clock and the rescan):"
+    _sunxi=""
+    for w in /sys/bus/platform/devices/*wlan* /sys/devices/platform/*wlan*; do
+        [ -d "$w" ] || continue
+        _sunxi=yes
+        echo "  ${w##*/}: driver=$(readlink "$w/driver" 2>/dev/null | sed 's|.*/||' || echo '<UNBOUND>')"
+        for a in "$w"/*; do
+            [ -f "$a" ] || continue
+            case "${a##*/}" in uevent|driver_override|modalias) continue ;; esac
+            echo "      ${a##*/} = $(cat "$a" 2>/dev/null | head -1)"
+        done
+        break
+    done
+    [ -n "$_sunxi" ] || echo "  none (normal off sunxi)"
+    [ -r /proc/driver/wifi-pm/power ] && echo "  wifi-pm power = $(cat /proc/driver/wifi-pm/power 2>/dev/null)"
 
     echo
     echo "==== wifi: radio state ===="
-    for c in "iw dev" "iwconfig" "ifconfig -a"; do
-        if command -v "${c%% *}" >/dev/null 2>&1; then
-            echo "--- $c ---"
-            $c 2>&1 | sed 's/^/  /'
-        else
-            echo "--- $c --- <not installed>"
+    # Built on wpa_cli, NOT iw. iw and iwconfig are absent on BaseOS, the Miyoo
+    # Flip and both Minis - more than half the fleet - so the old iw-based
+    # version of this section printed "<not installed>" and captured no
+    # association state at all on exactly the devices we get reports from.
+    # wpa_cli and udhcpc are the only wireless tools present everywhere.
+    _if=wlan0
+    [ -d /sys/class/net/wlan0 ] || _if=$(ls -d /sys/class/net/wlan* 2>/dev/null | head -1 | sed 's|.*/||')
+    echo "interface : ${_if:-<none>}"
+    if command -v wpa_cli >/dev/null 2>&1 && [ -n "$_if" ] \
+       && ps 2>/dev/null | grep -q '[w]pa_supplicant'; then
+        # ssid and bssid are dropped outright - see the privacy contract above.
+        # Everything that actually diagnoses an association survives.
+        # Anchored on purpose. An unanchored 'psk' also drops
+        # key_mgmt=WPA-PSK, which carries no secret and is how you tell WPA2
+        # from WPA3-SAE - a real source of association failures on these
+        # drivers. Anything holding actual key material is a psk=/passphrase=
+        # line, which this still catches.
+        wpa_cli -i "$_if" status 2>/dev/null \
+            | grep -viE '^(ssid|bssid|psk|passphrase|password)=' \
+            | redact_mac | sed 's/^/  /'
+        wpa_cli -i "$_if" signal_poll 2>/dev/null | sed 's/^/  /'
+        # Band, and whether this SSID is dual-band. A mixed-band AP advertises
+        # one name on both; wpa_supplicant scores toward the 5GHz BSS, whose
+        # association on XX hardware was measured at ~200s (61c97b9f0) - longer
+        # than the DHCP window. Counts only, never the name.
+        _freq=$(wpa_cli -i "$_if" status 2>/dev/null | sed -n 's/^freq=//p' | head -1)
+        if [ -n "$_freq" ]; then
+            _band=2.4GHz; [ "$_freq" -gt 4000 ] 2>/dev/null && _band=5GHz
+            echo "  band : $_freq MHz ($_band)"
+            _ssid=$(wpa_cli -i "$_if" status 2>/dev/null | sed -n 's/^ssid=//p' | head -1)
+            if [ -n "$_ssid" ]; then
+                _n24=0; _n5=0
+                # scan_results reads the LAST scan; it starts none.
+                while IFS= read -r _line; do
+                    case "$_line" in bssid*|"") continue ;; esac
+                    _lf=$(echo "$_line" | awk '{print $2}')
+                    [ "$(echo "$_line" | cut -f5-)" = "$_ssid" ] || continue
+                    if [ "$_lf" -gt 4000 ] 2>/dev/null; then _n5=$((_n5+1)); else _n24=$((_n24+1)); fi
+                done <<SCANEOF
+$(wpa_cli -i "$_if" scan_results 2>/dev/null)
+SCANEOF
+                echo "  connected SSID seen on : ${_n24} x 2.4GHz BSS, ${_n5} x 5GHz BSS"
+                [ "$_n24" -gt 0 ] && [ "$_n5" -gt 0 ] && \
+                    echo "  NOTE: mixed-band network - 5GHz association here can exceed the DHCP window"
+            fi
         fi
-    done
-    if command -v iw >/dev/null 2>&1; then
-        echo "--- iw dev wlan0 scan (SSID lines only) ---"
-        iw dev wlan0 scan 2>&1 | grep -E '^\s*(SSID|BSS)' | head -20 | sed 's/^/  /' \
-            || echo "  <scan failed or no results>"
+        echo "  networks in last scan : $(wpa_cli -i "$_if" scan_results 2>/dev/null | grep -vc '^bssid')"
+    else
+        if command -v wpa_cli >/dev/null 2>&1; then
+            echo "  wpa_supplicant not running - no association state available"
+        else
+            echo "  wpa_cli absent - no association state available"
+        fi
+    fi
+    if command -v ifconfig >/dev/null 2>&1; then
+        echo "--- ifconfig -a ---"
+        ifconfig -a 2>&1 | redact_mac | sed 's/^/  /'
+    fi
+
+    echo
+    echo "==== wifi: address / route / dns ===="
+    # Separates "no wifi" from "wifi but no DHCP", which are different bugs with
+    # different owners and look identical from the menu.
+    if command -v ip >/dev/null 2>&1 && [ -n "$_if" ]; then
+        # IPv4 and link state only. A global IPv6 address, and the /64 prefix
+        # inside it, identify the user's connection at least as precisely as a
+        # MAC - and none of it diagnoses anything on these devices. Count them
+        # so "v6 came up" is still visible, and print none of them.
+        ip addr show "$_if" 2>/dev/null | grep -v '^ *inet6 \|^ *valid_lft' \
+            | redact_mac | sed 's/^/  /'
+        echo "  ipv6 addresses : $(ip addr show "$_if" 2>/dev/null | grep -c '^ *inet6 ') (values withheld)"
+        echo "  routes:"; ip route 2>/dev/null | sed 's/^/    /'
+    fi
+    # Capture first: a pipeline ending in head/sed exits 0 on empty input, so
+    # the usual `... || echo none` never fires and the field prints blank.
+    _dhcp=$(ps 2>/dev/null | grep -E '[u]dhcpc|[d]hcpcd|[d]hclient' | head -1 | sed 's/^ *//')
+    echo "  dhcp client : ${_dhcp:-not running}"
+    if [ -L /etc/resolv.conf ]; then
+        echo "  /etc/resolv.conf -> $(readlink /etc/resolv.conf 2>/dev/null)"
+    fi
+    echo "  nameservers : $(grep -c '^nameserver' /etc/resolv.conf 2>/dev/null || echo 0) configured"
+
+    echo
+    echo "==== wifi: bluetooth half ===="
+    # RTL8821CS is one die carrying WiFi and Bluetooth on shared VBAT, VDDIO and
+    # a shared 32.768kHz clock, with separate enable pins. The supported bring-up
+    # order is WiFi first - muOS loads the network module before starting
+    # bluetooth and derives the BT MAC from wlan0's. BT up with no wlan means
+    # that order was inverted, which is worth eliminating before chasing the
+    # radio itself.
+    echo "  rtk_hciattach running : $(ps 2>/dev/null | grep -c '[r]tk_hciattach')"
+    echo "  bluetoothd running    : $(ps 2>/dev/null | grep -c '[b]luetoothd')"
+    if [ -n "$_rk_b_on" ] && [ -z "$_if" ]; then
+        echo "  ORDER VIOLATED: bluetooth is unblocked and there is no wlan"
+        echo "  interface. Eliminate this before drawing any conclusion about"
+        echo "  the radio - block bluetooth, reboot, and retry."
     fi
 
     echo
     echo "==== wifi: spruce side ===="
     echo "wifi flag in system json : $(jq -r '.wifi // "<absent>"' "$SYSTEM_JSON" 2>/dev/null || echo '<unreadable>')"
+    # spruce's own belief about the radio, which disable_wifi/enable_wifi set.
+    # Disagreeing with the interface state above is itself the bug.
+    [ -f /tmp/wifion ]  && echo "/tmp/wifion              : present (spruce believes WiFi is ON)"
+    [ -f /tmp/wifioff ] && echo "/tmp/wifioff             : present (spruce believes WiFi is OFF)"
+    [ -f /tmp/wifion ] || [ -f /tmp/wifioff ] || echo "wifi flag files          : neither /tmp/wifion nor /tmp/wifioff present"
     if [ -f "$WPA_SUPPLICANT_FILE" ]; then
-        # Count only. The file holds plaintext PSKs and must never be printed.
+        # Count only. The file holds plaintext PSKs and SSIDs and must never be
+        # printed, not even the ssid= lines.
         echo "wpa_supplicant.conf      : present, $(grep -c '^[[:space:]]*network=' "$WPA_SUPPLICANT_FILE" 2>/dev/null) network block(s)"
+        echo "  ctrl_interface set     : $(grep -qm1 '^ctrl_interface=' "$WPA_SUPPLICANT_FILE" 2>/dev/null && echo yes || echo NO)"
+        echo "  update_config set      : $(grep -qm1 '^update_config=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && echo yes || echo no)"
     else
         echo "wpa_supplicant.conf      : MISSING ($WPA_SUPPLICANT_FILE)"
     fi
     echo "running processes:"
-    ps 2>/dev/null | grep -iE "wpa_supplicant|dhclient|udhcpc|connman" | grep -v grep | sed 's/^/  /' \
-        || echo "  none running"
+    _procs=$(ps 2>/dev/null | grep -iE "wpa_supplicant|dhclient|udhcpc|connman" | grep -v grep)
+    if [ -n "$_procs" ]; then echo "$_procs" | sed 's/^/  /'; else echo "  none running"; fi
+    # BaseOS boot markers, in seconds since kernel start. rcS loads the radio
+    # module in the background and waits for the interface, so these say whether
+    # that ever completed.
+    for m in /run/boot-rcS-start /run/boot-rcS-done /run/boot-frontend-exec; do
+        [ -f "$m" ] && echo "${m##*/} : $(cat "$m" 2>/dev/null)"
+    done
 
     echo
     echo "==== wifi: kernel log ===="
@@ -230,8 +452,8 @@ dump_node() {
     # "module init ret=0" right before it. Without those patterns the single
     # most useful line lands in some other section's dmesg tail by luck, or not
     # at all, and the report looks like a driver that loaded fine.
-    dmesg 2>/dev/null | grep -iE 'wlan|wifi|nl80211|cfg80211|firmware|8188|8821|8723|aic|mmc[0-9]|sdio|sunxi-mmc' \
-        | tail -60 | sed 's/^/  /' || echo "  <nothing matched>"
+    _klog=$(dmesg 2>/dev/null | grep -iE 'wlan|wifi|nl80211|cfg80211|firmware|8188|8821|8723|aic|mmc[0-9]|sdio|sunxi-mmc|sunxi-rfkill' | tail -60)
+    if [ -n "$_klog" ]; then echo "$_klog" | redact_mac | sed 's/^/  /'; else echo "  <nothing matched>"; fi
 } > "$device_state" 2>&1
 
 7zr a -spf2 "$output7z" \
