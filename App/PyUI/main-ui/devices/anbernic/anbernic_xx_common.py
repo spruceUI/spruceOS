@@ -595,7 +595,33 @@ class AnbernicXXCommon(DeviceCommon):
         pass
 
     def start_udhcpc(self):
-        pass
+        # Overridden rather than inherited so this matches the invocation the
+        # shell side uses in device_start_dhcp_client (device.sh) exactly - one
+        # canonical form of the command on this device. -b matters: without it
+        # udhcpc stays in the foreground as a child of MainUI, which spruce
+        # kills and respawns around every game launch.
+        try:
+            # Match the whole invocation, not the bare name. udhcpc -b forks and
+            # the process we spawned exits immediately, leaving a defunct entry
+            # that ps renders as "[udhcpc]" until Python reaps it on its next
+            # Popen. A bare substring test matches that corpse and skips
+            # starting a real client - and it would do so in exactly the case
+            # below where wpa_supplicant is already up, so no intervening Popen
+            # has cleared it.
+            if 'udhcpc -i wlan0' in self.get_running_processes().stdout:
+                return
+
+            subprocess.Popen([
+                'udhcpc',
+                '-i', 'wlan0',
+                '-b',
+                '-t', '5',
+                '-T', '3'
+            ])
+            time.sleep(0.5)  # Wait for it to initialize
+            PyUiLogger.get_logger().info("udhcpc started.")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
 
     def start_wifi_services(self):
         pass
@@ -612,9 +638,13 @@ class AnbernicXXCommon(DeviceCommon):
         time.sleep(0.1)  
         ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
         time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-15', 'dhclient'])
+        # udhcpc, not dhclient. There is no dhclient on this platform - not in
+        # PATH, not anywhere on the filesystem - so these killalls matched
+        # nothing and the real client survived every "WiFi off". Verified on a
+        # CubeXX: udhcpc kept the same PID straight through an off/on cycle.
+        ProcessRunner.run(['killall', '-15', 'udhcpc'])
         time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-9', 'dhclient'])
+        ProcessRunner.run(['killall', '-9', 'udhcpc'])
         time.sleep(0.1)  
          
     def enable_wifi(self):
@@ -624,37 +654,38 @@ class AnbernicXXCommon(DeviceCommon):
         # still means WiFi is on, and the services still need starting.
         self.start_network_services()
         try:
-            # Check if wpa_supplicant is running using ps -f
-            result = self.get_running_processes()
-            if 'wpa_supplicant' in result.stdout:
-                return
+            # Only the supplicant is skipped when it is already up - the DHCP
+            # client is started unconditionally below. udhcpc exits on its own
+            # when it gives up (-t 5 failed discovers), and it leaves
+            # wpa_supplicant running when it does, so an early return here would
+            # make "turn WiFi on" the one action that cannot recover an
+            # interface that has associated but has no address.
+            if 'wpa_supplicant' not in self.get_running_processes().stdout:
+                # Also here, not just at startup: this is the call that actually
+                # consumes the file, and it has to survive the config being
+                # cleared or removed while the device is running - "Forget all
+                # WiFi networks" rewrites it, and a user can delete it off the
+                # card.
+                self.ensure_wpa_supplicant_conf()
 
-            # Also here, not just at startup: this is the call that actually
-            # consumes the file, and it has to survive the config being cleared
-            # or removed while the device is running - "Forget all WiFi
-            # networks" rewrites it, and a user can delete it off the card.
-            self.ensure_wpa_supplicant_conf()
+                # If not running, start it in the background
+                subprocess.Popen([
+                    'wpa_supplicant',
+                    '-B',
+                    '-D', 'nl80211',
+                    '-i', 'wlan0',
+                    '-c', self.get_wpa_supplicant_conf_path()
+                ])
+                time.sleep(0.5)  # Wait for it to initialize
+                PyUiLogger.get_logger().info("wpa_supplicant started.")
 
-            # If not running, start it in the background
-            subprocess.Popen([
-                'wpa_supplicant',
-                '-B',
-                '-D', 'nl80211',
-                '-i', 'wlan0',
-                '-c', self.get_wpa_supplicant_conf_path()
-            ])
-            time.sleep(0.5)  # Wait for it to initialize
-            PyUiLogger.get_logger().info("wpa_supplicant started.")
-
-            subprocess.Popen([
-                'dhclient',
-                'wlan0'
-            ])
-            time.sleep(0.5)  # Wait for it to initialize
-            PyUiLogger.get_logger().info("dhclient started")
+            # Was subprocess.Popen(['dhclient', 'wlan0']), which raised
+            # FileNotFoundError into the except below - so this logged "Error
+            # starting wpa_supplicant" and started no DHCP client at all.
+            self.start_udhcpc()
 
         except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting wpa_supplicant: {e}")
+            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
 
     def uses_deinit_v2(self):
         return True
