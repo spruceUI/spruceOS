@@ -183,6 +183,32 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
+# Powkiddy RGB30 (Rockchip RK3566, under MossySpruce)
+############################################################
+    "RGB30" )
+        # Unlike BaseOS, MossySpruce is a full glibc 2.38 distro that already
+        # provides libdrm, mesa and a KMSDRM SDL2, which is the backend our own
+        # bundled SDL2 was built for. So the mali-fbdev dance the H700 line
+        # needs does not apply here - use our normal dll.
+        export PYSDL2_DLL_PATH=/mnt/SDCARD/App/PyUI/dll
+        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib"
+
+        # MinUI's own launcher sets these on this hardware, which is the best
+        # evidence available that they are the working combination.
+        export SDL_VIDEODRIVER=kmsdrm
+        export SDL_AUDIODRIVER=alsa
+
+        log_message "Starting PyUI on $PLATFORM"
+        /mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device RGB30 \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
+
+    ;;
+
+############################################################
 # Miyoo Mini Flip
 ############################################################
     "MiyooMini" )

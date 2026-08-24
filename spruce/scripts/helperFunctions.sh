@@ -30,7 +30,36 @@ case $INFO in
     *TG3040*) export PLATFORM="Brick" ;;
     *TG5050*) export PLATFORM="SmartProS" ;;
     *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*) export PLATFORM="Flip" ;;
+    *0xd05*)
+        # Cortex-A55 is not unique to the Flip: the Powkiddy RGB30 is an
+        # RK3566, which is also A55, so cpuinfo alone reports 0xd05 for both.
+        # MossySpruce names itself in /etc/os-release, so key off that and
+        # leave the Flip as the default - a Flip has no os-release at all.
+        # MOSSYSPRUCE is our own build. MOSS is Shaun Inman's stock image with
+        # only the /mnt/SDCARD symlink added by tools/mod-moss-image.sh - the
+        # fallback path, which cannot rewrite os-release without rebuilding the
+        # thing it exists to avoid. Both boot spruce identically from here.
+        if grep -qE '^OS_NAME="(MOSSYSPRUCE|MOSS)"' /etc/os-release 2>/dev/null; then
+            export SPRUCE_MOSSYSPRUCE=1
+            # The kernel names the board in the device tree. This is how JELOS
+            # picks its own per-device quirks, so it is the same string its
+            # tooling uses.
+            DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
+            case "$DT_MODEL" in
+                *RGB30*) export PLATFORM="RGB30" ;;
+                # MossySpruce builds for RK3566 generally, but the RGB30 is the
+                # only board wired up so far. Fail towards it rather than
+                # leaving PLATFORM unset, which would die at the cfg source
+                # below with nothing in the log to explain why.
+                # No log_message here - it is not defined until much later in
+                # this file, and the BaseOS block above stays quiet for the
+                # same reason.
+                *) export PLATFORM="RGB30" ;;
+            esac
+        else
+            export PLATFORM="Flip"
+        fi
+        ;;
     *0xd04*) export PLATFORM="Pixel2" ;;
     *0xd03*)
         # The Allwinner H700 Anbernic line runs on BaseOS
@@ -1236,6 +1265,17 @@ enable_wifi() {
     rm -f /tmp/wifioff          2>/dev/null
     touch /tmp/wifion           2>/dev/null
     ifconfig wlan0 up           2>/dev/null
+
+    # Some hosts own the radio themselves. On the RGB30 that is connman, which
+    # does association AND DHCP, so starting our own wpa_supplicant against it
+    # is two daemons fighting over one interface - the same class of mistake
+    # the Anbernic XX line made by running dhclient beside udhcpc.
+    if device_manages_own_wifi; then
+        log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
+        /mnt/SDCARD/spruce/scripts/networkservices.sh &
+        device_extra_wifi_setup
+        return 0
+    fi
 
     # wpa_supplicant refuses to start without its config file, and every start
     # below passes -c without checking that the file is there. It fails in the
