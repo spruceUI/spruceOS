@@ -328,6 +328,22 @@ set_volume() {
     fi
 }
 
+  #########################
+#####   IN-GAME MENU   #####
+  #########################
+
+# The home button (L3) opening the emulator menu in-game goes through
+# common64bit's send_menu_button_to_retroarch, which pipes MENU_TOGGLE to
+# RetroArch's UDP command port with spruce's bundled netcat. That netcat's
+# hardcoded ELF loader path does not exist on Moss, so it dies with "No such
+# file or directory" and the menu never opens. Moss ships its own BusyBox nc,
+# which needs no loader - use it.
+send_menu_button_to_retroarch() {
+    if pgrep -f "ra64.universal|ra32.universal|retroarch" >/dev/null; then
+        echo "MENU_TOGGLE" | /usr/bin/nc -u -w1 127.0.0.1 55355
+    fi
+}
+
   ####################
 #####   SHUTDOWN   #####
   ####################
