@@ -351,6 +351,73 @@ class DeviceCommon(AbstractDevice):
 
 
     @throttle.limit_refresh(10)
+    def wifi_connect(self, ssid: str, password):
+        """Apply a network selection. password is None for an open network.
+
+        Default is the wpa_supplicant behaviour the WiFi menu used to do inline:
+        write a network block to wpa_supplicant.conf and tell wpa_cli to reload.
+        Hosts that manage WiFi another way (connman on the RGB30) override this.
+        """
+        from devices.utils.process_runner import ProcessRunner
+        conf_path = self.get_wpa_supplicant_conf_path()
+        if password is None:
+            pw_line = "key_mgmt=NONE"
+        else:
+            pw_line = 'psk="' + password + '"'
+        self._write_wpa_supplicant_block(conf_path, ssid, pw_line)
+        try:
+            ProcessRunner.run(["wpa_cli", "reconfigure"])
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"wpa_cli reconfigure failed: {e}")
+
+    def _write_wpa_supplicant_block(self, file_path, ssid, pw_line):
+        try:
+            try:
+                with open(file_path, "r") as f:
+                    lines = f.readlines()
+            except FileNotFoundError:
+                lines = []
+
+            header_lines = []
+            networks = []
+            current_block = []
+            in_block = False
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith("network={"):
+                    in_block = True
+                    current_block = [line]
+                elif in_block:
+                    current_block.append(line)
+                    if stripped == "}":
+                        networks.append(current_block)
+                        current_block = []
+                        in_block = False
+                else:
+                    header_lines.append(line)
+
+            # Written raw, deliberately - wpa_supplicant does no backslash
+            # unescaping in plain quoted strings.
+            new_block = ["network={\n", f'    ssid="{ssid}"\n', f"    {pw_line}\n", "}\n"]
+
+            # Drop any existing block for this ssid, then append the new one.
+            kept = []
+            for block in networks:
+                if not any(f'ssid="{ssid}"' in bl for bl in block):
+                    kept.append(block)
+            with open(file_path, "w") as f:
+                for line in header_lines:
+                    f.write(line)
+                for block in kept:
+                    f.write("\n")
+                    for line in block:
+                        f.write(line)
+                f.write("\n")
+                for line in new_block:
+                    f.write(line)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
+
     def get_ip_addr_text(self):
         import subprocess
 
@@ -762,4 +829,4 @@ class DeviceCommon(AbstractDevice):
         return None
 
     def get_game_images_folder_name(self):
-        return "Imgs"
+        return "Imgs"

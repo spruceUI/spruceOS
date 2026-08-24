@@ -120,23 +120,25 @@ class WifiMenu:
 
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
+        # The password prompt stays here (it is UI); applying the selection is
+        # the device's job, so a connman host can do it its own way. The default
+        # device implementation is the wpa_supplicant behaviour this method used
+        # to inline.
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password()):
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
-                self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
                 Display.display_message(
                     Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
                     .replace("{ssid}", net.ssid)
                     .replace("{password}", password),
                     duration_ms=5000,
                 )
+                Device.get_device().wifi_connect(net.ssid, password)
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
-        else:   
-            self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
-
-        self.reload_wpa_supplicant_config()
+        else:
+            Device.get_device().wifi_connect(net.ssid, None)
 
     def _build_options(
         self,

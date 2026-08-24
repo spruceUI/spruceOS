@@ -325,6 +325,14 @@ device_home_button_pressed() {
     log_message "Missing device_home_button_pressed function" -v
 }
 
+# True when the OS underneath spruce owns the radio end to end - association
+# and DHCP both - so spruce must not start a wpa_supplicant or a DHCP client of
+# its own alongside it. Default false: every device that manages WiFi through
+# spruce keeps the existing behaviour.
+device_manages_own_wifi() {
+    return 1
+}
+
 device_wifi_power_on() { 
     log_message "Missing device_wifi_power_on function" -v
 }
