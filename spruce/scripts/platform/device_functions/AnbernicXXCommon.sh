@@ -164,6 +164,11 @@ runtime_mounts_anbernic_34xxsp() {
         cp /mnt/SDCARD/spruce/flip/bin/python3.10 "$MAINUI"
         chmod +x "$MAINUI"
     fi
+
+    # PortMaster ports location
+    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
+    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
+
 }
 
 # Everything device_init does that is true of the whole XX line. Kept separate
