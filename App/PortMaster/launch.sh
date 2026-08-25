@@ -54,6 +54,21 @@ cp /mnt/SDCARD/App/PortMaster/config.py /mnt/SDCARD/Persistent/portmaster/PortMa
 rm /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
 cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
 
+# Ports source "$controlfolder/mod_${CFW_NAME}.txt" if it exists, and that is
+# the only hook that runs in the port's own shell after control.txt. On BaseOS
+# nothing ships one, so gptokeyb ports had no working keyboard and every
+# pm_message call died. Name it from the same field device_info.txt reads -
+# NAME= in /etc/os-release, "Base OS" on today's builds - so this keeps working
+# if BaseOS ever renames itself.
+case "$PLATFORM" in
+    Anbernic*)
+        XX_CFW_NAME="$(grep -a '^NAME="' /etc/os-release 2>/dev/null | cut -d'"' -f2)"
+        [ -n "$XX_CFW_NAME" ] || XX_CFW_NAME="Base OS"
+        cp /mnt/SDCARD/App/PortMaster/mod_BaseOS.txt \
+           "/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_${XX_CFW_NAME}.txt"
+        ;;
+esac
+
 #Launch port master
 cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
 

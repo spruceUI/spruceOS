@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# spruce additions for BaseOS, installed as "mod_${CFW_NAME}.txt". Ports source
+# that file right after control.txt, so it is the one hook that runs inside the
+# port's own shell between control.txt and the game starting.
+#
+# device_info.txt takes CFW_NAME from NAME= in /etc/os-release, which on BaseOS
+# is "Base OS" - space and all. launch.sh reads the same field rather than
+# hardcoding the filename, so a BaseOS that renames itself still gets this.
+#
+
+# PortMaster's dialog pipe never comes up here, so without this every port that
+# calls pm_message dies with "command not found". launch.sh appends the same
+# stub to mod_Miyoo.txt, which is the wrong file on this line - nothing reads it.
+pm_message() {
+    echo "$1" > "$CUR_TTY"
+}
+
+# Keep gptokeyb on the mali SDL2 while the game gets the vendor one below.
+#
+# gptokeyb reads the PAD, and only dll-mali carries NextUI's H700 joystick
+# classification patch, so it has to stay on that build - confirmed live, it
+# translates the pad correctly today. The game reads the KEYBOARD gptokeyb
+# injects, and needs the vendor SDL2 for it. Two processes, two SDL2s; the same
+# split App/Gallery/launch.sh makes for the same reason.
+#
+# $LD_LIBRARY_PATH is expanded here, at source time, so these keep the whole
+# ports path and merely put dll-mali in front of it.
+GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH $controlfolder/gptokeyb $ESUDOKILL"
+
+# Ports call this between backgrounding gptokeyb and starting the game.
+#
+# gptokeyb injects keystrokes through a uinput keyboard that appears seconds
+# before the game starts, and SDL has to find it. SDL_EVDEV_DEVICES names the
+# node outright and skips discovery. The node number is not fixed, so match on
+# the name gptokeyb gives it: gptokeyb2 registers "Fake Keyboard Mouse",
+# gptokeyb1 "Fake Keyboard".
+#
+# Honest caveat: this is kept because it was part of the configuration verified
+# working, NOT because it is proven load-bearing. The vendor SDL2 the game now
+# loads has no SDL_EVDEV_DEVICES string in it at all and discovers input through
+# libudev instead, so this export is probably inert for it - and dll-mali, which
+# does carry the string, was measured ignoring it (a port running under dll-mali
+# had the variable set correctly and still only ever opened the pad's node).
+# Left in place rather than stripped out of a just-verified fix.
+pm_platform_helper() {
+    [ -n "$SDL_EVDEV_DEVICES" ] && return 0
+
+    i=0
+    while [ "$i" -lt 30 ]; do
+        for d in /sys/class/input/event*; do
+            [ -r "$d/device/name" ] || continue
+            case "$(cat "$d/device/name" 2>/dev/null)" in
+                "Fake Keyboard Mouse"|"Fake Keyboard")
+                    export SDL_EVDEV_DEVICES="/dev/input/$(basename "$d")"
+                    return 0
+                    ;;
+            esac
+        done
+        i=$((i + 1))
+        sleep 0.1
+    done
+
+    return 0
+}
