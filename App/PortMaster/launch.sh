@@ -14,6 +14,20 @@ case "$PLATFORM" in
         ;;
     Anbernic*)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali"
+        export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        # pugwash reads the pad through SDL_GameController and nothing else -
+        # it handles CONTROLLERBUTTONDOWN and keyboard, never raw joystick
+        # events. BaseOS ships no mapping for the built-in pad, so
+        # SDL_IsGameController is false, no pad is opened, and every button
+        # does nothing. AnbernicXXCommon.cfg already picked the right map for
+        # this model; hand it to SDL and the menu responds.
+        #
+        # Label-named rather than positional: with no xbox fix on this
+        # platform pugwash treats SDL's "a" as its confirm button, and the
+        # label-named map puts "a" on the button actually marked A. That also
+        # matches what a Miyoo Flip does, where the stock mapping is
+        # positional but PlatformMiyoo flips A and B back.
+        export_sdl_gamecontroller_map
         ;;
     Brick|SmartPro|BrickPro)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"

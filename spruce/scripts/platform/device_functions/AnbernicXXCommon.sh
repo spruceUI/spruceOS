@@ -165,10 +165,13 @@ runtime_mounts_anbernic_34xxsp() {
         chmod +x "$MAINUI"
     fi
 
-    # PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
-
+    # PortMaster ports location. Ports and harbourmaster both expect a "ports"
+    # directory inside the ports root, which on spruce is Roms/PORTS itself.
+    # -o bind for the same BusyBox reason as the MainUI mount above: --bind is
+    # a util-linux long option this mount does not take, and the failure is
+    # silent.
+    mkdir -p /mnt/SDCARD/Roms/PORTS/ports
+    mount -o bind /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS/ports
 }
 
 # Everything device_init does that is true of the whole XX line. Kept separate
@@ -192,6 +195,18 @@ anbernic_xx_common_init() {
 
 device_init() {
     anbernic_xx_common_init
+}
+
+# Nothing to swap in or out around a port on this line: the SDL2 a port needs is
+# already on LD_LIBRARY_PATH and the pad map comes from the env. Defined anyway
+# so run_port does not log the "Missing device_prepare_for_ports_run" fallback
+# on every launch.
+device_prepare_for_ports_run() {
+    log_message "device_prepare_for_ports_run unneeded" -v
+}
+
+device_cleanup_after_ports_run() {
+    log_message "device_cleanup_after_ports_run unneeded" -v
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.

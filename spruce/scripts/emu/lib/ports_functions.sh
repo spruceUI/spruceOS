@@ -51,6 +51,22 @@ set_port_abxy_scheme() {
     else
         cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "$PM_DIR/gamecontrollerdb.txt"
     fi
+
+    # Neither db above has an entry for the Anbernic XX pad, and adding one
+    # would not work: every model on the line reports the same GUID and name,
+    # so a single row cannot get the triggers right on both the stick and the
+    # stickless halves. AnbernicXXCommon.cfg already selects the correct map by
+    # BASEOS_TARGET - pass it through the env hint instead, which SDL applies
+    # after the db file and so wins. No-op on every other device.
+    #
+    # The two conventions line up with the two db files: the 360 file is the
+    # stock SDL db, where "a" is the South button, and the nintendo file is the
+    # same db with a/b and x/y swapped so "a" is the button marked A.
+    if [ "$PORT_CONTROL" = "X360" ]; then
+        export_sdl_gamecontroller_map positional
+    else
+        export_sdl_gamecontroller_map
+    fi
 }
 
 run_port() {

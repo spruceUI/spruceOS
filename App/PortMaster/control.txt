@@ -54,7 +54,17 @@ get_controls() {
 
   ANALOGSTICKS=$ANALOG_STICKS
 
-  # sdl_controllerconfig="$(< "/tmp/gamecontrollerdb.txt")"
+  # Every port does `export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"`
+  # right after calling this. Leaving the variable empty therefore does not mean
+  # "no opinion" - it actively blanks whatever mapping the launcher exported.
+  #
+  # That costs nothing on devices whose pad is in the db file
+  # (SDL_GAMECONTROLLERCONFIG_FILE below still applies), which is why it went
+  # unnoticed. On the Anbernic XX line the db has no entry for the built-in pad
+  # and the env hint from set_port_abxy_scheme is the only mapping there is, so
+  # blanking it left every port with a dead pad. Hand the same value back
+  # through the variable the port actually reads.
+  sdl_controllerconfig="$SDL_GAMECONTROLLERCONFIG"
 }
 
 source $controlfolder/device_info.txt

@@ -3,6 +3,6 @@
   "icon": "portmaster.png",
   "launch": "launch.sh",
   "description": "PortMaster Menu",
-  "devices": ["MIYOO_FLIP", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2", "ANBERNIC_RG_XX"],
+  "devices": ["MIYOO_FLIP", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2", "ANBERNIC_RGXX"],
   "hideInSimpleMode": false
 }
