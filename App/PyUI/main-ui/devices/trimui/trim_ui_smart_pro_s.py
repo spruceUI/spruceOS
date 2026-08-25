@@ -154,6 +154,23 @@ class TrimUISmartProS(TrimUIDevice):
             if(old_volume != self.mainui_volume):
                 Display.volume_changed(self.mainui_volume * 5)
 
+            # Something outside this process - the physical switch's
+            # scene-wifi.sh, today - can flip .wifi in this same file while
+            # PyUI is already running. self.system_config only reflects what
+            # PyUI itself last wrote, so without this, monitor_wifi()'s
+            # self-heal loop keeps believing WiFi should still be in whatever
+            # state it was in at startup: it sees wlan0 go down, doesn't know
+            # the radio was turned off on purpose, and switches it back on
+            # within one poll (up to ~10s). Reloading here - this callback
+            # already runs on every change to this file - keeps
+            # is_wifi_enabled() and the status caches honest with whatever
+            # last touched it, switch or otherwise.
+            old_wifi_enabled = self.system_config.is_wifi_enabled()
+            self.system_config.reload_config()
+            if old_wifi_enabled != self.system_config.is_wifi_enabled():
+                self.get_wifi_status.force_refresh()
+                self.get_ip_addr_text.force_refresh()
+
         except Exception as e:
             PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
             return None
