@@ -7,13 +7,6 @@
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
 
-# Unconditional and as early as possible - before anything below that shells
-# out to jq. If PyUI's environment is missing something this script needs
-# (PATH, a sourced file failing partway through), this is the one line
-# guaranteed to still make it to spruce.log, so a silent no-op here is
-# distinguishable from "started and then didn't do anything."
-log_message "networkservices.sh started: args=$* pid=$$ PATH=$PATH"
-
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
 SSH_SERVICE_NAME=$(get_ssh_service_name)
 
