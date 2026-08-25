@@ -3,21 +3,24 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 #ENV Variables
+
+export HOME="/mnt/SDCARD/Saves/flip/home"
+
 case "$PLATFORM" in
     Flip|SmartProS)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
-        export HOME="/mnt/SDCARD/Saves/flip/home"
+        ;;
+    Anbernic*)
+        export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali"
         ;;
     Brick|SmartPro|BrickPro)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
-        export HOME="/mnt/SDCARD/Saves/flip/home"
         ;;
     Pixel2)
-        export HOME="/mnt/SDCARD/Saves/flip/home"
         /usr/bin/start_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
         /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
         rm /mnt/SDCARD/Roms/PORTS/gamelist.*
