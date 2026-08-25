@@ -31,14 +31,6 @@ case $INFO in
     *TG5050*) export PLATFORM="SmartProS" ;;
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)
-        # Cortex-A55 is not unique to the Flip: the Powkiddy RGB30 is an
-        # RK3566, which is also A55, so cpuinfo alone reports 0xd05 for both.
-        # MossySpruce names itself in /etc/os-release, so key off that and
-        # leave the Flip as the default - a Flip has no os-release at all.
-        # MOSSYSPRUCE is our own build. MOSS is Shaun Inman's stock image with
-        # only the /mnt/SDCARD symlink added by tools/mod-moss-image.sh - the
-        # fallback path, which cannot rewrite os-release without rebuilding the
-        # thing it exists to avoid. Both boot spruce identically from here.
         if grep -qE '^OS_NAME="(MOSSYSPRUCE|MOSS)"' /etc/os-release 2>/dev/null; then
             export SPRUCE_MOSSYSPRUCE=1
             # The kernel names the board in the device tree. This is how JELOS
@@ -62,31 +54,12 @@ case $INFO in
         ;;
     *0xd04*) export PLATFORM="Pixel2" ;;
     *0xd03*)
-        # The Allwinner H700 Anbernic line runs on BaseOS
-        # (github.com/pvaibhav/BaseOS) only - the Anbernic stock userland is no
-        # longer supported, and every path below it assumes BaseOS. BaseOS names
-        # the exact build target in /etc/baseos-release, which is strictly better
-        # than the old lcd_type + /mnt/vendor/oem/board.ini guesswork: that could
-        # not tell an RG34XX from an RG34XXSP, or an RG40XXV from an RG35XXH.
         export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
-
         case $BASEOS_TARGET in
             rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
             rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
-            # The RG SP shares the 34XX panel - 720x480, 3:2 - so it joins
-            # this profile rather than the 640x480 one the catch-all would
-            # otherwise have given it. It has no analog sticks, but that is
-            # decided separately: the pad map in AnbernicXXCommon.cfg keys
-            # off BASEOS_TARGET, not off this platform, and already lists
-            # rgsp as stickless. Its lid is handled too - has_lid() matches
-            # any target ending in "sp".
             rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicXX720480" ;;
-            # Also the empty case, which means /etc/baseos-release is missing -
-            # a stock image, or a BaseOS too old to name itself. Nothing here
-            # can work on stock, but leaving PLATFORM unset would fail at the
-            # `. $PLATFORM.cfg` below with no clue why, so take the most common
-            # profile in the line and let the failure happen somewhere legible.
             *)               export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
