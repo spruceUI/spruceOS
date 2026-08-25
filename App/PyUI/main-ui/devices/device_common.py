@@ -331,14 +331,28 @@ class DeviceCommon(AbstractDevice):
     NETWORK_SERVICES_SCRIPT = "/mnt/SDCARD/spruce/scripts/networkservices.sh"
 
     def _run_network_services(self, *args):
+        # Unconditional, on purpose: the two branches below (missing script /
+        # launch failure) already log, but a caller that never reaches this
+        # method at all would otherwise leave zero trace anywhere. This line
+        # is the one place that proves _run_network_services was actually
+        # invoked, and with what args, no matter what happens after.
+        PyUiLogger.get_logger().info(
+            f"_run_network_services called with args={args!r}"
+        )
         if not os.path.exists(self.NETWORK_SERVICES_SCRIPT):
             # Not a spruce userland (muOS, Rocknix) - nothing of ours to start.
+            PyUiLogger.get_logger().info(
+                f"{self.NETWORK_SERVICES_SCRIPT} not found, skipping"
+            )
             return
         try:
-            subprocess.Popen(
+            proc = subprocess.Popen(
                 [self.NETWORK_SERVICES_SCRIPT, *args],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+            )
+            PyUiLogger.get_logger().info(
+                f"Launched networkservices.sh {' '.join(args)} (pid {proc.pid})"
             )
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to launch networkservices.sh: {e}")
@@ -350,7 +364,6 @@ class DeviceCommon(AbstractDevice):
         self._run_network_services("off")
 
 
-    @throttle.limit_refresh(10)
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
@@ -418,6 +431,7 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
 
+    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import subprocess
 
