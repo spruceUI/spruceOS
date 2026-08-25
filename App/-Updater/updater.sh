@@ -316,8 +316,25 @@ log_update_message "Checking file permissions"
 ls -l "$UPDATE_FILE" >>"$LOG_LOCATION"
 kill_network_services
 
-# Creating a backup of current install
+# Creating a backup of current install.
+#
+# Everything below this point deletes and overwrites the install - including the
+# user's RetroArch per-core overrides, options and remaps, which the update
+# ships defaults for and extraction clobbers. spruceRestore.sh is the ONLY thing
+# that puts them back. So if the backup did not actually produce a fresh, valid
+# archive, there is nothing to restore from - abort here rather than destroy the
+# user's settings with no recovery.
+BACKUP_BEFORE=$(ls -t /mnt/SDCARD/Saves/spruce/backups/spruceBackup_*.7z 2>/dev/null | head -n1)
 /mnt/SDCARD/App/spruceBackup/spruceBackup.sh
+backup_rc=$?
+BACKUP_AFTER=$(ls -t /mnt/SDCARD/Saves/spruce/backups/spruceBackup_*.7z 2>/dev/null | head -n1)
+
+if [ "$backup_rc" -ne 0 ] || [ -z "$BACKUP_AFTER" ] || [ "$BACKUP_AFTER" = "$BACKUP_BEFORE" ] || ! 7zr t "$BACKUP_AFTER" >/dev/null 2>&1; then
+    log_update_message "Pre-update backup did not complete (rc=$backup_rc, newest=$BACKUP_AFTER) - aborting to protect user data"
+    display_image_and_text "$BAD_IMG" 35 25 "Update aborted: the safety backup did not complete, so nothing has been changed. Free up space (50MB+ on the card) and run the update again." 75
+    sleep 8
+    exit 1
+fi
 
 [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
 
