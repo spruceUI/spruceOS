@@ -829,4 +829,4 @@ class DeviceCommon(AbstractDevice):
         return None
 
     def get_game_images_folder_name(self):
-        return "Imgs"
+        return "Imgs"
