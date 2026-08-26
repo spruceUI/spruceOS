@@ -82,12 +82,12 @@ jobs:
 
           if [ "$HAS_PREVIOUS_RELEASE" = "true" ]; then
 
-            # The stable release workflow creates the incremental archive
-            # using this naming convention:
+            # The stable release workflow names the incremental archive after
+            # the previous release TAG (which carries the v prefix):
             #
-            # spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z
+            # spruceOTA-v${PREVIOUS_VERSION}-to-v${VERSION}.7z
             #
-            DIFF_ASSET="spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+            DIFF_ASSET="spruceOTA-v${PREVIOUS_VERSION}-to-v${VERSION}.7z"
 
             echo "Looking for stable incremental archive:"
             echo "$DIFF_ASSET"
@@ -149,7 +149,7 @@ jobs:
 
           if [ "$HAS_DIFF" = "true" ]; then
 
-            DIFF_FILE="spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+            DIFF_FILE="spruceOTA-v${PREVIOUS_VERSION}-to-v${VERSION}.7z"
 
             DIFF_CHECKSUM=$(md5sum "$DIFF_FILE" | cut -d' ' -f1)
             DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_FILE" | awk '{print $5}')
@@ -299,7 +299,7 @@ jobs:
             echo "  ${PREVIOUS_VERSION} -> ${VERSION}"
             echo ""
             echo "Archive:"
-            echo "  spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+            echo "  spruceOTA-v${PREVIOUS_VERSION}-to-v${VERSION}.7z"
           else
             echo "No previous stable release."
             echo "No incremental transition was created."
