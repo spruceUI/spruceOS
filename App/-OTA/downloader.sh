@@ -96,7 +96,10 @@ rm -rf "$TMP_DIR"
 mkdir -p "$TMP_DIR"
 
 # Check for Wi-Fi and active connection
-if ! is_wifi_connected; then sleep 3; exit 1; fi
+if ! is_wifi_connected; then
+    sleep 3
+    exit 1
+fi
 
 CURRENT_VERSION=$(get_version)
 read_only_check
@@ -155,8 +158,9 @@ rm -f "$TMP_DIR/ota_queue"
 # TYPE is either:
 #   FULL
 #   DIFF
+#   DIFF_NIGHTLY
 #
-# updater.py will eventually consume this queue in order.
+# updater.py consumes this queue in order.
 
 if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
 
@@ -177,11 +181,53 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
 
         NEXT_VERSION=$(echo "$DIFF_LINE" | sed "s/^RELEASE_DIFF_LINK_${QUEUE_VERSION}_//" | cut -d'=' -f1)
 
+        # Validate that the metadata actually advances the version.
+        # Prevent malformed OTA metadata from creating an infinite loop.
+        if [ -z "$NEXT_VERSION" ] || [ "$NEXT_VERSION" = "$QUEUE_VERSION" ]; then
+            log_message "OTA: Invalid incremental update chain: $QUEUE_VERSION -> $NEXT_VERSION"
+            display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update information. Please try again later or use Full update mode." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+
+        # Versions are expected to be numeric dotted versions.
+        CURRENT_MAJOR=$(echo "$QUEUE_VERSION" | cut -d. -f1)
+        CURRENT_MINOR=$(echo "$QUEUE_VERSION" | cut -d. -f2)
+        CURRENT_PATCH=$(echo "$QUEUE_VERSION" | cut -d. -f3)
+
+        NEXT_MAJOR=$(echo "$NEXT_VERSION" | cut -d. -f1)
+        NEXT_MINOR=$(echo "$NEXT_VERSION" | cut -d. -f2)
+        NEXT_PATCH=$(echo "$NEXT_VERSION" | cut -d. -f3)
+
+        # Reject malformed version strings.
+        case "$CURRENT_MAJOR$CURRENT_MINOR$CURRENT_PATCH$NEXT_MAJOR$NEXT_MINOR$NEXT_PATCH" in
+            *[!0-9]*)
+                log_message "OTA: Invalid version in incremental update chain: $QUEUE_VERSION -> $NEXT_VERSION"
+                display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update information. Please try again later or use Full update mode." 75
+                sleep 5
+                rm -rf "$TMP_DIR"
+                exit 1
+                ;;
+        esac
+
+        # Convert dotted versions to a comparable integer.
+        CURRENT_NUM=$((CURRENT_MAJOR * 1000000 + CURRENT_MINOR * 1000 + CURRENT_PATCH))
+        NEXT_NUM=$((NEXT_MAJOR * 1000000 + NEXT_MINOR * 1000 + NEXT_PATCH))
+
+        if [ "$NEXT_NUM" -le "$CURRENT_NUM" ]; then
+            log_message "OTA: Incremental update does not advance version: $QUEUE_VERSION -> $NEXT_VERSION"
+            display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update path. Please try again later or use Full update mode." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+
         DIFF_LINK=$(echo "$DIFF_LINE" | sed 's/^[^=]*=//')
         DIFF_CHECKSUM=$(sed -n "s/^RELEASE_DIFF_CHECKSUM_${QUEUE_VERSION}_${NEXT_VERSION}=//p" "$TMP_DIR/spruce" | tr -d '\n\r')
         DIFF_SIZE=$(sed -n "s/^RELEASE_DIFF_SIZE_IN_MB_${QUEUE_VERSION}_${NEXT_VERSION}=//p" "$TMP_DIR/spruce" | tr -d '\n\r')
 
-        if [ -z "$DIFF_CHECKSUM" ] || [ -z "$DIFF_SIZE" ]; then
+        if [ -z "$DIFF_CHECKSUM" ] || [ -z "$DIFF_SIZE" ] || [ -z "$DIFF_LINK" ]; then
             log_message "OTA: Incomplete incremental metadata for $QUEUE_VERSION -> $NEXT_VERSION"
             display_image_and_text "$BAD_IMG" 35 25 "Update information is incomplete. Please try again later." 75
             sleep 5
