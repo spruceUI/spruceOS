@@ -107,6 +107,29 @@ apply_now() {
         chmod +x "$SCENE_DIR/$name"
         echo "$action" > "$LABEL_FILE" 2>/dev/null
         log_message "apply-switch-action: switch set to '$action' ($name)"
+
+        # At boot, put the action into the state the switch is ALREADY in.
+        #
+        # trimui_scened only runs scene.sh on an actual flip, so nothing has ever
+        # applied the switch's resting position at startup: power off with the
+        # LEDs switched off and they came back on at boot, staying on until the
+        # switch was cycled. Same for WiFi, mute and the rest.
+        #
+        # device_get_switch_position echoes nothing on a device that cannot read
+        # the switch (the Smart Pro S has no GPIO for it), and then this is
+        # skipped entirely - leaving that device exactly as it behaved before.
+        if [ "$2" = "--boot" ]; then
+            pos="$(device_get_switch_position)"
+            case "$pos" in
+                0|1)
+                    log_message "apply-switch-action: applying '$action' for switch position $pos"
+                    "$SCENE_DIR/$name" "$pos"
+                    ;;
+                *)
+                    log_message "apply-switch-action: switch position unreadable, leaving '$action' unapplied"
+                    ;;
+            esac
+        fi
     else
         rm -f "$LABEL_FILE" 2>/dev/null
         log_message "apply-switch-action: switch action cleared (selected '$action')"
@@ -118,7 +141,7 @@ case "$1" in
         # Boot path. Import before applying, so a first boot adopts the existing
         # action rather than overwriting it with the shipped default.
         migrate_existing_action
-        apply_now
+        apply_now "" --boot
         ;;
     *)
         # changeCmd path. set_menu_option() saves the value BEFORE running this and

@@ -325,6 +325,17 @@ device_home_button_pressed() {
     log_message "Missing device_home_button_pressed function" -v
 }
 
+# Current position of the physical switch, in the same 1/0 convention
+# /usr/trimui/bin/scene.sh uses: 1 = switch on, 0 = switch off.
+#
+# Echo nothing when the device cannot read it. apply-switch-action treats an
+# empty answer as "do not touch the LEDs/radio at boot", which is the behaviour
+# every device had before this existed - so a device with no reader is no worse
+# off, it just does not get the boot-time apply.
+device_get_switch_position() {
+    echo ""
+}
+
 # True when the OS underneath spruce owns the radio end to end - association
 # and DHCP both - so spruce must not start a wpa_supplicant or a DHCP client of
 # its own alongside it. Default false: every device that manages WiFi through

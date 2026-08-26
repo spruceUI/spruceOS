@@ -25,6 +25,17 @@ rgb_led() {
     rgb_led_trimui "$@"
 }
 
+# The switch is "DIP Switch PH19" on this SoC, exported as gpio243 by each
+# device's init_gpio_a133p. Its raw value is the same 1/0 that trimui_scened
+# hands scene.sh, so it passes straight through.
+#
+# The Smart Pro S deliberately has no override for this: it is a different SoC
+# and exports no switch GPIO, so it keeps the empty default and skips the
+# boot-time apply.
+device_get_switch_position() {
+    cat /sys/class/gpio/gpio243/value 2>/dev/null
+}
+
 # used in principal.sh
 enable_or_disable_rgb() {
     enable_or_disable_rgb_trimui "$@"
