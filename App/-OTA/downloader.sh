@@ -73,6 +73,35 @@ verify_checksum() {
     fi
 }
 
+# Escape a version string for use inside a grep/sed basic regular expression.
+# Dots in versions are regex wildcards unless escaped.
+escape_re() {
+    printf '%s' "$1" | sed 's/[][\.*^$/]/\\&/g'
+}
+
+# Convert "major.minor.patch" (optionally prefixed with "v" and/or suffixed
+# with "-<anything>", e.g. "4.4.1-20260826") into a single comparable integer.
+# Prints nothing and returns 1 for malformed input.
+version_num() {
+    local v major minor patch rest
+    v="$(printf '%s' "$1" | sed 's/^v//; s/-.*$//')"
+    case "$v" in
+        ""|*[!0-9.]*|.*|*.) return 1 ;;
+    esac
+    major="${v%%.*}"
+    rest="${v#*.}"
+    if [ "$rest" = "$v" ]; then
+        minor=0; patch=0
+    else
+        minor="${rest%%.*}"
+        rest="${rest#*.}"
+        if [ "$rest" = "$minor" ]; then patch=0; else patch="${rest%%.*}"; fi
+    fi
+    [ -z "$minor" ] && minor=0
+    [ -z "$patch" ] && patch=0
+    echo $((major * 1000000 + minor * 1000 + patch))
+}
+
 ##### MAIN EXECUTION #####
 
 start_pyui_message_writer
@@ -153,12 +182,15 @@ log_message "OTA: Latest nightly version: $NIGHTLY_VERSION"
 rm -f "$TMP_DIR/ota_queue"
 
 # Each line in the queue contains:
-# VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE
+# VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE|FROM
 #
 # TYPE is either:
 #   FULL
 #   DIFF
 #   DIFF_NIGHTLY
+#
+# FROM is the version the archive must be applied on top of. updater.py uses
+# it to refuse a queue whose chain does not start at the installed version.
 #
 # updater.py consumes this queue in order.
 
@@ -169,9 +201,22 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
 
     while [ "$QUEUE_VERSION" != "$RELEASE_VERSION" ]; do
 
-        DIFF_LINE=$(grep "^RELEASE_DIFF_LINK_${QUEUE_VERSION}_" "$TMP_DIR/spruce" | head -n 1)
+        QUEUE_VERSION_RE="$(escape_re "$QUEUE_VERSION")"
 
-        if [ -z "$DIFF_LINE" ]; then
+        # Pick the highest-versioned successor advertised for this version.
+        # Do not rely on file order (head -n 1): a stale transition from a
+        # withdrawn release could otherwise be selected.
+        NEXT_VERSION=""
+        NEXT_NUM=0
+        for CANDIDATE in $(sed -n "s/^RELEASE_DIFF_LINK_${QUEUE_VERSION_RE}_\([^=]*\)=.*/\1/p" "$TMP_DIR/spruce" | tr -d '\r'); do
+            CANDIDATE_NUM="$(version_num "$CANDIDATE")" || continue
+            if [ "$CANDIDATE_NUM" -gt "$NEXT_NUM" ]; then
+                NEXT_NUM="$CANDIDATE_NUM"
+                NEXT_VERSION="$CANDIDATE"
+            fi
+        done
+
+        if [ -z "$NEXT_VERSION" ]; then
             log_message "OTA: No incremental update found from $QUEUE_VERSION"
             display_image_and_text "$IMAGE_PATH" 35 25 "No incremental update path is available from version $QUEUE_VERSION. Please switch OTA update type to Full and try again." 75
             sleep 5
@@ -179,43 +224,11 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
             exit 1
         fi
 
-        NEXT_VERSION=$(echo "$DIFF_LINE" | sed "s/^RELEASE_DIFF_LINK_${QUEUE_VERSION}_//" | cut -d'=' -f1)
-
         # Validate that the metadata actually advances the version.
-        # Prevent malformed OTA metadata from creating an infinite loop.
-        if [ -z "$NEXT_VERSION" ] || [ "$NEXT_VERSION" = "$QUEUE_VERSION" ]; then
-            log_message "OTA: Invalid incremental update chain: $QUEUE_VERSION -> $NEXT_VERSION"
-            display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update information. Please try again later or use Full update mode." 75
-            sleep 5
-            rm -rf "$TMP_DIR"
-            exit 1
-        fi
+        # Prevents malformed OTA metadata from creating an infinite loop.
+        QUEUE_NUM="$(version_num "$QUEUE_VERSION")" || QUEUE_NUM=""
 
-        # Versions are expected to be numeric dotted versions.
-        CURRENT_MAJOR=$(echo "$QUEUE_VERSION" | cut -d. -f1)
-        CURRENT_MINOR=$(echo "$QUEUE_VERSION" | cut -d. -f2)
-        CURRENT_PATCH=$(echo "$QUEUE_VERSION" | cut -d. -f3)
-
-        NEXT_MAJOR=$(echo "$NEXT_VERSION" | cut -d. -f1)
-        NEXT_MINOR=$(echo "$NEXT_VERSION" | cut -d. -f2)
-        NEXT_PATCH=$(echo "$NEXT_VERSION" | cut -d. -f3)
-
-        # Reject malformed version strings.
-        case "$CURRENT_MAJOR$CURRENT_MINOR$CURRENT_PATCH$NEXT_MAJOR$NEXT_MINOR$NEXT_PATCH" in
-            *[!0-9]*)
-                log_message "OTA: Invalid version in incremental update chain: $QUEUE_VERSION -> $NEXT_VERSION"
-                display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update information. Please try again later or use Full update mode." 75
-                sleep 5
-                rm -rf "$TMP_DIR"
-                exit 1
-                ;;
-        esac
-
-        # Convert dotted versions to a comparable integer.
-        CURRENT_NUM=$((CURRENT_MAJOR * 1000000 + CURRENT_MINOR * 1000 + CURRENT_PATCH))
-        NEXT_NUM=$((NEXT_MAJOR * 1000000 + NEXT_MINOR * 1000 + NEXT_PATCH))
-
-        if [ "$NEXT_NUM" -le "$CURRENT_NUM" ]; then
+        if [ -z "$QUEUE_NUM" ] || [ "$NEXT_NUM" -le "$QUEUE_NUM" ]; then
             log_message "OTA: Incremental update does not advance version: $QUEUE_VERSION -> $NEXT_VERSION"
             display_image_and_text "$BAD_IMG" 35 25 "Invalid incremental update path. Please try again later or use Full update mode." 75
             sleep 5
@@ -223,9 +236,10 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
             exit 1
         fi
 
-        DIFF_LINK=$(echo "$DIFF_LINE" | sed 's/^[^=]*=//')
-        DIFF_CHECKSUM=$(sed -n "s/^RELEASE_DIFF_CHECKSUM_${QUEUE_VERSION}_${NEXT_VERSION}=//p" "$TMP_DIR/spruce" | tr -d '\n\r')
-        DIFF_SIZE=$(sed -n "s/^RELEASE_DIFF_SIZE_IN_MB_${QUEUE_VERSION}_${NEXT_VERSION}=//p" "$TMP_DIR/spruce" | tr -d '\n\r')
+        NEXT_VERSION_RE="$(escape_re "$NEXT_VERSION")"
+        DIFF_LINK=$(sed -n "s/^RELEASE_DIFF_LINK_${QUEUE_VERSION_RE}_${NEXT_VERSION_RE}=//p" "$TMP_DIR/spruce" | head -n 1 | tr -d '\n\r')
+        DIFF_CHECKSUM=$(sed -n "s/^RELEASE_DIFF_CHECKSUM_${QUEUE_VERSION_RE}_${NEXT_VERSION_RE}=//p" "$TMP_DIR/spruce" | head -n 1 | tr -d '\n\r')
+        DIFF_SIZE=$(sed -n "s/^RELEASE_DIFF_SIZE_IN_MB_${QUEUE_VERSION_RE}_${NEXT_VERSION_RE}=//p" "$TMP_DIR/spruce" | head -n 1 | tr -d '\n\r')
 
         if [ -z "$DIFF_CHECKSUM" ] || [ -z "$DIFF_SIZE" ] || [ -z "$DIFF_LINK" ]; then
             log_message "OTA: Incomplete incremental metadata for $QUEUE_VERSION -> $NEXT_VERSION"
@@ -235,7 +249,7 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
             exit 1
         fi
 
-        echo "${NEXT_VERSION}|${DIFF_CHECKSUM}|${DIFF_LINK}|${DIFF_SIZE}|${RELEASE_INFO}|DIFF" >> "$TMP_DIR/ota_queue"
+        echo "${NEXT_VERSION}|${DIFF_CHECKSUM}|${DIFF_LINK}|${DIFF_SIZE}|${RELEASE_INFO}|DIFF|${QUEUE_VERSION}" >> "$TMP_DIR/ota_queue"
 
         log_message "OTA: Queued incremental update: $QUEUE_VERSION -> $NEXT_VERSION"
 
@@ -246,11 +260,13 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
     # incremental update after reaching the latest stable release.
     if [ "$TARGET_CHANNEL" = "nightly" ]; then
 
+        NIGHTLY_DIFF_BASE_VERSION=$(sed -n 's/^NIGHTLY_DIFF_BASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | sed 's/^v//')
+        NIGHTLY_DIFF_VERSION=$(sed -n 's/^NIGHTLY_DIFF_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
         NIGHTLY_DIFF_LINK=$(sed -n 's/^NIGHTLY_DIFF_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
         NIGHTLY_DIFF_CHECKSUM=$(sed -n 's/^NIGHTLY_DIFF_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
         NIGHTLY_DIFF_SIZE=$(sed -n 's/^NIGHTLY_DIFF_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
-        if [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ]; then
+        if [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ] || [ -z "$NIGHTLY_VERSION" ]; then
             log_message "OTA: Nightly incremental metadata is not available"
             display_image_and_text "$IMAGE_PATH" 35 25 "A nightly incremental update is not currently available. Please try again later or use Full update mode." 75
             sleep 5
@@ -258,7 +274,18 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
             exit 1
         fi
 
-        echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY" >> "$TMP_DIR/ota_queue"
+        # Every nightly diff is generated from one specific stable release.
+        # If a new stable was published after the last nightly build, the
+        # diff would be applied on top of the wrong base and mix two trees.
+        if [ "$NIGHTLY_DIFF_BASE_VERSION" != "$RELEASE_VERSION" ] || { [ -n "$NIGHTLY_DIFF_VERSION" ] && [ "$NIGHTLY_DIFF_VERSION" != "$NIGHTLY_VERSION" ]; }; then
+            log_message "OTA: Nightly diff base $NIGHTLY_DIFF_BASE_VERSION (version $NIGHTLY_DIFF_VERSION) does not match stable $RELEASE_VERSION / nightly $NIGHTLY_VERSION"
+            display_image_and_text "$IMAGE_PATH" 35 25 "The nightly incremental package has not been rebuilt against the latest stable release yet. Please try again after the next nightly, or use Full update mode." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+
+        echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY|${RELEASE_VERSION}" >> "$TMP_DIR/ota_queue"
 
         log_message "OTA: Queued nightly incremental update: $RELEASE_VERSION -> $NIGHTLY_VERSION"
     fi
@@ -266,9 +293,9 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
 else
     # Full update mode.
     if [ "$TARGET_CHANNEL" = "nightly" ]; then
-        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL" >> "$TMP_DIR/ota_queue"
+        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
     else
-        echo "${RELEASE_VERSION}|${RELEASE_CHECKSUM}|${RELEASE_LINK}|${RELEASE_SIZE}|${RELEASE_INFO}|FULL" >> "$TMP_DIR/ota_queue"
+        echo "${RELEASE_VERSION}|${RELEASE_CHECKSUM}|${RELEASE_LINK}|${RELEASE_SIZE}|${RELEASE_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
     fi
 fi
 
@@ -292,14 +319,14 @@ mkdir -p "$TMP_DIR/downloads"
 
 QUEUE_NUMBER=0
 
-while IFS='|' read -r QUEUE_VERSION QUEUE_CHECKSUM QUEUE_LINK QUEUE_SIZE QUEUE_INFO QUEUE_TYPE; do
+while IFS='|' read -r QUEUE_VERSION QUEUE_CHECKSUM QUEUE_LINK QUEUE_SIZE QUEUE_INFO QUEUE_TYPE QUEUE_FROM; do
 
     QUEUE_NUMBER=$((QUEUE_NUMBER + 1))
 
     FILENAME=$(echo "$QUEUE_LINK" | sed 's/.*\///')
     OUTPUT_FILE="/mnt/SDCARD/$FILENAME"
 
-    log_message "OTA: Processing archive $QUEUE_NUMBER/$QUEUE_COUNT: $QUEUE_VERSION"
+    log_message "OTA: Processing archive $QUEUE_NUMBER/$QUEUE_COUNT: $QUEUE_FROM -> $QUEUE_VERSION ($QUEUE_TYPE)"
 
     display_image_and_text "$IMAGE_PATH" 35 25 "Preparing update $QUEUE_NUMBER of $QUEUE_COUNT..." 75
 
