@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # update-ota-on-publish.yml pushes to the same OTA repositories; never race it.
+    concurrency:
+      group: ota-metadata
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v4

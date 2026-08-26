@@ -12,9 +12,15 @@ on:
 
 jobs:
   update-ota:
+    # Pre-releases published in this repository must never become RELEASE_*.
+    if: github.event_name == 'workflow_dispatch' || (github.event.release.prerelease == false && github.event.release.draft == false)
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # The nightly workflow pushes to the same OTA repositories; never race it.
+    concurrency:
+      group: ota-metadata
+      cancel-in-progress: false
 
     steps:
       - name: Debug event
