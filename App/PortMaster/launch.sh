@@ -48,6 +48,16 @@ rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
 rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
 rm /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
 cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
+# ...and again under a name the updater does not own. bash reads a script
+# incrementally by byte offset, so when pugwash's self-update replaces
+# PortMaster.txt mid-run, the shell keeps reading at its saved offset into the
+# NEW file and executes whatever bytes land there. That is where the
+# "PortMaster.txt: line 262: unexpected EOF" in the logs comes from - our copy
+# is 183 lines. It has only ever bitten at exit, but it is the shell running
+# arbitrary spliced text, so run the private copy instead. PortMaster.txt is
+# still staged above in case anything else invokes it by that name.
+cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/spruce_portmaster.sh
+chmod +x /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/spruce_portmaster.sh
 cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
 cp /mnt/SDCARD/App/PortMaster/config.py /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
 
@@ -74,7 +84,18 @@ cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
 
 cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/SDCARD/Saves/flip/home/device_info_Miyoo_Miyoo Flip.txt"
 
-./PortMaster.txt &> /mnt/SDCARD/Saves/spruce/portmaster.log
+./spruce_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
+
+# pugwash asks for a restart after updating itself by dropping this flag. We
+# deliberately do not restart in place - that would skip the staging above and
+# leave the next pugwash on upstream's config.py, which costs the theme and
+# sends ports to Roms/PORTS64. Exiting means the overrides get re-staged on the
+# next launch instead. Just record it and clear it.
+PM_REBOOT_FLAG="/mnt/SDCARD/Persistent/portmaster/PortMaster/.pugwash-reboot"
+if [ -f "$PM_REBOOT_FLAG" ]; then
+    log_message "PortMaster updated itself and asked to restart; exiting so the next launch re-applies spruce's config"
+    rm -f "$PM_REBOOT_FLAG"
+fi
 
 # Fix images to be spruce compatible
 /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
