@@ -405,16 +405,30 @@ jobs:
 
           # Function to update OTA file
           update_ota_file() {
-            local file="$1"
-            local content
-            content=$(cat "$file")
+              local file="$1"
+              local content
+              content=$(cat "$file")
 
-            echo "$content" | grep -v "^NIGHTLY_" > "$file"
-            echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
-            echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
-            echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
-            echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
-            echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+              # Remove existing nightly variables
+              echo "$content" | grep -v "^NIGHTLY_" > "$file"
+
+              # Full nightly release
+              echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+              echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
+              echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
+              echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+              echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+
+              # Stable -> nightly OTA diff
+              DIFF_ARCHIVE="spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+              DIFF_CHECKSUM=$(md5sum "$DIFF_ARCHIVE" | cut -d' ' -f1)
+              DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_ARCHIVE" | awk '{print $5}')
+
+              echo "NIGHTLY_DIFF_BASE_VERSION=${{ steps.previous_stable.outputs.tag }}" >> "$file"
+              echo "NIGHTLY_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+              echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
+              echo "NIGHTLY_DIFF_SIZE_IN_MB=$DIFF_SIZE_MB" >> "$file"
+              echo "NIGHTLY_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/${DIFF_ARCHIVE}" >> "$file"
           }
 
           # Update both OTA files
