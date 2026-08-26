@@ -12,7 +12,10 @@ The downloader creates:
     /mnt/SDCARD/App/-OTA/tmp/ota_queue
 
 Each queue line has:
-    VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE
+    VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE|FROM
+
+FROM is the version the archive must be applied on top of (older queues
+without it are still accepted, but their chain cannot be validated).
 
 TYPE is:
     FULL
@@ -27,6 +30,7 @@ are available.
 """
 
 import glob
+import hashlib
 import json
 import logging
 import os
@@ -284,11 +288,29 @@ def set_led_trigger(trigger):
             pass
 
 
+def version_base(version):
+    """
+    "v4.4.1-20260826" -> "4.4.1"
+
+    Nightly versions carry a "-<date>" suffix, but the installed
+    spruce/spruce file only ever holds the base version.
+    """
+    if not version:
+        return ""
+
+    version = version.strip()
+
+    if version.startswith("v"):
+        version = version[1:]
+
+    return version.split("-", 1)[0]
+
+
 def parse_version(version):
     try:
         return tuple(
             int(x)
-            for x in version.split(".")
+            for x in version_base(version).split(".")
         )
     except (ValueError, AttributeError):
         return (0,)
@@ -540,7 +562,9 @@ def load_queue():
 
                 parts = line.split("|")
 
-                if len(parts) != 6:
+                # VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE[|FROM]
+                # FROM is the version this archive must be applied on.
+                if len(parts) not in (6, 7):
 
                     raise ValueError(
                         f"Invalid queue entry on line "
@@ -554,7 +578,19 @@ def load_queue():
                     size,
                     info,
                     update_type
-                ) = parts
+                ) = parts[:6]
+
+                from_version = parts[6] if len(parts) == 7 else ""
+
+                if not re.fullmatch(
+                    r"[0-9a-fA-F]{32}",
+                    checksum
+                ):
+
+                    raise ValueError(
+                        f"Invalid checksum on line "
+                        f"{line_number}"
+                    )
 
                 if update_type not in (
                     "FULL",
@@ -584,6 +620,7 @@ def load_queue():
                     "size": size,
                     "info": info,
                     "type": update_type,
+                    "from": from_version,
                     "filename": filename,
                     "path": f"{SD_ROOT}/{filename}"
                 })
@@ -600,6 +637,131 @@ def load_queue():
         return None
 
     return updates
+
+
+# ---------------------------------------------------------------------------
+# Checksum / chain validation
+# ---------------------------------------------------------------------------
+
+def file_md5(path):
+
+    digest = hashlib.md5()
+
+    with open(path, "rb") as f:
+
+        for chunk in iter(
+            lambda: f.read(1024 * 1024),
+            b""
+        ):
+            digest.update(chunk)
+
+    return digest.hexdigest()
+
+
+def verify_checksum(archive, expected):
+    """
+    Re-verify the archive before anything destructive happens. The
+    downloader verified it once, but the file may have sat on the card
+    for days ("install later") or been replaced since.
+    """
+
+    try:
+        actual = file_md5(archive)
+
+    except OSError as exc:
+
+        log.error(
+            f"Could not read {archive}: {exc}"
+        )
+
+        return False
+
+    if actual.lower() != expected.lower():
+
+        log.error(
+            f"Checksum mismatch for {archive}: "
+            f"expected {expected}, got {actual}"
+        )
+
+        return False
+
+    return True
+
+
+def validate_incremental_chain(updates, installed_version):
+    """
+    Return an error message if the queued chain cannot be applied
+    on top of the installed version, else None.
+
+    Accepts an installed version that is one of the chain's targets:
+    that is a re-run after an interrupted attempt, and re-applying
+    the whole chain from the start is safe (every diff is a full-file
+    replacement plus explicit deletions).
+    """
+
+    expected = None
+
+    for index, update in enumerate(
+        updates,
+        start=1
+    ):
+
+        base = update["from"]
+
+        if not base:
+
+            log.warning(
+                f"Queue entry {index} has no FROM version; "
+                "chain continuity cannot be verified"
+            )
+
+            expected = update["version"]
+
+            continue
+
+        if (
+            expected is not None
+            and version_base(base) != version_base(expected)
+        ):
+
+            return (
+                f"Update chain is not continuous: "
+                f"entry {index} expects {base} but the "
+                f"previous entry installs {expected}."
+            )
+
+        expected = update["version"]
+
+    base = updates[0]["from"]
+
+    if not base or not installed_version:
+        return None
+
+    installed_base = version_base(installed_version)
+
+    if installed_base == version_base(base):
+        return None
+
+    targets = {
+        version_base(update["version"])
+        for update in updates
+    }
+
+    if installed_base in targets:
+
+        log.warning(
+            f"Installed version {installed_version} is "
+            "inside the queued chain (previous attempt "
+            "was interrupted); re-applying the whole chain."
+        )
+
+        return None
+
+    return (
+        f"Installed version {installed_version} does not "
+        f"match the update base {base}. "
+        "Run 'Check for Updates' again."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1473,6 +1635,24 @@ def main():
             f"{archive}"
         )
 
+        ui.image_and_text(
+            LOGO,
+            35,
+            25,
+            f"Verifying update {index} of {len(updates)}..."
+        )
+
+        if not verify_checksum(
+            archive,
+            update["checksum"]
+        ):
+
+            fail(
+                f"Update file failed verification:\n"
+                f"{update['filename']}\n"
+                "Run 'Check for Updates' to download it again."
+            )
+
         if update_type == "FULL":
 
             valid = verify_full_archive(
@@ -1553,6 +1733,22 @@ def main():
     is_full = bool(
         full_updates
     )
+
+    if not is_full:
+
+        chain_error = validate_incremental_chain(
+            incremental_updates,
+            read_sysfs(
+                VERSION_FILE,
+                ""
+            )
+        )
+
+        if chain_error:
+
+            fail(
+                chain_error
+            )
 
     # ------------------------------------------------------------------
     # Preserve flags before installation
@@ -1782,13 +1978,14 @@ def main():
 
     if (
         installed_version
-        and parse_version(installed_version)
-        != parse_version(final_version)
+        and version_base(installed_version)
+        != version_base(final_version)
     ):
 
         log.warning(
-            "Version file does not exactly match "
-            "the expected update version."
+            f"Version file ({installed_version}) does not "
+            f"match the expected update version "
+            f"({final_version})."
         )
 
     ui.image_and_text(
