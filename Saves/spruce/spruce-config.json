@@ -537,7 +537,7 @@
             },
             "otaUpdateType": {
                 "display": "OTA: update type",
-                "description": "incremental is faster; full can fix broken installs",
+                "description": "incremental is faster (developer mode only for now); full can fix broken installs",
                 "options": [
                     "Incremental",
                     "Full"
