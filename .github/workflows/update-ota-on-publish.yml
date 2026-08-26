@@ -122,9 +122,31 @@ jobs:
 
             content=$(cat "$file")
 
-            # Remove only the current RELEASE_* metadata.
-            # Existing RELEASE_DIFF_* entries are intentionally preserved.
-            echo "$content" | grep -v "^RELEASE_" > "$file"
+            # Remove only the current full-release metadata.
+            # Preserve all existing RELEASE_DIFF_* entries.
+            #
+            # If this workflow is manually rerun for the same version,
+            # also remove the existing diff metadata for this exact
+            # previous-version -> current-version pair so it can be replaced.
+            echo "$content" | awk \
+              -v prev="$PREVIOUS_VERSION" \
+              -v ver="$VERSION" '
+                /^RELEASE_DIFF_/ {
+                  if ($0 ~ "^RELEASE_DIFF_.*_" prev "_" ver "=") {
+                    next
+                  }
+                  print
+                  next
+                }
+
+                /^RELEASE_/ {
+                  next
+                }
+
+                {
+                  print
+                }
+              ' > "$file"
 
             # Add current full release information
             echo "RELEASE_VERSION=${VERSION}" >> "$file"
