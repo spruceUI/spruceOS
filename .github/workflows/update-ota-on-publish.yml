@@ -41,58 +41,134 @@ jobs:
           fi
           echo "Using version: $VERSION"
 
-      - name: Download release asset
+      - name: Determine previous stable release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "Finding previous stable release..."
+
+          PREVIOUS_VERSION=$(gh release list \
+            --repo spruceUI/spruceOS \
+            --exclude-drafts \
+            --exclude-pre-releases \
+            --limit 20 \
+            --json tagName,isLatest \
+            --jq '[.[] | select(.tagName != ("v" + env.VERSION))][0].tagName' | sed 's/^v//')
+
+          if [ -z "$PREVIOUS_VERSION" ]; then
+            echo "No previous stable release found."
+            echo "HAS_PREVIOUS_RELEASE=false" >> $GITHUB_ENV
+          else
+            echo "Previous stable release: $PREVIOUS_VERSION"
+            echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+            echo "HAS_PREVIOUS_RELEASE=true" >> $GITHUB_ENV
+          fi
+
+      - name: Download release assets
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           echo "Downloading release v${VERSION}"
-          gh release download "v${VERSION}" -p "*.7z"
+
+          gh release download "v${VERSION}" \
+            --repo spruceUI/spruceOS \
+            -p "spruceV${VERSION}.7z"
+
+          if [ "$HAS_PREVIOUS_RELEASE" = "true" ]; then
+            DIFF_ASSET="spruceV${VERSION}-diff.7z"
+
+            if gh release download "v${VERSION}" \
+                --repo spruceUI/spruceOS \
+                -p "$DIFF_ASSET"; then
+              echo "Diff asset downloaded: $DIFF_ASSET"
+              echo "HAS_DIFF=true" >> $GITHUB_ENV
+            else
+              echo "No diff asset found for this release."
+              echo "HAS_DIFF=false" >> $GITHUB_ENV
+            fi
+          else
+            echo "No previous stable release; skipping diff asset."
+            echo "HAS_DIFF=false" >> $GITHUB_ENV
+          fi
 
       - name: Update OTA files
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           VERSION: ${{ env.VERSION }}
+          PREVIOUS_VERSION: ${{ env.PREVIOUS_VERSION }}
         run: |
           # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git mirror_repo
-          
-          # Calculate file info
+
+          # Calculate full release file info
           CHECKSUM=$(md5sum "spruceV${VERSION}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${VERSION}.7z" | awk '{print $5}')
-          
+
+          # Calculate diff file info if available
+          if [ "$HAS_DIFF" = "true" ]; then
+            DIFF_FILE="spruceV${VERSION}-diff.7z"
+            DIFF_CHECKSUM=$(md5sum "$DIFF_FILE" | cut -d' ' -f1)
+            DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_FILE" | awk '{print $5}')
+
+            echo "Diff checksum: $DIFF_CHECKSUM"
+            echo "Diff size: ${DIFF_SIZE_MB} MB"
+          fi
+
           # Function to update OTA file
           update_ota_file() {
             local file="$1"
             local content
+
             content=$(cat "$file")
-            
+
+            # Remove only the current RELEASE_* metadata.
+            # Existing RELEASE_DIFF_* entries are intentionally preserved.
             echo "$content" | grep -v "^RELEASE_" > "$file"
+
+            # Add current full release information
             echo "RELEASE_VERSION=${VERSION}" >> "$file"
             echo "RELEASE_CHECKSUM=$CHECKSUM" >> "$file"
             echo "RELEASE_SIZE_IN_MB=$SIZE_MB" >> "$file"
             echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${VERSION}/spruceV${VERSION}.7z" >> "$file"
             echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${VERSION}" >> "$file"
+
+            # Add the new diff metadata, if a diff was produced
+            if [ "$HAS_DIFF" = "true" ]; then
+              echo "RELEASE_DIFF_LINK_${PREVIOUS_VERSION}_${VERSION}=https://github.com/spruceUI/spruceOS/releases/download/v${VERSION}/${DIFF_FILE}" >> "$file"
+              echo "RELEASE_DIFF_CHECKSUM_${PREVIOUS_VERSION}_${VERSION}=$DIFF_CHECKSUM" >> "$file"
+              echo "RELEASE_DIFF_SIZE_IN_MB_${PREVIOUS_VERSION}_${VERSION}=$DIFF_SIZE_MB" >> "$file"
+            fi
           }
-          
+
           # Update main OTA file
           update_ota_file "ota_repo/OTA/spruce"
-          
+
           # Update mirror OTA file
           update_ota_file "mirror_repo/OTA/spruce"
-          
+
           # Push changes to main repo
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update release to ${VERSION}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
-          
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in primary OTA repository."
+          else
+            git commit -m "Update release to ${VERSION}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          fi
+
           # Push changes to mirror repo
           cd ../mirror_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update release to ${VERSION}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in mirror OTA repository."
+          else
+            git commit -m "Update release to ${VERSION}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+          fi
