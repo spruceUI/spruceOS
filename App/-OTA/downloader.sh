@@ -102,6 +102,38 @@ version_num() {
     echo $((major * 1000000 + minor * 1000 + patch))
 }
 
+# Queue the traditional complete archive for the current channel.
+queue_full_update() {
+    if [ "$TARGET_CHANNEL" = "nightly" ]; then
+        if [ -z "$NIGHTLY_VERSION" ] || [ -z "$NIGHTLY_CHECKSUM" ] || [ -z "$NIGHTLY_LINK" ] || [ -z "$NIGHTLY_SIZE" ]; then
+            log_message "OTA: Invalid nightly release info (version=$NIGHTLY_VERSION checksum=$NIGHTLY_CHECKSUM link=$NIGHTLY_LINK size=$NIGHTLY_SIZE)"
+            display_image_and_text "$BAD_IMG" 35 20 "Update check failed: Invalid nightly release info." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
+        log_message "OTA: Queued full nightly update: $NIGHTLY_VERSION"
+    else
+        if [ -z "$RELEASE_VERSION" ] || [ -z "$RELEASE_CHECKSUM" ] || [ -z "$RELEASE_LINK" ] || [ -z "$RELEASE_SIZE" ]; then
+            log_message "OTA: Invalid release info (version=$RELEASE_VERSION checksum=$RELEASE_CHECKSUM link=$RELEASE_LINK size=$RELEASE_SIZE)"
+            display_image_and_text "$BAD_IMG" 35 20 "Update check failed: Invalid release info." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+        echo "${RELEASE_VERSION}|${RELEASE_CHECKSUM}|${RELEASE_LINK}|${RELEASE_SIZE}|${RELEASE_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
+        log_message "OTA: Queued full stable update: $RELEASE_VERSION"
+    fi
+}
+
+up_to_date_exit() {
+    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: $CURRENT_VERSION" 75
+    sleep 5
+    rm -rf "$TMP_DIR"
+    exit 0
+}
+
 ##### MAIN EXECUTION #####
 
 start_pyui_message_writer
@@ -147,28 +179,34 @@ if ! download_release_info "$OTA_URL" "$TMP_DIR/spruce" "$TMP_DIR"; then
     fi
 fi
 
-# Extract stable release info
-RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-RELEASE_CHECKSUM=$(sed -n 's/RELEASE_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-RELEASE_LINK=$(sed -n 's/RELEASE_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-RELEASE_SIZE=$(sed -n 's/RELEASE_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-RELEASE_INFO=$(sed -n 's/RELEASE_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+# Extract stable release info (keys are anchored so RELEASE_DIFF_* lines can never match)
+RELEASE_VERSION=$(sed -n 's/^RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+RELEASE_CHECKSUM=$(sed -n 's/^RELEASE_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+RELEASE_LINK=$(sed -n 's/^RELEASE_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+RELEASE_SIZE=$(sed -n 's/^RELEASE_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+RELEASE_INFO=$(sed -n 's/^RELEASE_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
 # Extract nightly info
-NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-NIGHTLY_CHECKSUM=$(sed -n 's/NIGHTLY_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-NIGHTLY_LINK=$(sed -n 's/NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-NIGHTLY_SIZE=$(sed -n 's/NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-NIGHTLY_INFO=$(sed -n 's/NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_VERSION=$(sed -n 's/^NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_CHECKSUM=$(sed -n 's/^NIGHTLY_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_LINK=$(sed -n 's/^NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_SIZE=$(sed -n 's/^NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_INFO=$(sed -n 's/^NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
 # Determine OTA update type
 OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateType.selected' "Full")"
+
+# "OTA: skip version check" allows re-installing the same (or an older)
+# version, e.g. to repair an installation. Developer/tester devices always
+# skip it: a nightly cannot be compared against the version file.
+SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
 # Determine desired release channel
 TARGET_CHANNEL="stable"
 
 if flag_check "developer_mode" || flag_check "tester_mode"; then
     TARGET_CHANNEL="nightly"
+    SKIP_VERSION_CHECK="True"
 fi
 
 log_message "OTA: Current version: $CURRENT_VERSION"
@@ -176,6 +214,16 @@ log_message "OTA: Update type: $OTA_UPDATE_TYPE"
 log_message "OTA: Target channel: $TARGET_CHANNEL"
 log_message "OTA: Latest stable version: $RELEASE_VERSION"
 log_message "OTA: Latest nightly version: $NIGHTLY_VERSION"
+
+if [ -z "$RELEASE_VERSION" ]; then
+    display_image_and_text "$BAD_IMG" 35 20 "Update check failed: Invalid release info." 75
+    sleep 5
+    rm -rf "$TMP_DIR"
+    exit 1
+fi
+
+CURRENT_NUM="$(version_num "$CURRENT_VERSION")" || CURRENT_NUM=""
+RELEASE_NUM="$(version_num "$RELEASE_VERSION")" || RELEASE_NUM=""
 
 ##### BUILD UPDATE QUEUE #####
 
@@ -195,6 +243,23 @@ rm -f "$TMP_DIR/ota_queue"
 # updater.py consumes this queue in order.
 
 if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
+
+    if [ -n "$CURRENT_NUM" ] && [ -n "$RELEASE_NUM" ] && [ "$CURRENT_NUM" -gt "$RELEASE_NUM" ]; then
+        # The installed version is newer than the latest stable release. This
+        # is normally a device running a nightly (spruce/spruce holds the base
+        # version of the Development branch). No stable diff can start here,
+        # and a stable -> nightly diff cannot be applied on top of a nightly.
+        if [ "$TARGET_CHANNEL" = "nightly" ]; then
+            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION; incremental updates cannot start from a nightly build"
+            display_image_and_text "$IMAGE_PATH" 35 25 "Incremental updates cannot be applied on top of a nightly build (installed $CURRENT_VERSION, latest stable $RELEASE_VERSION). Please use Full update mode." 75
+            sleep 5
+            rm -rf "$TMP_DIR"
+            exit 1
+        fi
+
+        log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION"
+        up_to_date_exit
+    fi
 
     # First bring the device up through the stable release chain.
     QUEUE_VERSION="$CURRENT_VERSION"
@@ -292,20 +357,22 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
 
 else
     # Full update mode.
-    if [ "$TARGET_CHANNEL" = "nightly" ]; then
-        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
-    else
-        echo "${RELEASE_VERSION}|${RELEASE_CHECKSUM}|${RELEASE_LINK}|${RELEASE_SIZE}|${RELEASE_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
+    if [ "$SKIP_VERSION_CHECK" != "True" ] && [ "$TARGET_CHANNEL" = "stable" ]; then
+        # Never re-download or downgrade when the installed stable release is
+        # already current ("OTA: skip version check" allows a reinstall).
+        if [ -n "$CURRENT_NUM" ] && [ -n "$RELEASE_NUM" ] && [ "$RELEASE_NUM" -le "$CURRENT_NUM" ]; then
+            log_message "OTA: Latest stable $RELEASE_VERSION is not newer than installed $CURRENT_VERSION"
+            up_to_date_exit
+        fi
     fi
+
+    queue_full_update
 fi
 
 ##### VERIFY UPDATE QUEUE #####
 
 if [ ! -s "$TMP_DIR/ota_queue" ]; then
-    display_image_and_text "$IMAGE_PATH" 35 25 "System is already up to date." 75
-    sleep 5
-    rm -rf "$TMP_DIR"
-    exit 0
+    up_to_date_exit
 fi
 
 QUEUE_COUNT=$(wc -l < "$TMP_DIR/ota_queue" | tr -d ' ')
