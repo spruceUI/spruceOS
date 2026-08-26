@@ -534,6 +534,15 @@
                     "False"
                 ],
                 "selected":"False"
+            },
+            "otaUpdateType": {
+                "display": "OTA: update type",
+                "description": "incremental is faster; full can fix broken installs",
+                "options": [
+                    "Incremental",
+                    "Full"
+                ],
+                "selected": "Incremental"
             }
         },
         "Proxy Settings": {
