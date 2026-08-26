@@ -542,7 +542,7 @@
                     "Incremental",
                     "Full"
                 ],
-                "selected": "Incremental"
+                "selected": "Full"
             }
         },
         "Proxy Settings": {
