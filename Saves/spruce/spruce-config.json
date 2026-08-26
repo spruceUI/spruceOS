@@ -387,7 +387,7 @@
                 "options": [
                     "Select",
                     "Start",
-                    "Menu",
+                    { "label": "Menu", "devices": ["MIYOO_A30", "MIYOO_FLIP"] },
                     "Custom"
                 ],
                 "selected": "Select"

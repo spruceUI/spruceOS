@@ -109,6 +109,39 @@ class SettingsMenu(ABC):
         return description
 
 
+    @staticmethod
+    def resolve_options_for_device(option):
+        """The selectable values of a config entry, minus any this device cannot do.
+
+        An entry in "options" is normally a plain string and every device sees
+        it. It may instead be an object - {"label": ..., "devices": [...]} - and
+        then it only appears on the devices named, matched the same way a
+        setting's own "devices" list is, so a hardware-line family token works
+        here too.
+
+        This exists because "devices" on the setting itself is all-or-nothing:
+        it decides whether the row appears at all. Without per-option filtering
+        a setting shared across a line has to offer every device's actions to
+        all of them - which is how the Anbernic XX RetroArch hotkey setting ends
+        up offering "Menu", a button no XX model has.
+
+        Returns plain strings, so everything downstream - the index lookup, the
+        left/right cycling, the picker, and the value written to "selected" -
+        is unchanged.
+        """
+        resolved = []
+        for entry in option.get('options', []) or []:
+            if isinstance(entry, dict):
+                label = entry.get('label')
+                if label is None:
+                    continue
+                if not Device.supports_device(entry.get('devices')):
+                    continue
+                resolved.append(label)
+            else:
+                resolved.append(entry)
+        return resolved
+
     def build_options_list_from_config_menu_options(self, category):
         option_list = []
         menu_options = CfwSystemConfig.get_menu_options(category=category)
@@ -154,7 +187,7 @@ class SettingsMenu(ABC):
                                         input_value, 
                                         entry_name=name, 
                                         category=category,
-                                        all_options=option.get('options', []),
+                                        all_options=self.resolve_options_for_device(option),
                                         current_value=selected_value,update_value=CfwSystemConfig.set_menu_option
                                         : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, all_options, current_value, update_value)
                             )

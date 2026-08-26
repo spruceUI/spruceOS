@@ -25,7 +25,17 @@ def merge_selected(old, new, path=""):
 
             # Normal option-based settings
             if isinstance(options, list):
-                if old_val in options:
+                # An option may be a plain string or {"label": ..., "devices": [...]}.
+                # Compare against the labels, and deliberately ignore "devices"
+                # here: this runs during a restore to decide whether a saved value
+                # is still a legal one, not whether this device can select it. A
+                # card moved between devices, or a restore run before the device is
+                # known, must not silently discard the user's choice.
+                valid_values = [
+                    o.get("label") if isinstance(o, dict) else o
+                    for o in options
+                ]
+                if old_val in valid_values:
                     print(f"Copying '{current_path}': {new_val} -> {old_val}")
                     new[key] = old_val
                 else:
