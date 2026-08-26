@@ -66,6 +66,13 @@ jobs:
 
           echo "Previous stable release: ${TAG_NAME}"
 
+          if [ "$TAG_NAME" = "v${{ steps.get_version.outputs.version }}" ]; then
+            echo "Error: v${{ steps.get_version.outputs.version }} is already the latest published stable release."
+            echo "Re-running this workflow after publishing would diff the release against itself"
+            echo "and reset the release to a draft. Bump spruce/spruce or delete the release first."
+            exit 1
+          fi
+
           # Resolve the tag to the actual commit.
           BASE_SHA="$(git rev-list -n 1 "$TAG_NAME")"
 
