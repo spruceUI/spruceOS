@@ -18,7 +18,20 @@ hex="$(led_color_hex)"
 # Note: rgb_led_trimui "off" sets effect=0 (disable), which only FREEZES the
 # animation engine -- the LEDs keep their last lit colour rather than going dark.
 # To actually extinguish them we drive a static effect with colour 000000.
+# The black write below only holds until something else writes a colour, and
+# plenty does: principal.sh runs set_rgb_in_menu on every return to the menu, and
+# led_effect re-colours on every game launch. So record the state in a flag that
+# rgb_led_trimui honours, and the LEDs stay off until this action turns them back
+# on. Order matters both ways - write while the flag is clear, or rgb_led_trimui
+# early-outs on our own call.
 case "$1" in
-    1)  rgb_led_trimui lrm12 static "000000" ;;  # switch on  -> LEDs off (black)
-    0)  rgb_led_trimui lrm12 static "$hex" ;;    # switch off -> LEDs on (colour)
+    1)  # switch on -> LEDs off (black)
+        flag_remove "leds_forced_off"
+        rgb_led_trimui lrm12 static "000000"
+        flag_add "leds_forced_off" --tmp
+        ;;
+    0)  # switch off -> LEDs on (configured colour)
+        flag_remove "leds_forced_off"
+        rgb_led_trimui lrm12 static "$hex"
+        ;;
 esac
