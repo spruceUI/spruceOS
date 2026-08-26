@@ -57,6 +57,14 @@ QUEUE_FILE = f"{OTA_TMP_DIR}/ota_queue"
 PERFORM_DELETION = True
 DELETE_UPDATE = True
 
+# 7zr returns 1 for warnings and 2 when at least one item failed
+# (e.g. a path that exists as a directory on the card). The traditional
+# updater logged this and carried on, relying on the post-extraction
+# directory check; a FULL update has already wiped the card at that point,
+# so aborting would leave nothing usable and a retry hits the same error.
+# Incremental chains are always strict: they can be retried from the queue.
+FULL_EXTRACTION_STRICT = False
+
 
 # Read platform vars from environment (set by helperFunctions.sh)
 PLATFORM = os.environ.get("PLATFORM", "MiyooMini")
@@ -1877,14 +1885,33 @@ def main():
 
         if result != 0:
 
-            fail(
-                "Full update extraction failed. "
-                "Check updater.log for details."
+            if FULL_EXTRACTION_STRICT:
+
+                fail(
+                    "Full update extraction failed. "
+                    "Check updater.log for details."
+                )
+
+            log.warning(
+                "Full update extraction completed with "
+                f"warnings (7zr exit code {result})"
             )
 
-        log.info(
-            "Full update extracted successfully"
-        )
+            ui.image_and_text(
+                LOGO,
+                35,
+                25,
+                "Update completed with warnings. "
+                "Check the update log for details."
+            )
+
+            time.sleep(5)
+
+        else:
+
+            log.info(
+                "Full update extracted successfully"
+            )
 
         final_version = update["version"]
 
