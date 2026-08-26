@@ -399,9 +399,19 @@ jobs:
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git source_repo
 
-          # Calculate file info
+          # Calculate full nightly release info
           CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
+
+          # Calculate stable -> nightly OTA diff info
+          DIFF_ARCHIVE="spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+          DIFF_CHECKSUM=$(md5sum "$DIFF_ARCHIVE" | cut -d' ' -f1)
+          DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_ARCHIVE" | awk '{print $5}')
+
+          echo "Nightly checksum: $CHECKSUM"
+          echo "Nightly size: ${SIZE_MB} MB"
+          echo "Stable -> nightly diff checksum: $DIFF_CHECKSUM"
+          echo "Stable -> nightly diff size: ${DIFF_SIZE_MB} MB"
 
           # Function to update OTA file
           update_ota_file() {
@@ -409,7 +419,9 @@ jobs:
               local content
               content=$(cat "$file")
 
-              # Remove existing nightly variables
+              # Remove existing nightly variables.
+              # Only one stable -> nightly diff is needed because every
+              # nightly is generated from the current stable release.
               echo "$content" | grep -v "^NIGHTLY_" > "$file"
 
               # Full nightly release
@@ -420,10 +432,6 @@ jobs:
               echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
 
               # Stable -> nightly OTA diff
-              DIFF_ARCHIVE="spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
-              DIFF_CHECKSUM=$(md5sum "$DIFF_ARCHIVE" | cut -d' ' -f1)
-              DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_ARCHIVE" | awk '{print $5}')
-
               echo "NIGHTLY_DIFF_BASE_VERSION=${{ steps.previous_stable.outputs.tag }}" >> "$file"
               echo "NIGHTLY_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
               echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
@@ -440,27 +448,36 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in primary OTA repository."
+          else
+            git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          fi
 
           # Update backup OTA repo
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in backup OTA repository."
+          else
+            git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+          fi
 
       - name: Delete old releases
         if: success() && steps.check_commits.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases and filter out beta releases
+          # Keep only the three most recent nightly releases.
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
-            jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
+            jq -r '.[] | .id')
 
-          # Convert to array and keep only releases after the first 3
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
@@ -469,4 +486,3 @@ jobs:
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done
-          
