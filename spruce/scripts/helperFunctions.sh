@@ -822,8 +822,10 @@ display_text_with_percentage_bar(){
 # BaseOS it will not load, for want of libpcre.so.1 and then libuuid.so.1.
 #
 # curl is present and working on every platform we ship, so it is the transport
-# here, with busybox-safe wget kept as a fallback. -k preserves the
-# --no-check-certificate behaviour these downloads have always had.
+# here, with busybox-safe wget kept as a fallback. Certificates are verified
+# against the bundled CA file (SSL_CERT_FILE) first; only a TLS failure retries
+# with -k, which preserves the --no-check-certificate behaviour these downloads
+# have always had on firmware whose TLS stack cannot use the bundle.
 download_url_to_file() {
     # $1 = remote url, $2 = destination path
     if command -v curl >/dev/null 2>&1; then
@@ -831,8 +833,15 @@ download_url_to_file() {
         # what wget did and what every caller here assumes. curl's own message
         # goes to the log rather than to stderr, where it would paint over the
         # UI the calling app is drawing.
-        curl_error="$(curl -sSLk -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
+        curl_error="$(curl -sSL -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
         curl_result=$?
+        case "$curl_result" in
+            35|51|58|59|60|77)
+                log_message "download_url_to_file: TLS verification failed for $1 (curl $curl_result: $curl_error); retrying without certificate verification"
+                curl_error="$(curl -sSLk -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
+                curl_result=$?
+                ;;
+        esac
         [ "$curl_result" -ne 0 ] && log_message "download_url_to_file: curl failed for $1 - $curl_error"
         return "$curl_result"
     else

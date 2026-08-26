@@ -27,11 +27,28 @@ download_release_info() {
     local output_file="$2"
     local tmp_dir="$3"
     
-    # Try to download the file
-    if ! curl -k -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"; then
-        error_msg=$(cat "$tmp_dir/curl_error")
-        log_message "OTA: Failed to download from $url - Error: $error_msg"
-        return 1
+    # Try to download the file with certificate verification first
+    # (SSL_CERT_FILE points at the bundled CA file). Only a TLS failure
+    # falls back to -k, so a working TLS stack is never silently downgraded.
+    curl -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"
+    curl_result=$?
+
+    if [ "$curl_result" -ne 0 ]; then
+        case "$curl_result" in
+            35|51|58|59|60|77)
+                log_message "OTA: TLS verification failed for $url (curl $curl_result: $(cat "$tmp_dir/curl_error")); retrying without certificate verification"
+                if ! curl -k -S -s -f -o "$output_file" "$url" 2>"$tmp_dir/curl_error"; then
+                    error_msg=$(cat "$tmp_dir/curl_error")
+                    log_message "OTA: Failed to download from $url - Error: $error_msg"
+                    return 1
+                fi
+                ;;
+            *)
+                error_msg=$(cat "$tmp_dir/curl_error")
+                log_message "OTA: Failed to download from $url - Error: $error_msg"
+                return 1
+                ;;
+        esac
     fi
     
     # Verify we got valid content
