@@ -131,13 +131,6 @@ NIGHTLY_LINK=$(sed -n 's/NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_SIZE=$(sed -n 's/NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_INFO=$(sed -n 's/NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
-# Extract beta info
-BETA_VERSION=$(sed -n 's/BETA_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-BETA_CHECKSUM=$(sed -n 's/BETA_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-BETA_LINK=$(sed -n 's/BETA_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-BETA_SIZE=$(sed -n 's/BETA_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-BETA_INFO=$(sed -n 's/BETA_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-
 # Set default target to release
 TARGET_VERSION="$RELEASE_VERSION"
 TARGET_CHECKSUM="$RELEASE_CHECKSUM"
@@ -147,47 +140,22 @@ TARGET_INFO="$RELEASE_INFO"
 
 # Handle version selection based on flags
 if flag_check "developer_mode"; then
-    # Developer mode: offer nightly -> beta -> release
+    # Developer mode: offer nightly -> release
     display_image_and_text "$IMAGE_PATH" 35 25 "Developer mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
     if confirm 30 0; then
         set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
-    elif [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 35 25 "Would you like to use the current beta version instead? Press A to update to $BETA_VERSION." 75
-        if confirm 30 1; then
-            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
-        fi
-    fi
-elif flag_check "beta"; then
-    # Beta mode: offer beta (if exists) -> release
-    if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 35 25 "Beta mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
-        if confirm 30 0; then
-            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
-        fi
     fi
 elif flag_check "tester_mode"; then
-    # Tester mode: offer beta (if exists) -> nightly -> release
-    if [ -n "$BETA_VERSION" ]; then
-        display_image_and_text "$IMAGE_PATH" 35 25 "Tester mode detected. Would you like to use the beta build? Press A to update to $BETA_VERSION." 75
-        if confirm 30 0; then
-            set_target "$BETA_VERSION" "$BETA_CHECKSUM" "$BETA_LINK" "$BETA_SIZE" "$BETA_INFO"
-        else
-            display_image_and_text "$IMAGE_PATH" 35 25 "Would you like to use the nightly release instead? Press A to update to nightly build $NIGHTLY_VERSION." 75
-            if confirm 30 0; then
-                set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
-            fi
-        fi
-    else
-        display_image_and_text "$IMAGE_PATH" 35 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
-        if confirm; then
-            set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
-        fi
+    # Tester mode: offer nightly -> release
+    display_image_and_text "$IMAGE_PATH" 35 25 "Tester mode detected. Press A to update to nightly build $NIGHTLY_VERSION." 75
+    if confirm 30 0; then
+        set_target "$NIGHTLY_VERSION" "$NIGHTLY_CHECKSUM" "$NIGHTLY_LINK" "$NIGHTLY_SIZE" "$NIGHTLY_INFO"
     fi
 fi
 
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 # Set SKIP_VERSION_CHECK to True if developer mode or tester mode is enabled
-if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
+if flag_check "developer_mode" || flag_check "tester_mode"; then
     SKIP_VERSION_CHECK="True"
 fi
 
@@ -255,7 +223,7 @@ if [ -f "/mnt/SDCARD/$FILENAME" ]; then
             rm -rf "$TMP_DIR"
             goto_install=true
         else
-            rm -rf "/mnt/SDCARD/$FILENAME"
+            rm -f "/mnt/SDCARD/$FILENAME"
         fi
     else
         display_image_and_text "$IMAGE_PATH" 35 25 "Existing update file isn't valid. Will download fresh copy." 75
