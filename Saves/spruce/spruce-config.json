@@ -461,7 +461,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh samba"
             },
             "enableSSH": {
                 "display": "Enable SSH",
@@ -470,7 +471,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh ssh"
             },
             "enableSyncthing": {
                 "display": "Enable Syncthing",
@@ -479,7 +481,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh syncthing"
             },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
@@ -488,7 +491,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
