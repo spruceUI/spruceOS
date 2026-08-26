@@ -376,8 +376,37 @@ if [ ! -s "$TMP_DIR/ota_queue" ]; then
 fi
 
 QUEUE_COUNT=$(wc -l < "$TMP_DIR/ota_queue" | tr -d ' ')
+FINAL_VERSION=$(tail -n 1 "$TMP_DIR/ota_queue" | cut -d'|' -f1)
+FINAL_INFO=$(tail -n 1 "$TMP_DIR/ota_queue" | cut -d'|' -f5)
+TOTAL_SIZE=0
 
-log_message "OTA: Update queue contains $QUEUE_COUNT archive(s)"
+while IFS='|' read -r _ _ _ QUEUE_SIZE _ _ _; do
+    case "$QUEUE_SIZE" in
+        ''|*[!0-9]*) ;;
+        *) TOTAL_SIZE=$((TOTAL_SIZE + QUEUE_SIZE)) ;;
+    esac
+done < "$TMP_DIR/ota_queue"
+
+log_message "OTA: Update queue contains $QUEUE_COUNT archive(s), ${TOTAL_SIZE} MB, final version $FINAL_VERSION"
+
+##### CONFIRM BEFORE DOWNLOADING #####
+
+if [ -z "$FINAL_INFO" ]; then
+    FINAL_INFO="https://github.com/spruceUI/spruceOS/releases/latest"
+fi
+
+update_qr_code="$(qr_code -t "$FINAL_INFO")"
+display_image_and_text "$update_qr_code" 50 5 "Scan QR code for release notes. New version available: $FINAL_VERSION ($QUEUE_COUNT package(s), about ${TOTAL_SIZE} MB). Press A to download and install, or B to cancel." 75
+
+if confirm 300; then
+    log_message "OTA: User confirmed download"
+else
+    log_message "OTA: User did not confirm download"
+    display_image_and_text "$BAD_IMG" 35 20 "Update cancelled." 75
+    sleep 3
+    rm -rf "$TMP_DIR"
+    exit 0
+fi
 
 ##### DOWNLOAD ALL REQUIRED ARCHIVES #####
 
