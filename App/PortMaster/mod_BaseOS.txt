@@ -29,6 +29,47 @@ pm_message() {
 GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
 GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH $controlfolder/gptokeyb $ESUDOKILL"
 
+# Pick the SDL2 this port needs, before it sources any runtime.
+#
+# There are two kinds of port on this line and they want opposite things:
+#
+#   gptokeyb given a -c mapping file - the port is KEYBOARD driven. gptokeyb
+#   turns the pad into keystrokes on a uinput device and the game reads that.
+#   dll-mali does not deliver them: a port under it had SDL_EVDEV_DEVICES set
+#   correctly at the node and still only ever opened the pad. The vendor build
+#   does, through libudev, whose enumeration reads sysfs and so works with no
+#   udevd running.
+#
+#   gptokeyb given no -c - it is only there for the quit hotkey, and the game
+#   reads the PAD itself through SDL_GameController. That needs dll-mali: the
+#   map in AnbernicXXCommon.cfg was measured against its enumeration, and the
+#   vendor build numbers the same buttons differently, so the game opens the
+#   pad and no button does what it should.
+#
+# Checked against every port tested on hardware: 100 Lil Jumps and Banana Duck
+# pass -c and want the vendor build; Apoc Runner and Apotris do not and want
+# dll-mali. Getting this backwards is silent - the game runs perfectly and
+# ignores the controls - so it is worth re-reading the port rather than
+# assuming.
+#
+# $0 is the port script itself, because this file is sourced by it. This runs
+# before the port sources its runtime, which matters: love.txt bakes the
+# current LD_LIBRARY_PATH into LOVE_RUN, so changing it any later is too late.
+#
+# gptokeyb keeps dll-mali either way - the definitions above put it first on
+# that command's own path - because gptokeyb has to SEE the pad, and only
+# dll-mali classifies it.
+# A WELL-FORMED -c only, space and all. Banana Duck ships
+# `$GPTOKEYB "$LOVE_GPTK"-c "./bananaduck.gptk"` with the space missing, so
+# gptokeyb takes "love.aarch64-c" as the program name and never loads the gptk
+# - it injects nothing. Matching that loosely would hand the port the vendor
+# build and leave it with neither working keys nor a correctly enumerated pad.
+# Falling through to dll-mali at least gives the game the pad. The typo is
+# upstream's and worth reporting; its controls are likely broken everywhere.
+if grep -qE '\$GPTOKEYB2?[^&|;]*[[:space:]]-c[[:space:]]' "$0" 2>/dev/null; then
+    export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH"
+fi
+
 # Ports call this between backgrounding gptokeyb and starting the game.
 #
 # gptokeyb injects keystrokes through a uinput keyboard that appears seconds
