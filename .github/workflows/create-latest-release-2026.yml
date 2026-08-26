@@ -170,42 +170,52 @@ jobs:
           # Files excluded from the full release archive should also be
           # excluded from the OTA package.
           is_excluded() {
-            local file="$1"
-
-            case "$file" in
-              .git/*|.git)
+            case "$1" in
+              .git/*|.git|.github/*|.github|.gitignore|.gitattributes)
                 return 0
                 ;;
-              .github/*|.github)
-                return 0
-                ;;
-              .gitignore)
-                return 0
-                ;;
-              .gitattributes)
-                return 0
-                ;;
-              create_spruce_release.bat)
-                return 0
-                ;;
-              create_spruce_release.sh)
+              create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
               spruce/flags/developer_mode)
                 return 0
                 ;;
-              App/adbd)
+              App/adbd|App/adbd/*)
                 return 0
                 ;;
-              To-Do.txt)
-                return 0
-                ;;
+
             esac
 
             return 1
           }
 
-          echo "Added / modified files:"
+          # Paths that the release build regenerates after checkout
+          # (see "Recombine split files" and "Archive Licenses folder").
+          # A change to any INPUT must ship the generated OUTPUT: the inputs
+          # no longer exist in the working tree by the time 7z runs, and the
+          # device only ever has the recombined file.
+          translate_path() {
+            case "$1" in
+              spruce/flip/miyoo355_rootfs_32.img_part*)
+                echo "spruce/flip/miyoo355_rootfs_32.img"
+                ;;
+              spruce/flip/muOS-pixie-reduced.sqsh-part*)
+                echo "spruce/flip/muOS-pixie-reduced.sqsh"
+                ;;
+              RetroArch/.retroarch/cores64/scummvm_libretro.so.part*)
+                echo "RetroArch/.retroarch/cores64/scummvm_libretro.so"
+                ;;
+              Licenses/*)
+                echo "Licenses.7z"
+                ;;
+              *)
+                echo "$1"
+                ;;
+            esac
+          }
+
+          RAW_ADD="$(mktemp)"
+          RAW_DEL="$(mktemp)"
 
           # --no-renames intentionally causes a rename to appear as:
           #   D old/path
@@ -219,28 +229,49 @@ jobs:
             "$BASE_SHA" "$HEAD_SHA" |
           while IFS= read -r -d '' STATUS && IFS= read -r -d '' FILE; do
 
+            if is_excluded "$FILE"; then
+              continue
+            fi
+
+            OUT_PATH="$(translate_path "$FILE")"
+
             if [ "$STATUS" = "D" ]; then
-              if is_excluded "$FILE"; then
-                continue
+              if [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
+                # A deleted input of a generated file means the generated
+                # file changed, not that it was removed.
+                printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+              else
+                printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
               fi
-
-              printf '%s\n' "$FILE" >> "$OTA_DELETE"
-
             else
-              if is_excluded "$FILE"; then
-                continue
-              fi
-
-              printf '%s\n' "$FILE" >> "$OTA_MANIFEST"
-              printf '%s\n' "$FILE" >> "$OTA_FILES"
+              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
             fi
 
           done
 
+          sort -u "$RAW_ADD" > "$OTA_FILES"
+          sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
+
+          # Every packaged path must exist as a regular file NOW. A path that
+          # is missing here would silently drop out of the archive.
+          MISSING=0
+          while IFS= read -r OTA_PATH; do
+            [ -z "$OTA_PATH" ] && continue
+            if [ ! -f "$OTA_PATH" ]; then
+              echo "ERROR: manifest path does not exist at packaging time: $OTA_PATH"
+              MISSING=1
+            fi
+          done < "$OTA_FILES"
+
+          if [ "$MISSING" -ne 0 ]; then
+            echo "Refusing to build an OTA archive with missing payload."
+            exit 1
+          fi
+
           echo ""
           echo "Changed files:"
-          if [ -s "$OTA_MANIFEST" ]; then
-            cat "$OTA_MANIFEST"
+          if [ -s "$OTA_FILES" ]; then
+            cat "$OTA_FILES"
           else
             echo "(none)"
           fi
@@ -254,8 +285,6 @@ jobs:
           fi
 
           # Add metadata to the beginning of the manifest.
-          TMP_MANIFEST="$(mktemp)"
-
           {
             echo "# spruceOS OTA manifest"
             echo "# From release: ${{ steps.previous_release.outputs.tag }}"
@@ -264,12 +293,12 @@ jobs:
             echo "# To SHA: $HEAD_SHA"
             echo ""
             echo "# Files to add/update:"
-            cat "$OTA_MANIFEST"
+            cat "$OTA_FILES"
             echo ""
             echo "# Deleted files are listed in .ota_delete"
-          } > "$TMP_MANIFEST"
+          } > "$OTA_MANIFEST"
 
-          mv "$TMP_MANIFEST" "$OTA_MANIFEST"
+          rm -f "$RAW_ADD" "$RAW_DEL"
 
           echo "manifest=${OTA_MANIFEST}" >> "$GITHUB_OUTPUT"
           echo "delete_list=${OTA_DELETE}" >> "$GITHUB_OUTPUT"
