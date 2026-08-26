@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
@@ -21,6 +22,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y p7zip-full
 
+      - name: Record current commit
+        id: current_commit
+        run: |
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Current main commit: ${HEAD_SHA}"
+
       - name: Read version from spruce/spruce
         id: get_version
         run: |
@@ -28,9 +36,48 @@ jobs:
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
+
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Using version: ${VERSION}"
+
+      - name: Find previous stable release
+        id: previous_release
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "Finding most recent published stable release..."
+
+          RELEASE_JSON="$(gh api \
+            "repos/${{ github.repository }}/releases?per_page=100" \
+            --jq '[.[] | select(.draft == false and .prerelease == false)] | .[0]')"
+
+          if [ -z "$RELEASE_JSON" ] || [ "$RELEASE_JSON" = "null" ]; then
+            echo "Error: No previous stable release was found."
+            exit 1
+          fi
+
+          TAG_NAME="$(echo "$RELEASE_JSON" | jq -r '.tag_name')"
+
+          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "null" ]; then
+            echo "Error: Could not determine tag of previous stable release."
+            exit 1
+          fi
+
+          echo "Previous stable release: ${TAG_NAME}"
+
+          # Resolve the tag to the actual commit.
+          BASE_SHA="$(git rev-list -n 1 "$TAG_NAME")"
+
+          if [ -z "$BASE_SHA" ]; then
+            echo "Error: Could not resolve ${TAG_NAME} to a commit."
+            exit 1
+          fi
+
+          echo "Previous stable release commit: ${BASE_SHA}"
+
+          echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Recombine split files
         run: |
@@ -68,6 +115,7 @@ jobs:
           RELEASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
 
           echo "Downloading selected themes from PyUI-Themes release..."
+
           wget -q --no-check-certificate -O "Themes/ALEKFULL_NX_ES.7z" "${RELEASE_URL}/ALEKFULL_NX_ES.7z" || true
           wget -q --no-check-certificate -O "Themes/ART_BOOK_OUTLINE.7z" "${RELEASE_URL}/ART_BOOK_OUTLINE.7z" || true
           wget -q --no-check-certificate -O "Themes/ART_BOOK_NEXT.7z" "${RELEASE_URL}/ART_BOOK_NEXT.7z" || true
@@ -95,11 +143,181 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      - name: Generate OTA diff manifest
+        id: ota_diff
+        run: |
+          BASE_SHA="${{ steps.previous_release.outputs.sha }}"
+          HEAD_SHA="${{ steps.current_commit.outputs.sha }}"
+
+          echo "=========================================="
+          echo "Generating OTA diff"
+          echo "=========================================="
+          echo "Base release: ${{ steps.previous_release.outputs.tag }}"
+          echo "Base SHA:     ${BASE_SHA}"
+          echo "Current SHA:  ${HEAD_SHA}"
+          echo ""
+
+          OTA_MANIFEST=".ota_manifest"
+          OTA_DELETE=".ota_delete"
+          OTA_FILES=".ota_files"
+
+          rm -f "$OTA_MANIFEST" "$OTA_DELETE" "$OTA_FILES"
+
+          touch "$OTA_MANIFEST"
+          touch "$OTA_DELETE"
+          touch "$OTA_FILES"
+
+          # Files excluded from the full release archive should also be
+          # excluded from the OTA package.
+          is_excluded() {
+            local file="$1"
+
+            case "$file" in
+              .git/*|.git)
+                return 0
+                ;;
+              .github/*|.github)
+                return 0
+                ;;
+              .gitignore)
+                return 0
+                ;;
+              .gitattributes)
+                return 0
+                ;;
+              create_spruce_release.bat)
+                return 0
+                ;;
+              create_spruce_release.sh)
+                return 0
+                ;;
+              spruce/flags/developer_mode)
+                return 0
+                ;;
+              App/adbd)
+                return 0
+                ;;
+              To-Do.txt)
+                return 0
+                ;;
+            esac
+
+            return 1
+          }
+
+          echo "Added / modified files:"
+
+          # --no-renames intentionally causes a rename to appear as:
+          #   D old/path
+          #   A new/path
+          #
+          # This is exactly what the OTA updater will eventually need.
+          git diff \
+            --no-renames \
+            --name-status \
+            -z \
+            "$BASE_SHA" "$HEAD_SHA" |
+          while IFS= read -r -d '' STATUS && IFS= read -r -d '' FILE; do
+
+            if [ "$STATUS" = "D" ]; then
+              if is_excluded "$FILE"; then
+                continue
+              fi
+
+              printf '%s\n' "$FILE" >> "$OTA_DELETE"
+
+            else
+              if is_excluded "$FILE"; then
+                continue
+              fi
+
+              printf '%s\n' "$FILE" >> "$OTA_MANIFEST"
+              printf '%s\n' "$FILE" >> "$OTA_FILES"
+            fi
+
+          done
+
+          echo ""
+          echo "Changed files:"
+          if [ -s "$OTA_MANIFEST" ]; then
+            cat "$OTA_MANIFEST"
+          else
+            echo "(none)"
+          fi
+
+          echo ""
+          echo "Deleted files:"
+          if [ -s "$OTA_DELETE" ]; then
+            cat "$OTA_DELETE"
+          else
+            echo "(none)"
+          fi
+
+          # Add metadata to the beginning of the manifest.
+          TMP_MANIFEST="$(mktemp)"
+
+          {
+            echo "# spruceOS OTA manifest"
+            echo "# From release: ${{ steps.previous_release.outputs.tag }}"
+            echo "# From SHA: $BASE_SHA"
+            echo "# To version: ${{ steps.get_version.outputs.version }}"
+            echo "# To SHA: $HEAD_SHA"
+            echo ""
+            echo "# Files to add/update:"
+            cat "$OTA_MANIFEST"
+            echo ""
+            echo "# Deleted files are listed in .ota_delete"
+          } > "$TMP_MANIFEST"
+
+          mv "$TMP_MANIFEST" "$OTA_MANIFEST"
+
+          echo "manifest=${OTA_MANIFEST}" >> "$GITHUB_OUTPUT"
+          echo "delete_list=${OTA_DELETE}" >> "$GITHUB_OUTPUT"
+          echo "file_list=${OTA_FILES}" >> "$GITHUB_OUTPUT"
+
+      - name: Create OTA archive
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          PREVIOUS_VERSION="${{ steps.previous_release.outputs.tag }}"
+
+          OTA_ARCHIVE="spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+
+          echo "Creating OTA archive: ${OTA_ARCHIVE}"
+
+          # Build a temporary 7z list containing:
+          #   - the manifest
+          #   - the delete list
+          #   - every changed/added file
+          OTA_7Z_LIST="$(mktemp)"
+
+          printf '%s\n' ".ota_manifest" >> "$OTA_7Z_LIST"
+          printf '%s\n' ".ota_delete" >> "$OTA_7Z_LIST"
+
+          if [ -s ".ota_files" ]; then
+            cat ".ota_files" >> "$OTA_7Z_LIST"
+          fi
+
+          7z a \
+            -t7z \
+            -m0=lzma2:d=16m \
+            -mx=7 \
+            -ms=off \
+            -mf- \
+            "$OTA_ARCHIVE" \
+            @"$OTA_7Z_LIST"
+
+          rm -f "$OTA_7Z_LIST"
+
+          echo ""
+          echo "OTA archive created:"
+          ls -lh "$OTA_ARCHIVE"
+
+          echo ""
+          echo "Archive contents:"
+          7z l "$OTA_ARCHIVE"
+
       - name: Create 7z archive
         run: |
-          # Dot-directories must be named explicitly - the shell's * does not
-          # match them. .system carries the BaseOS hand-off shim, and without it
-          # a fresh install leaves an Anbernic XX on "ADD FRONTEND TO SD CARD".
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update .system \
             -xr!.git \
             -xr!.github \
@@ -109,7 +327,10 @@ jobs:
             -x!create_spruce_release.sh \
             -x!spruce/flags/developer_mode \
             -xr!App/adbd \
-            -x!To-Do.txt
+            -x!To-Do.txt \
+            -x!.ota_manifest \
+            -x!.ota_delete \
+            -x!.ota_files
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
@@ -121,17 +342,19 @@ jobs:
         run: |
           if gh release view "v${{ steps.get_version.outputs.version }}" --repo spruceUI/spruceOS >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Release v${{ steps.get_version.outputs.version }} already exists, will update archive only"
+            echo "Release v${{ steps.get_version.outputs.version }} already exists, will update archives only"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
             echo "Release v${{ steps.get_version.outputs.version }} does not exist, will create new draft"
           fi
 
-      - name: Update existing release archive
+      - name: Update existing release archives
         if: steps.check_release.outputs.exists == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          files: |
+            spruceV${{ steps.get_version.outputs.version }}.7z
+            spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
@@ -142,7 +365,9 @@ jobs:
         if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          files: |
+            spruceV${{ steps.get_version.outputs.version }}.7z
+            spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
           name: spruceOS v${{ steps.get_version.outputs.version }}
           body: |
@@ -176,6 +401,7 @@ jobs:
             -
 
             ## Installation
+
             ## New Installer App
             - Try the all-in-one installer app for a super easy installation!
             - No need to download a release or format your card manually!
@@ -198,6 +424,13 @@ jobs:
             - Extract onto your PC using [7zip](https://www.7-zip.org/download.html)
             - Copy the entire contents to a blank FAT32 formatted SD card.
             - Seriously, use 7zip to extract onto your PC THEN copy the files. IDK why but Windows breaks stuff if you use its built in extraction tool.
+
+            ## OTA Update
+
+            - `spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z` contains only the files changed since the previous stable release.
+            - It also contains a deletion manifest for files removed since the previous stable release.
+            - This package is intended for OTA updates from `${{ steps.previous_release.outputs.tag }}` to `v${{ steps.get_version.outputs.version }}`.
+
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
           draft: true
@@ -211,6 +444,12 @@ jobs:
           echo "Version: ${{ steps.get_version.outputs.version }}"
           echo "Tag: v${{ steps.get_version.outputs.version }}"
           echo "File: spruceV${{ steps.get_version.outputs.version }}.7z"
+          echo ""
+          echo "OTA:"
+          echo "From: ${{ steps.previous_release.outputs.tag }}"
+          echo "From SHA: ${{ steps.previous_release.outputs.sha }}"
+          echo "To SHA: ${{ steps.current_commit.outputs.sha }}"
+          echo "File: spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
           echo ""
           echo "Next steps:"
           echo "1. Review the draft release in GitHub UI"
