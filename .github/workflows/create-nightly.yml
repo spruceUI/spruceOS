@@ -87,6 +87,7 @@ jobs:
           echo "Previous stable release commit: ${BASE_SHA}"
 
           echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
           echo "sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Check for commits
@@ -459,7 +460,10 @@ jobs:
               echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
 
               # Stable -> nightly OTA diff
-              echo "NIGHTLY_DIFF_BASE_VERSION=${{ steps.previous_stable.outputs.tag }}" >> "$file"
+              # Same representation as RELEASE_VERSION (no v prefix): the
+              # downloader compares the two to make sure the diff was built
+              # against the stable release the device will be on.
+              echo "NIGHTLY_DIFF_BASE_VERSION=${{ steps.previous_stable.outputs.version }}" >> "$file"
               echo "NIGHTLY_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
               echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
               echo "NIGHTLY_DIFF_SIZE_IN_MB=$DIFF_SIZE_MB" >> "$file"
