@@ -877,6 +877,35 @@ def verify_incremental_archive(archive):
 # Incremental deletion
 # ---------------------------------------------------------------------------
 
+def prune_empty_parents(path):
+    """
+    Git never tracks directories, so a deletion list only names files.
+    Remove directories left empty by those deletions, stopping at the
+    first non-empty parent. This also lets a later archive replace a
+    directory with a file of the same name.
+    """
+
+    root = os.path.normpath(SD_ROOT)
+
+    parent = os.path.dirname(
+        os.path.normpath(path)
+    )
+
+    while parent.startswith(root + os.sep):
+
+        try:
+            os.rmdir(parent)
+
+        except OSError:
+            break
+
+        log.info(
+            f"Removed empty directory: {parent}"
+        )
+
+        parent = os.path.dirname(parent)
+
+
 def safe_delete_relative(relative_path):
     """
     Delete one path relative to SD_ROOT.
@@ -980,6 +1009,8 @@ def safe_delete_relative(relative_path):
             )
 
             return False
+
+        prune_empty_parents(target)
 
     return True
 
@@ -1092,12 +1123,15 @@ def apply_incremental_deletions(archive):
 def extract_with_progress(
     archive,
     label,
-    total_hint=None
+    total_hint=None,
+    exclude=()
 ):
     """
     Extract an archive into SD_ROOT.
 
     This is used for both full and incremental archives.
+    `exclude` names archive entries that must not be written to the
+    card (the incremental metadata files).
     """
 
     result = run([
@@ -1113,7 +1147,7 @@ def extract_with_progress(
             1
             for line in result.stdout.splitlines()
             if re.match(
-                r"^\s*\*\d{4}-",
+                r"^\s*\d{4}-",
                 line
             )
         )
@@ -1150,9 +1184,13 @@ def extract_with_progress(
                 "x",
                 "-y",
                 "-scsUTF-8",
-                "-bb1",
-                archive
-            ],
+                "-bb1"
+            ]
+            + [
+                f"-x!{name}"
+                for name in exclude
+            ]
+            + [archive],
             stdout=subprocess.PIPE,
             stderr=errlog,
             text=True,
@@ -1906,15 +1944,20 @@ def main():
 
             result = extract_with_progress(
                 archive,
-                f"spruce {version}"
+                f"spruce {version}",
+                exclude=(
+                    ".ota_manifest",
+                    ".ota_delete"
+                )
             )
 
             if result != 0:
 
                 fail(
-                    f"Incremental update {version} "
-                    f"failed. Check updater.log "
-                    f"for details."
+                    f"Incremental update {version} failed "
+                    f"(7zr exit code {result}). Run the "
+                    "EZ Updater app to retry, or switch the "
+                    "OTA update type to Full."
                 )
 
             subprocess.run([
