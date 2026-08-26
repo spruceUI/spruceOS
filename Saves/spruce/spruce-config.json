@@ -288,9 +288,9 @@
                 "selected": "1392"
             },
             "trimuiOSD": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Run TrimUI OSD",
-                "description": "Early Alpha",
+                "description": "Stock TrimUI popups for volume, brightness and the switch. PyUI draws its own.",
                 "options": [
                     "True",
                     "False"

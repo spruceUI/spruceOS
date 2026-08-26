@@ -46,7 +46,11 @@ device_init() {
 
     version="$(get_fw_version)"
     if [ "$version" != "1.1.0" ]; then
-        run_trimui_osdd
+        # Same reasoning as the Brick line - PyUI draws its own popups, so the
+        # stock ones are duplicate clutter. The firmware check above is kept:
+        # it predates this and guards something separate.
+        run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
+        [ "$run_osd" = "True" ] && run_trimui_osdd
     fi
 
     if [ ! -x /bin/bash ]; then

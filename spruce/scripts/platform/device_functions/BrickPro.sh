@@ -30,7 +30,13 @@ init_gpio_a133p() {
 
 device_init() {
     device_init_a133p
-    run_trimui_osdd
+    # The stock OSD daemon draws TrimUI's own popups - volume, brightness, the
+    # Fn switch toast. PyUI draws its own, so running osdd just means two
+    # different-looking notifications for the same event. Off unless asked for,
+    # which is what the Smart Pro S has always done; this brings the rest of the
+    # line into line with it.
+    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
+    [ "$run_osd" = "True" ] && run_trimui_osdd
 
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_on_msg.sh" &
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_off_msg.sh" &
