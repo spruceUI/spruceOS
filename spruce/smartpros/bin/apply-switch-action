@@ -28,18 +28,21 @@ SELF_DIR="/mnt/SDCARD/spruce/smartpros/bin"
 apply_now() {
     action="$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "Nothing")"
 
-    # Map the menu label to the spruce-native action script to install. All three
+    # Map the menu label to the spruce-native action script to install. All four
     # actions drive spruce's own systems rather than the stock scene scripts,
     # whose control numbering is wrong on this device: the stock quiet script
     # pokes tinymix control 9 (DACL DACR Swap, not volume) and the stock ledc.sh
     # derives brightness from a shmvar spruce never populates. scene-rgb-led.sh
     # drives the LEDs via rgb_led; scene-quiet.sh / scene-silent.sh go through
-    # set_volume so the audio and the in-UI volume reading stay in sync.
+    # set_volume so the audio and the in-UI volume reading stay in sync;
+    # scene-wifi.sh goes through enable_wifi / disable_wifi so the radio and
+    # .wifi in SYSTEM_JSON stay in sync the same way.
     src=""; name=""
     case "$action" in
         "LED off")     src="$SELF_DIR/scene-rgb-led.sh"; name="scene-rgb-led.sh" ;;
         "Quiet Mode")  src="$SELF_DIR/scene-quiet.sh";   name="scene-quiet.sh" ;;
         "Silent Mode") src="$SELF_DIR/scene-silent.sh";  name="scene-silent.sh" ;;
+        "WiFi off")    src="$SELF_DIR/scene-wifi.sh";    name="scene-wifi.sh" ;;
         "Nothing"|*)   src=""; name="" ;;
     esac
 

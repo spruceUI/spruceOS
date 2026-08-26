@@ -32,10 +32,22 @@ class TrimUIDevice(DeviceCommon):
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
+        old_wifi_enabled = self.system_config.is_wifi_enabled()
         self.system_config.reload_config()
         new_volume = self.system_config.get_volume()
         if(old_volume != new_volume):
             Display.volume_changed(new_volume)
+
+        # Something outside this process - the physical switch's
+        # scene-wifi.sh, today - can flip .wifi in this same file while PyUI
+        # is already running. reload_config() above already picks up the
+        # fresh value, so monitor_wifi()'s self-heal loop won't fight the
+        # switch by turning WiFi back on - but the WiFi status caches still
+        # need an explicit nudge so the WiFi menu/top bar icon catch up
+        # immediately instead of waiting on their own throttle window.
+        if(old_wifi_enabled != self.system_config.is_wifi_enabled()):
+            self.get_wifi_status.force_refresh()
+            self.get_ip_addr_text.force_refresh()
 
     def ensure_wpa_supplicant_conf(self):
         MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
