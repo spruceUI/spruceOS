@@ -48,17 +48,30 @@ jobs:
         run: |
           echo "Finding previous stable release..."
 
-          PREVIOUS_VERSION=$(gh release list \
+          # The predecessor is the highest published stable version that is
+          # LOWER than the version being processed, in version order. Using
+          # "the first release in the list that is not this one" breaks when
+          # an older version is re-processed (workflow_dispatch) or when a
+          # hotfix was created before a larger release was published.
+          CANDIDATES="$(gh release list \
             --repo spruceUI/spruceOS \
             --exclude-drafts \
             --exclude-pre-releases \
             --limit 100 \
             --json tagName \
-            --jq '
-              [.[] |
-                select(.tagName != ("v" + env.VERSION))
-              ][0].tagName
-            ' | sed 's/^v//')
+            --jq '.[].tagName' \
+            | sed -n 's/^v\([0-9][0-9.]*\)$/\1/p' \
+            | grep -vx -- "$VERSION" || true)"
+
+          PREVIOUS_VERSION="$( { printf '%s\n' "$CANDIDATES"; echo "$VERSION"; } \
+            | grep -v '^$' \
+            | sort -uV \
+            | grep -x -B1 -- "$VERSION" \
+            | head -n 1)"
+
+          if [ "$PREVIOUS_VERSION" = "$VERSION" ]; then
+            PREVIOUS_VERSION=""
+          fi
 
           if [ -z "$PREVIOUS_VERSION" ]; then
             echo "No previous stable release found."
@@ -180,16 +193,34 @@ jobs:
             echo ""
             echo "Updating $file"
 
+            # Never move the advertised stable release backwards. When an
+            # older version is re-processed (workflow_dispatch), keep the
+            # current RELEASE_* block and only (re)generate the transition.
+            local existing_version keep_current
+            existing_version="$(sed -n 's/^RELEASE_VERSION=//p' "$file" | tr -d '\r' | head -n 1)"
+            keep_current=0
+
+            if [ -n "$existing_version" ] && [ "$existing_version" != "$VERSION" ]; then
+              if [ "$(printf '%s\n' "$existing_version" "$VERSION" | sort -V | tail -n 1)" = "$existing_version" ]; then
+                echo "Existing RELEASE_VERSION=$existing_version is newer than $VERSION; keeping current RELEASE_* entries."
+                keep_current=1
+              fi
+            fi
+
             # Preserve every existing RELEASE_DIFF_* entry except the
-            # exact transition we are replacing.
+            # exact transition we are replacing. The key is matched as a
+            # literal substring ("_<prev>_<ver>="): version dots are regex
+            # metacharacters, so no regex is used here.
             #
             # Everything beginning with RELEASE_* that is NOT a
-            # RELEASE_DIFF_* entry is removed and regenerated below.
+            # RELEASE_DIFF_* entry is removed and regenerated below
+            # (unless keep_current=1).
             awk \
               -v prev="$PREVIOUS_VERSION" \
-              -v ver="$VERSION" '
+              -v ver="$VERSION" \
+              -v keep="$keep_current" '
                 /^RELEASE_DIFF_/ {
-                  if ($0 ~ "^RELEASE_DIFF_.*_" prev "_" ver "=") {
+                  if (prev != "" && index($0, "_" prev "_" ver "=") > 0) {
                     next
                   }
 
@@ -198,6 +229,9 @@ jobs:
                 }
 
                 /^RELEASE_/ {
+                  if (keep == 1) {
+                    print
+                  }
                   next
                 }
 
@@ -210,13 +244,15 @@ jobs:
             # Current latest stable release
             # ----------------------------------------------------------
 
-            {
-              echo "RELEASE_VERSION=${VERSION}"
-              echo "RELEASE_CHECKSUM=${CHECKSUM}"
-              echo "RELEASE_SIZE_IN_MB=${SIZE_MB}"
-              echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${VERSION}/spruceV${VERSION}.7z"
-              echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${VERSION}"
-            } >> "$tmp_file"
+            if [ "$keep_current" -eq 0 ]; then
+              {
+                echo "RELEASE_VERSION=${VERSION}"
+                echo "RELEASE_CHECKSUM=${CHECKSUM}"
+                echo "RELEASE_SIZE_IN_MB=${SIZE_MB}"
+                echo "RELEASE_LINK=https://github.com/spruceUI/spruceOS/releases/download/v${VERSION}/spruceV${VERSION}.7z"
+                echo "RELEASE_INFO=https://github.com/spruceUI/spruceOS/releases/tag/v${VERSION}"
+              } >> "$tmp_file"
+            fi
 
             # ----------------------------------------------------------
             # New stable -> stable incremental transition
