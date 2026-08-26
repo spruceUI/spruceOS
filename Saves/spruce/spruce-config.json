@@ -327,6 +327,36 @@
                 ],
                 "selected": "Game Switcher"
             },
+            "fnF1Action": {
+                "devices": ["TRIMUI_BRICK"],
+                "display": "Left Fn key action",
+                "description": "What pressing the left Fn key does",
+                "options": [
+                    "LED off",
+                    "Quiet Mode",
+                    "Silent Mode",
+                    "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    "Nothing"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f1",
+                "selected": "Nothing"
+            },
+            "fnF2Action": {
+                "devices": ["TRIMUI_BRICK"],
+                "display": "Right Fn key action",
+                "description": "What pressing the right Fn key does",
+                "options": [
+                    "LED off",
+                    "Quiet Mode",
+                    "Silent Mode",
+                    "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    "Nothing"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f2",
+                "selected": "Nothing"
+            },
             "switchAction": {
                 "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Switch action",

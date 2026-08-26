@@ -52,6 +52,13 @@ device_init() {
     # adopts, once, whatever action was already installed - on the Brick line that
     # is whatever the old fn_editor app last wrote, and it outlives the SD card.
     /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
+
+    # Same for the two Fn keys. fnkey_watchdog.sh runs whatever absolute path it
+    # finds in /usr/trimui/fnkeys/f{1,2}key_launch, and until now nothing wrote
+    # those files at all - the retired fn_editor wrote a JSON format the watchdog
+    # never read, so the Fn keys silently did nothing.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f1 --now
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f2 --now
 }
 
 launch_startup_watchdogs() {
