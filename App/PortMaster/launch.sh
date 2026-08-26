@@ -15,6 +15,16 @@ case "$PLATFORM" in
     Anbernic*)
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali"
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        # PortMaster's own splash is a love2d app - pmsplash.txt sources the
+        # love_11.5 runtime and runs $LOVE_RUN on utils/pmsplash - so the GUI
+        # needs the same libraries a love PORT does. BaseOS ships none of them,
+        # and the runtime bundles only its own, so love died in the loader with
+        # "libopenal.so.1: cannot open shared object file" and the splash never
+        # drew. ports-lib64 is on PORTS_LD_LIBRARY_PATH for ports, but that is
+        # built by run_port and the GUI never sees it. Appended, not prepended:
+        # these are libraries BaseOS lacks outright, so they need to shadow
+        # nothing.
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
         # pugwash reads the pad through SDL_GameController and nothing else -
         # it handles CONTROLLERBUTTONDOWN and keyboard, never raw joystick
         # events. BaseOS ships no mapping for the built-in pad, so
