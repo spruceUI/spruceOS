@@ -276,6 +276,21 @@ jobs:
 
           done
 
+          # A full archive re-creates every tracked flag file (the first-boot
+          # lock for each platform, run_upgrades.lock), which the device
+          # consumes at runtime; that is how a full update re-arms the
+          # first-boot lane. Ship the same tracked flag files in every OTA
+          # package so an incremental update re-arms exactly what a full
+          # update would, without the updater needing per-platform knowledge.
+          git ls-tree -r --name-only "$HEAD_SHA" -- spruce/flags |
+          while IFS= read -r FLAG_FILE; do
+            [ -z "$FLAG_FILE" ] && continue
+            if is_excluded "$FLAG_FILE"; then
+              continue
+            fi
+            printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
+          done
+
           sort -u "$RAW_ADD" > "$OTA_FILES"
           sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
 
