@@ -44,4 +44,21 @@ device_init() {
     # adopts, once, whatever action was already installed - on the Brick line that
     # is whatever the old fn_editor app last wrote, and it outlives the SD card.
     /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
+
+    # Same for the two Fn keys. Nothing has ever written the launch files
+    # fnkey_watchdog.sh reads, so these keys have never done anything here.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f1 --now
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f2 --now
+}
+
+launch_startup_watchdogs() {
+    # Common plus the shared TrimUI ones (volume sync); sets SYSTEM_CPU.
+    launch_trimui_startup_watchdogs
+
+    # Dispatch the Fn keys (spruce does not run the stock keymon that would
+    # otherwise do this). The watchdog takes its key codes from FN_KEY_LEFT /
+    # FN_KEY_RIGHT in the platform config, which on this device are KEY_F1/KEY_F2
+    # rather than the Brick's 317/318 - those are real stick clicks here.
+    /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
 }

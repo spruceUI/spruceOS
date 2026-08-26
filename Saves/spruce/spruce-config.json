@@ -328,7 +328,7 @@
                 "selected": "Game Switcher"
             },
             "fnF1Action": {
-                "devices": ["TRIMUI_BRICK"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Left Fn key action",
                 "description": "What pressing the left Fn key does",
                 "options": [
@@ -343,7 +343,7 @@
                 "selected": "Nothing"
             },
             "fnF2Action": {
-                "devices": ["TRIMUI_BRICK"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Right Fn key action",
                 "description": "What pressing the right Fn key does",
                 "options": [

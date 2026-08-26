@@ -68,8 +68,8 @@ launch_startup_watchdogs() {
     # Dispatch the Brick's Fn keys (spruce does not run the stock keymon that
     # would otherwise do this). Launched here so it lives alongside the other
     # durable watchdogs and survives the early-boot churn; pinned like them.
-    # Brick-only: the Fn keys report as B_L3/B_R3, which are the stick clicks on
-    # the Smart Pro.
+    # The watchdog takes its key codes from FN_KEY_LEFT / FN_KEY_RIGHT in the
+    # platform config, because the Brick and the Brick Pro do not agree on them.
     /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
 }
