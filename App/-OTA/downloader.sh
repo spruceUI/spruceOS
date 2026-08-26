@@ -242,24 +242,32 @@ rm -f "$TMP_DIR/ota_queue"
 #
 # updater.py consumes this queue in order.
 
-if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
+# Incremental mode falls back to the traditional full archive whenever no
+# usable diff exists, instead of asking the user to change a setting.
+USE_INCREMENTAL=0
 
-    if [ -n "$CURRENT_NUM" ] && [ -n "$RELEASE_NUM" ] && [ "$CURRENT_NUM" -gt "$RELEASE_NUM" ]; then
+if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
+    USE_INCREMENTAL=1
+
+    if [ -z "$CURRENT_NUM" ] || [ -z "$RELEASE_NUM" ]; then
+        log_message "OTA: Cannot compare versions ($CURRENT_VERSION vs $RELEASE_VERSION); using a full update"
+        USE_INCREMENTAL=0
+    elif [ "$CURRENT_NUM" -gt "$RELEASE_NUM" ]; then
         # The installed version is newer than the latest stable release. This
         # is normally a device running a nightly (spruce/spruce holds the base
         # version of the Development branch). No stable diff can start here,
         # and a stable -> nightly diff cannot be applied on top of a nightly.
         if [ "$TARGET_CHANNEL" = "nightly" ]; then
-            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION; incremental updates cannot start from a nightly build"
-            display_image_and_text "$IMAGE_PATH" 35 25 "Incremental updates cannot be applied on top of a nightly build (installed $CURRENT_VERSION, latest stable $RELEASE_VERSION). Please use Full update mode." 75
-            sleep 5
-            rm -rf "$TMP_DIR"
-            exit 1
+            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION; nightly-to-nightly requires a full update"
+            USE_INCREMENTAL=0
+        else
+            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION"
+            up_to_date_exit
         fi
-
-        log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION"
-        up_to_date_exit
     fi
+fi
+
+if [ "$USE_INCREMENTAL" = "1" ]; then
 
     # First bring the device up through the stable release chain.
     QUEUE_VERSION="$CURRENT_VERSION"
@@ -282,11 +290,12 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
         done
 
         if [ -z "$NEXT_VERSION" ]; then
-            log_message "OTA: No incremental update found from $QUEUE_VERSION"
-            display_image_and_text "$IMAGE_PATH" 35 25 "No incremental update path is available from version $QUEUE_VERSION. Please switch OTA update type to Full and try again." 75
-            sleep 5
-            rm -rf "$TMP_DIR"
-            exit 1
+            log_message "OTA: No incremental update found from $QUEUE_VERSION; falling back to a full update"
+            display_image_and_text "$IMAGE_PATH" 35 25 "No incremental update path is available from version $QUEUE_VERSION. A full update will be used instead." 75
+            sleep 3
+            rm -f "$TMP_DIR/ota_queue"
+            USE_INCREMENTAL=0
+            break
         fi
 
         # Validate that the metadata actually advances the version.
@@ -321,42 +330,39 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
         QUEUE_VERSION="$NEXT_VERSION"
     done
 
-    # If the desired channel is nightly, add the stable -> nightly
-    # incremental update after reaching the latest stable release.
-    if [ "$TARGET_CHANNEL" = "nightly" ]; then
+fi
 
-        NIGHTLY_DIFF_BASE_VERSION=$(sed -n 's/^NIGHTLY_DIFF_BASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | sed 's/^v//')
-        NIGHTLY_DIFF_VERSION=$(sed -n 's/^NIGHTLY_DIFF_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-        NIGHTLY_DIFF_LINK=$(sed -n 's/^NIGHTLY_DIFF_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-        NIGHTLY_DIFF_CHECKSUM=$(sed -n 's/^NIGHTLY_DIFF_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-        NIGHTLY_DIFF_SIZE=$(sed -n 's/^NIGHTLY_DIFF_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+if [ "$USE_INCREMENTAL" = "1" ] && [ "$TARGET_CHANNEL" = "nightly" ]; then
 
-        if [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ] || [ -z "$NIGHTLY_VERSION" ]; then
-            log_message "OTA: Nightly incremental metadata is not available"
-            display_image_and_text "$IMAGE_PATH" 35 25 "A nightly incremental update is not currently available. Please try again later or use Full update mode." 75
-            sleep 5
-            rm -rf "$TMP_DIR"
-            exit 1
-        fi
+    # The desired channel is nightly: add the stable -> nightly incremental
+    # update after reaching the latest stable release.
+    NIGHTLY_DIFF_BASE_VERSION=$(sed -n 's/^NIGHTLY_DIFF_BASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | sed 's/^v//')
+    NIGHTLY_DIFF_VERSION=$(sed -n 's/^NIGHTLY_DIFF_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_DIFF_LINK=$(sed -n 's/^NIGHTLY_DIFF_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_DIFF_CHECKSUM=$(sed -n 's/^NIGHTLY_DIFF_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_DIFF_SIZE=$(sed -n 's/^NIGHTLY_DIFF_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
+    if [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ] || [ -z "$NIGHTLY_VERSION" ]; then
+        log_message "OTA: Nightly incremental metadata is not available; falling back to a full nightly update"
+        rm -f "$TMP_DIR/ota_queue"
+        USE_INCREMENTAL=0
+    elif [ "$NIGHTLY_DIFF_BASE_VERSION" != "$RELEASE_VERSION" ] || { [ -n "$NIGHTLY_DIFF_VERSION" ] && [ "$NIGHTLY_DIFF_VERSION" != "$NIGHTLY_VERSION" ]; }; then
         # Every nightly diff is generated from one specific stable release.
         # If a new stable was published after the last nightly build, the
         # diff would be applied on top of the wrong base and mix two trees.
-        if [ "$NIGHTLY_DIFF_BASE_VERSION" != "$RELEASE_VERSION" ] || { [ -n "$NIGHTLY_DIFF_VERSION" ] && [ "$NIGHTLY_DIFF_VERSION" != "$NIGHTLY_VERSION" ]; }; then
-            log_message "OTA: Nightly diff base $NIGHTLY_DIFF_BASE_VERSION (version $NIGHTLY_DIFF_VERSION) does not match stable $RELEASE_VERSION / nightly $NIGHTLY_VERSION"
-            display_image_and_text "$IMAGE_PATH" 35 25 "The nightly incremental package has not been rebuilt against the latest stable release yet. Please try again after the next nightly, or use Full update mode." 75
-            sleep 5
-            rm -rf "$TMP_DIR"
-            exit 1
-        fi
-
+        log_message "OTA: Nightly diff base $NIGHTLY_DIFF_BASE_VERSION (version $NIGHTLY_DIFF_VERSION) does not match stable $RELEASE_VERSION / nightly $NIGHTLY_VERSION; falling back to a full nightly update"
+        display_image_and_text "$IMAGE_PATH" 35 25 "The nightly incremental package was not built against the latest stable release. A full nightly update will be used instead." 75
+        sleep 3
+        rm -f "$TMP_DIR/ota_queue"
+        USE_INCREMENTAL=0
+    else
         echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY|${RELEASE_VERSION}" >> "$TMP_DIR/ota_queue"
-
         log_message "OTA: Queued nightly incremental update: $RELEASE_VERSION -> $NIGHTLY_VERSION"
     fi
+fi
 
-else
-    # Full update mode.
+if [ "$USE_INCREMENTAL" != "1" ]; then
+    # Full update mode (or incremental fallback).
     if [ "$SKIP_VERSION_CHECK" != "True" ] && [ "$TARGET_CHANNEL" = "stable" ]; then
         # Never re-download or downgrade when the installed stable release is
         # already current ("OTA: skip version check" allows a reinstall).
