@@ -6,16 +6,37 @@
 # "ON". The active switch action is the script present in /usr/trimui/scene/;
 # map its basename to a short label, falling back to "ON" when unknown.
 STATE="ON"
-SCENE_SH=$(ls /usr/trimui/scene/*.sh 2>/dev/null | head -n1)
-BASE=$(basename "$SCENE_SH" 2>/dev/null)
-case "$BASE" in
-    # The LED action is "LED off": switch ON turns the LEDs OFF, so the popup
-    # text is inverted relative to the switch state.
-    com.trimui.ledc.sh)                 MSG="LED: OFF" ;;
-    com.trimui.quiet.sh)                MSG="Quiet: $STATE" ;;
-    com.trimui.silent.sh)               MSG="Silent: $STATE" ;;
-    com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh|spruce_toggle_joystick.sh) MSG="Joystick: $STATE" ;;
-    *)                                  MSG="$STATE" ;;
+
+# apply-switch-action writes the chosen action's label here whenever it installs
+# one. Preferred over mapping script basenames: the scripts have already been
+# renamed once (moved to spruce/scripts/FN_Button), and a rename silently
+# degraded this popup to a bare "ON" with nothing to indicate why.
+LABEL_FILE="/tmp/spruce_switch_action_label"
+ACTION="$(cat "$LABEL_FILE" 2>/dev/null)"
+
+if [ -z "$ACTION" ]; then
+    # Fallback: name it from whichever script is installed. Covers a switch set
+    # by the old fn_editor app before apply-switch-action first ran.
+    SCENE_SH=$(ls /usr/trimui/scene/*.sh 2>/dev/null | head -n1)
+    case "$(basename "$SCENE_SH" 2>/dev/null)" in
+        scene-rgb-led.sh|com.trimui.ledc.sh)  ACTION="LED off" ;;
+        scene-quiet.sh|com.trimui.quiet.sh)   ACTION="Quiet Mode" ;;
+        scene-silent.sh|com.trimui.silent.sh) ACTION="Silent Mode" ;;
+        scene-wifi.sh)                        ACTION="WiFi off" ;;
+        scene-joystick.sh|spruce_toggle_joystick.sh|com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh)
+                                              ACTION="Joystick Toggle" ;;
+    esac
+fi
+
+case "$ACTION" in
+    # "LED off" and "WiFi off" name what the switch turns OFF, so their popup text
+    # is inverted relative to the switch state.
+    "LED off")         MSG="LED: OFF" ;;
+    "WiFi off")        MSG="WiFi: OFF" ;;
+    "Quiet Mode")      MSG="Quiet: ON" ;;
+    "Silent Mode")     MSG="Silent: ON" ;;
+    "Joystick Toggle") MSG="Joystick: ON" ;;
+    *)                 MSG="ON" ;;
 esac
 
 VOL_MSG_JSON="\n\

@@ -328,7 +328,7 @@
                 "selected": "Game Switcher"
             },
             "switchAction": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Switch action",
                 "description": "What flipping the physical switch does",
                 "options": [
@@ -336,9 +336,10 @@
                     "Quiet Mode",
                     "Silent Mode",
                     "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
                     "Nothing"
                 ],
-                "changeCmd": "/mnt/SDCARD/spruce/smartpros/bin/apply-switch-action",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",
                 "selected": "LED off"
             }
         },

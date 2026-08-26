@@ -1,0 +1,129 @@
+#!/bin/sh
+# Apply the configured switch action on the TrimUI line.
+#
+# The physical switch is dispatched by the stock trimui_scened daemon, which on
+# every flip runs /usr/trimui/bin/scene.sh, and scene.sh runs every *.sh found in
+# /usr/trimui/scene/ with 1 (switch on) or 0 (switch off). So the switch's
+# behaviour is "whichever action script lives in that directory". This script
+# makes that directory reflect the user's choice in Settings -> Button Settings
+# -> Switch action.
+#
+# Run at boot from device_init with --now, and as the setting's changeCmd, where
+# PyUI appends the newly-selected value as $1.
+#
+# All the actions drive spruce's own systems rather than the stock scene scripts,
+# whose control numbering is wrong on the Smart Pro S: the stock quiet script
+# pokes tinymix control 9 (DACL DACR Swap, not volume) and the stock ledc.sh
+# derives brightness from a shmvar spruce never populates.
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+SCENE_DIR="/usr/trimui/scene"
+SELF_DIR="/mnt/SDCARD/spruce/scripts/FN_Button"
+CONFIG="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+# Read by the Brick's switch popup so it can name the action. Written here rather
+# than having the popup map basenames, so renaming a script cannot silently
+# degrade the popup to a bare "ON".
+LABEL_FILE="/tmp/spruce_switch_action_label"
+MIGRATED_FLAG="/mnt/SDCARD/Saves/spruce/.switch_action_migrated"
+
+script_for_action() {
+    case "$1" in
+        "LED off")         echo "scene-rgb-led.sh" ;;
+        "Quiet Mode")      echo "scene-quiet.sh" ;;
+        "Silent Mode")     echo "scene-silent.sh" ;;
+        "WiFi off")        echo "scene-wifi.sh" ;;
+        "Joystick Toggle") echo "scene-joystick.sh" ;;
+        *)                 echo "" ;;
+    esac
+}
+
+# The reverse, for the one-time import below. Recognises the stock fn_editor
+# script names as well as ours, because on a Brick the installed script was put
+# there by fn_editor, not by us.
+action_for_script() {
+    case "$1" in
+        scene-rgb-led.sh|com.trimui.ledc.sh)   echo "LED off" ;;
+        scene-quiet.sh|com.trimui.quiet.sh)    echo "Quiet Mode" ;;
+        scene-silent.sh|com.trimui.silent.sh)  echo "Silent Mode" ;;
+        scene-wifi.sh)                         echo "WiFi off" ;;
+        scene-joystick.sh|spruce_toggle_joystick.sh|com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh)
+                                               echo "Joystick Toggle" ;;
+        *)                                     echo "" ;;
+    esac
+}
+
+set_configured_action() {
+    tmp="$(mktemp)" || return 1
+    if jq --arg v "$1" '.menuOptions."Button Settings".switchAction.selected = $v' "$CONFIG" > "$tmp"; then
+        mv "$tmp" "$CONFIG"
+    else
+        rm -f "$tmp"
+        log_message "apply-switch-action: could not write $CONFIG"
+    fi
+}
+
+# Adopt whatever the switch was already doing, once, on the first boot after this
+# arrives.
+#
+# /usr/trimui lives on an overlayfs whose upperdir is the device's INTERNAL
+# storage, so a switch action set through the old fn_editor app survives a
+# complete SD card reflash. Until now nothing but fn_editor ever wrote that
+# directory on a Brick, so it holds the user's real choice with no record of it
+# anywhere spruce can see. apply_now starts by clearing the directory, so without
+# this every existing Brick user would silently lose their switch on upgrade.
+migrate_existing_action() {
+    [ -f "$MIGRATED_FLAG" ] && return 0
+
+    installed="$(ls "$SCENE_DIR"/*.sh 2>/dev/null | head -n1)"
+    imported="$(action_for_script "$(basename "$installed" 2>/dev/null)")"
+
+    if [ -n "$imported" ]; then
+        log_message "apply-switch-action: adopting the switch action already installed: '$imported'"
+        set_configured_action "$imported"
+    fi
+
+    mkdir -p "$(dirname "$MIGRATED_FLAG")"
+    touch "$MIGRATED_FLAG"
+}
+
+apply_now() {
+    # $1 is the value PyUI just saved, when called as changeCmd. At boot there is
+    # no argument and the saved value is read instead.
+    action="$1"
+    [ -n "$action" ] || action="$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "Nothing")"
+
+    name="$(script_for_action "$action")"
+    src=""
+    [ -n "$name" ] && src="$SELF_DIR/$name"
+
+    mkdir -p "$SCENE_DIR"
+    # Clear any previously installed action so only the current one runs. This is
+    # also what makes the import above necessary.
+    rm -f "$SCENE_DIR"/*.sh 2>/dev/null
+
+    if [ -n "$src" ] && [ -f "$src" ]; then
+        cp "$src" "$SCENE_DIR/$name"
+        chmod +x "$SCENE_DIR/$name"
+        echo "$action" > "$LABEL_FILE" 2>/dev/null
+        log_message "apply-switch-action: switch set to '$action' ($name)"
+    else
+        rm -f "$LABEL_FILE" 2>/dev/null
+        log_message "apply-switch-action: switch action cleared (selected '$action')"
+    fi
+}
+
+case "$1" in
+    --now)
+        # Boot path. Import before applying, so a first boot adopts the existing
+        # action rather than overwriting it with the shipped default.
+        migrate_existing_action
+        apply_now
+        ;;
+    *)
+        # changeCmd path. set_menu_option() saves the value BEFORE running this and
+        # appends it as the last argument, so $1 is already current - no need to
+        # re-read the file, and no need for the delayed re-read this used to do.
+        apply_now "$1"
+        ;;
+esac

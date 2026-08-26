@@ -278,8 +278,10 @@ device_init() {
     device_run_thermal_process
 
     # Install the configured switch action into /usr/trimui/scene so the physical
-    # switch follows Settings -> Button Settings -> Switch action.
-    /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
+    # switch follows Settings -> Button Settings -> Switch action. --now also
+    # adopts, once, whatever action was already installed - on the Brick line that
+    # is whatever the old fn_editor app last wrote, and it outlives the SD card.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
 
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd

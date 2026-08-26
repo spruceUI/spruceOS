@@ -47,6 +47,11 @@ device_init() {
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
         chmod +x /bin/bash
     fi
+    # Install the configured switch action into /usr/trimui/scene so the physical
+    # switch follows Settings -> Button Settings -> Switch action. --now also
+    # adopts, once, whatever action was already installed - on the Brick line that
+    # is whatever the old fn_editor app last wrote, and it outlives the SD card.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
 }
 
 launch_startup_watchdogs() {
