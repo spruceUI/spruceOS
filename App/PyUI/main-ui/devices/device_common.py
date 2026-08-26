@@ -350,7 +350,6 @@ class DeviceCommon(AbstractDevice):
         self._run_network_services("off")
 
 
-    @throttle.limit_refresh(10)
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
@@ -418,6 +417,7 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
 
+    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import subprocess
 
@@ -829,4 +829,4 @@ class DeviceCommon(AbstractDevice):
         return None
 
     def get_game_images_folder_name(self):
-        return "Imgs"
+        return "Imgs"
