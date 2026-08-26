@@ -115,6 +115,9 @@ jobs:
           fi
 
       - name: Pull PyUI Themes
+        # TODO(OTA): these archives are downloaded from a fixed PyUI-Themes
+        # release tag and are not tracked in git, so they never appear in the
+        # OTA diff manifest: only full archives deliver theme updates.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

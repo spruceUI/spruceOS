@@ -23,3 +23,9 @@
 - add trimui zram modules from bmdhacks
 - reset config tasks for more standalone emulators
 - add vibrate to XX devices
+
+--- OTA ------------------------------------------------------------------------
+
+- Beta channel: BETA_* lines in OTA/spruce are ignored by the split downloader; design a beta tag/channel for the incremental flow
+- Theme delivery: Themes/*.7z come from a fixed PyUI-Themes release tag and are not in git, so only full archives deliver theme updates
+- Nightly identity: spruce/spruce holds only the base version, so nightly-to-nightly updates always use the full archive; write the full nightly version if nightly diffs are ever wanted

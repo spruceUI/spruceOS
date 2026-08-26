@@ -218,7 +218,15 @@ OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateTy
 # skip it: a nightly cannot be compared against the version file.
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
-# Determine desired release channel
+# Determine desired release channel. Developer/tester devices always follow
+# the nightly channel (intended; the previous downloader asked each time).
+#
+# TODO(OTA): the BETA_* channel in OTA/spruce is not handled here any more;
+# those lines are ignored until a beta channel is designed for this flow.
+#
+# Nightly builds only write the base version to spruce/spruce, so a device
+# cannot tell which nightly it has: "already current" cannot be detected for
+# nightlies and nightly-to-nightly updates always use the full archive.
 TARGET_CHANNEL="stable"
 
 if flag_check "developer_mode" || flag_check "tester_mode"; then
