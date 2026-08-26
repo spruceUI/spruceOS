@@ -59,6 +59,18 @@ rgb_led() {
 }
 
 # used in principal.sh
+# The switch is "DIP Switch PL11" on this SoC - gpio363, not the a133p line's
+# gpio243, which does not exist here. init_gpio_SmartProS leaves it commented out
+# because trimui_inputd owns the pin, but that also means trimui_inputd has
+# already exported it, so it can simply be read.
+#
+# Verified on hardware that the raw value is the same 1/0 trimui_scened hands
+# scene.sh, by flipping the switch with the action set to "LED off": LEDs off
+# reads 1, LEDs on reads 0.
+device_get_switch_position() {
+    cat /sys/class/gpio/gpio363/value 2>/dev/null
+}
+
 enable_or_disable_rgb() {
     enable_file="/sys/class/led_anim/enable"
     disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
