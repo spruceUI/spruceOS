@@ -2041,18 +2041,6 @@ def main():
     time.sleep(3)
 
     # ------------------------------------------------------------------
-    # Delete archives ONLY after the complete sequence succeeded
-    # ------------------------------------------------------------------
-
-    delete_update_files(
-        updates
-    )
-
-    subprocess.run([
-        "sync"
-    ])
-
-    # ------------------------------------------------------------------
     # Restore backup ONCE, regardless of update type
     # ------------------------------------------------------------------
 
@@ -2065,10 +2053,24 @@ def main():
 
     if not run_restore():
 
+        # Archives and the queue are kept on purpose: running the
+        # EZ Updater again re-applies the chain and retries the restore.
         fail(
             "Update applied, but data restore failed. "
-            "Check updater.log."
+            "Run the EZ Updater app again. Check updater.log."
         )
+
+    subprocess.run([
+        "sync"
+    ])
+
+    # ------------------------------------------------------------------
+    # Delete archives ONLY after the complete sequence succeeded
+    # ------------------------------------------------------------------
+
+    delete_update_files(
+        updates
+    )
 
     subprocess.run([
         "sync"
