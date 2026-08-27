@@ -10,6 +10,9 @@ log_message "homebutton_watchdog.sh: Started up."
 
 RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
 
+SCREENSHOT_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
+SELECT_DOWN=false
+
 cancel_menu_hold() {
     # If the menu button is currently held, cancel both tap and hold
     if [ -e /tmp/menubtn ]; then
@@ -100,7 +103,9 @@ getevent -pid $$ $EVENT_PATH_READ_INPUTS_SPRUCE | while read line; do
     case $line in
         # Home key down
         *"key $B_MENU 1"*)
-                home_key_down
+                if [ "$SCREENSHOT_SHORTCUT" != "MENU+SELECT" ] || [ "$SELECT_DOWN" = false ]; then
+                    home_key_down
+                fi
             ;;
 
         # Home key up
@@ -108,8 +113,17 @@ getevent -pid $$ $EVENT_PATH_READ_INPUTS_SPRUCE | while read line; do
                 home_key_up
             ;;
 
+        *"key $B_SELECT 1"*)
+            SELECT_DOWN=true
+            cancel_menu_hold
+            resume_drastic
+            ;;
+
+        *"key $B_SELECT 0"*)
+            SELECT_DOWN=false
+            ;;
+
         *"key $B_START 1"*  | \
-        *"key $B_SELECT 1"* | \
         *"key $B_R1"*      | \
         *"key $B_R2"*      | \
         *"key $B_L1"*      | \

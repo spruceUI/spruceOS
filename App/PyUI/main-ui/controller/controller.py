@@ -1,3 +1,4 @@
+import os
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -270,7 +271,16 @@ class Controller:
                             Controller.home_button_pressed()
                         Controller.clear_last_input()
                     elif Controller.last_controller_input == ControllerInput.MENU:
-                        if not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
+                        if not called_from_check_for_hotkey and os.path.exists("/tmp/screenshot_menu_consumed"):
+                            if not Controller.still_held_down():
+                                try:
+                                    os.remove("/tmp/screenshot_menu_consumed")
+                                except FileNotFoundError:
+                                    pass
+                            Controller.clear_last_input()
+                            was_hotkey = True
+                            break
+                        elif not Controller.is_check_for_hotkey and not called_from_check_for_hotkey and not Controller.check_for_hotkey():
                             Controller.set_last_input(ControllerInput.MENU)
                             break  # Treat MENU as valid input
                         else:
@@ -298,7 +308,10 @@ class Controller:
 
         if Controller.still_held_down():
             if(ControllerInput.MENU == Controller.last_input()):
-                was_hotkey = called_from_check_for_hotkey or Controller.check_for_hotkey()
+                if not called_from_check_for_hotkey and os.path.exists("/tmp/screenshot_menu_consumed"):
+                    was_hotkey = True
+                else:
+                    was_hotkey = called_from_check_for_hotkey or Controller.check_for_hotkey()
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
                     Controller.gs_triggered = True
                     Controller.first_check_after_gs_triggered = True
