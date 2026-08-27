@@ -389,5 +389,5 @@ run_poweroff_cmd() {
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
-    return 0
+    return 1
 }

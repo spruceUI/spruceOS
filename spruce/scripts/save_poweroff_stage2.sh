@@ -9,6 +9,11 @@ export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 unset LD_LIBRARY_PATH
 echo 2
 cd /tmp
+
+# Detach stage2 from inherited stdin/stdout/stderr so it does not
+# keep the SD filesystem busy during the final remount.
+exec </dev/null >/dev/null 2>&1
+
 echo 3
 # Close any file descriptors inherited from save_poweroff.sh that may
 # still reference files on the SD card.
