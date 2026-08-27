@@ -394,7 +394,8 @@ jobs:
             -x!To-Do.txt \
             -x!.ota_manifest \
             -x!.ota_delete \
-            -x!.ota_files
+            -x!.ota_files \
+            -x!spruceOTA-*.7z
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"

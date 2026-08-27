@@ -416,7 +416,8 @@ jobs:
             -x!To-Do.txt \
             -x!.ota_manifest \
             -x!.ota_delete \
-            -x!.ota_files
+            -x!.ota_files \
+            -x!spruceOTA-*.7z
 
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
