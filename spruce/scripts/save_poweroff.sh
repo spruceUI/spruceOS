@@ -342,8 +342,15 @@ if device_needs_strict_unmount; then
     flag_add "shutting_down" --tmp
 fi
 
+# Breadcrumbs. Without them a hang anywhere in the shutdown path is
+# indistinguishable from the script never having run at all - the log simply
+# stops, which is exactly how the RGB30 lockup first presented. These are three
+# writes on a path that ends in a poweroff; they cost nothing.
+log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
+
 blink_led_if_applicable
 device_prepare_for_poweroff
+log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 

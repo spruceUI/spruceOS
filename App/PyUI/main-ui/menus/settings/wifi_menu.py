@@ -121,7 +121,8 @@ class WifiMenu:
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
         # The password prompt stays here (it is UI); applying the selection is
-        # the device's job, so a connman host can do it its own way. The default
+        # the device's job, so a host with its own network stack can do it that
+        # way. The default
         # device implementation is the wpa_supplicant behaviour this method used
         # to inline.
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")

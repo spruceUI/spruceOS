@@ -355,7 +355,8 @@ class DeviceCommon(AbstractDevice):
 
         Default is the wpa_supplicant behaviour the WiFi menu used to do inline:
         write a network block to wpa_supplicant.conf and tell wpa_cli to reload.
-        Hosts that manage WiFi another way (connman on the RGB30) override this.
+        Hosts that manage WiFi another way (NetworkManager on the RGB30, connman
+        on the GKD Pixel 2) override this.
         """
         from devices.utils.process_runner import ProcessRunner
         conf_path = self.get_wpa_supplicant_conf_path()
@@ -776,6 +777,24 @@ class DeviceCommon(AbstractDevice):
 
     def uses_deinit_v2(self):
         # Need to test 1 at a time to ensure it works
+        return False
+
+    def wants_gles_context(self):
+        """
+        Ask SDL for an OpenGL ES EGL config rather than a desktop GL one.
+
+        On KMSDRM, SDL picks the EGL config for its window from
+        gl_config.profile_mask. Left at the default it asks for
+        EGL_OPENGL_BIT, and a GPU that only does GLES advertises no such
+        config - so eglChooseConfig matches nothing and window creation fails
+        with "Can't window GBM/EGL surfaces", naming neither GL nor the
+        config as the cause.
+
+        Almost certainly right for every device here, since they are all
+        GLES-only ARM parts, but left off by default: the ones that already
+        work are not worth risking to tidy this up, and it can be widened per
+        device as each is actually tested.
+        """
         return False
     
     def get_device_names(self):

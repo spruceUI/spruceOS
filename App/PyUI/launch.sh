@@ -191,7 +191,9 @@ case "$PLATFORM" in
         # bundled SDL2 was built for. So the mali-fbdev dance the H700 line
         # needs does not apply here - use our normal dll.
         export PYSDL2_DLL_PATH=/mnt/SDCARD/App/PyUI/dll
-        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib"
+        # /usr/lib/aarch64-linux-gnu, not /usr/lib: on Debian aarch64 that is
+        # where libEGL, libgbm and libMali actually live.
+        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib/aarch64-linux-gnu"
 
         # MinUI's own launcher sets these on this hardware, which is the best
         # evidence available that they are the working combination.

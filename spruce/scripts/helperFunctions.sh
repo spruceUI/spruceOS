@@ -31,15 +31,16 @@ case $INFO in
     *TG5050*) export PLATFORM="SmartProS" ;;
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)
-        if grep -qE '^OS_NAME="(MOSSYSPRUCE|MOSS)"' /etc/os-release 2>/dev/null; then
-            export SPRUCE_MOSSYSPRUCE=1
-            # The kernel names the board in the device tree. This is how JELOS
-            # picks its own per-device quirks, so it is the same string its
-            # tooling uses.
+        # Cortex-A55 is not unique to the Flip: the Powkiddy RGB30 is an RK3566,
+        # which is also A55, so cpuinfo alone reports 0xd05 for both. dArkMoss
+        # names itself in /etc/os-release, so key off that and leave the Flip as
+        # the default - a Flip has no os-release at all.
+        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+            # The kernel names the board in the device tree.
             DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
             case "$DT_MODEL" in
                 *RGB30*) export PLATFORM="RGB30" ;;
-                # MossySpruce builds for RK3566 generally, but the RGB30 is the
+                # dArkMoss builds for RK3566 generally, but the RGB30 is the
                 # only board wired up so far. Fail towards it rather than
                 # leaving PLATFORM unset, which would die at the cfg source
                 # below with nothing in the log to explain why.
@@ -564,8 +565,14 @@ read_only_check() {
         return 0
     else
         log_message "SD card does not appear to be read only"
-        # clean up test file and continue to next stage of RO check just cuz.
+        # A passing write test is authoritative: the card is writable. Return
+        # that now rather than falling through to the mount-line check below.
+        # That check reports read-only whenever SD_DEV is absent from the mount
+        # table, because an `if` with no matching branch and no else exits 0 -
+        # so on a base whose TF2 device node does not match SD_DEV, a perfectly
+        # writable card is called read-only forever and repairSD loops.
         rm -f "$TEST_FILE"
+        return 1
     fi
 
     if [ -n "$MNT_LINE" ]; then
@@ -1323,18 +1330,48 @@ restart_wifi() {
     enable_wifi
 }
 
+# Does this interface hold an address?
+#
+# Ask iproute2 and net-tools both, and believe either. An ifconfig-only version
+# always answered "no address" on Debian, which does not ship net-tools:
+# network_is_connected never returned true, networkservices.sh waited on it
+# forever, and SSH, Samba, SFTPGo, syncthing and time sync were never started.
+# Nothing logged an error - that loop waits indefinitely on purpose.
+#
+# Believing only ip would trade that for the same bug on any busybox device
+# whose ip applet does not take these options, so ask both.
+iface_has_address() {
+    _iface="$1"
+
+    [ -n "$_iface" ] || return 1
+
+    if command -v ip >/dev/null 2>&1; then
+        if ip -o addr show dev "$_iface" 2>/dev/null | grep -q "inet"; then
+            return 0
+        fi
+    fi
+
+    if command -v ifconfig >/dev/null 2>&1; then
+        if ifconfig "$_iface" 2>/dev/null | grep -qE "inet |inet6 "; then
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
 network_is_connected() {
     CHECK_ETH="${1:-false}" # Defaults to false if no argument
 
 	iface_up=false
     wifi_iface=$(ls /sys/class/net/ | grep wlan | head -1)
 
-    if ifconfig "$wifi_iface" | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+    if iface_has_address "$wifi_iface"; then
         iface_up=true
     fi
 
     if [ "$CHECK_ETH" = true ]; then
-        if ifconfig eth0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+        if iface_has_address eth0; then
             iface_up=true
         fi
     fi

@@ -16,7 +16,7 @@ from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.connman_wifi_scanner import ConnmanWifiScanner
+from devices.wifi.nmcli_wifi_scanner import NmcliWifiScanner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
@@ -28,17 +28,16 @@ from utils.logger import PyUiLogger
 
 
 class Rgb30(DeviceCommon):
-    """Powkiddy RGB30 running MossySpruce.
+    """Powkiddy RGB30 running dArkMoss.
 
-    MossySpruce is our fork of Moss (a JELOS fork) on TF1; spruce runs from TF2.
-    The panel is 720x720, the same 1:1 geometry as the RG CubeXX, so the square
-    themes and layouts apply unchanged. This is the only device on this OS, so it
-    is a single self-contained class rather than a shared base.
+    dArkMoss is our fork of dArkOS - Debian trixie - on TF1; spruce runs from
+    TF2. The panel is 720x720, the same 1:1 geometry as the RG CubeXX, so the
+    square themes and layouts apply unchanged. This is the only device on this
+    OS, so it is a single self-contained class rather than a shared base.
     """
 
-    # The pad's stable by-path node. Moss names it singleadc-joypad (no distro
-    # prefix), confirmed on hardware via MinUI's keymon reading
-    # /sys/bus/platform/devices/singleadc-joypad/hp.
+    # The pad's stable by-path node - singleadc-joypad, with no distro prefix,
+    # confirmed on hardware.
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
 
     KEY_VOLUMEDOWN = 114
@@ -52,6 +51,14 @@ class Rgb30(DeviceCommon):
         self.game_utils = MiyooTrimGameSystemUtils()
         DeviceCommon.__init__(self)
         self._start_volume_watcher()
+
+    def wants_gles_context(self):
+        # The Mali G52 blob on this device offers no desktop GL config at all.
+        # Every RGB configuration it advertises reports EGL_RENDERABLE_TYPE
+        # 0x45 - GLES 1, 2 and 3 - and none carries EGL_OPENGL_BIT, so SDL's
+        # default request matched nothing and PyUI could never open a window.
+        # Measured on hardware; see spruce/scripts/platform/rgb30_gbm_probe.py.
+        return True
 
     # ---- RGB30-specific ----
 
@@ -229,11 +236,11 @@ class Rgb30(DeviceCommon):
         Display.init()
 
     #####################################################################
-    # WiFi - backed by connman, which owns the radio on this OS.
+    # WiFi - backed by NetworkManager, which owns the radio on dArkMoss.
     #
-    # Moss runs connman, which owns the radio and does its own DHCP, so the
-    # wpa_supplicant path does not apply - connman has no wpa_cli daemon to talk
-    # to. Wire spruce's WiFi menu straight to connman.
+    # This is Debian, so there is no connman and no wpa_cli daemon for the base
+    # scanner to talk to. nmcli does its own DHCP too, so spruce only has to
+    # ask for a network and read back what happened.
     #####################################################################
 
     def supports_wifi(self):
@@ -241,55 +248,45 @@ class Rgb30(DeviceCommon):
 
     def is_wifi_enabled(self):
         try:
-            result = ProcessRunner.run(["connmanctl", "technologies"], timeout=5)
-            block = ""
-            for line in (result.stdout or "").splitlines():
-                if line.strip().startswith("/net/connman/technology/wifi"):
-                    block = "wifi"
-                elif line.strip().startswith("/net/connman/technology/"):
-                    block = ""
-                elif block == "wifi" and "Powered" in line:
-                    return "True" in line
+            result = ProcessRunner.run(["nmcli", "radio", "wifi"], timeout=5)
+            return "enabled" in (result.stdout or "").strip().lower()
         except Exception as e:
-            PyUiLogger.get_logger().error(f"connman is_wifi_enabled failed: {e}")
+            PyUiLogger.get_logger().error(f"nmcli is_wifi_enabled failed: {e}")
         return False
 
     def enable_wifi(self):
-        ProcessRunner.run(["connmanctl", "enable", "wifi"], timeout=10)
+        ProcessRunner.run(["nmcli", "radio", "wifi", "on"], timeout=10)
 
     def disable_wifi(self):
-        ProcessRunner.run(["connmanctl", "disable", "wifi"], timeout=10)
+        ProcessRunner.run(["nmcli", "radio", "wifi", "off"], timeout=10)
 
     def get_new_wifi_scanner(self):
-        return ConnmanWifiScanner()
+        return NmcliWifiScanner()
 
     def wifi_connect(self, ssid, password):
-        # connman connects non-interactively from a service config file - the
-        # same mechanism JELOS's own wifictl uses. Writing it and letting
-        # connman auto-connect avoids needing an interactive passphrase agent.
-        cfg_dir = "/storage/.cache/connman"
-        cfg = cfg_dir + "/wifi.config"
+        # NetworkManager stores the profile and reconnects on its own from
+        # then on, so this only has to run once per network.
         try:
-            os.makedirs(cfg_dir, exist_ok=True)
-            lines = [
-                "[global]",
-                "Name = spruce",
-                "",
-                "[service_spruce_wifi]",
-                "Type = wifi",
-                "Name = " + ssid,
-                "AutoConnect = true",
-            ]
-            if password is not None:
-                lines.append("Passphrase = " + password)
-            with open(cfg, "w") as f:
-                f.write("\n".join(lines) + "\n")
-            os.chmod(cfg, 0o600)
-            # Nudge connman to re-read and associate.
-            ProcessRunner.run(["connmanctl", "scan", "wifi"], timeout=15)
-            PyUiLogger.get_logger().info(f"connman wifi.config written for {ssid}")
+            if password:
+                cmd = ["nmcli", "device", "wifi", "connect", ssid,
+                       "password", password]
+            else:
+                cmd = ["nmcli", "device", "wifi", "connect", ssid]
+
+            result = ProcessRunner.run(cmd, timeout=45)
+
+            if result and result.returncode == 0:
+                PyUiLogger.get_logger().info(f"nmcli connected to {ssid}")
+                return
+
+            # Deliberately not logging nmcli's own stderr: it echoes back the
+            # arguments it was given, password included.
+            PyUiLogger.get_logger().error(
+                f"nmcli could not connect to {ssid} "
+                f"(exit {result.returncode if result else 'none'})"
+            )
         except Exception as e:
-            PyUiLogger.get_logger().error(f"connman wifi_connect failed: {e}")
+            PyUiLogger.get_logger().error(f"nmcli wifi_connect failed: {e}")
 
     def get_wpa_supplicant_conf_path(self):
         # Not used - wifi_connect is overridden - but the WiFi menu still reads
@@ -334,7 +331,7 @@ class Rgb30(DeviceCommon):
         except OSError:
             return False
 
-    # ---- JELOS-lineage behaviour ----
+    # ---- host behaviour ----
 
     def sleep(self):
         pass
@@ -346,10 +343,12 @@ class Rgb30(DeviceCommon):
         return self.is_hdmi_connected()
 
     def power_off_cmd(self):
-        return "poweroff"
+        # Through systemd, so TF2 is unmounted cleanly. A bare poweroff leaves
+        # the FAT dirty.
+        return "systemctl poweroff"
 
     def reboot_cmd(self):
-        return "reboot"
+        return "systemctl reboot"
 
     # Why does this break? Using the script should be better than just
     # Running the direct command
@@ -425,7 +424,33 @@ class Rgb30(DeviceCommon):
             self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+        # spruce classifies on RSSI in dBm; nmcli reports link quality 0-100,
+        # so map it the usual way - 100 at -50 dBm, 0 at -100.
+        try:
+            result = ProcessRunner.run(
+                ["nmcli", "-t", "-f", "ACTIVE,SIGNAL", "device", "wifi"],
+                timeout=5,
+            )
+
+            for line in (result.stdout or "").splitlines():
+                parts = line.split(":")
+
+                if len(parts) >= 2 and parts[0] == "yes":
+                    quality = max(0, min(100, int(parts[1])))
+                    return WiFiConnectionQualityInfo(
+                        noise_level=0,
+                        signal_level=(quality // 2) - 100,
+                        link_quality=quality,
+                    )
+        except Exception as e:
+            PyUiLogger.get_logger().error(
+                f"nmcli get_wifi_connection_quality_info failed: {e}"
+            )
+
+        # -200 is what device_common reads as "no signal".
+        return WiFiConnectionQualityInfo(
+            noise_level=0, signal_level=-200, link_quality=0
+        )
 
     def set_wifi_power(self, value):
         pass

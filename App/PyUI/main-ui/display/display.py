@@ -226,6 +226,16 @@ class Display:
         with log_timing("sdl2.ext.init", PyUiLogger.get_logger()):    
             sdl2.ext.init(controller=False)
 
+        # After sdl2.ext.init, never before: SDL_Init calls
+        # SDL_GL_ResetAttributes and would wipe anything set earlier. Before
+        # the window, because that is when the EGL config is chosen.
+        if Device.get_device().wants_gles_context():
+            sdl2.SDL_GL_SetAttribute(
+                sdl2.SDL_GL_CONTEXT_PROFILE_MASK,
+                sdl2.SDL_GL_CONTEXT_PROFILE_ES
+            )
+            PyUiLogger.get_logger().info("Requesting an OpenGL ES EGL config")
+
         with log_timing("sdl2.SDL_DisplayMode", PyUiLogger.get_logger()):    
             display_mode = sdl2.SDL_DisplayMode()
             if sdl2.SDL_GetCurrentDisplayMode(0, display_mode) != 0:

@@ -102,14 +102,20 @@ start_ssh_process() {
 
         log_message "SSH ERROR: dropbearmulti did not take port 22 - SSH is DOWN. Check that host keys exist in $SSH_KEYS."
         return 1
-    else # sshd
-        systemctl start sshd
+    else
+        # Whatever the platform calls its system ssh unit. Hardcoding "sshd"
+        # worked while the GKD Pixel 2 was the only user, but Debian calls it
+        # ssh.service and ships the sshd alias only once the unit is enabled -
+        # and enabling it there fights the socket activation that actually
+        # serves port 22.
+        systemctl start "$SSH_SERVICE_NAME"
     fi
 }
 
 stop_ssh_process() {
     log_message "Shutting down ssh..."
     # Stop all forms of ssh
+    systemctl stop "$SSH_SERVICE_NAME" 2>/dev/null
     systemctl stop sshd 2>/dev/null
     killall -9 sshd 2>/dev/null
     killall -9 dropbearmulti 2>/dev/null || true
