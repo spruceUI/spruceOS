@@ -94,6 +94,23 @@ jobs:
           echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
           echo "sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
 
+      - name: Write nightly markers
+        run: |
+          # Every nightly package (full and diff) carries the stable release it
+          # was generated from and its own version, so that any install - by
+          # the updater, the PC installer or a manual copy - identifies itself:
+          #   Saves/spruce/ota_nightly_base   stable base (read by downloader.sh)
+          #   /<version>                      root marker read by get_version_complex
+          # .ota_extra_files lists generated files the OTA manifest step adds.
+          mkdir -p Saves/spruce
+          printf '%s\n' "${{ steps.previous_stable.outputs.version }}" > Saves/spruce/ota_nightly_base
+          : > "${{ steps.get_version.outputs.version }}"
+          printf '%s\n' \
+            "commits_nightly.txt" \
+            "Saves/spruce/ota_nightly_base" \
+            "${{ steps.get_version.outputs.version }}" \
+            > .ota_extra_files
+
       - name: Check for commits
         id: check_commits
         run: |
@@ -304,6 +321,16 @@ jobs:
             printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
           done
 
+          # Generated files that must travel in every package (nightly
+          # markers, commit log), listed by an earlier step in .ota_extra_files.
+          if [ -f .ota_extra_files ]; then
+            while IFS= read -r EXTRA_FILE; do
+              if [ -n "$EXTRA_FILE" ] && [ -f "$EXTRA_FILE" ]; then
+                printf '%s\n' "$EXTRA_FILE" >> "$RAW_ADD"
+              fi
+            done < .ota_extra_files
+          fi
+
           sort -u "$RAW_ADD" > "$OTA_FILES"
           sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
 
@@ -417,6 +444,7 @@ jobs:
             -x!.ota_manifest \
             -x!.ota_delete \
             -x!.ota_files \
+            -x!.ota_extra_files \
             -x!spruceOTA-*.7z
 
           # Add the commits file separately to place it at the root
