@@ -9,6 +9,9 @@ OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
 OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
 TMP_DIR="/mnt/SDCARD/App/-OTA/tmp"
+# Written by updater.py after a nightly install: the stable release that
+# nightly was generated from. Absent on stable installs.
+NIGHTLY_BASE_FILE="/mnt/SDCARD/Saves/spruce/ota_nightly_base"
 
 ##### FUNCTIONS #####
 
@@ -129,7 +132,10 @@ queue_full_update() {
             rm -rf "$TMP_DIR"
             exit 1
         fi
-        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL|${CURRENT_VERSION}" >> "$TMP_DIR/ota_queue"
+        # FROM of a full nightly is the stable release it was generated from
+        # (recorded on the device by updater.py); empty if the metadata does
+        # not say, in which case later nightly diffs fall back to full.
+        echo "${NIGHTLY_VERSION}|${NIGHTLY_CHECKSUM}|${NIGHTLY_LINK}|${NIGHTLY_SIZE}|${NIGHTLY_INFO}|FULL|${NIGHTLY_DIFF_BASE_VERSION}" >> "$TMP_DIR/ota_queue"
         log_message "OTA: Queued full nightly update: $NIGHTLY_VERSION"
     else
         if [ -z "$RELEASE_VERSION" ] || [ -z "$RELEASE_CHECKSUM" ] || [ -z "$RELEASE_LINK" ] || [ -z "$RELEASE_SIZE" ]; then
@@ -180,6 +186,7 @@ if ! is_wifi_connected; then
 fi
 
 CURRENT_VERSION=$(get_version)
+INSTALLED_NIGHTLY_BASE="$(cat "$NIGHTLY_BASE_FILE" 2>/dev/null | tr -d '[:space:]' | sed 's/^v//; s/-.*$//')"
 read_only_check
 
 # Try primary and backup URLs
@@ -235,8 +242,11 @@ SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipV
 # those lines are ignored until a beta channel is designed for this flow.
 #
 # Nightly builds only write the base version to spruce/spruce, so a device
-# cannot tell which nightly it has: "already current" cannot be detected for
-# nightlies and nightly-to-nightly updates always use the full archive.
+# cannot tell which nightly it has and "already current" cannot be detected
+# for nightlies. Nightly-to-nightly updates do not need that: every nightly
+# diff is generated from the current stable release and covers every path
+# touched since it, so it applies on top of any nightly with the same
+# recorded stable base (see NIGHTLY_BASE_FILE).
 TARGET_CHANNEL="stable"
 
 if flag_check "developer_mode" || flag_check "tester_mode"; then
@@ -260,6 +270,25 @@ fi
 CURRENT_NUM="$(version_num "$CURRENT_VERSION")" || CURRENT_NUM=""
 RELEASE_NUM="$(version_num "$RELEASE_VERSION")" || RELEASE_NUM=""
 
+# Nightly incremental metadata. Every nightly diff is generated from one
+# specific stable release and covers every path touched since it, so it can
+# be applied on top of that stable OR on top of any nightly derived from it.
+# It is only usable when it was built from the CURRENT stable release.
+NIGHTLY_DIFF_BASE_VERSION=$(sed -n 's/^NIGHTLY_DIFF_BASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | sed 's/^v//')
+NIGHTLY_DIFF_VERSION=$(sed -n 's/^NIGHTLY_DIFF_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_DIFF_LINK=$(sed -n 's/^NIGHTLY_DIFF_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_DIFF_CHECKSUM=$(sed -n 's/^NIGHTLY_DIFF_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+NIGHTLY_DIFF_SIZE=$(sed -n 's/^NIGHTLY_DIFF_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+
+NIGHTLY_DIFF_OK=0
+if [ -n "$NIGHTLY_DIFF_LINK" ] && [ -n "$NIGHTLY_DIFF_CHECKSUM" ] && [ -n "$NIGHTLY_DIFF_SIZE" ] && [ -n "$NIGHTLY_VERSION" ] \
+    && [ "$NIGHTLY_DIFF_BASE_VERSION" = "$RELEASE_VERSION" ] \
+    && { [ -z "$NIGHTLY_DIFF_VERSION" ] || [ "$NIGHTLY_DIFF_VERSION" = "$NIGHTLY_VERSION" ]; }; then
+    NIGHTLY_DIFF_OK=1
+fi
+
+log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
+
 ##### BUILD UPDATE QUEUE #####
 
 rm -f "$TMP_DIR/ota_queue"
@@ -280,6 +309,7 @@ rm -f "$TMP_DIR/ota_queue"
 # Incremental mode falls back to the traditional full archive whenever no
 # usable diff exists, instead of asking the user to change a setting.
 USE_INCREMENTAL=0
+NIGHTLY_QUEUED=0
 
 if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
     USE_INCREMENTAL=1
@@ -287,13 +317,28 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
     if [ -z "$CURRENT_NUM" ] || [ -z "$RELEASE_NUM" ]; then
         log_message "OTA: Cannot compare versions ($CURRENT_VERSION vs $RELEASE_VERSION); using a full update"
         USE_INCREMENTAL=0
+    elif [ -n "$INSTALLED_NIGHTLY_BASE" ]; then
+        # The device runs a nightly. The stable chain never applies on top
+        # of a nightly; the only incremental path is the nightly diff, and
+        # only when that nightly was generated from the same stable release
+        # as the installed one.
+        if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$NIGHTLY_DIFF_OK" = "1" ] && [ "$INSTALLED_NIGHTLY_BASE" = "$RELEASE_VERSION" ]; then
+            echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY|${RELEASE_VERSION}" >> "$TMP_DIR/ota_queue"
+            log_message "OTA: Queued nightly incremental update on top of nightly $CURRENT_VERSION (stable base $INSTALLED_NIGHTLY_BASE): -> $NIGHTLY_VERSION"
+            NIGHTLY_QUEUED=1
+        elif [ "$TARGET_CHANNEL" = "nightly" ]; then
+            log_message "OTA: Nightly diff not applicable on this nightly (installed base $INSTALLED_NIGHTLY_BASE, diff base ${NIGHTLY_DIFF_BASE_VERSION:-none}, stable $RELEASE_VERSION); falling back to a full nightly update"
+            USE_INCREMENTAL=0
+        else
+            log_message "OTA: Device runs a nightly (base $INSTALLED_NIGHTLY_BASE) on the stable channel; using a full update"
+            USE_INCREMENTAL=0
+        fi
     elif [ "$CURRENT_NUM" -gt "$RELEASE_NUM" ]; then
-        # The installed version is newer than the latest stable release. This
-        # is normally a device running a nightly (spruce/spruce holds the base
-        # version of the Development branch). No stable diff can start here,
-        # and a stable -> nightly diff cannot be applied on top of a nightly.
+        # Newer than the latest stable without a recorded nightly base: a
+        # nightly installed before the base was recorded, or an unknown
+        # state. No diff can be trusted here.
         if [ "$TARGET_CHANNEL" = "nightly" ]; then
-            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION; nightly-to-nightly requires a full update"
+            log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION and has no recorded nightly base; using a full nightly update"
             USE_INCREMENTAL=0
         else
             log_message "OTA: Installed version $CURRENT_VERSION is newer than stable $RELEASE_VERSION"
@@ -302,7 +347,7 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ]; then
     fi
 fi
 
-if [ "$USE_INCREMENTAL" = "1" ]; then
+if [ "$USE_INCREMENTAL" = "1" ] && [ "$NIGHTLY_QUEUED" != "1" ]; then
 
     # First bring the device up through the stable release chain.
     QUEUE_VERSION="$CURRENT_VERSION"
@@ -367,32 +412,26 @@ if [ "$USE_INCREMENTAL" = "1" ]; then
 
 fi
 
-if [ "$USE_INCREMENTAL" = "1" ] && [ "$TARGET_CHANNEL" = "nightly" ]; then
+if [ "$USE_INCREMENTAL" = "1" ] && [ "$NIGHTLY_QUEUED" != "1" ] && [ "$TARGET_CHANNEL" = "nightly" ]; then
 
     # The desired channel is nightly: add the stable -> nightly incremental
     # update after reaching the latest stable release.
-    NIGHTLY_DIFF_BASE_VERSION=$(sed -n 's/^NIGHTLY_DIFF_BASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | sed 's/^v//')
-    NIGHTLY_DIFF_VERSION=$(sed -n 's/^NIGHTLY_DIFF_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-    NIGHTLY_DIFF_LINK=$(sed -n 's/^NIGHTLY_DIFF_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-    NIGHTLY_DIFF_CHECKSUM=$(sed -n 's/^NIGHTLY_DIFF_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-    NIGHTLY_DIFF_SIZE=$(sed -n 's/^NIGHTLY_DIFF_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-
-    if [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ] || [ -z "$NIGHTLY_VERSION" ]; then
+    if [ "$NIGHTLY_DIFF_OK" = "1" ]; then
+        echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY|${RELEASE_VERSION}" >> "$TMP_DIR/ota_queue"
+        log_message "OTA: Queued nightly incremental update: $RELEASE_VERSION -> $NIGHTLY_VERSION"
+    elif [ -z "$NIGHTLY_DIFF_LINK" ] || [ -z "$NIGHTLY_DIFF_CHECKSUM" ] || [ -z "$NIGHTLY_DIFF_SIZE" ] || [ -z "$NIGHTLY_VERSION" ]; then
         log_message "OTA: Nightly incremental metadata is not available; falling back to a full nightly update"
         rm -f "$TMP_DIR/ota_queue"
         USE_INCREMENTAL=0
-    elif [ "$NIGHTLY_DIFF_BASE_VERSION" != "$RELEASE_VERSION" ] || { [ -n "$NIGHTLY_DIFF_VERSION" ] && [ "$NIGHTLY_DIFF_VERSION" != "$NIGHTLY_VERSION" ]; }; then
-        # Every nightly diff is generated from one specific stable release.
-        # If a new stable was published after the last nightly build, the
-        # diff would be applied on top of the wrong base and mix two trees.
+    else
+        # The nightly diff was generated against a different stable release
+        # (e.g. a new stable was published after the last nightly build).
+        # Applying it on top of $RELEASE_VERSION would mix two trees.
         log_message "OTA: Nightly diff base $NIGHTLY_DIFF_BASE_VERSION (version $NIGHTLY_DIFF_VERSION) does not match stable $RELEASE_VERSION / nightly $NIGHTLY_VERSION; falling back to a full nightly update"
         display_image_and_text "$IMAGE_PATH" 35 25 "The nightly incremental package was not built against the latest stable release. A full nightly update will be used instead." 75
         sleep 3
         rm -f "$TMP_DIR/ota_queue"
         USE_INCREMENTAL=0
-    else
-        echo "${NIGHTLY_VERSION}|${NIGHTLY_DIFF_CHECKSUM}|${NIGHTLY_DIFF_LINK}|${NIGHTLY_DIFF_SIZE}|${NIGHTLY_INFO}|DIFF_NIGHTLY|${RELEASE_VERSION}" >> "$TMP_DIR/ota_queue"
-        log_message "OTA: Queued nightly incremental update: $RELEASE_VERSION -> $NIGHTLY_VERSION"
     fi
 fi
 
