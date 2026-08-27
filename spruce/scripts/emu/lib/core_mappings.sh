@@ -28,6 +28,7 @@ get_core_folder() {
         "fceumm_libretro.so") echo "FCEUmm" ;;
         "flycast_libretro.so") echo "Flycast" ;;
         "flycast2021_libretro.so") echo "Flycast 2021" ;;
+        "flycast2024_libretro.so") echo "Flycast 2024" ;;
         "fmsx_libretro.so") echo "fMSX" ;;
         "freechaf_libretro.so") echo "FreeChaF" ;;
         "freeintv_libretro.so") echo "FreeIntv" ;;
