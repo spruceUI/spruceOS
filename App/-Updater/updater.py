@@ -1319,8 +1319,9 @@ def extract_with_progress(
             total_hint
         )
 
+    # Entries excluded from extraction are still counted by `7zr l`.
     total = max(
-        total,
+        total - len(exclude),
         1
     )
 
