@@ -16,6 +16,11 @@ Each queue line has:
 
 FROM is the version the archive must be applied on top of (older queues
 without it are still accepted, but their chain cannot be validated).
+For DIFF_NIGHTLY and for a FULL nightly it is the STABLE release the nightly
+was generated from; a nightly diff may be applied on top of that stable or
+on top of any nightly derived from it. The stable base of the installed
+nightly is recorded in NIGHTLY_BASE_FILE and removed again by any stable
+install.
 
 TYPE is:
     FULL
@@ -53,6 +58,7 @@ CONFIG_FILE = f"{SD_ROOT}/Saves/spruce/spruce-config.json"
 VERSION_FILE = f"{SD_ROOT}/spruce/spruce"
 APP_CONFIG = f"{APP_DIR}/config.json"
 QUEUE_FILE = f"{OTA_TMP_DIR}/ota_queue"
+NIGHTLY_BASE_FILE = f"{SD_ROOT}/Saves/spruce/ota_nightly_base"
 
 PERFORM_DELETION = True
 DELETE_UPDATE = True
@@ -696,10 +702,83 @@ def verify_checksum(archive, expected):
     return True
 
 
-def validate_incremental_chain(updates, installed_version):
+def read_nightly_base():
+    """Stable release the installed nightly was generated from, or ""."""
+
+    return version_base(
+        read_sysfs(
+            NIGHTLY_BASE_FILE,
+            ""
+        )
+    )
+
+
+def is_nightly_update(update):
+
+    if update["type"] == "DIFF_NIGHTLY":
+        return True
+
+    return (
+        update["type"] == "FULL"
+        and "-" in update["version"]
+    )
+
+
+def record_nightly_base(updates):
+    """
+    After a successful update, remember which stable release the
+    installed nightly derives from (FROM of the last queue entry), or
+    forget it when a stable release was installed.
+    """
+
+    last = updates[-1]
+
+    base = (
+        version_base(last["from"])
+        if is_nightly_update(last)
+        else ""
+    )
+
+    try:
+
+        if base:
+
+            Path(
+                NIGHTLY_BASE_FILE
+            ).write_text(base + "\n")
+
+            log.info(
+                f"Recorded nightly base {base}"
+            )
+
+        else:
+
+            if os.path.exists(NIGHTLY_BASE_FILE):
+                os.remove(NIGHTLY_BASE_FILE)
+
+                log.info(
+                    "Cleared nightly base marker"
+                )
+
+    except OSError as exc:
+
+        log.warning(
+            f"Could not update {NIGHTLY_BASE_FILE}: {exc}"
+        )
+
+
+def validate_incremental_chain(
+    updates,
+    installed_version,
+    installed_nightly_base=""
+):
     """
     Return an error message if the queued chain cannot be applied
     on top of the installed version, else None.
+
+    A device that runs a nightly (installed_nightly_base set) can only
+    take a nightly diff generated from that same stable release; the
+    stable chain never applies on top of a nightly.
 
     Accepts an installed version that is one of the chain's targets:
     that is a re-run after an interrupted attempt, and re-applying
@@ -741,6 +820,23 @@ def validate_incremental_chain(updates, installed_version):
         expected = update["version"]
 
     base = updates[0]["from"]
+
+    if installed_nightly_base:
+
+        if (
+            updates[0]["type"] != "DIFF_NIGHTLY"
+            or not base
+            or version_base(base) != installed_nightly_base
+        ):
+
+            return (
+                f"This device runs a nightly build based on "
+                f"{installed_nightly_base}; only a nightly update "
+                f"built from that release can be applied. "
+                "Run 'Check for Updates' again."
+            )
+
+        return None
 
     if not base or not installed_version:
         return None
@@ -1787,7 +1883,8 @@ def main():
             read_sysfs(
                 VERSION_FILE,
                 ""
-            )
+            ),
+            read_nightly_base()
         )
 
         if chain_error:
@@ -2115,13 +2212,17 @@ def main():
     ])
 
     # ------------------------------------------------------------------
-    # Restore flags
+    # Restore flags / remember the nightly base
     # ------------------------------------------------------------------
 
     restore_flags(
         developer_mode,
         tester_mode,
         beta
+    )
+
+    record_nightly_base(
+        updates
     )
 
     # ------------------------------------------------------------------
