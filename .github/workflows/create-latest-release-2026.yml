@@ -284,6 +284,16 @@ jobs:
             printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
           done
 
+          # Generated files that must travel in every package (nightly
+          # markers, commit log), listed by an earlier step in .ota_extra_files.
+          if [ -f .ota_extra_files ]; then
+            while IFS= read -r EXTRA_FILE; do
+              if [ -n "$EXTRA_FILE" ] && [ -f "$EXTRA_FILE" ]; then
+                printf '%s\n' "$EXTRA_FILE" >> "$RAW_ADD"
+              fi
+            done < .ota_extra_files
+          fi
+
           sort -u "$RAW_ADD" > "$OTA_FILES"
           sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
 
@@ -394,7 +404,9 @@ jobs:
             -x!To-Do.txt \
             -x!.ota_manifest \
             -x!.ota_delete \
-            -x!.ota_files
+            -x!.ota_files \
+            -x!.ota_extra_files \
+            -x!spruceOTA-*.7z
 
           echo "Archive created: spruceV${{ steps.get_version.outputs.version }}.7z"
           ls -lh "spruceV${{ steps.get_version.outputs.version }}.7z"
