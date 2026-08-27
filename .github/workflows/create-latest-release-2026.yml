@@ -227,17 +227,29 @@ jobs:
           RAW_ADD="$(mktemp)"
           RAW_DEL="$(mktemp)"
 
-          # --no-renames intentionally causes a rename to appear as:
-          #   D old/path
-          #   A new/path
+          # The package must bring ANY installation derived from the base
+          # release to HEAD - not only the base release itself. A nightly
+          # device may carry files that Development changed and later
+          # reverted, or added and later removed; a plain tree diff between
+          # base and HEAD never mentions those. So the frame of reference is
+          # every path touched since the base (history) united with every
+          # path that differs from it (tree): paths present at HEAD are
+          # shipped (restoring base content where needed), paths absent at
+          # HEAD are deleted.
           #
-          # This is exactly what the OTA updater will eventually need.
-          git diff \
-            --no-renames \
-            --name-status \
-            -z \
-            "$BASE_SHA" "$HEAD_SHA" |
-          while IFS= read -r -d '' STATUS && IFS= read -r -d '' FILE; do
+          # --no-renames intentionally causes a rename to appear as a delete
+          # of the old path plus an add of the new path, which is exactly
+          # what the OTA updater needs.
+          {
+            git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA"
+            git log --no-renames --name-only --format= -z "${BASE_SHA}..${HEAD_SHA}"
+          } |
+          sort -z -u |
+          while IFS= read -r -d '' FILE; do
+
+            if [ -z "$FILE" ]; then
+              continue
+            fi
 
             if is_excluded "$FILE"; then
               continue
@@ -245,16 +257,14 @@ jobs:
 
             OUT_PATH="$(translate_path "$FILE")"
 
-            if [ "$STATUS" = "D" ]; then
-              if [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
-                # A deleted input of a generated file means the generated
-                # file changed, not that it was removed.
-                printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
-              else
-                printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
-              fi
-            else
+            if git cat-file -e "${HEAD_SHA}:${FILE}" 2>/dev/null; then
               printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+            elif [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
+              # A removed input of a generated file means the generated
+              # file changed, not that it was removed.
+              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+            else
+              printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
             fi
 
           done
