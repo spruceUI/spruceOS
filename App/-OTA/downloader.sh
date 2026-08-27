@@ -150,8 +150,25 @@ queue_full_update() {
     fi
 }
 
+# Is the installed nightly at least as new as the advertised one? Base
+# versions compare numerically; equal bases compare by the date suffix.
+nightly_is_current() {
+    local installed_num target_num installed_date target_date
+    installed_num="$(version_num "$INSTALLED_NIGHTLY_VERSION")" || return 1
+    target_num="$(version_num "$NIGHTLY_VERSION")" || return 1
+    [ "$target_num" -gt "$installed_num" ] && return 1
+    [ "$target_num" -lt "$installed_num" ] && return 0
+    installed_date="${INSTALLED_NIGHTLY_VERSION##*-}"
+    target_date="${NIGHTLY_VERSION##*-}"
+    case "$installed_date$target_date" in
+        ""|*[!0-9]*) return 1 ;;
+    esac
+    [ "$target_date" -gt "$installed_date" ] && return 1
+    return 0
+}
+
 up_to_date_exit() {
-    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: $CURRENT_VERSION" 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: ${INSTALLED_NIGHTLY_VERSION:-$CURRENT_VERSION}" 75
     sleep 5
     rm -rf "$TMP_DIR"
     exit 0
@@ -187,6 +204,13 @@ fi
 
 CURRENT_VERSION=$(get_version)
 INSTALLED_NIGHTLY_BASE="$(cat "$NIGHTLY_BASE_FILE" 2>/dev/null | tr -d '[:space:]' | sed 's/^v//; s/-.*$//')"
+# Full version of an installed nightly, e.g. 4.3.6-20260828, when the install
+# left its root marker (/mnt/SDCARD/<base>-<date>, read by get_version_complex).
+INSTALLED_NIGHTLY_VERSION=""
+INSTALLED_FULL_VERSION="$(get_version_complex)"
+if [ -n "$INSTALLED_FULL_VERSION" ] && [ "$INSTALLED_FULL_VERSION" != "$CURRENT_VERSION" ]; then
+    INSTALLED_NIGHTLY_VERSION="$INSTALLED_FULL_VERSION"
+fi
 read_only_check
 
 # Try primary and backup URLs
@@ -232,8 +256,8 @@ fi
 
 # "OTA: skip version check" allows re-installing the same (or an older)
 # version, e.g. to repair an installation. Developer/tester devices on the
-# nightly channel always skip it: a nightly cannot be compared against the
-# version file.
+# nightly channel skip it only when the installed nightly left no version
+# marker, because then it cannot be compared against anything.
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
 # Determine desired release channel. Developer/tester devices follow the
@@ -259,7 +283,9 @@ if flag_check "developer_mode" || flag_check "tester_mode"; then
         TARGET_CHANNEL="stable"
     else
         TARGET_CHANNEL="nightly"
-        SKIP_VERSION_CHECK="True"
+        if [ -z "$INSTALLED_NIGHTLY_VERSION" ]; then
+            SKIP_VERSION_CHECK="True"
+        fi
     fi
 fi
 
@@ -296,7 +322,14 @@ if [ -n "$NIGHTLY_DIFF_LINK" ] && [ -n "$NIGHTLY_DIFF_CHECKSUM" ] && [ -n "$NIGH
     NIGHTLY_DIFF_OK=1
 fi
 
-log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
+log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; installed nightly version: ${INSTALLED_NIGHTLY_VERSION:-none}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
+
+# A nightly that knows its own version is not offered the same (or an older)
+# nightly again.
+if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$SKIP_VERSION_CHECK" != "True" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && nightly_is_current; then
+    log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is current (latest advertised: $NIGHTLY_VERSION)"
+    up_to_date_exit
+fi
 
 ##### BUILD UPDATE QUEUE #####
 

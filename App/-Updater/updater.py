@@ -18,9 +18,10 @@ FROM is the version the archive must be applied on top of (older queues
 without it are still accepted, but their chain cannot be validated).
 For DIFF_NIGHTLY and for a FULL nightly it is the STABLE release the nightly
 was generated from; a nightly diff may be applied on top of that stable or
-on top of any nightly derived from it. The stable base of the installed
-nightly is recorded in NIGHTLY_BASE_FILE and removed again by any stable
-install.
+on top of any nightly derived from it. After a nightly install the stable
+base is recorded in NIGHTLY_BASE_FILE and the full nightly version as an
+empty root marker /mnt/SDCARD/<base>-<date> (the file get_version_complex()
+in helperFunctions.sh reads); both are removed again by any stable install.
 
 TYPE is:
     FULL
@@ -59,6 +60,7 @@ VERSION_FILE = f"{SD_ROOT}/spruce/spruce"
 APP_CONFIG = f"{APP_DIR}/config.json"
 QUEUE_FILE = f"{OTA_TMP_DIR}/ota_queue"
 NIGHTLY_BASE_FILE = f"{SD_ROOT}/Saves/spruce/ota_nightly_base"
+NIGHTLY_MARKER_RE = re.compile(r"^\d+\.\d+(?:\.\d+)*-\d{8}$")
 
 PERFORM_DELETION = True
 DELETE_UPDATE = True
@@ -765,6 +767,58 @@ def record_nightly_base(updates):
         log.warning(
             f"Could not update {NIGHTLY_BASE_FILE}: {exc}"
         )
+
+
+def record_nightly_version(updates):
+    """
+    Keep exactly one root marker (/mnt/SDCARD/<base>-<date>) naming the
+    installed nightly, or none after a stable install. helperFunctions'
+    get_version_complex() reports it as the device version.
+    """
+
+    last = updates[-1]
+
+    version = last["version"].strip()
+
+    for entry in os.listdir(SD_ROOT):
+
+        path = f"{SD_ROOT}/{entry}"
+
+        if (
+            NIGHTLY_MARKER_RE.match(entry)
+            and os.path.isfile(path)
+            and entry != version
+        ):
+
+            try:
+                os.remove(path)
+
+                log.info(
+                    f"Removed stale nightly marker {entry}"
+                )
+
+            except OSError as exc:
+
+                log.warning(
+                    f"Could not remove {path}: {exc}"
+                )
+
+    if is_nightly_update(last) and NIGHTLY_MARKER_RE.match(version):
+
+        try:
+            Path(
+                f"{SD_ROOT}/{version}"
+            ).touch()
+
+            log.info(
+                f"Recorded nightly version {version}"
+            )
+
+        except OSError as exc:
+
+            log.warning(
+                f"Could not write nightly marker: {exc}"
+            )
 
 
 def validate_incremental_chain(
@@ -2222,6 +2276,10 @@ def main():
     )
 
     record_nightly_base(
+        updates
+    )
+
+    record_nightly_version(
         updates
     )
 

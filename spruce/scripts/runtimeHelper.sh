@@ -41,11 +41,31 @@ check_and_handle_firmware_app() {
     fi
 }
 
+# Download the OTA release info into "$TMP_DIR/spruce". Certificates are
+# verified first (SSL_CERT_FILE); only a TLS failure retries with -k, the
+# same way downloader.sh does it.
+fetch_release_info() {
+    curl -sS -f --connect-timeout 15 -o "$TMP_DIR/spruce" "$1" 2>"$TMP_DIR/curl_error"
+    fetch_rc=$?
+    case "$fetch_rc" in
+        35|51|58|59|60|77)
+            log_message "Update Check: TLS verification failed for $1 (curl $fetch_rc); retrying without certificate verification"
+            curl -k -sS -f --connect-timeout 15 -o "$TMP_DIR/spruce" "$1" 2>"$TMP_DIR/curl_error"
+            fetch_rc=$?
+            ;;
+    esac
+    [ "$fetch_rc" -eq 0 ] && grep -q "RELEASE_VERSION=" "$TMP_DIR/spruce"
+}
+
 check_for_update() {
 
     SD_CARD="/mnt/SDCARD"
     OTA_URL="https://spruceui.github.io/OTA/spruce"
-    TMP_DIR="$SD_CARD/App/-OTA/tmp"
+    OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
+    OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
+    # Not App/-OTA/tmp: that directory holds a pending "install later"
+    # queue for the EZ Updater, and this function removes its own scratch dir.
+    TMP_DIR="$SD_CARD/App/-OTA/check_tmp"
     CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
     should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
@@ -113,7 +133,7 @@ check_for_update() {
     log_message "Update Check: Current version: $CURRENT_VERSION"
 
     # Download and parse the release info file
-    if ! curl -s -o "$TMP_DIR/spruce" "$OTA_URL"; then
+    if ! fetch_release_info "$OTA_URL" && ! fetch_release_info "$OTA_URL_BACKUP" && ! fetch_release_info "$OTA_URL_BACKUP_BACKUP"; then
         log_message "Update Check: Failed to download release info"
         rm -rf "$TMP_DIR"
         return 1
@@ -131,7 +151,11 @@ check_for_update() {
     fi
 
     if flag_check "developer_mode" || flag_check "tester_mode"; then
-        TARGET_VERSION="$NIGHTLY_VERSION"
+        # Same rule as downloader.sh: "OTA: release channel" = Stable keeps a
+        # developer/tester device on stable releases.
+        if [ "$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")" != "Stable" ]; then
+            TARGET_VERSION="$NIGHTLY_VERSION"
+        fi
     fi
 
     # Compare versions, handling nightly date format and beta versions
