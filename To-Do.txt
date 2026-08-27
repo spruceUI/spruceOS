@@ -28,4 +28,4 @@
 
 - Beta channel: BETA_* lines in OTA/spruce are ignored by the split downloader; design a beta tag/channel for the incremental flow
 - Theme delivery: Themes/*.7z come from a fixed PyUI-Themes release tag and are not in git, so only full archives deliver theme updates
-- Nightly identity: spruce/spruce holds only the base version, so nightly-to-nightly updates always use the full archive; write the full nightly version if nightly diffs are ever wanted
+- Nightly identity: spruce/spruce holds only the base version, so a device cannot tell which nightly it has and "already current" is never detected for nightlies (nightly-to-nightly diffs work regardless: the package covers every path touched since the stable base recorded in Saves/spruce/ota_nightly_base)
