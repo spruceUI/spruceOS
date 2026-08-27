@@ -221,11 +221,11 @@ NIGHTLY_INFO=$(sed -n 's/^NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateType.selected' "Full")"
 
 # TODO: remove once incremental OTA is approved as stable.
-# Incremental updates are limited to developer-mode devices while the
+# Incremental updates are limited to developer/tester devices while the
 # release pipeline is being proven; everyone else gets the full archive.
-if [ "$OTA_UPDATE_TYPE" = "Incremental" ] && ! flag_check "developer_mode"; then
-    log_message "OTA: Incremental update type selected without developer_mode; using a full update"
-    display_image_and_text "$IMAGE_PATH" 35 25 "Incremental updates are currently limited to developer mode. A full update will be used instead." 75
+if [ "$OTA_UPDATE_TYPE" = "Incremental" ] && ! flag_check "developer_mode" && ! flag_check "tester_mode"; then
+    log_message "OTA: Incremental update type selected without developer_mode/tester_mode; using a full update"
+    display_image_and_text "$IMAGE_PATH" 35 25 "Incremental updates are currently limited to developer or tester mode. A full update will be used instead." 75
     sleep 3
     OTA_UPDATE_TYPE="Full"
 fi
