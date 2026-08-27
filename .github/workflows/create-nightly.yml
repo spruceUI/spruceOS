@@ -12,11 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # update-ota-on-publish.yml pushes to the same OTA repositories; never race it.
+    concurrency:
+      group: ota-metadata
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
         with:
           ref: Development
           fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install 7zip
         run: |
@@ -30,8 +36,10 @@ jobs:
             echo "Error: spruce/spruce file not found"
             exit 1
           fi
+
           VERSION="$(< spruce/spruce)"
           echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+
           # Get last commit hash and commits, save to file
           {
             echo "Last commit: $(git rev-parse HEAD)"
@@ -40,15 +48,63 @@ jobs:
             git log --since="24 hours ago" --pretty=format:'- %s (%an)'
           } > commits_nightly.txt
 
+      - name: Record current Development commit
+        id: current_commit
+        run: |
+          HEAD_SHA="$(git rev-parse HEAD)"
+          echo "sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Current Development commit: ${HEAD_SHA}"
+
+      - name: Find last stable release
+        id: previous_stable
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "Finding most recent published stable release..."
+
+          RELEASE_JSON="$(gh api \
+            "repos/spruceUI/spruceOS/releases?per_page=100" \
+            --jq '[.[] | select(.draft == false and .prerelease == false)] | .[0]')"
+
+          if [ -z "$RELEASE_JSON" ] || [ "$RELEASE_JSON" = "null" ]; then
+            echo "Error: No previous stable release was found."
+            exit 1
+          fi
+
+          TAG_NAME="$(echo "$RELEASE_JSON" | jq -r '.tag_name')"
+
+          if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "null" ]; then
+            echo "Error: Could not determine tag of previous stable release."
+            exit 1
+          fi
+
+          echo "Previous stable release: ${TAG_NAME}"
+
+          # Resolve the stable release tag to its actual commit.
+          BASE_SHA="$(git rev-list -n 1 "$TAG_NAME")"
+
+          if [ -z "$BASE_SHA" ]; then
+            echo "Error: Could not resolve ${TAG_NAME} to a commit."
+            exit 1
+          fi
+
+          echo "Previous stable release commit: ${BASE_SHA}"
+
+          echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
+          echo "sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
+
       - name: Check for commits
         id: check_commits
         run: |
           # Get all commits from last 24 hours
           COMMITS=$(git log --since="24 hours ago" --pretty=format:'- %s (%an)%n')
+
           if [ -z "$COMMITS" ]; then
             echo "No commits in the last 24 hours"
             exit 1
           fi
+
           # Write commits to output
           {
             echo "commits<<EOF"
@@ -79,6 +135,9 @@ jobs:
           fi
 
       - name: Pull selected PyUI Themes
+        # TODO(OTA): these archives are downloaded from a fixed PyUI-Themes
+        # release tag and are not tracked in git, so they never appear in the
+        # OTA diff manifest: only full archives deliver theme updates.
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -86,6 +145,7 @@ jobs:
           RELEASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
 
           echo "Downloading selected themes from PyUI-Themes release..."
+
           wget -q --no-check-certificate -O "Themes/ALEKFULL_NX_ES.7z" "${RELEASE_URL}/ALEKFULL_NX_ES.7z" || true
           wget -q --no-check-certificate -O "Themes/ART_BOOK_OUTLINE.7z" "${RELEASE_URL}/ART_BOOK_OUTLINE.7z" || true
           wget -q --no-check-certificate -O "Themes/ART_BOOK_NEXT.7z" "${RELEASE_URL}/ART_BOOK_NEXT.7z" || true
@@ -113,6 +173,233 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      - name: Generate OTA diff manifest
+        id: ota_diff
+        run: |
+          BASE_SHA="${{ steps.previous_stable.outputs.sha }}"
+          HEAD_SHA="${{ steps.current_commit.outputs.sha }}"
+
+          echo "=========================================="
+          echo "Generating OTA diff"
+          echo "=========================================="
+          echo "Base stable release: ${{ steps.previous_stable.outputs.tag }}"
+          echo "Base SHA:            ${BASE_SHA}"
+          echo "Development SHA:     ${HEAD_SHA}"
+          echo ""
+
+          OTA_MANIFEST=".ota_manifest"
+          OTA_DELETE=".ota_delete"
+          OTA_FILES=".ota_files"
+
+          rm -f "$OTA_MANIFEST" "$OTA_DELETE" "$OTA_FILES"
+
+          touch "$OTA_MANIFEST"
+          touch "$OTA_DELETE"
+          touch "$OTA_FILES"
+
+          # Files excluded from the full release archive should also be
+          # excluded from the OTA package.
+          is_excluded() {
+            case "$1" in
+              .git/*|.git|.github/*|.github|.gitignore|.gitattributes)
+                return 0
+                ;;
+              create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
+                return 0
+                ;;
+              spruce/flags/developer_mode)
+                return 0
+                ;;
+              commits_nightly.txt)
+                return 0
+                ;;
+
+            esac
+
+            return 1
+          }
+
+          # Paths that the release build regenerates after checkout
+          # (see "Recombine split files" and "Archive Licenses folder").
+          # A change to any INPUT must ship the generated OUTPUT: the inputs
+          # no longer exist in the working tree by the time 7z runs, and the
+          # device only ever has the recombined file.
+          translate_path() {
+            case "$1" in
+              spruce/flip/miyoo355_rootfs_32.img_part*)
+                echo "spruce/flip/miyoo355_rootfs_32.img"
+                ;;
+              spruce/flip/muOS-pixie-reduced.sqsh-part*)
+                echo "spruce/flip/muOS-pixie-reduced.sqsh"
+                ;;
+              RetroArch/.retroarch/cores64/scummvm_libretro.so.part*)
+                echo "RetroArch/.retroarch/cores64/scummvm_libretro.so"
+                ;;
+              Licenses/*)
+                echo "Licenses.7z"
+                ;;
+              *)
+                echo "$1"
+                ;;
+            esac
+          }
+
+          RAW_ADD="$(mktemp)"
+          RAW_DEL="$(mktemp)"
+
+          # The package must bring ANY installation derived from the base
+          # release to HEAD - not only the base release itself. A nightly
+          # device may carry files that Development changed and later
+          # reverted, or added and later removed; a plain tree diff between
+          # base and HEAD never mentions those. So the frame of reference is
+          # every path touched since the base (history) united with every
+          # path that differs from it (tree): paths present at HEAD are
+          # shipped (restoring base content where needed), paths absent at
+          # HEAD are deleted.
+          #
+          # --no-renames intentionally causes a rename to appear as a delete
+          # of the old path plus an add of the new path, which is exactly
+          # what the OTA updater needs.
+          {
+            git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA"
+            git log --no-renames --name-only --format= -z "${BASE_SHA}..${HEAD_SHA}"
+          } |
+          sort -z -u |
+          while IFS= read -r -d '' FILE; do
+
+            if [ -z "$FILE" ]; then
+              continue
+            fi
+
+            if is_excluded "$FILE"; then
+              continue
+            fi
+
+            OUT_PATH="$(translate_path "$FILE")"
+
+            if git cat-file -e "${HEAD_SHA}:${FILE}" 2>/dev/null; then
+              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+            elif [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
+              # A removed input of a generated file means the generated
+              # file changed, not that it was removed.
+              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+            else
+              printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
+            fi
+
+          done
+
+          # A full archive re-creates every tracked flag file (the first-boot
+          # lock for each platform, run_upgrades.lock), which the device
+          # consumes at runtime; that is how a full update re-arms the
+          # first-boot lane. Ship the same tracked flag files in every OTA
+          # package so an incremental update re-arms exactly what a full
+          # update would, without the updater needing per-platform knowledge.
+          git ls-tree -r --name-only "$HEAD_SHA" -- spruce/flags |
+          while IFS= read -r FLAG_FILE; do
+            [ -z "$FLAG_FILE" ] && continue
+            if is_excluded "$FLAG_FILE"; then
+              continue
+            fi
+            printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
+          done
+
+          sort -u "$RAW_ADD" > "$OTA_FILES"
+          sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
+
+          # Every packaged path must exist as a regular file NOW. A path that
+          # is missing here would silently drop out of the archive.
+          MISSING=0
+          while IFS= read -r OTA_PATH; do
+            [ -z "$OTA_PATH" ] && continue
+            if [ ! -f "$OTA_PATH" ]; then
+              echo "ERROR: manifest path does not exist at packaging time: $OTA_PATH"
+              MISSING=1
+            fi
+          done < "$OTA_FILES"
+
+          if [ "$MISSING" -ne 0 ]; then
+            echo "Refusing to build an OTA archive with missing payload."
+            exit 1
+          fi
+
+          echo ""
+          echo "Changed files:"
+          if [ -s "$OTA_FILES" ]; then
+            cat "$OTA_FILES"
+          else
+            echo "(none)"
+          fi
+
+          echo ""
+          echo "Deleted files:"
+          if [ -s "$OTA_DELETE" ]; then
+            cat "$OTA_DELETE"
+          else
+            echo "(none)"
+          fi
+
+          # Add metadata to the beginning of the manifest.
+          {
+            echo "# spruceOS OTA manifest"
+            echo "# From stable release: ${{ steps.previous_stable.outputs.tag }}"
+            echo "# From SHA: $BASE_SHA"
+            echo "# To nightly version: ${{ steps.get_version.outputs.version }}"
+            echo "# To SHA: $HEAD_SHA"
+            echo ""
+            echo "# Files to add/update:"
+            cat "$OTA_FILES"
+            echo ""
+            echo "# Deleted files are listed in .ota_delete"
+          } > "$OTA_MANIFEST"
+
+          rm -f "$RAW_ADD" "$RAW_DEL"
+
+          echo "manifest=${OTA_MANIFEST}" >> "$GITHUB_OUTPUT"
+          echo "delete_list=${OTA_DELETE}" >> "$GITHUB_OUTPUT"
+          echo "file_list=${OTA_FILES}" >> "$GITHUB_OUTPUT"
+
+      - name: Create OTA archive
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          PREVIOUS_VERSION="${{ steps.previous_stable.outputs.tag }}"
+
+          OTA_ARCHIVE="spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+
+          echo "Creating OTA archive: ${OTA_ARCHIVE}"
+
+          # Build a temporary 7z list containing:
+          #   - the manifest
+          #   - the delete list
+          #   - every changed/added file
+          OTA_7Z_LIST="$(mktemp)"
+
+          printf '%s\n' ".ota_manifest" >> "$OTA_7Z_LIST"
+          printf '%s\n' ".ota_delete" >> "$OTA_7Z_LIST"
+
+          if [ -s ".ota_files" ]; then
+            cat ".ota_files" >> "$OTA_7Z_LIST"
+          fi
+
+          7z a \
+            -t7z \
+            -m0=lzma2:d=16m \
+            -mx=7 \
+            -ms=off \
+            -mf- \
+            "$OTA_ARCHIVE" \
+            @"$OTA_7Z_LIST"
+
+          rm -f "$OTA_7Z_LIST"
+
+          echo ""
+          echo "OTA archive created:"
+          ls -lh "$OTA_ARCHIVE"
+
+          echo ""
+          echo "Archive contents:"
+          7z l "$OTA_ARCHIVE"
+
       - name: Create 7z archive
         run: |
           # Dot-directories must be named explicitly - the shell's * does not
@@ -126,7 +413,11 @@ jobs:
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
             -x!commits_nightly.txt \
-            -x!To-Do.txt
+            -x!To-Do.txt \
+            -x!.ota_manifest \
+            -x!.ota_delete \
+            -x!.ota_files
+
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
@@ -134,9 +425,26 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: success() && steps.check_commits.outcome == 'success'
         with:
-          files: spruceV${{ steps.get_version.outputs.version }}.7z
+          files: |
+            spruceV${{ steps.get_version.outputs.version }}.7z
+            spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z
           tag_name: v${{ steps.get_version.outputs.version }}
-          body: ${{ steps.check_commits.outputs.commits }}
+          body: |
+            ${{ steps.check_commits.outputs.commits }}
+
+            ## OTA Update
+
+            This nightly includes an OTA package containing all changes from stable release `${{ steps.previous_stable.outputs.tag }}` to this Development build.
+
+            OTA package:
+            `spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z`
+
+            Base stable commit:
+            `${{ steps.previous_stable.outputs.sha }}`
+
+            Development commit:
+            `${{ steps.current_commit.outputs.sha }}`
+
           repository: spruceUI/spruceOSNightlies
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
@@ -150,65 +458,94 @@ jobs:
           # Clone both repositories
           git clone https://github.com/spruceUI/spruceui.github.io.git ota_repo
           git clone https://github.com/spruceUI/spruceSource.git source_repo
-          
-          # Calculate file info
+
+          # Calculate full nightly release info
           CHECKSUM=$(md5sum "spruceV${{ steps.get_version.outputs.version }}.7z" | cut -d' ' -f1)
           SIZE_MB=$(ls -l --block-size=1M "spruceV${{ steps.get_version.outputs.version }}.7z" | awk '{print $5}')
-          
+
+          # Calculate stable -> nightly OTA diff info
+          DIFF_ARCHIVE="spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+          DIFF_CHECKSUM=$(md5sum "$DIFF_ARCHIVE" | cut -d' ' -f1)
+          DIFF_SIZE_MB=$(ls -l --block-size=1M "$DIFF_ARCHIVE" | awk '{print $5}')
+
+          echo "Nightly checksum: $CHECKSUM"
+          echo "Nightly size: ${SIZE_MB} MB"
+          echo "Stable -> nightly diff checksum: $DIFF_CHECKSUM"
+          echo "Stable -> nightly diff size: ${DIFF_SIZE_MB} MB"
+
           # Function to update OTA file
           update_ota_file() {
-            local file="$1"
-            local content
-            content=$(cat "$file")
-            
-            echo "$content" | grep -v "^NIGHTLY_" > "$file"
-            echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
-            echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
-            echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
-            echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
-            echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+              local file="$1"
+              local content
+              content=$(cat "$file")
+
+              # Remove existing nightly variables.
+              # Only one stable -> nightly diff is needed because every
+              # nightly is generated from the current stable release.
+              echo "$content" | grep -v "^NIGHTLY_" > "$file"
+
+              # Full nightly release
+              echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+              echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
+              echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
+              echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+              echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+
+              # Stable -> nightly OTA diff
+              # Same representation as RELEASE_VERSION (no v prefix): the
+              # downloader compares the two to make sure the diff was built
+              # against the stable release the device will be on.
+              echo "NIGHTLY_DIFF_BASE_VERSION=${{ steps.previous_stable.outputs.version }}" >> "$file"
+              echo "NIGHTLY_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+              echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
+              echo "NIGHTLY_DIFF_SIZE_IN_MB=$DIFF_SIZE_MB" >> "$file"
+              echo "NIGHTLY_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/${DIFF_ARCHIVE}" >> "$file"
           }
-          
+
           # Update both OTA files
           update_ota_file "ota_repo/OTA/spruce"
           update_ota_file "source_repo/OTA/spruce"
-          
+
           # Update primary OTA repo
           cd ota_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
-          
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in primary OTA repository."
+          else
+            git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceui.github.io.git main
+          fi
+
           # Update backup OTA repo
           cd ../source_repo
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
           git add OTA/spruce
-          git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
-          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit in backup OTA repository."
+          else
+            git commit -m "Update nightly release to ${{ steps.get_version.outputs.version }}"
+            git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/spruceUI/spruceSource.git main
+          fi
 
       - name: Delete old releases
         if: success() && steps.check_commits.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Get all releases and filter out beta releases
+          # Keep only the three most recent nightly releases.
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
-            jq -r '.[] | select(.tag_name | contains("-Beta") | not) | .id')
-          
-          # Convert to array and keep only releases after the first 3
+            jq -r '.[] | .id')
+
           COUNT=0
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
+
             if [ $COUNT -gt 3 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
-
           done
-
-
-
-
-

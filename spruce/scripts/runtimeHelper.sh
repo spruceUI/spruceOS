@@ -233,6 +233,13 @@ update_checker(){
 }
 
 check_for_update_file() {
+    # An incremental OTA leaves spruceOTA-*.7z archives plus a queue file
+    # rather than a spruceV*.7z, and "install later" must survive a reboot.
+    if [ -f /mnt/SDCARD/App/-OTA/tmp/ota_queue ]; then
+        echo "Pending OTA queue found"
+        return 0
+    fi
+
     echo "Searching for update file"
     UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{print $2, $0}' | sort -n | tail -n1 | cut -d' ' -f2-)
     echo "Found update file: $UPDATE_FILE"
