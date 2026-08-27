@@ -40,7 +40,10 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "options": ["64-bit", "32-bit"],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
       "selected": "64-bit",
       "overrides": {}
     },
@@ -56,7 +59,11 @@
       ],
       "options": [
         "Flycast-libretro",
-        "Flycast-standalone"
+        "Flycast-standalone",
+        "Flycast2024-libretro",
+        "Flycast2024-standalone",
+        "Flycast2021-libretro",
+        "Flycast2021-standalone"
       ],
       "selected": "Flycast-libretro",
       "overrides": {}

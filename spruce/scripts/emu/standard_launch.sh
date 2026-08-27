@@ -68,18 +68,16 @@ case $EMU_NAME in
 		;;
 
 	"DC"|"NAOMI"|"ATOMISWAVE")
-		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast2024-standalone" ]; then
-			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
-			run_flycast_standalone
-		elif [ "$CORE" = "Flycast-libretro" ]; then
-			export CORE="flycast"
-			run_retroarch
-		elif [ "$CORE" = "Flycast2021-libretro" ]; then
-			export CORE="flycast2021"
-			run_retroarch
-		else
-			run_retroarch
-		fi
+		case "$CORE" in
+			Flycast-standalone|Flycast2021-standalone|Flycast2024-standalone)
+				. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
+				run_flycast_standalone
+				;;
+			Flycast-libretro)      export CORE="flycast";     run_retroarch ;;
+			Flycast2021-libretro)  export CORE="flycast2021"; run_retroarch ;;
+			Flycast2024-libretro)  export CORE="flycast2024"; run_retroarch ;;
+			*)                     run_retroarch ;;
+		esac
 		;;
 
 	"GB"*)
