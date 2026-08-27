@@ -1358,29 +1358,22 @@ def extract_with_progress(
 
         for line in proc.stdout:
 
-            name = (
-                line.strip()
-                .lstrip("- ")
-            )
+            text = line.rstrip("\r\n")
 
-            if not name:
-                continue
+            # -bb1 prints every extracted item as "- <path>". Anything else
+            # is a banner, a summary ("Sub items Errors: N") or an error
+            # message: keep it in the log instead of counting it as a file.
+            if not text.startswith("- "):
 
-            if name.startswith(
-                (
-                    "ERROR",
-                    "WARNING",
-                    "Cannot",
-                    "Can not",
-                    "Skipping"
-                )
-            ):
+                if text.strip():
 
-                log.warning(
-                    f"7zr: {name}"
-                )
+                    log.info(
+                        f"7zr: {text.strip()}"
+                    )
 
                 continue
+
+            name = text[2:]
 
             count += 1
 
@@ -1402,6 +1395,20 @@ def extract_with_progress(
                 last_pct = pct
 
         proc.wait()
+
+    meaning = {
+        0: "ok",
+        1: "warnings",
+        2: "errors"
+    }.get(
+        proc.returncode,
+        "fatal"
+    )
+
+    log.info(
+        f"7zr finished: exit code {proc.returncode} "
+        f"({meaning}), {count} items"
+    )
 
     return proc.returncode
 
