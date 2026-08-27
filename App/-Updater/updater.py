@@ -774,6 +774,11 @@ def record_nightly_version(updates):
     Keep exactly one root marker (/mnt/SDCARD/<base>-<date>) naming the
     installed nightly, or none after a stable install. helperFunctions'
     get_version_complex() reports it as the device version.
+
+    The sweep is deliberately narrow. It deletes from the root of the user's
+    SD card, so matching a name pattern alone is not enough - a marker is an
+    empty file this updater created, and requiring it to be empty means
+    anything of the user's that happens to be named like a version survives.
     """
 
     last = updates[-1]
@@ -782,26 +787,26 @@ def record_nightly_version(updates):
 
     for entry in os.listdir(SD_ROOT):
 
+        if entry == version or not NIGHTLY_MARKER_RE.match(entry):
+            continue
+
         path = f"{SD_ROOT}/{entry}"
 
-        if (
-            NIGHTLY_MARKER_RE.match(entry)
-            and os.path.isfile(path)
-            and entry != version
-        ):
+        try:
+            if not os.path.isfile(path) or os.path.getsize(path) != 0:
+                continue
 
-            try:
-                os.remove(path)
+            os.remove(path)
 
-                log.info(
-                    f"Removed stale nightly marker {entry}"
-                )
+            log.info(
+                f"Removed stale nightly marker {entry}"
+            )
 
-            except OSError as exc:
+        except OSError as exc:
 
-                log.warning(
-                    f"Could not remove {path}: {exc}"
-                )
+            log.warning(
+                f"Could not remove {path}: {exc}"
+            )
 
     if is_nightly_update(last) and NIGHTLY_MARKER_RE.match(version):
 
@@ -819,7 +824,6 @@ def record_nightly_version(updates):
             log.warning(
                 f"Could not write nightly marker: {exc}"
             )
-
 
 def validate_incremental_chain(
     updates,

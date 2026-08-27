@@ -150,9 +150,16 @@ queue_full_update() {
     fi
 }
 
-# Is the installed nightly at least as new as the advertised one? Base
+# Is the installed nightly strictly NEWER than the advertised one? Base
 # versions compare numerically; equal bases compare by the date suffix.
-nightly_is_current() {
+#
+# Strictly newer, not "at least as new": an advertised nightly carrying the
+# same version as the installed one is still offered. More than one nightly is
+# sometimes spun on a single date, so an equal date does not mean equal build,
+# and being able to re-take the current one is how the OTA path gets tested at
+# all. Only a device that is genuinely ahead of what is advertised - a nightly
+# newer than the published one - is told it is up to date.
+nightly_is_newer_than_advertised() {
     local installed_num target_num installed_date target_date
     installed_num="$(version_num "$INSTALLED_NIGHTLY_VERSION")" || return 1
     target_num="$(version_num "$NIGHTLY_VERSION")" || return 1
@@ -163,7 +170,7 @@ nightly_is_current() {
     case "$installed_date$target_date" in
         ""|*[!0-9]*) return 1 ;;
     esac
-    [ "$target_date" -gt "$installed_date" ] && return 1
+    [ "$target_date" -ge "$installed_date" ] && return 1
     return 0
 }
 
@@ -324,9 +331,9 @@ fi
 
 log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; installed nightly version: ${INSTALLED_NIGHTLY_VERSION:-none}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
 
-# A nightly that knows its own version is not offered the same (or an older)
-# nightly again.
-if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$SKIP_VERSION_CHECK" != "True" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && nightly_is_current; then
+# A nightly that knows its own version is not offered an OLDER nightly. The
+# same version is still offered - see nightly_is_newer_than_advertised.
+if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$SKIP_VERSION_CHECK" != "True" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && nightly_is_newer_than_advertised; then
     log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is current (latest advertised: $NIGHTLY_VERSION)"
     up_to_date_exit
 fi
