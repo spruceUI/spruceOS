@@ -231,12 +231,16 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ] && ! flag_check "developer_mode"; then
 fi
 
 # "OTA: skip version check" allows re-installing the same (or an older)
-# version, e.g. to repair an installation. Developer/tester devices always
-# skip it: a nightly cannot be compared against the version file.
+# version, e.g. to repair an installation. Developer/tester devices on the
+# nightly channel always skip it: a nightly cannot be compared against the
+# version file.
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
-# Determine desired release channel. Developer/tester devices always follow
-# the nightly channel (intended; the previous downloader asked each time).
+# Determine desired release channel. Developer/tester devices follow the
+# nightly channel unless "OTA: release channel" is set to Stable; that choice
+# exists so the stable->stable incremental path can be exercised while
+# incremental updates are gated behind developer mode. Everybody else always
+# follows the stable channel.
 #
 # TODO(OTA): the BETA_* channel in OTA/spruce is not handled here any more;
 # those lines are ignored until a beta channel is designed for this flow.
@@ -247,11 +251,16 @@ SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipV
 # diff is generated from the current stable release and covers every path
 # touched since it, so it applies on top of any nightly with the same
 # recorded stable base (see NIGHTLY_BASE_FILE).
+OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")"
 TARGET_CHANNEL="stable"
 
 if flag_check "developer_mode" || flag_check "tester_mode"; then
-    TARGET_CHANNEL="nightly"
-    SKIP_VERSION_CHECK="True"
+    if [ "$OTA_CHANNEL" = "Stable" ]; then
+        TARGET_CHANNEL="stable"
+    else
+        TARGET_CHANNEL="nightly"
+        SKIP_VERSION_CHECK="True"
+    fi
 fi
 
 log_message "OTA: Current version: $CURRENT_VERSION"
@@ -437,9 +446,11 @@ fi
 
 if [ "$USE_INCREMENTAL" != "1" ]; then
     # Full update mode (or incremental fallback).
-    if [ "$SKIP_VERSION_CHECK" != "True" ] && [ "$TARGET_CHANNEL" = "stable" ]; then
+    if [ "$SKIP_VERSION_CHECK" != "True" ] && [ "$TARGET_CHANNEL" = "stable" ] && [ -z "$INSTALLED_NIGHTLY_BASE" ]; then
         # Never re-download or downgrade when the installed stable release is
-        # already current ("OTA: skip version check" allows a reinstall).
+        # already current ("OTA: skip version check" allows a reinstall). A
+        # device that runs a nightly is not on any stable release, so on the
+        # stable channel it is always offered the full stable archive.
         if [ -n "$CURRENT_NUM" ] && [ -n "$RELEASE_NUM" ] && [ "$RELEASE_NUM" -le "$CURRENT_NUM" ]; then
             log_message "OTA: Latest stable $RELEASE_VERSION is not newer than installed $CURRENT_VERSION"
             up_to_date_exit

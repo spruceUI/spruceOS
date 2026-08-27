@@ -543,6 +543,15 @@
                     "Full"
                 ],
                 "selected": "Full"
+            },
+            "otaChannel": {
+                "display": "OTA: release channel",
+                "description": "developer/tester mode only: Nightly follows the nightly builds, Stable follows stable releases",
+                "options": [
+                    "Nightly",
+                    "Stable"
+                ],
+                "selected": "Nightly"
             }
         },
         "Proxy Settings": {
