@@ -35,7 +35,7 @@ case "$PLATFORM" in
     MODULE_DIR="/mnt/SDCARD/spruce/smartpros/modules"
     load_module lzo_compress
     load_module lzo
-    load_module lzo_rle
+    load_module lzo-rle
     load_module zsmalloc
     load_module zram
     ;;
