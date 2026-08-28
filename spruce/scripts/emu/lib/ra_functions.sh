@@ -150,6 +150,63 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
+	# "Hotkeys" (Emulator Settings > Hold home key action) turns MENU into a
+	# live chord modifier for content running under RetroArch: menu+A=reset,
+	# menu+B=emulator menu, menu+L=load state, menu+R=save state, menu+
+	# Start=exit game. Wiring these as real RA hotkeys (rather than relying
+	# on the userspace watchdog alone) gets RA's own input suppression for
+	# free - the core never sees the A/B/L/R/Start press, same as it
+	# already doesn't see MENU once MENU is the hotkey-enable button.
+	# Deliberately forces MENU as the hotkey-enable button whenever this
+	# mode is on, regardless of the separate "RA: Hotkey enable button"
+	# setting, since Hotkeys mode is specifically about what MENU does.
+	# Also clears input_screenshot_btn: the shipped default binds it to the
+	# same joyindex as the "A" button, so without this, menu+A would both
+	# reset the rom and take a screenshot.
+	#
+	# The A/B/L/R joyindices are read back from this platform's own already-
+	# verified input_player1_a/b/l/r_btn lines rather than hardcoded.
+	# A/B need cross-referencing against spruceOS's own physical A/B
+	# positions (see B_A/B_B in the platform script) because RetroArch's
+	# face-button semantics are SNES-style (a=east, b=south) and happen to
+	# line up directly here; L/R have no such position ambiguity - a
+	# shoulder button is a shoulder button - so they're used as-is. Only
+	# runs on platforms confirmed to share this layout and that bind real
+	# (non-"nul") values for all four.
+	case "$PLATFORM" in
+		"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
+			knulli_ra_a="$(sed -n 's/^input_player1_a_btn = "\(.*\)".*/\1/p' "$PLATFORM_CFG" | head -n1)"
+			knulli_ra_b="$(sed -n 's/^input_player1_b_btn = "\(.*\)".*/\1/p' "$PLATFORM_CFG" | head -n1)"
+			knulli_ra_l="$(sed -n 's/^input_player1_l_btn = "\(.*\)".*/\1/p' "$PLATFORM_CFG" | head -n1)"
+			knulli_ra_r="$(sed -n 's/^input_player1_r_btn = "\(.*\)".*/\1/p' "$PLATFORM_CFG" | head -n1)"
+			if [ -n "$knulli_ra_a" ] && [ "$knulli_ra_a" != "nul" ] && \
+			   [ -n "$knulli_ra_b" ] && [ "$knulli_ra_b" != "nul" ] && \
+			   [ -n "$knulli_ra_l" ] && [ "$knulli_ra_l" != "nul" ] && \
+			   [ -n "$knulli_ra_r" ] && [ "$knulli_ra_r" != "nul" ]; then
+				hold_home_action="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
+				if [ "$hold_home_action" = "Hotkeys" ]; then
+					TMP_CFG="$(mktemp)"
+					if sed \
+						-e "s|^$RA_HOTKEY_LINE = .*|$RA_HOTKEY_LINE = \"$RA_HOME_VAL\"|" \
+						-e "s|^input_reset_btn = .*|input_reset_btn = \"$knulli_ra_a\"|" \
+						-e "s|^input_menu_toggle_btn = .*|input_menu_toggle_btn = \"$knulli_ra_b\"|" \
+						-e "s|^input_load_state_btn = .*|input_load_state_btn = \"$knulli_ra_l\"|" \
+						-e "s|^input_save_state_btn = .*|input_save_state_btn = \"$knulli_ra_r\"|" \
+						-e "s|^input_exit_emulator_btn = .*|input_exit_emulator_btn = \"$RA_START_VAL\"|" \
+						-e 's|^input_fps_toggle_btn = .*|input_fps_toggle_btn = "nul"|' \
+						-e 's|^input_screenshot_btn = .*|input_screenshot_btn = "nul"|' \
+						"$PLATFORM_CFG" > "$TMP_CFG"; then
+						mv "$TMP_CFG" "$PLATFORM_CFG"
+						log_message "ra hotkeys remapped for Hotkeys mode: enable=menu($RA_HOME_VAL) reset=$knulli_ra_a menu=$knulli_ra_b load=$knulli_ra_l save=$knulli_ra_r exit=$RA_START_VAL" -v
+					else
+						rm -f "$TMP_CFG"
+					fi
+				fi
+			fi
+			;;
+		*) ;;
+	esac
+
 	# Handle resolution and rotation for Anbernic H700 devices
 	case "$PLATFORM" in
 		*"Anbernic"*)

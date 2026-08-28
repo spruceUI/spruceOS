@@ -394,6 +394,7 @@
                     "Emulator menu",
                     "Game Switcher",
                     "Exit game",
+                    "Hotkeys",
                     "Nothing"
                 ],
                 "selected": "Game Switcher"

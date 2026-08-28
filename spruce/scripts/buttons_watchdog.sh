@@ -100,6 +100,29 @@ volume_up_bg() {
     done
 }
 
+# "Hotkeys" (Emulator Settings > Hold home key action): while
+# MENU is held, vol_up/vol_down step brightness instead of volume. /tmp/menubtn
+# is the same held-state flag homebutton_watchdog.sh uses; that script is a
+# separate process, so this is the only way for this one to know MENU is down.
+knulli_menu_held() {
+    [ -e /tmp/menubtn ] || return 1
+    [ "$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")" = "Hotkeys" ]
+}
+
+brightness_down_bg() {
+    while true; do
+        sleep 0.3
+        brightness_down
+    done
+}
+
+brightness_up_bg() {
+    while true; do
+        sleep 0.3
+        brightness_up
+    done
+}
+
 take_screenshot_bg() {
     timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
@@ -188,11 +211,17 @@ getevent $EVENTS | while read line; do
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
 
-            volume_down # ensure fire the first run
+            if knulli_menu_held; then
+                brightness_down # ensure fire the first run
+                brightness_down_bg &
+                PID_DOWN=$!
+            else
+                volume_down # ensure fire the first run
 
-            CURR_VOLUME=$(get_volume_level)
-            volume_down_bg &
-            PID_DOWN=$!
+                CURR_VOLUME=$(get_volume_level)
+                volume_down_bg &
+                PID_DOWN=$!
+            fi
         ;;
         *"key $B_VOLDOWN 0"*) # VOLUMEDOWN key up
             kill $PID_DOWN 2&> /dev/null
@@ -202,11 +231,17 @@ getevent $EVENTS | while read line; do
             kill $PID_UP 2&> /dev/null
             PID_UP=""
 
-            volume_up # ensure fire the first run
+            if knulli_menu_held; then
+                brightness_up # ensure fire the first run
+                brightness_up_bg &
+                PID_UP=$!
+            else
+                volume_up # ensure fire the first run
 
-            CURR_VOLUME=$(get_volume_level)
-            volume_up_bg &
-            PID_UP=$!
+                CURR_VOLUME=$(get_volume_level)
+                volume_up_bg &
+                PID_UP=$!
+            fi
         ;;
         *"key $B_VOLUP 0"*) # VOLUMEUP key up
             kill $PID_UP 2&> /dev/null
