@@ -324,6 +324,59 @@ set_volume() {
     fi
 }
 
+# asound-setup.sh runs immediately before RetroArch and, when there is no
+# Bluetooth sink, deletes the .asoundrc in RA's HOME and calls this to write the
+# wired one back. Every other platform leaves it to device.sh's stub, because
+# their ALSA default lives in /etc/asound.conf and survives a HOME change.
+#
+# dArkMoss is not like that. Its config is dArkOS's per-user ~/.asoundrc, and
+# /etc/asound.conf is empty - so RetroArch, which runs with HOME set to
+# /mnt/SDCARD/RetroArch/, loses it and falls through to raw hw:0,0. That costs
+# two things: dmix, so anything else holding the PCM makes RA's open fail, and
+# the softvol "Master" control, which is the one set_volume above drives. Not
+# writing this leaves the in-game volume buttons moving a control that no longer
+# affects the sound.
+#
+# So this is the base's own ~/.asoundrc verbatim rather than a fresh design -
+# it is what the hardware is known to work with, and matching it keeps one
+# "Master" control in front of both the menu and the emulator.
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.!default {
+    type        plug
+    slave.pcm   "softvol"
+}
+
+ctl.!default {
+    type        hw
+    card        0
+}
+
+pcm.ddmix {
+    ipc_key     1024
+    type        dmix
+    slave {
+        pcm         "hw:0,0"
+        period_time 0
+        period_size 1024
+        buffer_size 4096
+        rate        44100
+    }
+}
+
+pcm.softvol {
+    type        softvol
+    slave {
+        pcm     "ddmix"
+    }
+    control {
+        name    "Master"
+        card    0
+    }
+}
+EOF
+}
+
   #############################
 #####   MENU LOOP HOOKS   #####
   #############################
