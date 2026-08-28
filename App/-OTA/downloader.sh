@@ -122,6 +122,27 @@ version_num() {
     echo $((major * 1000000 + minor * 1000 + patch))
 }
 
+# Build identity of the installed nightly: the commit the package was built
+# from. The nightly workflow writes "Last commit: <sha>" into
+# /mnt/SDCARD/commits_nightly.txt and ships that file in every nightly
+# package (full and diff), so any install - updater, PC installer or a
+# manual copy - identifies itself. Several nightlies built on one day share
+# a version string; this tells a rebuild from the build already installed.
+# Prints nothing when unknown.
+#
+# TODO(OTA, future wave): a build counter in the nightly version itself
+# (e.g. 4.3.6-20260827.2) would make this and NIGHTLY_COMMIT unnecessary.
+# Keep every identity reader in this function so that swap is a one-place
+# change (the boot-time checker in runtimeHelper.sh mirrors it).
+installed_nightly_build() {
+    sed -n 's/^Last commit: *//p' /mnt/SDCARD/commits_nightly.txt 2>/dev/null | head -n 1 | tr -d '[:space:]' | tr 'A-F' 'a-f'
+}
+
+# Short form of a build identity for messages.
+short_build() {
+    printf '%s' "$1" | cut -c1-7
+}
+
 # Queue the traditional complete archive for the current channel.
 queue_full_update() {
     if [ "$TARGET_CHANNEL" = "nightly" ]; then
@@ -174,8 +195,12 @@ nightly_is_newer_than_advertised() {
     return 0
 }
 
+# Optional $1 replaces the generic sentence, e.g. when the device is ahead
+# of the update feed.
 up_to_date_exit() {
-    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: ${INSTALLED_NIGHTLY_VERSION:-$CURRENT_VERSION}" 75
+    local installed="${INSTALLED_NIGHTLY_VERSION:-$CURRENT_VERSION}"
+    [ -n "$INSTALLED_NIGHTLY_BUILD" ] && installed="$installed ($(short_build "$INSTALLED_NIGHTLY_BUILD"))"
+    display_image_and_text "$IMAGE_PATH" 35 25 "${1:-System is up to date.} Installed version: $installed" 75
     sleep 5
     rm -rf "$TMP_DIR"
     exit 0
@@ -218,6 +243,10 @@ INSTALLED_FULL_VERSION="$(get_version_complex)"
 if [ -n "$INSTALLED_FULL_VERSION" ] && [ "$INSTALLED_FULL_VERSION" != "$CURRENT_VERSION" ]; then
     INSTALLED_NIGHTLY_VERSION="$INSTALLED_FULL_VERSION"
 fi
+INSTALLED_NIGHTLY_BUILD=""
+if [ -n "$INSTALLED_NIGHTLY_VERSION" ]; then
+    INSTALLED_NIGHTLY_BUILD="$(installed_nightly_build)"
+fi
 read_only_check
 
 # Try primary and backup URLs
@@ -247,6 +276,8 @@ NIGHTLY_CHECKSUM=$(sed -n 's/^NIGHTLY_CHECKSUM=//p' "$TMP_DIR/spruce" | tr -d '\
 NIGHTLY_LINK=$(sed -n 's/^NIGHTLY_LINK=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_SIZE=$(sed -n 's/^NIGHTLY_SIZE_IN_MB=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 NIGHTLY_INFO=$(sed -n 's/^NIGHTLY_INFO=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+# Commit the published nightly was built from (see installed_nightly_build).
+NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
 
 # Determine OTA update type
 OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateType.selected' "Full")"
@@ -262,9 +293,9 @@ if [ "$OTA_UPDATE_TYPE" = "Incremental" ] && ! flag_check "developer_mode" && ! 
 fi
 
 # "OTA: skip version check" allows re-installing the same (or an older)
-# version, e.g. to repair an installation. Developer/tester devices on the
-# nightly channel skip it only when the installed nightly left no version
-# marker, because then it cannot be compared against anything.
+# stable release, e.g. to repair an installation, and lets a nightly device
+# take an advertised nightly that is OLDER than the installed one. The same
+# nightly version is always offered again (see nightly_is_newer_than_advertised).
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
 # Determine desired release channel. Developer/tester devices follow the
@@ -276,12 +307,12 @@ SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipV
 # TODO(OTA): the BETA_* channel in OTA/spruce is not handled here any more;
 # those lines are ignored until a beta channel is designed for this flow.
 #
-# Nightly builds only write the base version to spruce/spruce, so a device
-# cannot tell which nightly it has and "already current" cannot be detected
-# for nightlies. Nightly-to-nightly updates do not need that: every nightly
-# diff is generated from the current stable release and covers every path
-# touched since it, so it applies on top of any nightly with the same
-# recorded stable base (see NIGHTLY_BASE_FILE).
+# A nightly device knows its version from the root marker
+# (/mnt/SDCARD/<base>-<date>), its build from commits_nightly.txt and its
+# stable base from NIGHTLY_BASE_FILE. Nightly-to-nightly updates only need
+# the base: every nightly diff is generated from the current stable release
+# and covers every path touched since it, so it applies on top of any
+# nightly with the same recorded base.
 OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")"
 TARGET_CHANNEL="stable"
 
@@ -290,9 +321,6 @@ if flag_check "developer_mode" || flag_check "tester_mode"; then
         TARGET_CHANNEL="stable"
     else
         TARGET_CHANNEL="nightly"
-        if [ -z "$INSTALLED_NIGHTLY_VERSION" ]; then
-            SKIP_VERSION_CHECK="True"
-        fi
     fi
 fi
 
@@ -329,13 +357,33 @@ if [ -n "$NIGHTLY_DIFF_LINK" ] && [ -n "$NIGHTLY_DIFF_CHECKSUM" ] && [ -n "$NIGH
     NIGHTLY_DIFF_OK=1
 fi
 
-log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; installed nightly version: ${INSTALLED_NIGHTLY_VERSION:-none}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
+log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; installed nightly version: ${INSTALLED_NIGHTLY_VERSION:-none}; installed build: ${INSTALLED_NIGHTLY_BUILD:-unknown}; published build: ${NIGHTLY_COMMIT:-unknown}; nightly diff base: ${NIGHTLY_DIFF_BASE_VERSION:-none} (usable: $NIGHTLY_DIFF_OK)"
 
 # A nightly that knows its own version is not offered an OLDER nightly. The
 # same version is still offered - see nightly_is_newer_than_advertised.
 if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$SKIP_VERSION_CHECK" != "True" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && nightly_is_newer_than_advertised; then
-    log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is current (latest advertised: $NIGHTLY_VERSION)"
-    up_to_date_exit
+    # The feed lags a publish (or a publish half-failed): say so instead
+    # of "up to date", which sends testers looking in the wrong place.
+    log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is newer than the published nightly $NIGHTLY_VERSION"
+    up_to_date_exit "Installed nightly $INSTALLED_NIGHTLY_VERSION is newer than the published nightly $NIGHTLY_VERSION; the update feed may not have been refreshed yet."
+fi
+
+# When the advertised nightly IS the installed version, say what a re-take
+# means: the same build again (a plain reinstall), a rebuild with the same
+# version string, or unknown (no build identity on either side). The offer
+# itself does not depend on this; only the log line and the prompt do.
+NIGHTLY_SAME_VERSION=0
+NIGHTLY_SAME_BUILD=0
+if [ "$TARGET_CHANNEL" = "nightly" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && [ "$INSTALLED_NIGHTLY_VERSION" = "$NIGHTLY_VERSION" ]; then
+    NIGHTLY_SAME_VERSION=1
+    if [ -z "$INSTALLED_NIGHTLY_BUILD" ] || [ -z "$NIGHTLY_COMMIT" ]; then
+        log_message "OTA: Nightly $NIGHTLY_VERSION is already installed (build unknown); offering it again"
+    elif [ "$INSTALLED_NIGHTLY_BUILD" = "$NIGHTLY_COMMIT" ]; then
+        NIGHTLY_SAME_BUILD=1
+        log_message "OTA: Nightly $NIGHTLY_VERSION ($(short_build "$NIGHTLY_COMMIT")) is already installed; offering a reinstall"
+    else
+        log_message "OTA: Nightly $NIGHTLY_VERSION was rebuilt since it was installed (installed $(short_build "$INSTALLED_NIGHTLY_BUILD"), published $(short_build "$NIGHTLY_COMMIT")); offering it again"
+    fi
 fi
 
 ##### BUILD UPDATE QUEUE #####
@@ -526,8 +574,21 @@ if [ -z "$FINAL_INFO" ]; then
     FINAL_INFO="https://github.com/spruceUI/spruceOS/releases/latest"
 fi
 
+UPDATE_PROMPT="New version available: $FINAL_VERSION"
+if [ "$NIGHTLY_SAME_VERSION" = "1" ] && [ "$FINAL_VERSION" = "$NIGHTLY_VERSION" ]; then
+    if [ "$NIGHTLY_SAME_BUILD" = "1" ]; then
+        UPDATE_PROMPT="Nightly $FINAL_VERSION ($(short_build "$NIGHTLY_COMMIT")) is already installed; this reinstalls the same build"
+    elif [ -n "$INSTALLED_NIGHTLY_BUILD" ] && [ -n "$NIGHTLY_COMMIT" ]; then
+        UPDATE_PROMPT="Nightly $FINAL_VERSION was rebuilt since it was installed (installed $(short_build "$INSTALLED_NIGHTLY_BUILD"), published $(short_build "$NIGHTLY_COMMIT"))"
+    else
+        UPDATE_PROMPT="Nightly $FINAL_VERSION is already installed; it may have been rebuilt since"
+    fi
+elif [ "$FINAL_VERSION" = "$NIGHTLY_VERSION" ] && [ -n "$NIGHTLY_COMMIT" ]; then
+    UPDATE_PROMPT="New version available: $FINAL_VERSION ($(short_build "$NIGHTLY_COMMIT"))"
+fi
+
 update_qr_code="$(qr_code -t "$FINAL_INFO")"
-display_image_and_text "$update_qr_code" 50 5 "Scan QR code for release notes. New version available: $FINAL_VERSION ($QUEUE_COUNT package(s), about ${TOTAL_SIZE} MB). Press A to download and install, or B to cancel." 75
+display_image_and_text "$update_qr_code" 50 5 "Scan QR code for release notes. $UPDATE_PROMPT ($QUEUE_COUNT package(s), about ${TOTAL_SIZE} MB). Press A to download and install, or B to cancel." 75
 
 if confirm 300; then
     log_message "OTA: User confirmed download"
