@@ -142,6 +142,7 @@ check_for_update() {
     # Extract version info from downloaded file
     RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
     BETA_VERSION=$(sed -n 's/BETA_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
     # Set target version based on developer/tester mode
@@ -172,6 +173,23 @@ check_for_update() {
     target_is_beta=$(echo "$target_suffix" | grep -q "Beta" && echo "1" || echo "0")
     target_date=$(echo "$target_suffix" | grep -qE "^[0-9]{8}$" && echo "$target_suffix" || echo "")
 
+    # Build identity of the installed nightly, mirroring
+    # installed_nightly_build() in App/-OTA/downloader.sh: the commit in
+    # /mnt/SDCARD/commits_nightly.txt (shipped by every nightly package)
+    # against NIGHTLY_COMMIT from the feed. Several nightlies built on one
+    # day share a version string, so a different build of the installed
+    # version counts as an update. Unknown on either side = no opinion.
+    current_build=""
+    if [ -n "$current_date" ]; then
+        current_build=$(sed -n 's/^Last commit: *//p' /mnt/SDCARD/commits_nightly.txt 2>/dev/null | head -n 1 | tr -d '[:space:]' | tr 'A-F' 'a-f')
+    fi
+    target_build=""
+    [ "$TARGET_VERSION" = "$NIGHTLY_VERSION" ] && target_build="$NIGHTLY_COMMIT"
+    nightly_rebuilt=0
+    if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ] && [ -n "$current_build" ] && [ -n "$target_build" ] && [ "$current_build" != "$target_build" ]; then
+        nightly_rebuilt=1
+    fi
+
     update_available=0
     
     # Compare base versions first
@@ -185,6 +203,9 @@ check_for_update() {
         if flag_check "developer_mode" || flag_check "tester_mode"; then
             # For testers/developers, nightlies are updates
             if [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
+                update_available=1
+            elif [ "$nightly_rebuilt" = "1" ]; then
+                log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
                 update_available=1
             fi
         elif flag_check "beta"; then
@@ -202,10 +223,12 @@ check_for_update() {
     if [ $update_available -eq 1 ]; then
         log_message "Update Check: Update available"
         # Update is available - show app and set label and description
-        jq --arg ver "$TARGET_VERSION" '
+        available_text="Version $TARGET_VERSION is available"
+        [ "$nightly_rebuilt" = "1" ] && available_text="A new build of version $TARGET_VERSION ($(printf '%s' "$target_build" | cut -c1-7)) is available"
+        jq --arg desc "$available_text" '
           (if ."#label" then del(."#label") else . end)
           | .label = "Update Available"
-          | .description = "Version \($ver) is available"
+          | .description = $desc
         ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
 
@@ -214,12 +237,15 @@ check_for_update() {
             # First time seeing this update
             flag_add "update_available"
             flag_add "update_prompted"
-            echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+            # Line 1: version prompted; line 2: its build (nightly commit), so
+            # a same-day rebuild of an already prompted nightly prompts again.
+            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
             echo "$TARGET_VERSION" > "$(flag_path update_available)"
         else
-            # Get version from previous prompt
-            prompted_version=$(cat "$(flag_path update_prompted)")
-            
+            # Get version (and build) from previous prompt
+            prompted_version=$(head -n 1 "$(flag_path update_prompted)" | tr -d '[:space:]')
+            prompted_build=$(sed -n '2p' "$(flag_path update_prompted)" | tr -d '[:space:]')
+
             # Compare versions (using same logic as above)
             prompted_base_version=$(echo "$prompted_version" | cut -d'-' -f1)
             prompted_date=$(echo "$prompted_version" | cut -d'-' -f2 -s)
@@ -229,12 +255,14 @@ check_for_update() {
                 newer_than_prompted=1
             elif [ -n "$prompted_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$prompted_date" ]; then
                 newer_than_prompted=1
+            elif [ "$nightly_rebuilt" = "1" ] && [ "$prompted_version" = "$TARGET_VERSION" ] && [ "$prompted_build" != "$target_build" ]; then
+                newer_than_prompted=1
             fi
 
             if [ $newer_than_prompted -eq 1 ]; then
-                # New version is newer than previously prompted version
+                # New version (or build) is newer than previously prompted
                 flag_add "update_available"
-                echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
                 echo "$TARGET_VERSION" > "$(flag_path update_available)"
             fi
         fi

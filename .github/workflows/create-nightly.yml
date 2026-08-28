@@ -101,6 +101,8 @@ jobs:
           # the updater, the PC installer or a manual copy - identifies itself:
           #   Saves/spruce/ota_nightly_base   stable base (read by downloader.sh)
           #   /<version>                      root marker read by get_version_complex
+          #   commits_nightly.txt             "Last commit: <sha>" = build identity,
+          #                                   compared with NIGHTLY_COMMIT in OTA/spruce
           # .ota_extra_files lists generated files the OTA manifest step adds.
           mkdir -p Saves/spruce
           printf '%s\n' "${{ steps.previous_stable.outputs.version }}" > Saves/spruce/ota_nightly_base
@@ -519,6 +521,11 @@ jobs:
               echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
               echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
               echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+              # Build identity: the commit this nightly was built from. Several
+              # nightlies built on one day share a version string; a device
+              # compares this with "Last commit:" in its commits_nightly.txt to
+              # tell a rebuild from the build it already runs.
+              echo "NIGHTLY_COMMIT=${{ steps.current_commit.outputs.sha }}" >> "$file"
 
               # Stable -> nightly OTA diff
               # Same representation as RELEASE_VERSION (no v prefix): the
