@@ -21,6 +21,14 @@
 
 while [ 1 ]; do
     log_message "Starting new loop of principal.sh"
+
+    # Exit-to-stock: the boot session supervisor reads this flag after runtime
+    # returns and hands the boot to the vendor UI. Without a supervisor above
+    # us there is nothing to hand to, so the flag is only honoured under one.
+    if [ -n "$SPRUCE_BOOT_SESSION" ] && flag_check "exit_to_stock"; then
+        log_message "exit_to_stock flag present; leaving principal.sh for the boot session"
+        exit 0
+    fi
     set_smart
 
     stop_pyui_message_writer

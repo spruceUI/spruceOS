@@ -14,6 +14,9 @@ from controller.key_watcher_controller import KeyWatcherController
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
+from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
+from menus.games.utils.rom_info import RomInfo
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
@@ -66,6 +69,7 @@ class MiniloongPocket1(DeviceCommon):
         self.load_miniloong_system_json()
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
+        self.miyoo_games_file_parser = MiyooGamesFileParser()
         DeviceCommon.__init__(self)
         if main_ui_mode:
             threading.Thread(target=self.startup_init, daemon=True).start()
@@ -438,6 +442,37 @@ class MiniloongPocket1(DeviceCommon):
 
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
+
+    def run_game(self, rom_info: RomInfo) -> "subprocess.Popen":
+        # Launch through the standard spruce Emu flow: MiyooTrimCommon writes
+        # the platform launch command and lets principal.sh run it, so the
+        # per-emulator setup in spruce/scripts/emu/lib (setup_for_retroarch,
+        # the retroarch-Miniloong.cfg staging, core resolution) all applies -
+        # exactly as on the Flip. The same helper the Flip's run_game uses.
+        return MiyooTrimCommon.run_game(self, rom_info)
+
+    def take_snapshot(self, path):
+        # Screenshots are taken by the shell (spruce/flip/screenshot.sh via
+        # take_screenshot in Miniloong.sh); PyUI has no in-menu capture here.
+        return None
+
+    def get_save_state_image(self, rom_info: RomInfo):
+        # Save-state thumbnails are not wired for this platform yet (MLP1-009).
+        return None
+
+    # Panel colour calibration (modetest on the Flip) is UNVERIFIED on this
+    # board, so the display menu hides these knobs until a device confirms them.
+    def supports_brightness_calibration(self):
+        return False
+
+    def supports_contrast_calibration(self):
+        return False
+
+    def supports_saturation_calibration(self):
+        return False
+
+    def supports_hue_calibration(self):
+        return False
 
     def get_game_system_utils(self):
         return self.game_utils

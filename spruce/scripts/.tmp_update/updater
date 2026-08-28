@@ -26,8 +26,21 @@ case $INFO in
 esac
 
 
+# The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh
+# with a crash-loop guard and a hand-off to the vendor UI. It is the only path
+# on the Miniloong; on the Flip it is opt-in through a flag while it is being
+# validated, so a card that has not asked for it boots exactly as before.
+SESSION=/mnt/SDCARD/spruce/scripts/boot/session.sh
+use_session=0
+case "$PLATFORM" in
+    Miniloong) use_session=1 ;;
+    Flip) [ -e /mnt/SDCARD/spruce/flags/boot_session_enabled ] && use_session=1 ;;
+esac
+
 if [ "$PLATFORM" = "MiyooMini" ]; then
     /mnt/SDCARD/spruce/scripts/platform/miyoo_mini_startup.sh
+elif [ "$use_session" = "1" ] && [ -f "$SESSION" ]; then
+    SPRUCE_BOOT_PLATFORM="$PLATFORM" exec sh "$SESSION"
 else
     cd /mnt/SDCARD/spruce/scripts
     ./runtime.sh
