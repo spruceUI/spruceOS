@@ -343,11 +343,17 @@ runtime_mounts_Miniloong() {
 
 # Spruce's dropbearmulti authenticates against /etc/passwd + /etc/shadow, and the
 # stock loong rootfs ships no "spruce" account, so spruce/happygaming (and Samba's
-# `smbpasswd -a spruce`) have nothing to authenticate and ssh is refused. The
-# SPRUCE_ETC_DIR bind in runtime_mounts_Miniloong would cover this, but there is no
-# spruce/miniloong/etc payload, so nothing is mounted. Inject a root-equivalent
-# spruce user by bind-mounting patched copies over the stock files - ephemeral,
-# re-applied each boot, gone on reboot. Mirrors AnbernicXXCommon.add_spruce_system_user.
+# `smbpasswd -a spruce`) have nothing to authenticate and ssh is refused.
+#
+# PRIMARY path: spruce/miniloong/etc/passwd (a superset of the captured stock
+# accounts + a root-equivalent spruce with its hash inline, no shadow needed - the
+# miyoomini pattern) is bind-mounted over /etc/passwd by runtime_mounts_Miniloong,
+# which runs first. This function is then the FALLBACK: its `grep '^spruce:'` guard
+# makes it a no-op whenever that static passwd is present, and it only does the
+# work if the payload lacks the file or a stock-firmware update replaced
+# /etc/passwd out from under the bind. Inject a root-equivalent spruce user by
+# bind-mounting patched copies over the stock files - ephemeral, re-applied each
+# boot. Mirrors AnbernicXXCommon.add_spruce_system_user.
 add_spruce_system_user() {
     grep -q '^spruce:' /etc/passwd 2>/dev/null && return 0
 
