@@ -449,3 +449,33 @@ device_start_dhcp_client() {
 device_stop_dhcp_client() {
     killall -9 udhcpc 2>/dev/null
 }
+
+# ---------------------------------------------------------------------------
+# Boot-session hooks (see spruce/scripts/boot/session.sh).
+#
+# The on-card session supervisor calls these around runtime.sh. Defaults are
+# no-ops so every platform behaves exactly as before the supervisor existed;
+# a device opts in by overriding them in its device_functions file.
+# ---------------------------------------------------------------------------
+
+# Extra preflight before runtime.sh is started. Return non-zero to refuse the
+# boot (the supervisor then hands the device to stock); log the reason first.
+device_boot_preflight() {
+    return 0
+}
+
+# Runs once per boot before runtime.sh, after platform detection. The place for
+# work the stock firmware would have done and Spruce now owns (codec init,
+# compositor decisions, remounts) - not for watchdogs, which belong in
+# launch_startup_watchdogs.
+device_boot_pre_session() {
+    return 0
+}
+
+# How to hand this boot to the vendor UI when Spruce cannot or will not run.
+# Print a command line to exec, or nothing when the rootfs stub owns that hand-off
+# (the supervisor then just returns to it). The Flip prints its stock launcher;
+# devices whose stub blocks the stock init script leave this empty.
+device_stock_ui_command() {
+    printf ''
+}

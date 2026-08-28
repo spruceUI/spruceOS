@@ -137,7 +137,7 @@ run_firstboot_package_phase() {
         # Anbernic* is the whole XX line - every Anbernic platform we build for is
         # H700 aarch64, which is what the shipped advmame binary is. A platform
         # left out of this list simply skips AdvanceMAME and keeps its archive.
-        "Brick" | "BrickPro" | "SmartPro" | "SmartProS" | "Flip" | "Pixel2" | Anbernic*)
+        "Brick" | "BrickPro" | "SmartPro" | "SmartProS" | "Flip" | "Miniloong" | "Pixel2" | Anbernic*)
             ADVMAME_7Z="$ADVMAME_DIR/advmame.7z"
             ;;
     esac

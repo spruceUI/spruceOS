@@ -38,6 +38,14 @@ case $INFO in
                 *RGB30*) export PLATFORM="RGB30" ;;
                 *) export PLATFORM="RGB30" ;;
             esac
+        elif [ -x /loong/loong_daemon ]; then
+            # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
+            # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
+            # cannot tell them apart; the vendor's stock daemon can. The device
+            # tree model is the better key once it has been captured on a board
+            # (the Flip's reads "MIYOO RK3566 355 V10 Board"); until then this
+            # path check is the only unambiguous signal we have.
+            export PLATFORM="Miniloong"
         else
             export PLATFORM="Flip"
         fi

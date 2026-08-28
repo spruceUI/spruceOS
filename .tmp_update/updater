@@ -5,9 +5,16 @@ case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
     *"TG5040"*)	export PLATFORM="SmartPro" ;;
     *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG4040"*)	export PLATFORM="BrickPro"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
+    *"TG4040"*)	export PLATFORM="BrickPro"	;;
+    *"0xd05"*)
+        # Flip and Miniloong Pocket 1 share the part id; see helperFunctions.sh.
+        if [ -x /loong/loong_daemon ]; then
+            export PLATFORM="Miniloong"
+        else
+            export PLATFORM="Flip"
+        fi
+        ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) 
         if [ -e /usr/magicx ]; then
