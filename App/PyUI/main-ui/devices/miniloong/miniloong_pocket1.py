@@ -164,11 +164,21 @@ class MiniloongPocket1(DeviceCommon):
             return ControllerInput.POWER_BUTTON
         return None
 
+    # The pad enumerates as evdev name "Loong Gamepad" (verified on hardware:
+    # event4). Resolve it by NAME rather than a by-path link, which the stock
+    # firmware does not always create - a wrong node = no input, and PyUI then
+    # screensavers/idles to a black screen after ~15s.
+    JOYPAD_NAME = "Loong Gamepad"
+
     def _resolve_joypad(self):
+        node = self._resolve_named_node([self.JOYPAD_NAME])
+        if node and os.path.exists(node):
+            PyUiLogger.get_logger().info(f"Miniloong: joypad '{self.JOYPAD_NAME}' at {node}")
+            return node
         if os.path.exists(self.JOYPAD_NODE):
             PyUiLogger.get_logger().info(f"Miniloong: joypad at {self.JOYPAD_NODE}")
-        else:
-            PyUiLogger.get_logger().error("Miniloong: no loong1_joypad node found, controls will not respond")
+            return self.JOYPAD_NODE
+        PyUiLogger.get_logger().error("Miniloong: no Loong Gamepad node found, controls will not respond")
         return self.JOYPAD_NODE
 
     def get_controller_interface(self):
@@ -205,15 +215,18 @@ class MiniloongPocket1(DeviceCommon):
     def output_screen_width(self):
         if self.should_scale_screen():
             return 1920
-        return self.screen_height()
+        return int(self.screen_width() * 1.5)   # 1440
 
     def output_screen_height(self):
         if self.should_scale_screen():
             return 1080
-        return self.screen_width()
+        return int(self.screen_height() * 1.5)  # 1080
 
+    # Panel scale. The Miniloong panel is higher-DPI than the 960x720 base render,
+    # so UI/assets scale by 1.5 (measured on hardware 2026-08-28). HDMI keeps its
+    # own factor. output_screen_* below are screen dims x1.5 to match.
     def get_scale_factor(self):
-        return 2 if self.is_hdmi_connected() else 1
+        return 2 if self.is_hdmi_connected() else 1.5
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()

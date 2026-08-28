@@ -248,6 +248,28 @@ resolve_key_event_node() {
     done
     log_message "Miniloong: input nodes:$_seen"
 
+    # Resolve the gamepad by evdev NAME ("Loong Gamepad"); the stock firmware
+    # does not reliably create the by-path link the cfg defaults to, and a wrong
+    # node means no input -> idlemon sees no activity and PyUI screensavers to a
+    # black screen. Verified on hardware: the pad is "Loong Gamepad" (event4).
+    _pad=""
+    for _dir in /sys/class/input/event*; do
+        [ -e "$_dir" ] || continue
+        _ev=$(basename "$_dir")
+        if [ "$(cat "$_dir/device/name" 2>/dev/null)" = "Loong Gamepad" ]; then
+            _pad="/dev/input/$_ev"
+            break
+        fi
+    done
+    if [ -n "$_pad" ] && [ -c "$_pad" ]; then
+        export EVENT_PATH_READ_INPUTS_SPRUCE="$_pad"
+        export EVENT_PATH_SEND_TO_RA_AND_PPSSPP="$_pad"
+        export EVENT_PATH_SEND_TO_DRASTIC="$_pad"
+        log_message "Miniloong: gamepad 'Loong Gamepad' at $_pad"
+    else
+        log_message "Miniloong: 'Loong Gamepad' node not found; leaving $EVENT_PATH_READ_INPUTS_SPRUCE"
+    fi
+
     if [ -n "$_power" ] && [ -c "$_power" ]; then
         export EVENT_PATH_POWER="$_power"
     fi
@@ -262,6 +284,9 @@ resolve_key_event_node() {
         log_message "Miniloong: no node reports volume keys; volume watchdog idles on $EVENT_PATH_VOLUME"
     fi
     {
+        echo "EVENT_PATH_READ_INPUTS_SPRUCE='${EVENT_PATH_READ_INPUTS_SPRUCE}'"
+        echo "EVENT_PATH_SEND_TO_RA_AND_PPSSPP='${EVENT_PATH_READ_INPUTS_SPRUCE}'"
+        echo "EVENT_PATH_SEND_TO_DRASTIC='${EVENT_PATH_READ_INPUTS_SPRUCE}'"
         echo "EVENT_PATH_VOLUME='${EVENT_PATH_VOLUME}'"
         echo "EVENT_PATH_POWER='${EVENT_PATH_POWER}'"
     } > "$MINILOONG_INPUT_NODES_FILE" 2>/dev/null
