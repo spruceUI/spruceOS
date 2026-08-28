@@ -27,10 +27,37 @@ SD1="${SPRUCE_SD1:-/mnt/sdcard}"
 SD2="${SPRUCE_SD2:-/media/sdcard1}"
 SDCARD="${SPRUCE_SDCARD:-/mnt/SDCARD}"
 BOOT_LOG="${SPRUCE_BOOT_LOG:-/tmp/spruce-boot.log}"
+# Set once a slot is resolved+bound; then every line also lands on the card so a
+# failure that ends in a power-cycle still leaves a trail (tmpfs does not survive).
+PERSIST_LOG=""
+STAGE_FILE="${SPRUCE_STAGE_FILE:-}"
+
+_ts() { date '+%F %T' 2>/dev/null || echo unknown; }
 
 log() {
-    printf '%s\n' "$*" >&2
-    printf '%s\n' "$*" >>"$BOOT_LOG" 2>/dev/null || true
+    _line="[$(_ts)] S49spruce: $*"
+    printf '%s\n' "$_line" >&2
+    printf '%s\n' "$_line" >>"$BOOT_LOG" 2>/dev/null || true
+    [ -n "$PERSIST_LOG" ] && printf '%s\n' "$_line" >>"$PERSIST_LOG" 2>/dev/null || true
+}
+
+# Record the furthest boot stage reached, so `cat boot-stage` on the card tells
+# you how far it got even without reading the full log. Stages:
+#   start resolved bound entered pass-to-stock
+breadcrumb() {
+    log "stage: $1"
+    [ -n "$STAGE_FILE" ] && printf '%s\n' "$1" >"$STAGE_FILE" 2>/dev/null || true
+}
+
+# Once /mnt/SDCARD is bound to the payload slot, start persisting the trace there
+# and flush what we have so far from tmpfs.
+begin_persist() {
+    _dir="${SPRUCE_PERSIST_DIR:-$SDCARD/Saves/spruce}"
+    mkdir -p "$_dir" 2>/dev/null || return 0
+    PERSIST_LOG="$_dir/spruce-boot.log"
+    STAGE_FILE="${SPRUCE_STAGE_FILE:-$_dir/boot-stage}"
+    cat "$BOOT_LOG" >>"$PERSIST_LOG" 2>/dev/null || true
+    log "persisting boot trace to $PERSIST_LOG"
 }
 
 # A slot carries a full Spruce payload iff both the entry point and the runtime
@@ -82,28 +109,40 @@ bind_sdcard() {
     if mount --bind "$_slot" "$SDCARD" >>"$BOOT_LOG" 2>&1; then
         return 0
     fi
-    log "S49spruce: could not bind $_slot -> $SDCARD"
+    log "could not bind $_slot -> $SDCARD"
     return 1
 }
 
 start() {
+    breadcrumb start
     if stock_ota_present; then
-        log "S49spruce: stock loong_upgrade present; passing to stock"
+        log "stock loong_upgrade present; passing to stock"
+        breadcrumb pass-to-stock:stock-ota
         return 0
     fi
 
     _slot="$(resolve_full_spruce_slot)" || {
-        log "S49spruce: no full Spruce payload on $SD1 or $SD2; passing to stock"
+        log "no full Spruce payload on $SD1 or $SD2; passing to stock"
+        # best-effort persistent note on either slot's Saves/, so a "why no Spruce"
+        # breadcrumb survives even when nothing was bound.
+        for _d in "$SD1/Saves/spruce" "$SD2/Saves/spruce"; do
+            [ -d "$_d" ] && printf '%s\n' "[$(_ts)] S49spruce: no payload resolved; passed to stock" >>"$_d/spruce-boot.log" 2>/dev/null && break
+        done
+        breadcrumb pass-to-stock:no-payload
         return 0
     }
-    log "S49spruce: full Spruce payload on $_slot"
+    log "full Spruce payload on $_slot"
+    breadcrumb resolved
 
-    bind_sdcard "$_slot" || return 0
+    bind_sdcard "$_slot" || { breadcrumb "bind-failed (stock)"; return 0; }
+    breadcrumb bound
+    begin_persist
 
     _entry="$SDCARD/.tmp_update/updater"
-    [ -f "$_entry" ] || { log "S49spruce: $_entry missing after bind; stock"; return 0; }
+    [ -f "$_entry" ] || { log "$_entry missing after bind; stock"; return 0; }
 
-    log "S49spruce: entering Spruce via $_entry"
+    breadcrumb entered
+    log "entering Spruce via $_entry"
     # The updater detects the platform (Miniloong via /loong/loong_daemon) and
     # execs the boot session, which runs runtime.sh. It does not return in normal
     # operation; if it does, rcS continues into stock S50loong, which is correct.
