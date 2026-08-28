@@ -341,8 +341,38 @@ runtime_mounts_Miniloong() {
     /mnt/SDCARD/spruce/flip/recombine_large_files.sh >> /mnt/SDCARD/Saves/spruce/spruce.log 2>&1
 }
 
+# Spruce's dropbearmulti authenticates against /etc/passwd + /etc/shadow, and the
+# stock loong rootfs ships no "spruce" account, so spruce/happygaming (and Samba's
+# `smbpasswd -a spruce`) have nothing to authenticate and ssh is refused. The
+# SPRUCE_ETC_DIR bind in runtime_mounts_Miniloong would cover this, but there is no
+# spruce/miniloong/etc payload, so nothing is mounted. Inject a root-equivalent
+# spruce user by bind-mounting patched copies over the stock files - ephemeral,
+# re-applied each boot, gone on reboot. Mirrors AnbernicXXCommon.add_spruce_system_user.
+add_spruce_system_user() {
+    grep -q '^spruce:' /etc/passwd 2>/dev/null && return 0
+
+    SP_HASH='$6$spruceos00$.nwqRlVkLe.wmkXcEHXcu127ZFxpFQ.8JDbdh4CRd.FbF5biVcIl9qeE9T6QNAbbJaFKp3MLUwlaPUN0alXcl.'
+    cp /etc/passwd /tmp/spruce_passwd 2>/dev/null || return 0
+    if cp /etc/shadow /tmp/spruce_shadow 2>/dev/null; then
+        echo 'spruce:x:0:0:spruce:/root:/bin/sh' >> /tmp/spruce_passwd
+        echo "spruce:${SP_HASH}:19000:0:99999:7:::" >> /tmp/spruce_shadow
+        chmod 644 /tmp/spruce_passwd
+        chmod 600 /tmp/spruce_shadow
+        mount -o bind /tmp/spruce_passwd /etc/passwd 2>/dev/null
+        mount -o bind /tmp/spruce_shadow /etc/shadow 2>/dev/null
+    else
+        # No /etc/shadow on this rootfs: carry the hash inline in passwd, which
+        # dropbear reads when the password field is not "x".
+        echo "spruce:${SP_HASH}:0:0:spruce:/root:/bin/sh" >> /tmp/spruce_passwd
+        chmod 644 /tmp/spruce_passwd
+        mount -o bind /tmp/spruce_passwd /etc/passwd 2>/dev/null
+    fi
+    log_message "Miniloong: provisioned spruce login for dropbear/samba"
+}
+
 device_init() {
     runtime_mounts_Miniloong
+    add_spruce_system_user
     echo 3 > /proc/sys/kernel/printk
     export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:/usr/lib:/lib"
     rumble_pwm_init
