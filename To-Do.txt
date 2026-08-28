@@ -20,13 +20,10 @@
 
 - Add Jaguar emu
 - RA cfg overhaul
-- add trimui zram modules from bmdhacks
 - reset config tasks for more standalone emulators
-- add vibrate to XX devices
 
 --- OTA ------------------------------------------------------------------------
 
-- Beta channel: BETA_* lines in OTA/spruce are ignored by the split downloader; design a beta tag/channel for the incremental flow
 - Theme delivery: Themes/*.7z come from a fixed PyUI-Themes release tag and are not in git, so only full archives deliver theme updates
 - Nightly identity: spruce/spruce holds only the base version; the installed nightly is named by the empty root marker /mnt/SDCARD/<base>-<date> and identified by "Last commit:" in commits_nightly.txt (both shipped in every nightly package), compared with NIGHTLY_COMMIT in OTA/spruce. Same-day rebuilds share the version string, so the same nightly version is always offered again by the OTA app; the boot-time checker flags a rebuild when both sides know their build. Nightly-to-nightly diffs work regardless: the package covers every path touched since the stable base recorded in Saves/spruce/ota_nightly_base
 - Nightly build counter (future wave): put the build number in the nightly version itself (e.g. 4.3.6-20260827.2) so same-day rebuilds become distinct versions and the NIGHTLY_COMMIT / commits_nightly.txt identity can go. Touches get_version's regex in helperFunctions.sh, NIGHTLY_MARKER_RE in updater.py, the boot checker's date compare and version_num/installed_nightly_build in downloader.sh, so it needs its own device pass

@@ -128,7 +128,7 @@ check_for_update() {
     done
 
     # Get current version based on mode
-    if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
         CURRENT_VERSION=$(get_version_complex)
     else
         CURRENT_VERSION=$(get_version)
@@ -149,13 +149,9 @@ check_for_update() {
     RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
-    BETA_VERSION=$(sed -n 's/BETA_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
 
     # Set target version based on developer/tester mode
     TARGET_VERSION="$RELEASE_VERSION"
-    if flag_check "beta"; then
-        TARGET_VERSION="$BETA_VERSION"
-    fi
 
     if flag_check "developer_mode" || flag_check "tester_mode"; then
         # Same rule as downloader.sh: "OTA: release channel" = Stable keeps a
@@ -165,18 +161,16 @@ check_for_update() {
         fi
     fi
 
-    # Compare versions, handling nightly date format and beta versions
+    # Compare versions
     log_message "Update Check: Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
     
-    # Extract base version, date, and beta status
+    # Extract base version and date status
     current_base_version=$(echo "$CURRENT_VERSION" | cut -d'-' -f1)
     current_suffix=$(echo "$CURRENT_VERSION" | cut -d'-' -f2 -s)
-    current_is_beta=$(echo "$current_suffix" | grep -q "Beta" && echo "1" || echo "0")
     current_date=$(echo "$current_suffix" | grep -qE "^[0-9]{8}$" && echo "$current_suffix" || echo "")
 
     target_base_version=$(echo "$TARGET_VERSION" | cut -d'-' -f1)
     target_suffix=$(echo "$TARGET_VERSION" | cut -d'-' -f2 -s)
-    target_is_beta=$(echo "$target_suffix" | grep -q "Beta" && echo "1" || echo "0")
     target_date=$(echo "$target_suffix" | grep -qE "^[0-9]{8}$" && echo "$target_suffix" || echo "")
 
     # Build identity of the installed nightly, mirroring
@@ -215,15 +209,6 @@ check_for_update() {
                 update_available=1
             elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
                 log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
-            fi
-        elif flag_check "beta"; then
-            # Beta mode logic
-            if [ "$current_is_beta" = "1" ]; then
-                # Currently on beta, only higher base versions are updates
-                update_available=0
-            elif [ "$target_is_beta" = "1" ]; then
-                # Not on beta, but target is beta - consider it an update
-                update_available=1
             fi
         fi
     fi

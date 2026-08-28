@@ -1609,8 +1609,7 @@ def run_restore():
 
 def restore_flags(
     developer_mode,
-    tester_mode,
-    beta
+    tester_mode
 ):
 
     if developer_mode:
@@ -1633,12 +1632,6 @@ def restore_flags(
         flag_add(
             "tester_mode"
         )
-
-    if beta:
-
-        Path(
-            f"{FLAGS_DIR}/beta"
-        ).touch()
 
 
 def get_update_channel():
@@ -1971,9 +1964,6 @@ def main():
         "tester_mode"
     )
 
-    beta = flag_check(
-        "beta"
-    )
 
     # TODO: remove once incremental OTA is approved as stable.
     # The downloader only builds incremental queues for developer/tester
@@ -2283,8 +2273,7 @@ def main():
 
     restore_flags(
         developer_mode,
-        tester_mode,
-        beta
+        tester_mode
     )
 
     record_nightly_base(

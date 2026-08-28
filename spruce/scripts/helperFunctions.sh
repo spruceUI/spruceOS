@@ -383,8 +383,8 @@ get_version() {
         return 1
     fi
 
-    # Updated regex to handle both beta and nightly versions
-    # e.g., 3.3.2-Beta or 3.3.1-20250123
+    # Updated regex to handle nightly versions
+    # e.g., 3.3.1-20250123
     if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*(-([A-Za-z]+|[0-9]{8}))?$'; then
         echo "$version"
         return 0
@@ -405,7 +405,7 @@ get_version_complex() {
 
     version_pattern="/mnt/SDCARD/${base_version}-*"
     
-    # Find any matching version file (beta or nightly)
+    # Find any matching version file (nightly)
     test_file=$(ls $version_pattern 2>/dev/null | head -n 1)
 
     if [ -n "$test_file" ]; then

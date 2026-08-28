@@ -304,9 +304,6 @@ SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipV
 # incremental updates are gated behind developer mode. Everybody else always
 # follows the stable channel.
 #
-# TODO(OTA): the BETA_* channel in OTA/spruce is not handled here any more;
-# those lines are ignored until a beta channel is designed for this flow.
-#
 # A nightly device knows its version from the root marker
 # (/mnt/SDCARD/<base>-<date>), its build from commits_nightly.txt and its
 # stable base from NIGHTLY_BASE_FILE. Nightly-to-nightly updates only need
