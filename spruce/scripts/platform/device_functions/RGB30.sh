@@ -17,11 +17,24 @@
 #
 # cpu_control_functions is entirely driven by the CPU_* variables in RGB30.cfg,
 # so it needs no per-device code. legacy_display supplies display and
-# display_kill, which principal.sh calls on every pass through the menu loop. It
-# runs display_text.elf, an SDL2 binary that takes its own KMSDRM surface - that
-# would fight PyUI for DRM master, but only if both were up at once, and in the
-# canonical flow they never are: principal.sh calls these between PyUI exiting
-# and the next thing starting.
+# display_kill. display_kill is the one that earns its keep - principal.sh calls
+# it on every pass through the menu loop to clear strays, and without the source
+# it would hit device.sh's log-only stub.
+#
+# display itself will NOT render on this device, and that is worth knowing
+# before someone spends an afternoon on it. It runs bin64/display_text.elf,
+# which calls SDL_CreateWindow and SDL_CreateRenderer and never touches
+# SDL_GL_SetAttribute. On KMSDRM, SDL takes its EGL config from
+# gl_config.profile_mask, which defaults to desktop GL, and this Mali G52 blob
+# advertises no desktop GL config at all - the exact wall PyUI hit until
+# wants_gles_context() was added. So display_text.elf dies at CreateWindow with
+# "Can't window GBM/EGL surfaces" and there is no env knob for the profile mask;
+# it needs a rebuild that asks for ES.
+#
+# Sourcing anyway: the only caller of display on this device is m3u_generator's
+# progress screen, which carries on without it, and the alternative is losing a
+# working display_kill to keep a broken display honest. Fix it in the binary,
+# not here.
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
