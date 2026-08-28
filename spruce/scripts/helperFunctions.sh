@@ -41,10 +41,11 @@ case $INFO in
         elif [ -x /loong/loong_daemon ]; then
             # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
             # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
-            # cannot tell them apart; the vendor's stock daemon can. The device
-            # tree model is the better key once it has been captured on a board
-            # (the Flip's reads "MIYOO RK3566 355 V10 Board"); until then this
-            # path check is the only unambiguous signal we have.
+            # cannot tell them apart. The vendor's stock launcher daemon is the
+            # reliable discriminator: it is present only on the loong firmware
+            # and Spruce is about to replace its boot path anyway. The device
+            # tree model string ("MIYOO RK3566 355 V10 Board" on the Flip) can
+            # corroborate once captured on a board, but the daemon is the key.
             export PLATFORM="Miniloong"
         else
             export PLATFORM="Flip"

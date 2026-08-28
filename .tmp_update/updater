@@ -8,7 +8,8 @@ case $INFO in
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"TG4040"*)	export PLATFORM="BrickPro"	;;
     *"0xd05"*)
-        # Flip and Miniloong Pocket 1 share the part id; see helperFunctions.sh.
+        # Flip and Miniloong share the RK3566 part id; the loong daemon is the
+        # reliable discriminator. See helperFunctions.sh.
         if [ -x /loong/loong_daemon ]; then
             export PLATFORM="Miniloong"
         else
