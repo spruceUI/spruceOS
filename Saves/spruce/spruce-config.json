@@ -228,10 +228,11 @@
             "useZRAM":{
                 "devices": [
                     "MIYOO_FLIP",
-                    "GKD_PIXEL2"
+                    "GKD_PIXEL2",
+                    "TRIMUI_SMART_PRO_S"
                 ],
-                "display": "Use ZRAM",
-                "description": "reboot to apply",
+                "display": "Enable ZRAM",
+                "description": "50% of device RAM; reboot to apply",
                 "options": [
                     "True",
                     "False"
