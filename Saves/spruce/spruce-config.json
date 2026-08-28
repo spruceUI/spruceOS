@@ -229,6 +229,9 @@
                 "devices": [
                     "MIYOO_FLIP",
                     "GKD_PIXEL2",
+                    "TRIMUI_BRICK",
+                    "TRIMUI_BRICK_PRO",
+                    "TRIMUI_SMART_PRO",
                     "TRIMUI_SMART_PRO_S"
                 ],
                 "display": "Enable ZRAM",
