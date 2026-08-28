@@ -25,43 +25,32 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 
 case $INFO in
-    *sun8i*) export PLATFORM="A30" ;;
+    *sun8i*) export PLATFORM="A30" ;;           # A33
     *TG5040*) export PLATFORM="SmartPro" ;;
     *TG3040*) export PLATFORM="Brick" ;;
     *TG5050*) export PLATFORM="SmartProS" ;;
     *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*)
-        # Cortex-A55 is not unique to the Flip: the Powkiddy RGB30 is an RK3566,
-        # which is also A55, so cpuinfo alone reports 0xd05 for both. dArkMoss
-        # names itself in /etc/os-release, so key off that and leave the Flip as
-        # the default - a Flip has no os-release at all.
+    *0xd05*)                                    # RK3566
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
             # The kernel names the board in the device tree.
             DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
             case "$DT_MODEL" in
                 *RGB30*) export PLATFORM="RGB30" ;;
-                # dArkMoss builds for RK3566 generally, but the RGB30 is the
-                # only board wired up so far. Fail towards it rather than
-                # leaving PLATFORM unset, which would die at the cfg source
-                # below with nothing in the log to explain why.
-                # No log_message here - it is not defined until much later in
-                # this file, and the BaseOS block above stays quiet for the
-                # same reason.
                 *) export PLATFORM="RGB30" ;;
             esac
         else
             export PLATFORM="Flip"
         fi
         ;;
-    *0xd04*) export PLATFORM="Pixel2" ;;
-    *0xd03*)
+    *0xd04*) export PLATFORM="Pixel2" ;;        # RK3326
+    *0xd03*)                                    # H700
         export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
         case $BASEOS_TARGET in
-            rg28xx)          export PLATFORM="AnbernicRG28XX" ;;
-            rgcubexx)        export PLATFORM="AnbernicRGCubeXX" ;;
-            rg34xx|rg34xxsp|rgsp) export PLATFORM="AnbernicXX720480" ;;
-            *)               export PLATFORM="AnbernicXX640480" ;;
+            rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
+            rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
+            rg34xx|rg34xxsp|rgsp)   export PLATFORM="AnbernicXX720480" ;;
+            *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
     *) 
@@ -95,7 +84,7 @@ acknowledge() {
             esac
         fi
 
-        # Prevent CPU pegging
+        # Prevent CPU pegging (giggity)
         sleep 0.1
     done
 
@@ -379,11 +368,6 @@ get_current_theme() {
     fi
 }
 
-
-get_event() {
-    "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_READ_INPUTS_SPRUCE
-}
-
 get_version() {
     spruce_file="/mnt/SDCARD/spruce/spruce"
 
@@ -574,72 +558,8 @@ read_only_check() {
         rm -f "$TEST_FILE"
         return 1
     fi
-
-    if [ -n "$MNT_LINE" ]; then
-        MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
-        if [ "$MNT_STATUS" = "ro" ]; then
-            log_message "SD card is mounted as RO. Attempting to remount."
-            mount -o remount,rw "$SD_DEV" "$SD_MOUNTPOINT"
-            return 0
-        else
-            log_message "SD card is not read-only."
-            return 1
-        fi
-    fi
 }
 
-# Toggle screen recording with audio
-# Usage: record_video [output_file] [timeout_minutes]
-# If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
-# If no timeout is specified, defaults to 5 minutes
-record_video() {
-    if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-        # Stop recording if one is in progress
-        vibrate 200 &
-        pid=$(cat "/tmp/ffmpeg_recording.pid")
-        kill "$pid" 2>/dev/null
-        rm "/tmp/ffmpeg_recording.pid"
-        flag_remove "setting_cpu"
-        log_message "Stopped recording" -v
-        sleep 1
-        display -t "Recording stopped" -d 3
-    else
-        # Start new recording
-        output_file="$1"
-        timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
-        date_str=$(date +%Y-%m-%d_%H-%M-%S)
-        set_performance
-        # Prevent the CPU from being clocked down while recording
-        flag_add "setting_cpu" --tmp
-
-        # If no output file specified, create one with timestamp
-        if [ -z "$output_file" ]; then
-            output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
-        fi
-
-        vibrate &
-        sleep 0.1
-        vibrate &
-        # Start ffmpeg recording
-        ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
-            -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
-            -c:a aac -b:a 80k -ac 1 \
-            -t $((timeout_minutes * 60)) "$output_file" &
-
-        # Store PID for later use
-        echo $! > "/tmp/ffmpeg_recording.pid"
-
-        log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-
-        # Set up automatic stop after timeout
-        (
-            sleep $((timeout_minutes * 60))
-            if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-                record_video
-            fi
-        ) &
-    fi
-}
 
 run_upgrade_scripts() {
     UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
