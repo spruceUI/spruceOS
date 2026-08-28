@@ -240,6 +240,8 @@ launch_trimui_startup_watchdogs() {
     # hardware Volume +/- keys, including while a key is held.
     /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
+
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 launch_startup_watchdogs() {
