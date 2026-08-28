@@ -365,6 +365,25 @@ run_poweroff_cmd() {
 }
 
 device_prepare_for_poweroff() {
+    # Ignore SIGHUP for the rest of the shutdown, this hook being the last
+    # thing that runs before save_poweroff.sh starts killing processes.
+    #
+    # stop_problematic_scripts() kills runtime.sh, which here is
+    # spruce-launch.service's MainPID, so the unit stops. That unit holds
+    # /dev/tty1 with TTYVHangup=yes, and stopping it hangs the terminal up -
+    # SIGHUPing everything still on it, the shutdown script included. It died
+    # at the very first killall, ~120 commands before the poweroff, and did it
+    # silently: the device stayed on, the unit deactivated cleanly, and the log
+    # just stopped. Only an execution trace showed where.
+    #
+    # A trap set in a function applies to the whole shell, and SIG_IGN survives
+    # exec, so this covers stage 2 as well.
+    #
+    # Deliberately here rather than in save_poweroff.sh: it is right for every
+    # platform, but shutdown is a bad place to take a fleet-wide risk on one
+    # device's evidence. Move it up once another systemd host needs it.
+    trap "" HUP
+
     sync
 }
 
