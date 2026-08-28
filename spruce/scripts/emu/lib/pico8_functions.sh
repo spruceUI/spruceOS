@@ -124,7 +124,9 @@ run_pico8() {
 	fi
 
 	if [ "${GAME##*.}" = "splore" ]; then
-		check_and_connect_wifi
+		if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -ne 0 ]; then
+			check_and_connect_wifi
+		fi
 		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > $(emu_log_file) 2>&1
 	else
 		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > $(emu_log_file) 2>&1
@@ -168,8 +170,7 @@ load_pico8_control_profile() {
 			# Nothing to add. Under BaseOS the SDL2 PICO-8 needs is the
 			# mali-fbdev build in dll-mali, which AnbernicXXCommon.cfg already
 			# has on LD_LIBRARY_PATH; run_pico8 preloads a shim so its missing
-			# sensor subsystem does not abort startup. On stock the system SDL2
-			# is used, as before.
+			# sensor subsystem does not abort startup.
 			;;
 	esac
 
