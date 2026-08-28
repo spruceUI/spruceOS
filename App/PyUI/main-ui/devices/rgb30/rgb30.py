@@ -1,7 +1,6 @@
 import fcntl
 import json
 import os
-import shutil
 import subprocess
 import threading
 from pathlib import Path
@@ -15,6 +14,7 @@ from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcher
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
+from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.nmcli_wifi_scanner import NmcliWifiScanner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
@@ -187,61 +187,20 @@ class Rgb30(DeviceCommon):
             mapping_provider=DictKeyMappingProvider(key_mappings),
         )
 
-    def run_game(self, rom_info: RomInfo):
-        """Launch through ra64.universal rather than the RG DS binary.
-
-        The generic run_game targets the RG DS binary (ra64.rgds) and
-        retroarch-RGDS.cfg. Neither ships for this device, so every
-        launch exec'd a missing file and dropped straight back to the menu.
-        Same shape as the Anbernic XX override, pointed at the binary and
-        config this platform actually has.
-        """
-        menu_options = rom_info.game_system.game_system_config.get_menu_options()
-        selected_core = self.get_selected_emulator(menu_options)
-        if selected_core is None:
-            Display.display_message("No core found", 2_000)
-            return
-
-        core_path = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-        if not os.path.exists(core_path):
-            PyUiLogger.get_logger().error(f"RGB30: core not found: {core_path}")
-            Display.display_message("Core not installed", 2_000)
-            return
-
-        ra_bin = "/mnt/SDCARD/RetroArch/ra64.universal"
-        platform_cfg = "/mnt/SDCARD/RetroArch/platform/retroarch-RGB30.cfg"
-        active_cfg = "/mnt/SDCARD/RetroArch/retroarch.cfg"
-        if not os.path.exists(ra_bin):
-            PyUiLogger.get_logger().error(f"RGB30: {ra_bin} missing")
-            Display.display_message("RetroArch not installed", 2_000)
-            return
-
-        try:
-            shutil.copyfile(platform_cfg, active_cfg)
-        except OSError as e:
-            # Not fatal - RA will fall back to whatever retroarch.cfg is there.
-            PyUiLogger.get_logger().error(f"RGB30: could not stage {platform_cfg}: {e}")
-
-        cmds = [
-            ra_bin,
-            "-v",
-            "--config", active_cfg,
-            "--log-file", "/mnt/SDCARD/Saves/spruce/retroarch.log",
-            "-L", core_path,
-            rom_info.rom_file_path,
-        ]
-        PyUiLogger.get_logger().debug(f"RGB30: launching {cmds}")
-        Display.deinit_display()
-        subprocess.run(cmds, cwd="/mnt/SDCARD/RetroArch/")
-        Display.init()
-
-    #####################################################################
-    # WiFi - backed by NetworkManager, which owns the radio on dArkMoss.
-    #
-    # This is Debian, so there is no connman and no wpa_cli daemon for the base
-    # scanner to talk to. nmcli does its own DHCP too, so spruce only has to
-    # ask for a network and read back what happened.
-    #####################################################################
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+        # The same path the Flip, A30 and TrimUI take: stage the command, drop
+        # PyUI, and let principal.sh run it.
+        #
+        # This used to launch ra64.universal directly, which skipped everything
+        # the shell does around a game - per-game governor, save and state
+        # handling, the in-game menu, m3u generation, rumble setup. That
+        # override existed because the class inherited RocknixDevice.run_game
+        # back on MossySpruce, and that names a binary (ra64.rgds) this device
+        # does not ship, so every launch exec'd a missing file. The base is
+        # DeviceCommon now, and principal.sh has been running here the whole
+        # time - runtime.sh execs it - so the standard handoff was always
+        # available and there is no reason to hand-roll a launch.
+        return MiyooTrimCommon.run_game(self, rom_info)
 
     def supports_wifi(self):
         return True

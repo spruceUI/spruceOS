@@ -16,10 +16,15 @@
 # governor is never set and the watchdogs never launch.
 #
 # cpu_control_functions is entirely driven by the CPU_* variables in RGB30.cfg,
-# so it needs no per-device code. legacy_display is not sourced: it drives the
-# old framebuffer path, and this device is KMSDRM.
+# so it needs no per-device code. legacy_display supplies display and
+# display_kill, which principal.sh calls on every pass through the menu loop. It
+# runs display_text.elf, an SDL2 binary that takes its own KMSDRM surface - that
+# would fight PyUI for DRM master, but only if both were up at once, and in the
+# canonical flow they never are: principal.sh calls these between PyUI exiting
+# and the next thing starting.
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 
@@ -317,6 +322,42 @@ set_volume() {
     if [ "$SAVE_TO_CONFIG" = true ]; then
         save_volume_to_config_file "$VOLUME_LV" 2>/dev/null
     fi
+}
+
+  #############################
+#####   MENU LOOP HOOKS   #####
+  #############################
+
+# principal.sh calls these around each PyUI session. runtime.sh execs
+# principal.sh here like everywhere else, so they run on this device too and
+# were logging a miss on every loop.
+
+prepare_for_pyui_launch() {
+    # SDL2 startup is the slowest part of reaching the menu, so give it the full
+    # clock and drop back once it is up.
+    #
+    # Deliberately not the Flip's version, which also writes "performance" to
+    # /sys/class/devfreq/dmc and never puts it back, leaving the memory
+    # controller pinned at its top clock for the rest of the session. The CPU is
+    # what PyUI is waiting on here.
+    set_performance
+    (
+        sleep 5
+        if flag_check "in_menu"; then
+            set_smart
+        fi
+        unlock_governor 2>/dev/null
+    ) &
+}
+
+post_pyui_exit() {
+    log_message "post_pyui_exit not needed on this device" -v
+}
+
+# A live RGB30 reports it has an LED, but the sysfs path has not been found yet,
+# so there is nothing to drive. See LED_PATH in RGB30.cfg.
+enable_or_disable_rgb() {
+    log_message "No controllable RGB LED on this device" -v
 }
 
   ###############################
