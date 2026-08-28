@@ -319,6 +319,94 @@ set_volume() {
     fi
 }
 
+  ###############################
+#####   EMULATION AND PORTS   #####
+  ###############################
+
+# ra_functions.sh calls this right before it execs RetroArch. The job is to
+# point CORE_DIR at the right core set and echo back the binary to run.
+#
+# 64-bit only, so there is no 32-bit branch like the Flip's: RGB30.cfg sets
+# DEVICE_HAS_32_BIT_RA=false and RA_BIN=ra64.universal, and the cores are the
+# aarch64 set in cores64. retroarch-RGB30.cfg already points libretro_directory
+# at the same place.
+#
+# The three per-core library cases are the Flip's, and they apply unchanged
+# because this is the same RK3566 and the same aarch64 userland - the files
+# those paths name were confirmed to be aarch64 on the card. EASYRPG genuinely
+# has no lib-RGB30; lib-Flip is the correct directory here, not a fallback.
+setup_for_retroarch() {
+    case "$CORE" in
+        uae4arm)      export LD_LIBRARY_PATH="$EMU_DIR:$LD_LIBRARY_PATH" ;;
+        easyrpg)      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip" ;;
+        yabasanshiro) export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64" ;;
+    esac
+
+    export CORE_DIR="$RA_DIR/.retroarch/cores64"
+
+    # A core shipped next to the system's own files wins over the shared set.
+    if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+        export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+    else
+        export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+    fi
+
+    echo "$RA_BIN"
+}
+
+# Ports run straight from the shell here - nothing to set up or tear down. The
+# base is a full Debian userland, so there is no busybox-era environment to
+# patch the way the older platforms do.
+device_prepare_for_ports_run() {
+    log_message "device_prepare_for_ports_run unneeded on this device" -v
+}
+
+device_cleanup_after_ports_run() {
+    log_message "device_cleanup_after_ports_run unneeded on this device" -v
+}
+
+# led_functions.sh calls rgb_led unconditionally when a game starts. RGB30.cfg
+# reports LED_PATH="not applicable" - a live device says it HAS an LED, but the
+# sysfs path for it has not been found yet, so there is nothing to drive. Absorb
+# the call rather than let it hit device.sh's "Missing" stub on every launch.
+rgb_led() {
+    return 0
+}
+
+# GameNursery reads this. PyUI keeps its system config beside the app rather
+# than in Saves/, and RGB30.cfg's SYSTEM_JSON already points at it - use that
+# instead of a second literal that could drift out of step with it.
+get_config_path() {
+    echo "${SYSTEM_JSON:-/mnt/SDCARD/App/PyUI/config/rgb30-system.json}"
+}
+
+# The Reset RetroArch Hotkeys task calls this. Values are the ones already
+# shipped in retroarch-RGB30.cfg, which were taken from a live RGB30, so a reset
+# restores the shipped mapping rather than the Flip's. Hotkey is SELECT (8), and
+# the entries deliberately left as "nul" there are reset to "nul" too - a reset
+# that only rewrote the bound keys would leave stale bindings behind.
+set_default_ra_hotkeys() {
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+
+    log_message "Resetting RetroArch hotkeys to Spruce defaults."
+
+    update_ra_config_file_with_new_setting "$RA_FILE" \
+        "input_enable_hotkey_btn = \"8\"" \
+        "input_exit_emulator_btn = \"0\"" \
+        "input_fps_toggle_btn = \"2\"" \
+        "input_load_state_btn = \"4\"" \
+        "input_save_state_btn = \"5\"" \
+        "input_menu_toggle = \"f1\"" \
+        "input_menu_toggle_btn = \"3\"" \
+        "input_quit_gamepad_combo = \"0\"" \
+        "input_toggle_fast_forward_btn = \"10\"" \
+        "input_screenshot_btn = \"nul\"" \
+        "input_shader_toggle_btn = \"nul\"" \
+        "input_state_slot_decrease_btn = \"nul\"" \
+        "input_state_slot_increase_btn = \"nul\"" \
+        "input_toggle_slowmotion_btn = \"nul\""
+}
+
   #########################
 #####   IN-GAME MENU   #####
   #########################
