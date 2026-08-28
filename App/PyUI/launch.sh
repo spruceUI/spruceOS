@@ -183,16 +183,34 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Powkiddy RGB30 (Rockchip RK3566, under MossySpruce)
+# Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
 ############################################################
     "RGB30" )
-        # Unlike BaseOS, MossySpruce is a full glibc 2.38 distro that already
-        # provides libdrm, mesa and a KMSDRM SDL2, which is the backend our own
-        # bundled SDL2 was built for. So the mali-fbdev dance the H700 line
-        # needs does not apply here - use our normal dll.
+        # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
+        # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
+        # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
+        # backend, so the mali-fbdev dance the H700 line needs does not apply.
+        # Use our normal dll.
+        #
+        # The blob is GLES-only: it advertises no desktop GL EGL config at all.
+        # That is handled in PyUI, not here - Device.wants_gles_context() ->
+        # display.py asks SDL for an ES profile before the window is made. There
+        # is no environment variable for SDL's gl_config.profile_mask, so it has
+        # to be code.
         export PYSDL2_DLL_PATH=/mnt/SDCARD/App/PyUI/dll
         # /usr/lib/aarch64-linux-gnu, not /usr/lib: on Debian aarch64 that is
         # where libEGL, libgbm and libMali actually live.
+        #
+        # NOTE, not yet acted on: flip/lib sits ahead of the system path here,
+        # and on a Debian base that is backwards. Measured against the card, the
+        # bundled SDL2 and python3.10 need nothing from flip/lib but glibc, and
+        # of the stdlib extension modules only Tkinter does - while flip/lib
+        # carries 59 buster-era libraries trixie also has, among them libsystemd
+        # (LIBSYSTEMD_245 against the base's 257), libwayland-client and
+        # libdecor-0, all of which SDL2 dlopens. Nothing PyUI or RetroArch calls
+        # is actually broken by it today, which is why this is a note and not a
+        # change: this exact ordering is the one PyUI is known to boot with, and
+        # swapping it is a deliberate test, not a tidy-up.
         export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib/aarch64-linux-gnu"
 
         # MinUI's own launcher sets these on this hardware, which is the best
