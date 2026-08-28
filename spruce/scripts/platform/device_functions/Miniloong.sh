@@ -428,11 +428,13 @@ device_cleanup_after_ports_run() {
     log_message "device_cleanup_after_ports_run unneeded" -v
 }
 
-# Stock S40network/S41dhcpcd own wlan0 (association and DHCP), so spruce must
-# not start a second wpa_supplicant or DHCP client beside them. The PyUI WiFi
-# menu is not wired to the stock supplicant yet (MLP1-008).
+# Spruce manages WiFi here. The stock network init runs (S40network < S49spruce)
+# but only auto-connects through the vendor UI / loong_daemon, which Spruce
+# bypasses - so left to stock, wlan0 never associates. Spruce therefore owns
+# wpa_supplicant (-D nl80211) + udhcpc and the PyUI WiFi menu, the same as the
+# Flip. (return 1 = false = "spruce manages it".)
 device_manages_own_wifi() {
-    return 0
+    return 1
 }
 
 device_wifi_power_on() {
@@ -442,14 +444,6 @@ device_wifi_power_on() {
 
 device_wifi_power_off() {
     [ -w /sys/class/rkwifi/wifi_power ] && echo 0 > /sys/class/rkwifi/wifi_power
-}
-
-device_start_dhcp_client() {
-    return 0
-}
-
-device_stop_dhcp_client() {
-    return 0
 }
 
 device_system_handles_sdcard_unmount() {

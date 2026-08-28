@@ -344,30 +344,52 @@ class MiniloongPocket1(DeviceCommon):
 
     # ---- wifi: owned by the stock S40network/dhcpcd; menu not wired yet (MLP1-008) ----
 
+    # WiFi: Spruce-managed (the shell owns wpa_supplicant + udhcpc; see Miniloong.sh
+    # device_manages_own_wifi=false). PyUI scans/connects via wpa_cli. UNVERIFIED
+    # against the on-device stack (wlan0 present, driver, wpa_cli available) - MLP1-008.
     def supports_wifi(self):
-        return False
+        return True
 
     def is_wifi_enabled(self):
         try:
             with open("/sys/class/net/wlan0/operstate") as f:
-                return f.read().strip() == "up"
+                return f.read().strip() != "down"
         except OSError:
-            return False
+            return bool(self.system_config.is_wifi_enabled())
 
     def enable_wifi(self):
-        pass
+        self.system_config.set_wifi(1); self.system_config.save_config()
+        ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=10)
+        ProcessRunner.run(["/mnt/SDCARD/spruce/scripts/networkservices.sh"], timeout=None)
 
     def disable_wifi(self):
-        pass
+        self.system_config.set_wifi(0); self.system_config.save_config()
+        ProcessRunner.run(["killall", "-9", "wpa_supplicant"], timeout=10)
+        ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=10)
 
     def get_new_wifi_scanner(self):
-        return None
+        from devices.wifi.wifi_scanner import WiFiScanner
+        return WiFiScanner(interface="wlan0")
 
     def wifi_connect(self, ssid, password):
-        pass
+        # Add/enable the network through wpa_cli and persist it; udhcpc then leases.
+        try:
+            nid = (ProcessRunner.run(["wpa_cli", "-i", "wlan0", "add_network"], timeout=5).stdout or "").strip().splitlines()[-1]
+            def setn(k, v):
+                ProcessRunner.run(["wpa_cli", "-i", "wlan0", "set_network", nid, k, v], timeout=5)
+            setn("ssid", f'"{ssid}"')
+            if password:
+                setn("psk", f'"{password}"')
+            else:
+                setn("key_mgmt", "NONE")
+            ProcessRunner.run(["wpa_cli", "-i", "wlan0", "enable_network", nid], timeout=10)
+            ProcessRunner.run(["wpa_cli", "-i", "wlan0", "save_config"], timeout=5)
+            ProcessRunner.run(["udhcpc", "-i", "wlan0", "-b", "-t", "5", "-T", "3"], timeout=30)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Miniloong wifi_connect failed: {e}")
 
     def get_wpa_supplicant_conf_path(self):
-        return "/tmp/wpa_supplicant.conf"
+        return "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
 
     def ensure_wpa_supplicant_conf(self):
         pass
