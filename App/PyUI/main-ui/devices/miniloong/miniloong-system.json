@@ -5,6 +5,6 @@
         "contrast": 10,
         "saturation": 10,
         "hue":10,
-        "wifi": 0,
+        "wifi": 1,
         "bluetooth": 0
 }
