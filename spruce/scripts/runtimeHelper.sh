@@ -75,6 +75,12 @@ check_for_update() {
 
     timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     check_interval=86400  # 24 hours in seconds
+    # Developer/tester devices follow nightlies, which can be rebuilt several
+    # times a day; waiting 24 h after a prompt would flag a rebuild a day
+    # late. Check on every boot instead (one small fetch with mirrors).
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
+        check_interval=0
+    fi
 
     # If update was previously prompted, check the timestamp
     if flag_check "update_prompted"; then
