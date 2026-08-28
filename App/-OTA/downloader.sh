@@ -195,10 +195,12 @@ nightly_is_newer_than_advertised() {
     return 0
 }
 
+# Optional $1 replaces the generic sentence, e.g. when the device is ahead
+# of the update feed.
 up_to_date_exit() {
     local installed="${INSTALLED_NIGHTLY_VERSION:-$CURRENT_VERSION}"
     [ -n "$INSTALLED_NIGHTLY_BUILD" ] && installed="$installed ($(short_build "$INSTALLED_NIGHTLY_BUILD"))"
-    display_image_and_text "$IMAGE_PATH" 35 25 "System is up to date. Installed version: $installed" 75
+    display_image_and_text "$IMAGE_PATH" 35 25 "${1:-System is up to date.} Installed version: $installed" 75
     sleep 5
     rm -rf "$TMP_DIR"
     exit 0
@@ -360,8 +362,10 @@ log_message "OTA: Installed nightly base: ${INSTALLED_NIGHTLY_BASE:-none}; insta
 # A nightly that knows its own version is not offered an OLDER nightly. The
 # same version is still offered - see nightly_is_newer_than_advertised.
 if [ "$TARGET_CHANNEL" = "nightly" ] && [ "$SKIP_VERSION_CHECK" != "True" ] && [ -n "$INSTALLED_NIGHTLY_VERSION" ] && nightly_is_newer_than_advertised; then
-    log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is current (latest advertised: $NIGHTLY_VERSION)"
-    up_to_date_exit
+    # The feed lags a publish (or a publish half-failed): say so instead
+    # of "up to date", which sends testers looking in the wrong place.
+    log_message "OTA: Installed nightly $INSTALLED_NIGHTLY_VERSION is newer than the published nightly $NIGHTLY_VERSION"
+    up_to_date_exit "Installed nightly $INSTALLED_NIGHTLY_VERSION is newer than the published nightly $NIGHTLY_VERSION; the update feed may not have been refreshed yet."
 fi
 
 # When the advertised nightly IS the installed version, say what a re-take

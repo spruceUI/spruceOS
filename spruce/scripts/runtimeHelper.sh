@@ -213,6 +213,8 @@ check_for_update() {
             elif [ "$nightly_rebuilt" = "1" ]; then
                 log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
                 update_available=1
+            elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
+                log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
             fi
         elif flag_check "beta"; then
             # Beta mode logic
