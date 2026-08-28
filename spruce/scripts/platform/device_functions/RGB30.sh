@@ -509,8 +509,10 @@ set_default_ra_hotkeys() {
 # common64bit's send_menu_button_to_retroarch, which pipes MENU_TOGGLE to
 # RetroArch's UDP command port with spruce's bundled netcat. That netcat's
 # hardcoded ELF loader path does not exist on this base, so it dies with "No
-# such file or directory" and the menu never opens. The base ships BusyBox nc,
-# which needs no loader - use it.
+# such file or directory" and the menu never opens. The base ships Debian's own
+# netcat-openbsd at /usr/bin/nc (an alternatives symlink to nc.openbsd), which
+# needs no loader - use it. Its -u -w1 sends the datagram and exits after a
+# second, which is what this needs.
 send_menu_button_to_retroarch() {
     if pgrep -f "ra64.universal|ra32.universal|retroarch" >/dev/null; then
         echo "MENU_TOGGLE" | /usr/bin/nc -u -w1 127.0.0.1 55355
