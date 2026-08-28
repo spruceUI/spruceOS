@@ -358,14 +358,26 @@ class MiniloongPocket1(DeviceCommon):
             return bool(self.system_config.is_wifi_enabled())
 
     def enable_wifi(self):
+        # Never block the UI thread: the bring-up (ifconfig up, wpa_supplicant,
+        # udhcpc via networkservices.sh) can stall on a bad driver, so run it on
+        # a daemon thread with bounded timeouts. Toggling wifi used to call
+        # networkservices.sh with no timeout on the UI thread and froze the device.
         self.system_config.set_wifi(1); self.system_config.save_config()
-        ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=10)
-        ProcessRunner.run(["/mnt/SDCARD/spruce/scripts/networkservices.sh"], timeout=None)
+        def _bring_up():
+            try:
+                ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=10)
+                ProcessRunner.run(["/mnt/SDCARD/spruce/scripts/networkservices.sh"], timeout=60)
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"Miniloong enable_wifi bring-up failed: {e}")
+        threading.Thread(target=_bring_up, daemon=True).start()
 
     def disable_wifi(self):
         self.system_config.set_wifi(0); self.system_config.save_config()
-        ProcessRunner.run(["killall", "-9", "wpa_supplicant"], timeout=10)
-        ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=10)
+        def _tear_down():
+            ProcessRunner.run(["killall", "-9", "wpa_supplicant"], timeout=10)
+            ProcessRunner.run(["killall", "-9", "udhcpc"], timeout=10)
+            ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=10)
+        threading.Thread(target=_tear_down, daemon=True).start()
 
     def get_new_wifi_scanner(self):
         from devices.wifi.wifi_scanner import WiFiScanner
@@ -373,6 +385,10 @@ class MiniloongPocket1(DeviceCommon):
 
     def wifi_connect(self, ssid, password):
         # Add/enable the network through wpa_cli and persist it; udhcpc then leases.
+        # Runs on a daemon thread so udhcpc's wait cannot freeze the wifi menu.
+        threading.Thread(target=self._wifi_connect_worker, args=(ssid, password), daemon=True).start()
+
+    def _wifi_connect_worker(self, ssid, password):
         try:
             nid = (ProcessRunner.run(["wpa_cli", "-i", "wlan0", "add_network"], timeout=5).stdout or "").strip().splitlines()[-1]
             def setn(k, v):
