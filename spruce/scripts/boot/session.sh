@@ -51,6 +51,21 @@ now() {
     date '+%s' 2>/dev/null || echo 0
 }
 
+# The Miniloong stock firmware mounts the SD card noexec, so executing runtime.sh
+# (and RetroArch, python, .so off the card) fails with rc=126 and the session
+# crash-loops. Flip the payload mount (and its two possible source slots) to exec.
+# Cheap and idempotent; a no-op on devices whose card is already exec.
+remount_sd_exec() {
+    for _t in "$SD" /mnt/sdcard /media/sdcard1; do
+        [ -d "$_t" ] || continue
+        mount -o remount,exec,nosuid "$_t" 2>/dev/null || \
+            mount -o remount,rw,exec,nosuid "$_t" 2>/dev/null || true
+    done
+    _opts="$(awk -v m="$SD" '$2==m{print $4; exit}' /proc/mounts 2>/dev/null)"
+    log "remounted payload exec ($SD -> ${_opts:-?})"
+}
+
+
 # The stock UI command comes from the platform's device functions, which need
 # helperFunctions.sh sourced. Sourcing that file is the first thing that can
 # go wrong on a broken card, so it is syntax-checked first and sourced in a
@@ -135,6 +150,7 @@ crash_guard() {
 
 preflight || hand_to_stock 1 "preflight failed"
 
+remount_sd_exec
 log "starting session (platform hook: ${SPRUCE_BOOT_PLATFORM:-unset})"
 while :; do
     crash_guard || hand_to_stock 2 "crash-loop guard"

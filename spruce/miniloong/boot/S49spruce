@@ -93,6 +93,16 @@ stock_ota_present() {
     return 1
 }
 
+# Stock loong firmware mounts the SD noexec; Spruce executes runtime.sh, RetroArch,
+# python and .so straight off the card, so flip the payload slot and the /mnt/SDCARD
+# bind to exec (Leaf's remount_sd_mode exec equivalent). Without it runtime.sh dies
+# with rc=126 and the session crash-loops.
+remount_exec() {
+    _t="$1"
+    mount -o remount,exec,nosuid "$_t" >>"$BOOT_LOG" 2>&1 || \
+        mount -o remount,rw,exec,nosuid "$_t" >>"$BOOT_LOG" 2>&1 || true
+}
+
 bind_sdcard() {
     _slot="$1"
     [ "$_slot" = "$SDCARD" ] && return 0
@@ -137,6 +147,11 @@ start() {
     bind_sdcard "$_slot" || { breadcrumb "bind-failed (stock)"; return 0; }
     breadcrumb bound
     begin_persist
+    remount_exec "$_slot"
+    remount_exec "$SDCARD"
+    _o="$(awk -v m="$SDCARD" '$2==m{print $4; exit}' /proc/mounts 2>/dev/null)"
+    log "remounted payload exec ($SDCARD -> ${_o:-?})"
+    breadcrumb exec
 
     _entry="$SDCARD/.tmp_update/updater"
     [ -f "$_entry" ] || { log "$_entry missing after bind; stock"; return 0; }
