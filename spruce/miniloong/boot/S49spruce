@@ -1,0 +1,125 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          spruce
+# Required-Start:    mountvirtfs
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Spruce launcher session gate for the Miniloong Pocket 1
+### END INIT INFO
+#
+# Miniloong rootfs stub. Installed into the vendor loong firmware by the
+# loong_upgrade OTA (spruce-install.sh) as /etc/init.d/S49spruce, so rcS runs it
+# BEFORE S49weston and S50loong ("spruce" > "loong", so an S50 name would sort
+# too late - hence S49). It blocks rcS for the whole Spruce session; the stock
+# compositor never starts, leaving DRM free for the KMSDRM launcher. Its only jobs are the ones that must
+# work with no card, a half-written card, or a crashing payload:
+#   1. resolve which SD slot holds the full Spruce payload (SD1 or SD2),
+#   2. bind /mnt/SDCARD to it (Spruce hard-codes that path),
+#   3. enter the normal Spruce entry chain (.tmp_update/updater),
+#   4. fall through to stock S50loong on any failure or when disabled.
+#
+# Everything richer (crash-loop guard, preflight, exit-to-stock) lives on the
+# card in spruce/scripts/boot/session.sh, reached via the updater. Design:
+# ~/ai/CFW/Miniloong/research/rk3566-boot-bootstrap-phase1-20260828.md.
+
+SD1="${SPRUCE_SD1:-/mnt/sdcard}"
+SD2="${SPRUCE_SD2:-/media/sdcard1}"
+SDCARD="${SPRUCE_SDCARD:-/mnt/SDCARD}"
+BOOT_LOG="${SPRUCE_BOOT_LOG:-/tmp/spruce-boot.log}"
+
+log() {
+    printf '%s\n' "$*" >&2
+    printf '%s\n' "$*" >>"$BOOT_LOG" 2>/dev/null || true
+}
+
+# A slot carries a full Spruce payload iff both the entry point and the runtime
+# are present. The disable flag (spruce/flags/boot_to_stock.lock) is a positive
+# opt-out, never a missing file (repairSD.sh and the installer re-create the
+# updater), so a disabled card resolves as "no payload here".
+slot_has_full_spruce() {
+    _s="$1"
+    [ -n "$_s" ] || return 1
+    [ -f "$_s/.tmp_update/updater" ] || return 1
+    [ -f "$_s/spruce/scripts/runtime.sh" ] || return 1
+    [ -e "$_s/spruce/flags/boot_to_stock.lock" ] && return 1
+    return 0
+}
+
+# The full Spruce payload normally lives on SD1 (the preferred single-card
+# layout). SD2 is supported only as an optional overlay/fallback: if SD1 has
+# no payload, use SD2. Prefer SD1 whenever both carry one.
+resolve_full_spruce_slot() {
+    if slot_has_full_spruce "$SD1"; then printf '%s\n' "$SD1"; return 0; fi
+    if slot_has_full_spruce "$SD2"; then printf '%s\n' "$SD2"; return 0; fi
+    return 1
+}
+
+# A valid stock loong_upgrade on either slot means a vendor update is pending -
+# let stock handle it rather than starting Spruce over the top.
+stock_ota_present() {
+    for _root in "$SD1" "$SD2"; do
+        [ -n "$_root" ] || continue
+        [ -s "$_root/loong_upgrade" ] || continue
+        grep -q '"otaCommand"' "$_root/loong_upgrade" 2>/dev/null && return 0
+    done
+    return 1
+}
+
+bind_sdcard() {
+    _slot="$1"
+    [ "$_slot" = "$SDCARD" ] && return 0
+    # Already bound to the right slot?
+    if [ -f "$SDCARD/spruce/scripts/runtime.sh" ]; then
+        _dev_now="$(awk -v m="$SDCARD" '$2==m{print $1}' /proc/mounts 2>/dev/null | head -1)"
+        _dev_want="$(awk -v m="$_slot" '$2==m{print $1}' /proc/mounts 2>/dev/null | head -1)"
+        [ -n "$_dev_now" ] && [ "$_dev_now" = "$_dev_want" ] && return 0
+    fi
+    mkdir -p "$SDCARD" 2>/dev/null || true
+    # rootfs is ext4 and writable on this firmware; make sure before mkdir/bind.
+    mount -o remount,rw / >>"$BOOT_LOG" 2>&1 || \
+        mount -o remount,rw /dev/root / >>"$BOOT_LOG" 2>&1 || true
+    if mount --bind "$_slot" "$SDCARD" >>"$BOOT_LOG" 2>&1; then
+        return 0
+    fi
+    log "S49spruce: could not bind $_slot -> $SDCARD"
+    return 1
+}
+
+start() {
+    if stock_ota_present; then
+        log "S49spruce: stock loong_upgrade present; passing to stock"
+        return 0
+    fi
+
+    _slot="$(resolve_full_spruce_slot)" || {
+        log "S49spruce: no full Spruce payload on $SD1 or $SD2; passing to stock"
+        return 0
+    }
+    log "S49spruce: full Spruce payload on $_slot"
+
+    bind_sdcard "$_slot" || return 0
+
+    _entry="$SDCARD/.tmp_update/updater"
+    [ -f "$_entry" ] || { log "S49spruce: $_entry missing after bind; stock"; return 0; }
+
+    log "S49spruce: entering Spruce via $_entry"
+    # The updater detects the platform (Miniloong via /loong/loong_daemon) and
+    # execs the boot session, which runs runtime.sh. It does not return in normal
+    # operation; if it does, rcS continues into stock S50loong, which is correct.
+    SPRUCE_BOOT_SLOT="$_slot" sh "$_entry"
+    return 0
+}
+
+stop() {
+    # The session owns its own teardown; nothing to do here.
+    return 0
+}
+
+case "${1:-start}" in
+    start|"") start ;;
+    stop) stop ;;
+    restart|reload) stop; start ;;
+    *) echo "Usage: $0 {start|stop|restart}" >&2; exit 3 ;;
+esac
+exit 0
