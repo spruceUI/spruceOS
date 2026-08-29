@@ -1,0 +1,28 @@
+{
+  "label": "Atari Jaguar",
+  "icon": "jaguar.png",
+  "iconsel": "jaguar_sel.png",
+  "themecolor": "4fa1d5",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "j64|jag|rom|abs|cof|bin|cue|cdi|prg|iso|zip|7z",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 1000,
+  "brand": "Atari",
+  "type": "homeconsole",
+  "releaseYear": 1993,
+  "default_emulator": "virtualjaguar",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": ["jaguar", "Atari Jaguar", "jag", "JAG"]
+}
