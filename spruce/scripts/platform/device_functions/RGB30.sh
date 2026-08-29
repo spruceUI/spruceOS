@@ -237,26 +237,30 @@ device_hdmi_connected() {
 #####   NETWORK   #####
   ###################
 
-# connman owns the radio end to end here - association and DHCP both - so
-# spruce must not start a wpa_supplicant beside it. This is what stops
+# NetworkManager owns the radio end to end here - association and DHCP both -
+# so spruce must not start a wpa_supplicant beside it. This is what stops
 # enable_wifi from doing that; without it two daemons fight over wlan0 and the
-# first boot log showed spruce launching wpa_supplicant on a connman system.
+# first boot log showed spruce launching wpa_supplicant on top of the base's.
 device_manages_own_wifi() {
     return 0
 }
 
-# connman is a daemon, not a per-connection process: it is already running and
-# owns the radio. Toggling the interface is the right granularity here, and
-# doing it through connman keeps its state machine in agreement with reality.
+# NetworkManager is a daemon, not a per-connection process: it is already
+# running and owns the radio. Toggling the radio is the right granularity here,
+# and doing it through nmcli keeps NM's state machine in agreement with reality.
+#
+# These used to call connmanctl, carried over from the JELOS-based MossySpruce
+# base. dArkMoss is Debian and has no connman at all, so both were silently
+# doing nothing - the WiFi toggle in settings looked like it worked and did not.
 device_wifi_power_on() {
-    connmanctl enable wifi >/dev/null 2>&1
+    nmcli radio wifi on >/dev/null 2>&1
 }
 
 device_wifi_power_off() {
-    connmanctl disable wifi >/dev/null 2>&1
+    nmcli radio wifi off >/dev/null 2>&1
 }
 
-# connman runs its own DHCP. Starting udhcpc alongside it would give the
+# NetworkManager runs its own DHCP. Starting udhcpc alongside it would give the
 # interface two clients racing for the same lease - the mistake the Anbernic XX
 # line made with dhclient. Deliberately empty, not unimplemented.
 device_start_dhcp_client() {
