@@ -1,0 +1,47 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+struct PushVarsPS
+{
+    highp vec4 sScreenSize;
+    highp float sHCurve;
+    highp float sHBias;
+    highp float sVCurve;
+    highp float sVBias;
+    highp float sBoundaryFade;
+};
+
+uniform PushVarsPS pushvars;
+
+uniform highp sampler2D sTex;
+
+in highp vec2 ilUV;
+layout(location = 0) out highp vec4 outColor0;
+
+highp float uv_clip_mask(highp vec2 uv)
+{
+    highp float flx = (uv.x < 0.0) ? 0.0 : 1.0;
+    highp float fgx = (uv.x > 1.0) ? 0.0 : 1.0;
+    highp float fx = min(flx, fgx);
+    highp float fly = (uv.y < 0.0) ? 0.0 : 1.0;
+    highp float fgy = (uv.y > 1.0) ? 0.0 : 1.0;
+    highp float fy = min(fly, fgy);
+    return min(fx, fy);
+}
+
+void main()
+{
+    highp vec2 uv = ilUV;
+    highp vec2 uvc = (uv - vec2(0.5)) * 2.0;
+    highp float ax = pow(abs(uvc.x), pushvars.sVCurve);
+    highp float ay = pow(abs(uvc.y), pushvars.sHCurve);
+    highp vec2 uvcScale = vec2(1.0 / max((1.0 - ay) + (pushvars.sHBias * ay), pushvars.sScreenSize.z), 1.0 / max((1.0 - ax) + (pushvars.sVBias * ax), pushvars.sScreenSize.w));
+    uvc *= uvcScale;
+    uv = (uvc + vec2(1.0)) * 0.5;
+    highp vec2 d = vec2(abs(round(uv) - uv)) * 12.0;
+    highp vec2 param = uv;
+    highp float fc = uv_clip_mask(param);
+    outColor0 = vec4(texture(sTex, uv).xyz * fc, fc * mix(1.0, min(min(d.x, d.y), 1.0), pushvars.sBoundaryFade));
+}
+

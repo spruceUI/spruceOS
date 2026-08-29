@@ -1,0 +1,286 @@
+{
+    "DickPostStack": {
+        "UserOptions": [
+            {
+                "Constant": "PHOSPHOR",
+                "Type": "float",
+                "Description": "CRT - Phosphor ON/OFF",
+                "DefaultVal": 1.0,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 1.0
+            },
+            {
+                "Constant": "VSCANLINES",
+                "Type": "float",
+                "Description": "CRT - Scanlines Direction",
+                "DefaultVal": 0.0,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 1.0
+            },
+            {
+                "Constant": "InputGamma",
+                "Type": "float",
+                "Description": "CRT - Input gamma",
+                "DefaultVal": 2.5,
+                "MinVal": 0.0,
+                "MaxVal": 5.0,
+                "StepVal": 0.1
+            },
+            {
+                "Constant": "OutputGamma",
+                "Type": "float",
+                "Description": "CRT - Output Gamma",
+                "DefaultVal": 2.2,
+                "MinVal": 0.0,
+                "MaxVal": 5.0,
+                "StepVal": 0.1
+            },
+            {
+                "Constant": "SHARPNESS",
+                "Type": "float",
+                "Description": "CRT - Sharpness Hack",
+                "DefaultVal": 1.0,
+                "MinVal": 1.0,
+                "MaxVal": 5.0,
+                "StepVal": 1.0
+            },
+            {
+                "Constant": "COLOR_BOOST",
+                "Type": "float",
+                "Description": "CRT - Color Boost",
+                "DefaultVal": 1.5,
+                "MinVal": 1.0,
+                "MaxVal": 2.0,
+                "StepVal": 0.05
+            },
+            {
+                "Constant": "RED_BOOST",
+                "Type": "float",
+                "Description": "CRT - Red Boost",
+                "DefaultVal": 1.0,
+                "MinVal": 1.0,
+                "MaxVal": 2.0,
+                "StepVal": 0.01
+            },
+            {
+                "Constant": "GREEN_BOOST",
+                "Type": "float",
+                "Description": "CRT - Green Boost",
+                "DefaultVal": 1.0,
+                "MinVal": 1.0,
+                "MaxVal": 2.0,
+                "StepVal": 0.01
+            },
+            {
+                "Constant": "BLUE_BOOST",
+                "Type": "float",
+                "Description": "CRT - Blue Boost",
+                "DefaultVal": 1.0,
+                "MinVal": 1.0,
+                "MaxVal": 2.0,
+                "StepVal": 0.01
+            },
+            {
+                "Constant": "SCANLINES_STRENGTH",
+                "Type": "float",
+                "Description": "CRT - Scanline Strength",
+                "DefaultVal": 0.5,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 0.02
+            },
+            {
+                "Constant": "BEAM_MIN_WIDTH",
+                "Type": "float",
+                "Description": "CRT - Min Beam Width",
+                "DefaultVal": 0.8600000143051148,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 0.02
+            },
+            {
+                "Constant": "BEAM_MAX_WIDTH",
+                "Type": "float",
+                "Description": "CRT - Max Beam Width",
+                "DefaultVal": 1.0,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 0.02
+            },
+            {
+                "Constant": "CRT_ANTI_RINGING",
+                "Type": "float",
+                "Description": "CRT - Anti-Ringing",
+                "DefaultVal": 0.8,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 0.1
+            }
+        ],
+        "Textures": [],
+        "CommonDataBlocks": [],
+        "Passes": [
+            {
+                "RTFormat": "R8G8B8A8_UNORM",
+                "RTexWrapMode": "ClampToEdge",
+                "RTTexFilter": "Point",
+                "RTGenMips": false,
+                "RTSizeType": [
+                    "TargetArea",
+                    "TargetArea"
+                ],
+                "RTScale": [
+                    1.0,
+                    1.0
+                ],
+                "TextureProviders": [
+                    {
+                        "Name": "Source",
+                        "ResourceSlot": 2,
+                        "Type": "2D",
+                        "SourceType": "PreviousPass",
+                        "RefIndex": -1
+                    }
+                ],
+                "DataBlocks": [
+                    {
+                        "Name": "UBO",
+                        "Type": "ConstantBuffer",
+                        "Location": 0,
+                        "Size": 112,
+                        "DataProviders": [
+                            {
+                                "Name": "SourceSize",
+                                "Type": "float4",
+                                "Offset": 96,
+                                "SourceType": "PreviousPassSize",
+                                "RefIndex": -1
+                            },
+                            {
+                                "Name": "OutputSize",
+                                "Type": "float4",
+                                "Offset": 64,
+                                "SourceType": "RTSize",
+                                "RefIndex": -1
+                            },
+                            {
+                                "Name": "MVP",
+                                "Type": "float4x4",
+                                "Offset": 0,
+                                "SourceType": "MVP",
+                                "RefIndex": -1
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "param",
+                        "Type": "Loose",
+                        "Location": 0,
+                        "Size": 52,
+                        "DataProviders": [
+                            {
+                                "Name": "SHARPNESS",
+                                "Type": "float",
+                                "Offset": 16,
+                                "SourceType": "UserOption",
+                                "RefIndex": 4
+                            },
+                            {
+                                "Name": "VSCANLINES",
+                                "Type": "float",
+                                "Offset": 4,
+                                "SourceType": "UserOption",
+                                "RefIndex": 1
+                            },
+                            {
+                                "Name": "InputGamma",
+                                "Type": "float",
+                                "Offset": 8,
+                                "SourceType": "UserOption",
+                                "RefIndex": 2
+                            },
+                            {
+                                "Name": "CRT_ANTI_RINGING",
+                                "Type": "float",
+                                "Offset": 48,
+                                "SourceType": "UserOption",
+                                "RefIndex": 12
+                            },
+                            {
+                                "Name": "BEAM_MIN_WIDTH",
+                                "Type": "float",
+                                "Offset": 40,
+                                "SourceType": "UserOption",
+                                "RefIndex": 10
+                            },
+                            {
+                                "Name": "BEAM_MAX_WIDTH",
+                                "Type": "float",
+                                "Offset": 44,
+                                "SourceType": "UserOption",
+                                "RefIndex": 11
+                            },
+                            {
+                                "Name": "SCANLINES_STRENGTH",
+                                "Type": "float",
+                                "Offset": 36,
+                                "SourceType": "UserOption",
+                                "RefIndex": 9
+                            },
+                            {
+                                "Name": "COLOR_BOOST",
+                                "Type": "float",
+                                "Offset": 20,
+                                "SourceType": "UserOption",
+                                "RefIndex": 5
+                            },
+                            {
+                                "Name": "RED_BOOST",
+                                "Type": "float",
+                                "Offset": 24,
+                                "SourceType": "UserOption",
+                                "RefIndex": 6
+                            },
+                            {
+                                "Name": "GREEN_BOOST",
+                                "Type": "float",
+                                "Offset": 28,
+                                "SourceType": "UserOption",
+                                "RefIndex": 7
+                            },
+                            {
+                                "Name": "BLUE_BOOST",
+                                "Type": "float",
+                                "Offset": 32,
+                                "SourceType": "UserOption",
+                                "RefIndex": 8
+                            },
+                            {
+                                "Name": "PHOSPHOR",
+                                "Type": "float",
+                                "Offset": 0,
+                                "SourceType": "UserOption",
+                                "RefIndex": 0
+                            },
+                            {
+                                "Name": "OutputGamma",
+                                "Type": "float",
+                                "Offset": 12,
+                                "SourceType": "UserOption",
+                                "RefIndex": 3
+                            }
+                        ]
+                    }
+                ],
+                "PixelGLSL": "crt-hyllian/_pass00_pixel.glsl",
+                "VertexGLSL": "crt-hyllian/_pass00_vertex.glsl",
+                "PixelESSL": "crt-hyllian/_pass00_pixel.essl",
+                "VertexESSL": "crt-hyllian/_pass00_vertex.essl",
+                "PixelDXBC": "crt-hyllian/_pass00_pixel.dxbc",
+                "VertexDXBC": "crt-hyllian/_pass00_vertex.dxbc"
+            }
+        ]
+    }
+}

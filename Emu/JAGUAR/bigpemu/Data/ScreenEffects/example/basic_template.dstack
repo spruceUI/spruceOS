@@ -1,0 +1,42 @@
+{
+    "DickPostStack": {
+        "UserOptions": [],
+		"Textures": [],
+        "CommonDataBlocks": [
+            {
+                "Name": "UBO",
+                "Type": "ConstantBuffer",
+                "Location": 0,
+                "Size": 64,
+                "DataProviders": [
+                    {
+                        "Name": "mMVP",
+                        "Type": "float4x4",
+                        "Offset": 0,
+                        "SourceType": "MVP"
+                    }
+                ]
+			}
+		],
+        "Passes": [
+            {
+                "RTFormat": "R8G8B8A8_UNORM",
+                "RTexWrapMode": "ClampToEdge",
+                "RTTexFilter": "Point",
+                "RTGenMips": false,
+                "RTSizeType": "TargetArea",
+                "RTScale": 1.0,
+                "TextureProviders": [
+                    {
+                        "Name": "sTex",
+                        "Type": "2D",
+                        "SourceType": "PreviousPass"
+                    }
+                ],
+                "DataBlocks": [],
+                "PixelGLSL": "basic_template_ps.glsl",
+                "VertexGLSL": "basic_template_vs.glsl"
+            }
+		]
+	}
+}

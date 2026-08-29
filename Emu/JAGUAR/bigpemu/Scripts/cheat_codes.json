@@ -1,0 +1,994 @@
+{
+    "DickGenie": {
+		"7b94c22f2e84d795": {
+			"Name": "AirCars",
+			"Codes": [
+				{
+					"Name": "Infinite ammo",
+					"Code": "M=ICBN@T,V;/F!ZS.?+.36 M=ICBN@X,V;/F!ZS.?+.36 E=ACBN@U,V;5<`@0 U=]CBN`^,V;/6"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "U=]CBN@(-&;)4"
+				}
+			]
+		},
+		"1bcb3230db41aa47": {
+			"Name": "Alien vs Predator",
+			"Codes": [
+				{
+					"Name": "Infinite ammo",
+					"Code": "==]T}85{]M6S ==]T}83{]M6S ==]T}81{]M6S ==]T}8/{]M6S"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "==YT}(*X]MO8"
+				},
+				{
+					"Name": "All weapons",
+					"Code": "5=]T}(V{]-FT"
+				},
+				{
+					"Name": "All keys",
+					"Code": "5=]T}X]X]-LS"
+				}
+			]
+		},
+		"d6821157bfc4a8b0": {
+			"Name": "Atari Karts",
+			"Codes": [
+				{
+					"Name": "Unlock all",
+					"Code": "5;1VSB6 %;M)S}96!.>S"
+				},
+				{
+					"Name": "Force lap count",
+					"Code": ["5;1{M}8", "5;1{MB7", "5;1{M}7", "5;1{MB6", "5;1{M}6", "5;1{MB5", "5;1{M}5", "5;1{MB4", "5;1{M}4"],
+					"CodeLabels": ["!STR_DISABLED", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+				},
+				{
+					"Name": "Always final lap",
+					"Code": "5?1W08?B 5;1{M}6"
+				},
+				{
+					"Name": "Ridiculous acceleration",
+					"Code": "%?M1&C}V(4F06"
+				}
+			]
+		},
+		"c1e15384328cdb32": {
+			"Name": "Attack of the Mutant Penguins",
+			"Codes": [
+				{
+					"Name": "Infinite club",
+					"Code": "=?EZI`@V(4 =?E[I`@V(4 5?=]I`@VX 5?]^I`@VX 5?=^I`@VX U=]1HP`}[];93 5?QQI`@Z"
+				},
+				{
+					"Name": "Infinite boomerang",
+					"Code": "=?EZI`@V(4 =?E[I`@V(4 5?=]I`@VX 5?]^I`@VX 5?=^I`@VX U=]1HP`}[];A4 5?1QI`@Z"
+				},
+				{
+					"Name": "Infinite lives (Penguin Attack)",
+					"Code": "5?1ML`@H"
+				}
+			]
+		},
+		"a1189031055c26ce": {
+			"Name": "Breakout 2000",
+			"Codes": [
+				{
+					"Name": "Infinite balls",
+					"Code": "5?1]^+=H"
+				},
+				{
+					"Name": "Force ball type",
+					"Code": ["5?Q^^+=J", "5?Q^^+=P", "5?Q^^+=N", "5?Q^^+=D", "5?Q^^+=B"],
+					"CodeLabels": ["!STR_DISABLED", "Normal", "Super", "Exploding", "Classic", "Classic Super"]
+				},
+				{
+					"Name": "Infinite attract",
+					"Code": "5?QN7,=J"
+				},
+				{
+					"Name": "Infinite catch",
+					"Code": "5?QP7,=J"
+				},
+				{
+					"Name": "Infinite cannon",
+					"Code": "5?1P7,=J"
+				},
+				{
+					"Name": "Start on level",
+					"Code": ["5=U$QIF=}- 5=U$Q)[9}-", "5=Q$QIF=}-3 5=Q$Q)[9}-3", "5=Q$QIF=}M4 5=Q$Q)[9}M4", "5=Q$QIF=}-4 5=Q$Q)[9}-4", "5=Q$QIF=}M1 5=Q$Q)[9}M1", "5=Q$QIF=}-1 5=Q$Q)[9}-1", "5=Q$QIF=}M2 5=Q$Q)[9}M2", "5=Q$QIF=}-2 5=Q$Q)[9}-2", "5=Q$QIF=}M7 5=Q$Q)[9}M7", "5=Q$QIF=}-7 5=Q$Q)[9}-7", "5=Q$QIF=}M8 5=Q$Q)[9}M8", "5=Q$QIF=}-8 5=Q$Q)[9}-8", "5=Q$QIF=}M5 5=Q$Q)[9}M5", "5=Q$QIF=}-5 5=Q$Q)[9}-5", "5=Q$QIF=}M6 5=Q$Q)[9}M6", "5=Q$QIF=}-6 5=Q$Q)[9}-6", "5=]$QIF=}M3S 5=]$Q)[9}M3S", "5=]$QIF=}-3S 5=]$Q)[9}-3S", "5=]$QIF=}M4S 5=]$Q)[9}M4S", "5=]$QIF=}-4S 5=]$Q)[9}-4S", "5=]$QIF=}M1S 5=]$Q)[9}M1S", "5=]$QIF=}-1S 5=]$Q)[9}-1S", "5=]$QIF=}M2S 5=]$Q)[9}M2S", "5=]$QIF=}-2S 5=]$Q)[9}-2S", "5=]$QIF=}M7S 5=]$Q)[9}M7S", "5=]$QIF=}-7S 5=]$Q)[9}-7S", "5=]$QIF=}M8S 5=]$Q)[9}M8S", "5=]$QIF=}-8S 5=]$Q)[9}-8S", "5=]$QIF=}M5S 5=]$Q)[9}M5S", "5=]$QIF=}-5S 5=]$Q)[9}-5S", "5=]$QIF=}M6S 5=]$Q)[9}M6S", "5=]$QIF=}-6S 5=]$Q)[9}-6S", "5=]$QIF=}M+S 5=]$Q)[9}M+S", "5=]$QIF=}-+S 5=]$Q)[9}-+S", "5=]$QIF=}M,S 5=]$Q)[9}M,S", "5=]$QIF=}-,S 5=]$Q)[9}-,S", "5=]$QIF=}M)S 5=]$Q)[9}M)S", "5=]$QIF=}-)S 5=]$Q)[9}-)S", "5=]$QIF=}M*S 5=]$Q)[9}M*S", "5=]$QIF=}-*S 5=]$Q)[9}-*S", "5=]$QIF=}M/S 5=]$Q)[9}M/S", "5=]$QIF=}-/S 5=]$Q)[9}-/S", "5=]$QIF=}M0S 5=]$Q)[9}M0S", "5=]$QIF=}-0S 5=]$Q)[9}-0S", "5=]$QIF=}M-S 5=]$Q)[9}M-S", "5=]$QIF=}--S 5=]$Q)[9}--S", "5=]$QIF=}M.S 5=]$Q)[9}M.S", "5=]$QIF=}-.S 5=]$Q)[9}-.S", "5=]$QIF=}M#S 5=]$Q)[9}M#S", "5=]$QIF=}-#S 5=]$Q)[9}-#S"],
+					"CodeLabels": ["!STR_DISABLED"]
+				}
+			]
+		},
+		"04c9b92982b10ea5": {
+			"Name": "Brutal Sports Football",
+			"Codes": [
+				{
+					"Name": "P1 always wins",
+					"Code": "=?Q/GK?Z =?Q*GK?Z =?U0GK?* =?U)GK?*"
+				},
+				{
+					"Name": "P2 always wins",
+					"Code": "=?U/GK?* =?U*GK?* =?Q0GK?Z =?Q)GK?Z"
+				},
+				{
+					"Name": "1 minute matches",
+					"Code": "]]U74Q]02G9S ]]Q74Q]/2G9="
+				}
+			]
+		},
+		"5c0c7827948f0f27": {
+			"Name": "Bubsy in Fractured Furry Tales",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1:!V@{"
+				},
+				{
+					"Name": "Infinite time",
+					"Code": "=?YX!V@JQO"
+				},
+				{
+					"Name": "Invincible",
+					"Code": "=?EP!V@V($"
+				},
+				{
+					"Name": "Shadow invincible",
+					"Code": "=?EA!V@V($"
+				}
+			]
+		},
+		"b1edd5d934a2102c": {
+			"Name": "Cannon Fodder",
+			"Codes": [
+				{
+					"Name": "Infinite recruits",
+					"Code": "53]A7BN,Y%"
+				},
+				{
+					"Name": "Infinite grenades",
+					"Code": "5?1{:L=H"
+				},
+				{
+					"Name": "Infinite bazookas",
+					"Code": "5?1_:L=H"
+				}
+			]
+		},
+		"f9dda93597c567f7": {
+			"Name": "Checkered Flag",
+			"Codes": [
+				{
+					"Name": "Win after 1 lap",
+					"Code": "U]QA)0?1C~<% U]QA)0_L:~<%"
+				}
+			]
+		},
+		"19359d79b2431503": {
+			"Name": "Club Drive",
+			"Codes": [
+				{
+					"Name": "Win after 1 ball or lap",
+					"Code": "U]]%9LP+,`6)4"
+				}
+			]
+		},
+		"3f97a08e8550667c": {
+			"Name": "Cybermorph",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=?Y5]O?,=P"
+				},
+				{
+					"Name": "Infinite lives",
+					"Code": "5?Q^^O?B"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?1E^O?B 5?1G^O?B 5?1G^O?B 5?1H^O?B 5?1Y^O?B 5?1Z^O?B 5?1[^O?B"
+				}
+			]
+		},
+		"6b591ba55b0bcbd7": {
+			"Name": "Defender 2000",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1.!U=B 5?1($U=B"
+				},
+				{
+					"Name": "Infinite bombs",
+					"Code": "5?1-!U=^ 5?19$U=^"
+				}
+			]
+		},
+		"75f2216bd4f54ac2": {
+			"Name": "DOOM",
+			"Codes": [
+				{
+					"Name": "Invulnerable",
+					"Code": "%?Q;2&@^"
+				},
+				{
+					"Name": "All weapons/ammo",
+					"Code": "%?Q]7&@J %?Q_7&@J %?QQ7&@J %?QS7&@J %?QU7&@J %?QW7&@J %?Y)7&@DXO %?Y+7&@DXO %?Y-7&@DXO %?Y/7&@DXO"
+				},
+				{
+					"Name": "All keys",
+					"Code": "%?Q32&@J %?Q52&@J %?Q72&@J %?QI7&@J %?QK7&@J %?QM7&@J"
+				},
+				{
+					"Name": "Unlock all levels",
+					"Code": "5?=T9!@{Q"
+				}
+			]
+		},
+		"cca2530a5a110e60": {
+			"Name": "Double Dragon V: The Shadow Falls",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=?YXBI@<HO"
+				}
+			]
+		},
+		"1d72b9ed4d0094f2": {
+			"Name": "Dragon: The Bruce Lee Story",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "]]YB2HP-*O+Q+^"
+				},
+				{
+					"Name": "Infinite chi",
+					"Code": "]]YB2HPA)O+Q+^"
+				}
+			]
+		},
+		"8ed8554f0955f6ef": {
+			"Name": "Evolution: Dino Dudes",
+			"Codes": [
+				{
+					"Name": "Infinite dudes",
+					"Code": "=?E*6!@<[&"
+				},
+				{
+					"Name": "Infinite time",
+					"Code": "=?E`6!@,[%"
+				}
+			]
+		},
+		"537b347137eb7408": {
+			"Name": "Fever Pitch Soccer",
+			"Codes": [
+				{
+					"Name": "Team 1 always wins",
+					"Code": "5?5L4#@* 5?1X3#@Z"
+				},
+				{
+					"Name": "Team 2 always wins",
+					"Code": "5?1L4#@Z 5?5X3#@*"
+				}
+			]
+		},
+		"c56b6f168a80e5ee": {
+			"Name": "Fight for Life",
+			"Codes": [
+				{
+					"Name": "Infinite P1 health",
+					"Code": "U]]E-B0$~K5/6"
+				}
+			]
+		},
+		"de2d2efb0d1b64de": {
+			"Name": "Flashback: The Quest for Identity",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "5;1AS}4"
+				}
+			]
+		},
+		"7fb2d44f557ed585": {
+			"Name": "FlipOut!",
+			"Codes": [
+				{
+					"Name": "Start scene",
+					"Code": ["U]QMLA0&KI8=", "U]QMLA0&KI8?", "U]QMLA0&KI8!", "U]QMLA0&KI8#", "U]QMLA0&KI8%", "U]QMLA0&KI8~", "U]QMLA0&KI8)", "U]QMLA0&KI8+", "U]QMLA0&KI8-", "U]QMLA0&KI8/", "U]]MLA0&KI813", "U]]MLA0&KI833", "U]]MLA0&KI853", "U]]MLA0&KI873", "U]]MLA0&KI893", "U]]MLA0&KI8;3", "U]]MLA0&KI8=3", "U]]MLA0&KI8?3", "U]]MLA0&KI8!3", "U]]MLA0&KI8#3", "U]]MLA0&KI8%3", "U]]MLA0&KI8~3", "U]]MLA0&KI8)3", "U]]MLA0&KI8+3", "U]]MLA0&KI8-3", "U]]MLA0&KI8/3", "U]]MLA0&KI8Q4", "U]]MLA0&KI8S4", "U]]MLA0&KI8U4", "U]]MLA0&KI8W4", "U]]MLA0&KI8Y4", "U]]MLA0&KI8[4", "U]]MLA0&KI8]4", "U]]MLA0&KI8_4", "U]]MLA0&KI8A4", "U]]MLA0&KI8C4", "U]]MLA0&KI8E4", "U]]MLA0&KI8G4", "U]]MLA0&KI8I4", "U]]MLA0&KI8K4", "U]]MLA0&KI8M4", "U]]MLA0&KI8O4", "U]]MLA0&KI814", "U]]MLA0&KI834", "U]]MLA0&KI854", "U]]MLA0&KI874", "U]]MLA0&KI894", "U]]MLA0&KI8;4", "U]]MLA0&KI8=4", "U]]MLA0&KI8?4", "U]]MLA0&KI8!4", "U]]MLA0&KI8#4", "U]]MLA0&KI8%4", "U]]MLA0&KI8~4"],
+					"CodeLabels": ["!STR_DISABLED"]
+				}
+			]
+		},
+		"67c944ee0406fad9": {
+			"Name": "Hover Strike",
+			"Codes": [
+				{
+					"Name": "Infinite energy",
+					"Code": "=?E12)=V(4"
+				},
+				{
+					"Name": "Infinite shield",
+					"Code": "=?E62)=V(4"
+				},
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1_:*=F"
+				}
+			]
+		},
+		"99a14c375429a786": {
+			"Name": "I-War",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1`Y~?B"
+				}
+			]
+		},
+		"d69687190b9108c8": {
+			"Name": "International Sensible Soccer",
+			"Codes": [
+				{
+					"Name": "Team 1 always wins",
+					"Code": "5;1IL(4 5;1KL(4 5;1ML(4 5;5JL( 5;5LL( 5;5NL("
+				},
+				{
+					"Name": "Team 2 always wins",
+					"Code": "5;5IL( 5;5KL( 5;5ML( 5;1JL(4 5;1LL(4 5;1NL(4"
+				}
+			]
+		},
+		"8429fdcfcdf35fa1": {
+			"Name": "Iron Soldier",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=;E<JF@LT"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5;QYMB2 =;E[MB@NR 5;Q{MB4 5;]]MB~* 5;Q_M}8"
+				},
+				{
+					"Name": "Unlock all",
+					"Code": "5;QTJB4"
+				}
+			]
+		},
+		"39159e865ab73158": {
+			"Name": "Iron Soldier 2",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=?E93K@,Q$"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "=;EGNB@PR =;EZNB@PR =;EQNB@PR =;ESNB@PR =;ETNB@PR 5;QHNB2 5;Q[NB4 5;]{NB~* 5;Q^N}8 5;QRNB5"
+				},
+				{
+					"Name": "Unlock all",
+					"Code": "5;]FOB4*"
+				}
+			]
+		},
+		"392906008d83777e": {
+			"Name": "Kasumi Ninja",
+			"Codes": [
+				{
+					"Name": "Infinite P1 health",
+					"Code": "=;ETD!AUX"
+				},
+				{
+					"Name": "Infinite P2 health",
+					"Code": "=;E(B!AUX"
+				},
+				{
+					"Name": "Infinite time",
+					"Code": "=;U~H!"
+				}
+			]
+		},
+		"8a324beec06140ab": {
+			"Name": "Missile Command 3D",
+			"Codes": [
+				{
+					"Name": "Infinite missiles",
+					"Code": "&?M4>(>$9?047`74(JS &?ML`Q?4Q$@}1`74D.T"
+				}
+			]
+		},
+		"10b81f6bcf91c1b5": {
+			"Name": "NBA Jam: Tournament Edition",
+			"Codes": [
+				{
+					"Name": "1-shot fire P1",
+					"Code": "5;1=B!7"
+				},
+				{
+					"Name": "1-shot fire P2",
+					"Code": "5;1]F!7"
+				},
+				{
+					"Name": "1-shot fire P3",
+					"Code": "5;1=I!7"
+				},
+				{
+					"Name": "1-shot fire P4",
+					"Code": "5;1]M!7"
+				},
+				{
+					"Name": "Infinite turbo P1",
+					"Code": "%;A+AA@,Y)"
+				},
+				{
+					"Name": "Infinite turbo P2",
+					"Code": "%;AKEA@,Y)"
+				},
+				{
+					"Name": "Infinite turbo P3",
+					"Code": "%;A+LA@,Y)"
+				},
+				{
+					"Name": "Infinite turbo P4",
+					"Code": "%;AKPA@,Y)"
+				}
+			]
+		},
+		"8117c6d51b9dd788": {
+			"Name": "Pinball Fantasies",
+			"Codes": [
+				{
+					"Name": "Infinite balls",
+					"Code": "=;YASB@N"
+				}
+			]
+		},
+		"10b52759119ef17a": {
+			"Name": "Pitfall: The Mayan Adventure",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?13>#@B"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "5?U:*#@*"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?Q4>#@B 5?14>#@B 5?Q5>#@B"
+				}
+			]
+		},
+		"3381b57a63bbdbcb": {
+			"Name": "Power Drive Rally",
+			"Codes": [
+				{
+					"Name": "Infinite money",
+					"Code": "%;A41F0]6."
+				},
+				{
+					"Name": "Infinite time",
+					"Code": "G50-B]`. GE`>B]@$Z"
+				},
+				{
+					"Name": "Win in 1 lap",
+					"Code": "]]QDO:]&A<:# ]]QDO:]8D<:#"
+				}
+			]
+		},
+		"5fa30c19c9dcd87f": {
+			"Name": "Raiden",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?Q4G0@Z 5?Q:R0@Z"
+				},
+				{
+					"Name": "Infinite bombs",
+					"Code": "5?14G0@Z 5?1:R0@Z"
+				},
+				{
+					"Name": "Max weapons",
+					"Code": "5?QIH0@F 5?Q?R0@F 5?QJH0@D 5?Q@R0@D"
+				}
+			]
+		},
+		"4f7e323a69447a71": {
+			"Name": "Rayman",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5;Q9[A4"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "5;]:[A(*"
+				},
+				{
+					"Name": "Unlock levels",
+					"Code": "5;=^[!A) 5;=Q[!A) 5;=T[!A) 5;=V[!A) 5;1*[!1"
+				},
+				{
+					"Name": "Unlock specials",
+					"Code": "5;]*[!/*"
+				}
+			]
+		},
+		"f8aa9f6b845dc022": {
+			"Name": "Ruiner Pinball",
+			"Codes": [
+				{
+					"Name": "Infinite balls",
+					"Code": ">?11BH!$UN >?1Q/6}$UN"
+				}
+			]
+		},
+		"1d8c0621eb876398": {
+			"Name": "Super Burnout",
+			"Codes": [
+				{
+					"Name": "Always first place",
+					"Code": "5?1*L5@J"
+				}
+			]
+		},
+		"de60afafcf4b2035": {
+			"Name": "Supercross 3D",
+			"Codes": [
+				{
+					"Name": "Always first place",
+					"Code": "5?5I/{=*"
+				}
+			]
+		},
+		"8de431284ec0fed4": {
+			"Name": "Syndicate",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "5?=?*E>LQ 5?=-/E>LQ 5?=[0E>LQ 5?=I-E>LQ"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "G5`%DA`0"
+				}
+			]
+		},
+		"0030407d0269ce03": {
+			"Name": "Tempest 2000",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "6;1=R]>9"
+				},
+				{
+					"Name": "Infinite zapper",
+					"Code": "5;Q=W&8"
+				}
+			]
+		},
+		"75f4878c35a30a60": {
+			"Name": "Theme Park",
+			"Codes": [
+				{
+					"Name": "Infinite money",
+					"Code": "%?MK0S?,]SHV3 %?MA0S?,]SHV3"
+				}
+			]
+		},
+		"0f86df20af3a5ae4": {
+			"Name": "Towers II: Plight of the Stargazer",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=?YQ8W=,QO =?YR8W=,QO"
+				},
+				{
+					"Name": "Infinite magic",
+					"Code": "=?Y_8W=,QO =?Y`8W=,QO"
+				}
+			]
+		},
+		"68e321f5ecf43196": {
+			"Name": "Trevor McFur in the Crescent Galaxy",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1^9==Z"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?1!8==Z 5?1}8==Z 5?1#8==Z 5?1$8==Z 5?1%8==Z 5?1&8==Z 5?1~8==Z 5?1(8==Z 5?198==Z"
+				},
+				{
+					"Name": "Max weapons",
+					"Code": "5?1/8==P 5?1)9==B"
+				}
+			]
+		},
+		"f0518496c40b956b": {
+			"Name": "Troy Aikman NFL Football",
+			"Codes": [
+				{
+					"Name": "Team 1 always wins",
+					"Code": "5;Q/BB3 5;1/BB3 5;Q0BB3 5;10BB3 5;=GGB,* 5;U!B} 5;5!B} 5;U}B} 5;5}B} 5;5HG}"
+				},
+				{
+					"Name": "Team 2 always wins",
+					"Code": "5;Q!BB3 5;1!BB3 5;Q}BB3 5;1}BB3 5;=HGB,* 5;U/B} 5;5/B} 5;U0B} 5;50B} 5;5GG}"
+				}
+			]
+		},
+		"13773a13560ca917": {
+			"Name": "Ultra Vortek",
+			"Codes": [
+				{
+					"Name": "Infinite health P1",
+					"Code": "=;]4-}4*"
+				},
+				{
+					"Name": "Infinite health P2",
+					"Code": "=;]5-}4*"
+				}
+			]
+		},
+		"8551c87570272a14": {
+			"Name": "Val d'Isere Skiing and Snowboarding",
+			"Codes": [
+				{
+					"Name": "Infinite time",
+					"Code": "G5(LWE^/ G5(7RE^/"
+				}
+			]
+		},
+		"dc70c941f5af75d6": {
+			"Name": "White Men Can't Jump",
+			"Codes": [
+				{
+					"Name": "P1 zero score",
+					"Code": "5;5@4}"
+				},
+				{
+					"Name": "P2 zero score",
+					"Code": "5;5L1}"
+				}
+			]
+		},
+		"f714bd1b17d9375d": {
+			"Name": "Wolfenstein 3D",
+			"Codes": [
+				{
+					"Name": "Invulnerable",
+					"Code": "%?Q-1T@J"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "%?Y11T@DXO %?Y31T@DXO %?Y51T@DXO %?Y71T@DXO %?QI2T@J %?QK2T@J %?QM2T@J %?QO2T@J"
+				}
+			]
+		},
+		"94e62b5f01653696": {
+			"Name": "Worms",
+			"Codes": [
+				{
+					"Name": "1-shot kills",
+					"Code": "=?EASJ@V<#"
+				}
+			]
+		},
+		"5e5f0de6864b2af8": {
+			"Name": "Zero 5",
+			"Codes": [
+				{
+					"Name": "Invulnerable",
+					"Code": "5?1VX?=J"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?1RW?=P"
+				},
+				{
+					"Name": "Unlock all levels",
+					"Code": "5?1`X?=V"
+				}
+			]
+		},
+		"55c927b5c2ad250e": {
+			"Name": "Zool 2",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5;1;K&4"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "5;1!K&6"
+				}
+			]
+		},
+		"911e3c8231ee1d7a": {
+			"Name": "Zoop",
+			"Codes": [
+				{
+					"Name": "Instant win",
+					"Code": "==UK@&875-"
+				}
+			]
+		},
+		"23f072d1924e84ac": {
+			"Name": "Baldies",
+			"Codes": [
+				{
+					"Name": "Infinite resources",
+					"Code": "=?Y<}Q@DXO =?Y=}Q@DXO =?Y>}Q@DXO =?Y?}Q@DXO"
+				}
+			]
+		},
+		"1aefcb23c3bfbe19": {
+			"Name": "Battlemorph",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?15]8@B"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "=?YN^8@,BO"
+				}
+			]
+		},
+		"ac96d5c484853aea": {
+			"Name": "Blue Lightning",
+			"Codes": [
+				{
+					"Name": "No damage",
+					"Code": "5?5Z3.@*"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?1*3.@B 5?1-3.@N"
+				},
+				{
+					"Name": "All jets available",
+					"Code": "-?U2[-@* -?U6[-@*"
+				}
+			]
+		},
+		"05bdc6a87b600bb6": {
+			"Name": "Brain Dead 13",
+			"Codes": [
+				{
+					"Name": "Start at end",
+					"Code": "%%QEXAVPT %%QEX!V0U"
+				},
+				{
+					"Name": "Exception nop",
+					"Code": ">;EC)VDA]>DE >;E+{VDA]>DE"
+				}
+			]
+		},
+		"44fc002f199f4443": {
+			"Name": "Dragon's Lair",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "%;Q5/}6"
+				}
+			]
+		},
+		"f08a239ffa8f47c4": {
+			"Name": "Highlander: The Last of the MacLeods",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "5?]8O[@VX"
+				}
+			]
+		},
+		"511bb457142985fd": {
+			"Name": "Hover Strike: Unconquered Lands",
+			"Codes": [
+				{
+					"Name": "Infinite energy",
+					"Code": "=?ES<}={X/"
+				},
+				{
+					"Name": "Infinite shield",
+					"Code": "=?YX<}=0WO"
+				},
+				{
+					"Name": "Infinite lives",
+					"Code": "]=Q@CZ=5;[;5"
+				}
+			]
+		},
+		"962ccbedfaac5f28": {
+			"Name": "Iron Soldier 2 (CD)",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=?E13K@,Q$"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "=;EGNB@PR =;EZNB@PR =;EQNB@PR =;ESNB@PR =;ETNB@PR 5;QHNB2 5;Q[NB4 5;]{NB~* 5;Q^N}8 5;QRNB5"
+				},
+				{
+					"Name": "Unlock all",
+					"Code": "5;]FOB4*"
+				}
+			]
+		},
+		"5f44cec1a837375c": {
+			"Name": "Myst",
+			"Codes": [
+				{
+					"Name": "Password to end",
+					"Code": "-=I-~(9P[M3Q3^~RSBZSF -=I-~(8P[-3Q3{~,T}FSF -=I-~(7P[M5Q#_~HS}YSF -=I-~(6P[M;QK`~,SBESF -=I-~(5P[-7Q#]~$S}QSF ==Q-~(4P[-8"
+				}
+			]
+		},
+		"b658fd728cb60822": {
+			"Name": "Primal Rage",
+			"Codes": [
+				{
+					"Name": "Infinite health P1",
+					"Code": "=?UD!==*"
+				},
+				{
+					"Name": "Infinite health P2",
+					"Code": "=?U^}==*"
+				}
+			]
+		},
+		"939e5369acd0e69a": {
+			"Name": "Space Ace",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "%;Q53}6"
+				}
+			]
+		},
+		"fb286cff629ac4ae": {
+			"Name": "Vid Grid",
+			"Codes": [
+				{
+					"Name": "Auto-solve",
+					"Code": "F=5[BJ?{U{=Q3`?> F=M{BJ?{U{=Q;`~&S}V3MIP"
+				}
+			]
+		},
+		"cf1dfec53ade6564": {
+			"Name": "World Tour Racing",
+			"Codes": [
+				{
+					"Name": "Always first place",
+					"Code": "5;5/C("
+				}
+			]
+		},
+		"59785577bfbc435b": {
+			"Name": "BattleSphere Gold",
+			"Codes": [
+				{
+					"Name": "Infinite shield/energy/ammo",
+					"Code": "%?A]Y1>V(4>S %?AGY1>,YM@S 5?10_1>T 5?1}_1>T 5?1$_1>T 5?1&_1>T 5?1(_1>T"
+				}
+			]
+		},
+		"5e7d34816a56842f": {
+			"Name": "Hyper Force",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1E$5?B"
+				},
+				{
+					"Name": "Infinite energy",
+					"Code": "=?YL$5?{RO"
+				},
+				{
+					"Name": "Infinite money",
+					"Code": "=?EJ$5?LC5"
+				},
+				{
+					"Name": "Infinite time",
+					"Code": "5?=T5:?$T"
+				},
+				{
+					"Name": "All weapons/ammo",
+					"Code": "5?1F$5?J 5?QG$5?J 5?1G$5?J 5?QH$5?J 5?=Y$5?DQ 5?]Z$5?DQ 5?=Z$5?DQ 5?][$5?DQ"
+				}
+			]
+		},
+		"8a5b268040c78624": {
+			"Name": "Protector: Special Edition",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?139T@P"
+				},
+				{
+					"Name": "Infinite bombs",
+					"Code": "5?159T@N"
+				},
+				{
+					"Name": "Infinite money",
+					"Code": "=?Y79T@:QP"
+				},
+				{
+					"Name": "Infinite health/shields",
+					"Code": "5?1I:T@N 5?1K:T@B"
+				}
+			]
+		},
+		"c6a8442bce267c50": {
+			"Name": "Skyhammer",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "%?AQ6$=,Y-7S %?AS6$=,Y-7S"
+				},
+				{
+					"Name": "Infinite fuel",
+					"Code": "%?A#6$=VZS?S"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5?=V6$=,U 5?=X6$=,R 5?1*6$={ 5?1,6$={ 5?1.6$={ =?Y06$=,YP"
+				}
+			]
+		},
+		"be2734b7b5478e11": {
+			"Name": "Soccer Kid",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?Q($*@N"
+				},
+				{
+					"Name": "Infinite health",
+					"Code": "5?QE!*@P"
+				}
+			]
+		},
+		"4d034a7d5cce8365": {
+			"Name": "Space War 2000",
+			"Codes": [
+				{
+					"Name": "Infinite health",
+					"Code": "=;E?5E@LQ"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "5;1LSH7 5;1MSH7 5;1NSH7 5;1OSH7 5;1PSH4"
+				}
+			]
+		},
+		"bfb6accfcb95e76e": {
+			"Name": "Total Carnage",
+			"Codes": [
+				{
+					"Name": "Infinite lives",
+					"Code": "5?1]IS@B"
+				},
+				{
+					"Name": "Infinite bombs",
+					"Code": "5?1^IS@B"
+				},
+				{
+					"Name": "Infinite ammo",
+					"Code": "=YEZ{P,.:Z=T"
+				}
+			]
+		}
+	}
+}

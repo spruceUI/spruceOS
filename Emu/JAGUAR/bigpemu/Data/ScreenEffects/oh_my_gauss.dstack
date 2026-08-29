@@ -1,0 +1,270 @@
+{
+	"DickPostStack": {
+		"UserOptions": [],
+		"Textures": [],
+		"CommonDataBlocks": [
+			{
+				"Name": "UBO",
+				"Type": "ConstantBuffer",
+				"Location": 0,
+				"Size": 64,
+				"DataProviders": [
+					{
+						"Name": "mMVP",
+						"Type": "float4x4",
+						"Offset": 0,
+						"SourceType": "MVP"
+					}
+				]
+			}
+		],
+		"Passes": [
+			{
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "UnfilteredScreen",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sTargetAreaOffsets",
+								"Type": "float4",
+								"SourceType": "TargetAreaOffsets"
+							}
+						]
+					}
+				],				
+				"PixelGLSL": "util/copypass_tolin_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "util/copypass_tolin_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "util/copypass_tolin_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "PreviousPass",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sRatiosAndScales",
+								"Type": "float4",
+								"SourceType": "RatiosAndScales"
+							}
+						]
+					}
+				],			
+				"PixelGLSL": "util/copypass_ps.glsl",
+				"VertexGLSL": "oh_my_gauss/scale_up_vs.glsl",
+				"PixelESSL": "util/copypass_ps.essl",
+				"VertexESSL": "oh_my_gauss/scale_up_vs.essl",
+				"PixelDXBC": "util/copypass_ps.dxbc",
+				"VertexDXBC": "oh_my_gauss/scale_up_vs.dxbc"
+			},
+			{
+				"Name": "BlurBase",
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "PreviousPass",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sRTSize",
+								"Type": "float4",
+								"SourceType": "RTSize"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "oh_my_gauss/blur_h_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "oh_my_gauss/blur_h_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "oh_my_gauss/blur_h_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_v_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_v_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_v_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_h_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_h_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_h_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_v_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_v_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_v_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_h_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_h_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_h_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_v_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_v_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_v_ps.dxbc"
+			},
+			{
+				"Name": "Canvas",
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "Backbuffer",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"PixelGLSL": "util/copypass_togamma_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "util/copypass_togamma_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "util/copypass_togamma_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"Name": "TerribleWarpedScreen",
+				"RTFormat": "R8G8B8A8_UNORM",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "TargetArea",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "UnfilteredScreenTex"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sScreenSize",
+								"Type": "float4",
+								"SourceType": "UnfilteredScreenSize"
+							},
+							{
+								"Name": "sHCurve",
+								"Type": "float",
+								"InlineData": 2.0
+							},
+							{
+								"Name": "sHBias",
+								"Type": "float",
+								"InlineData": 0.98
+							},
+							{
+								"Name": "sVCurve",
+								"Type": "float",
+								"InlineData": 2.0
+							},
+							{
+								"Name": "sVBias",
+								"Type": "float",
+								"InlineData": 0.98
+							},
+							{
+								"Name": "sBoundaryFade",
+								"Type": "float",
+								"InlineData": 1.0
+							}
+						]
+					}
+				],
+				"PixelGLSL": "warping/warping_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "warping/warping_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "warping/warping_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"BlendMode": "Alpha",
+				"RTLayerTarget": "Canvas",
+				"RTSizeType": "Backbuffer",
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "NamedPass",
+						"RefName": "TerribleWarpedScreen"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sTargetAreaOffsets",
+								"Type": "float4",
+								"SourceType": "TargetAreaOffsets"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "oh_my_gauss/ol_ps.glsl",
+				"VertexGLSL": "oh_my_gauss/ol_vs.glsl",
+				"PixelESSL": "oh_my_gauss/ol_ps.essl",
+				"VertexESSL": "oh_my_gauss/ol_vs.essl",
+				"PixelDXBC": "oh_my_gauss/ol_ps.dxbc",
+				"VertexDXBC": "oh_my_gauss/ol_vs.dxbc"
+			},
+			{
+				"RTFormat": "R8G8B8A8_UNORM",
+				"RTSizeType": "Backbuffer",
+				"ForceViewportSize": true,
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "NamedPass",
+						"RefName": "Canvas"
+					}
+				],
+				"PixelGLSL": "util/copypass_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "util/copypass_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "util/copypass_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			}
+		]
+	}
+}

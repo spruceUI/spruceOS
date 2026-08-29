@@ -1,0 +1,29 @@
+#version 300 es
+
+layout(std140) uniform UBO
+{
+    mat4 mMVP;
+} sUBOConstants;
+
+struct PushVarsVS
+{
+    vec4 sTargetAreaOffsets;
+};
+
+uniform PushVarsVS pushvars;
+
+out vec2 ilUV;
+layout(location = 1) in vec2 inVertexUV;
+layout(location = 0) in vec4 inVertexPos;
+
+void main()
+{
+    ilUV = inVertexUV;
+    vec4 adjustedPos = inVertexPos;
+    vec4 _19 = adjustedPos;
+    vec2 _34 = (_19.xy * pushvars.sTargetAreaOffsets.zw) + pushvars.sTargetAreaOffsets.xy;
+    adjustedPos.x = _34.x;
+    adjustedPos.y = _34.y;
+    gl_Position = sUBOConstants.mMVP * adjustedPos;
+}
+

@@ -1,0 +1,78 @@
+{
+	"DickPostStack": {
+		"CommonDataBlocks": [
+			{
+				"Name": "UBO",
+				"Type": "ConstantBuffer",
+				"Location": 0,
+				"Size": 64,
+				"DataProviders": [
+					{
+						"Name": "mMVP",
+						"Type": "float4x4",
+						"Offset": 0,
+						"SourceType": "MVP"
+					}
+				]
+			}
+		],
+		"Passes": [
+			{
+				"RTFormat": "R8G8B8A8_UNORM",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "Explicit",
+				"RTScale": [800.0, 450.0],
+				"TextureProviders": [
+					{
+						"Name": "iChannel0",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "iTime",
+								"Type": "float",
+								"SourceType": "Time"
+							},
+							{
+								"Name": "iResolution",
+								"Type": "float4",
+								"SourceType": "RTSize"
+							},
+							{
+								"Name": "iChannel0Resolution",
+								"Type": "float4",
+								"SourceType": "PreviousPassSize"
+							},
+							{
+								"Name": "iFrame",
+								"Type": "uint32",
+								"SourceType": "FrameCount"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "shadertoy/shadertoy_framework_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl"
+			},
+			{
+				"RTFormat": "R8G8B8A8_SRGB",
+				"RTSizeType": "Backbuffer",
+				"RTScale": 1.0,				
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"PixelGLSL": "util/copypass_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl"
+			}
+		]
+	}
+}

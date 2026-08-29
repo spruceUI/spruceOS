@@ -1,0 +1,27 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+uniform highp sampler2D sTex;
+
+layout(location = 0) out highp vec4 outColor0;
+in highp vec2 ilUV;
+
+highp vec3 to_linear_approx(highp vec3 clr)
+{
+    highp float toLinear = 2.2000000476837158203125;
+    return pow(clr, vec3(toLinear));
+}
+
+highp vec4 to_linear_approx(highp vec4 clr)
+{
+    highp vec3 param = clr.xyz;
+    return vec4(to_linear_approx(param), clr.w);
+}
+
+void main()
+{
+    highp vec4 param = texture(sTex, ilUV);
+    outColor0 = to_linear_approx(param);
+}
+

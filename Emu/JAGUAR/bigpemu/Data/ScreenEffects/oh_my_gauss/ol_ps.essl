@@ -1,0 +1,14 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+uniform highp sampler2D sTex;
+
+layout(location = 0) out highp vec4 outColor0;
+in highp vec2 ilUV;
+
+void main()
+{
+    outColor0 = texture(sTex, ilUV);
+}
+

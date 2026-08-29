@@ -43,6 +43,25 @@
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP"
       ]
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "GKD_PIXEL2",
+        "ANBERNIC_RGXX",
+        "RGB30"
+      ],
+      "options": [
+        "bigpemu-standalone",
+        "virtualjaguar"
+      ],
+      "selected": "bigpemu-standalone",
+      "overrides": {}
     }
   },
   "sortOrder": 1000,
@@ -51,5 +70,10 @@
   "releaseYear": 1993,
   "default_emulator": "virtualjaguar",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["jaguar", "Atari Jaguar", "jag", "JAG"]
+  "alternativeFolderNames": [
+    "jaguar",
+    "Atari Jaguar",
+    "jag",
+    "JAG"
+  ]
 }

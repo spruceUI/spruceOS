@@ -1,0 +1,144 @@
+{
+    "DickPostStack": {
+        "UserOptions": [
+            {
+                "Constant": "XBR_Y_WEIGHT",
+                "Type": "float",
+                "Description": "Y Weight",
+                "DefaultVal": 48.0,
+                "MinVal": 0.0,
+                "MaxVal": 100.0,
+                "StepVal": 1.0
+            },
+            {
+                "Constant": "XBR_EQ_THRESHOLD",
+                "Type": "float",
+                "Description": "Eq Threshold",
+                "DefaultVal": 15.0,
+                "MinVal": 0.0,
+                "MaxVal": 50.0,
+                "StepVal": 1.0
+            },
+            {
+                "Constant": "XBR_LV1_COEFFICIENT",
+                "Type": "float",
+                "Description": "Lv1 Coefficient",
+                "DefaultVal": 0.5,
+                "MinVal": 0.0,
+                "MaxVal": 30.0,
+                "StepVal": 0.5
+            },
+            {
+                "Constant": "XBR_LV2_COEFFICIENT",
+                "Type": "float",
+                "Description": "Lv2 Coefficient",
+                "DefaultVal": 2.0,
+                "MinVal": 1.0,
+                "MaxVal": 3.0,
+                "StepVal": 0.1
+            },
+            {
+                "Constant": "small_details",
+                "Type": "float",
+                "Description": "Preserve Small Details",
+                "DefaultVal": 0.0,
+                "MinVal": 0.0,
+                "MaxVal": 1.0,
+                "StepVal": 1.0
+            }
+        ],
+        "Textures": [],
+        "CommonDataBlocks": [],
+        "Passes": [
+            {
+                "RTFormat": "R8G8B8A8_UNORM",
+                "RTexWrapMode": "ClampToEdge",
+                "RTTexFilter": "Point",
+                "RTGenMips": false,
+                "RTSizeType": [
+                    "TargetArea",
+                    "TargetArea"
+                ],
+                "RTScale": [
+                    1.0,
+                    1.0
+                ],
+                "TextureProviders": [
+                    {
+                        "Name": "Source",
+                        "ResourceSlot": 2,
+                        "Type": "2D",
+                        "SourceType": "PreviousPass",
+                        "RefIndex": -1
+                    }
+                ],
+                "DataBlocks": [
+                    {
+                        "Name": "UBO",
+                        "Type": "ConstantBuffer",
+                        "Location": 0,
+                        "Size": 64,
+                        "DataProviders": [
+                            {
+                                "Name": "MVP",
+                                "Type": "float4x4",
+                                "Offset": 0,
+                                "SourceType": "MVP",
+                                "RefIndex": -1
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "params",
+                        "Type": "Loose",
+                        "Location": 0,
+                        "Size": 72,
+                        "DataProviders": [
+                            {
+                                "Name": "SourceSize",
+                                "Type": "float4",
+                                "Offset": 0,
+                                "SourceType": "PreviousPassSize",
+                                "RefIndex": -1
+                            },
+                            {
+                                "Name": "XBR_Y_WEIGHT",
+                                "Type": "float",
+                                "Offset": 52,
+                                "SourceType": "UserOption",
+                                "RefIndex": 0
+                            },
+                            {
+                                "Name": "small_details",
+                                "Type": "float",
+                                "Offset": 68,
+                                "SourceType": "UserOption",
+                                "RefIndex": 4
+                            },
+                            {
+                                "Name": "XBR_EQ_THRESHOLD",
+                                "Type": "float",
+                                "Offset": 56,
+                                "SourceType": "UserOption",
+                                "RefIndex": 1
+                            },
+                            {
+                                "Name": "XBR_LV2_COEFFICIENT",
+                                "Type": "float",
+                                "Offset": 64,
+                                "SourceType": "UserOption",
+                                "RefIndex": 3
+                            }
+                        ]
+                    }
+                ],
+                "PixelGLSL": "xbr-lv2/_pass00_pixel.glsl",
+                "VertexGLSL": "xbr-lv2/_pass00_vertex.glsl",
+                "PixelESSL": "xbr-lv2/_pass00_pixel.essl",
+                "VertexESSL": "xbr-lv2/_pass00_vertex.essl",
+                "PixelDXBC": "xbr-lv2/_pass00_pixel.dxbc",
+                "VertexDXBC": "xbr-lv2/_pass00_vertex.dxbc"
+            }
+        ]
+    }
+}

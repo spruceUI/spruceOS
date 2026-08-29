@@ -123,6 +123,15 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"JAGUAR")
+		if [ "$CORE" = "bigpemu-standalone" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/bigpemu_functions.sh
+			run_bigpemu_standalone
+		else
+			run_retroarch
+		fi
+		;;
+
 	"OPENBOR")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/openbor_functions.sh
 		run_openbor

@@ -114,6 +114,14 @@ kill_ra_and_standard_emulators() {
     killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
 }
 
+kill_bigpemu() {
+	log_message "button_actions.sh: Killing BigPEmu!"
+    killall -q -9 gptokeyb2
+    killall -q -15 bigpemu
+    sleep 1
+    killall -q -9 bigpemu
+}
+
 kill_emulator() {
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         kill_drastic
@@ -127,6 +135,8 @@ kill_emulator() {
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
+    elif pgrep -f "bigpemu" >/dev/null; then
+        kill_bigpemu
     else
         kill_ra_and_standard_emulators
     fi
