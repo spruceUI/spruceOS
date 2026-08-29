@@ -206,11 +206,19 @@ class Rgb30(DeviceCommon):
         return True
 
     def is_wifi_enabled(self):
+        # Read the rfkill soft-block state directly. Instant, no subprocess -
+        # and crucially no nmcli, which shells out on the UI status path AND
+        # drives NetworkManager/dbus CPU on every call.
         try:
-            result = ProcessRunner.run(["nmcli", "radio", "wifi"], timeout=5)
-            return "enabled" in (result.stdout or "").strip().lower()
+            import glob, os
+            for d in glob.glob("/sys/class/rfkill/*"):
+                try:
+                    if open(os.path.join(d, "type")).read().strip() == "wlan":
+                        return open(os.path.join(d, "soft")).read().strip() == "0"
+                except OSError:
+                    continue
         except Exception as e:
-            PyUiLogger.get_logger().error(f"nmcli is_wifi_enabled failed: {e}")
+            PyUiLogger.get_logger().error(f"rfkill is_wifi_enabled failed: {e}")
         return False
 
     def enable_wifi(self):
@@ -383,27 +391,25 @@ class Rgb30(DeviceCommon):
             self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        # spruce classifies on RSSI in dBm; nmcli reports link quality 0-100,
-        # so map it the usual way - 100 at -50 dBm, 0 at -100.
+        # Read RSSI straight from the kernel. Instant and, crucially, no scan:
+        # "nmcli device wifi" periodically triggers a rescan that blocks for
+        # seconds and freezes the whole UI on this device. /proc/net/wireless
+        # column 3 is the live signal level in dBm.
         try:
-            result = ProcessRunner.run(
-                ["nmcli", "-t", "-f", "ACTIVE,SIGNAL", "device", "wifi"],
-                timeout=5,
-            )
-
-            for line in (result.stdout or "").splitlines():
-                parts = line.split(":")
-
-                if len(parts) >= 2 and parts[0] == "yes":
-                    quality = max(0, min(100, int(parts[1])))
-                    return WiFiConnectionQualityInfo(
-                        noise_level=0,
-                        signal_level=(quality // 2) - 100,
-                        link_quality=quality,
-                    )
+            with open("/proc/net/wireless") as f:
+                for line in f:
+                    line = line.strip()
+                    if line.startswith("wlan0:"):
+                        rssi = int(float(line.split()[3].rstrip(".")))
+                        quality = max(0, min(100, 2 * (rssi + 100)))
+                        return WiFiConnectionQualityInfo(
+                            noise_level=0,
+                            signal_level=rssi,
+                            link_quality=quality,
+                        )
         except Exception as e:
             PyUiLogger.get_logger().error(
-                f"nmcli get_wifi_connection_quality_info failed: {e}"
+                f"wifi quality read from /proc/net/wireless failed: {e}"
             )
 
         # -200 is what device_common reads as "no signal".

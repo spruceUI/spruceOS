@@ -112,17 +112,21 @@ class NmcliWifiScanner(WiFiScanner):
 
     # ---- connected-network query (used for the status line) ----
     def get_connected_ssid(self):
+        # "device wifi" triggers a radio scan (~4.5s on this hardware) and the
+        # wifi menu calls this every loop, so navigating froze for seconds per
+        # keypress. "device show" just reads the interface state - no scan. For
+        # a wifi profile NetworkManager names the connection after the SSID.
         try:
             result = ProcessRunner.run(
-                ["nmcli", "-t", "-f", "ACTIVE,SSID", "device", "wifi"],
+                ["nmcli", "-t", "-f", "GENERAL.CONNECTION", "device", "show", "wlan0"],
                 timeout=5,
             )
 
             for line in (result.stdout or "").splitlines():
-                parts = self._split(line)
-
-                if len(parts) >= 2 and parts[0] == "yes" and parts[1]:
-                    return parts[1], None
+                if line.startswith("GENERAL.CONNECTION:"):
+                    name = line.split(":", 1)[1].strip()
+                    if name and name != "--":
+                        return name, None
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"nmcli get_connected_ssid failed: {e}")
