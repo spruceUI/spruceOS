@@ -131,7 +131,6 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "true"
-    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
     /mnt/SDCARD/spruce/scripts/leds_manager.sh &
@@ -240,9 +239,6 @@ WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 device_enter_sleep() {
     turn_off_screen
 
-    amixer -c0 sset "Playback Path" "OFF"
-    pkill gpiomon
-
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
@@ -255,7 +251,6 @@ device_exit_sleep() {
     backlight=$(current_backlight)
     set_backlight $backlight
     turn_on_screen
-    restore_audio
 
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
