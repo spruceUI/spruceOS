@@ -394,6 +394,7 @@
                     "Emulator menu",
                     "Game Switcher",
                     "Exit game",
+                    "Brightness (Menu + Vol)",
                     "Nothing"
                 ],
                 "selected": "Game Switcher"
