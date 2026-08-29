@@ -18,6 +18,8 @@ if [ -f "$HOME/config.ini" ]; then
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
 fi
 
+[ "$PLATFORM" = "RGB30" ] && export VTREE_GLES=1  # GLES window on the Mali blob
+
 case "$PLATFORM" in
     "SmartPro"* | "BrickPro") export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
     * )           export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
