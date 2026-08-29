@@ -18,7 +18,9 @@ if [ -f "$HOME/config.ini" ]; then
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
 fi
 
-[ "$PLATFORM" = "RGB30" ] && export VTREE_GLES=1  # GLES window on the Mali blob
+# GLES window on the Mali blob. The Miniloong Pocket 1 has the same GLES-only
+# Mali-G52 as the RGB30, so it needs the same context or vtree fails to open one.
+{ [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "Miniloong" ]; } && export VTREE_GLES=1
 
 case "$PLATFORM" in
     "SmartPro"* | "BrickPro") export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;

@@ -396,6 +396,28 @@ launch_startup_watchdogs() {
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
+# principal.sh calls these around the PyUI launch; device.sh only stubs them with
+# a "Missing ..." log, so without them the Miniloong just eats the warning and
+# gets no boost. Adopt the RGB30's version - the sibling RK3566/Mali-G52 port -
+# NOT the Flip's, which also pins /sys/class/devfreq/dmc at "performance" for the
+# rest of the session. SDL2/KMSDRM startup is the slowest step to the menu here
+# (see MLP1-019), and the CPU is what it waits on: run the governor flat out for
+# the first few seconds, then drop back to smart once the menu is up.
+prepare_for_pyui_launch() {
+    set_performance
+    (
+        sleep 5
+        if flag_check "in_menu"; then
+            set_smart
+        fi
+        unlock_governor 2>/dev/null
+    ) &
+}
+
+post_pyui_exit() {
+    log_message "post_pyui_exit not needed on this device" -v
+}
+
 set_event_arg_for_idlemon() {
     EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
