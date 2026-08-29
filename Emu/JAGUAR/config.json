@@ -16,6 +16,18 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "km_vjag_xtreme_amped",
+        "virtualjaguar"
+      ],
+      "selected": "km_vjag_xtreme_amped",
+      "overrides": {}
     }
   },
   "sortOrder": 1000,
