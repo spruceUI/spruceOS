@@ -10,7 +10,7 @@ from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
+from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
@@ -25,6 +25,55 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
+
+
+class Rgb30KeyMappingProvider:
+    """Buttons from a plain dict, plus the left analog stick as d-pad input.
+
+    The pad reports its axes on a -1800..1800 range, not the +-32767 SDL scale
+    the TrimUI provider assumes, so the deadzone is sized for this device -
+    measured with evtest on hardware, which also gives fuzz 16 / flat 16 and a
+    rest value of exactly 0 on all four axes.
+
+    Only the left stick is mapped. The right stick is live (ABS_RX/ABS_RY) but
+    nothing in the UI consumes RIGHT_STICK_*, so mapping it would just queue
+    inputs no view acts on.
+    """
+
+    ABS_X = 0
+    ABS_Y = 1
+    EV_ABS = 3
+    DEADZONE = 900
+
+    def __init__(self, key_mappings):
+        self.key_mappings = key_mappings
+        self.axis_inputs = {
+            self.ABS_X: (ControllerInput.LEFT_STICK_LEFT,
+                         ControllerInput.LEFT_STICK_RIGHT),
+            self.ABS_Y: (ControllerInput.LEFT_STICK_UP,
+                         ControllerInput.LEFT_STICK_DOWN),
+        }
+
+    def get_mapped_events(self, key_event):
+        if key_event.event_type != self.EV_ABS:
+            return self.key_mappings.get(key_event)
+
+        directions = self.axis_inputs.get(key_event.code)
+        if directions is None:
+            return None
+        negative, positive = directions
+
+        # Release the opposite direction on every press: a fast flick can cross
+        # the whole axis between two reported samples and never land inside the
+        # deadzone, which would otherwise leave the old direction held forever.
+        if key_event.value < -self.DEADZONE:
+            return [InputResult(positive, KeyState.RELEASE),
+                    InputResult(negative, KeyState.PRESS)]
+        elif key_event.value > self.DEADZONE:
+            return [InputResult(negative, KeyState.RELEASE),
+                    InputResult(positive, KeyState.PRESS)]
+        return [InputResult(negative, KeyState.RELEASE),
+                InputResult(positive, KeyState.RELEASE)]
 
 
 class Rgb30(DeviceCommon):
@@ -183,8 +232,16 @@ class Rgb30(DeviceCommon):
         bind(547, ControllerInput.DPAD_RIGHT)
 
         return KeyWatcherController(
+            # Signed values. The kernel's input_event.value is __s32, but
+            # KeyWatcherController defaults to 'llHHI' - unsigned - which is
+            # only harmless for a pure EV_KEY pad, where every value is 0/1/2.
+            # Read that way an axis at -440 arrives as 4294966856, clears any
+            # deadzone as a huge positive, and the stick reads left as right
+            # and up as down. Every other device with an analog axis passes
+            # this too.
+            event_format="llHHi",
             event_path=self._resolve_joypad(),
-            mapping_provider=DictKeyMappingProvider(key_mappings),
+            mapping_provider=Rgb30KeyMappingProvider(key_mappings),
         )
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
