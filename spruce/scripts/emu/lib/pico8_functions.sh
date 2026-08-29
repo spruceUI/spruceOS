@@ -119,6 +119,16 @@ run_pico8() {
 
 	else
 		PICO8_BINARY="pico8_64"
+
+		# use_wget is 1, so PICO-8 shells out to wget for every cart fetch.
+		# spruce/bin64/wget is first on PATH but is linked against
+		# libpcre.so.1, which the RGB30's dArkMoss base does not ship - it
+		# exits 127 with zero bytes and Splore fails "could not connect to
+		# bbs". curl is present and works, so route downloads through the
+		# same curl-backed wget shim Anbernic uses.
+		[ -x "$EMU_DIR/bin/wget" ] && command -v curl >/dev/null 2>&1 && \
+			export PATH="$EMU_DIR/bin:$PATH"
+
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 	fi
