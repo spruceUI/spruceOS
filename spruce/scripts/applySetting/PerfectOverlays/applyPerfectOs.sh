@@ -6,20 +6,20 @@
 apply_offset_filter() {
     log_message "Applying GBAOffset.filt for MiyooMini"
     update_ra_config_file_with_new_setting \
-        /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/gpSP.cfg \
+        /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg \
         "video_filter = \":/.retroarch/filters/video/GBAOffset.filt\""
     update_ra_config_file_with_new_setting \
-        /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/mGBA.cfg \
+        /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GBA.cfg \
         "video_filter = \":/.retroarch/filters/video/GBA/GBAOffset.filt\""
 }
 
 remove_offset_filter() {
     log_message "Removing GBAOffset.filt"
     update_ra_config_file_with_new_setting \
-        /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/gpSP.cfg \
+        /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg \
         "video_filter = \"\""
     update_ra_config_file_with_new_setting \
-        /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/mGBA.cfg \
+        /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GBA.cfg \
         "video_filter = \"\""
 }
 
@@ -34,12 +34,12 @@ if [ "$1" = "True" ]; then
 
     case "$PLATFORM" in
         "MiyooMini"*)
-            if ! grep -q "GBAOffset.filt" /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/gpSP.cfg; then
+            if ! grep -q "GBAOffset.filt" /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg; then
                 apply_offset_filter
             fi
             ;;
         *)
-            if grep -q "GBAOffset.filt" /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/gpSP.cfg; then
+            if grep -q "GBAOffset.filt" /mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg; then
                 remove_offset_filter
             fi
             ;;
