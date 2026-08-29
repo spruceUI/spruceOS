@@ -23,21 +23,10 @@ log_message "menuButton.sh: menu button is now ${1:-unset}, restarting homebutto
 (
     WATCHDOG="/mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh"
 
-    # Reap this watchdog's getevent by name before killing the watchdog itself.
-    # In principle "getevent -pid N" dies with N, but it only notices when it
-    # next tries to write, so with nobody pressing anything it can outlive its
-    # reader indefinitely. Matching on the pid is what keeps this off the other
-    # watchdogs' readers - a bare "killall getevent" takes out the power and
-    # volume ones too.
-    for pid in $(pgrep -f "$WATCHDOG"); do
-        pkill -f "getevent -pid $pid"
-    done
-
-    # pkill -f, not killall. The process name is "sh" - the script is only an
-    # argument - and dArkMoss is Debian, whose procps killall matches the name
-    # and would find nothing. (save_poweroff.sh's killall works on the busybox
-    # devices, where killall does match the script.)
-    pkill -f "$WATCHDOG"
+    # Shared with the boot launcher (utils/watchdog_launcher.sh, reachable here
+    # because helperFunctions.sh sources the platform's device_functions file).
+    # It kills the watchdog and the getevent it owns.
+    stop_running_watchdog "$WATCHDOG"
 
     sleep 1
 

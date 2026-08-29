@@ -111,6 +111,20 @@ has_lid() {
 }
 
 launch_startup_watchdogs(){
+    # Same reason as launch_common_startup_watchdogs_v2: this runs per start of
+    # the frontend, not per boot, so clear out a previous run's watchdogs before
+    # starting a second set. stop_running_watchdog comes from
+    # utils/watchdog_launcher.sh, sourced at the top of this file.
+    for _wd in \
+        /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
+        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
+    do
+        stop_running_watchdog "$_wd"
+    done
+    unset _wd
+
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
