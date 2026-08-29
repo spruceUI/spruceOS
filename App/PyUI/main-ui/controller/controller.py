@@ -299,6 +299,17 @@ class Controller:
         if Controller.still_held_down():
             if(ControllerInput.MENU == Controller.last_input()):
                 was_hotkey = called_from_check_for_hotkey or Controller.check_for_hotkey()
+                if(not was_hotkey and not called_from_check_for_hotkey
+                        and not Controller.gs_triggered and not Controller.allow_pyui_game_switcher()
+                        and Controller.menu_vol_brightness_enabled()):
+                    # Nothing else claims a held MENU here, so keep watching for
+                    # a Menu + Vol brightness chord for as long as MENU is held
+                    # instead of falling through and firing MENU's own action
+                    # (the main menu popup) out from under a vol press that
+                    # lands after check_for_hotkey's 300ms window closed.
+                    while Controller.still_held_down():
+                        if(Controller.check_for_hotkey()):
+                            was_hotkey = True
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
                     Controller.gs_triggered = True
                     Controller.first_check_after_gs_triggered = True
@@ -358,9 +369,25 @@ class Controller:
     def add_button_watcher(button_watcher):
         Controller.additional_button_watchers.append(button_watcher)
 
+    # Button Settings > Brightness hotkey. The shell watchdogs read the same
+    # setting; this is the PyUI half of it, so turning the chord off in settings
+    # turns it off in the UI too instead of only in game. A config that predates
+    # the setting has no key at all - treat that as on, which is what PyUI did
+    # before the setting existed.
+    @staticmethod
+    def menu_vol_brightness_enabled():
+        from utils.cfw_system_config import CfwSystemConfig
+        selected = CfwSystemConfig.get_selected_value("Button Settings", "brightnessHotkey")
+        return selected is None or selected in ("Menu + Vol", "Both")
+
     #return TRUE if it was a hotkey press, FALSE otherwise
     @staticmethod
     def check_for_hotkey():
+        # Bail before swallowing anything: with the chord off, MENU has to reach
+        # the view as a plain press and the volume keys have to stay volume keys.
+        if(not Controller.menu_vol_brightness_enabled()):
+            return False
+
         Controller.is_check_for_hotkey = True
         cached_event = Controller.last_controller_input
         Controller.controller_interface.cache_last_event()

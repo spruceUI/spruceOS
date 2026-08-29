@@ -100,6 +100,50 @@ volume_up_bg() {
     done
 }
 
+# Button Settings > Brightness hotkey. Read at press time rather than cached at
+# startup so a change in the settings menu applies without a reboot. Both
+# callers below put their cheap test first, so the jq call only happens for a
+# press that could actually be a brightness chord.
+brightness_hotkey() {
+    get_config_value '.menuOptions."Button Settings".brightnessHotkey.selected' "Both"
+}
+
+start_lr_brightness_active() {
+    case "$(brightness_hotkey)" in
+        "Start + L/R" | "Both") return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# While MENU is held, vol_up/vol_down step brightness instead of volume.
+# /tmp/menubtn is the held-state flag homebutton_watchdog.sh sets; that script is
+# a separate process, so this is the only way for this one to know MENU is down.
+# Nothing else needs to be disabled to make room for this chord: a volume key
+# pressed while MENU is held already runs cancel_menu_hold in
+# homebutton_watchdog.sh, which kills the pending hold-home timer and suppresses
+# the tap-home action, so the chord costs none of the other MENU actions.
+menu_vol_brightness_active() {
+    [ -e /tmp/menubtn ] || return 1
+    case "$(brightness_hotkey)" in
+        "Menu + Vol" | "Both") return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+brightness_down_bg() {
+    while true; do
+        sleep 0.3
+        brightness_down
+    done
+}
+
+brightness_up_bg() {
+    while true; do
+        sleep 0.3
+        brightness_up
+    done
+}
+
 take_screenshot_bg() {
     timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
@@ -148,12 +192,12 @@ getevent $EVENTS | while read line; do
             START_DOWN=false
         ;;
         *"key $B_L1 1"*) # L1 key down
-            if [ "$START_DOWN" = true ] ; then
+            if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
                 brightness_down
             fi
         ;;
         *"key $B_R1 1"*) # R1 key down
-            if [ "$START_DOWN" = true ] ; then
+            if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
                 brightness_up
             fi
         ;;
@@ -188,11 +232,17 @@ getevent $EVENTS | while read line; do
             kill $PID_DOWN 2&> /dev/null
             PID_DOWN=""
 
-            volume_down # ensure fire the first run
+            if menu_vol_brightness_active; then
+                brightness_down # ensure fire the first run
+                brightness_down_bg &
+                PID_DOWN=$!
+            else
+                volume_down # ensure fire the first run
 
-            CURR_VOLUME=$(get_volume_level)
-            volume_down_bg &
-            PID_DOWN=$!
+                CURR_VOLUME=$(get_volume_level)
+                volume_down_bg &
+                PID_DOWN=$!
+            fi
         ;;
         *"key $B_VOLDOWN 0"*) # VOLUMEDOWN key up
             kill $PID_DOWN 2&> /dev/null
@@ -202,11 +252,17 @@ getevent $EVENTS | while read line; do
             kill $PID_UP 2&> /dev/null
             PID_UP=""
 
-            volume_up # ensure fire the first run
+            if menu_vol_brightness_active; then
+                brightness_up # ensure fire the first run
+                brightness_up_bg &
+                PID_UP=$!
+            else
+                volume_up # ensure fire the first run
 
-            CURR_VOLUME=$(get_volume_level)
-            volume_up_bg &
-            PID_UP=$!
+                CURR_VOLUME=$(get_volume_level)
+                volume_up_bg &
+                PID_UP=$!
+            fi
         ;;
         *"key $B_VOLUP 0"*) # VOLUMEUP key up
             kill $PID_UP 2&> /dev/null
