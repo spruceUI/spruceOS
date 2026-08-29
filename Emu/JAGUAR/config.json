@@ -28,6 +28,21 @@
       ],
       "selected": "km_vjag_xtreme_amped",
       "overrides": {}
+    },
+    "Emulator_MiyooMini": {
+      "display": "Retroarch Core",
+      "options": [
+        "km_vjag_xtreme_amped",
+        "virtualjaguar"
+      ],
+      "selected": "km_vjag_xtreme_amped",
+      "overrides": {},
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
     }
   },
   "sortOrder": 1000,
