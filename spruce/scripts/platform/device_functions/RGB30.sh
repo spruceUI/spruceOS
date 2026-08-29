@@ -522,7 +522,9 @@ set_default_ra_hotkeys() {
 #####   IN-GAME MENU   #####
   #########################
 
-# The home button (L3) opening the emulator menu in-game goes through
+# The menu button (a stick click - which one is Button Settings > Menu
+# button, resolved into B_MENU by RGB30.cfg) opening the emulator menu in-game
+# goes through
 # common64bit's send_menu_button_to_retroarch, which pipes MENU_TOGGLE to
 # RetroArch's UDP command port with spruce's bundled netcat. That netcat's
 # hardcoded ELF loader path does not exist on this base, so it dies with "No

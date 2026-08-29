@@ -42,8 +42,22 @@ class Rgb30KeyMappingProvider:
 
     ABS_X = 0
     ABS_Y = 1
+    EV_KEY = 1
     EV_ABS = 3
     DEADZONE = 900
+
+    BTN_THUMBL = 317
+    BTN_THUMBR = 318
+
+    # What a stick click does when it is NOT the menu button. Nothing in the UI
+    # consumes L3/R3 today, so this is effectively no action - but reporting the
+    # real button beats swallowing the event, and it costs nothing if a view
+    # ever grows a use for them. Emulators are unaffected either way: they read
+    # the pad themselves, so both clicks stay L3/R3 in game.
+    THUMB_FALLBACK = {
+        BTN_THUMBL: ControllerInput.L3,
+        BTN_THUMBR: ControllerInput.R3,
+    }
 
     def __init__(self, key_mappings):
         self.key_mappings = key_mappings
@@ -53,8 +67,39 @@ class Rgb30KeyMappingProvider:
             self.ABS_Y: (ControllerInput.LEFT_STICK_UP,
                          ControllerInput.LEFT_STICK_DOWN),
         }
+        # Which input each click reported when it went down, so its release
+        # always matches - the setting can change between the two.
+        self.thumb_pressed_as = {}
+
+    def _menu_thumb_code(self):
+        # Read per click rather than caching: the controller is built once at
+        # init, so a cached value would need a PyUI restart to take effect.
+        # CfwSystemConfig serves this from its in-memory copy, and a stick click
+        # is not a hot path. Anything but R3, including a missing option on an
+        # older config, leaves the L3 default.
+        from utils.cfw_system_config import CfwSystemConfig
+        if "R3" == CfwSystemConfig.get_selected_value("Button Settings", "menuButton"):
+            return self.BTN_THUMBR
+        return self.BTN_THUMBL
+
+    def _map_thumb_click(self, key_event):
+        if key_event.value == 1:
+            control = (ControllerInput.MENU
+                       if key_event.code == self._menu_thumb_code()
+                       else self.THUMB_FALLBACK[key_event.code])
+            self.thumb_pressed_as[key_event.code] = control
+            return [InputResult(control, KeyState.PRESS)]
+        if key_event.value == 0:
+            control = self.thumb_pressed_as.pop(key_event.code, None)
+            if control is None:
+                return None
+            return [InputResult(control, KeyState.RELEASE)]
+        return None  # autorepeat
 
     def get_mapped_events(self, key_event):
+        if key_event.event_type == self.EV_KEY and key_event.code in self.THUMB_FALLBACK:
+            return self._map_thumb_click(key_event)
+
         if key_event.event_type != self.EV_ABS:
             return self.key_mappings.get(key_event)
 
@@ -219,12 +264,12 @@ class Rgb30(DeviceCommon):
         bind(315, ControllerInput.START)
         bind(314, ControllerInput.SELECT)
 
-        # 317/318 are BTN_THUMBL/BTN_THUMBR and the device does have two sticks
-        # (a live UnofficialOS card reports ANALOG_STICKS=2), but there is no
-        # dedicated menu button, so MinUI uses the stick clicks as its two Menu
-        # buttons and so do we. A deliberate trade of L3/R3 for a menu button.
-        bind(317, ControllerInput.MENU)       # BTN_THUMBL, MinUI CODE_MENU
-        bind(318, ControllerInput.MENU)       # BTN_THUMBR, MinUI CODE_MENU_ALT
+        # 317/318 are BTN_THUMBL/BTN_THUMBR. The device has no dedicated menu
+        # button, so one stick click has to be it - a deliberate trade of L3 or
+        # R3, the same one MinUI makes. Which click is bound in
+        # Rgb30KeyMappingProvider, not here: it follows Button Settings > Menu
+        # button, and the shell reads that same setting for B_MENU in RGB30.cfg
+        # so the in-game menu button matches.
 
         bind(544, ControllerInput.DPAD_UP)
         bind(545, ControllerInput.DPAD_DOWN)

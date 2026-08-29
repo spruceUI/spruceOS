@@ -342,6 +342,17 @@
                 ],
                 "selected": "Game Switcher"
             },
+            "menuButton": {
+                "devices": ["RGB30"],
+                "display": "Menu button",
+                "description": "Which stick click opens the menu",
+                "options": [
+                    "L3",
+                    "R3"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
+                "selected": "L3"
+            },
             "fnF1Action": {
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Left Fn key action",
