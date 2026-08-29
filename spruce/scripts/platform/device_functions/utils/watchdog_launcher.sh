@@ -1,5 +1,37 @@
 #!/bin/sh
 
+# True only if pid $1 is actually RUNNING script $2 - the script is argv[0] or
+# argv[1] - rather than merely mentioning it somewhere in its command line.
+# "pgrep -f <path>" alone is too loose: anything carrying the path further along
+# its arguments matches, and this function kills what it matches.
+_wd_runs_script() {
+    _wd_a0=""
+    _wd_a1=""
+    _wd_n=0
+    for _wd_w in $(tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null); do
+        _wd_n=$((_wd_n + 1))
+        [ "$_wd_n" -eq 1 ] && _wd_a0="$_wd_w"
+        [ "$_wd_n" -eq 2 ] && _wd_a1="$_wd_w"
+        [ "$_wd_n" -ge 2 ] && break
+    done
+    [ "$_wd_a0" = "$2" ] || [ "$_wd_a1" = "$2" ]
+}
+
+# Print the pids of pid $1's getevent children.
+#
+# By parentage, not by command line. buttons_watchdog's getevent is spawned with
+# no -pid argument, so a "getevent .* -pid N" match misses it entirely and it
+# leaks one orphan per restart - measured on a Brick Pro, ppid 1, still holding
+# the input node. Every watchdog's getevent is a direct child, so this catches
+# both shapes.
+_wd_getevent_children() {
+    for _wd_d in /proc/[0-9]*; do
+        [ -r "$_wd_d/stat" ] || continue
+        read -r _wd_x _wd_comm _wd_st _wd_ppid _wd_rest < "$_wd_d/stat" 2>/dev/null || continue
+        [ "$_wd_comm" = "(getevent)" ] && [ "$_wd_ppid" = "$1" ] && echo "${_wd_d#/proc/}"
+    done
+}
+
 # Stop an already-running instance of a watchdog, plus the getevent it owns.
 #
 # The launchers below run once per start of the frontend, NOT once per boot. If
@@ -12,15 +44,17 @@
 #
 # Matched on the full script path. pin_cpu carries the bare basename in its argv,
 # so matching that instead would kill the pins rather than the watchdogs.
+#
+# At a cold boot nothing matches, so the whole thing - including the /proc walk
+# in _wd_getevent_children - never runs.
 stop_running_watchdog() {
     _swd_script="$1"
     for _swd_pid in $(pgrep -f "$_swd_script" 2>/dev/null); do
         [ "$_swd_pid" = "$$" ] && continue
-        # getevent is spawned with -pid of its watchdog and is meant to exit with
-        # it, but it only notices when it next tries to write - with no button
-        # pressed it outlives its reader indefinitely. Take it by that pid; a
-        # bare "killall getevent" would hit the other watchdogs' readers too.
-        for _swd_ge in $(pgrep -f "getevent.*-pid $_swd_pid" 2>/dev/null); do
+        _wd_runs_script "$_swd_pid" "$_swd_script" || continue
+        # getevent first: killing the watchdog on its own orphans its reader,
+        # which then holds the input node until it next tries to write.
+        for _swd_ge in $(_wd_getevent_children "$_swd_pid"); do
             kill "$_swd_ge" 2>/dev/null
         done
         kill "$_swd_pid" 2>/dev/null

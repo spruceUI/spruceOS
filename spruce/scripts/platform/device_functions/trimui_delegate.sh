@@ -238,6 +238,7 @@ launch_trimui_startup_watchdogs() {
     # /tmp/system/set_volume (the stock firmware on the Brick, spruce's own hold
     # loop on the Smart Pro and Smart Pro S) so the in-UI volume bar tracks the
     # hardware Volume +/- keys, including while a key is held.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh
     /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
 

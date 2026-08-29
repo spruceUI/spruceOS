@@ -76,6 +76,7 @@ launch_startup_watchdogs() {
     # durable watchdogs and survives the early-boot churn; pinned like them.
     # The watchdog takes its key codes from FN_KEY_LEFT / FN_KEY_RIGHT in the
     # platform config, because the Brick and the Brick Pro do not agree on them.
+    stop_running_watchdog /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh
     /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
 }

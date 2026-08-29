@@ -65,6 +65,7 @@ launch_startup_watchdogs() {
     # otherwise do this). The watchdog takes its key codes from FN_KEY_LEFT /
     # FN_KEY_RIGHT in the platform config, which on this device are KEY_F1/KEY_F2
     # rather than the Brick's 317/318 - those are real stick clicks here.
+    stop_running_watchdog /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh
     /mnt/SDCARD/spruce/brick/fnkey_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n fnkey_watchdog.sh &
 }
