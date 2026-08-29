@@ -240,19 +240,8 @@ class MainMenu:
                     if(ControllerInput.A == selected.get_input()): 
                         self.launch_selection(selected.get_selection().get_value())
                     elif(ControllerInput.MENU == selected.get_input()):
-                        # Emulator Settings > Hold home key action = "Brightness (Menu + Vol)"
-                        # turns MENU into a chord modifier (see buttons_watchdog.sh and
-                        # homebutton_watchdog.sh); Controller's own 300ms Menu+Vol hotkey
-                        # window (check_for_hotkey/perform_hotkey) already swallows MENU
-                        # when the chord lands in time, but a MENU press that falls through
-                        # here - because the volume press was a bit later, mid-hold - would
-                        # otherwise still pop this menu open underneath the user. Skip it in
-                        # that mode; a plain, undelayed MENU tap still reaches here as normal
-                        # in every other mode.
-                        from utils.cfw_system_config import CfwSystemConfig
-                        if("Brightness (Menu + Vol)" != CfwSystemConfig.get_selected_value("Emulator Settings", "holdHomeAction")):
-                            PyUiLogger.get_logger().info(f"Launching Main Menu Popup")  
-                            self.popup_menu.run_popup_menu_selection()
+                        PyUiLogger.get_logger().info(f"Launching Main Menu Popup")  
+                        self.popup_menu.run_popup_menu_selection()
 
                     if(selected.get_input() is not None):
                         image_text_list = self.build_options()

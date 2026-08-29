@@ -100,15 +100,34 @@ volume_up_bg() {
     done
 }
 
-# Emulator Settings > Hold home key action = "Brightness (Menu + Vol)": while
-# MENU is held, vol_up/vol_down step brightness instead of volume. /tmp/menubtn
-# is the same held-state flag homebutton_watchdog.sh uses; that script is a
-# separate process, so this is the only way for this one to know MENU is down.
-# Mutually exclusive with the other hold-home actions by design - see the
-# "Brightness (Menu + Vol)" branch in homebutton_watchdog.sh's home_key_down.
+# Button Settings > Brightness hotkey. Read at press time rather than cached at
+# startup so a change in the settings menu applies without a reboot. Both
+# callers below put their cheap test first, so the jq call only happens for a
+# press that could actually be a brightness chord.
+brightness_hotkey() {
+    get_config_value '.menuOptions."Button Settings".brightnessHotkey.selected' "Both"
+}
+
+start_lr_brightness_active() {
+    case "$(brightness_hotkey)" in
+        "Start + L/R" | "Both") return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# While MENU is held, vol_up/vol_down step brightness instead of volume.
+# /tmp/menubtn is the held-state flag homebutton_watchdog.sh sets; that script is
+# a separate process, so this is the only way for this one to know MENU is down.
+# Nothing else needs to be disabled to make room for this chord: a volume key
+# pressed while MENU is held already runs cancel_menu_hold in
+# homebutton_watchdog.sh, which kills the pending hold-home timer and suppresses
+# the tap-home action, so the chord costs none of the other MENU actions.
 menu_vol_brightness_active() {
-    [ "$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")" = "Brightness (Menu + Vol)" ] || return 1
-    [ -e /tmp/menubtn ]
+    [ -e /tmp/menubtn ] || return 1
+    case "$(brightness_hotkey)" in
+        "Menu + Vol" | "Both") return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
 brightness_down_bg() {
@@ -132,9 +151,6 @@ take_screenshot_bg() {
     vibrate &
     take_screenshot "$ss_name"
 }
-
-# Setup brightness hotkey (Button Settings > Brightness hotkey)
-BRIGHTNESS_HOTKEY="$(get_config_value '.menuOptions."Button Settings".brightnessHotkey.selected' "Start + L/R")"
 
 # Setup global screenshot shortcut
 SS_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
@@ -176,12 +192,12 @@ getevent $EVENTS | while read line; do
             START_DOWN=false
         ;;
         *"key $B_L1 1"*) # L1 key down
-            if [ "$BRIGHTNESS_HOTKEY" = "Start + L/R" ] && [ "$START_DOWN" = true ] ; then
+            if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
                 brightness_down
             fi
         ;;
         *"key $B_R1 1"*) # R1 key down
-            if [ "$BRIGHTNESS_HOTKEY" = "Start + L/R" ] && [ "$START_DOWN" = true ] ; then
+            if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
                 brightness_up
             fi
         ;;

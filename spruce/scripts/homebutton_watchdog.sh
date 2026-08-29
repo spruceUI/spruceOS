@@ -32,46 +32,33 @@ home_key_down () {
         log_message "Menu button pressed at $menu_btn_press_time" 
         touch /tmp/menubtn
 
-        HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
-
-        if [ "$HOLD_HOME" = "Brightness (Menu + Vol)" ]; then
-            # Mutually exclusive with the other hold-home actions below: MENU
-            # is dedicated to the vol_up/vol_down brightness chord (handled
-            # by buttons_watchdog.sh) instead of auto-firing anything after a
-            # timed hold, so there's no hold-timer to start here. Without
-            # this, the timer and the brightness chord race each other -
-            # holding MENU long enough to reach for vol_up/vol_down risks the
-            # timer firing whatever the *other* hold-home action would have
-            # been out from under the chord.
-            menu_hold_pid=""
-        else
-            # Launch background timer that waits required seconds, then triggers the action
-            (
-                menu_hold_time=$(get_config_value '.menuOptions."Game Switcher Settings".menuHoldTime.selected' 2)
-                sleep "$menu_hold_time"
-                # Check if the menubtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
-                if [ -e /tmp/menubtn ] && [ ! -e /tmp/menubtn_cancelled ]; then
-                    rm -f /tmp/menubtn
-                    rm -f /tmp/menubtn_cancelled
-                    do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
-                    # Only vibrate if enabled
-                    if [ "$do_vibrate" = "True" ]; then
-                        vibrate &
-                    fi
-                    log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
-                    perform_action "$HOLD_HOME"
-
-                    # Only clean up game state when the action actually killed the game.
-                    # "Emulator menu" just opens an in-game menu — the game is still running.
-                    if [ "$HOLD_HOME" != "Emulator menu" ]; then
-                        rm -f /tmp/cmd_to_run.sh
-                        rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
-                    fi
-
+        # Launch background timer that waits required seconds, then triggers the action
+        (
+            menu_hold_time=$(get_config_value '.menuOptions."Game Switcher Settings".menuHoldTime.selected' 2)
+            sleep "$menu_hold_time"
+            # Check if the menubtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
+            if [ -e /tmp/menubtn ] && [ ! -e /tmp/menubtn_cancelled ]; then
+                rm -f /tmp/menubtn
+                rm -f /tmp/menubtn_cancelled
+                do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
+                # Only vibrate if enabled
+                if [ "$do_vibrate" = "True" ]; then
+                    vibrate &
                 fi
-            ) &
-            menu_hold_pid=$!
-        fi
+                HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
+                log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
+                perform_action "$HOLD_HOME"
+
+                # Only clean up game state when the action actually killed the game.
+                # "Emulator menu" just opens an in-game menu — the game is still running.
+                if [ "$HOLD_HOME" != "Emulator menu" ]; then
+                    rm -f /tmp/cmd_to_run.sh
+                    rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+                fi
+
+            fi
+        ) &
+        menu_hold_pid=$!
     fi
 }
 
@@ -114,11 +101,10 @@ home_key_up () {
 # cancel_menu_hold() never fires for them: a vol_up/vol_down pressed while
 # MENU is held doesn't cancel the pending hold-home-action timer, and the
 # hold action fires out from under whatever the vol press was meant to do.
-# (Less of a concern for "Brightness (Menu + Vol)" itself, which skips the
-# timer entirely in home_key_down - but this still matters for a vol chord
-# pressed while some *other* hold-home action is selected.) Mirrors the
-# same conditional EVENT_PATH_VOLUME handling buttons_watchdog.sh already
-# does.
+# That cancel is what lets the Menu + Vol brightness chord coexist with the
+# hold-home actions, so on these devices the chord doesn't work at all
+# without this. Mirrors the same conditional EVENT_PATH_VOLUME handling
+# buttons_watchdog.sh already does.
 HOMEBTN_EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
 [ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && HOMEBTN_EVENTS="$HOMEBTN_EVENTS $EVENT_PATH_VOLUME"
 

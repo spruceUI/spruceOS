@@ -317,6 +317,17 @@
             }
         },
         "Button Settings": {
+            "brightnessHotkey": {
+                "display": "Brightness hotkey",
+                "description": "Which button combo adjusts screen brightness",
+                "options": [
+                    "Start + L/R",
+                    "Menu + Vol",
+                    "Both",
+                    "Off"
+                ],
+                "selected": "Both"
+            },
             "homeAction": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
                 "display": "Home button action",
@@ -394,7 +405,6 @@
                     "Emulator menu",
                     "Game Switcher",
                     "Exit game",
-                    "Brightness (Menu + Vol)",
                     "Nothing"
                 ],
                 "selected": "Game Switcher"
