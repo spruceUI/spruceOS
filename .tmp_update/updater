@@ -5,9 +5,17 @@ case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
     *"TG5040"*)	export PLATFORM="SmartPro" ;;
     *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG4040"*)	export PLATFORM="BrickPro"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
+    *"TG4040"*)	export PLATFORM="BrickPro"	;;
+    *"0xd05"*)
+        # Flip and Miniloong share the RK3566 part id; the loong daemon is the
+        # reliable discriminator. See helperFunctions.sh.
+        if [ -x /loong/loong_daemon ]; then
+            export PLATFORM="Miniloong"
+        else
+            export PLATFORM="Flip"
+        fi
+        ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) 
         if [ -e /usr/magicx ]; then
@@ -19,8 +27,21 @@ case $INFO in
 esac
 
 
+# The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh
+# with a crash-loop guard and a hand-off to the vendor UI. It is the only path
+# on the Miniloong; on the Flip it is opt-in through a flag while it is being
+# validated, so a card that has not asked for it boots exactly as before.
+SESSION=/mnt/SDCARD/spruce/scripts/boot/session.sh
+use_session=0
+case "$PLATFORM" in
+    Miniloong) use_session=1 ;;
+    Flip) [ -e /mnt/SDCARD/spruce/flags/boot_session_enabled ] && use_session=1 ;;
+esac
+
 if [ "$PLATFORM" = "MiyooMini" ]; then
     /mnt/SDCARD/spruce/scripts/platform/miyoo_mini_startup.sh
+elif [ "$use_session" = "1" ] && [ -f "$SESSION" ]; then
+    SPRUCE_BOOT_PLATFORM="$PLATFORM" exec sh "$SESSION"
 else
     cd /mnt/SDCARD/spruce/scripts
     ./runtime.sh

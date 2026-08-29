@@ -386,7 +386,10 @@ device_init() {
     # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
     perform_fw_update_Flip
 
-    killall runmiyoo.sh   
+    # runmiyoo.sh is this process's ancestor when the boot session supervisor
+    # is in use (SPR-MED-168): killing it would kill the fall-through to stock.
+    # Without the supervisor the old behaviour stays.
+    [ -n "$SPRUCE_BOOT_SESSION" ] || killall runmiyoo.sh
     /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
 
 }
@@ -506,4 +509,11 @@ ctl.!default {
 }
 EOF
     fi
+}
+
+# The boot session hands a failed boot to the vendor UI through this. The
+# stock launcher script is re-entrant and still present after our hook install
+# (my355/init.sh renames it rather than replacing it).
+device_stock_ui_command() {
+    printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
 }

@@ -108,6 +108,9 @@ def initialize_device(device, main_ui_mode):
     elif "ANBERNIC_RG28XX" == device:
         from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
         Device.init(AnbernicRG28xx(main_ui_mode))
+    elif "MINILOONG_POCKET1" == device:
+        from devices.miniloong.miniloong_pocket1 import MiniloongPocket1
+        Device.init(MiniloongPocket1(device, main_ui_mode))
     elif "ANBERNIC_RGCUBEXX" == device:
         from devices.anbernic.anbernic_rgcubexx import AnbernicRGCubeXX
         Device.init(AnbernicRGCubeXX(main_ui_mode))
