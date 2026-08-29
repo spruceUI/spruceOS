@@ -425,7 +425,7 @@
                     { "label": "Menu", "devices": ["MIYOO_A30", "MIYOO_FLIP"] },
                     "Custom"
                 ],
-                "selected": "Select"
+                "selected": "Custom"
             },
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
@@ -437,7 +437,7 @@
                     "Menu",
                     "Custom"
                 ],
-                "selected": "Menu"
+                "selected": "Custom"
             },
             "raAutoSave": {
                 "display": "RA: auto save state on close",
