@@ -22,6 +22,19 @@
       "selected": "Smart",
       "overrides": {}
     },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "PCSX-ReARMed-standalone",
+        "pcsx_rearmed",
+        "swanstation"
+      ],
+      "selected": "PCSX-ReARMed-standalone",
+      "overrides": {}
+    },
     "Emulator_A30": {
       "display": "Retroarch Core",
       "devices": [
@@ -41,7 +54,10 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "options": ["64-bit", "32-bit"],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
       "selected": "64-bit",
       "overrides": {}
     },

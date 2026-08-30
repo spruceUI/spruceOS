@@ -22,6 +22,18 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "Flycast-standalone",
+        "Flycast-libretro"
+      ],
+      "selected": "Flycast-standalone",
+      "overrides": {}
+    },
     "Emulator_A30": {
       "display": "Retroarch Core",
       "devices": [
@@ -40,7 +52,10 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "options": ["64-bit", "32-bit"],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
       "selected": "64-bit",
       "overrides": {}
     },

@@ -50,7 +50,8 @@
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "RGB30"
       ],
       "options": [
         "gvu",

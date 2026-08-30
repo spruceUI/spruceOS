@@ -22,6 +22,19 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "yabasanshiro-standalone-hle",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro_a133p_libretro"
+      ],
+      "selected": "yabasanshiro-standalone-hle",
+      "overrides": {}
+    },
     "Emulator_Flip": {
       "display": "Emulator",
       "options": [
