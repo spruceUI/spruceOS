@@ -623,8 +623,14 @@ class Rgb30(DeviceCommon):
         return None
 
     def get_save_state_image(self, rom_info: RomInfo):
-        #TODO, where does it store this?
-        return None
+        # Answering the TODO that used to sit here: spruce writes it to
+        # Saves/states/.gameswitcher/<rom name>.state.auto.png, same as every
+        # other device, and MiyooTrimGameSystemUtils already knows how to find
+        # it. Returning None here meant PyUI never looked at the disk, so the
+        # game switcher showed a blank thumbnail no matter what was captured -
+        # which was invisible until take_screenshot() started producing files
+        # on this device at all.
+        return self.get_game_system_utils().get_save_state_image(rom_info)
 
     def supports_brightness_calibration(self):
         return False

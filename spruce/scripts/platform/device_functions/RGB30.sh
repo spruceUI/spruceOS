@@ -556,6 +556,11 @@ vibrate() {
 # from the app. drmModeGetFB2 on another client's framebuffer needs
 # CAP_SYS_ADMIN; spruce runs as root here.
 #
+# Output is rgba, not rgb24. Every other image PyUI loads is rgba, and the
+# thumbnail actually verified rendering in the game switcher was an rgba one -
+# an rgb24 capture has never been shown to display. The conversion is free here
+# since ffmpeg is already reformatting after hwdownload.
+#
 # Costs about 2.3s on this hardware, nearly all of it ffmpeg startup. That lands
 # in the hold-home path ahead of kill_emulator, so the game takes that much
 # longer to exit. A dedicated DRM helper would be far quicker if it ever matters.
@@ -580,7 +585,7 @@ take_screenshot() {
 
     if timeout 15 "$_ff" -hide_banner -loglevel error \
         -f kmsgrab -i - \
-        -vf "hwdownload,format=bgr0" \
+        -vf "hwdownload,format=bgr0,format=rgba" \
         -frames:v 1 -update 1 -y "$screenshot_path" >/dev/null 2>&1; then
         return 0
     fi
