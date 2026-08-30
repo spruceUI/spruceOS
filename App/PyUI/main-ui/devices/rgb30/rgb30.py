@@ -586,7 +586,13 @@ class Rgb30(DeviceCommon):
         self.button_remapper.remap_buttons()
 
     def get_roms_dir(self):
-        return "/mnt/union/ROMS/"
+        # /mnt/SDCARD/Roms/, as on every other spruce device. This used to
+        # return muOS's "/mnt/union/ROMS/", inherited from the class this device
+        # was originally derived from and a path that does not exist here. The
+        # Anbernic XX carried the same inherited value and it broke the gamelist
+        # and box art there; the callers are the ROM list builder and both box
+        # art paths.
+        return "/mnt/SDCARD/Roms/"
 
     def output_screen_width(self):
         if(self.should_scale_screen()):
