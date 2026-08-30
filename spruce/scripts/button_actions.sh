@@ -18,7 +18,10 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
-    if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
+    # case, not [[ ]]: this file is #!/bin/sh and on the RGB30 that is dash,
+    # where [[ is "not found".
+    case "$CMD" in
+    *"/Roms/PORTS/"*)
         rm -f /tmp/menubtn
 
         capture_screen
@@ -27,8 +30,8 @@ kill_port(){
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
         kill -9 -"$SID" 2>/dev/null
-
-    fi
+        ;;
+    esac
 }
 
 # TODO bypass all of this if drastic original as killall -15 does not work on it
@@ -173,7 +176,13 @@ update_gameswitcher_json() {
     rom_file_path=$(readlink -f "$rom_file_path")
     # Keep consistent between devices
     # TODO move to device so we don't make this a giant list of regexs
-    rom_file_path="${rom_file_path//\/sdcard\//\/SDCARD\/}"
+    # sed, not ${var//a/b}: that is a bashism, and on the RGB30 /bin/sh is dash,
+    # where it is a fatal "Bad substitution". This function runs inside the
+    # ( ... ) & subshell in homebutton_watchdog.sh, so the abort was silent and
+    # took kill_emulator - the very next line of prepare_game_switcher - with
+    # it. Symptom: hold-home logged "Performing hold-home action: Game Switcher"
+    # and the game just kept running, for every emulator on that device.
+    rom_file_path=$(printf '%s' "$rom_file_path" | sed 's|/sdcard/|/SDCARD/|g')
     case "$rom_file_path" in
         /mnt/SDCARD/mmc*/?*)
             rom_file_path="/mnt/SDCARD/${rom_file_path#*/mnt/SDCARD/mmc*/}"
