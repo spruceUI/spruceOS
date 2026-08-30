@@ -27,7 +27,8 @@
       "options": [
         "DraStic-original",
         "DraStic-Steward",
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
       "selected": "DraStic-original",
       "overrides": {}
@@ -40,7 +41,8 @@
       "options": [
         "DraStic-original",
         "DraStic-Steward",
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
       "selected": "DraStic-original",
       "overrides": {}
@@ -52,7 +54,8 @@
       ],
       "options": [
         "DraStic-Steward",
-        "DraStic-original"
+        "DraStic-original",
+        "DSperate"
       ],
       "selected": "DraStic-original",
       "overrides": {}
@@ -64,22 +67,24 @@
       ],
       "options": [
         "DraStic-original",
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
       "selected": "DraStic-original",
       "overrides": {}
     },
     "Emulator_SmartProS": {
-        "display": "Emulator",
-        "devices": [
-            "TRIMUI_SMART_PRO_S"
-        ],
-        "options": [
-            "DraStic-original",
-            "DraStic-trngaje"
-        ],
-        "selected": "DraStic-trngaje",
-        "overrides": {}
+      "display": "Emulator",
+      "devices": [
+        "TRIMUI_SMART_PRO_S"
+      ],
+      "options": [
+        "DraStic-original",
+        "DraStic-trngaje",
+        "DSperate"
+      ],
+      "selected": "DraStic-trngaje",
+      "overrides": {}
     },
     "Emulator_Pixel2": {
       "display": "Emulator",
@@ -87,7 +92,8 @@
         "GKD_PIXEL2"
       ],
       "options": [
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
       "selected": "DraStic-trngaje",
       "overrides": {}

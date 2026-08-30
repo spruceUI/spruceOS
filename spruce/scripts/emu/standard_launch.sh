@@ -108,8 +108,13 @@ case $EMU_NAME in
 		;;
 
 	"NDS")
-		. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
-		run_drastic
+		if [ "$CORE" = "DSperate" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate
+		else
+			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
+			run_drastic
+		fi
 		;;
 
 	"N64")

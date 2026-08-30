@@ -114,6 +114,15 @@ kill_ra_and_standard_emulators() {
     killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
 }
 
+kill_dsperate() {
+	log_message "button_actions.sh: Killing DSperate!"
+	# SIGTERM first and give it a moment: DSperate writes the battery save on
+	# a launcher's SIGTERM, so -9 straight away loses the last save.
+	killall -q -15 dsperate-sdl
+	sleep 1
+	killall -q -9 dsperate-sdl
+}
+
 kill_bigpemu() {
 	log_message "button_actions.sh: Killing BigPEmu!"
     killall -q -9 gptokeyb2
@@ -139,6 +148,10 @@ kill_emulator() {
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
+    elif pgrep dsperate-sdl >/dev/null; then
+        # Plain pgrep, not -f: busybox pgrep -f can match its own command line,
+        # and "dsperate-sdl" would appear in it.
+        kill_dsperate
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu
     elif pgrep -f "vtree" >/dev/null; then
