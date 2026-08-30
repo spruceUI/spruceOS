@@ -35,6 +35,20 @@ build_mupen_args() {
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
 
+	# That assumes a panel at least as wide as 4:3, which every device had until
+	# the RGB30: it is square at 720x720, so the canvas came out 960 wide and
+	# 240px of the picture hung off the right edge. The centering branch below
+	# cannot help - it only fires when the panel is WIDER than the canvas.
+	#
+	# Fit to width instead and shorten the canvas to keep 4:3. Provably a no-op
+	# on every other device, where DISPLAY_HEIGHT*4/3 is already <= DISPLAY_WIDTH
+	# (Brick/BrickPro 1024x768 -> 1024, SmartPro/S 1280x720 -> 960, Flip/Pixel2
+	# 640x480 -> 640).
+	if [ "$G_WIDTH" -gt "$DISPLAY_WIDTH" ]; then
+		G_WIDTH=$DISPLAY_WIDTH
+		G_HEIGHT=$((DISPLAY_WIDTH * 3 / 4))
+	fi
+
 	# Read video plugin from overlay config (written to [SpruceOS] section)
 	# Values: 0=GLideN64, 1=Rice, 2=Glide64mk2
 	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
