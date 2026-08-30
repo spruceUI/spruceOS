@@ -145,10 +145,6 @@ if [ -n "$AUTOINSTALL" ]; then
   done
 
   if [ -f "$controlfolder/autoinstall/PortMaster.zip" ]; then
-    if [ ! -f "$file_name" ]; then
-      continue
-    fi
-
     file_name="$controlfolder/autoinstall/PortMaster.zip"
 
     if [[ $(PortMasterDialogResult "install" "$file_name") == "OKAY" ]]; then
