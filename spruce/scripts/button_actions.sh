@@ -122,6 +122,10 @@ kill_bigpemu() {
     killall -q -9 bigpemu
 }
 
+kill_vtree() {
+    kill -15 $(pgrep -f vtree)
+}
+
 kill_emulator() {
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         kill_drastic
@@ -137,6 +141,8 @@ kill_emulator() {
         kill_gvu
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu
+    elif pgrep -f "vtree" >/dev/null; then
+        kill_vtree
     else
         kill_ra_and_standard_emulators
     fi
