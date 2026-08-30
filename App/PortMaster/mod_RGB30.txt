@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# SPDX-License-Identifier: MIT
+#
+# Staged by launch.sh as mod_<CFW_NAME>.txt. Ports and PortMaster.txt source
+# "$controlfolder/mod_${CFW_NAME}.txt" if it exists, and it is the only hook
+# that runs in their own shell after control.txt.
+#
+# Nothing upstream ships a mod file for the ArkOS family that dArkMoss belongs
+# to, so without this every pm_message call dies with "command not found" -
+# including the one PortMaster.txt makes before pugwash starts.
+#
+# Deliberately minimal. The Anbernic XX's mod_BaseOS.txt also juggles two SDL2
+# builds because BaseOS ships none that suits; this base has a real SDL2 built
+# against its own Mali blob and every library a port needs, so none of that
+# applies here.
+
+pm_message() {
+    echo "$1" > "$CUR_TTY"
+}

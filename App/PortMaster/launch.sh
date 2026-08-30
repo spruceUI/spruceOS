@@ -68,6 +68,19 @@ case "$PLATFORM" in
         # therefore the button marked B. Hand SDL the label-named map so confirm
         # lands on the button marked A - same reason the Anbernic branch does it.
         export_sdl_gamecontroller_map
+        # Ports and PortMaster.txt source mod_${CFW_NAME}.txt if it exists, and
+        # nothing upstream ships one for the ArkOS family this base belongs to,
+        # so pm_message dies with "command not found". Name it from the live
+        # CFW_NAME rather than hardcoding: it reads "Unknown" today because
+        # PortMaster identifies ArkOS by finding "arkos" in the plymouth title
+        # and the dArkMoss rebrand does not contain it, but that can change
+        # without this needing to.
+        # device_info.txt is bash ([[ ]]) and this script is dash, so it has to
+        # be sourced by bash or it aborts on syntax and yields an empty name.
+        RGB30_CFW_NAME="$(bash -c '. /mnt/SDCARD/Persistent/portmaster/PortMaster/device_info.txt >/dev/null 2>&1; printf "%s" "$CFW_NAME"')"
+        [ -n "$RGB30_CFW_NAME" ] || RGB30_CFW_NAME="Unknown"
+        cp /mnt/SDCARD/App/PortMaster/mod_RGB30.txt \
+           "/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_${RGB30_CFW_NAME}.txt"
         ;;
     Pixel2)
         /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
