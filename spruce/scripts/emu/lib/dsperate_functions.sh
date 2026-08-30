@@ -79,6 +79,14 @@ run_dsperate() {
 	cd "$EMU_DIR"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 
+	# Speed, per-stage times and audio buffer depth, once a second. The buffer
+	# depth is the one that matters: DSperate paces the emulator off the audio
+	# queue, so a depth that oscillates means the pacing loop is the problem and
+	# a steady one points at the resampler instead. Tied to verbose logging
+	# because emu_log_file is /dev/null without it, so this would have nowhere
+	# to go anyway.
+	[ "$VERBOSE_EMU" = "1" ] && export DS_FPS=1
+
 	# Currently inert - pin_to_dedicated_cores has a quoting bug that makes its
 	# sleep fail, so it greps for the process before it exists. Called anyway,
 	# so this starts working the day that is fixed rather than needing a second
