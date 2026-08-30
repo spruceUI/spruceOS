@@ -545,6 +545,53 @@ vibrate() {
     /mnt/SDCARD/spruce/bin64/rumble "$EVENT_PATH_READ_INPUTS_SPRUCE" "$intensity" "$duration"
 }
 
+# /dev/fb0 is dead on this device: under DRM it is only an emulated shim and
+# reads back all zeros, so every fbdev grab produced a black image. That is why
+# this used to fall through to the "Missing take_screenshot function" stub in
+# device.sh, and why Saves/states/.gameswitcher was always empty.
+#
+# The real scanout is a KMS plane, so grab that instead. This captures whatever
+# is actually on screen - PyUI, RetroArch, DSperate, anything - because it reads
+# the plane rather than any application's buffers, so it needs no cooperation
+# from the app. drmModeGetFB2 on another client's framebuffer needs
+# CAP_SYS_ADMIN; spruce runs as root here.
+#
+# Costs about 2.3s on this hardware, nearly all of it ffmpeg startup. That lands
+# in the hold-home path ahead of kill_emulator, so the game takes that much
+# longer to exit. A dedicated DRM helper would be far quicker if it ever matters.
+take_screenshot() {
+    screenshot_path="$1"
+    [ -n "$screenshot_path" ] || return 1
+    # An absolute path, NOT plain "ffmpeg". helperFunctions.sh puts
+    # /mnt/SDCARD/spruce/bin64 first on PATH, and that build has no kmsgrab
+    # demuxer - it fails with "Unknown input format: 'kmsgrab'". So the capture
+    # works when run by hand and fails through spruce's own environment, which
+    # is the only way it is ever actually called. Debian's ffmpeg has it, and
+    # spruce/bin/ffmpeg does too as a fallback.
+    _ff=""
+    for _c in /usr/bin/ffmpeg /mnt/SDCARD/spruce/bin/ffmpeg; do
+        [ -x "$_c" ] && { _ff="$_c"; break; }
+    done
+    [ -n "$_ff" ] || {
+        log_message "take_screenshot: no ffmpeg with kmsgrab available"
+        return 1
+    }
+    mkdir -p "$(dirname "$screenshot_path")" 2>/dev/null
+
+    if timeout 15 "$_ff" -hide_banner -loglevel error \
+        -f kmsgrab -i - \
+        -vf "hwdownload,format=bgr0" \
+        -frames:v 1 -update 1 -y "$screenshot_path" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    # Leave nothing behind: a half-written or empty file would show up in the
+    # game switcher as a broken thumbnail, which is worse than no thumbnail.
+    rm -f "$screenshot_path" 2>/dev/null
+    log_message "take_screenshot: kmsgrab capture failed"
+    return 1
+}
+
 get_config_path() {
     echo "${SYSTEM_JSON:-/mnt/SDCARD/App/PyUI/config/rgb30-system.json}"
 }
