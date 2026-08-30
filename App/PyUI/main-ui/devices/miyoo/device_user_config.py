@@ -28,17 +28,28 @@ class DeviceUserConfig:
             try:
                 dirpath = os.path.dirname(self.filepath)
 
-                with tempfile.NamedTemporaryFile(
-                    'w',
-                    dir=dirpath,
-                    delete=False
-                ) as tmp:
-                    json.dump(self.config, tmp, indent=8)
-                    tmp.flush()
-                    os.fsync(tmp.fileno())
-                    tempname = tmp.name
+                tempname = None
+                try:
+                    with tempfile.NamedTemporaryFile(
+                        'w',
+                        dir=dirpath,
+                        delete=False
+                    ) as tmp:
+                        tempname = tmp.name
+                        json.dump(self.config, tmp, indent=8)
+                        tmp.flush()
+                        os.fsync(tmp.fileno())
 
-                os.replace(tempname, self.filepath) 
+                    os.replace(tempname, self.filepath)
+                except BaseException:
+                    # A failed dump or replace must not leave the delete=False
+                    # staging file beside the config it never replaced.
+                    if tempname is not None:
+                        try:
+                            os.unlink(tempname)
+                        except OSError:
+                            pass
+                    raise
 
             except Exception as e:
                 raise RuntimeError(f"Failed to save config: {e}")
@@ -331,12 +342,21 @@ class DeviceUserConfig:
         try:
             dirpath = os.path.dirname(cls.SHARED_CONFIG_PATH)
             os.makedirs(dirpath, exist_ok=True)
-            with tempfile.NamedTemporaryFile('w', dir=dirpath, delete=False) as tmp:
-                json.dump(data, tmp, indent=4)
-                tmp.flush()
-                os.fsync(tmp.fileno())
-                tempname = tmp.name
-            os.replace(tempname, cls.SHARED_CONFIG_PATH)
+            tempname = None
+            try:
+                with tempfile.NamedTemporaryFile('w', dir=dirpath, delete=False) as tmp:
+                    tempname = tmp.name
+                    json.dump(data, tmp, indent=4)
+                    tmp.flush()
+                    os.fsync(tmp.fileno())
+                os.replace(tempname, cls.SHARED_CONFIG_PATH)
+            except BaseException:
+                if tempname is not None:
+                    try:
+                        os.unlink(tempname)
+                    except OSError:
+                        pass
+                raise
         except OSError as e:
             PyUiLogger.get_logger().error(f"Could not write {cls.SHARED_CONFIG_PATH}: {e}")
 
