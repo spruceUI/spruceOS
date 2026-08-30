@@ -58,6 +58,7 @@ while true; do
             # Execute the content of the file as a command
             eval "$content"
             rm -f "$RESULT_FILE"
+            stop_pyui_message_writer
             "$INSTALL"
             break
         fi
