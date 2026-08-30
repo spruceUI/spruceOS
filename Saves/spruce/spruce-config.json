@@ -563,6 +563,14 @@
             },
             "otaUpdateType": {
                 "display": "OTA: update type",
+                "devices":["MIYOO_FLIP", "MIYOO_MINI",
+                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
+                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
+                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
+                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
+                           "ANBERNIC_RGXX640480", "RGB30"],
                 "description": "incremental is faster (developer/tester mode only for now); full can fix broken installs",
                 "options": [
                     "Incremental",
@@ -572,6 +580,14 @@
             },
             "otaChannel": {
                 "display": "OTA: release channel",
+                "devices":["MIYOO_FLIP", "MIYOO_MINI",
+                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
+                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
+                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
+                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
+                           "ANBERNIC_RGXX640480", "RGB30"],
                 "description": "developer/tester mode only: Nightly follows the nightly builds, Stable follows stable releases",
                 "options": [
                     "Nightly",
