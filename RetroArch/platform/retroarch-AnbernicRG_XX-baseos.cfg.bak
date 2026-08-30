@@ -1,0 +1,18 @@
+# BaseOS overlay, layered over retroarch-AnbernicRG_XX-universal.cfg with
+# --appendconfig. BaseOS runs no udevd, so RetroArch's udev input drivers
+# enumerate nothing and the pad is dead in-game. The built-in ANBERNIC-keys
+# device exposes js0 + ABS axes + gamepad buttons, so the sdl2 driver (backed by
+# the mali-fbdev SDL2 we stage, which carries the H700 joystick-classification
+# patch) picks it up - matching what every other spruce device already uses.
+# Kept as an overlay so the shared universal cfg and the stock-image path are
+# untouched.
+input_driver = "sdl2"
+input_joypad_driver = "sdl2"
+
+# Drive the Mali blob directly instead of going RetroArch -> SDL2 -> mali fbdev
+# EGL. ra64.h700 is built --enable-mali_fbdev, and gfx_ctx_mali_fbdev already
+# sorts ahead of sdl_gl_ctx in RetroArch's auto-pick order, so this only pins a
+# choice it would make anyway - the value is that it stops being silent. If the
+# binary ever lacks the context RetroArch says so and falls back, rather than
+# quietly costing frames with nothing in the log to explain it.
+video_context_driver = "fbdev_mali"
