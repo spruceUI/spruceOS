@@ -741,7 +741,7 @@ kill_pyui_message_writer() {
 
 stop_pyui_message_writer() {
     kill_pyui_message_writer
-    freemma &>/dev/null # I don't think we have this bin on any spruce devices
+    freemma >/dev/null 2>&1 # I don't think we have this bin on any spruce devices
 }
 
 display_message() {
