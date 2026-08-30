@@ -48,8 +48,8 @@ ORIG_LOGO_PATH="$LOGO_PATH"
 # there (a stock CubeXX has a 720x720 panel but a 640x480 bootlogo.bmp), and the
 # ffprobe below is a 32-bit binary that cannot run under BaseOS.
 case "$PLATFORM" in
-    Anbernic*) SKIP_GENERIC_CONVERT=1 ;;
-    *)         SKIP_GENERIC_CONVERT=0 ;;
+    Anbernic*|Pixel2) SKIP_GENERIC_CONVERT=1 ;;
+    *)                SKIP_GENERIC_CONVERT=0 ;;
 esac
 
 if [ "$SKIP_GENERIC_CONVERT" = "0" ]; then
@@ -372,6 +372,15 @@ case "$PLATFORM" in
         umount "$BOOT_PATH" 2>/dev/null
         rmdir "$BOOT_PATH" 2>/dev/null
         rm -f "$TEMP_BMP"
+        ;;
+    "Pixel2")
+        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+
+        mount -o remount,rw /flash
+        magick $LOGO_PATH -colorspace sRGB -alpha off -resize 640x480\> -rotate 270 /flash/logo.bmp
+        sync
+
+        mount -o remount,ro /flash
         ;;
 esac
 
