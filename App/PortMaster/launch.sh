@@ -64,6 +64,10 @@ case "$PLATFORM" in
         # CFW_NAME - but it is why no shim can be keyed on the name yet.
         export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu"
         export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        # pugwash confirms on SDL's "a", which on this pad is positional and
+        # therefore the button marked B. Hand SDL the label-named map so confirm
+        # lands on the button marked A - same reason the Anbernic branch does it.
+        export_sdl_gamecontroller_map
         ;;
     Pixel2)
         /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
