@@ -327,7 +327,7 @@ map_mainui_brightness_to_system_value() {
 set_backlight() {
     new_bl="$1"
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
-    if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
+    if [ "$new_bl" -ge 0 ] 2>/dev/null && [ "$new_bl" -le 10 ] 2>/dev/null; then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
