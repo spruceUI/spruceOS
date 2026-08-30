@@ -44,9 +44,47 @@ case "$PLATFORM" in
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
         ;;
+    RGB30)
+        # dArkMoss is Debian, so unlike every other spruce device the base
+        # already carries what a port needs - SDL2 2.32 built for this Mali
+        # blob, the GLES stack, and every library the Anbernic XX needed a
+        # bundled ports-lib64 for. Point pysdl2 at the system SDL2 rather than
+        # a spruce-bundled one for exactly that reason: dArkOS built it against
+        # this GPU.
+        #
+        # pugwash still needs the bundled Python 3.10 on PATH; the base ships
+        # 3.13 with no sdl2 module. Verified 3.10.16 runs on trixie's glibc.
+        #
+        # No mod_<CFW_NAME>.txt is staged. Upstream ships none for the ArkOS
+        # family, which is what this base is, so ports are expected to run on
+        # the defaults. Note CFW_NAME currently resolves to "Unknown" here
+        # anyway: PortMaster identifies ArkOS by finding "arkos" inside the
+        # plymouth title, and the dArkMoss rebrand ("darkmoss") does not
+        # contain it. Cosmetic for now - nothing in harbourmaster reads
+        # CFW_NAME - but it is why no shim can be keyed on the name yet.
+        export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu"
+        export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        # pugwash confirms on SDL's "a", which on this pad is positional and
+        # therefore the button marked B. Hand SDL the label-named map so confirm
+        # lands on the button marked A - same reason the Anbernic branch does it.
+        export_sdl_gamecontroller_map
+        # Ports and PortMaster.txt source mod_${CFW_NAME}.txt if it exists, and
+        # nothing upstream ships one for the ArkOS family this base belongs to,
+        # so pm_message dies with "command not found". Name it from the live
+        # CFW_NAME rather than hardcoding: it reads "Unknown" today because
+        # PortMaster identifies ArkOS by finding "arkos" in the plymouth title
+        # and the dArkMoss rebrand does not contain it, but that can change
+        # without this needing to.
+        # device_info.txt is bash ([[ ]]) and this script is dash, so it has to
+        # be sourced by bash or it aborts on syntax and yields an empty name.
+        RGB30_CFW_NAME="$(bash -c '. /mnt/SDCARD/Persistent/portmaster/PortMaster/device_info.txt >/dev/null 2>&1; printf "%s" "$CFW_NAME"')"
+        [ -n "$RGB30_CFW_NAME" ] || RGB30_CFW_NAME="Unknown"
+        cp /mnt/SDCARD/App/PortMaster/mod_RGB30.txt \
+           "/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_${RGB30_CFW_NAME}.txt"
+        ;;
     Pixel2)
-        /usr/bin/start_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
-        /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+        /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
+        /mnt/SDCARD/App/PortMaster/update_images.sh > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
         rm /mnt/SDCARD/Roms/PORTS/gamelist.*
         exit 0
         ;;
@@ -94,7 +132,7 @@ cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
 
 cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/SDCARD/Saves/flip/home/device_info_Miyoo_Miyoo Flip.txt"
 
-./spruce_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
+./spruce_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
 
 # pugwash asks for a restart after updating itself by dropping this flag. We
 # deliberately do not restart in place - that would skip the staging above and
@@ -108,7 +146,7 @@ if [ -f "$PM_REBOOT_FLAG" ]; then
 fi
 
 # Fix images to be spruce compatible
-/mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+/mnt/SDCARD/App/PortMaster/update_images.sh > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
 
 # Hide pm_message for miyoo as it creates some issues for us (jpg and broken ports)
 FILE="/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_Miyoo.txt"
