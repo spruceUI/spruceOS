@@ -51,24 +51,9 @@ if (Path().cwd() / '.git').is_dir():
     HM_TESTING=True
     
 elif Path("/mnt/SDCARD/spruce").is_dir():
-    ## Spruce
+    ## Spruce (Miyoo Flip)
     HM_DEFAULT_TOOLS_DIR   = Path("/mnt/SDCARD/Persistent/portmaster")
-    # Data goes in Roms/PORTS/ports, launchers in Roms/PORTS.
-    #
-    # Two kinds of port share Roms/PORTS. spruce's own (from
-    # Ports-and-Free-Games) are self-contained scripts that find their files
-    # with $(dirname "$0"), so their data sits flat beside the launcher and
-    # never passes through harbourmaster. PortMaster's ports compute
-    # GAMEDIR=/$directory/ports/<name>, and spruce's control.txt sets
-    # directory=/mnt/SDCARD/Roms/PORTS - so they look in Roms/PORTS/ports.
-    #
-    # harbourmaster puts a zip's top-level .sh files in SCRIPTS_DIR and
-    # everything else in PORTS_DIR, so pointing PORTS_DIR at the ports
-    # subdirectory puts each kind exactly where its own launcher looks. With
-    # both set to Roms/PORTS the data landed flat, one level above where
-    # PortMaster's scripts look, and every one of them died on
-    # "cd: .../ports/<name>: No such file or directory".
-    HM_DEFAULT_PORTS_DIR   = Path("/mnt/SDCARD/Roms/PORTS/ports")
+    HM_DEFAULT_PORTS_DIR   = Path("/mnt/SDCARD/Roms/PORTS")
     HM_DEFAULT_SCRIPTS_DIR = Path("/mnt/SDCARD/Roms/PORTS")
 
 elif Path("/mnt/SDCARD/MIYOO_EX/PortMaster").is_dir():
