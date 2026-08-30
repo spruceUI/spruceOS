@@ -74,6 +74,36 @@ esac
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
+# Every name this device answers to in an Emu config.json "devices" list, most
+# specific first. Mirrors PyUI's Device.get_device_names(): almost every device
+# answers to one name, and the Anbernic XX line also answers to a family token
+# so a single config entry covers the whole line.
+#
+# MUST stay in step with App/PyUI/launch.sh, which passes these same names to
+# PyUI as -device. When the two disagree, the UI writes the user's emulator
+# choice into one menuOption and the launcher reads a different one - which is
+# exactly the bug this exists to prevent. Defined here, after the device
+# functions are sourced, because the Mini resolves its variant at runtime.
+device_names() {
+    case "$PLATFORM" in
+        A30)              echo "MIYOO_A30" ;;
+        Brick)            echo "TRIMUI_BRICK" ;;
+        BrickPro)         echo "TRIMUI_BRICK_PRO" ;;
+        SmartPro)         echo "TRIMUI_SMART_PRO" ;;
+        SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
+        Flip)             echo "MIYOO_FLIP" ;;
+        Pixel2)           echo "GKD_PIXEL2" ;;
+        RGB30)            echo "RGB30" ;;
+        Miniloong)        echo "MINILOONG_POCKET1" ;;
+        Zero28)           echo "MAGICX_ZERO28" ;;
+        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
+        AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX720480) echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
+        AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
+    esac
+}
+
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {

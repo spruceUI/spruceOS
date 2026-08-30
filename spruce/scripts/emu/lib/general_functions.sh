@@ -38,12 +38,44 @@ get_effective_ra_build() {
     echo "$ra_build"
 }
 
+# The Emulator* menuOption key whose "devices" list names this device, resolved
+# exactly the way PyUI's Device.get_selected_emulator does: walk the keys in
+# file order and take the first whose list contains any of our names. Empty when
+# nothing matches, so callers fall through to their existing behaviour.
+emu_option_key_for_device() {
+    _names="$(device_names 2>/dev/null)"
+    [ -n "$_names" ] || return 0
+    _names_json="$(printf '%s\n' $_names | jq -R . | jq -sc .)"
+    jq -r --argjson names "$_names_json" '
+        [ .menuOptions | to_entries[]
+          | select(.key | startswith("Emulator"))
+          | select( [ (.value.devices // [])[] as $d | $names | index($d) ]
+                    | map(select(. != null)) | length > 0 )
+        ][0].key // empty
+    ' "$EMU_JSON_PATH" 2>/dev/null
+}
+
 set_emu_core_from_emu_json() {
     # Try to use platform-specific emulator if it exists
     CORE_PATH=".menuOptions.Emulator_$PLATFORM.selected"
     if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
         export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
         return
+    fi
+
+    # Match the "devices" list the way PyUI does, before falling back on the
+    # architecture suffix. Without this the Anbernic XX line never resolved:
+    # PyUI writes the choice into Emulator_Flip (matched by the ANBERNIC_RGXX
+    # family token) while this looked for Emulator_AnbernicXX640480, found
+    # nothing, and silently used default_emulator - so every non-default
+    # emulator choice on that line was discarded.
+    DEV_KEY="$(emu_option_key_for_device)"
+    if [ -n "$DEV_KEY" ]; then
+        CORE_SEL="$(jq -r --arg k "$DEV_KEY" '.menuOptions[$k].selected // empty' "$EMU_JSON_PATH" 2>/dev/null)"
+        if [ -n "$CORE_SEL" ] && [ "$CORE_SEL" != "null" ]; then
+            export CORE="$CORE_SEL"
+            return
+        fi
     fi
 
     # Try the architecture suffix
@@ -74,6 +106,11 @@ get_core_override() {
     # Determine the platform-specific key first
     if jq -e ".menuOptions.Emulator_$PLATFORM" "$EMU_JSON_PATH" >/dev/null 2>&1; then
         core_section=".menuOptions.Emulator_$PLATFORM"
+    elif [ -n "$(emu_option_key_for_device)" ]; then
+        # Same devices-list resolution, so a per-game override is read from the
+        # key the UI actually wrote it to. The NDS arm below sent every non-Flip
+        # device to Emulator_Brick, which on the XX line holds nothing.
+        core_section=".menuOptions.$(emu_option_key_for_device)"
     else
         # Fallback for EMU_NAME-specific keys
         case "$EMU_NAME" in
