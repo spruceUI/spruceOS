@@ -153,7 +153,18 @@ take_screenshot_bg() {
 }
 
 # Setup global screenshot shortcut
-SS_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
+# Read both locations. The option lived under System Settings and moved to
+# Button Settings in d0956be41, but only in the shipped config - an installed
+# card keeps the old location until an update merges the new default in, and a
+# card that has never been updated keeps it indefinitely. This reader was left
+# on the old path, and because get_config_value falls back to its default on a
+# missing path - the same L2+R2+Y - the setting looked like it worked while
+# being ignored, so choosing X, DOWN or Off silently did nothing.
+#
+# Try the new location first so it wins once a config has both, and fall back to
+# the old one rather than to the default, which would discard a user's choice.
+SS_SHORTCUT="$(get_config_value '.menuOptions."Button Settings".globalScreenshotShortcut.selected' "")"
+[ -n "$SS_SHORTCUT" ] || SS_SHORTCUT="$(get_config_value '.menuOptions."System Settings".globalScreenshotShortcut.selected' "L2+R2+Y")"
 SS_B1=$B_L2
 SS_B2=$B_R2
 
@@ -173,6 +184,47 @@ case "$SS_SHORTCUT" in
         SS_B3="NULL"
         ;;
 esac
+
+# Build the press/release patterns for one combo button.
+#
+# The matches below are written as "key $VAR <value>", which assumes a B_* holds
+# just "type code". Most buttons do, but analog triggers and hats bake the value
+# in - B_L2="3 2 255" on the Flip and the TrimUI line, B_DOWN="3 17 1" on nearly
+# everything - so the pattern ended up with two values and could never match a
+# real getevent line. Measured on a Flip: L2 emits "key 3 2 255" while the
+# watchdog was looking for "key 3 2 255 1". That left SS_B1_DOWN and SS_B2_DOWN
+# permanently false, so the one leg that did match could never fire, and every
+# screenshot shortcut was dead on 7 devices (9 for the DOWN variant).
+#
+# Derive both patterns from the spec instead of assuming its shape:
+#   "T C"    -> press "key T C 1", release "key T C 0"   (unchanged behaviour)
+#   "T C V"  -> press "key T C V", release "key T C 0"
+#
+# Anything else - "NULL" when the shortcut is Off, "DOESNT_EXIST", or the Mini's
+# literal "B_L2" placeholder for triggers it does not have - gets a sentinel that
+# cannot appear in the stream. It must never be empty: an empty pattern makes
+# *""* match every line and would fire screenshots continuously.
+ss_set_patterns() {
+    _ss_var="$2"
+    case "$(echo $_ss_var | wc -w)" in
+        2)
+            eval "${1}_PRESS=\"key \$_ss_var 1\""
+            eval "${1}_REL=\"key \$_ss_var 0\""
+            ;;
+        3)
+            eval "${1}_PRESS=\"key \$_ss_var\""
+            eval "${1}_REL=\"key $(echo $_ss_var | awk '{print $1, $2, 0}')\""
+            ;;
+        *)
+            eval "${1}_PRESS='__ss_disabled__'"
+            eval "${1}_REL='__ss_disabled__'"
+            ;;
+    esac
+}
+
+ss_set_patterns SS_B1 "$SS_B1"
+ss_set_patterns SS_B2 "$SS_B2"
+ss_set_patterns SS_B3 "$SS_B3"
 
 SS_B1_DOWN=false
 SS_B2_DOWN=false
@@ -201,31 +253,31 @@ getevent $EVENTS | while read line; do
                 brightness_up
             fi
         ;;
-        *"key $SS_B1 1"*) # Screenshot key 1 down
+        *"$SS_B1_PRESS"*) # Screenshot key 1 down
             SS_B1_DOWN=true
             if [ "$SS_B2_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $SS_B1 0"*) # Screenshot key 1 up
+        *"$SS_B1_REL"*) # Screenshot key 1 up
             SS_B1_DOWN=false
         ;;
-        *"key $SS_B2 1"*) # Screenshot key 2 down
+        *"$SS_B2_PRESS"*) # Screenshot key 2 down
             SS_B2_DOWN=true
             if [ "$SS_B1_DOWN" = true ] && [ "$SS_B3_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $SS_B2 0"*) # Screenshot key 2 up
+        *"$SS_B2_REL"*) # Screenshot key 2 up
             SS_B2_DOWN=false
         ;;
-        *"key $SS_B3 1"*) # Screenshot key 3 down
+        *"$SS_B3_PRESS"*) # Screenshot key 3 down
             SS_B3_DOWN=true
             if [ "$SS_B1_DOWN" = true ] && [ "$SS_B2_DOWN" = true ] ; then
                 take_screenshot_bg &
             fi
         ;;
-        *"key $SS_B3 0"*) # Screenshot key 3 up
+        *"$SS_B3_REL"*) # Screenshot key 3 up
             SS_B3_DOWN=false
         ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
