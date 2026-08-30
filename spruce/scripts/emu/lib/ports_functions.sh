@@ -93,14 +93,22 @@ run_port() {
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
-        "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
         if [ "$MOUNT_BIND" = true ]; then
             mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python
         fi
 
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
-        setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        # "&>" is bash-only. This script is #!/bin/sh, and on the Debian-based
+        # dArkMoss that is dash, which parses it as two commands: the port
+        # backgrounded, then a separate backgrounded null command holding the
+        # redirect. $! then captured that null command, which exits at once, so
+        # the wait below returned immediately, run_port returned, and
+        # principal.sh brought PyUI back up on top of a still-running port -
+        # the UI and the port fighting over the display. Measured: under dash
+        # the wait returned in 0s, under bash in the full 8s.
+        setsid "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
         SID=$!
         echo "$SID" > /tmp/last_port_sid
         wait "$SID"
