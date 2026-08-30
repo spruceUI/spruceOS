@@ -297,8 +297,68 @@ class DeviceUserConfig:
         self.save_config()
 
 
+    # The timezone is shared by every device on the card, not stored per device.
+    #
+    # Everything else in this file is genuinely a property of the handheld -
+    # volume, brightness, the button map. A timezone is a property of whoever
+    # owns the card: the same card in another device is the same person in the
+    # same place. There are fifteen of these per-device files, so a zone set on
+    # one device was invisible to the next and moving the card meant setting it
+    # again.
+    #
+    # It has to live in a file the update does NOT ship. The per-device configs
+    # survive updates only because they are untracked, so the archive never
+    # overwrites them; App/PyUI/py-ui-config.json is tracked and would be
+    # replaced by the shipped default on a full update, losing the zone every
+    # time. Hence a sibling of the per-device files rather than a shared key in
+    # an existing config.
+    TIMEZONE_KEY = "timezone"
+    SHARED_CONFIG_PATH = "/mnt/SDCARD/Saves/spruce/shared-system.json"
+
+    @classmethod
+    def _read_shared(cls):
+        try:
+            with open(cls.SHARED_CONFIG_PATH) as f:
+                return json.load(f)
+        except (OSError, json.JSONDecodeError):
+            return {}
+
+    @classmethod
+    def _write_shared(cls, data):
+        # Same care save_config takes: these devices get switched off mid-write,
+        # and a half-written file would read back as no setting at all.
+        import tempfile
+        try:
+            dirpath = os.path.dirname(cls.SHARED_CONFIG_PATH)
+            os.makedirs(dirpath, exist_ok=True)
+            with tempfile.NamedTemporaryFile('w', dir=dirpath, delete=False) as tmp:
+                json.dump(data, tmp, indent=4)
+                tmp.flush()
+                os.fsync(tmp.fileno())
+                tempname = tmp.name
+            os.replace(tempname, cls.SHARED_CONFIG_PATH)
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"Could not write {cls.SHARED_CONFIG_PATH}: {e}")
+
+    def _read_timezone(self):
+        timezone = self._read_shared().get(self.TIMEZONE_KEY)
+        if timezone:
+            return timezone
+
+        # A zone chosen before this moved card-global is still sitting in this
+        # device's own file. Adopt it rather than making the user pick again,
+        # which would look exactly like the bug this fixes. If two devices
+        # disagree, whichever boots first wins - the owner cannot have been in
+        # two places at once.
+        legacy = self.config.get(self.TIMEZONE_KEY)
+        if legacy:
+            PyUiLogger.get_logger().info(
+                f"Adopting timezone {legacy} from {self.filepath} into {self.SHARED_CONFIG_PATH}")
+            self.set_timezone(legacy)
+        return legacy
+
     def get_timezone(self):
-        return self.config.get("timezone",'America/New_York')
+        return self._read_timezone() or 'America/New_York'
 
     def has_timezone(self):
         """
@@ -307,11 +367,12 @@ class DeviceUserConfig:
         must not be mistaken for a choice: applying it to a device that has
         never set one would move a clock the user had already set correctly.
         """
-        return bool(self.config.get("timezone"))
+        return bool(self._read_timezone())
 
     def set_timezone(self, value):
-        self.config["timezone"] = value
-        self.save_config()
+        shared = self._read_shared()
+        shared[self.TIMEZONE_KEY] = value
+        self._write_shared(shared)
 
     def play_button_press_sound(self):
         return self.config.get("playButtonPressSound", True)
