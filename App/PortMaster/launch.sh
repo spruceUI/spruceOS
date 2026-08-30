@@ -44,9 +44,30 @@ case "$PLATFORM" in
         export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
         ;;
+    RGB30)
+        # dArkMoss is Debian, so unlike every other spruce device the base
+        # already carries what a port needs - SDL2 2.32 built for this Mali
+        # blob, the GLES stack, and every library the Anbernic XX needed a
+        # bundled ports-lib64 for. Point pysdl2 at the system SDL2 rather than
+        # a spruce-bundled one for exactly that reason: dArkOS built it against
+        # this GPU.
+        #
+        # pugwash still needs the bundled Python 3.10 on PATH; the base ships
+        # 3.13 with no sdl2 module. Verified 3.10.16 runs on trixie's glibc.
+        #
+        # No mod_<CFW_NAME>.txt is staged. Upstream ships none for the ArkOS
+        # family, which is what this base is, so ports are expected to run on
+        # the defaults. Note CFW_NAME currently resolves to "Unknown" here
+        # anyway: PortMaster identifies ArkOS by finding "arkos" inside the
+        # plymouth title, and the dArkMoss rebrand ("darkmoss") does not
+        # contain it. Cosmetic for now - nothing in harbourmaster reads
+        # CFW_NAME - but it is why no shim can be keyed on the name yet.
+        export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu"
+        export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+        ;;
     Pixel2)
-        /usr/bin/start_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
-        /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+        /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
+        /mnt/SDCARD/App/PortMaster/update_images.sh > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
         rm /mnt/SDCARD/Roms/PORTS/gamelist.*
         exit 0
         ;;
@@ -94,7 +115,7 @@ cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
 
 cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/SDCARD/Saves/flip/home/device_info_Miyoo_Miyoo Flip.txt"
 
-./spruce_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
+./spruce_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
 
 # pugwash asks for a restart after updating itself by dropping this flag. We
 # deliberately do not restart in place - that would skip the staging above and
@@ -108,7 +129,7 @@ if [ -f "$PM_REBOOT_FLAG" ]; then
 fi
 
 # Fix images to be spruce compatible
-/mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+/mnt/SDCARD/App/PortMaster/update_images.sh > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
 
 # Hide pm_message for miyoo as it creates some issues for us (jpg and broken ports)
 FILE="/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_Miyoo.txt"

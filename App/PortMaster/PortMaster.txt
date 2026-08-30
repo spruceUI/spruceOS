@@ -20,7 +20,19 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
       *"TG3040"*)	export PLATFORM="Brick"	;;
       *"TG4040"*)	export PLATFORM="BrickPro"	;;
       *"TG5050"*)	export PLATFORM="SmartProS"	;;
-      *"0xd05"*) export PLATFORM="Flip" ;;
+      *"0xd05"*)
+          # RK3566 and the Flip's A55 both report 0xd05, so this test cannot
+          # tell an RGB30 from a Miyoo Flip - the same collision
+          # helperFunctions.sh resolves by reading OS_NAME. Without this the
+          # RGB30 was detected as a Flip and handed the Flip's bundled SDL2,
+          # which cannot create a GBM/EGL surface on this Mali blob: every
+          # window creation failed with "Can't window GBM/EGL surfaces" and
+          # the GUI died before drawing.
+          case "$(grep -a '^OS_NAME=' /etc/os-release 2>/dev/null)" in
+              *DARKMOSS*) export PLATFORM="RGB30" ;;
+              *)          export PLATFORM="Flip" ;;
+          esac
+          ;;
       *) export PLATFORM="MiyooMini" ;;
   esac
 
@@ -31,6 +43,13 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
           ;;
       Brick|SmartPro|BrickPro)
           export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
+          ;;
+      RGB30)
+          # dArkOS built the base's SDL2 against this exact Mali blob, so use
+          # it rather than a spruce-bundled one. launch.sh sets the same value;
+          # it is repeated here because this file runs later and would
+          # otherwise overwrite it.
+          export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu"
           ;;
   esac
 else

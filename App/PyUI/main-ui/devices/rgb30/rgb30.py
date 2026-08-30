@@ -448,10 +448,13 @@ class Rgb30(DeviceCommon):
         PyUiLogger.get_logger().debug(f"About to launch app {args} from dir {dir}")
         subprocess.run(args, cwd = dir)
 
-    def run_app(self, folder,launch):
-        directory = os.path.dirname(launch)
-        PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-        subprocess.run([launch], cwd = directory)
+    def run_app(self, folder, launch):
+        # The same handoff run_game uses: stage the command, drop PyUI, let the
+        # shell run it. Running the app as a child of PyUI instead - which this
+        # did - leaves PyUI alive and still drawing, so it and the app fight over
+        # the display. PortMaster came up flashing against the spruce UI and
+        # fell back to the app list within a second.
+        return MiyooTrimCommon.run_app(self, folder, launch)
 
     def map_digital_input(self, sdl_input):
         return None
