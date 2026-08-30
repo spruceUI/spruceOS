@@ -186,6 +186,9 @@ monitor_start_button() {
     # Start getevent in the background
     getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
     GE_PID=$!
+    # The pid lives in this backgrounded subshell only; leave it where the
+    # caller's cleanup trap can reach it.
+    echo "$GE_PID" > /tmp/syncthing_getevent.pid
 
     while true; do
         if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
@@ -201,7 +204,7 @@ monitor_start_button() {
     done
 
     kill "$GE_PID" 2>/dev/null
-    rm -f /tmp/ge_out 2>/dev/null
+    rm -f /tmp/ge_out /tmp/syncthing_getevent.pid 2>/dev/null
 }
 
 monitor_sync_status() {
@@ -251,7 +254,10 @@ No devices configured" -i "$BG_TREE"
 Press START to cancel" -i "$BG_TREE"
 
     # Make sure we clean up properly on any exit
-    trap 'kill $monitor_pid 2>/dev/null; rm -f /tmp/sync_cancelled; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
+    # Kill the getevent reader as well as the subshell holding it: killing only
+    # $monitor_pid orphans the reader, which then holds the input node for the
+    # rest of the shutdown (save_poweroff.sh clears readers BEFORE this runs).
+    trap 'kill $monitor_pid 2>/dev/null; kill "$(cat /tmp/syncthing_getevent.pid 2>/dev/null)" 2>/dev/null; rm -f /tmp/syncthing_getevent.pid /tmp/ge_out /tmp/sync_cancelled; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
 
     # Start the monitor in background
     monitor_start_button &
