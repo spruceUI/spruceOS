@@ -97,6 +97,18 @@
       ],
       "selected": "DraStic-trngaje",
       "overrides": {}
+    },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "DSperate",
+        "DraStic-original"
+      ],
+      "selected": "DSperate",
+      "overrides": {}
     }
   },
   "sortOrder": 4000,
