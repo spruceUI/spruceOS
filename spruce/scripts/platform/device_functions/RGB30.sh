@@ -503,6 +503,48 @@ rgb_led() {
 # GameNursery reads this. PyUI keeps its system config beside the app rather
 # than in Saves/, and RGB30.cfg's SYSTEM_JSON already points at it - use that
 # instead of a second literal that could drift out of step with it.
+# The RGB30 ships with no rumble motor, but it is a documented solder mod
+# (ArkOS wiki, "How do I add and enable a rumble/vibration motor to my unit"):
+# a 1.5-3.0V button motor onto pads Powkiddy left in place, and no software
+# change needed - the singleadc-joypad driver already claims the PWM
+# (supplier:platform:fe6e0010.pwm) and the pad already advertises FF_RUMBLE.
+#
+# So this is implemented rather than left as the device.sh stub. On a modded
+# unit it buzzes; on a stock one the kernel accepts the effect and nothing
+# happens, which is measured behaviour (rc=0, nothing felt) and is exactly what
+# the stub did anyway. Costs a stock unit nothing.
+#
+# Magnitudes are the Anbernic starting values and are UNTUNED here - nobody has
+# felt this device. The RG SP turned out to have a floor above 0x2000, so all
+# three sit well above it; retuning is shell-side and needs no rebuild.
+vibrate() {
+    duration=150
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
+
+    # Arguments in any order, matching the other platforms.
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
+        esac
+        shift
+    done
+
+    case "$intensity" in
+        "Weak")   intensity=0x8000 ;;
+        "Medium") intensity=0xC000 ;;
+        "Strong") intensity=0xFFFF ;;
+    esac
+
+    [ -x /mnt/SDCARD/spruce/bin64/rumble ] || return 0
+    /mnt/SDCARD/spruce/bin64/rumble "$EVENT_PATH_READ_INPUTS_SPRUCE" "$intensity" "$duration"
+}
+
 get_config_path() {
     echo "${SYSTEM_JSON:-/mnt/SDCARD/App/PyUI/config/rgb30-system.json}"
 }
