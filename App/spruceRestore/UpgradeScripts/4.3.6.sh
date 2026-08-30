@@ -20,6 +20,45 @@
 #
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+#
+# Carry the screenshot shortcut across its move between settings categories.
+#
+# globalScreenshotShortcut moved from "System Settings" to "Button Settings".
+# merge_configs.py matches by key path, so a key that moved between categories
+# looks like a deletion plus an unrelated addition: it logs "not in the new
+# config", skips it, and the user gets the shipped default. Anyone who had
+# chosen X, DOWN or Off silently loses that on update.
+#
+# Fixed by moving the key inside the BACKUP before the merge reads it, so the
+# key sits in the same place in both files and merge_configs copies the value
+# across by itself. This runs at spruceRestore.sh:163 and the merge at :182, so
+# the ordering holds. Moving the whole object keeps "options" alongside
+# "selected", which merge_selected needs to validate the value.
+#
+# Idempotent by construction: once moved there is nothing left under the old
+# path, and a later backup is taken from a config that already has the new
+# layout. That matters because .lastUpdate is wiped by every in-device update,
+# so upgrade scripts re-run every time.
+#
+CONFIG_BACKUP="/mnt/SDCARD/Saves/spruce/backups/spruce-config.json"
+SS_OLD_PATH='.menuOptions."System Settings".globalScreenshotShortcut'
+SS_NEW_PATH='.menuOptions."Button Settings".globalScreenshotShortcut'
+
+if [ -f "$CONFIG_BACKUP" ]; then
+    ss_old_value="$(jq -r "$SS_OLD_PATH.selected // empty" "$CONFIG_BACKUP" 2>/dev/null)"
+    if [ -n "$ss_old_value" ]; then
+        if jq "$SS_NEW_PATH = $SS_OLD_PATH | del($SS_OLD_PATH)" \
+               "$CONFIG_BACKUP" > "${CONFIG_BACKUP}.tmp" 2>/dev/null \
+           && [ -s "${CONFIG_BACKUP}.tmp" ]; then
+            mv -f "${CONFIG_BACKUP}.tmp" "$CONFIG_BACKUP"
+            log_message "4.3.6: moved screenshot shortcut ($ss_old_value) to Button Settings so the merge keeps it"
+        else
+            rm -f "${CONFIG_BACKUP}.tmp"
+            log_message "4.3.6: could not move the screenshot shortcut - it will reset to the default"
+        fi
+    fi
+fi
+
 STATE_DIR="/mnt/SDCARD/Saves/states/Flycast"
 BACKUP_DIR="/mnt/SDCARD/Saves/states/Flycast.pre-4.3.6"
 
