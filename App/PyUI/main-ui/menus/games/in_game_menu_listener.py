@@ -45,7 +45,7 @@ class InGameMenuListener:
                         PyUiLogger.get_logger().debug(f"For exitting child PID {child.pid}")
                         child.kill()
                 if ps_proc.is_running():
-                    PyUiLogger.get_logger().debug(f"For exitting PID {child.pid}")
+                    PyUiLogger.get_logger().debug(f"For exitting PID {ps_proc.pid}")
                     ps_proc.kill()
 
         except Exception as e:

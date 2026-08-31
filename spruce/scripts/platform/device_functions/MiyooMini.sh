@@ -359,7 +359,7 @@ is_mini_og() {
 }
 
 has_v4_screen() {
-    grep -q "752x560p" /sys/class/graphics/fb0/modes &>/dev/null
+    grep -q "752x560p" /sys/class/graphics/fb0/modes >/dev/null 2>&1
 }
 
 get_miyoo_mini_variant() {

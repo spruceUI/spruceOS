@@ -43,18 +43,20 @@ get_rand_file() {
     IFS=$'\n'
     ALL_FILES=$(ls -d -1 "$folder"* | grep -E "\.($(echo "$extensions" | sed -e "s/ /\|/g"))$" | grep -Fxvf "$PREV5_FILE")
     SIZE=$(echo "$ALL_FILES" | wc -l)
+    match=""
     if [ $SIZE -gt 0 ]; then
         SEED=$(date +%N)
         RINDEX=$(awk -v max=$SIZE -v seed=$SEED 'BEGIN{srand(seed); print int(rand()*(max))}')
         for file in $ALL_FILES; do
             if [ $RINDEX -eq 0 ]; then
-                echo -n "${file}"
-                return
+                match="${file}"
+                break
             fi
             RINDEX=$(expr $RINDEX - 1)
         done
     fi
     IFS="$OIFS"
+    [ -n "$match" ] && echo -n "$match"
 }
 
 ROM_DIR="/mnt/SDCARD/Roms"
@@ -65,8 +67,15 @@ if [ ! -d "$ROM_DIR" ] || [ ! -d "$EMU_DIR" ]; then
 fi
 
 NOTOK=1
+MAX_ATTEMPTS=30
+attempt_count=0
 while [ "$NOTOK" -eq 1 ]; do
     NOTOK=0
+    attempt_count=$((attempt_count + 1))
+    if [ "$attempt_count" -gt "$MAX_ATTEMPTS" ]; then
+        display --icon "$IMAGE_PATH" -t "No eligible games found. Add some games first!" -d 3
+        exit 1
+    fi
     # TODO: this _will_ select an empty folder, probably shouldn't
     SELECTED_FOLDER=$(get_rand_folder "$ROM_DIR")
     SELECTED_GAME=$(get_rand_file "$SELECTED_FOLDER")
@@ -92,8 +101,8 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-cmd="\"/mnt/SDCARD/Emu/${FOLDER_NAME}/../../spruce/scripts/emu/standard_launch.sh\" \"${SELECTED_GAME}\""
-echo "$cmd" > /tmp/cmd_to_run.sh
-eval "$cmd"
+LAUNCH_SCRIPT="/mnt/SDCARD/spruce/scripts/emu/standard_launch.sh"
+echo "\"$LAUNCH_SCRIPT\" \"${SELECTED_GAME}\"" > /tmp/cmd_to_run.sh
+"$LAUNCH_SCRIPT" "$SELECTED_GAME"
 
 auto_regen_tmp_update

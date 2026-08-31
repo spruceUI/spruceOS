@@ -48,7 +48,7 @@ class DeviceCommon(AbstractDevice):
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
                     self.power_off()
-                elif(Controller.last_input() == ControllerInput.X and self.reboot_cmd is not None):
+                elif(Controller.last_input() == ControllerInput.X and self.reboot_cmd() is not None):
                     self.reboot()
                 elif(Controller.last_input() == ControllerInput.B):
                     return

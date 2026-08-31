@@ -15,24 +15,38 @@ fi
 
 log_message "Lid watchdog started, monitoring lid state"
 
+previous_state=1
+
+launch_sleep_helper_once() {
+    if [ -e /tmp/sleep_helper_started ]; then
+        return 0
+    fi
+    /mnt/SDCARD/spruce/scripts/sleep_helper.sh
+    while [ "$(device_lid_open)" = "0" ]; do
+        sleep 0.5
+    done
+}
+
 while true; do
     # Read current lid state (1 = open, 0 = closed)
     current_state=$(device_lid_open)
-    
+
     # check lid sleep spruce setting
     lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
-    
+
     case "$lid_sleep_enabled" in
-        "True") 
+        "True")
             # Detect lid close only
-            if [ "$current_state" = "0" ]; then
-                /mnt/SDCARD/spruce/scripts/sleep_helper.sh
+            if [ "$current_state" = "0" ] && [ "$previous_state" = "1" ]; then
+                launch_sleep_helper_once
+                current_state=$(device_lid_open)
             fi
             ;;
         "Only when unplugged")
             # Detect lid close and charging state
-            if [ "$current_state" = "0" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
-                /mnt/SDCARD/spruce/scripts/sleep_helper.sh
+            if [ "$current_state" = "0" ] && [ "$previous_state" = "1" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+                launch_sleep_helper_once
+                current_state=$(device_lid_open)
             fi
             ;;
         "False")
@@ -40,6 +54,7 @@ while true; do
             sleep 1
             ;;
     esac
-    
+
+    previous_state="$current_state"
     sleep 0.5
 done

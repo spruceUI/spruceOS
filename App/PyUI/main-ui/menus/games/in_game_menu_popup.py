@@ -41,7 +41,10 @@ class InGameMenuPopup:
         while (popup_selection := popup_view.get_selection()):
             if(popup_selection.get_input() is not None):
                 break
-        
+
+        if popup_selection is None:
+            return True
+
         if(ControllerInput.A == popup_selection.get_input()): 
             return popup_selection.get_selection().get_value()(popup_selection.get_input())
 

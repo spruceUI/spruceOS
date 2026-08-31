@@ -703,10 +703,15 @@ start_pyui_message_writer() {
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
 
-    # Optional wait for the listener file
     if [ "$wait_for_listener" != "0" ]; then
         log_message "Waiting for realtime_message_network_listener to appear..."
+        listener_tries=0
         while [ ! -e "/mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt" ]; do
+            listener_tries=$((listener_tries + 1))
+            if [ "$listener_tries" -ge 150 ]; then
+                log_message "Realtime message listener never appeared after 15s; continuing without it."
+                return 1
+            fi
             sleep 0.1
         done
         log_message "Realtime message network listener detected."
@@ -736,7 +741,7 @@ kill_pyui_message_writer() {
 
 stop_pyui_message_writer() {
     kill_pyui_message_writer
-    freemma &>/dev/null # I don't think we have this bin on any spruce devices
+    freemma >/dev/null 2>&1 # I don't think we have this bin on any spruce devices
 }
 
 display_message() {
@@ -757,14 +762,19 @@ except Exception as e:
 ' "$message"
 }
 
+json_escape() {
+    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
+        -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
+}
+
 log_and_display_message(){
     log_message "$1"
-    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_option_list(){
     log_message "Display option list $1"
-    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_text_with_percentage_bar(){
@@ -773,9 +783,9 @@ display_text_with_percentage_bar(){
     # $3 = Optional bottom text
     log_message "Display text with percentage bar $1 $2"
     if [ $# -eq 2 ]; then
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$(json_escape "$1")" "$2")"
     else
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$(json_escape "$1")" "$2" "$(json_escape "$3")")"
     fi
 }
 
@@ -906,7 +916,7 @@ display_image_and_text() {
 
     display_message "$(printf \
         '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' \
-        "$img" "$text" "$size" "$img_y" "$text_y"
+        "$(json_escape "$img")" "$(json_escape "$text")" "$size" "$img_y" "$text_y"
     )"
 }
 
@@ -1241,26 +1251,37 @@ enable_wifi() {
     fi
 
     # check if WPA supplicant needs to be started or restarted
+    # pgrep can return SEVERAL pids: a stale supplicant from a previous config
+    # and a fresh one can both match. The old single-pid form redirected
+    # /proc/$WPA_PID/cmdline with a multi-word variable, which fails outright,
+    # so a wrong-config supplicant survived and the UI never associated.
     WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
     if [ -n "$WPA_PID" ]; then
-        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-            # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
-            # that is the OS underneath us, and it is very likely ASSOCIATED
-            # RIGHT NOW. spruce takes ownership here by design, but taking it by
-            # killing that process and starting ours against a config that may
-            # hold no networks at all just drops a working connection, and the
-            # user sees WiFi die a few seconds into boot for no reason.
-            #
-            # Carry its networks across first, then take over.
-            log_message "wpa_supplicant using wrong config; taking over with $WPA_SUPPLICANT_FILE"
-            import_wpa_networks_from "$(wpa_conf_path_of_pid "$WPA_PID")"
-            kill -9 "$WPA_PID" 2>/dev/null
+        WPA_CORRECT_RUNNING=0
+        for wpa_pid in $WPA_PID; do
+            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
+            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+                WPA_CORRECT_RUNNING=1
+            else
+                # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
+                # that is the OS underneath us, and it is very likely ASSOCIATED
+                # RIGHT NOW. spruce takes ownership here by design, but taking it by
+                # killing that process and starting ours against a config that may
+                # hold no networks at all just drops a working connection, and the
+                # user sees WiFi die a few seconds into boot for no reason.
+                #
+                # Carry its networks across first, then take over.
+                log_message "wpa_supplicant $wpa_pid using wrong config; taking over with $WPA_SUPPLICANT_FILE"
+                import_wpa_networks_from "$(wpa_conf_path_of_pid "$wpa_pid")"
+                kill -9 "$wpa_pid" 2>/dev/null
+            fi
+        done
+        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
+            log_message "wpa_supplicant was running with the correct conf file already"
+        else
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
             log_message "wpa_supplicant was running with the wrong conf so restarted"
-        else
-            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"

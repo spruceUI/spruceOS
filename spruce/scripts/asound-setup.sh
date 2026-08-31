@@ -42,6 +42,8 @@ get_connected_audio_bt_mac() {
 
 mac=$(get_connected_audio_bt_mac)
 
+mkdir -p "$(dirname "$ASOUND_CONF")"
+
 if [ -n "$mac" ]; then
     cat > "$ASOUND_CONF" <<EOF
 pcm.!default {

@@ -98,9 +98,13 @@ class Sdl2AudioPlayer:
 
         safe_path = src.with_suffix(".__safe__.ogg")
 
-        # Already converted?
         if safe_path.exists():
-            return str(safe_path)
+            try:
+                if safe_path.stat().st_size > 0:
+                    return str(safe_path)
+                safe_path.unlink()
+            except OSError:
+                pass
 
         PyUiLogger.get_logger().warning(f"Converting MP3 to safe OGG: {src.name}")
 
@@ -123,6 +127,14 @@ class Sdl2AudioPlayer:
                 PyUiLogger.get_logger().warning(f"FFmpeg failed converting {src}")
                 return None
 
+            if not safe_path.exists() or safe_path.stat().st_size == 0:
+                PyUiLogger.get_logger().warning(f"FFmpeg produced no usable output for {src}")
+                try:
+                    safe_path.unlink()
+                except OSError:
+                    pass
+                return None
+
             return str(safe_path)
 
         except Exception as e:
@@ -139,6 +151,13 @@ class Sdl2AudioPlayer:
 
     @staticmethod
     def audio_cleanup():
+        if Sdl2AudioPlayer._worker_thread is None or not Sdl2AudioPlayer._running:
+            Sdl2AudioPlayer._worker_thread = None
+            Sdl2AudioPlayer._cmd_q = None
+            Sdl2AudioPlayer._running = False
+            Sdl2AudioPlayer._initialized = False
+            Sdl2AudioPlayer._init_failed = False
+            return
         # Request worker to cleanup and terminate; block until worker exits or timeout
         Sdl2AudioPlayer._send_cmd("cleanup")
         if Sdl2AudioPlayer._worker_thread:

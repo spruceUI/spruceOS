@@ -1,3 +1,4 @@
+#!/bin/bash
 #Directory to search in
 directory="/mnt/SDCARD/Roms/PORTS"
 

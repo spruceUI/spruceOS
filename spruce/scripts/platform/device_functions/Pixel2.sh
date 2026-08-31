@@ -131,6 +131,11 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "true"
+    # Same per-start-of-frontend dedupe the common launcher applies to its own
+    # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
+    # not stack a second theme_watchdog / leds_manager on the first.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/theme_watchdog.sh
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/leds_manager.sh
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
     /mnt/SDCARD/spruce/scripts/leds_manager.sh &
@@ -225,13 +230,6 @@ map_mainui_volume_to_system_value() {
         20) echo $SYSTEM_VOLUME_20 ;;
         *) echo $SYSTEM_VOLUME_10 ;;
     esac
-}
-
-restore_audio() {
-    AUDIO_SINK=$(pactl list sinks short | grep rk817 | cut -c 0-2)
-    pactl suspend-sink "$AUDIO_SINK" 1
-
-    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
 }
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
@@ -329,7 +327,7 @@ map_mainui_brightness_to_system_value() {
 set_backlight() {
     new_bl="$1"
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
-    if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
+    if [ "$new_bl" -ge 0 ] 2>/dev/null && [ "$new_bl" -le 10 ] 2>/dev/null; then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi

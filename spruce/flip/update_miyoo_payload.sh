@@ -35,7 +35,7 @@ else
 	# Check if payload has version string. Returns number of lines with PAYLOAD_VERSION in it
 	PAYLOAD_HAS_VERSION=$(cat /usr/miyoo/bin/runmiyoo.sh | grep -c PAYLOAD_VERSION)
 
-	if [[ PAYLOAD_HAS_VERSION -eq 0 ]]; then
+	if [ "$PAYLOAD_HAS_VERSION" -eq 0 ]; then
 		# Payload installed but has no version.
 		INSTALLED_PAYLOAD_VERSION=1
 		echo "OLD NO VERSION"
@@ -45,7 +45,7 @@ else
 		echo "OLD $OLD_PAYLOAD_VERSION"
 
 		# Compare payload versions
-		if [[ $NEW_PAYLOAD_VERSION -le $OLD_PAYLOAD_VERSION ]]; then
+		if [ "$NEW_PAYLOAD_VERSION" -le "$OLD_PAYLOAD_VERSION" ]; then
 			echo "Payload is up to date"
 			exit 0	
 		fi
