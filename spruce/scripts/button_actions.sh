@@ -140,7 +140,9 @@ kill_bigpemu() {
 }
 
 kill_vtree() {
-    kill -15 $(pgrep -f vtree)
+    killall -q -15 vtree.a30 vtree.mini vtree.aarch64
+    sleep 2
+    killall -q -9 vtree.a30 vtree.mini vtree.aarch64
 }
 
 kill_emulator() {
@@ -157,8 +159,6 @@ kill_emulator() {
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
     elif pgrep dsperate-sdl >/dev/null; then
-        # Plain pgrep, not -f: busybox pgrep -f can match its own command line,
-        # and "dsperate-sdl" would appear in it.
         kill_dsperate
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu
