@@ -18,16 +18,24 @@ chmod +x ./moonlight/moonlight
 ./love gui
 
 cd "$MOONDIR"
-COMMAND=$(cat command.txt)
-
 export GAMEDIR
-/mnt/SDCARD/spruce/bin64/gptokeyb "moonlight" &
-set -f
-# shellcheck disable=SC2086
-set -- $COMMAND
-set +f
-./moonlight "$@"
-kill -9 $(pidof gptokeyb) 2>/dev/null
+
+# No command.txt means the GUI was closed without picking an app.
+#
+# It is written by gui/main.lua, one argument per line. Read it that way:
+# word-splitting it would neither strip quotes nor expand anything, so an app
+# name with spaces would arrive as several arguments. "stream" and -keydir go
+# on here because this is the script that knows GAMEDIR.
+if [ -f command.txt ]; then
+    set -- stream -keydir "$GAMEDIR/keys"
+    while IFS= read -r moonlight_arg || [ -n "$moonlight_arg" ]; do
+        [ -n "$moonlight_arg" ] && set -- "$@" "$moonlight_arg"
+    done < command.txt
+
+    /mnt/SDCARD/spruce/bin64/gptokeyb "moonlight" &
+    ./moonlight "$@"
+    kill -9 $(pidof gptokeyb) 2>/dev/null
+fi
 
 rm -f command.txt
 rm -f /tmp/stay_awake

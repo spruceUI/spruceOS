@@ -15,7 +15,13 @@ fi
 
 log_message "Lid watchdog started, monitoring lid state"
 
-previous_state=1
+# Tracks whether THIS lid close has already been acted on, which is not the
+# same as the raw lid state. Latching the raw state meant a close that was
+# rejected (charging, under "Only when unplugged") still counted as handled:
+# unplugging later with the lid still shut could never sleep, because the
+# open->closed edge never came round again until the lid was physically
+# cycled. Cleared when the lid actually opens.
+close_handled=0
 
 launch_sleep_helper_once() {
     if [ -e /tmp/sleep_helper_started ]; then
@@ -37,14 +43,16 @@ while true; do
     case "$lid_sleep_enabled" in
         "True")
             # Detect lid close only
-            if [ "$current_state" = "0" ] && [ "$previous_state" = "1" ]; then
+            if [ "$current_state" = "0" ] && [ "$close_handled" = "0" ]; then
+                close_handled=1
                 launch_sleep_helper_once
                 current_state=$(device_lid_open)
             fi
             ;;
         "Only when unplugged")
             # Detect lid close and charging state
-            if [ "$current_state" = "0" ] && [ "$previous_state" = "1" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+            if [ "$current_state" = "0" ] && [ "$close_handled" = "0" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+                close_handled=1
                 launch_sleep_helper_once
                 current_state=$(device_lid_open)
             fi
@@ -55,6 +63,7 @@ while true; do
             ;;
     esac
 
-    previous_state="$current_state"
+    # An open lid arms the next close, whether or not this one was acted on.
+    [ "$current_state" = "1" ] && close_handled=0
     sleep 0.5
 done

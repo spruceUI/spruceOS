@@ -101,7 +101,13 @@ if [ -f "$BOX_ART_PATH" ]; then
     kill $(jobs -p)
 fi
 
-LAUNCH_SCRIPT="/mnt/SDCARD/spruce/scripts/emu/standard_launch.sh"
+# standard_launch.sh takes its identity from $0: it strips up to "/Emu/" and
+# keeps the next path component as EMU_NAME. So it has to be invoked through
+# Emu/<system>/, and the ../../ detour is load-bearing rather than redundant.
+# Calling the canonical path directly leaves EMU_NAME empty and the game
+# launches with no emulator. The same string goes to /tmp/cmd_to_run.sh, where
+# button_actions.sh greps Emu/<system>/ back out for the game switcher.
+LAUNCH_SCRIPT="/mnt/SDCARD/Emu/${FOLDER_NAME}/../../spruce/scripts/emu/standard_launch.sh"
 echo "\"$LAUNCH_SCRIPT\" \"${SELECTED_GAME}\"" > /tmp/cmd_to_run.sh
 "$LAUNCH_SCRIPT" "$SELECTED_GAME"
 
