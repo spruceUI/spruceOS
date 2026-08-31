@@ -72,7 +72,12 @@ class RomSelectOptionsBuilder:
                 return save_state_image_path
 
 
-        if(game_entry is not None):
+        # A <game> in gamelist.xml with no <image> yields image=None, and
+        # CachedExists.exists(None) raises TypeError out of os.path.normpath.
+        # This is reached lazily while the ROM grid draws, outside any handler,
+        # so an unscraped entry takes the whole list down. "" is not safe
+        # either: normpath("") is ".", which exists.
+        if(game_entry is not None and game_entry.image):
             if(CachedExists.exists(game_entry.image)):
                 return game_entry.image
 
@@ -303,7 +308,10 @@ class RomSelectOptionsBuilder:
                 rom_file_name = os.path.basename(rom_file_path)
 
                 game_entry = get_by_file_path(rom_file_path)
-                display_name = game_entry.name if game_entry else get_name_no_ext(game_system, rom_file_path)
+                # A <game> with no <name> gives name=None, which reaches
+                # get_sort_key() -> .strip() and takes the whole list down.
+                # Fall back exactly as a missing entry already does.
+                display_name = game_entry.name if (game_entry and game_entry.name) else get_name_no_ext(game_system, rom_file_path)
 
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
@@ -325,7 +333,7 @@ class RomSelectOptionsBuilder:
             for rom_file_path in valid_folders:
                 rom_file_name = os.path.basename(rom_file_path)
                 game_entry = get_by_file_path(rom_file_path)
-                display_name = game_entry.name if game_entry else rom_file_name
+                display_name = game_entry.name if (game_entry and game_entry.name) else rom_file_name
 
                 if not filter(rom_file_name, rom_file_path, display_name):
                     continue
