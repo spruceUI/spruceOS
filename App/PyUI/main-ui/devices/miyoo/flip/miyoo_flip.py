@@ -306,9 +306,6 @@ class MiyooFlip(MiyooDevice):
     def reboot_cmd(self):
         return "reboot"
 
-    def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf")
-
     def get_volume(self):
         return self.system_config.get_volume()
 

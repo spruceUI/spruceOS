@@ -12,6 +12,15 @@ if [ -n "$WPA_SUPPLICANT_FILE" ] ; then
     # Remove all networks
     echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" | tee "$WPA_SUPPLICANT_FILE" "${WPA_SUPPLICANT_FILE}.tmp"
 
+    # And from the pre-card-global locations, or enable_wifi's adoption sweep
+    # would import every one of them straight back on the next boot and the
+    # user's "forget all networks" would silently undo itself.
+    for _legacy_conf in $WPA_LEGACY_CONFS; do
+        [ -f "$_legacy_conf" ] || continue
+        echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$_legacy_conf"
+        log_message "Wifi: cleared saved networks from $_legacy_conf"
+    done
+
     # Bring up interface to avoid issues with MainUI
     ifconfig wlan0 up
 elif [ -d /storage/.config/NetworkManager/ ] ; then # NetworkManager

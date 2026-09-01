@@ -21,7 +21,6 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 class TrimUIDevice(DeviceCommon):
     
@@ -289,9 +288,6 @@ class TrimUIDevice(DeviceCommon):
 
     def take_snapshot(self, path):
         return None
-    
-    def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/userdata/cfg/wpa_supplicant.conf")
     
     def supports_brightness_calibration():
         return True

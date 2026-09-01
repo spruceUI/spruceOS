@@ -875,9 +875,6 @@ class MiyooMiniCommon(MiyooDevice):
     def reboot_cmd(self):
         return self.miyoo_mini_specific_model_variables.reboot_cmd
 
-    def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/appconfigs/wpa_supplicant.conf")
-
     def get_volume(self):
         try:
             return self.mainui_volume * 5

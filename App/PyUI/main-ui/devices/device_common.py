@@ -350,6 +350,21 @@ class DeviceCommon(AbstractDevice):
         self._run_network_services("off")
 
 
+    # Saved networks live on the card, not on the handheld, so a password
+    # entered on one device is enough for every device the card is moved to.
+    # This is the path the shell has always used - see WPA_SUPPLICANT_FILE in
+    # helperFunctions.sh - and PyUI used to disagree with it, writing to
+    # internal flash while the device booted its supplicant from the card.
+    #
+    # Saves/spruce is untracked, so an update never extracts a default over it.
+    # Hosts that manage WiFi another way override this and return None.
+    WPA_SUPPLICANT_CONF = "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+
+    def get_wpa_supplicant_conf_path(self):
+        return PyUiConfig.get_wpa_supplicant_conf_file_location(
+            DeviceCommon.WPA_SUPPLICANT_CONF
+        )
+
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
@@ -405,6 +420,9 @@ class DeviceCommon(AbstractDevice):
             for block in networks:
                 if not any(f'ssid="{ssid}"' in bl for bl in block):
                     kept.append(block)
+            parent = os.path.dirname(file_path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
             with open(file_path, "w") as f:
                 for line in header_lines:
                     f.write(line)

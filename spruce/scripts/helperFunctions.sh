@@ -16,6 +16,12 @@
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+# Where PyUI wrote saved networks before they became card-global: all on the
+# handheld's own storage, which is why a card carrying a password from another
+# device used to arrive with nothing. enable_wifi adopts from these, and
+# clearwifi.sh has to clear them too or a "forget all networks" would simply be
+# re-imported on the next boot. Keep the two uses reading this one list.
+export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 
 # Export for enabling SSL support in CURL
@@ -1249,6 +1255,23 @@ enable_wifi() {
         printf 'ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n' > "$WPA_SUPPLICANT_FILE"
         log_message "Created missing $WPA_SUPPLICANT_FILE"
     fi
+
+    # Adopt networks from the places PyUI used to write before saved networks
+    # became card-global. Each path is somewhere on the handheld's own storage,
+    # so a card carrying a password from another device found nothing here and
+    # the user had to type it again.
+    #
+    # import_wpa_networks_from skips any SSID we already hold, so this is
+    # idempotent and runs every boot on purpose rather than once: it keeps
+    # working for someone who later joins a network through the stock firmware
+    # UI, which still writes these files. Absent paths cost nothing.
+    #
+    # Deliberately NOT including the vendor /etc/wifi/wpa_supplicant.conf - the
+    # takeover below already imports from whatever supplicant is running, and
+    # the vendor file can hold factory defaults we do not want to adopt.
+    for _legacy_conf in $WPA_LEGACY_CONFS; do
+        [ -f "$_legacy_conf" ] && import_wpa_networks_from "$_legacy_conf"
+    done
 
     # check if WPA supplicant needs to be started or restarted
     # pgrep can return SEVERAL pids: a stale supplicant from a previous config

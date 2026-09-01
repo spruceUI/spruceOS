@@ -358,8 +358,8 @@ class Rgb30(DeviceCommon):
             PyUiLogger.get_logger().error(f"nmcli wifi_connect failed: {e}")
 
     def get_wpa_supplicant_conf_path(self):
-        # Not used - wifi_connect is overridden - but the WiFi menu still reads
-        # it, so return a harmless path rather than None.
+        # Not used - wifi_connect is overridden - but return a harmless path
+        # rather than None so nothing downstream has to guard for it.
         return "/tmp/wpa_supplicant.conf"
 
     def get_device_name(self):

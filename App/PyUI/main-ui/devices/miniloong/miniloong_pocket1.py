@@ -452,9 +452,6 @@ class MiniloongPocket1(DeviceCommon):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Miniloong wifi_connect failed: {e}")
 
-    def get_wpa_supplicant_conf_path(self):
-        return "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
-
     def ensure_wpa_supplicant_conf(self):
         # wpa_supplicant reads the whole file at startup and exits on the first
         # parse error, so a missing/broken conf shows up as "scanning forever".
