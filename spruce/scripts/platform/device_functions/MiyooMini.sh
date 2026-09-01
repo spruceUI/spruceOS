@@ -79,11 +79,9 @@ device_init() {
     killall -9 main ### SUPER important in preventing .tmp_update suicide
 }
 
+# Sleeps floor at 10ms, so tiers are pulse rate, not strength.
 vibrate() {
-    duration=0.5
-    # This never read the setting, so "Off" buzzed like any other value. Only
-    # the on/off decision comes from it: the Mini's GPIO has no intensity
-    # control, so Weak/Medium/Strong stay indistinguishable here as before.
+    duration=400
     intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
 
     # Parse arguments in any order
@@ -102,9 +100,30 @@ vibrate() {
 
     [ "$intensity" = "Off" ] && return 0
 
-    echo out > /sys/class/gpio/gpio48/direction
-    sleep "$duration"
-    echo 1 > /sys/class/gpio/gpio48/value
+    _g=/sys/class/gpio/gpio48
+    echo out > $_g/direction
+
+    # 0 drives the motor, 1 stops it
+    case "$intensity" in
+        "Weak")   _on=0.003; _off=0.009; _cycles=$((duration / 31)) ;;
+        "Medium") _on=0.005; _off=0.005; _cycles=$((duration / 20)) ;;
+        *)        _cycles=0 ;;
+    esac
+
+    if [ "$_cycles" -lt 1 ]; then
+        echo 0 > $_g/value
+        sleep "$(awk "BEGIN{print $duration/1000}")"
+        echo 1 > $_g/value
+        return 0
+    fi
+
+    _i=0
+    while [ "$_i" -lt "$_cycles" ]; do
+        echo 0 > $_g/value; sleep $_on
+        echo 1 > $_g/value; sleep $_off
+        _i=$((_i + 1))
+    done
+    echo 1 > $_g/value
 }
 
 display_kill() {
