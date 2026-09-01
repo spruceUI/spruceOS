@@ -577,20 +577,33 @@ vibrate() {
 # an rgb24 capture has never been shown to display. The conversion is free here
 # since ffmpeg is already reformatting after hwdownload.
 #
-# Costs about 2.3s on this hardware, nearly all of it ffmpeg startup. That lands
-# in the hold-home path ahead of kill_emulator, so the game takes that much
-# longer to exit. A dedicated DRM helper would be far quicker if it ever matters.
+# This lands in the hold-home path ahead of kill_emulator, so the whole capture
+# is dead time between the rumble and the game switcher appearing, and it cannot
+# move: the frame has to be grabbed while the emulator still owns the screen.
+#
+# Measured on hardware 2026-09-01, three runs each:
+#
+#   /usr/bin/ffmpeg              204 shared libs   2302ms just to start   3.0-4.5s total
+#   /mnt/SDCARD/spruce/bin/ffmpeg  static, 0 libs     76ms just to start   1.7s total
+#
+# Nearly all of the difference is process startup, not the grab. A dedicated DRM
+# helper would still be quicker than either if it ever matters.
 take_screenshot() {
     screenshot_path="$1"
     [ -n "$screenshot_path" ] || return 1
     # An absolute path, NOT plain "ffmpeg". helperFunctions.sh puts
-    # /mnt/SDCARD/spruce/bin64 first on PATH, and that build has no kmsgrab
+    # /mnt/SDCARD/spruce/bin64 first on PATH, and *that* build has no kmsgrab
     # demuxer - it fails with "Unknown input format: 'kmsgrab'". So the capture
     # works when run by hand and fails through spruce's own environment, which
-    # is the only way it is ever actually called. Debian's ffmpeg has it, and
-    # spruce/bin/ffmpeg does too as a fallback.
+    # is the only way it is ever actually called.
+    #
+    # spruce/bin/ffmpeg is a different binary from bin64/ffmpeg and does have
+    # the demuxer, verified on hardware. It goes first because it is static and
+    # starts in a fraction of the time Debian's dynamically linked build takes -
+    # see the measurements above. Debian's stays as the fallback for a card
+    # whose spruce/bin/ffmpeg is missing or predates the kmsgrab build.
     _ff=""
-    for _c in /usr/bin/ffmpeg /mnt/SDCARD/spruce/bin/ffmpeg; do
+    for _c in /mnt/SDCARD/spruce/bin/ffmpeg /usr/bin/ffmpeg; do
         [ -x "$_c" ] && { _ff="$_c"; break; }
     done
     [ -n "$_ff" ] || {
