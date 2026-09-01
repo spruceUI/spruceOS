@@ -89,6 +89,10 @@ vibrate() {
         shift
     done
 
+    # "Off" is a real option, not an invalid value - handle it before the
+    # catch-all below starts calling it invalid on every vibrate.
+    [ "$intensity" = "Off" ] && return 0
+
     case "$intensity" in
         Strong)
             timer=0

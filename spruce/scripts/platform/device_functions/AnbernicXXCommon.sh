@@ -48,6 +48,12 @@ vibrate() {
         shift
     done
 
+
+    # "Off" is one of the four options the setting offers and it has to be
+    # honoured here. Falling through leaves it to whatever follows, which on
+    # some platforms drives the motor anyway and on others just makes noise.
+    [ "$intensity" = "Off" ] && return 0
+
     case "$intensity" in
         "Weak")   intensity=0x8000 ;;
         "Medium") intensity=0xC000 ;;

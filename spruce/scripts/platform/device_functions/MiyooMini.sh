@@ -81,6 +81,10 @@ device_init() {
 
 vibrate() {
     duration=0.5
+    # This never read the setting, so "Off" buzzed like any other value. Only
+    # the on/off decision comes from it: the Mini's GPIO has no intensity
+    # control, so Weak/Medium/Strong stay indistinguishable here as before.
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
 
     # Parse arguments in any order
     while [ $# -gt 0 ]; do
@@ -95,6 +99,8 @@ vibrate() {
         esac
         shift
     done
+
+    [ "$intensity" = "Off" ] && return 0
 
     echo out > /sys/class/gpio/gpio48/direction
     sleep "$duration"

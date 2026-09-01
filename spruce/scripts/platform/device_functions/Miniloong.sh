@@ -68,8 +68,18 @@ vibrate() {
         esac
         shift
     done
-    [ -n "$_intensity" ] || _intensity="$(jq -r '.rumble_intensity // "Medium"' "$SYSTEM_JSON" 2>/dev/null)"
+    # .rumble_intensity in SYSTEM_JSON is read first for anything that already
+    # sets it, but nothing in the tree writes that key - the settings menu
+    # writes rumbleIntensity to spruce-config like every other platform. Without
+    # the second fallback this device always saw "Medium" and the user's choice,
+    # "Off" included, did nothing.
+    [ -n "$_intensity" ] || _intensity="$(jq -r '.rumble_intensity // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    [ -n "$_intensity" ] || _intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
     _period="${RUMBLE_PWM_PERIOD:-1000000}"
+    # Without this Off lands on the catch-all below and runs the motor at half
+    # duty, which is the opposite of what the setting says.
+    [ "$_intensity" = "Off" ] && return 0
+
     case "$_intensity" in
         Strong) _duty=$_period ;;
         Weak)   _duty=$((_period / 4)) ;;

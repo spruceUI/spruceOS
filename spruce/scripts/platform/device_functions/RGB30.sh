@@ -514,11 +514,10 @@ rgb_led() {
 # happens, which is measured behaviour (rc=0, nothing felt) and is exactly what
 # the stub did anyway. Costs a stock unit nothing.
 #
-# Magnitudes are the Anbernic starting values and are UNTUNED here - nobody has
-# felt this device. The RG SP turned out to have a floor above 0x2000, so all
-# three sit well above it; retuning is shell-side and needs no rebuild.
+# Tuned 2026-09-01 on a unit with the motor fitted, replacing the Anbernic
+# starting values. Retuning stays shell-side and needs no rebuild.
 vibrate() {
-    duration=150
+    duration=""
     intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
 
     # Arguments in any order, matching the other platforms.
@@ -535,11 +534,28 @@ vibrate() {
         shift
     done
 
+    # Tuned on a modded unit 2026-09-01. The motor Powkiddy leaves pads for is a
+    # small button type and it is FAINT: the old Medium of 0xC000 at 150ms was
+    # barely perceptible in the game switcher, while 0xFFFF at 300ms is easily
+    # felt. Magnitude is a 16-bit value and Medium already sat at 75% of full
+    # scale, so there was almost no headroom left there - the tier has to carry
+    # a duration as well or Weak/Medium/Strong are indistinguishable at the top
+    # of the range.
+    #
+    # A duration passed by the caller still wins, so low_power_warning's morse
+    # timing is untouched.
+    #
+    # "Off" is one of the four options the setting offers, so it is matched
+    # before the catch-all - otherwise turning rumble off drives the motor at
+    # full scale.
     case "$intensity" in
-        "Weak")   intensity=0x8000 ;;
-        "Medium") intensity=0xC000 ;;
-        "Strong") intensity=0xFFFF ;;
+        "Off")    return 0 ;;
+        "Weak")   intensity=0xC000; tier_duration=200 ;;
+        "Medium") intensity=0xFFFF; tier_duration=300 ;;
+        "Strong") intensity=0xFFFF; tier_duration=450 ;;
+        *)        intensity=0xFFFF; tier_duration=300 ;;
     esac
+    [ -n "$duration" ] || duration="$tier_duration"
 
     [ -x /mnt/SDCARD/spruce/bin64/rumble ] || return 0
     /mnt/SDCARD/spruce/bin64/rumble "$EVENT_PATH_READ_INPUTS_SPRUCE" "$intensity" "$duration"
