@@ -103,6 +103,13 @@ check_for_update() {
     # Update timestamp for next check
     date +%s > "$timestamp_file"
 
+    # No radio, no network, no check - and none of the three 20-second waits.
+    if ! wifi_available_on_device; then
+        log_message "Update Check: device has no WiFi, skipping."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
     if [ "$wifi_enabled" -eq 0 ]; then
