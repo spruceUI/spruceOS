@@ -769,7 +769,17 @@ except Exception as e:
 }
 
 json_escape() {
-    printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
+    # Callers write a two-character \n where they want a line break - that is the
+    # convention at every display_* call site in the tree, and before this
+    # function existed the sequence passed straight into the JSON string and
+    # decoded to a real newline. Escaping backslashes without undoing it first
+    # doubles it, and the UI draws a literal \n instead of breaking the line.
+    #
+    # So fold it back to a real newline up front; the awk below re-emits it as a
+    # JSON \n. The replacement is a backslash-newline rather than \n because
+    # busybox sed does not read \n in the RHS as a newline.
+    printf '%s' "$1" | sed -e 's/\\n/\
+/g' -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
         -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
 }
 
