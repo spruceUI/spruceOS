@@ -15,7 +15,7 @@
 # only: its recompiler emits AArch64, so there is no 32-bit build worth
 # offering. It sits alongside DraStic rather than replacing it.
 
-
+DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 
 # DSperate needs a real DS BIOS pair and firmware. It cannot use the two files
 # in Emu/NDS/system: those are DraStic's own replacements, not dumps (their
