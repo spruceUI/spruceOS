@@ -244,7 +244,7 @@ class DeviceCommon(AbstractDevice):
 
             time.sleep(10)
 
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_status(self):
         if not self.is_wifi_enabled():
             return WifiStatus.OFF
@@ -253,6 +253,7 @@ class DeviceCommon(AbstractDevice):
             Language.label("wifiStatusOff", "Off"),
             Language.label("wifiStatusError", "Error"),
             Language.label("wifiStatusConnecting", "Connecting"),
+            Language.label("wifiStatusNoNetwork", "No network selected"),
         ]:
             return WifiStatus.OFF
 
@@ -436,7 +437,46 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
 
-    @throttle.limit_refresh(10)
+    # Deadline (time.time()) until which the WiFi status caches refresh every
+    # second instead of every 10-15 s; see utils/throttle.limit_refresh.
+    _wifi_settle_until = 0.0
+
+    def note_wifi_change(self, settle_seconds=60):
+        """The user just toggled WiFi or picked a network: drop the throttled
+        status caches now and keep them fast while the join settles, so the
+        Settings row and the top-bar icon follow the link within a second."""
+        self._wifi_settle_until = time.time() + settle_seconds
+        for name in ("get_wifi_status", "get_ip_addr_text", "_get_ip_addr_text", "get_wifi_connection_quality_info"):
+            for cls in type(self).__mro__:
+                fn = cls.__dict__.get(name)
+                force = getattr(fn, "force_refresh", None)
+                if force:
+                    force()
+
+    def wifi_has_saved_network(self):
+        """True when the device's wpa_supplicant.conf holds at least one network block.
+
+        A read error answers True: never claim "no network" on a guess.
+        """
+        try:
+            with open(self.get_wpa_supplicant_conf_path()) as f:
+                return any(line.strip().startswith("network=") for line in f)
+        except Exception:
+            return True
+
+    def wifi_pending_text(self):
+        """Status for a radio that is on but has no address.
+
+        "Connecting" used to cover two very different states: joining a saved
+        network, and having no network to join at all (a fresh card, a cleared
+        conf). The second is the one people can act on - open the network list -
+        so say so instead of implying a join that will never finish.
+        """
+        if not self.wifi_has_saved_network():
+            return Language.label("wifiStatusNoNetwork", "No network selected")
+        return Language.label("wifiStatusConnecting", "Connecting")
+
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
         import subprocess
 
@@ -459,7 +499,7 @@ class DeviceCommon(AbstractDevice):
                 if line.startswith("inet "):
                     return line.split()[1].split("/")[0]
 
-            return Language.label("wifiStatusConnecting", "Connecting")
+            return self.wifi_pending_text()
 
         except Exception:
             return Language.label("wifiStatusError", "Error")    

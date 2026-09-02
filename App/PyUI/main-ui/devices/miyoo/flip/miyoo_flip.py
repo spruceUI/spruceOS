@@ -406,10 +406,10 @@ class MiyooFlip(MiyooDevice):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
     
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_status(self):
         if(self.is_wifi_enabled()):
-            if(self.get_ip_addr_text() in ["Off","Error","Connecting"]):
+            if(self.get_ip_addr_text() in ["Off","Error","Connecting","No network selected"]):
                 return WifiStatus.OFF
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution

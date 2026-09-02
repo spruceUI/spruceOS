@@ -774,7 +774,7 @@ class MiyooMiniCommon(MiyooDevice):
     def take_snapshot(self, path):
         return None
     
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
         if self.miyoo_mini_specific_model_variables.supports_wifi:
             if self.is_wifi_enabled():

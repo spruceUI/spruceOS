@@ -29,8 +29,10 @@ class WifiMenu:
     def wifi_adjust(self):
         if Device.get_device().is_wifi_enabled():
             Device.get_device().disable_wifi()
+            Device.get_device().note_wifi_change()
         else:
             Device.get_device().enable_wifi()
+            Device.get_device().note_wifi_change()
 
 
     def reload_wpa_supplicant_config(self):
@@ -59,10 +61,12 @@ class WifiMenu:
                     duration_ms=5000,
                 )
                 Device.get_device().wifi_connect(net.ssid, password)
+                Device.get_device().note_wifi_change()
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
         else:
             Device.get_device().wifi_connect(net.ssid, None)
+            Device.get_device().note_wifi_change()
 
     def _build_options(
         self,

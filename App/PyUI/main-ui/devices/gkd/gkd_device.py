@@ -158,7 +158,7 @@ class GKDDevice(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    @throttle.limit_refresh(10)
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
         import psutil
         if self.is_wifi_enabled():
@@ -177,9 +177,9 @@ class GKDDevice(DeviceCommon):
                     for addr in addrs:
                         if addr.family == socket.AF_INET:
                             return addr.address
-                    return "Connecting"
+                    return self.wifi_pending_text()
                 else:
-                    return "Connecting"
+                    return self.wifi_pending_text()
             except Exception:
                 return "Error"
 
