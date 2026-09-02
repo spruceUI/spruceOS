@@ -67,7 +67,7 @@ get_game_code() {
 
 get_state_path() {
 	_code=$(get_game_code "$1")
-	echo "/mnt/SDCARD/Saves/states/dsperate/${_code}.0.dss"
+	echo "/mnt/SDCARD/Saves/states/dsperate/${_code}.auto.dss"
 }
 
 run_dsperate() {
@@ -107,7 +107,7 @@ run_dsperate() {
 	if is_autoload_enabled && [ -f "$state_path" ]; then
 		./dsperate "$ROM_FILE" \
 			--fullscreen \
-			--auto-load "$state_path" \
+			--load-state "$state_path" \
 			> "$(emu_log_file)" 2>&1
 	else
 		./dsperate "$ROM_FILE" \
