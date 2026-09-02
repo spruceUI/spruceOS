@@ -81,9 +81,9 @@ run_dsperate() {
 	# sleep fail, so it greps for the process before it exists. Called anyway,
 	# so this starts working the day that is fixed rather than needing a second
 	# edit here.
-	pin_to_dedicated_cores dsperate-sdl 2
+	pin_to_dedicated_cores dsperate 3
 
-	./dsperate-sdl "$ROM_FILE" \
+	./dsperate "$ROM_FILE" \
 		--fullscreen \
 		> $(emu_log_file) 2>&1
 
