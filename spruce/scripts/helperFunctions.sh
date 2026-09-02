@@ -1238,6 +1238,14 @@ enable_wifi() {
 
     device_wifi_power_on
 
+    # power_on may have just discovered the radio is unusable (a module that
+    # refuses to load marks the session radio-less); stop before building a
+    # supplicant/DHCP stack on a wlan0 that cannot exist.
+    if ! wifi_available_on_device; then
+        log_message "WiFi: radio became unavailable during power-on - stopping"
+        return 1
+    fi
+
     # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
     # not - the radio fails to enumerate and the interface is never created -
     # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
