@@ -38,6 +38,7 @@ display_dsperate_bios_message() {
 }
 
 seed_dsperate_config() {
+	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
 	_cfg="$_cfg_dir/dsperate.ini"
 	[ -f "$_cfg" ] && return 0
@@ -46,14 +47,32 @@ seed_dsperate_config() {
 		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
 		log_message "DSperate: seeded config from spruce.ini"
 	fi
-	# Keep saves and states on spruce's paths instead of beside the ROM, or
-	# every Roms/NDS folder collects .sav and .dss files.
-	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
+}
+
+
+# returns 0=true or 1=false; for now, no per-game override logic in place.
+is_autoload_enabled() {
+    autoload_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected' "/mnt/SDCARD/Emu/NDS/config.json")"
+    if [ "$autoload_setting" = "Enabled" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+get_game_code() {
+    dd if="$1" bs=1 skip=12 count=4 2>/dev/null
+    echo
+}
+
+get_state_path() {
+	_code=$(get_game_code "$1")
+	echo "/mnt/SDCARD/Saves/states/dsperate/${_code}.0.dss"
 }
 
 run_dsperate() {
 	export HOME="$EMU_DIR"
-	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves/"
+	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 	export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 
 	_missing="$(dsperate_bios_missing)"
@@ -83,9 +102,18 @@ run_dsperate() {
 	# edit here.
 	pin_to_dedicated_cores dsperate 3
 
-	./dsperate "$ROM_FILE" \
-		--fullscreen \
-		> $(emu_log_file) 2>&1
+	state_path="$(get_state_path "$ROM_FILE")"
+
+	if is_autoload_enabled && [ -f "$state_path" ]; then
+		./dsperate "$ROM_FILE" \
+			--fullscreen \
+			--auto-load "$state_path" \
+			> "$(emu_log_file)" 2>&1
+	else
+		./dsperate "$ROM_FILE" \
+			--fullscreen \
+			> "$(emu_log_file)" 2>&1
+	fi
 
 	sync
 }

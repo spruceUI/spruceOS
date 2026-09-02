@@ -72,6 +72,24 @@
       ],
       "selected": "DSperate",
       "overrides": {}
+    },
+    "dsperateAutoLoad": {
+      "display": "DSperate: Auto Save/Resume",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RGXX",
+        "GKD_PIXEL2",
+        "RGB30"
+      ],
+      "options": [
+        "Enabled",
+        "Disabled"
+      ],
+      "selected": "Enabled"
     }
   },
   "sortOrder": 4000,
