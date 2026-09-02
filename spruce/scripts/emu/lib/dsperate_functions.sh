@@ -15,7 +15,7 @@
 # only: its recompiler emits AArch64, so there is no 32-bit build worth
 # offering. It sits alongside DraStic rather than replacing it.
 
-DSPERATE_BIOS_DIR="/mnt/SDCARD/BIOS/nds"
+
 
 # DSperate needs a real DS BIOS pair and firmware. It cannot use the two files
 # in Emu/NDS/system: those are DraStic's own replacements, not dumps (their
@@ -37,28 +37,18 @@ display_dsperate_bios_message() {
 	stop_pyui_message_writer
 }
 
-# First run only. DSperate writes an all-commented default ini, which leaves it
-# on desktop keyboard bindings; advdrastic.ini is upstream's Knulli "Advanced
-# DraStic" scheme, which is the closest thing to what a spruce user coming off
-# DraStic already has in their hands.
 seed_dsperate_config() {
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
 	_cfg="$_cfg_dir/dsperate.ini"
 	[ -f "$_cfg" ] && return 0
 	mkdir -p "$_cfg_dir"
-	if [ -f "$EMU_DIR/dsperate-configs/advdrastic.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/advdrastic.ini" "$_cfg"
-		log_message "DSperate: seeded config from advdrastic.ini"
+	if [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
+		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
+		log_message "DSperate: seeded config from spruce.ini"
 	fi
 	# Keep saves and states on spruce's paths instead of beside the ROM, or
 	# every Roms/NDS folder collects .sav and .dss files.
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
-	{
-		echo ""
-		echo "[paths]"
-		echo "saves = /mnt/SDCARD/Saves/saves/dsperate"
-		echo "states = /mnt/SDCARD/Saves/states/dsperate"
-	} >> "$_cfg"
 }
 
 run_dsperate() {
@@ -94,9 +84,6 @@ run_dsperate() {
 	pin_to_dedicated_cores dsperate-sdl 2
 
 	./dsperate-sdl "$ROM_FILE" \
-		--bios9 "$DSPERATE_BIOS_DIR/bios9.bin" \
-		--bios7 "$DSPERATE_BIOS_DIR/bios7.bin" \
-		--firmware "$DSPERATE_BIOS_DIR/firmware.bin" \
 		--fullscreen \
 		> $(emu_log_file) 2>&1
 
