@@ -22,20 +22,7 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
-      ],
-      "options": [
-        "DraStic-original",
-        "DraStic-Steward",
-        "DraStic-trngaje",
-        "DSperate"
-      ],
-      "selected": "DraStic-original",
-      "overrides": {}
-    },
-    "Emulator_Brick": {
-      "display": "Emulator",
-      "devices": [
+        "ANBERNIC_RGXX",
         "TRIMUI_BRICK"
       ],
       "options": [
@@ -44,39 +31,15 @@
         "DraStic-trngaje",
         "DSperate"
       ],
-      "selected": "DraStic-original",
-      "overrides": {}
-    },
-    "Emulator_BrickPro": {
-      "display": "Emulator",
-      "devices": [
-        "TRIMUI_BRICK_PRO"
-      ],
-      "options": [
-        "DraStic-Steward",
-        "DraStic-original",
-        "DSperate"
-      ],
-      "selected": "DraStic-original",
+      "selected": "DraStic-trngaje",
       "overrides": {}
     },
     "Emulator_SmartPro": {
       "display": "Emulator",
       "devices": [
-        "TRIMUI_SMART_PRO"
-      ],
-      "options": [
-        "DraStic-original",
-        "DraStic-trngaje",
-        "DSperate"
-      ],
-      "selected": "DraStic-original",
-      "overrides": {}
-    },
-    "Emulator_SmartProS": {
-      "display": "Emulator",
-      "devices": [
-        "TRIMUI_SMART_PRO_S"
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_BRICK_PRO"
       ],
       "options": [
         "DraStic-original",
