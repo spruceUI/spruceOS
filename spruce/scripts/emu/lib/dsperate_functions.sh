@@ -63,7 +63,7 @@ seed_dsperate_config() {
 
 run_dsperate() {
 	export HOME="$EMU_DIR"
-	export XDG_CONFIG_HOME="$EMU_DIR/config"
+	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves/"
 	export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 
 	_missing="$(dsperate_bios_missing)"

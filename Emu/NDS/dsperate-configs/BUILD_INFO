@@ -1,9 +1,0 @@
-upstream:   https://github.com/beebono/DSperate.git
-ref:        main
-commit:     2916a295e5d91559973774931ea34b11b38e5298
-committed:  2026-08-30T07:27:10-05:00
-built:      2026-08-30T15:42:34Z
-toolchain:  aarch64-linux-gnu-g++-10 (Ubuntu 10.5.0-1ubuntu1~20.04) 10.5.0 (Ubuntu 20.04 multiarch)
-glibc floor: 2.31
-sdl2:       2.26.1 (built from source, linked not bundled)
-flags:      -O3 -mtune=cortex-a55 -pthread
