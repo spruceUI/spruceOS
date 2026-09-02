@@ -5,69 +5,54 @@
 
 # Sets SCUMMVM_BIN, SCUMMVM_CONFIG, DEFAULT_CONFIG based on PLATFORM
 _set_scummvm_platform() {
+
+	SCUMMVM_BIN="$EMU_DIR/scummvm.64" # override in case statement only if needed
+
 	case "$PLATFORM" in
 		"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"SmartPro")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsp/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsp/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"SmartProS")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsps/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsps/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"Brick")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brick/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			touch /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 			SCUMMVM_BRICK_JOYSTICK=1
 			;;
 		"BrickPro")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brickpro/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brickpro/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-pixel2/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-pixel2/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			enable_dpad_to_analog
 			;;
 		"Anbernic"*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-anbernic/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-anbernic/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"A30")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/liba30:$LD_LIBRARY_PATH"
 			export DISPLAY_ROTATION=270
 			;;
 		"MiyooMini")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.mini"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-mini/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-mini/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/libmini:$LD_LIBRARY_PATH"
 			;;
 		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 	esac
