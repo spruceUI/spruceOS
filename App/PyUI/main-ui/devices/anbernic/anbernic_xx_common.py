@@ -484,7 +484,7 @@ class AnbernicXXCommon(DeviceCommon):
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
-    @throttle.limit_refresh(5)
+    @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         if(not self.is_wifi_enabled()):
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
@@ -557,7 +557,7 @@ class AnbernicXXCommon(DeviceCommon):
             PyUiLogger.get_logger().error(f"An error occurred {e}")
             return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
-    @throttle.limit_refresh(10)
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def _get_ip_addr_text(self):
         import socket
         import fcntl
@@ -573,7 +573,9 @@ class AnbernicXXCommon(DeviceCommon):
             )[20:24]
             return socket.inet_ntoa(ip)
         except OSError:
-            return "Connecting"
+            # No address yet: "Connecting" if a network is saved, otherwise
+            # "No network selected" so the fix (open the list) is obvious.
+            return self.wifi_pending_text()
         except Exception:
             return "Error"
         

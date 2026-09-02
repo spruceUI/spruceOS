@@ -55,6 +55,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 Device.get_device().disable_wifi()
             else:
                 Device.get_device().enable_wifi()
+            Device.get_device().note_wifi_change()
 
         if(ControllerInput.A == input):
             self.wifi_menu.show_wifi_menu()

@@ -134,7 +134,7 @@ while [ 1 ]; do
 
     # Bring up network services and idlemon in case they were disabled in-game or otherwise toggled
     /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
+    if wifi_available_on_device && [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
         /mnt/SDCARD/spruce/scripts/networkservices.sh &
     fi
 

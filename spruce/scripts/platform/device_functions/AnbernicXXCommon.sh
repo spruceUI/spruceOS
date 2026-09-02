@@ -560,8 +560,30 @@ setup_for_retroarch(){
 # sdc1 is mmc2 and carries no block device: the SD card is sdc2/mmc1
 # (mmcblk1p1) and eMMC is sdc0/mmc0. Nothing here can affect storage.
 
-WIFI_MODULE="8821cs"
-WIFI_MODULE_PATH="/lib/modules/8821cs.ko"
+# Radio contract. The XX line ships two radios: every model but the RG28XX has
+# an RTL8821CS on SDIO (sdc1); the RG28XX has an RTL8188EU on USB. The
+# per-model cfg may override any of these (it is sourced before this file);
+# the defaults keep every SDIO model exactly as before.
+WIFI_BUS="${WIFI_BUS:-sdio}"
+WIFI_MODULE="${WIFI_MODULE:-8821cs}"
+WIFI_MODULE_PATH="${WIFI_MODULE_PATH:-/lib/modules/8821cs.ko}"
+# USB ids the model's driver binds, "vvvv:pppp ..." - empty means "not USB".
+WIFI_USB_IDS="${WIFI_USB_IDS:-}"
+WIFI_USB_SYS="${WIFI_USB_SYS:-/sys/bus/usb/devices}"
+# Set by device_wifi_power_on when the module refuses to load: the session is
+# radio-less from then on (device_has_wifi_radio on models that key on it),
+# with the reason already in the log. Cleared on a successful load.
+WIFI_UNAVAILABLE_FLAG="${WIFI_UNAVAILABLE_FLAG:-/tmp/wifi_unavailable}"
+# Set when the USB radio is not on the bus after the enumeration wait, cleared
+# the moment it is seen: "no adapter right now". Distinct from the flag above
+# because it is not sticky - plug the adapter in and the next enable succeeds.
+WIFI_RADIO_ABSENT_FLAG="${WIFI_RADIO_ABSENT_FLAG:-/tmp/wifi_radio_absent}"
+# How long device_wifi_power_on waits for a USB radio to enumerate. BaseOS
+# starts spruce about 3 s into boot and the 2026-09-01 capture shows the
+# dongle arriving at 4.2 s, so a one-shot check loses the race by a second.
+# The enable path runs in the background (runtime.sh, game exit), so this
+# never sits on the boot-critical path.
+WIFI_USB_ENUM_WAIT="${WIFI_USB_ENUM_WAIT:-10}"
 SDC1_INSERT="/sys/devices/platform/soc/sdc1/sunxi_insert"
 # How long the rail stays down between unload and reload. Reloading the driver
 # is not what fixes a wedged chip - the chip losing power for long enough to
@@ -593,10 +615,61 @@ device_wifi_power_off() {
     fi
 }
 
+# Is the model's USB radio enumerated on the bus? Instant sysfs read - the
+# bus-first ordering below is what keeps a radio-less boot near-free: USB
+# enumeration finishes seconds into boot, long before any of this runs, so an
+# absent id is a reliable "no hardware" answer.
+wifi_usb_radio_present() {
+    [ -n "$WIFI_USB_IDS" ] || return 0
+    for _ud in "$WIFI_USB_SYS"/*; do
+        [ -r "$_ud/idVendor" ] || continue
+        _uid="$(cat "$_ud/idVendor" 2>/dev/null):$(cat "$_ud/idProduct" 2>/dev/null)"
+        case " $WIFI_USB_IDS " in *" $_uid "*) return 0 ;; esac
+    done
+    return 1
+}
+
+# Bounded wait for the USB radio to enumerate: present -> clear the absent
+# marker and return 0 at once; still missing after WIFI_USB_ENUM_WAIT seconds
+# -> set the marker and return 1. USB models only (callers gate on WIFI_BUS).
+wifi_usb_wait_for_radio() {
+    _waited=0
+    while :; do
+        if wifi_usb_radio_present; then
+            rm -f "$WIFI_RADIO_ABSENT_FLAG" 2>/dev/null
+            return 0
+        fi
+        [ "$_waited" -ge "$WIFI_USB_ENUM_WAIT" ] && break
+        sleep 1
+        _waited=$((_waited + 1))
+    done
+    touch "$WIFI_RADIO_ABSENT_FLAG" 2>/dev/null
+    return 1
+}
+
 device_wifi_power_on() {
+    # Bus-first on USB models: no adapter after the enumeration wait means no
+    # radio this session - no module load, and the availability guards turn
+    # the rest of the WiFi path off instead of starting a supplicant on a
+    # wlan0 that cannot exist.
+    if [ "$WIFI_BUS" = "usb" ] && ! wifi_usb_wait_for_radio; then
+        log_message "WiFi: $WIFI_MODULE radio not enumerated on USB after ${WIFI_USB_ENUM_WAIT}s - no radio this session"
+        return 1
+    fi
     if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
-        insmod "$WIFI_MODULE_PATH" 2>/dev/null
-        log_message "WiFi radio powered up ($WIFI_MODULE loaded)"
+        if insmod "$WIFI_MODULE_PATH" 2>/tmp/wifi_insmod_err; then
+            rm -f "$WIFI_UNAVAILABLE_FLAG" 2>/dev/null
+            log_message "WiFi radio powered up ($WIFI_MODULE loaded)"
+        else
+            # A module that will not load means no radio this session. Say why
+            # once, mark the session, and let the availability guards turn the
+            # rest of the path off instead of recovering toward a driver that
+            # cannot bind (SPR-MED-177 was exactly this: the 8188eu.ko spruce
+            # shipped before 2026-09-01 was built for an older stock kernel).
+            log_message "WiFi: insmod $WIFI_MODULE_PATH failed: $(head -1 /tmp/wifi_insmod_err 2>/dev/null); kernel: $(dmesg 2>/dev/null | grep "$WIFI_MODULE" | tail -1)"
+            touch "$WIFI_UNAVAILABLE_FLAG" 2>/dev/null
+            return 1
+        fi
     fi
     wait_for_wlan0 8 >/dev/null 2>&1
 }
@@ -604,7 +677,7 @@ device_wifi_power_on() {
 # Bring wlan0 back when the chip failed to enumerate. Escalates: each step is
 # strictly more disruptive than the one before, and we stop the moment wlan0
 # shows up.
-device_ensure_wifi_interface() {
+ensure_wifi_interface_sdio() {
     wlan0_exists && return 0
 
     # Not there yet is not the same as broken. BaseOS loads 8821cs itself and
@@ -666,6 +739,63 @@ device_ensure_wifi_interface() {
 
     log_message "WiFi recovery: wlan0 still missing after $((_wifi_try - 1)) attempts, giving up"
     return 1
+}
+
+# The USB radio's version. No sunxi-wlan, no sdc1, no 8821cs: those are the
+# SDIO part's levers, and unbinding sunxi-wlan is precisely the step the
+# 2026-08-31/09-01 RG28XX captures show never returning. Bus-first, bounded,
+# and every step is one the USB stack actually owns.
+ensure_wifi_interface_usb() {
+    wlan0_exists && return 0
+
+    if ! wifi_usb_wait_for_radio; then
+        log_message "WiFi: radio not enumerated on USB - nothing to recover"
+        return 1
+    fi
+
+    # The driver's probe is asynchronous after insmod; give it its window.
+    if wait_for_wlan0 12; then
+        log_message "wlan0 appeared while the USB probe finished"
+        return 0
+    fi
+
+    # One driver re-probe.
+    log_message "wlan0 is missing - re-probing the $WIFI_MODULE USB driver"
+    rmmod "$WIFI_MODULE" 2>/dev/null
+    sleep 1
+    insmod "$WIFI_MODULE_PATH" 2>/dev/null
+    if wait_for_wlan0 8; then
+        log_message "WiFi recovery: wlan0 back after driver re-probe"
+        return 0
+    fi
+
+    # One re-enumerate: drop and re-authorize the device itself.
+    for _ud in "$WIFI_USB_SYS"/*; do
+        [ -r "$_ud/idVendor" ] || continue
+        _uid="$(cat "$_ud/idVendor" 2>/dev/null):$(cat "$_ud/idProduct" 2>/dev/null)"
+        case " $WIFI_USB_IDS " in
+            *" $_uid "*)
+                echo 0 > "$_ud/authorized" 2>/dev/null
+                sleep 1
+                echo 1 > "$_ud/authorized" 2>/dev/null
+                ;;
+        esac
+    done
+    if wait_for_wlan0 8; then
+        log_message "WiFi recovery: wlan0 back after USB re-enumerate"
+        return 0
+    fi
+
+    log_message "WiFi: USB radio present but no wlan0 after re-probe and re-enumerate - giving up"
+    return 1
+}
+
+device_ensure_wifi_interface() {
+    if [ "$WIFI_BUS" = "usb" ]; then
+        ensure_wifi_interface_usb
+    else
+        ensure_wifi_interface_sdio
+    fi
 }
 
 # Leave the radio unpowered on the way to a shutdown or reboot, so the chip is

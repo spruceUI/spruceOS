@@ -1228,7 +1228,23 @@ import_wpa_networks_from() {
 }
 
 enable_wifi() {
+    # A device without a radio has nothing to power, recover, associate or
+    # lease. Refusing here covers every path in: boot, game exit, the settings
+    # toggle, restart_wifi and check_and_connect_wifi.
+    if ! wifi_available_on_device; then
+        log_message "WiFi: enable requested on a device without a radio - ignored"
+        return 1
+    fi
+
     device_wifi_power_on
+
+    # power_on may have just discovered the radio is unusable (a module that
+    # refuses to load marks the session radio-less); stop before building a
+    # supplicant/DHCP stack on a wlan0 that cannot exist.
+    if ! wifi_available_on_device; then
+        log_message "WiFi: radio became unavailable during power-on - stopping"
+        return 1
+    fi
 
     # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
     # not - the radio fails to enumerate and the interface is never created -
@@ -1327,7 +1343,30 @@ enable_wifi() {
     device_extra_wifi_setup
 }
 
+# Does this device have a WiFi radio at all? A STATIC hardware question,
+# deliberately separate from device_wifi_is_available: that older hook answers
+# a LIVE question on some devices (the Pixel2 returns false whenever wlan0 is
+# not up yet - correct for check_and_connect_wifi's "is there a network right
+# now", and exactly wrong for deciding whether to bring the radio up, since
+# enable_wifi is what puts the interface up in the first place). Only a device
+# whose radio genuinely does not work answers device_has_wifi_radio false
+# (today: the RG28XX, SPR-MED-177); everywhere else - including platforms that
+# never define it - the answer is yes and nothing changes. The system json's
+# "wifi" flag is the USER's preference and is only consulted once the hardware
+# is there.
+wifi_available_on_device() {
+    if command -v device_has_wifi_radio >/dev/null 2>&1; then
+        device_has_wifi_radio
+    else
+        return 0
+    fi
+}
+
 enable_or_disable_wifi_per_system_json() {
+    if ! wifi_available_on_device; then
+        log_message "WiFi: not available on this device, radio path left alone" -v
+        return 0
+    fi
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
         disable_wifi
     else
