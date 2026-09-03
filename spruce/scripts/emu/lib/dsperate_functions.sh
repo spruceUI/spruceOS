@@ -103,10 +103,6 @@ run_dsperate() {
 	# to go anyway.
 	[ "$VERBOSE_EMU" = "1" ] && export DS_FPS=1
 
-	# Currently inert - pin_to_dedicated_cores has a quoting bug that makes its
-	# sleep fail, so it greps for the process before it exists. Called anyway,
-	# so this starts working the day that is fixed rather than needing a second
-	# edit here.
 	pin_to_dedicated_cores dsperate 3
 
 	state_path="$(get_state_path "$ROM_FILE")"
