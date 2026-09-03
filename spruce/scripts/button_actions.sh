@@ -159,7 +159,7 @@ kill_emulator() {
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
-    elif pgrep dsperate-sdl >/dev/null; then
+    elif pgrep dsperate >/dev/null; then
         kill_dsperate
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu

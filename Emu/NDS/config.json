@@ -89,7 +89,8 @@
         "Enabled",
         "Disabled"
       ],
-      "selected": "Enabled"
+      "selected": "Enabled",
+      "overrides": {}
     }
   },
   "sortOrder": 4000,
