@@ -127,9 +127,9 @@ kill_dsperate() {
 	log_message "button_actions.sh: Killing DSperate!"
 	# SIGTERM first and give it a moment: DSperate writes the battery save on
 	# a launcher's SIGTERM, so -9 straight away loses the last save.
-	killall -q -15 dsperate-sdl
-	sleep 1
-	killall -q -9 dsperate-sdl
+	killall -q -15 dsperate
+	sleep 3
+	killall -q -9 dsperate
 }
 
 kill_bigpemu() {
