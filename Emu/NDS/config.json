@@ -18,6 +18,18 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_A30": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "DraStic-Steward",
+        "DSperate"
+      ],
+      "selected": "DraStic-trngaje",
+      "overrides": {}
+    },
     "Emulator_Flip": {
       "display": "Emulator",
       "devices": [

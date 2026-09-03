@@ -185,7 +185,12 @@ run_dsperate() {
 		set -- "$@" --load-state "$_state"
 	fi
 
-	./dsperate "$@" > "$(emu_log_file)" 2>&1
+	if [ "$PLATFORM" = "A30" ]; then
+		export DS_ROTATE=270
+		./dsperate.a30 "$@" > "$(emu_log_file)" 2>&1
+	else
+		./dsperate "$@" > "$(emu_log_file)" 2>&1
+	fi
 
 	rm -rf "$DSPERATE_TMP_DIR"
 	sync
