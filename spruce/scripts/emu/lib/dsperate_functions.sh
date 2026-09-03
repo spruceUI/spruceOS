@@ -61,8 +61,15 @@ is_autoload_enabled() {
 }
 
 get_game_code() {
-    dd if="$1" bs=1 skip=12 count=4 2>/dev/null
-    echo
+	case "$1" in
+		*.nds|*.NDS)
+			dd if="$1" bs=1 skip=12 count=4 2>/dev/null
+			;;
+		*.zip|*.ZIP)
+			unzip -p "$1" '*.nds' | dd bs=1 skip=12 count=4 2>/dev/null
+			;;
+	esac
+	echo
 }
 
 get_state_path() {
