@@ -103,8 +103,6 @@ run_dsperate() {
 	# to go anyway.
 	[ "$VERBOSE_EMU" = "1" ] && export DS_FPS=1
 
-	pin_to_dedicated_cores dsperate 3
-
 	state_path="$(get_state_path "$ROM_FILE")"
 
 	if is_autoload_enabled && [ -f "$state_path" ]; then
