@@ -49,31 +49,44 @@ seed_dsperate_config() {
 	fi
 }
 
-
 # returns 0=true or 1=false; for now, no per-game override logic in place.
 is_autoload_enabled() {
-    autoload_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected' "/mnt/SDCARD/Emu/NDS/config.json")"
-    if [ "$autoload_setting" = "Enabled" ]; then
-		return 0
-	else
-		return 1
-	fi
+	_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected // "Enabled"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
+	[ "$_setting" = "Enabled" ]
 }
 
+# The NDS header carries a four-character game code at offset 12, and DSperate
+# names the auto slot after it, so the launcher has to read it the same way to
+# know which file to resume from. 7zr cannot open a .rar and neither can
+# python's zipfile, so those come back empty rather than wrong.
 get_game_code() {
 	case "$1" in
-		*.nds|*.NDS)
-			dd if="$1" bs=1 skip=12 count=4 2>/dev/null
-			;;
-		*.zip|*.ZIP)
-			unzip -p "$1" '*.nds' | dd bs=1 skip=12 count=4 2>/dev/null
-			;;
+	*.nds | *.NDS)
+		dd if="$1" bs=1 skip=12 count=4 2>/dev/null
+		;;
+	*.zip | *.ZIP)
+		"$(get_python_path)" -c "
+import sys, zipfile
+with zipfile.ZipFile(sys.argv[1]) as z:
+    for name in z.namelist():
+        if name.lower().endswith('.nds'):
+            sys.stdout.write(z.open(name).read(16)[12:16].decode('latin-1'))
+            break
+" "$1" 2>/dev/null
+		;;
+	*.7z | *.7Z)
+		7zr e "$1" -so 2>/dev/null | dd bs=1 skip=12 count=4 2>/dev/null
+		;;
 	esac
-	echo
 }
 
+# Empty when the code cannot be read: a .rar, an archive with no .nds inside,
+# or a header full of junk. The caller has to check, because falling back to a
+# bare ".auto.dss" would be both a path DSperate never writes and one every
+# game would share.
 get_state_path() {
-	_code=$(get_game_code "$1")
+	_code="$(get_game_code "$1" | tr -dc 'A-Za-z0-9#_-')"
+	[ -n "$_code" ] || return 0
 	echo "/mnt/SDCARD/Saves/states/dsperate/${_code}.auto.dss"
 }
 
@@ -103,18 +116,21 @@ run_dsperate() {
 	# to go anyway.
 	[ "$VERBOSE_EMU" = "1" ] && export DS_FPS=1
 
-	state_path="$(get_state_path "$ROM_FILE")"
+	# The BIOS paths are in spruce.ini too, but pass them anyway: they are what
+	# dsperate_bios_missing just checked for, and a card upgraded from a config
+	# seeded before spruce.ini existed has no [paths] block at all.
+	set -- "$ROM_FILE" \
+		--bios9 "$DSPERATE_BIOS_DIR/bios9.bin" \
+		--bios7 "$DSPERATE_BIOS_DIR/bios7.bin" \
+		--firmware "$DSPERATE_BIOS_DIR/firmware.bin" \
+		--fullscreen
 
-	if is_autoload_enabled && [ -f "$state_path" ]; then
-		./dsperate "$ROM_FILE" \
-			--fullscreen \
-			--load-state "$state_path" \
-			> "$(emu_log_file)" 2>&1
-	else
-		./dsperate "$ROM_FILE" \
-			--fullscreen \
-			> "$(emu_log_file)" 2>&1
+	_state="$(get_state_path "$ROM_FILE")"
+	if [ -n "$_state" ] && [ -f "$_state" ] && is_autoload_enabled; then
+		set -- "$@" --load-state "$_state"
 	fi
+
+	./dsperate "$@" > "$(emu_log_file)" 2>&1
 
 	sync
 }
