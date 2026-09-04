@@ -52,10 +52,12 @@ class MiniloongPocket1(DeviceCommon):
     EVIOCGRAB = 0x40044590
 
     AUDIO_CARD = "1"
-    # rk817 DAC taper: ~167 barely audible, 210 the calibrated ceiling, 252
-    # painful (Leaf 00-audio-init.sh). Config volume 0-100 maps onto 150..210.
-    DAC_MIN = 150
-    DAC_MAX = 210
+    # rk817 DAC Playback Volume per 0..20 level, mirroring SYSTEM_VOLUME_0..20 in
+    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
+    # Leaf measured ~167 barely audible, 210 comfortable, 252 painful; the old
+    # linear 150..210 ramp put the first six steps below audibility (SPR-MED-182).
+    DAC_TABLE = (0, 168, 171, 175, 178, 181, 185, 188, 192, 195, 198, 202,
+                 205, 208, 212, 215, 219, 222, 225, 229, 232)
     # Backlight raw <= 55 flickers on this panel (Jawaka device_mlp1.c:26).
     BACKLIGHT_FLOOR = 60
 
@@ -141,8 +143,10 @@ class MiniloongPocket1(DeviceCommon):
         power = self._resolve_power_node()
         if node and os.path.exists(node) and node != power:
             return node
-        # Whether a dedicated rocker exists is UNVERIFIED; the shell side
-        # points EVENT_PATH_VOLUME at the power node when it finds none.
+        # The volume keys are on the gamepad node (captured 2026-09-04), which the
+        # main controller already reads and maps (MiniloongKeyMappingProvider);
+        # the shell parks EVENT_PATH_VOLUME on the power node. Never attach a
+        # second, grabbing watcher to the pad.
         return None
 
     def _start_key_watchers(self):
@@ -279,12 +283,13 @@ class MiniloongPocket1(DeviceCommon):
 
     def _set_volume(self, volume):
         pct = max(0, min(100, int(volume)))
+        level = max(0, min(20, (pct + 2) // 5))   # the shell's 0..20 level
         try:
-            if pct == 0:
+            if level == 0:
                 subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "sset", "Playback Path", "OFF"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                raw = self.DAC_MIN + (self.DAC_MAX - self.DAC_MIN) * pct // 100
+                raw = self.DAC_TABLE[level]
                 subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "cset",
                                 "name='DAC Playback Volume'", f"{raw},{raw}"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

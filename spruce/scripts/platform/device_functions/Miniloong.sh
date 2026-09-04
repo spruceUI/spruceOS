@@ -226,18 +226,33 @@ device_lid_open() {
 # Power and volume key nodes, asked of the kernel rather than guessed
 # (RGB30 precedent). The pad has its own by-path link.
 node_reports_key() {
-    _caps="/sys/class/input/$1/device/capabilities/key"
+    # Does /sys/class/input/<event>/device/capabilities/key declare key code $2?
+    # The file is 64-bit hex words, most significant first, unpadded. Pure sh on
+    # purpose: the loong busybox awk has no math support, so the previous awk
+    # (which used ^) aborted and reported "no node reports volume keys" for a pad
+    # that plainly declares 114/115 (2026-09-04, SPR-MED-183).
+    _caps="${SPRUCE_INPUT_SYSFS:-/sys/class/input}/$1/device/capabilities/key"
     _key="$2"
     [ -r "$_caps" ] || return 1
-    awk -v key="$_key" '{
-        s=""
-        for (i=1; i<=NF; i++) { w=$i; if (i>1) { while (length(w)<16) w="0" w } s=s w }
-        nib=int(key/4); bit=key%4; pos=length(s)-nib
-        if (pos < 1) exit 1
-        c=tolower(substr(s,pos,1)); v=index("0123456789abcdef",c)-1
-        if (v < 0) exit 1
-        exit (int(v/(2^bit))%2 == 1) ? 0 : 1
-    }' "$_caps"
+    read -r _line < "$_caps" || return 1
+    set -- $_line
+    _nwords=$#
+    _widx=$((_key / 64))                 # word index counted from the right
+    [ "$_widx" -lt "$_nwords" ] || return 1
+    _from_left=$((_nwords - _widx))
+    _w=""; _i=1
+    for _tok in "$@"; do
+        [ "$_i" -eq "$_from_left" ] && _w="$_tok"
+        _i=$((_i + 1))
+    done
+    while [ ${#_w} -lt 16 ]; do _w="0$_w"; done
+    _bit=$((_key % 64))
+    _nib=$((_bit / 4))
+    _pos=$((16 - _nib))
+    _c="$(printf '%s' "$_w" | cut -c"$_pos")"
+    case "$_c" in [0-9a-fA-F]) ;; *) return 1 ;; esac
+    _v=$((0x$_c))
+    [ $(( (_v >> (_bit % 4)) & 1 )) -eq 1 ]
 }
 
 resolve_key_event_node() {
@@ -283,7 +298,17 @@ resolve_key_event_node() {
     if [ -n "$_power" ] && [ -c "$_power" ]; then
         export EVENT_PATH_POWER="$_power"
     fi
-    if [ -n "$_volume" ] && [ -c "$_volume" ]; then
+    VOLUME_KEYS_ON_PAD=0
+    if [ -n "$_volume" ] && [ -c "$_volume" ] && [ "$_volume" = "$_pad" ]; then
+        # The volume keys are on the gamepad itself (KEY_VOLUMEDOWN 114 /
+        # KEY_VOLUMEUP 115, captured on hardware 2026-09-04). Every pad watcher
+        # already reads that node, so EVENT_PATH_VOLUME must NOT point at it too
+        # (two readers = two steps per press); park it on the power node and
+        # tell buttons_watchdog/PyUI where the keys live instead.
+        VOLUME_KEYS_ON_PAD=1
+        export EVENT_PATH_VOLUME="$EVENT_PATH_POWER"
+        log_message "Miniloong: volume keys are on the gamepad node $_volume (pad watchers read them)"
+    elif [ -n "$_volume" ] && [ -c "$_volume" ]; then
         export EVENT_PATH_VOLUME="$_volume"
         log_message "Miniloong: volume keys on $_volume"
     else
@@ -299,7 +324,9 @@ resolve_key_event_node() {
         echo "EVENT_PATH_SEND_TO_DRASTIC='${EVENT_PATH_READ_INPUTS_SPRUCE}'"
         echo "EVENT_PATH_VOLUME='${EVENT_PATH_VOLUME}'"
         echo "EVENT_PATH_POWER='${EVENT_PATH_POWER}'"
+        echo "VOLUME_KEYS_ON_PAD='${VOLUME_KEYS_ON_PAD}'"
     } > "$MINILOONG_INPUT_NODES_FILE" 2>/dev/null
+    export VOLUME_KEYS_ON_PAD
 }
 
 setup_mainui_alias() {

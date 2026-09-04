@@ -35,6 +35,11 @@ class MiniloongKeyMappingProvider(MiyooTrimKeyMappingProvider):
         bind(312, ControllerInput.L2)  # BTN_TL2, a key on this pad
         bind(313, ControllerInput.R2)  # BTN_TR2, a key on this pad
         bind(317, ControllerInput.L3)  # BTN_THUMBL, the only stick click declared
+        # The volume keys are on this node too (DT VOLUMEDOWN_key/VOLUMEUP_key,
+        # captured 2026-09-04). Controller.get_input hands them to
+        # Device.special_input, the way the separate KeyWatcher does elsewhere.
+        bind(114, ControllerInput.VOLUME_DOWN)
+        bind(115, ControllerInput.VOLUME_UP)
 
         # The Flip table's analog-trigger entries (ABS 2/5 at 255) have no source
         # on this pad; drop them so a stale entry can never shadow the keys above.

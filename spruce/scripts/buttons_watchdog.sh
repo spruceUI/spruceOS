@@ -281,6 +281,11 @@ getevent $EVENTS | while read line; do
             SS_B3_DOWN=false
         ;;
         *"key $B_VOLDOWN 1"*) # VOLUMEDOWN key down
+            # Volume keys that live on the gamepad node (Miniloong) are PyUI's while
+            # a menu is up: it shows the indicator and saves the level, and acting
+            # here as well would double every step. In game PyUI is gone and this
+            # is the only handler.
+            if [ "${VOLUME_KEYS_ON_PAD:-0}" = "1" ] && flag_check "in_menu"; then continue; fi
             [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
             PID_DOWN=""
             [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
@@ -303,6 +308,11 @@ getevent $EVENTS | while read line; do
             PID_DOWN=""
         ;;
         *"key $B_VOLUP 1"*) # VOLUMEUP key down
+            # Volume keys that live on the gamepad node (Miniloong) are PyUI's while
+            # a menu is up: it shows the indicator and saves the level, and acting
+            # here as well would double every step. In game PyUI is gone and this
+            # is the only handler.
+            if [ "${VOLUME_KEYS_ON_PAD:-0}" = "1" ] && flag_check "in_menu"; then continue; fi
             [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
             PID_UP=""
             [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
