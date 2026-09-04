@@ -127,9 +127,13 @@ kill_dsperate() {
 	log_message "button_actions.sh: Killing DSperate!"
 	# SIGTERM first and give it a moment: DSperate writes the battery save on
 	# a launcher's SIGTERM, so -9 straight away loses the last save.
-	killall -q -15 dsperate
+	# Both names: killall matches the process name exactly, and the A30 runs
+	# dsperate.a30. The dispatcher above finds it either way because plain
+	# pgrep matches on a substring, so this used to route here and then signal
+	# nothing at all - the game switcher could not close it.
+	killall -q -15 dsperate dsperate.a30
 	sleep 3
-	killall -q -9 dsperate
+	killall -q -9 dsperate dsperate.a30
 }
 
 kill_bigpemu() {
