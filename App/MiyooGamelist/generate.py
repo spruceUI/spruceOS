@@ -90,7 +90,7 @@ class RomNameCleaner:
         4. Remove leading numbers with dots (e.g. "001.")
         5. Replace underscores with spaces
         6. Strip / collapse whitespace
-        7. Move trailing articles to front ("Game, The" -> "The Game")
+        7. Move leading articles to the end ("The Game" -> "Game, The")
         8. Replace " - " with ": "
         """
         name = RomNameCleaner.strip_extensions(filename, extlist)
@@ -100,10 +100,16 @@ class RomNameCleaner:
         name = name.replace("_", " ")
         name = " ".join(name.split())
 
-        m = re.search(r",\s+(A|The|An)$", name)
+        # A leading article moves to the end of the whole name:
+        # "The Legend of Zelda, Ocarina of Time - Master Quest" becomes
+        # "Legend of Zelda, Ocarina of Time - Master Quest, The". The rule this
+        # replaces went the other way, and only when the article ended the
+        # string - so "Legend of Zelda, The.nes" became "The Legend of Zelda"
+        # while "Legend of Zelda, The - Ocarina of Time.nes" kept its comma,
+        # filing one series under two letters.
+        m = re.match(r"(A|An|The)\s+(.+)$", name)
         if m:
-            article = m.group(1)
-            name = article + " " + re.sub(r",\s+(A|The|An)$", "", name)
+            name = m.group(2) + ", " + m.group(1)
 
         name = name.replace(" - ", ": ")
         return name
