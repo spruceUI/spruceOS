@@ -787,6 +787,14 @@ class MiyooMiniCommon(MiyooDevice):
                     )
 
                     if result.returncode != 0:
+                        # `ip: can't find device 'wlan0'` - the interface does not
+                        # exist. While our own start_wifi_services() is bringing the
+                        # driver up (it arms the settle window first) that is the
+                        # normal state for a few seconds, not an error; the 15 s
+                        # cache otherwise pins "Error" on screen long after the
+                        # address arrives.
+                        if time.time() < self._wifi_settle_until:
+                            return "Connecting"
                         return "Error"
 
                     # Look for an IPv4 address in the command output
@@ -831,6 +839,10 @@ class MiyooMiniCommon(MiyooDevice):
                 ip = parts[-1] if parts else ""
 
                 if not ip:
+                    # Drop the throttled status caches and refresh every second
+                    # while the join settles, so the Settings row and top-bar icon
+                    # follow the link instead of showing a 15 s stale sample.
+                    self.note_wifi_change()
                     PyUiLogger.get_logger().info("Wifi is disabled - trying to enable it...")
                     if(foreground_call):
                         Display.display_message("Loading WiFi driver\n(May take up to 5s)")
