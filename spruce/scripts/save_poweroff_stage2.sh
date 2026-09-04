@@ -27,6 +27,11 @@ done
 # device that had a working shutdown keeps exactly the code it had, and opts in
 # only once someone has tested the strict path on that hardware.
 STRICT_UNMOUNT="${SPRUCE_STRICT_UNMOUNT:-0}"
+# Whether init can service `poweroff`/`reboot` at all on this device (see
+# device_power_transition_bypasses_init in device.sh). Default off.
+FORCE_POWER_TRANSITION="${SPRUCE_FORCE_POWER_TRANSITION:-0}"
+SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
+SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
 
 # ...and stdin/stdout/stderr, which that loop deliberately skips. They are
 # inherited too, and whatever launched the shutdown decides where they point -
@@ -270,7 +275,36 @@ else
     WANT_REBOOT=0
 fi
 
-if [ "$STRICT_UNMOUNT" != "1" ]; then
+if [ "$FORCE_POWER_TRANSITION" = "1" ]; then
+    # init cannot service the plain applets here (Miniloong: rcS is held by the
+    # boot supervisor for the whole session), so `poweroff`/`reboot` would return
+    # having done nothing and the 10 s waits below would just be 10 s of a device
+    # that looks hung with its card unmounted. Take the filesystems down the
+    # REISUB way - enable sysrq, Sync, emergency remount-ro (works on a busy
+    # FAT where `mount -o remount,ro` returns EBUSY), Sync - then call the forced
+    # form, which is reboot(2) straight to the kernel. Sequence per Jawaka's
+    # device_mlp1.c, which measured FAT corruption on this board without it.
+    echo 1 > "$SYSRQ_CTL" 2>/dev/null
+    sync
+    echo s > "$SYSRQ_TRIGGER" 2>/dev/null
+    echo u > "$SYSRQ_TRIGGER" 2>/dev/null
+    echo s > "$SYSRQ_TRIGGER" 2>/dev/null
+    sleep 0.5
+    if [ "$WANT_REBOOT" -eq 1 ]; then
+        echo "stage2: forced reboot (init does not service power commands on this device)"
+        reboot -f
+        sleep 3
+        echo "stage2: reboot -f did not take, trying sysrq"
+        echo b > "$SYSRQ_TRIGGER" 2>/dev/null
+    else
+        echo "stage2: forced poweroff (init does not service power commands on this device)"
+        poweroff -f
+        sleep 3
+        echo "stage2: poweroff -f did not take, trying sysrq"
+        echo o > "$SYSRQ_TRIGGER" 2>/dev/null
+    fi
+    sleep 5
+elif [ "$STRICT_UNMOUNT" != "1" ]; then
     # The original: issue the command and let init take it from there. Every
     # device on this branch has been powering off this way for years, and the
     # escalation below is only worth its risk where the recovery it protects
@@ -281,10 +315,9 @@ if [ "$STRICT_UNMOUNT" != "1" ]; then
         poweroff
     fi
     exit 0
-fi
-
+else
 # sysrq is the last resort below and is commonly left disabled.
-echo 1 > /proc/sys/kernel/sysrq 2>/dev/null
+echo 1 > "$SYSRQ_CTL" 2>/dev/null
 
 if [ "$WANT_REBOOT" -eq 1 ]; then
     echo "stage2: rebooting"
@@ -294,7 +327,7 @@ if [ "$WANT_REBOOT" -eq 1 ]; then
     reboot -f
     sleep 5
     echo "stage2: reboot -f did not take, trying sysrq"
-    echo b > /proc/sysrq-trigger 2>/dev/null
+    echo b > "$SYSRQ_TRIGGER" 2>/dev/null
     sleep 5
 else
     echo "stage2: powering off"
@@ -304,8 +337,9 @@ else
     poweroff -f
     sleep 5
     echo "stage2: poweroff -f did not take, trying sysrq"
-    echo o > /proc/sysrq-trigger 2>/dev/null
+    echo o > "$SYSRQ_TRIGGER" 2>/dev/null
     sleep 5
+fi
 fi
 
 # Still running. Recover rather than leave the user holding a device that cannot

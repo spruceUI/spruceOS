@@ -295,6 +295,11 @@ exec_shutdown_stage_2() {
         else
             export SPRUCE_STRICT_UNMOUNT=0
         fi
+        if device_power_transition_bypasses_init; then
+            export SPRUCE_FORCE_POWER_TRANSITION=1
+        else
+            export SPRUCE_FORCE_POWER_TRANSITION=0
+        fi
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."

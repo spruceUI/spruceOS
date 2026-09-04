@@ -518,12 +518,50 @@ device_system_handles_sdcard_unmount() {
     return 1
 }
 
+# Power transitions. The stock busybox `poweroff`/`reboot` only signal PID 1,
+# and init is blocked in rcS for the whole Spruce session (S49spruce ->
+# session.sh -> runtime.sh), so they return having done nothing: three shutdown
+# attempts on 2026-08-28 and two on 2026-09-04 all ended at "Attempting to
+# unmount /mnt/SDCARD" with the device still up (SPR-HIGH-051). Magic SysRq is
+# 0 by default here. So: opt into the strict unmount path (which also sets the
+# shutting_down flag the boot session reads, so runtime's exit is a clean
+# shutdown and not a crash to relaunch), tell stage 2 the applets cannot be
+# trusted, and when we must do it ourselves take the filesystems down the
+# REISUB way and call the forced form - reboot(2), no init involved. Sequence
+# per Jawaka device_mlp1.c, which measured FAT corruption on this board without
+# the emergency remount-ro.
+device_needs_strict_unmount() {
+    return 0
+}
+
+device_power_transition_bypasses_init() {
+    return 0
+}
+
+miniloong_forced_power_transition() {
+    # $1 = poweroff | reboot
+    _sysrq_ctl="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
+    _sysrq_trigger="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
+    echo 1 > "$_sysrq_ctl" 2>/dev/null
+    sync
+    echo s > "$_sysrq_trigger" 2>/dev/null
+    echo u > "$_sysrq_trigger" 2>/dev/null
+    echo s > "$_sysrq_trigger" 2>/dev/null
+    sleep 0.5
+    "$1" -f
+    sleep 3
+    case "$1" in
+        reboot) echo b > "$_sysrq_trigger" 2>/dev/null ;;
+        *) echo o > "$_sysrq_trigger" 2>/dev/null ;;
+    esac
+}
+
 run_poweroff_cmd() {
-    poweroff
+    miniloong_forced_power_transition poweroff
 }
 
 device_run_reboot_cmd() {
-    reboot
+    miniloong_forced_power_transition reboot
 }
 
 # The rootfs stub (spruce/miniloong/S50spruce) owns the hand-off to stock
