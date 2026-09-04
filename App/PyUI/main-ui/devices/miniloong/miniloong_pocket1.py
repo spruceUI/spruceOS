@@ -11,9 +11,9 @@ from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import KeyWatcherController
+from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
-from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from menus.games.utils.rom_info import RomInfo
@@ -52,12 +52,20 @@ class MiniloongPocket1(DeviceCommon):
     EVIOCGRAB = 0x40044590
 
     AUDIO_CARD = "1"
-    # rk817 DAC taper: ~167 barely audible, 210 the calibrated ceiling, 252
-    # painful (Leaf 00-audio-init.sh). Config volume 0-100 maps onto 150..210.
-    DAC_MIN = 150
-    DAC_MAX = 210
-    # Backlight raw <= 55 flickers on this panel (Jawaka device_mlp1.c:26).
-    BACKLIGHT_FLOOR = 60
+    # rk817 DAC Playback Volume per 0..20 level, mirroring SYSTEM_VOLUME_0..20 in
+    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
+    # Leaf measured ~167 barely audible, 210 comfortable, 252 painful; the old
+    # linear 150..210 ramp put the first six steps below audibility (SPR-MED-182).
+    DAC_TABLE = (0, 168, 171, 175, 178, 181, 185, 188, 192, 195, 198, 202,
+                 205, 208, 212, 215, 219, 222, 225, 229, 232)
+    # Backlight raw per 0..10 level, mirroring SYSTEM_BRIGHTNESS_0..10 in
+    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
+    # Measured 2026-09-04: the panel lights from off at raw 62 and goes dark
+    # stepping down at 62; 60 and below are black (the old floor of 60 booted
+    # to a dark screen). Floor 70 = stock's charger floor with margin; above
+    # ~135 nothing changes. Level 0 is the dimmest safe level, never dark.
+    BACKLIGHT_TABLE = (70, 77, 83, 90, 96, 103, 109, 116, 122, 129, 135)
+    BACKLIGHT_FLOOR = 70
 
     def __init__(self, device_name, main_ui_mode=True):
         self.device_name = device_name
@@ -141,8 +149,10 @@ class MiniloongPocket1(DeviceCommon):
         power = self._resolve_power_node()
         if node and os.path.exists(node) and node != power:
             return node
-        # Whether a dedicated rocker exists is UNVERIFIED; the shell side
-        # points EVENT_PATH_VOLUME at the power node when it finds none.
+        # The volume keys are on the gamepad node (captured 2026-09-04), which the
+        # main controller already reads and maps (MiniloongKeyMappingProvider);
+        # the shell parks EVENT_PATH_VOLUME on the power node. Never attach a
+        # second, grabbing watcher to the pad.
         return None
 
     def _start_key_watchers(self):
@@ -193,11 +203,12 @@ class MiniloongPocket1(DeviceCommon):
         return self.JOYPAD_NODE
 
     def get_controller_interface(self):
-        # Standard Linux gamepad codes with hat axes for the D-pad, the same
-        # table the Flip and TrimUI devices use. UNVERIFIED for this pad.
+        # The Flip/TrimUI table with this pad's measured differences layered on
+        # top: X is BTN_NORTH (307) here, the triggers are keys (312/313) and
+        # there is one thumb click (317). See MiniloongKeyMappingProvider.
         return KeyWatcherController(
             event_path=self._resolve_joypad(),
-            mapping_provider=MiyooTrimKeyMappingProvider(),
+            mapping_provider=MiniloongKeyMappingProvider(),
             event_format="llHHi",
         )
 
@@ -251,11 +262,15 @@ class MiniloongPocket1(DeviceCommon):
             return False
 
     def _set_lumination_to_config(self):
-        raw = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
-        raw = max(self.BACKLIGHT_FLOOR, int(raw))
+        level = max(0, min(10, int(self.system_config.backlight)))
+        raw = max(self.BACKLIGHT_FLOOR, self.BACKLIGHT_TABLE[level])
         try:
             with open("/sys/class/backlight/backlight/brightness", "w") as f:
                 f.write(str(raw))
+            # A level write is also a "screen on" request: make sure the panel is
+            # not left blanked by an earlier bl_power=4.
+            with open("/sys/class/backlight/backlight/bl_power", "w") as f:
+                f.write("0")
         except OSError as e:
             PyUiLogger.get_logger().error(f"Miniloong: backlight write failed: {e}")
 
@@ -278,12 +293,13 @@ class MiniloongPocket1(DeviceCommon):
 
     def _set_volume(self, volume):
         pct = max(0, min(100, int(volume)))
+        level = max(0, min(20, (pct + 2) // 5))   # the shell's 0..20 level
         try:
-            if pct == 0:
+            if level == 0:
                 subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "sset", "Playback Path", "OFF"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                raw = self.DAC_MIN + (self.DAC_MAX - self.DAC_MIN) * pct // 100
+                raw = self.DAC_TABLE[level]
                 subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "cset",
                                 "name='DAC Playback Volume'", f"{raw},{raw}"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -469,7 +485,51 @@ class MiniloongPocket1(DeviceCommon):
             PyUiLogger.get_logger().error(f"Miniloong ensure_wpa_supplicant_conf failed: {e}")
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+        # RSSI from wpa_cli signal_poll (RSSI=-46 / LINKSPEED=72 / NOISE=9999 /
+        # FREQUENCY=2422, measured on the MLP1 2026-09-04), the Anbernic XX
+        # reading. Not /proc/net/wireless: the RTL8723DS reports its "level"
+        # column as 100+dBm (54 for -46 dBm), which device_common would grade
+        # as a positive, perfect signal. wpa_supplicant is already ours.
+        # -200 is what device_common reads as "no signal" - returned on any
+        # failure so the top-bar icon falls back to the off/locked glyph
+        # instead of a full-strength one.
+        no_signal = WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+        if not self.is_wifi_enabled():
+            return no_signal
+        try:
+            result = ProcessRunner.run(["wpa_cli", "-i", "wlan0", "signal_poll"], timeout=3, print=False)
+            output = result.stdout or ""
+            if result.returncode != 0 or "FAIL" in output:
+                return no_signal
+            signal_level = None
+            noise_level = 0
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("RSSI="):
+                    try:
+                        signal_level = int(line.split("=", 1)[1])
+                    except ValueError:
+                        pass
+                elif line.startswith("NOISE="):
+                    try:
+                        noise = int(line.split("=", 1)[1])
+                    except ValueError:
+                        noise = 9999
+                    if noise != 9999:  # wpa_supplicant's "not reported" sentinel
+                        noise_level = noise
+            if signal_level is None:
+                return no_signal
+            # Same dBm -> 0..70 mapping the other devices use.
+            if signal_level <= -100:
+                link_quality = 0
+            elif signal_level >= -50:
+                link_quality = 70
+            else:
+                link_quality = int((signal_level + 100) * 1.4)
+            return WiFiConnectionQualityInfo(noise_level=noise_level, signal_level=signal_level, link_quality=link_quality)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Miniloong wifi signal_poll failed: {e}")
+            return no_signal
 
     # ---- bluetooth: not wired (stock btmanager equivalent unknown) ----
 

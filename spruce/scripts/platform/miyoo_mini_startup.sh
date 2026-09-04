@@ -26,7 +26,18 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
-    if [ "$(jq -r '.wifi // 0' "/mnt/SDCARD/Saves/mini-flip-system.json")" -eq 1 ]; then
+    # On a first boot PyUI has not copied its template to Saves/ yet; read the
+    # template it will copy (wifi defaults to 1) instead of skipping the whole
+    # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
+    system_json="/mnt/SDCARD/Saves/mini-flip-system.json"
+    [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/mini-flip-system.json"
+    wifi_enabled="$(jq -r '.wifi // 0' "$system_json" 2>/dev/null)"
+    # Only the Mini Plus and Mini Flip have the RTL8188FU radio; the OG Mini and
+    # V4 do not, and the template's wifi=1 would otherwise send them through
+    # insmod / axp_test / wpa_supplicant for nothing. Same discriminator as
+    # is_mini_og in device_functions/MiyooMini.sh: axp_test ships only with the
+    # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
+    if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
         insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
         ifconfig lo up
         /customer/app/axp_test wifion

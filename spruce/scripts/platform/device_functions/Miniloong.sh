@@ -226,18 +226,33 @@ device_lid_open() {
 # Power and volume key nodes, asked of the kernel rather than guessed
 # (RGB30 precedent). The pad has its own by-path link.
 node_reports_key() {
-    _caps="/sys/class/input/$1/device/capabilities/key"
+    # Does /sys/class/input/<event>/device/capabilities/key declare key code $2?
+    # The file is 64-bit hex words, most significant first, unpadded. Pure sh on
+    # purpose: the loong busybox awk has no math support, so the previous awk
+    # (which used ^) aborted and reported "no node reports volume keys" for a pad
+    # that plainly declares 114/115 (2026-09-04, SPR-MED-183).
+    _caps="${SPRUCE_INPUT_SYSFS:-/sys/class/input}/$1/device/capabilities/key"
     _key="$2"
     [ -r "$_caps" ] || return 1
-    awk -v key="$_key" '{
-        s=""
-        for (i=1; i<=NF; i++) { w=$i; if (i>1) { while (length(w)<16) w="0" w } s=s w }
-        nib=int(key/4); bit=key%4; pos=length(s)-nib
-        if (pos < 1) exit 1
-        c=tolower(substr(s,pos,1)); v=index("0123456789abcdef",c)-1
-        if (v < 0) exit 1
-        exit (int(v/(2^bit))%2 == 1) ? 0 : 1
-    }' "$_caps"
+    read -r _line < "$_caps" || return 1
+    set -- $_line
+    _nwords=$#
+    _widx=$((_key / 64))                 # word index counted from the right
+    [ "$_widx" -lt "$_nwords" ] || return 1
+    _from_left=$((_nwords - _widx))
+    _w=""; _i=1
+    for _tok in "$@"; do
+        [ "$_i" -eq "$_from_left" ] && _w="$_tok"
+        _i=$((_i + 1))
+    done
+    while [ ${#_w} -lt 16 ]; do _w="0$_w"; done
+    _bit=$((_key % 64))
+    _nib=$((_bit / 4))
+    _pos=$((16 - _nib))
+    _c="$(printf '%s' "$_w" | cut -c"$_pos")"
+    case "$_c" in [0-9a-fA-F]) ;; *) return 1 ;; esac
+    _v=$((0x$_c))
+    [ $(( (_v >> (_bit % 4)) & 1 )) -eq 1 ]
 }
 
 resolve_key_event_node() {
@@ -283,7 +298,17 @@ resolve_key_event_node() {
     if [ -n "$_power" ] && [ -c "$_power" ]; then
         export EVENT_PATH_POWER="$_power"
     fi
-    if [ -n "$_volume" ] && [ -c "$_volume" ]; then
+    VOLUME_KEYS_ON_PAD=0
+    if [ -n "$_volume" ] && [ -c "$_volume" ] && [ "$_volume" = "$_pad" ]; then
+        # The volume keys are on the gamepad itself (KEY_VOLUMEDOWN 114 /
+        # KEY_VOLUMEUP 115, captured on hardware 2026-09-04). Every pad watcher
+        # already reads that node, so EVENT_PATH_VOLUME must NOT point at it too
+        # (two readers = two steps per press); park it on the power node and
+        # tell buttons_watchdog/PyUI where the keys live instead.
+        VOLUME_KEYS_ON_PAD=1
+        export EVENT_PATH_VOLUME="$EVENT_PATH_POWER"
+        log_message "Miniloong: volume keys are on the gamepad node $_volume (pad watchers read them)"
+    elif [ -n "$_volume" ] && [ -c "$_volume" ]; then
         export EVENT_PATH_VOLUME="$_volume"
         log_message "Miniloong: volume keys on $_volume"
     else
@@ -299,7 +324,9 @@ resolve_key_event_node() {
         echo "EVENT_PATH_SEND_TO_DRASTIC='${EVENT_PATH_READ_INPUTS_SPRUCE}'"
         echo "EVENT_PATH_VOLUME='${EVENT_PATH_VOLUME}'"
         echo "EVENT_PATH_POWER='${EVENT_PATH_POWER}'"
+        echo "VOLUME_KEYS_ON_PAD='${VOLUME_KEYS_ON_PAD}'"
     } > "$MINILOONG_INPUT_NODES_FILE" 2>/dev/null
+    export VOLUME_KEYS_ON_PAD
 }
 
 setup_mainui_alias() {
@@ -518,12 +545,76 @@ device_system_handles_sdcard_unmount() {
     return 1
 }
 
+# Power transitions. The stock busybox `poweroff`/`reboot` only signal PID 1,
+# and init is blocked in rcS for the whole Spruce session (S49spruce ->
+# session.sh -> runtime.sh), so they return having done nothing: three shutdown
+# attempts on 2026-08-28 and two on 2026-09-04 all ended at "Attempting to
+# unmount /mnt/SDCARD" with the device still up (SPR-HIGH-051). Magic SysRq is
+# 0 by default here. So: opt into the strict unmount path (which also sets the
+# shutting_down flag the boot session reads, so runtime's exit is a clean
+# shutdown and not a crash to relaunch), tell stage 2 the applets cannot be
+# trusted, and when we must do it ourselves take the filesystems down the
+# REISUB way and call the forced form - reboot(2), no init involved. Sequence
+# per Jawaka device_mlp1.c, which measured FAT corruption on this board without
+# the emergency remount-ro.
+device_needs_strict_unmount() {
+    return 0
+}
+
+device_power_transition_bypasses_init() {
+    return 0
+}
+
+# The rk817 (i2c-0, 0x20) ships with SYS_CFG3 (0xF4) bits 7:6 = 00, Rockchip's
+# RST_FUNC_DEV "reset the dev": a SoC reset makes the PMIC power-cycle every rail,
+# and on this unit that ends with the board OFF - a menu reboot and an ssh
+# `reboot -f` both left it dark (2026-09-04). Rockchip's own driver flips the
+# field to RST_FUNC_REG (0x1<<6, "reset the reg only") before loader/recovery/
+# fastboot/panic/watchdog reboots and leaves plain reboots on the power-cycling
+# mode. Doing the same flip before OUR plain reboot brought the unit back in
+# 19 s (04:19:25 -> up, uptime 15 s). Read-modify-write so the SLPPIN and other
+# bits keep whatever the driver set; -f because the rk808 driver owns 0x20.
+MINILOONG_PMIC_I2C_BUS="${MINILOONG_PMIC_I2C_BUS:-0}"
+MINILOONG_PMIC_I2C_ADDR="${MINILOONG_PMIC_I2C_ADDR:-0x20}"
+MINILOONG_PMIC_SYS_CFG3="0xf4"
+
+miniloong_pmic_reset_registers_only() {
+    _cur="$(i2cget -f -y "$MINILOONG_PMIC_I2C_BUS" "$MINILOONG_PMIC_I2C_ADDR" "$MINILOONG_PMIC_SYS_CFG3" 2>/dev/null)"
+    case "$_cur" in 0x[0-9a-fA-F][0-9a-fA-F]) ;; *) _cur=0x18 ;; esac
+    _new=$(( (_cur & 0x3f) | 0x40 ))
+    i2cset -f -y "$MINILOONG_PMIC_I2C_BUS" "$MINILOONG_PMIC_I2C_ADDR" "$MINILOONG_PMIC_SYS_CFG3" "$_new" 2>/dev/null
+    log_message "Miniloong: rk817 SYS_CFG3 $_cur -> $(printf '0x%02x' "$_new") (reset registers only) before reboot"
+}
+
+device_prepare_for_reboot() {
+    miniloong_pmic_reset_registers_only
+}
+
+miniloong_forced_power_transition() {
+    # $1 = poweroff | reboot
+    _sysrq_ctl="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
+    _sysrq_trigger="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
+    [ "$1" = "reboot" ] && miniloong_pmic_reset_registers_only
+    echo 1 > "$_sysrq_ctl" 2>/dev/null
+    sync
+    echo s > "$_sysrq_trigger" 2>/dev/null
+    echo u > "$_sysrq_trigger" 2>/dev/null
+    echo s > "$_sysrq_trigger" 2>/dev/null
+    sleep 0.5
+    "$1" -f
+    sleep 3
+    case "$1" in
+        reboot) echo b > "$_sysrq_trigger" 2>/dev/null ;;
+        *) echo o > "$_sysrq_trigger" 2>/dev/null ;;
+    esac
+}
+
 run_poweroff_cmd() {
-    poweroff
+    miniloong_forced_power_transition poweroff
 }
 
 device_run_reboot_cmd() {
-    reboot
+    miniloong_forced_power_transition reboot
 }
 
 # The rootfs stub (spruce/miniloong/S50spruce) owns the hand-off to stock

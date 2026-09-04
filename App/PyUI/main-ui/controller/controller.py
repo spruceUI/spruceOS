@@ -277,6 +277,15 @@ class Controller:
                             was_hotkey = True
                             while Controller.still_held_down() and not called_from_check_for_hotkey:
                                 Controller.check_for_hotkey()
+                    elif (Controller.last_controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN)
+                          and not called_from_check_for_hotkey):
+                        # Pads that carry the volume keys on the gamepad node (Miniloong)
+                        # deliver them here instead of through a KeyWatcher; give them the
+                        # watcher's treatment (device.special_input -> step + indicator +
+                        # save). Inside check_for_hotkey they stay inputs, so the Menu + Vol
+                        # brightness chord keeps working.
+                        Device.get_device().special_input(Controller.last_controller_input, 0)
+                        Controller.clear_last_input()
                     else:
                         break  # Valid non-hotkey input
                 elapsed = time.monotonic() - start_time

@@ -384,6 +384,32 @@ device_needs_strict_unmount() {
     return 1
 }
 
+device_power_transition_bypasses_init() {
+    # return 0 = true
+    # return non-zero = false
+    #
+    # Whether `poweroff`/`reboot` can be trusted to do anything on this device.
+    # The busybox applets only signal PID 1 and return; if init is blocked for
+    # the whole Spruce session (the Miniloong's rcS is held by the boot
+    # supervisor, S49spruce -> session.sh -> runtime.sh) those signals are never
+    # serviced and the device just sits there with its card unmounted. A device
+    # answering true tells stage 2 to skip the plain applets and the 10 s waits
+    # on them, take the filesystems down the REISUB way (sysrq s/u/s) and call
+    # the forced form straight away, which is reboot(2) and needs no init.
+    # Only meaningful together with device_needs_strict_unmount. Default off.
+    return 1
+}
+
+device_prepare_for_reboot() {
+    # Runs on the reboot path only, after apps are closed and before stage 2
+    # takes the card away - the last moment the device layer is still on hand.
+    # For hardware where the plain kernel restart does not come back: the
+    # Miniloong's rk817 is configured to power-cycle every rail on a SoC reset
+    # ("reset the dev", pmic-reset-func 0) and the unit stays off, so it flips
+    # the PMIC to register-only reset first (SPR-HIGH-051). Default: nothing.
+    :
+}
+
 device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently
