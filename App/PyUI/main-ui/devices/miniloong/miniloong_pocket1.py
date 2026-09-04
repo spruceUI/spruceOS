@@ -469,7 +469,51 @@ class MiniloongPocket1(DeviceCommon):
             PyUiLogger.get_logger().error(f"Miniloong ensure_wpa_supplicant_conf failed: {e}")
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+        # RSSI from wpa_cli signal_poll (RSSI=-46 / LINKSPEED=72 / NOISE=9999 /
+        # FREQUENCY=2422, measured on the MLP1 2026-09-04), the Anbernic XX
+        # reading. Not /proc/net/wireless: the RTL8723DS reports its "level"
+        # column as 100+dBm (54 for -46 dBm), which device_common would grade
+        # as a positive, perfect signal. wpa_supplicant is already ours.
+        # -200 is what device_common reads as "no signal" - returned on any
+        # failure so the top-bar icon falls back to the off/locked glyph
+        # instead of a full-strength one.
+        no_signal = WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+        if not self.is_wifi_enabled():
+            return no_signal
+        try:
+            result = ProcessRunner.run(["wpa_cli", "-i", "wlan0", "signal_poll"], timeout=3, print=False)
+            output = result.stdout or ""
+            if result.returncode != 0 or "FAIL" in output:
+                return no_signal
+            signal_level = None
+            noise_level = 0
+            for line in output.splitlines():
+                line = line.strip()
+                if line.startswith("RSSI="):
+                    try:
+                        signal_level = int(line.split("=", 1)[1])
+                    except ValueError:
+                        pass
+                elif line.startswith("NOISE="):
+                    try:
+                        noise = int(line.split("=", 1)[1])
+                    except ValueError:
+                        noise = 9999
+                    if noise != 9999:  # wpa_supplicant's "not reported" sentinel
+                        noise_level = noise
+            if signal_level is None:
+                return no_signal
+            # Same dBm -> 0..70 mapping the other devices use.
+            if signal_level <= -100:
+                link_quality = 0
+            elif signal_level >= -50:
+                link_quality = 70
+            else:
+                link_quality = int((signal_level + 100) * 1.4)
+            return WiFiConnectionQualityInfo(noise_level=noise_level, signal_level=signal_level, link_quality=link_quality)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Miniloong wifi signal_poll failed: {e}")
+            return no_signal
 
     # ---- bluetooth: not wired (stock btmanager equivalent unknown) ----
 
