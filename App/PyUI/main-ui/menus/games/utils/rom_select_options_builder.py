@@ -33,7 +33,60 @@ class RomSelectOptionsBuilder:
     def __init__(self):
         self.roms_path = Device.get_device().get_roms_dir()
         self.rom_utils : RomUtils= RomUtils(self.roms_path)
-        
+        # folder_name -> (xml path, mtime it was parsed at, MiyooGameList)
+        self._game_list_cache: dict[str, tuple[str, float, MiyooGameList]] = {}
+
+    def get_game_list(self, folder_name) -> MiyooGameList:
+        """The parsed gamelist for one system, reparsed when the file changes.
+
+        Favorites, Recents and Collections mix systems in one screen, so they
+        cannot build a single list the way build_rom_list does. The mtime check
+        is what lets a scrape land while MainUI is running: the scraper writes
+        gamelist.xml, and the next draw picks the new names up rather than
+        holding whatever was cached at boot.
+        """
+        path = self.rom_utils.get_miyoo_games_file(folder_name)
+        try:
+            mtime = os.path.getmtime(path) if path else 0.0
+        except OSError:
+            mtime = 0.0
+
+        cached = self._game_list_cache.get(folder_name)
+        if cached is not None and cached[0] == path and cached[1] == mtime:
+            return cached[2]
+
+        game_list = MiyooGameList(path)
+        self._game_list_cache[folder_name] = (path, mtime, game_list)
+        return game_list
+
+    def get_game_entry(self, rom_info: RomInfo):
+        """The gamelist entry for a rom, or None. Never raises."""
+        try:
+            if rom_info.game_system is None or rom_info.is_collection:
+                return None
+            return self.get_game_list(rom_info.game_system.folder_name).get_by_file_path(rom_info.rom_file_path)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Unable to read gamelist for {rom_info.rom_file_path}: {e}")
+            return None
+
+    def resolve_display_name(self, rom_info: RomInfo, game_entry = None) -> str:
+        """What to show for a rom outside its own system's list.
+
+        gamelist.xml first, then whatever name was stored when the rom was put
+        on the list, then the filename. Reading the gamelist here rather than
+        trusting the stored name is the point: Favorites and Recents freeze a
+        name at the moment the game is added, so anything added before the
+        system was scraped kept its filename forever, and Collections never
+        stored a name at all.
+        """
+        if game_entry is None:
+            game_entry = self.get_game_entry(rom_info)
+        if game_entry is not None and game_entry.name:
+            return game_entry.name
+        if rom_info.display_name:
+            return rom_info.display_name
+        return RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+
 
     def build_fake_game_system(self, item, display_name=None, is_collection=None):
         # Should not use muos game system config to get around this but it works for now
@@ -293,7 +346,7 @@ class RomSelectOptionsBuilder:
         with log_timing("build_rom_list", PyUiLogger.get_logger()):    
             file_rom_list = []
             folder_rom_list = []
-            miyoo_game_list = MiyooGameList(self.rom_utils.get_miyoo_games_file(game_system.folder_name))
+            miyoo_game_list = self.get_game_list(game_system.folder_name)
 
             append_file = file_rom_list.append
             append_folder = folder_rom_list.append

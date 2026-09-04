@@ -3,7 +3,6 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.favorites_manager import FavoritesManager
-from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.consts import FAVORITES
@@ -18,11 +17,14 @@ class FavoritesMenu(RomsMenuCommon):
     def _get_rom_list(self) -> list[GridOrListEntry]:
         rom_list = []
         favorites : list[RomInfo] = FavoritesManager.get_favorites()
-        get_image_path_fn = get_rom_select_options_builder().get_image_path
+        builder = get_rom_select_options_builder()
+        get_image_path_fn = builder.get_image_path
         for rom_info in favorites:
-            display_name = rom_info.display_name
-            if(display_name is None):
-                display_name =  RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+            # Read the name out of gamelist.xml rather than trusting the one
+            # stored when the game was favorited: anything favorited before the
+            # system was scraped stored its filename and would keep it forever.
+            game_entry = builder.get_game_entry(rom_info)
+            display_name = builder.resolve_display_name(rom_info, game_entry)
 
             rom_list.append(
                 RomGridOrListEntry(
@@ -30,7 +32,7 @@ class FavoritesMenu(RomsMenuCommon):
                         folder_name="Favorites",
                         game_system=rom_info.game_system,
                         rom_file_path=rom_info.rom_file_path,
-                        game_entry=None,
+                        game_entry=game_entry,
                         prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
                         get_image_path_fn=get_image_path_fn,
                         get_favorite_icon=None
@@ -43,7 +45,8 @@ class FavoritesMenu(RomsMenuCommon):
 
     def sort_favorites_alphabetically(self, input_value):
         if(ControllerInput.A == input_value):
-            FavoritesManager.sort_favorites_alphabetically()
+            FavoritesManager.sort_favorites_alphabetically(
+                get_rom_select_options_builder().resolve_display_name)
 
     def get_additional_menu_options(self):
         popup_options = []

@@ -21,14 +21,17 @@ class RomsListEntry:
         self.display_name = display_name
 
     def get_sort_key(self):
-        text = self.display_name or os.path.basename(self.rom_file_path).lower() or ""
-        lower = text.lower()
-        if(UserConfig.get_ignore_articles_when_sorting()):
-            for article in ("the ", "a ", "an "):
-                if lower.startswith(article):
-                    return (text[len(article):] + ", " + article.strip()).lower()
-                
-        return lower        
+        return sort_key_for_text(self.display_name or os.path.basename(self.rom_file_path).lower() or "")
+
+
+def sort_key_for_text(text):
+    lower = text.lower()
+    if(UserConfig.get_ignore_articles_when_sorting()):
+        for article in ("the ", "a ", "an "):
+            if lower.startswith(article):
+                return (text[len(article):] + ", " + article.strip()).lower()
+
+    return lower
 
 
 class RomsListManager:
@@ -202,8 +205,26 @@ class RomsListManager:
 
         return rom_info_list
 
-    def sort_alphabetically(self):
-        self._entries.sort(key=lambda entry: (entry.get_sort_key()))
+    def sort_alphabetically(self, display_name_fn=None):
+        # display_name_fn lets the caller sort on the name actually shown.
+        # Favorites and Recents render the gamelist.xml name now, which is not
+        # necessarily the one stored in the entry, and sorting on the stored
+        # one would leave the list looking unsorted.
+        if display_name_fn is None:
+            self._entries.sort(key=lambda entry: (entry.get_sort_key()))
+        else:
+            def sort_key(entry):
+                try:
+                    game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                    if game_system is None:
+                        return entry.get_sort_key()
+                    return sort_key_for_text(display_name_fn(
+                        RomInfo(game_system, entry.rom_file_path, entry.display_name)))
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Unable to sort {entry.rom_file_path}: {e}")
+                    return entry.get_sort_key()
+
+            self._entries.sort(key=sort_key)
         # rebuild dict after sorting
         self._entries_dict = {
             self._entry_key(entry.rom_file_path, entry.game_system_name): entry

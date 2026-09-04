@@ -11,7 +11,6 @@ from menus.games.game_select_menu_popup import GameSelectMenuPopup
 from menus.games.in_game_menu_listener import InGameMenuListener
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.recents_manager import RecentsManager
-from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from themes.theme import Theme
@@ -73,22 +72,36 @@ class RomsMenuCommon(ABC):
         raw_rom_list = CollectionsManager.get_games_in_collection(collection)
         
         rom_list = []
-        get_image_path_fn = get_rom_select_options_builder().get_image_path
+        builder = get_rom_select_options_builder()
+        get_image_path_fn = builder.get_image_path
 
         for rom_info in raw_rom_list:
-            rom_file_name = RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+            # Collections never stored a display name at all - the entry only
+            # holds a path and a system - so this used to be the filename
+            # whatever gamelist.xml said. A collection of NeoGeo roms was
+            # unreadable as a result.
+            game_entry = builder.get_game_entry(rom_info)
+            display_name = builder.resolve_display_name(rom_info, game_entry)
             rom_list.append(
                     RomGridOrListEntry(
-                            display_name=self._remove_extension(rom_file_name)  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
+                            # No _remove_extension here: resolve_display_name never returns
+                            # one, and splitext on a real title cuts it at the
+                            # first period - "Mr. Do!" became "Mr".
+                            display_name=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
                             folder_name=collection,
                             game_system=rom_info.game_system,
                             rom_file_path=rom_info.rom_file_path,
-                            game_entry=None,
+                            game_entry=game_entry,
                             prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
                             get_image_path_fn=get_image_path_fn,
                             get_favorite_icon=None
                     )
             )
+
+        # CollectionsManager sorted these by filename, which stops matching what
+        # is on screen now that the name comes from gamelist.xml. Sort on the
+        # text actually shown, the same key build_rom_list uses.
+        rom_list.sort(key=lambda entry: entry.get_sort_key())
 
         return rom_list
 
