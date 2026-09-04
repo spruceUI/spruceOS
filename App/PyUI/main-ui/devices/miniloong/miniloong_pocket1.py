@@ -58,8 +58,14 @@ class MiniloongPocket1(DeviceCommon):
     # linear 150..210 ramp put the first six steps below audibility (SPR-MED-182).
     DAC_TABLE = (0, 168, 171, 175, 178, 181, 185, 188, 192, 195, 198, 202,
                  205, 208, 212, 215, 219, 222, 225, 229, 232)
-    # Backlight raw <= 55 flickers on this panel (Jawaka device_mlp1.c:26).
-    BACKLIGHT_FLOOR = 60
+    # Backlight raw per 0..10 level, mirroring SYSTEM_BRIGHTNESS_0..10 in
+    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
+    # Measured 2026-09-04: the panel lights from off at raw 62 and goes dark
+    # stepping down at 62; 60 and below are black (the old floor of 60 booted
+    # to a dark screen). Floor 70 = stock's charger floor with margin; above
+    # ~135 nothing changes. Level 0 is the dimmest safe level, never dark.
+    BACKLIGHT_TABLE = (70, 77, 83, 90, 96, 103, 109, 116, 122, 129, 135)
+    BACKLIGHT_FLOOR = 70
 
     def __init__(self, device_name, main_ui_mode=True):
         self.device_name = device_name
@@ -256,11 +262,15 @@ class MiniloongPocket1(DeviceCommon):
             return False
 
     def _set_lumination_to_config(self):
-        raw = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
-        raw = max(self.BACKLIGHT_FLOOR, int(raw))
+        level = max(0, min(10, int(self.system_config.backlight)))
+        raw = max(self.BACKLIGHT_FLOOR, self.BACKLIGHT_TABLE[level])
         try:
             with open("/sys/class/backlight/backlight/brightness", "w") as f:
                 f.write(str(raw))
+            # A level write is also a "screen on" request: make sure the panel is
+            # not left blanked by an earlier bl_power=4.
+            with open("/sys/class/backlight/backlight/bl_power", "w") as f:
+                f.write("0")
         except OSError as e:
             PyUiLogger.get_logger().error(f"Miniloong: backlight write failed: {e}")
 
