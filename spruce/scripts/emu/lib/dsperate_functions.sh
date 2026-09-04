@@ -152,6 +152,10 @@ run_dsperate() {
 
 	seed_dsperate_config
 
+	# DSperate opens Gamepads and Keyboards, but not joysticks so SDL needs to
+	# be able to see them. DSperate also binds by SDL position (DS A = pad "b").
+	export_sdl_gamecontroller_map positional
+
 	if ! _rom="$(prepare_dsperate_rom "$ROM_FILE")"; then
 		start_pyui_message_writer
 		log_and_display_message "Could not unpack $(basename "$ROM_FILE")."
