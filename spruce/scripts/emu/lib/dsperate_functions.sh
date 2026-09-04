@@ -189,6 +189,18 @@ run_dsperate() {
 		set -- "$@" --load-state "$_state"
 	fi
 
+	# The game switcher's thumbnail, written by DSperate itself with the auto
+	# state (emu.autosave_png). The device's take_screenshot runs first in
+	# the hold-Home path and this overwrites it a moment later, which is the
+	# point: that grab reads the panel from outside and cannot see what the
+	# emulator draws on a hardware scaler layer (the A30 got a jumble of the
+	# frame at the wrong stride). PyUI uses the basename with no extension,
+	# so we match that here too.
+	_gs_dir="/mnt/SDCARD/Saves/states/.gameswitcher"
+	_gs_name="$(basename "$ROM_FILE")"
+	mkdir -p "$_gs_dir"
+	set -- "$@" --autosave-png "$_gs_dir/${_gs_name%.*}.state.auto.png"
+
 	if [ "$PLATFORM" = "A30" ]; then
 		export DS_ROTATE=270
 		./dsperate.a30 "$@" > "$(emu_log_file)" 2>&1
