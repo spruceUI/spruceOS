@@ -11,9 +11,9 @@ from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import KeyWatcherController
+from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
-from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from menus.games.utils.rom_info import RomInfo
@@ -193,11 +193,12 @@ class MiniloongPocket1(DeviceCommon):
         return self.JOYPAD_NODE
 
     def get_controller_interface(self):
-        # Standard Linux gamepad codes with hat axes for the D-pad, the same
-        # table the Flip and TrimUI devices use. UNVERIFIED for this pad.
+        # The Flip/TrimUI table with this pad's measured differences layered on
+        # top: X is BTN_NORTH (307) here, the triggers are keys (312/313) and
+        # there is one thumb click (317). See MiniloongKeyMappingProvider.
         return KeyWatcherController(
             event_path=self._resolve_joypad(),
-            mapping_provider=MiyooTrimKeyMappingProvider(),
+            mapping_provider=MiniloongKeyMappingProvider(),
             event_format="llHHi",
         )
 
