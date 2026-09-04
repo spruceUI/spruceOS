@@ -277,12 +277,35 @@ clean_up_flags() {
     flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 }
 
+# Stage 2 must be copied off the card BEFORE anything is unmounted. On the
+# Miniloong the card is at /mnt/sdcard and /mnt/SDCARD is a separate BIND mount
+# (the Flip's /mnt/SDCARD is a symlink), so unmount_all - which spares only
+# $SD_MOUNTPOINT - takes /mnt/SDCARD away and the copy below found nothing:
+# stage 2 never ran there, the fallback ran the power-off command for a
+# reboot too, and three shutdown attempts left the device on its unmounted
+# card (SPR-HIGH-051, 2026-08-28 and 2026-09-04). Called right after the
+# starting breadcrumb, while every path is still mounted.
+stage_shutdown_stage_2() {
+    if [ -e "$STAGE_2_SD_PATH" ]; then
+        if cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null; then
+            chmod +x "$STAGE_2_TMP_PATH"
+            log_message "save_poweroff.sh: staged stage 2 at $STAGE_2_TMP_PATH"
+        else
+            log_message "save_poweroff.sh: WARNING could not stage stage 2 to /tmp"
+        fi
+    else
+        log_message "save_poweroff.sh: WARNING stage 2 script missing at $STAGE_2_SD_PATH"
+    fi
+}
+
 exec_shutdown_stage_2() {
     log_message "Running stage 2 of save_poweroff from /tmp."
     sync
-    if [ -e "$STAGE_2_SD_PATH" ]; then
-        cp $STAGE_2_SD_PATH $STAGE_2_TMP_PATH
-        chmod +x $STAGE_2_TMP_PATH
+    # Prefer the copy staged before the unmounts; fall back to copying now.
+    if [ ! -x "$STAGE_2_TMP_PATH" ] && [ -e "$STAGE_2_SD_PATH" ]; then
+        cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null && chmod +x "$STAGE_2_TMP_PATH"
+    fi
+    if [ -x "$STAGE_2_TMP_PATH" ]; then
         # Reset environment BEFORE exec so the new shell interpreter
         # doesn't load shared libraries from the SD card
         export PATH=/usr/bin:/usr/sbin:/bin:/sbin
@@ -302,8 +325,14 @@ exec_shutdown_stage_2() {
         fi
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
-        log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
-        run_poweroff_cmd
+        # No stage 2 at all: still honour what was asked for.
+        if [ "$s2_arg" = "--reboot" ]; then
+            log_message "ERROR: Stage 2 script missing! Executing device_run_reboot_cmd() instead."
+            device_run_reboot_cmd
+        else
+            log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
+            run_poweroff_cmd
+        fi
     fi
 }
 
@@ -354,6 +383,7 @@ fi
 # stops, which is exactly how the RGB30 lockup first presented. These are three
 # writes on a path that ends in a poweroff; they cost nothing.
 log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
+stage_shutdown_stage_2
 
 blink_led_if_applicable
 device_prepare_for_poweroff
