@@ -538,10 +538,36 @@ device_power_transition_bypasses_init() {
     return 0
 }
 
+# The rk817 (i2c-0, 0x20) ships with SYS_CFG3 (0xF4) bits 7:6 = 00, Rockchip's
+# RST_FUNC_DEV "reset the dev": a SoC reset makes the PMIC power-cycle every rail,
+# and on this unit that ends with the board OFF - a menu reboot and an ssh
+# `reboot -f` both left it dark (2026-09-04). Rockchip's own driver flips the
+# field to RST_FUNC_REG (0x1<<6, "reset the reg only") before loader/recovery/
+# fastboot/panic/watchdog reboots and leaves plain reboots on the power-cycling
+# mode. Doing the same flip before OUR plain reboot brought the unit back in
+# 19 s (04:19:25 -> up, uptime 15 s). Read-modify-write so the SLPPIN and other
+# bits keep whatever the driver set; -f because the rk808 driver owns 0x20.
+MINILOONG_PMIC_I2C_BUS="${MINILOONG_PMIC_I2C_BUS:-0}"
+MINILOONG_PMIC_I2C_ADDR="${MINILOONG_PMIC_I2C_ADDR:-0x20}"
+MINILOONG_PMIC_SYS_CFG3="0xf4"
+
+miniloong_pmic_reset_registers_only() {
+    _cur="$(i2cget -f -y "$MINILOONG_PMIC_I2C_BUS" "$MINILOONG_PMIC_I2C_ADDR" "$MINILOONG_PMIC_SYS_CFG3" 2>/dev/null)"
+    case "$_cur" in 0x[0-9a-fA-F][0-9a-fA-F]) ;; *) _cur=0x18 ;; esac
+    _new=$(( (_cur & 0x3f) | 0x40 ))
+    i2cset -f -y "$MINILOONG_PMIC_I2C_BUS" "$MINILOONG_PMIC_I2C_ADDR" "$MINILOONG_PMIC_SYS_CFG3" "$_new" 2>/dev/null
+    log_message "Miniloong: rk817 SYS_CFG3 $_cur -> $(printf '0x%02x' "$_new") (reset registers only) before reboot"
+}
+
+device_prepare_for_reboot() {
+    miniloong_pmic_reset_registers_only
+}
+
 miniloong_forced_power_transition() {
     # $1 = poweroff | reboot
     _sysrq_ctl="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
     _sysrq_trigger="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
+    [ "$1" = "reboot" ] && miniloong_pmic_reset_registers_only
     echo 1 > "$_sysrq_ctl" 2>/dev/null
     sync
     echo s > "$_sysrq_trigger" 2>/dev/null

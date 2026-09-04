@@ -400,6 +400,16 @@ device_power_transition_bypasses_init() {
     return 1
 }
 
+device_prepare_for_reboot() {
+    # Runs on the reboot path only, after apps are closed and before stage 2
+    # takes the card away - the last moment the device layer is still on hand.
+    # For hardware where the plain kernel restart does not come back: the
+    # Miniloong's rk817 is configured to power-cycle every rail on a SoC reset
+    # ("reset the dev", pmic-reset-func 0) and the unit stays off, so it flips
+    # the PMIC to register-only reset first (SPR-HIGH-051). Default: nothing.
+    :
+}
+
 device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently

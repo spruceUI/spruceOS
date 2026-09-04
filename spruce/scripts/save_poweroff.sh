@@ -376,6 +376,12 @@ alsactl store 2>/dev/null
 kill_remaining_background_processes
 
 # Systemd handles graceful shutdown on the pixel2
+# Reboot-only preparation while the device functions are still reachable
+# (stage 2 runs from /tmp with the card gone). See device_prepare_for_reboot.
+if [ "$s2_arg" = "--reboot" ]; then
+    device_prepare_for_reboot
+fi
+
 if device_system_handles_sdcard_unmount; then
 
     if [ "$s2_arg" = "--reboot" ]; then
