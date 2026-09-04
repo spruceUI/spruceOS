@@ -113,8 +113,17 @@ class MiyooMiniCommon(MiyooDevice):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.mainui_volume = None
+            # keymon owns the volume keys and writes /appconfigs/system.json on every
+            # press; this watcher is how the PyUI indicator learns the new level.
+            # /appconfigs is jffs2 with ONE-SECOND mtime granularity, so presses
+            # inside the same second do not change the mtime and were collapsed
+            # into one detection - the indicator lagged a step and could stay
+            # stale until the next unrelated write (Mini Plus/Flip, 2026-09-04).
+            # The granularity repeat keeps re-reading the file for two seconds
+            # after any change, which catches every same-second write.
             self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2)
+                "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2,
+                repeat_trigger_for_mtime_granularity_issues=True)
             threading.Thread(target=self.startup_init, daemon=True).start()
 
         super().__init__()
@@ -135,7 +144,9 @@ class MiyooMiniCommon(MiyooDevice):
                 volume = data.get("vol")
 
         except Exception as e:
-            PyUiLogger.get_logger().warning(
+            # keymon leaves stale bytes after the closing brace, so strict JSON
+            # fails on every press; the regex below is the normal path here.
+            PyUiLogger.get_logger().debug(
                 f"JSON parse failed for {path}, attempting fallback parse: {e}"
             )
 
@@ -163,6 +174,16 @@ class MiyooMiniCommon(MiyooDevice):
         if old_volume != self.mainui_volume:
             from display.display import Display
             Display.volume_changed(self.mainui_volume * 5)
+
+    def special_input(self, controller_input, length_in_seconds):
+        # The volume keys are keymon's; PyUI only mirrors the level it writes.
+        # A press reaches us through the event0 watcher before the file watcher's
+        # next tick, so re-read at once - if keymon has not written yet, the
+        # watcher's granularity repeat picks the change up within 200 ms.
+        if controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN):
+            self.on_mainui_config_change()
+            return
+        super().special_input(controller_input, length_in_seconds)
 
     def startup_init(self, include_wifi=True):
         if(self.is_wifi_enabled()):
