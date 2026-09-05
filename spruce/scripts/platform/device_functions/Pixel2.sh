@@ -93,14 +93,35 @@ disable_swap() {
     fi
 }
 
+setup_network_services() {
+    systemctl start network-base
+    systemctl start systemd-resolved
+    systemctl start NetworkManager
+    systemctl start iwd
+
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        WIFI_STATUS=$(jq -r '.wifi' "$SYSTEM_JSON")
+    else
+        WIFI_STATUS=0
+    fi
+
+    if [ "$WIFI_STATUS" -eq 1 ]; then
+        device_wifi_power_on
+    else
+        device_wifi_power_off
+    fi
+}
+
 device_init() {
     sync_volume_level
     disable_swap
     set_loading_screen &
+    setup_network_services &
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event2"
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 check_if_fw_needs_update() {
