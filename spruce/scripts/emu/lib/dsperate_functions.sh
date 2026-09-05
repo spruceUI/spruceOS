@@ -41,11 +41,16 @@ seed_dsperate_config() {
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
 	_cfg="$_cfg_dir/dsperate.ini"
+	_cfg_a30="$_cfg_dir/a30.ini"
 	[ -f "$_cfg" ] && return 0
 	mkdir -p "$_cfg_dir"
 	if [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
 		log_message "DSperate: seeded config from spruce.ini"
+	fi
+	if [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
+		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
+		log_message "DSperate: seeded config from a30.ini"
 	fi
 }
 
@@ -203,7 +208,7 @@ run_dsperate() {
 
 	if [ "$PLATFORM" = "A30" ]; then
 		export DS_ROTATE=270
-		./dsperate.a30 "$@" > "$(emu_log_file)" 2>&1
+		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
 	else
 		./dsperate "$@" > "$(emu_log_file)" 2>&1
 	fi
