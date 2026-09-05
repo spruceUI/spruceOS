@@ -104,6 +104,28 @@
       ],
       "selected": "Enabled",
       "overrides": {}
+    },
+    "dsperateVideoEffect": {
+      "display": "DSperate: Video Effect",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RGXX",
+        "GKD_PIXEL2",
+        "RGB30",
+        "MIYOO_A30"
+      ],
+      "options": [
+        "None",
+        "Antialiasing",
+        "Chunky Grid",
+        "Extra Chunky"
+      ],
+      "selected": "None",
+      "overrides": {}
     }
   },
   "sortOrder": 4000,

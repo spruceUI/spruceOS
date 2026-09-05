@@ -59,6 +59,11 @@ seed_dsperate_config() {
 	fi
 }
 
+get_video_effect() {
+	_setting="$(jq -r '.menuOptions.dsperateVideoEffect.selected // "None"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
+	echo "$_setting"
+}
+
 # returns 0=true or 1=false; for now, no per-game override logic in place.
 is_autoload_enabled() {
 	_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected // "Enabled"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
@@ -199,6 +204,13 @@ run_dsperate() {
 		set -- "$@" --load-state "$_state"
 	fi
 
+	_video_effect="$(get_video_effect)"
+	case "$_video_effect" in
+		"None") ;;
+		"Antialiasing") set -- "$@" --aa --seam blend ;;
+		"Chunky Grid") set -- "$@" --chunky --lcd_grid 1 ;;
+	esac
+
 	# The game switcher's thumbnail, written by DSperate itself with the auto
 	# state (emu.autosave_png). The device's take_screenshot runs first in
 	# the hold-Home path and this overwrites it a moment later, which is the
@@ -217,7 +229,7 @@ run_dsperate() {
 
 	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "0" ]; then
 		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no_analog.ini" > "$(emu_log_file)" 2>&1
-		
+
 	else
 		# let XDG_CONFIG_HOME or other XDG paths determine the config location
 		./dsperate "$@" > "$(emu_log_file)" 2>&1
