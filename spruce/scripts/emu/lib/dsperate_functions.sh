@@ -43,6 +43,7 @@ seed_dsperate_config() {
 	_cfg="$_cfg_dir/dsperate.ini"
 	_cfg_a30="$_cfg_dir/a30.ini"
 	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
+	_cfg_one_stick="$_cfg_dir/one-stick.ini"
 	mkdir -p "$_cfg_dir"
 	if [ ! -f "$_cfg" ] && [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
@@ -55,6 +56,10 @@ seed_dsperate_config() {
 	if [ ! -f "$_cfg_no_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/no-sticks.ini" "$_cfg_no_sticks"
 		log_message "DSperate: seeded config from no-sticks.ini"
+	fi
+	if [ ! -f "$_cfg_one_stick" ] && [ -f "$EMU_DIR/dsperate-configs/one-stick.ini" ]; then
+		cp -f "$EMU_DIR/dsperate-configs/one-stick.ini" "$_cfg_one_stick"
+		log_message "DSperate: seeded config from one-stick.ini"
 	fi
 }
 
@@ -228,6 +233,9 @@ run_dsperate() {
 
 	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "0" ]; then
 		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no-sticks.ini" > "$(emu_log_file)" 2>&1
+
+	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "1" ]; then
+		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/one-stick.ini" > "$(emu_log_file)" 2>&1
 
 	else
 		# let XDG_CONFIG_HOME or other XDG paths determine the config location
