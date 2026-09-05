@@ -43,17 +43,16 @@ seed_dsperate_config() {
 	_cfg="$_cfg_dir/dsperate.ini"
 	_cfg_a30="$_cfg_dir/a30.ini"
 	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
-	[ -f "$_cfg" ] && return 0
 	mkdir -p "$_cfg_dir"
-	if [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
+	if [ ! -f "$_cfg" ] && [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
 		log_message "DSperate: seeded config from spruce.ini"
 	fi
-	if [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
+	if [ ! -f "$_cfg_a30" ] && [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
 		log_message "DSperate: seeded config from a30.ini"
 	fi
-	if [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
+	if [ ! -f "$_cfg_no_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/no-sticks.ini" "$_cfg_no_sticks"
 		log_message "DSperate: seeded config from no-sticks.ini"
 	fi
