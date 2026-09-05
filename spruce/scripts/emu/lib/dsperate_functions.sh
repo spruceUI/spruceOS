@@ -227,7 +227,7 @@ run_dsperate() {
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
 
 	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "0" ]; then
-		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no_analog.ini" > "$(emu_log_file)" 2>&1
+		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no-sticks.ini" > "$(emu_log_file)" 2>&1
 
 	else
 		# let XDG_CONFIG_HOME or other XDG paths determine the config location
