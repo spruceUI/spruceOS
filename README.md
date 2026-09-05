@@ -88,23 +88,20 @@ Please do not adjust the RetroArch configurations unless you are already familia
 
 ## Active team members:
 
-spruceOS is a volunteer community effort, with a very fluid team structure. It would be impossible to list everyone who has contributed to the project, code or otherwise. Here are some of our recently active contributors, in alphabetical order:
+spruceOS is a volunteer community effort, with a very fluid team structure. It would be impossible to list everyone who has contributed to the project, code or otherwise. Here are some contributors from recent development cycles, in alphabetical order:
 
-   - Arkun
-   - Chrisj951 - Discord @chrisbastion
-   - Chris Cromer
-   - CilantroLimewire
-   - Cobaltdsc4102
-   - Hario
-   - Kitfox
-   - Lazydog
-   - Lonko
-   - RDWilliamson
-   - Ry - Ryan Sartor
-   - SundownerSport
-   - Tag
-   - wakeboxer
-   - Zetarancio
+   - [Arkun](https://github.com/CatalyticArkun)
+   - [Chrisj951](https://github.com/chrisj951) - Discord @chrisbastion
+   - [Hario](https://github.com/Hairo)
+   - [KitFox](https://github.com/orgs/spruceUI/people/KitFox0618)
+   - [KMFDManic](https://github.com/KMFDManic)
+   - [Lonko](https://github.com/orgs/spruceUI/people/LonkoDeLonk)
+   - [Mike Kendall](https://github.com/zenkalia)
+   - [Noxwell](https://github.com/beebono)
+   - [RDWilliamson](https://github.com/orgs/spruceUI/people/robertdw1974-byte)
+   - [Ryan "Ry" Sartor](https://github.com/ryanmsartor)
+   - [SundownerSport](https://github.com/Sundownersport)
+   
 
 ## Special Thanks
   - Tenlevels: Starting spruce, making kickass themes and getting the A30 where it deserves to be! Spruce would never have existed without him, we are eternally grateful to the long hours and dedication he put in. Thanks buddy!
@@ -121,12 +118,12 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
   - Metallic77: Custom lightweight shaders for the A30, and Flycast tweaks.
   - Russ from RGC: His YouTube channel is an inspiration.
   - [Icons8.com](icons8.com) for the logo, icons and their genrosity in giving us expanded access to icons for this project.
-  - [Miyoo](https://lomiyoo.com/) for sending us development units.
+  - [Miyoo](https://lomiyoo.com/), [TrimUI](https://trimui.net/), and [Anbernic](https://anbernic.com/) for sending us development units.
   - All past and present Team Members!
   - Our wonderful nightly testers, who have provided tons of helpful feedback, bug reports, and comeradery!
 
 
-THANK YOU TO THE AMAZING MIYOO COMMUNITY!!
+THANK YOU TO THE AMAZING RETRO HANDHELD COMMUNITY!!
 
 
 ## SUPPORTED GAME SYSTEMS
