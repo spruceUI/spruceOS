@@ -7,17 +7,17 @@
 CUR_TTY=/dev/null
 
 if [ -d "/mnt/SDCARD/spruce" ]; then
-  controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  directory="/mnt/SDCARD/Roms/PORTS/"
+  export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+  export directory="/mnt/SDCARD/Roms/PORTS/"
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
 else
-  controlfolder="/mnt/SDCARD/MIYOO_EX/PortMaster"
-  directory="/mnt/SDCARD/MIYOO_EX/"
+  export controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
+  export directory="/mnt/sdcard/MIYOO_EX/"
   # MIYOO_EXtra shit i need.
-  export PATH="/mnt/SDCARD/MIYOO_EX/bin:$PATH"
-  export LD_LIBRARY_PATH="/mnt/SDCARD/MIYOO_EX/lib:$LD_LIBRARY_PATH"
-
+  export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
+  export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
+  
   ## Python 3 runtime.
   mkdir -p $HOME/python3
 
@@ -25,13 +25,12 @@ else
     umount $HOME/python3
   fi
 
-  mount /mnt/SDCARD/MIYOO_EX/python_3.11.squashfs $HOME/python3
+  mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
   source $HOME/python3/bin/activate
 fi
 
-
-ESUDO=""
-ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
+export ESUDO=""
+export ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
 
 export SDL_GAMECONTROLLERCONFIG_FILE="$controlfolder/gamecontrollerdb.txt"
 
@@ -70,5 +69,5 @@ get_controls() {
 source $controlfolder/device_info.txt
 source $controlfolder/funcs.txt
 
-GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
-GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"
+export GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+export GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"

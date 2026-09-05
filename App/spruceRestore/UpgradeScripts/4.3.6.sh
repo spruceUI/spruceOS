@@ -59,6 +59,24 @@ if [ -f "$CONFIG_BACKUP" ]; then
     fi
 fi
 
+#
+# Drop dead files from older PortMaster trees. pugwash has read its fonts from
+# pylibs/resources for as long as spruce has shipped it; the copies at
+# PortMaster/resources/*.ttf (35MB) were never used, and the top-level
+# PortMaster.txt is a 2025 leftover - the live one is miyoo/PortMaster.txt,
+# which launch.sh restages. Upstream's splash/error ini and do_init live in
+# the same resources/ dir and stay. Idempotent.
+#
+PM_ROOT="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+if [ -d "$PM_ROOT" ]; then
+    removed=0
+    for f in "$PM_ROOT"/resources/*.ttf "$PM_ROOT/PortMaster.txt"; do
+        [ -f "$f" ] || continue
+        rm -f "$f" && removed=$((removed + 1))
+    done
+    [ "$removed" -gt 0 ] && log_message "4.3.6: removed $removed dead PortMaster file(s)"
+fi
+
 STATE_DIR="/mnt/SDCARD/Saves/states/Flycast"
 BACKUP_DIR="/mnt/SDCARD/Saves/states/Flycast.pre-4.3.6"
 
@@ -119,3 +137,4 @@ NOTE
 log_message "4.3.6: moved $moved Flycast save state(s) to $BACKUP_DIR (not deleted)"
 sync
 exit 0
+

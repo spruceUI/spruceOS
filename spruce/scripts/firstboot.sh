@@ -71,10 +71,65 @@ show_firstboot_archive_progress() {
     firstboot_progress_show "$FIRSTBOOT_ARCHIVE_COMPLETED" "$FIRSTBOOT_ARCHIVE_TOTAL" "$SPRUCE_LOGO"
 }
 
+PORTMASTER_7Z="/mnt/SDCARD/App/PortMaster/portmaster.7z"
+PORTMASTER_ROOT="/mnt/SDCARD/Persistent/portmaster"
+
+# True when the bundled PortMaster is newer than the one under Persistent/.
+# Versions are YYYY.MM.DD-HHMM, so plain sort order is version order. A missing
+# installed version counts as older; a device that self-updated past the bundle
+# is left alone.
+firstboot_portmaster_bundle_is_newer() {
+    [ -f "$PORTMASTER_7Z" ] || return 1
+    bundle_ver="$(7zr e -so "$PORTMASTER_7Z" portmaster/PortMaster/version 2>/dev/null | tr -d '\r\n')"
+    [ -n "$bundle_ver" ] || return 1
+    installed_ver="$(cat "$PORTMASTER_ROOT/PortMaster/version" 2>/dev/null | tr -d '\r\n')"
+    [ "$bundle_ver" != "$installed_ver" ] || return 1
+    [ "$(printf '%s\n%s\n' "$installed_ver" "$bundle_ver" | sort | tail -n1)" = "$bundle_ver" ]
+}
+
+# Lay the bundled PortMaster/ tree over an existing install - the same thing
+# pugwash's self-update does with upstream's PortMaster.zip - so an update
+# leaves every device on the bundled version whether or not it ever had WiFi.
+# Everything outside PortMaster/ (the Python runtime) is unchanged since the
+# tar.gz days, so only that subtree is written. config/ is skipped: it holds the
+# user's theme, release channel and warning timers, and upstream's zip does not
+# carry it either. libs/ (installed runtimes), autoinstall/ and the logs are
+# not in the archive beyond placeholders, so they survive untouched.
+#
+# Stale modules from the old pylibs/ are left behind rather than rmtree'd
+# first: a failed extraction would otherwise leave no pylibs at all, and an
+# unused file that upstream renamed away harms nothing. A pylibs.zip left by a
+# self-update that never got its follow-up launch IS removed - it is older than
+# what was just written, and launch.sh would unpack it over the new tree.
+run_firstboot_portmaster_overlay() {
+    log_location="/mnt/SDCARD/Saves/spruce/portmaster_extract.log"
+    log_firstboot_archive_status "ARCHIVE_BEGIN" "PortMaster" "start" "archive=portmaster.7z mode=overlay"
+
+    7zr x -y -scsUTF-8 -o"/mnt/SDCARD/Persistent/" "$PORTMASTER_7Z" \
+        portmaster/PortMaster -x'!portmaster/PortMaster/config' >>"$log_location" 2>&1
+    rc=$?
+    if [ "$rc" -eq 0 ]; then
+        rm -f "$PORTMASTER_ROOT/PortMaster/pylibs.zip"
+        chmod -R +x "$PORTMASTER_ROOT/PortMaster" 2>/dev/null
+    fi
+
+    FIRSTBOOT_ARCHIVE_COMPLETED=$((FIRSTBOOT_ARCHIVE_COMPLETED + 1))
+    show_firstboot_archive_progress
+
+    if [ "$rc" -eq 0 ]; then
+        log_firstboot_archive_status "ARCHIVE_RESULT" "PortMaster" "success" "archive=portmaster.7z mode=overlay rc=$rc"
+    else
+        log_firstboot_archive_status "ARCHIVE_RESULT" "PortMaster" "failed" "archive=portmaster.7z mode=overlay rc=$rc"
+    fi
+    return "$rc"
+}
+
 plan_firstboot_archive_totals() {
     PORTMASTER_ARCHIVE_COUNT=0
-    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ] && [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] && [ -f /mnt/SDCARD/App/PortMaster/portmaster.7z ]; then
-        PORTMASTER_ARCHIVE_COUNT=1
+    if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ] && [ -f "$PORTMASTER_7Z" ]; then
+        if [ ! -d "$PORTMASTER_ROOT" ] || firstboot_portmaster_bundle_is_newer; then
+            PORTMASTER_ARCHIVE_COUNT=1
+        fi
     fi
 
     SCUMMVM_ARCHIVE_COUNT=0
@@ -149,13 +204,16 @@ run_firstboot_package_phase() {
 
     if [ "$DEVICE_SUPPORTS_PORTMASTER" = "true" ]; then
         mkdir -p /mnt/SDCARD/Persistent/
-        if [ ! -d "/mnt/SDCARD/Persistent/portmaster" ] ; then
-            run_firstboot_archive_extract /mnt/SDCARD/App/PortMaster/portmaster.7z /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
+        if [ ! -d "$PORTMASTER_ROOT" ] ; then
+            run_firstboot_archive_extract "$PORTMASTER_7Z" /mnt/SDCARD/Persistent/ /mnt/SDCARD/Saves/spruce/portmaster_extract.log "PortMaster"
+        elif [ "$PORTMASTER_ARCHIVE_COUNT" -eq 1 ]; then
+            log_message "Firstboot: PortMaster installed but older than the bundle, overlaying"
+            run_firstboot_portmaster_overlay
         else
-            log_message "Firstboot: PortMaster already installed, skipping archive extraction"
+            log_message "Firstboot: PortMaster already installed and current, skipping archive extraction"
         fi
 
-        rm -f /mnt/SDCARD/App/PortMaster/portmaster.7z
+        rm -f "$PORTMASTER_7Z"
     fi
 
     if [ -f "$SCUMMVM_7Z" ]; then

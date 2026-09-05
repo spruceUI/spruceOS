@@ -6,18 +6,18 @@
 # TODO: check this
 CUR_TTY=/dev/null
 
-if [ -d "/mnt/sdcard/spruce" ]; then
-  controlfolder="/mnt/sdcard/Persistent/portmaster/PortMaster"
-  directory="/mnt/sdcard/Roms/PORTS/"
-  export PATH="/mnt/sdcard/Persistent/portmaster/bin:$PATH"
-  export LD_LIBRARY_PATH="/mnt/sdcard/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
+if [ -d "/mnt/SDCARD/spruce" ]; then
+  export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+  export directory="/mnt/SDCARD/Roms/PORTS/"
+  export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
+  export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
 else
-  controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
-  directory="/mnt/sdcard/MIYOO_EX/"
+  export controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
+  export directory="/mnt/sdcard/MIYOO_EX/"
   # MIYOO_EXtra shit i need.
   export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
-
+  
   ## Python 3 runtime.
   mkdir -p $HOME/python3
 
@@ -29,9 +29,8 @@ else
   source $HOME/python3/bin/activate
 fi
 
-
-ESUDO=""
-ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
+export ESUDO=""
+export ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
 
 export SDL_GAMECONTROLLERCONFIG_FILE="$controlfolder/gamecontrollerdb.txt"
 
@@ -54,11 +53,21 @@ get_controls() {
 
   ANALOGSTICKS=$ANALOG_STICKS
 
-  # sdl_controllerconfig="$(< "/tmp/gamecontrollerdb.txt")"
+  # Every port does `export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"`
+  # right after calling this. Leaving the variable empty therefore does not mean
+  # "no opinion" - it actively blanks whatever mapping the launcher exported.
+  #
+  # That costs nothing on devices whose pad is in the db file
+  # (SDL_GAMECONTROLLERCONFIG_FILE below still applies), which is why it went
+  # unnoticed. On the Anbernic XX line the db has no entry for the built-in pad
+  # and the env hint from set_port_abxy_scheme is the only mapping there is, so
+  # blanking it left every port with a dead pad. Hand the same value back
+  # through the variable the port actually reads.
+  sdl_controllerconfig="$SDL_GAMECONTROLLERCONFIG"
 }
 
 source $controlfolder/device_info.txt
 source $controlfolder/funcs.txt
 
-GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
-GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"
+export GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+export GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"

@@ -94,7 +94,36 @@ esac
 # Just replacing the entire file. This should go away soon
 rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
 rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
-rm /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
+# A self-update leaves pylibs.zip behind and pugwash unpacks it at startup -
+# rmtree pylibs/ and exlibs/, extract, record the md5, delete the zip. Anything
+# staged into pylibs/ before that is thrown away with the old tree, so the
+# launch right after an update ran on upstream's config.py. Do the unpack here
+# first, the same way pugwash does, so the config.py copy below lands on the
+# tree pugwash will actually use. The bundled python is the one thing every
+# platform has; unzip is not.
+PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+if [ -f "$PM_DIR/pylibs.zip" ]; then
+    log_message "PortMaster: unpacking pylibs.zip left by a self-update"
+    rm -rf "$PM_DIR/pylibs" "$PM_DIR/exlibs"
+    LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH" \
+        /mnt/SDCARD/Persistent/portmaster/bin/python3 -m zipfile -e "$PM_DIR/pylibs.zip" "$PM_DIR" \
+        && md5sum "$PM_DIR/pylibs.zip" | cut -d' ' -f1 > "$PM_DIR/pylibs.zip.md5" \
+        && rm -f "$PM_DIR/pylibs.zip"
+fi
+# Upstream's config.py has a spruce branch, but it targets a layout we do not
+# use (/mnt/sdcard, Roms/.portmaster, Roms/PORTS64). Patch those four strings in
+# place rather than dropping in our own copy of the file: harbourmaster does
+# "from .config import *" and any symbol a newer upstream adds to config.py
+# would be missing from a copy made against an older one (a self-updated
+# 2026.07 tree with the 2025.03 copy staged in died on
+# HM_ACCEPTABLE_NON_BASH_TOP_LEVEL_FILES). Whatever version the device has,
+# it keeps its own config.py. Idempotent.
+sed -i \
+    -e 's|/mnt/sdcard/spruce|/mnt/SDCARD/spruce|' \
+    -e 's|/mnt/sdcard/Persistent/portmaster|/mnt/SDCARD/Persistent/portmaster|' \
+    -e 's|/mnt/SDCARD/Roms/\.portmaster|/mnt/SDCARD/Persistent/portmaster|' \
+    -e 's|/mnt/SDCARD/Roms/PORTS64|/mnt/SDCARD/Roms/PORTS|' \
+    "$PM_DIR/pylibs/harbourmaster/config.py"
 cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
 # ...and again under a name the updater does not own. bash reads a script
 # incrementally by byte offset, so when pugwash's self-update replaces
@@ -107,7 +136,6 @@ cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/P
 cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/spruce_portmaster.sh
 chmod +x /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/spruce_portmaster.sh
 cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
-cp /mnt/SDCARD/App/PortMaster/config.py /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
 
 rm /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
 cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
@@ -129,8 +157,6 @@ esac
 
 #Launch port master
 cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
-
-cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/SDCARD/Saves/flip/home/device_info_Miyoo_Miyoo Flip.txt"
 
 ./spruce_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
 
