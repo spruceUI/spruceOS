@@ -208,7 +208,7 @@ run_dsperate() {
 	case "$_video_effect" in
 		"None") ;;
 		"Antialiasing") set -- "$@" --aa --seam blend ;;
-		"Chunky Grid") set -- "$@" --chunky --lcd_grid 1 ;;
+		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 	esac
 
 	# The game switcher's thumbnail, written by DSperate itself with the auto
