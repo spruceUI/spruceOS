@@ -42,6 +42,7 @@ seed_dsperate_config() {
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
 	_cfg="$_cfg_dir/dsperate.ini"
 	_cfg_a30="$_cfg_dir/a30.ini"
+	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
 	[ -f "$_cfg" ] && return 0
 	mkdir -p "$_cfg_dir"
 	if [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
@@ -51,6 +52,10 @@ seed_dsperate_config() {
 	if [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
 		log_message "DSperate: seeded config from a30.ini"
+	fi
+	if [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
+		cp -f "$EMU_DIR/dsperate-configs/no-sticks.ini" "$_cfg_no_sticks"
+		log_message "DSperate: seeded config from no-sticks.ini"
 	fi
 }
 
@@ -209,7 +214,12 @@ run_dsperate() {
 	if [ "$PLATFORM" = "A30" ]; then
 		export DS_ROTATE=270
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
+
+	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "0" ]; then
+		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no_analog.ini" > "$(emu_log_file)" 2>&1
+		
 	else
+		# let XDG_CONFIG_HOME or other XDG paths determine the config location
 		./dsperate "$@" > "$(emu_log_file)" 2>&1
 	fi
 

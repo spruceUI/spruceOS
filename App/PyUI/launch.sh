@@ -54,7 +54,7 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Brick / SmartPro / SmartProS
+# Brick / BrickPro / SmartPro / SmartProS
 ############################################################
     "Brick" | "BrickPro" | "SmartPro" | "SmartProS" )
         tinymix set 9 1
