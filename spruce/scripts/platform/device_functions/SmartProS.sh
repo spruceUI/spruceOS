@@ -506,3 +506,13 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # SmartProS leaves dirty bit set?
 }
+
+# Strict unmount by default (SPR-MED-199). Measured 2026-09-06: the original
+# single umount fails here on the fan script's python (exe on the card) and on
+# hciattach/bluetoothd (cwd on the card), holders the fd-only sweep never
+# sees, and falls back to a lazy detach. The strict path took the card off
+# cleanly in every run of 2026-09-05/06 (USB Storage Mode session, T5-3 to
+# T5-7) at a cost of a few seconds.
+device_needs_strict_unmount() {
+    return 0
+}

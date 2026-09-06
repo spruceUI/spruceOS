@@ -300,3 +300,15 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # Brick/SmartPro leaves dirty bit set?
 }
+
+# Strict unmount by default (SPR-MED-199). Measured 2026-09-06 with stage 2's
+# per-shutdown log: on every TrimUI A133P device the original single umount
+# fails on holders the fd-only sweep cannot see - orphaned getevents from the
+# power-button watchdog on the Brick, Brick Pro and Smart Pro - and falls back
+# to a lazy detach that leaves the FAT dirty flag set. The strict path (cwd,
+# exe and mapping holders, a sweep between retries, remount-ro, a holder dump
+# on failure) took the card off cleanly on the Smart Pro S, Smart Pro and
+# Brick the same night, at a cost of a few seconds.
+device_needs_strict_unmount() {
+    return 0
+}

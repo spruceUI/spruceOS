@@ -45,6 +45,11 @@ class GKDDevice(DeviceCommon):
     def restore_framebuffer(self):
         pass
     
+    def sd_card_repair_supported(self):
+        # The system owns the card's unmount at power-off, so spruce's stage 2
+        # never runs here and no fsck can be offered (SPR-MED-199).
+        return False
+
     def power_off_cmd(self):
         return "poweroff"
     

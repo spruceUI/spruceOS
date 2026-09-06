@@ -78,11 +78,28 @@ fi
 killall -q idlemon 2>/dev/null
 killall -q idlemon_mm.sh 2>/dev/null
 
+# 4. Export. The PC must not be handed a filesystem the kernel still has
+# mounted (SPR-MED-198), so wherever spruce owns the card the export is a
+# card-less session: stage what it needs into /tmp and hand over to the
+# shutdown, which unmounts cleanly, exports, waits, and reboots. Only where
+# the system owns the card (device_system_handles_sdcard_unmount) is the
+# mounted export kept.
+if ! device_system_handles_sdcard_unmount; then
+    if usb_session_stage; then
+        log_and_display_message "Preparing the SD card for USB..."
+        sleep 1
+        stop_pyui_message_writer
+        sync
+        exec "$SAVE_POWEROFF" --usb-storage-export
+    fi
+    log_message "USB Storage Mode: session staging failed, falling back to the mounted export"
+fi
+
 log_and_display_message "Connecting USB Mass Storage Mode..."
 configure_usb_gadget
 log_and_display_message "" # Clear the "Connecting" message
 
-# 4. Main loop
+# 4b. Legacy loop (mounted export)
 while true; do
     if [ "$(device_get_charging_status)" = "Discharging" ]; then
         log_and_display_message "USB Cable Disconnected."

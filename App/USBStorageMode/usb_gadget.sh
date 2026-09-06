@@ -108,11 +108,21 @@ usb_gadget_release() {
     sync
 }
 
+# Legacy path: export with the card still mounted. Only for platforms whose
+# system owns the card (device_system_handles_sdcard_unmount), where the
+# card-less session below cannot take it away. Everywhere else the PC would
+# be handed a filesystem the kernel still has mounted read-write (SPR-MED-198).
 configure_usb_gadget() {
     log_message "Configuring USB gadget for $PLATFORM..."
     safe_unmount_all
     sync
     echo 3 > /proc/sys/vm/drop_caches
+    usb_export_gadget
+}
+
+# Write the LUN, build the configuration, bind the UDC. Pure gadget work: the
+# caller decides what state the card is in.
+usb_export_gadget() {
 
     case "$PLATFORM" in
         "A30")
@@ -183,4 +193,83 @@ configure_usb_gadget() {
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
             ;;
     esac
+}
+
+# ---------------------------------------------------------------------------
+# Card-less USB session (SPR-MED-198)
+#
+# The PC must never be handed a filesystem the kernel still has mounted. So
+# USB Storage Mode is run as a shutdown that pauses before the power command:
+# the app stages the shutdown UI (spruce/scripts/shutdown_ui.sh: display tool,
+# input reader, fsck.fat, font, background, platform facts) plus this file
+# into /tmp, hands over to save_poweroff.sh --usb-storage-export, stage 2 does
+# its strict clean unmount, and then sources this file from /tmp and calls
+# usb_session_run - repair if the dirty flag is set, export, static screen,
+# wait for A or the cable, release, back to stage 2 for the reboot.
+# Everything the session touches lives on the rootfs or in /tmp.
+# ---------------------------------------------------------------------------
+USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
+SHUTDOWN_UI_DIR="${SHUTDOWN_UI_DIR:-/tmp/shutdown_ui}"
+
+# Card side: stage the shutdown UI and this file. Returns 1 if anything is
+# missing, in which case the caller keeps the mounted export.
+usb_session_stage() {
+    [ -f /mnt/SDCARD/spruce/scripts/shutdown_ui.sh ] || { log_message "USB Storage Mode: shutdown_ui.sh missing"; return 1; }
+    . /mnt/SDCARD/spruce/scripts/shutdown_ui.sh
+    shutdown_ui_stage || return 1
+    rm -rf "$USB_SESSION_DIR"
+    mkdir -p "$USB_SESSION_DIR" || return 1
+    cp /mnt/SDCARD/App/USBStorageMode/usb_gadget.sh "$USB_SESSION_DIR/usb_gadget.sh" || return 1
+    sync
+    log_message "USB Storage Mode: session staged in $USB_SESSION_DIR"
+    return 0
+}
+
+# Block until the cable is pulled or A is pressed. Prints which.
+usb_session_wait_for_exit() {
+    shutdown_ui_getevent_start
+    _why=""
+    while [ -z "$_why" ]; do
+        if [ "$(cat "$BATTERY/status" 2>/dev/null)" = "Discharging" ]; then
+            _why="cable disconnected"
+        elif shutdown_ui_key_seen A; then
+            _why="A pressed"
+        else
+            sleep 0.2
+        fi
+    done
+    shutdown_ui_getevent_stop
+    echo "$_why"
+}
+
+# Runs inside stage 2, after the strict unmount, from the /tmp copies.
+usb_session_run() {
+    [ -f "$SHUTDOWN_UI_DIR/shutdown_ui.sh" ] || { echo "usb session: no shutdown UI in $SHUTDOWN_UI_DIR"; return 1; }
+    . "$SHUTDOWN_UI_DIR/shutdown_ui.sh"
+    shutdown_ui_load_env || { echo "usb session: no env in $SHUTDOWN_UI_DIR"; return 1; }
+    usb_gadget_platform_setup || { echo "usb session: no gadget table for $PLATFORM"; return 1; }
+    # The whole point: refuse to export a mounted card.
+    if grep -q "^$SD_DEV " /proc/mounts; then
+        echo "usb session: $SD_DEV is still mounted, refusing to export"
+        return 1
+    fi
+    # The FAT dirty flag is sticky (SPR-MED-199): a card cut once is offered
+    # "scan and fix" on every insert until an fsck clears it. This is the one
+    # moment the card is cleanly unmounted and quiesced, and the repair takes
+    # seconds: run it, and only then export.
+    _flag="$(sd_card_dirty_flag)"
+    shutdown_ui_log "dirty flag after the device's unmount: $_flag"
+    case "$_flag" in dirty*) sd_card_repair "Checking the SD card before USB mode..." ;; esac
+    shutdown_ui_log "exporting $SD_DEV (unmounted)"
+    usb_export_gadget
+    shutdown_ui_display "USB Mode Active. Press A to exit and reboot your device."
+    _why="$(usb_session_wait_for_exit)"
+    shutdown_ui_log "exit ($_why)"
+    shutdown_ui_display "Device will now reboot."
+    usb_gadget_release
+    sleep 1
+    shutdown_ui_log "dirty flag after the PC gave the card back: $(sd_card_dirty_flag)"
+    shutdown_ui_display_kill
+    shutdown_ui_display_errors
+    return 0
 }
