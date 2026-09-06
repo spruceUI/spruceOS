@@ -221,8 +221,16 @@ unpack_archives() {
                 log_firstboot_theme_archive_status "$section_label" "start" "$archive_name.7z"
             fi
 
-            member_paths=$(7zr l -slt "$archive" 2>/dev/null | sed -n 's/^Path = //p' | sed '1d')
-            if [ -n "$member_paths" ] && ! printf '%s\n' "$member_paths" | grep -qvE '^mnt(/SDCARD(/.*)?)?$'; then
+            # Judge the members the way 7zr will extract them: it drops a
+            # leading "/" and empty path components, so an archive built with
+            # absolute paths (xmb.7z ships "/mnt/SDCARD/..." members) or a
+            # "mnt/" directory entry (overlays_1024x768.7z) lands under
+            # /mnt/SDCARD just like a plain "mnt/SDCARD/..." one. ".."
+            # components are refused outright.
+            member_paths=$(7zr l -slt "$archive" 2>/dev/null | sed -n 's/^Path = //p' | sed '1d' | tr -s '/' | sed 's#^/##; s#/$##')
+            if [ -n "$member_paths" ] &&
+                ! printf '%s\n' "$member_paths" | grep -qvE '^mnt(/SDCARD(/.*)?)?$' &&
+                ! printf '%s\n' "$member_paths" | grep -qE '(^|/)\.\.(/|$)'; then
                 if 7zr x -aoa "$archive" -o/; then
                     rm -f "$archive"
                     log_message "Unpacker: Unpacked and removed: $archive_name.7z"
