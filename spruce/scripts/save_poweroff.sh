@@ -27,19 +27,14 @@ STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 #                 skips as --usb-storage, nothing to release here, and stage 2
 #                 is told to unmount strictly and then run the export session
 #                 from /tmp (usb_session_run) before it reboots
-# --repair-sd     the user consented (PyUI asks when the card booted dirty)
-#                 to an fsck of the card once it is unmounted; stage 2 runs it
-#                 before the power command (SPR-MED-199)
 s2_arg=""
 USB_STORAGE_EXIT=0
 USB_STORAGE_EXPORT=0
-SD_REPAIR=0
 for arg in "$@"; do
     case "$arg" in
         --reboot) s2_arg="--reboot" ;;
         --usb-storage) USB_STORAGE_EXIT=1 ;;
         --usb-storage-export) USB_STORAGE_EXIT=1; USB_STORAGE_EXPORT=1; s2_arg="--reboot" ;;
-        --repair-sd) SD_REPAIR=1 ;;
     esac
 done
 
@@ -305,7 +300,6 @@ clean_up_flags() {
 # reboot too, and three shutdown attempts left the device on its unmounted
 # card (SPR-HIGH-051, 2026-08-28 and 2026-09-04). Called right after the
 # starting breadcrumb, while every path is still mounted.
-SD_REPAIR_STAGED=0
 stage_shutdown_stage_2() {
     if [ -e "$STAGE_2_SD_PATH" ]; then
         if cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null; then
@@ -316,19 +310,6 @@ stage_shutdown_stage_2() {
         fi
     else
         log_message "save_poweroff.sh: WARNING stage 2 script missing at $STAGE_2_SD_PATH"
-    fi
-    # The user consented to a repair (PyUI asked because the card booted dirty):
-    # stage fsck.fat and the platform facts with stage 2, which runs it once the
-    # card is unmounted (SPR-MED-199). Only on request - it costs a megabyte of
-    # /tmp and a card read.
-    if [ "$SD_REPAIR" = "1" ] && [ -f /mnt/SDCARD/spruce/scripts/shutdown_ui.sh ]; then
-        . /mnt/SDCARD/spruce/scripts/shutdown_ui.sh
-        if shutdown_ui_stage; then
-            SD_REPAIR_STAGED=1
-            log_message "save_poweroff.sh: repair consented, stage 2 will fsck the card"
-        else
-            log_message "save_poweroff.sh: WARNING could not stage the repair, card left as it is"
-        fi
     fi
 }
 
@@ -395,15 +376,6 @@ exec_shutdown_stage_2() {
         else
             export SPRUCE_USB_EXPORT=0
         fi
-        # A consented repair needs the card really off: the single umount of
-        # the original path fails on any lingering holder (an orphaned
-        # getevent did it on the Smart Pro S), stage 2 then refuses to fsck a
-        # lazily detached card, and the question comes back next boot. The
-        # strict path retries with a sweep between attempts.
-        if [ "$SD_REPAIR_STAGED" = "1" ]; then
-            export SPRUCE_STRICT_UNMOUNT=1
-        fi
-        export SPRUCE_SD_REPAIR="$SD_REPAIR_STAGED"
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         # No stage 2 at all: still honour what was asked for.

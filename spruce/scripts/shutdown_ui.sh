@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Shutdown-time UI that works with the card gone (SPR-MED-198, SPR-MED-199).
+# Shutdown-time UI that works with the card gone (SPR-MED-198).
 #
-# Sourced twice: from the card by save_poweroff.sh or the USB Storage Mode app
-# to STAGE it into SHUTDOWN_UI_DIR, and from that /tmp copy by stage 2 to USE
-# it once the card is unmounted. Nothing here runs on load. Every runtime
+# Sourced twice: from the card by the USB Storage Mode app to STAGE it into
+# SHUTDOWN_UI_DIR, and from that /tmp copy by the USB session inside stage 2
+# to USE it once the card is unmounted. Nothing here runs on load. Every runtime
 # dependency is on the rootfs or in SHUTDOWN_UI_DIR: the display tool and the
 # input reader (the repairSD.sh pattern), the rootfs SDL libraries, a font, a
 # background, fsck.fat, and an env file with the platform facts stage 2 can no
@@ -142,8 +142,7 @@ sd_card_dirty_flag() {
 }
 
 # fsck.fat -a on the (unmounted, quiesced) card. With a message, a screen is
-# drawn for it (the USB session); without one, whatever is on the panel stays
-# (PyUI's "Repairing the SD card..." on the shutdown path). Prints the
+# drawn for it; without one, whatever is on the panel stays. Prints the
 # outcome; returns fsck's status, 2 when no fsck.fat was staged.
 sd_card_repair() {
     if [ ! -x "$SHUTDOWN_UI_DIR/fsck.fat" ]; then
@@ -157,16 +156,4 @@ sd_card_repair() {
     shutdown_ui_log "fsck.fat -a rc=$_rc in $(awk -v a="$_t0" -v b="$(cut -d' ' -f1 /proc/uptime)" 'BEGIN{print b-a}') s, flag now: $(sd_card_dirty_flag)"
     tail -3 "$SHUTDOWN_UI_DIR/fsck.out" 2>/dev/null | sed 's/^/shutdown ui: fsck: /'
     return $_rc
-}
-
-# The shutdown-path repair (SPR-MED-199). Consent was given in PyUI, which
-# owns the question; this only checks that the flag is really set and runs
-# the repair. Called by stage 2 after the card's umount SUCCEEDED.
-sd_card_repair_if_dirty() {
-    _flag="$(sd_card_dirty_flag)"
-    shutdown_ui_log "dirty flag after the unmount: $_flag"
-    case "$_flag" in
-        dirty*) sd_card_repair "" ;;
-        *) shutdown_ui_log "card is clean, nothing to repair"; return 0 ;;
-    esac
 }

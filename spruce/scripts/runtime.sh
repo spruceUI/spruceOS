@@ -33,15 +33,6 @@ log_message "---------Starting up---------"
 
 run_sd_card_fix_if_triggered    # do this before anything else
 
-# The card came up with its FAT dirty flag set: some earlier end was not clean.
-# Nothing clears that flag by itself - not a clean unmount, not a clean eject,
-# only an fsck - so every PC the card meets offers to "scan and fix" it until
-# then (SPR-MED-199). Remember it for the shutdown, which offers the repair once
-# the card is unmounted. /tmp, so a real boot never sees a stale flag.
-if dmesg 2>/dev/null | grep -q "FAT-fs (${SD_DEV##*/}): Volume was not properly unmounted"; then
-    flag_add "sd_card_dirty" --tmp
-    log_message "SD card was not cleanly unmounted before this boot; the shutdown will offer a repair"
-fi
 set_performance
 device_init
 { sleep 1.5; set_volume_to_config; } &
