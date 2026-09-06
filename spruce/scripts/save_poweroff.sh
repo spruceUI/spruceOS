@@ -23,12 +23,18 @@ STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 #                 shutdown screen, no syncthing wait, and the mass-storage
 #                 gadget is released here, after stage 2 is staged (see
 #                 usb_storage_release_gadget)
+# --usb-storage-export  the app hands over BEFORE anything is exported: same
+#                 skips as --usb-storage, nothing to release here, and stage 2
+#                 is told to unmount strictly and then run the export session
+#                 from /tmp (usb_session_run) before it reboots
 s2_arg=""
 USB_STORAGE_EXIT=0
+USB_STORAGE_EXPORT=0
 for arg in "$@"; do
     case "$arg" in
         --reboot) s2_arg="--reboot" ;;
         --usb-storage) USB_STORAGE_EXIT=1 ;;
+        --usb-storage-export) USB_STORAGE_EXIT=1; USB_STORAGE_EXPORT=1; s2_arg="--reboot" ;;
     esac
 done
 
@@ -362,6 +368,14 @@ exec_shutdown_stage_2() {
         else
             export SPRUCE_FORCE_POWER_TRANSITION=0
         fi
+        # The export session needs a card that is really gone, so the strict
+        # unmount is forced regardless of the platform default.
+        if [ "$USB_STORAGE_EXPORT" = "1" ]; then
+            export SPRUCE_STRICT_UNMOUNT=1
+            export SPRUCE_USB_EXPORT=1
+        else
+            export SPRUCE_USB_EXPORT=0
+        fi
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
         # No stage 2 at all: still honour what was asked for.
@@ -464,11 +478,14 @@ fi
 
 # USB Storage Mode: the gadget goes last among the things that need the card,
 # and before any power command - the card may vanish the moment it is released.
-if usb_storage_exit; then
+if usb_storage_exit && [ "$USB_STORAGE_EXPORT" != "1" ]; then
     usb_storage_release_gadget
 fi
 
-if device_system_handles_sdcard_unmount; then
+# The export session must reach stage 2 even where the system would handle
+# the unmount at a real power-off; the app only takes this path where spruce
+# owns the card, this is the second line of defence.
+if [ "$USB_STORAGE_EXPORT" != "1" ] && device_system_handles_sdcard_unmount; then
 
     if [ "$s2_arg" = "--reboot" ]; then
         device_run_reboot_cmd

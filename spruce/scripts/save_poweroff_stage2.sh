@@ -30,6 +30,11 @@ STRICT_UNMOUNT="${SPRUCE_STRICT_UNMOUNT:-0}"
 # Whether init can service `poweroff`/`reboot` at all on this device (see
 # device_power_transition_bypasses_init in device.sh). Default off.
 FORCE_POWER_TRANSITION="${SPRUCE_FORCE_POWER_TRANSITION:-0}"
+# USB Storage Mode export session (App/USBStorageMode/usb_gadget.sh): after
+# the clean unmount below, export the card, wait for A or the cable, release,
+# then reboot. Default off.
+USB_EXPORT="${SPRUCE_USB_EXPORT:-0}"
+USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
 SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
 SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
 
@@ -99,6 +104,32 @@ resolve_sd_mountpoint() {
     esac
 }
 
+# Who still holds the card. Only ever called after a failed clean umount, so
+# the cost is irrelevant and the answer is the whole point: without it a
+# "clean umount FAILED" line names nothing (SPR-MED-199).
+stage2_dump_holders() {
+    echo "stage2: holders of $SD_MOUNTPOINT after the sweep:"
+    awk -v mp="$SD_MOUNTPOINT" '$2 ~ "^"mp"(/|$)" {print "  mount " $1 " on " $2}' /proc/mounts 2>/dev/null
+    for _pp in /proc/[0-9]*; do
+        _pid="${_pp#/proc/}"
+        [ "$_pid" = "$$" ] && continue
+        _why=""
+        for _link in cwd exe; do
+            _t=$(readlink "$_pp/$_link" 2>/dev/null) || continue
+            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
+        done
+        for _fd in "$_pp"/fd/*; do
+            _t=$(readlink "$_fd" 2>/dev/null) || continue
+            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why fd=$_t"; break ;; esac
+        done
+        _m=$(grep -m1 " $SD_MOUNTPOINT/" "$_pp/maps" 2>/dev/null | awk '{print $NF}')
+        [ -n "$_m" ] && _why="$_why map=$_m"
+        [ -n "$_why" ] && echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why"
+    done
+    awk -v mp="$SD_MOUNTPOINT" '$NF ~ "^"mp"/" {print "  unix-socket " $NF}' /proc/net/unix 2>/dev/null
+    echo "stage2: end of holders"
+}
+
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     SD_MOUNTPOINT="$(resolve_sd_mountpoint)"
 
@@ -106,7 +137,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     # log file - chosen here rather than above precisely so it can be checked
     # against the resolved path instead of a configured guess.
     STAGE2_LOG=/tmp/save_poweroff_stage2.log
-    for _d in /data /mnt/data; do
+    for _d in /data /mnt/data /mnt/UDISK; do
         case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
         [ -d "$_d" ] || continue
         if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
@@ -146,40 +177,58 @@ fi
 # holds it through its exe mapping with no fd at all, and a process merely
 # sitting in a directory holds it through cwd. Checking only fd/ misses both,
 # which is why the plain umount kept failing.
-for pidpath in /proc/[0-9]*; do
-    pid="${pidpath#/proc/}"
+# The sweep, as a function: the strict path runs it again between umount
+# retries, because a holder can appear AFTER the first pass - a watchdog's
+# getevent respawned in the instant between its parent being killed and
+# the loop reaching it (measured on the Smart Pro S, 2026-09-05: the one
+# holder left after the sweep was an orphaned getevent with no card fd).
+stage2_kill_holders() {
+    for pidpath in /proc/[0-9]*; do
+        pid="${pidpath#/proc/}"
 
-    # Never kill init (pid 1) or ourselves
-    [ "$pid" -le 1 ] && continue
-    [ "$pid" = "$$" ] && continue
+        # Never kill init (pid 1) or ourselves
+        [ "$pid" -le 1 ] && continue
+        [ "$pid" = "$$" ] && continue
 
-    holds_sd=0
+        holds_sd=0
 
-    # cwd and the running executable, neither of which appears under fd/.
-    # Strict mode only: this kills strictly more processes than the original
-    # loop did, and on a device whose umount already succeeded that is risk
-    # with nothing to buy.
-    if [ "$STRICT_UNMOUNT" = "1" ]; then
-        for link in "$pidpath/cwd" "$pidpath/exe"; do
-            target=$(readlink "$link" 2>/dev/null) || continue
-            case "$target" in
-                "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
-            esac
-        done
-    fi
+        # cwd and the running executable, neither of which appears under fd/.
+        # Strict mode only: this kills strictly more processes than the original
+        # loop did, and on a device whose umount already succeeded that is risk
+        # with nothing to buy.
+        if [ "$STRICT_UNMOUNT" = "1" ]; then
+            for link in "$pidpath/cwd" "$pidpath/exe"; do
+                target=$(readlink "$link" 2>/dev/null) || continue
+                case "$target" in
+                    "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
+                esac
+            done
+            # A mapped file pins the filesystem exactly like an open descriptor,
+            # and a rootfs binary that loaded a library through the card (the
+            # sdl2 bind directory, a Python extension) shows up nowhere else:
+            # no card exe, no card cwd, no fd. Measured on the Smart Pro S
+            # (2026-09-05): with fd/cwd/exe holders gone the card still would
+            # not unmount.
+            if [ "$holds_sd" -eq 0 ] && grep -q " $SD_MOUNTPOINT/" "$pidpath/maps" 2>/dev/null; then
+                holds_sd=1
+            fi
+        fi
 
-    # Then open file descriptors
-    if [ "$holds_sd" -eq 0 ]; then
-        for fd in "$pidpath/fd/"*; do
-            target=$(readlink "$fd" 2>/dev/null) || continue
-            case "$target" in
-                "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
-            esac
-        done
-    fi
+        # Then open file descriptors
+        if [ "$holds_sd" -eq 0 ]; then
+            for fd in "$pidpath/fd/"*; do
+                target=$(readlink "$fd" 2>/dev/null) || continue
+                case "$target" in
+                    "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
+                esac
+            done
+        fi
 
-    [ "$holds_sd" -eq 1 ] && kill -9 "$pid" 2>/dev/null
-done
+        [ "$holds_sd" -eq 1 ] && kill -9 "$pid" 2>/dev/null
+    done
+}
+
+stage2_kill_holders
 
 # Give the kernel time to close file descriptors from killed processes
 sleep 0.1
@@ -238,6 +287,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
             break
         fi
         umount_tries=$((umount_tries + 1))
+        stage2_kill_holders
         sleep 0.3
     done
 
@@ -245,6 +295,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
         echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
     else
         echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
+        stage2_dump_holders
         umount -l "$SD_MOUNTPOINT"
     fi
 else
@@ -252,6 +303,29 @@ else
     # insurance on a device that needs it and a delay on every shutdown for one
     # that does not.
     umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
+fi
+
+# USB Storage Mode: the card is unmounted and clean, nothing is left that runs
+# from it. Export it now and hold here until the user is done; the reboot
+# below is the exit. A session that cannot run (nothing staged, card still
+# mounted) falls straight through to the reboot rather than exporting.
+if [ "$USB_EXPORT" = "1" ]; then
+    echo "stage2: USB Storage Mode export session from $USB_SESSION_DIR"
+    # A lazy fallback takes the card out of /proc/mounts while its superblock
+    # lives on in whatever still holds it - exporting then is the very hazard
+    # this session exists to remove. Only a clean umount earns the export.
+    if [ "${umount_ok:-0}" != "1" ]; then
+        echo "stage2: the card did not unmount cleanly, not exporting it"
+    elif [ -f "$USB_SESSION_DIR/usb_gadget.sh" ]; then
+        . "$USB_SESSION_DIR/usb_gadget.sh"
+        if usb_session_run; then
+            echo "stage2: USB session ended, rebooting"
+        else
+            echo "stage2: USB session did not run (rc=$?), rebooting"
+        fi
+    else
+        echo "stage2: no USB session staged at $USB_SESSION_DIR, rebooting"
+    fi
 fi
 
 # Cut the power, and do not take "maybe" for an answer.
@@ -269,7 +343,7 @@ fi
 # MM v1-4 require the reboot command to power off properly.
 if [ -d /customer/app ] && [ ! -e /customer/app/axp_test ]; then
     WANT_REBOOT=1
-elif [ "$1" = "--reboot" ]; then
+elif [ "$1" = "--reboot" ] || [ "$USB_EXPORT" = "1" ]; then
     WANT_REBOOT=1
 else
     WANT_REBOOT=0
