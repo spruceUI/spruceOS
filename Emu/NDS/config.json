@@ -34,7 +34,6 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX",
         "TRIMUI_BRICK"
       ],
       "options": [
