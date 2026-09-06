@@ -411,11 +411,6 @@ class Rgb30(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    def sd_card_repair_supported(self):
-        # The system owns the card's unmount at power-off, so spruce's stage 2
-        # never runs here and no fsck can be offered (SPR-MED-199).
-        return False
-
     def power_off_cmd(self):
         # Through systemd, so TF2 is unmounted cleanly. A bare poweroff leaves
         # the FAT dirty.
