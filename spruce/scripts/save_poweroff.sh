@@ -18,11 +18,19 @@ mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 
-if [ "$1" = "--reboot" ]; then
-    s2_arg="--reboot";
-else
-    s2_arg=""
-fi
+# --reboot        reboot instead of powering off
+# --usb-storage   the USB Storage Mode app is handing over: no emulator, no
+#                 shutdown screen, no syncthing wait, and the mass-storage
+#                 gadget is released here, after stage 2 is staged (see
+#                 usb_storage_release_gadget)
+s2_arg=""
+USB_STORAGE_EXIT=0
+for arg in "$@"; do
+    case "$arg" in
+        --reboot) s2_arg="--reboot" ;;
+        --usb-storage) USB_STORAGE_EXIT=1 ;;
+    esac
+done
 
 ##### FUNCTION DEFINITIONS ####################
 
@@ -298,6 +306,36 @@ stage_shutdown_stage_2() {
     fi
 }
 
+usb_storage_exit() {
+    [ "$USB_STORAGE_EXIT" = "1" ]
+}
+
+# Release the USB mass-storage gadget on behalf of App/USBStorageMode.
+#
+# Closing the LUN closes the card's block device, and on TrimUI stock udev's
+# block `watch` rule turns that close into a synthesized `change` uevent that
+# /sbin/mdev answers with /etc/mdev/sdcard_remove: `umount -l` of the card,
+# `rm -rf` of its mount point, `rm -f /mnt/SDCARD` (SPR-HIGH-053, measured on
+# the Smart Pro S). From that instant nothing on the card can be reached by
+# path. So this runs only after stage 2 is staged into /tmp and every helper
+# that needs the card has had its turn; what follows it (unmount_all, the
+# stage-2 hand-off) works from memory and /tmp.
+usb_storage_release_gadget() {
+    hook=/mnt/SDCARD/App/USBStorageMode/usb_gadget.sh
+    if [ ! -f "$hook" ]; then
+        log_message "save_poweroff.sh: WARNING usb gadget hook missing at $hook"
+        return 1
+    fi
+    . "$hook"
+    if ! usb_gadget_platform_setup; then
+        log_message "save_poweroff.sh: WARNING no USB gadget table for $PLATFORM"
+        return 1
+    fi
+    log_message "save_poweroff.sh: releasing the USB mass-storage gadget ($PLATFORM)"
+    usb_gadget_release
+    log_message "save_poweroff.sh: USB gadget released"
+}
+
 exec_shutdown_stage_2() {
     log_message "Running stage 2 of save_poweroff from /tmp."
     sync
@@ -391,7 +429,7 @@ log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 
-if ! flag_check "in_menu"; then
+if ! usb_storage_exit && ! flag_check "in_menu"; then
     attempt_to_close_emu_gracefully
     wait_for_graceful_emu_exit
     sync
@@ -399,8 +437,10 @@ if ! flag_check "in_menu"; then
     close_non_emu_cmd_to_run
 fi
 
-display_appropriate_icon_and_message
-dim_screen_and_do_syncthing_check
+if ! usb_storage_exit; then
+    display_appropriate_icon_and_message
+    dim_screen_and_do_syncthing_check
+fi
 clean_up_flags
 alsactl store 2>/dev/null
 kill_remaining_background_processes
@@ -410,6 +450,12 @@ kill_remaining_background_processes
 # (stage 2 runs from /tmp with the card gone). See device_prepare_for_reboot.
 if [ "$s2_arg" = "--reboot" ]; then
     device_prepare_for_reboot
+fi
+
+# USB Storage Mode: the gadget goes last among the things that need the card,
+# and before any power command - the card may vanish the moment it is released.
+if usb_storage_exit; then
+    usb_storage_release_gadget
 fi
 
 if device_system_handles_sdcard_unmount; then
