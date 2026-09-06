@@ -82,6 +82,17 @@ is_autoload_enabled() {
 	[ "$_setting" = "Enabled" ]
 }
 
+get_integer_scale_setting() {
+	_setting="$(jq -r '.menuOptions.dsperateIntegerScale.selected // "Off"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
+
+    _override=$(jq -r --arg game "$GAME" ".menuOptions.dsperateIntegerScale.overrides[\$game]" "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")
+    if [ -n "$_override" ] && [ "$_override" != "null" ]; then
+        _setting="$_override"
+    fi
+
+	echo "$_setting"
+}
+
 # The NDS header carries a four-character game code at offset 12, and DSperate
 # names the auto slot after it, so the launcher has to read it the same way to
 # know which file to resume from. Only the two containers DSperate itself
@@ -222,6 +233,13 @@ run_dsperate() {
 		"Subtle Grid") set -- "$@" --lcd-grid 0.15 ;;
 		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
+	esac
+
+	_integer_scale="$(get_integer_scale_setting)"
+	case "$_integer_scale" in
+		"Off") set -- "$@" --integer-scale off ;;
+		"Under") set -- "$@" --integer-scale under ;;
+		"Over") set -- "$@" --integer-scale over ;;
 	esac
 
 	# The game switcher's thumbnail, written by DSperate itself with the auto

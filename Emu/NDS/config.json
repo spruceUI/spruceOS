@@ -128,6 +128,27 @@
       ],
       "selected": "None",
       "overrides": {}
+    },
+    "dsperateIntegerScale": {
+      "display": "DSperate: Integer Scaling",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RGXX",
+        "GKD_PIXEL2",
+        "RGB30",
+        "MIYOO_A30"
+      ],
+      "options": [
+        "Off",
+        "Under",
+        "Over"
+      ],
+      "selected": "Off",
+      "overrides": {}
     }
   },
   "sortOrder": 4000,
