@@ -13,17 +13,10 @@
 # Provides:
 #   run_dsperate
 
-# DSperate is a from-source NDS emulator (spruceUI/DSperate-spruce), 64-bit
-# only: its recompiler emits AArch64, so there is no 32-bit build worth
-# offering. It sits alongside DraStic rather than replacing it.
+
 
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 
-# DSperate needs a real DS BIOS pair and firmware. It cannot use the two files
-# in Emu/NDS/system: those are DraStic's own replacements, not dumps (their
-# md5s do not match the real BIOS), and there is no firmware image there at
-# all. DSperate reads the real firmware for touchscreen calibration, the KEY1
-# key table and the direct-boot path, so this is not something to work around.
 dsperate_bios_missing() {
 	_missing=""
 	for _f in bios9.bin bios7.bin firmware.bin; do
@@ -42,14 +35,15 @@ display_dsperate_bios_message() {
 seed_dsperate_config() {
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
-	_cfg="$_cfg_dir/dsperate.ini"
 	_cfg_a30="$_cfg_dir/a30.ini"
 	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
 	_cfg_one_stick="$_cfg_dir/one-stick.ini"
+	_cfg_two_sticks="$_cfg_dir/two-sticks.ini"
+
 	mkdir -p "$_cfg_dir"
-	if [ ! -f "$_cfg" ] && [ -f "$EMU_DIR/dsperate-configs/spruce.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/spruce.ini" "$_cfg"
-		log_message "DSperate: seeded config from spruce.ini"
+	if [ ! -f "$_cfg_two_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/two-sticks.ini" ]; then
+		cp -f "$EMU_DIR/dsperate-configs/two-sticks.ini" "$_cfg_two_sticks"
+		log_message "DSperate: seeded config from two-sticks.ini"
 	fi
 	if [ ! -f "$_cfg_a30" ] && [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
 		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
@@ -208,9 +202,7 @@ run_dsperate() {
 	# to go anyway.
 	[ "$VERBOSE_EMU" = "1" ] && export DS_FPS=1
 
-	# The BIOS paths are in spruce.ini too, but pass them anyway: they are what
-	# dsperate_bios_missing just checked for, and a card upgraded from a config
-	# seeded before spruce.ini existed has no [paths] block at all.
+	# shared arguments for all DSperate invocations
 	set -- "$_rom" \
 		--bios9 "$DSPERATE_BIOS_DIR/bios9.bin" \
 		--bios7 "$DSPERATE_BIOS_DIR/bios7.bin" \
@@ -246,16 +238,13 @@ run_dsperate() {
 	if [ "$PLATFORM" = "A30" ]; then
 		export DS_ROTATE=270
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
-
-	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "0" ]; then
-		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/no-sticks.ini" > "$(emu_log_file)" 2>&1
-
-	elif [ "$DEVICE_NUM_ANALOG_STICKS" = "1" ]; then
-		./dsperate "$@" --config "/mnt/SDCARD/Saves/dsperate/one-stick.ini" > "$(emu_log_file)" 2>&1
-
 	else
-		# let XDG_CONFIG_HOME or other XDG paths determine the config location
-		./dsperate "$@" > "$(emu_log_file)" 2>&1
+		case "$DEVICE_NUM_ANALOG_STICKS" in
+			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"  ;;
+			"1") _config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"  ;;
+			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
+		esac
+		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 
 	rm -rf "$DSPERATE_TMP_DIR"
