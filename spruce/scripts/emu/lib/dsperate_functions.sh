@@ -3,6 +3,8 @@
 # Requires globals:
 #   EMU_DIR
 #   ROM_FILE
+#   GAME
+#   EMU_JSON_PATH
 #   PLATFORM
 #   CORE
 #   LD_LIBRARY_PATH
@@ -65,12 +67,24 @@ seed_dsperate_config() {
 
 get_video_effect() {
 	_setting="$(jq -r '.menuOptions.dsperateVideoEffect.selected // "None"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
+
+    _override=$(jq -r --arg game "$GAME" ".menuOptions.dsperateVideoEffect.overrides[\$game]" "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")
+    if [ -n "$_override" ] && [ "$_override" != "null" ]; then
+        _setting="$_override"
+    fi
+
 	echo "$_setting"
 }
 
 # returns 0=true or 1=false; for now, no per-game override logic in place.
 is_autoload_enabled() {
 	_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected // "Enabled"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
+
+    _override=$(jq -r --arg game "$GAME" ".menuOptions.dsperateAutoLoad.overrides[\$game]" "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")
+    if [ -n "$_override" ] && [ "$_override" != "null" ]; then
+        _setting="$_override"
+    fi
+
 	[ "$_setting" = "Enabled" ]
 }
 
