@@ -35,10 +35,6 @@ FORCE_POWER_TRANSITION="${SPRUCE_FORCE_POWER_TRANSITION:-0}"
 # then reboot. Default off.
 USB_EXPORT="${SPRUCE_USB_EXPORT:-0}"
 USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
-# The user consented (in PyUI) to an fsck of the card and save_poweroff.sh
-# staged it: run it after a clean umount (SPR-MED-199). Default off.
-SD_REPAIR="${SPRUCE_SD_REPAIR:-0}"
-SHUTDOWN_UI_DIR="${SHUTDOWN_UI_DIR:-/tmp/shutdown_ui}"
 SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
 SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
 
@@ -342,25 +338,6 @@ if [ "$USB_EXPORT" = "1" ]; then
         fi
     else
         echo "stage2: no USB session staged at $USB_SESSION_DIR, rebooting"
-    fi
-fi
-
-# The user consented to the repair and the card is now cleanly unmounted:
-# fsck it before the power command. PyUI's last frame ("Repairing the SD
-# card...") stays on the panel meanwhile, so no screen is drawn here. Never
-# after a lazy fallback - holders are still on that filesystem - the flag
-# then survives and PyUI asks again next time.
-if [ "$USB_EXPORT" != "1" ] && [ "$SD_REPAIR" = "1" ]; then
-    if [ "${umount_ok:-0}" = "1" ] && [ -f "$SHUTDOWN_UI_DIR/shutdown_ui.sh" ]; then
-        echo "stage2: repair consented, checking the card"
-        . "$SHUTDOWN_UI_DIR/shutdown_ui.sh"
-        if shutdown_ui_load_env; then
-            sd_card_repair_if_dirty
-        else
-            echo "stage2: shutdown UI env missing, repair skipped"
-        fi
-    else
-        echo "stage2: card not cleanly unmounted or nothing staged, repair skipped"
     fi
 fi
 

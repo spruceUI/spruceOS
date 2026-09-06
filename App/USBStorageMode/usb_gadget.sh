@@ -201,11 +201,11 @@ usb_export_gadget() {
 # The PC must never be handed a filesystem the kernel still has mounted. So
 # USB Storage Mode is run as a shutdown that pauses before the power command:
 # the app stages the shutdown UI (spruce/scripts/shutdown_ui.sh: display tool,
-# input reader, fsck.fat, font, background, platform facts) plus this file
+# input reader, font, background, platform facts) plus this file
 # into /tmp, hands over to save_poweroff.sh --usb-storage-export, stage 2 does
 # its strict clean unmount, and then sources this file from /tmp and calls
-# usb_session_run - repair if the dirty flag is set, export, static screen,
-# wait for A or the cable, release, back to stage 2 for the reboot.
+# usb_session_run - export, static screen, wait for A or the cable, release,
+# back to stage 2 for the reboot.
 # Everything the session touches lives on the rootfs or in /tmp.
 # ---------------------------------------------------------------------------
 USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
@@ -253,13 +253,6 @@ usb_session_run() {
         echo "usb session: $SD_DEV is still mounted, refusing to export"
         return 1
     fi
-    # The FAT dirty flag is sticky (SPR-MED-199): a card cut once is offered
-    # "scan and fix" on every insert until an fsck clears it. This is the one
-    # moment the card is cleanly unmounted and quiesced, and the repair takes
-    # seconds: run it, and only then export.
-    _flag="$(sd_card_dirty_flag)"
-    shutdown_ui_log "dirty flag after the device's unmount: $_flag"
-    case "$_flag" in dirty*) sd_card_repair "Checking the SD card before USB mode..." ;; esac
     shutdown_ui_log "exporting $SD_DEV (unmounted)"
     usb_export_gadget
     shutdown_ui_display "USB Mode Active. Press A to exit and reboot your device."
@@ -268,7 +261,6 @@ usb_session_run() {
     shutdown_ui_display "Device will now reboot."
     usb_gadget_release
     sleep 1
-    shutdown_ui_log "dirty flag after the PC gave the card back: $(sd_card_dirty_flag)"
     shutdown_ui_display_kill
     shutdown_ui_display_errors
     return 0

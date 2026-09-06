@@ -53,90 +53,17 @@ class DeviceCommon(AbstractDevice):
                 elif(Controller.last_input() == ControllerInput.B):
                     return
 
-    # runtime.sh drops this flag when the kernel reported the card's FAT dirty
-    # flag at boot: some earlier end was not clean. Nothing clears that flag by
-    # itself - not a clean unmount, not a clean eject, only an fsck - so every
-    # PC the card meets offers to "scan and fix" it until then (SPR-MED-199).
-    # The shutdown can run that fsck once the card is unmounted; the consent
-    # for it is asked here, by the UI, before anything happens.
-    SD_CARD_DIRTY_FLAG = "/tmp/sd_card_dirty.lock"
-
-    def sd_card_needs_repair(self):
-        return os.path.exists(self.SD_CARD_DIRTY_FLAG)
-
-    def sd_card_repair_supported(self):
-        # The shutdown can only fsck a card it unmounts itself. Where the
-        # system owns the card (Pixel2 under systemd, the RGB30 under dArkMoss)
-        # stage 2 never runs, so there is nothing to consent to; those device
-        # classes return False.
-        return True
-
-    def _repair_offered_for(self, cmd):
-        # Only spruce's own shutdown understands the answer; under another OS
-        # (muOS, Rocknix) the power command is the host's and the card is not
-        # ours to fsck.
-        return self.sd_card_repair_supported() and cmd is not None and ("save_poweroff" in cmd or "reboot-spruce" in cmd)
-
-    def sd_card_repair_consent_for(self, action):
-        """The consent question for a power-off ("poweroff") or a reboot
-        ("reboot"), asked only where the answer can be acted on."""
-        if action == "reboot":
-            cmd = PyUiConfig.get_reboot_cmd() or self.reboot_cmd()
-        else:
-            cmd = PyUiConfig.get_poweroff_cmd() or self.power_off_cmd()
-        if not self._repair_offered_for(cmd):
-            return False
-        return self.sd_card_repair_consent()
-
-    def sd_card_repair_consent(self):
-        """Ask whether this shutdown may repair the card. False when the card is
-        clean, when the user declines, or when the question cannot be shown."""
-        if not self.sd_card_needs_repair():
-            return False
-        from display.display import Display
-        from themes.theme import Theme
-        from controller.controller import Controller
-        PyUiLogger.get_logger().info("Prompting for SD card repair consent")
-        while(True):
-            Display.clear("Power")
-            Display.render_text_centered(Language.label("sdRepairPrompt", "The SD card was not shut down cleanly last time."),self.screen_width()//2, self.screen_height()//2-50,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.render_text_centered(Language.label("sdRepairQuestion", "Repair it during this shutdown? (about 10 seconds)"),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.render_text_centered(Language.label("sdRepairOptions", "A = Repair, B = Skip"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
-            Display.present()
-            if(Controller.get_input()):
-                if(Controller.last_input() == ControllerInput.A):
-                    PyUiLogger.get_logger().info("SD card repair: consented")
-                    Display.clear("Power")
-                    Display.render_text_centered(Language.label("sdRepairRunning", "Repairing the SD card, then shutting down..."),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
-                    Display.present()
-                    return True
-                elif(Controller.last_input() == ControllerInput.B):
-                    PyUiLogger.get_logger().info("SD card repair: skipped")
-                    return False
-
-    def _power_args(self, cmd, repair_sd):
-        # The consent only means something to spruce's own shutdown; a stock
-        # `poweroff` must not be handed an argument it does not know.
-        args = [cmd]
-        if repair_sd and ("save_poweroff" in cmd or "reboot-spruce" in cmd):
-            args.append("--repair-sd")
-        return args
-
-    def power_off(self, repair_sd=None):
-        if repair_sd is None:
-            repair_sd = self.sd_card_repair_consent_for("poweroff")
+    def power_off(self):
         if PyUiConfig.get_poweroff_cmd():
-            self.run_cmd(self._power_args(PyUiConfig.get_poweroff_cmd(), repair_sd), is_power_cmd=True)
+            self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd(self._power_args(self.power_off_cmd(), repair_sd), is_power_cmd=True)
+            self.run_cmd([self.power_off_cmd()], is_power_cmd=True)
 
-    def reboot(self, repair_sd=None):
-        if repair_sd is None:
-            repair_sd = self.sd_card_repair_consent_for("reboot")
+    def reboot(self):
         if PyUiConfig.get_reboot_cmd():
-            self.run_cmd(self._power_args(PyUiConfig.get_reboot_cmd(), repair_sd), is_power_cmd=True)
+            self.run_cmd([PyUiConfig.get_reboot_cmd()], is_power_cmd=True)
         else:
-            self.run_cmd(self._power_args(self.reboot_cmd(), repair_sd), is_power_cmd=True)
+            self.run_cmd([self.reboot_cmd()], is_power_cmd=True)
 
 
     def input_timeout_default(self):
