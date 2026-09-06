@@ -2,197 +2,35 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
+. /mnt/SDCARD/App/USBStorageMode/usb_gadget.sh
 
-STAGE_2_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
-STAGE_2_TMP=/tmp/save_poweroff_stage2.sh
+SAVE_POWEROFF=/mnt/SDCARD/spruce/scripts/save_poweroff.sh
 
-# --- Platform-specific configuration ---
-case "$PLATFORM" in
-    "A30")
-        STORAGE_DEVICE="/dev/mmcblk0p1"
-        MOUNT_POINT="/mnt/SDCARD"
-        USB_GADGET_PATH="/sys/devices/platform/sunxi_usb_udc/gadget"
-        LUN_PATH="$USB_GADGET_PATH/lun0"
-        LUN_FILE="$LUN_PATH/file"
-        ;;
-    "Brick" | "SmartPro" | "BrickPro")
-        STORAGE_DEVICE="/dev/mmcblk1p1"
-        MOUNT_POINT="/mnt/SDCARD"
-        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
-        ;;
-    "Flip")
-        STORAGE_DEVICE="/dev/mmcblk1p1"
-        MOUNT_POINT="/mnt/SDCARD"
-        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
-        USB_UDC_CONTROLLER="fcc00000.dwc3"
-        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
-        ;;
-    "Pixel2")
-        STORAGE_DEVICE="/dev/mmcblk0p3"
-        MOUNT_POINT="/mnt/SDCARD/"
-        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
-        USB_UDC_CONTROLLER="ff300000.usb"
-        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/b.1"
-        ;;
-    "SmartProS")
-        STORAGE_DEVICE="/dev/mmcblk1p1"
-        MOUNT_POINT="/mnt/sdcard/mmcblk1p1"
-        USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
-        USB_UDC_CONTROLLER="4100000.udc-controller"
-        USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
-        ;;
-    *)
-        # This will run if PyUI isn't ready yet, providing a basic message.
-        /mnt/SDCARD/App/PyUI/main-ui/devices/utils/display_text "USB Storage Mode is not supported on this device." &
-        sleep 3
-        exit 1
-        ;;
-esac
+if ! usb_gadget_platform_setup; then
+    # This will run if PyUI isn't ready yet, providing a basic message.
+    /mnt/SDCARD/App/PyUI/main-ui/devices/utils/display_text "USB Storage Mode is not supported on this device." &
+    sleep 3
+    exit 1
+fi
 
-# --- Unified Functions ---
-
-safe_unmount_all() {
-    for mpoint in $(mount | grep "$STORAGE_DEVICE" | awk '{print $3}' | sort -r); do
-        for i in 1 2 3 4 5; do
-            ! mount | grep -q " $mpoint " && break
-            sync
-            umount "$mpoint" 2>/dev/null && break
-            sleep 1
-        done
-        if mount | grep -q " $mpoint "; then
-            umount -f "$mpoint" 2>/dev/null
-        fi
-    done
-    if grep -q "$MOUNT_POINT" /proc/mounts; then
-        umount -f "$MOUNT_POINT" 2>/dev/null
+# One shutdown path (SPR-HIGH-053). save_poweroff.sh --usb-storage stages
+# stage 2 into /tmp, runs the device preparation, releases the gadget
+# through usb_gadget_release, and reboots from /tmp - so nothing depends on
+# the card after the LUN closes, which on TrimUI stock is the moment the
+# card disappears (mdev's sdcard_remove). The realtime message listener is
+# stopped here because it executes the MainUI bind on the card.
+exit_usb_storage_mode() {
+    log_message "USB Storage Mode: exiting ($1), handing over to save_poweroff.sh --usb-storage"
+    log_and_display_message "Device will now reboot."
+    sleep 3
+    stop_pyui_message_writer
+    sync
+    if [ -x "$SAVE_POWEROFF" ]; then
+        exec "$SAVE_POWEROFF" --reboot --usb-storage
     fi
-}
-
-remount_all() {
-    mount -o rw "$STORAGE_DEVICE" "$MOUNT_POINT" 2>/dev/null
-    if [ "$PLATFORM" = "A30" ]; then
-        for mpoint in "/usr/miyoo/lib" "/tmp/lib" "/etc/profile" "/usr/miyoo/res" "/etc/group" "/etc/passwd"; do
-            mount "$STORAGE_DEVICE" "$mpoint" 2>/dev/null
-        done
-    fi
-    sync
-}
-
-cleanup_usb_gadget() {
-    log_message "Cleaning up USB gadget..."
-    sync
-    echo 3 > /proc/sys/vm/drop_caches
-
-    case "$PLATFORM" in
-        "A30")
-            echo "" > "$LUN_FILE" 2>/dev/null
-            [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 0 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
-            ;;
-        "Brick" | "SmartPro" | "BrickPro")
-            echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
-            rm -f $USB_GADGET_PATH/configs/c.1/mass_storage.usb0
-            [ -d "$USB_GADGET_PATH/configs/c.1" ] && rmdir "$USB_GADGET_PATH/configs/c.1" 2>/dev/null
-            [ -d "$USB_GADGET_PATH/functions/mass_storage.usb0" ] && rmdir "$USB_GADGET_PATH/functions/mass_storage.usb0" 2>/dev/null
-            [ -d "$USB_GADGET_PATH/strings/0x409" ] && rmdir "$USB_GADGET_PATH/strings/0x409" 2>/dev/null
-            ;;
-        "Flip" | "Pixel2")
-            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            sleep 1
-            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
-            rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
-            ;;
-        "SmartProS")
-            echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
-            sleep 1
-            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            sleep 2
-            rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
-            ;;
-    esac
-
-    sync
-    echo 3 > /proc/sys/vm/drop_caches
-    safe_unmount_all
-    remount_all
-    sync
-}
-
-configure_usb_gadget() {
-    log_message "Configuring USB gadget for $PLATFORM..."
-    safe_unmount_all
-    sync
-    echo 3 > /proc/sys/vm/drop_caches
-
-    case "$PLATFORM" in
-        "A30")
-            echo "" > "$LUN_FILE" 2>/dev/null
-            [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 0 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
-            sleep 1
-            [ -f "$LUN_PATH/ro" ] && echo 0 > "$LUN_PATH/ro" 2>/dev/null
-            [ -f "$LUN_PATH/nofua" ] && echo 0 > "$LUN_PATH/nofua" 2>/dev/null
-            [ -f "$LUN_PATH/removable" ] && echo 1 > "$LUN_PATH/removable" 2>/dev/null
-            echo "$STORAGE_DEVICE" > "$LUN_FILE" 2>/dev/null
-            sleep 1
-            [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 1 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
-            ;;
-        "Brick" | "SmartPro" | "BrickPro")
-            mkdir -p $USB_GADGET_PATH/functions/mass_storage.usb0
-            echo "0x1d6b" > $USB_GADGET_PATH/idVendor
-            echo "0x0104" > $USB_GADGET_PATH/idProduct
-            echo "$STORAGE_DEVICE" > $USB_GADGET_PATH/functions/mass_storage.usb0/lun.0/file
-            echo 1 > $USB_GADGET_PATH/functions/mass_storage.usb0/lun.0/removable
-            mkdir -p $USB_GADGET_PATH/configs/c.1
-            ln -s $USB_GADGET_PATH/functions/mass_storage.usb0 $USB_GADGET_PATH/configs/c.1/
-            mkdir -p $USB_GADGET_PATH/strings/0x409
-            echo "TrimUI" > $USB_GADGET_PATH/strings/0x409/manufacturer
-            echo "TrimUI Device" > $USB_GADGET_PATH/strings/0x409/product
-            echo "1234567890" > $USB_GADGET_PATH/strings/0x409/serialnumber
-            echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
-            echo "musb-hdrc" > $USB_GADGET_PATH/UDC
-            ;;
-        "Flip")
-            mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0/lun.0" 2>/dev/null
-            echo "1" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable" 2>/dev/null
-            echo "0" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/ro" 2>/dev/null
-            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
-            [ -e "$USB_CONFIG_PATH/mass_storage.0" ] || ln -sf "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/" 2>/dev/null
-            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            sleep 1
-            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            ;;
-        "Pixel2")
-            mkdir $USB_GADGET_PATH -m 0770
-            echo "0x2207" > $USB_GADGET_PATH/idVendor
-            echo "0x0000" > $USB_GADGET_PATH/idProduct
-            echo "0x0200" > $USB_GADGET_PATH/bcdUSB
-            mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
-            echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
-            echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
-            echo “Pixel2” > $USB_GADGET_PATH/strings/0x409/product
-            mkdir $USB_CONFIG_PATH -m 0770
-            mkdir $USB_CONFIG_PATH/strings/0x409 -m 0770
-            echo "mass_storage" > $USB_CONFIG_PATH/strings/0x409/configuration
-            mkdir $USB_GADGET_PATH/functions/mass_storage.0
-            echo $STORAGE_DEVICE > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/file
-		    echo 1 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable
-		    echo 0 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/nofua
-            ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
-            echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
-            ;;
-            "SmartProS")
-            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
-            mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0"
-            echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
-            echo 0 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/ro"
-            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file"
-            mkdir -p "$USB_CONFIG_PATH/strings/0x409"
-            echo "Mass Storage" > "$USB_CONFIG_PATH/strings/0x409/configuration"
-            [ -L "$USB_CONFIG_PATH/mass_storage.0" ] || ln -s "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/"
-            sleep 1
-            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
-            ;;
-    esac
+    log_message "USB Storage Mode: $SAVE_POWEROFF missing, releasing the gadget and rebooting directly"
+    usb_gadget_release
+    device_run_reboot_cmd
 }
 
 # --- Main Execution ---
@@ -248,41 +86,16 @@ log_and_display_message "" # Clear the "Connecting" message
 while true; do
     if [ "$(device_get_charging_status)" = "Discharging" ]; then
         log_and_display_message "USB Cable Disconnected."
-        cleanup_usb_gadget
-        log_and_display_message "Device will now reboot."
-        sleep 3
-        stop_pyui_message_writer
-        sync
-
-        if device_system_handles_sdcard_unmount; then
-            device_run_reboot_cmd
-        else
-            cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
-            export PATH=/usr/bin:/usr/sbin:/bin:/sbin
-            unset LD_LIBRARY_PATH
-            exec "$STAGE_2_TMP" --reboot
-        fi
+        exit_usb_storage_mode "cable disconnected"
     fi
 
     log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device."
     if confirm; then
-        cleanup_usb_gadget
-        log_and_display_message "Device will now reboot."
-        sleep 3
-        stop_pyui_message_writer
-        sync
-
-        if device_system_handles_sdcard_unmount; then
-            device_run_reboot_cmd
-        else
-            cp "$STAGE_2_PATH" "$STAGE_2_TMP" && chmod +x "$STAGE_2_TMP"
-            export PATH=/usr/bin:/usr/sbin:/bin:/sbin
-            unset LD_LIBRARY_PATH
-            exec "$STAGE_2_TMP" --reboot
-        fi
+        exit_usb_storage_mode "A pressed"
     fi
     # Add a small sleep to prevent the loop from overwhelming the CPU
     sleep 1
 done
 
 exit 0
+
