@@ -381,7 +381,9 @@ unstage_archive() {
     ARC_DIR="/mnt/SDCARD/spruce/archives"
     STAGED_ARCHIVE="$1"
     TARGET="$2"
-    if [ -z "$TARGET_FOLDER" ] || [ "$TARGET_FOLDER" != "preCmd" ]; then TARGET="preMenu"; fi
+    # Only the two unpacker lanes are valid targets; anything else lands in
+    # the pre-menu lane.
+    if [ "$TARGET" != "preCmd" ]; then TARGET="preMenu"; fi
 
     if [ -f "$ARC_DIR/staging/$STAGED_ARCHIVE" ]; then
         log_message "$STAGED_ARCHIVE detected in spruce/archives/staging. Moving into place!"
@@ -389,20 +391,24 @@ unstage_archive() {
     fi
 }
 
+# These archives have always unpacked in the pre-menu lane: the target
+# argument used to be ignored, so "preCmd" here never took effect. Keep them
+# in preMenu; moving any of them to the background pre_cmd lane is a
+# deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
     if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
-        unstage_archive "overlays_640x480.7z" "preCmd"
+        unstage_archive "overlays_640x480.7z" "preMenu"
     elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
-        unstage_archive "overlays_1024x768.7z" "preCmd"
+        unstage_archive "overlays_1024x768.7z" "preMenu"
     fi
     if [ "$DEVICE_CAN_USE_EXTERNAL_CONTROLLER" = "true" ]; then
-        unstage_archive "autoconfig.7z" "preCmd"
+        unstage_archive "autoconfig.7z" "preMenu"
     fi
     if [ "$DEVICE_USES_64_BIT_RA" = "true" ]; then
-        unstage_archive "cores64.7z" "preCmd"
+        unstage_archive "cores64.7z" "preMenu"
     fi
     if [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || [ "$DEVICE_USES_64_BIT_RA" != "true" ]; then
-        unstage_archive "cores32.7z" "preCmd"
+        unstage_archive "cores32.7z" "preMenu"
     fi
 }
 
