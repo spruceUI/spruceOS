@@ -189,36 +189,6 @@ class TrimUISmartProS(TrimUIDevice):
                             stderr=subprocess.DEVNULL)
         self.system_config.set_bluetooth(1)
 
-    def _signal_osd_quit(self):
-        os.makedirs("/tmp/trimui_osd", exist_ok=True)
-        open("/tmp/trimui_osd/osdd_quit", "a").close()
-
-    def _wpa_supplicant_quit(self):
-        ProcessRunner.run(["killall", "wpa_supplicant"])  
-
-    def _prepare_for_power_action(self):
-        self._signal_osd_quit()
-        self._wpa_supplicant_quit()
-        time.sleep(1)
-
-    def power_off(self):
-        Display.display_message(Language.label("poweringOff", "Powering off..."))
-        self._prepare_for_power_action()
-        time.sleep(1)
-        super().power_off()
-        # So we dont update the display while shutting down
-        time.sleep(10)
-
-
-    def reboot(self):
-        Display.display_message(Language.label("rebooting", "Rebooting..."))
-        self._prepare_for_power_action()
-        time.sleep(1)
-        super().reboot()
-        # So we dont update the display while rebooting
-        time.sleep(10)
-
-
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)
 

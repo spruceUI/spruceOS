@@ -15,6 +15,7 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
+from menus.language.language import Language
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
@@ -68,6 +69,42 @@ class TrimUIDevice(DeviceCommon):
     def reboot_cmd(self):
         return "reboot"
         
+    # Shared by the Brick, Brick Pro, Smart Pro and Smart Pro S. The consent
+    # question (SPR-MED-199) needs the UI, so it is asked first; the
+    # "Powering off" / "Rebooting" message ends the UI, and the trailing sleep
+    # keeps PyUI from drawing over it while the shutdown runs.
+    def _signal_osd_quit(self):
+        os.makedirs("/tmp/trimui_osd", exist_ok=True)
+        open("/tmp/trimui_osd/osdd_quit", "a").close()
+
+    def _wpa_supplicant_quit(self):
+        ProcessRunner.run(["killall", "wpa_supplicant"])
+
+    def _prepare_for_power_action(self):
+        self._signal_osd_quit()
+        self._wpa_supplicant_quit()
+        time.sleep(1)
+
+    def power_off(self):
+        repair_sd = self.sd_card_repair_consent_for("poweroff")
+        if not repair_sd:
+            Display.display_message(Language.label("poweringOff", "Powering off..."))
+        self._prepare_for_power_action()
+        time.sleep(1)
+        super().power_off(repair_sd=repair_sd)
+        # So we dont update the display while shutting down
+        time.sleep(10)
+
+    def reboot(self):
+        repair_sd = self.sd_card_repair_consent_for("reboot")
+        if not repair_sd:
+            Display.display_message(Language.label("rebooting", "Rebooting..."))
+        self._prepare_for_power_action()
+        time.sleep(1)
+        super().reboot(repair_sd=repair_sd)
+        # So we dont update the display while rebooting
+        time.sleep(10)
+
     def _set_lumination_to_config(self):
         val = self.map_backlight_from_10_to_full_255(self.system_config.backlight)
         try:

@@ -35,6 +35,10 @@ FORCE_POWER_TRANSITION="${SPRUCE_FORCE_POWER_TRANSITION:-0}"
 # then reboot. Default off.
 USB_EXPORT="${SPRUCE_USB_EXPORT:-0}"
 USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
+# The user consented (in PyUI) to an fsck of the card and save_poweroff.sh
+# staged it: run it after a clean umount (SPR-MED-199). Default off.
+SD_REPAIR="${SPRUCE_SD_REPAIR:-0}"
+SHUTDOWN_UI_DIR="${SHUTDOWN_UI_DIR:-/tmp/shutdown_ui}"
 SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
 SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
 
@@ -132,27 +136,6 @@ stage2_dump_holders() {
 
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     SD_MOUNTPOINT="$(resolve_sd_mountpoint)"
-
-    # Now that the card's real mount point is known, reopen stdout/stderr on a
-    # log file - chosen here rather than above precisely so it can be checked
-    # against the resolved path instead of a configured guess.
-    STAGE2_LOG=/tmp/save_poweroff_stage2.log
-    for _d in /data /mnt/data /mnt/UDISK; do
-        case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
-        [ -d "$_d" ] || continue
-        if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
-            rm -f "$_d/.spruce_shutdown_write_test"
-            STAGE2_LOG="$_d/spruce_shutdown.log"
-            break
-        fi
-    done
-
-    # Truncate rather than append: one shutdown per file, so the next boot
-    # reports the shutdown that just happened and this cannot grow without bound.
-    exec >"$STAGE2_LOG" 2>&1
-    echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} ==="
-    echo "stage2: logging to $STAGE2_LOG"
-    echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
 else
     # The original guess, unchanged. Correct on every device that was shipping
     # this before the XX work: their configured mount point is not behind a
@@ -166,6 +149,32 @@ else
         *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
     esac
 fi
+
+# Now that the card's mount point is known, reopen stdout/stderr on a log
+# file that is NOT on the card - chosen here rather than above precisely so it
+# can be checked against the mount point. On every path, strict or not: a
+# shutdown that leaves no trace cannot be told apart from one that never ran,
+# and "did the umount succeed" is the one fact the next boot needs
+# (SPR-MED-199). /data and /mnt/data are separate partitions under BaseOS,
+# /mnt/UDISK is the TrimUI eMMC; /tmp is the fallback and at least survives
+# long enough to be read over ssh.
+STAGE2_LOG=/tmp/save_poweroff_stage2.log
+for _d in /data /mnt/data /mnt/UDISK; do
+    case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
+    [ -d "$_d" ] || continue
+    if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
+        rm -f "$_d/.spruce_shutdown_write_test"
+        STAGE2_LOG="$_d/spruce_shutdown.log"
+        break
+    fi
+done
+
+# Truncate rather than append: one shutdown per file, so the next boot
+# reports the shutdown that just happened and this cannot grow without bound.
+exec >"$STAGE2_LOG" 2>&1
+echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} strict=$STRICT_UNMOUNT ==="
+echo "stage2: logging to $STAGE2_LOG"
+echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
@@ -302,7 +311,15 @@ else
     # The original single attempt. Up to three seconds of retries is cheap
     # insurance on a device that needs it and a delay on every shutdown for one
     # that does not.
-    umount "$SD_MOUNTPOINT" 2>/dev/null || umount -l "$SD_MOUNTPOINT"
+    if umount "$SD_MOUNTPOINT" 2>/dev/null; then
+        umount_ok=1
+        echo "stage2: unmounted $SD_MOUNTPOINT cleanly (single attempt)"
+    else
+        umount_ok=0
+        echo "stage2: umount of $SD_MOUNTPOINT FAILED, falling back to lazy - filesystem will be left dirty"
+        stage2_dump_holders
+        umount -l "$SD_MOUNTPOINT"
+    fi
 fi
 
 # USB Storage Mode: the card is unmounted and clean, nothing is left that runs
@@ -325,6 +342,25 @@ if [ "$USB_EXPORT" = "1" ]; then
         fi
     else
         echo "stage2: no USB session staged at $USB_SESSION_DIR, rebooting"
+    fi
+fi
+
+# The user consented to the repair and the card is now cleanly unmounted:
+# fsck it before the power command. PyUI's last frame ("Repairing the SD
+# card...") stays on the panel meanwhile, so no screen is drawn here. Never
+# after a lazy fallback - holders are still on that filesystem - the flag
+# then survives and PyUI asks again next time.
+if [ "$USB_EXPORT" != "1" ] && [ "$SD_REPAIR" = "1" ]; then
+    if [ "${umount_ok:-0}" = "1" ] && [ -f "$SHUTDOWN_UI_DIR/shutdown_ui.sh" ]; then
+        echo "stage2: repair consented, checking the card"
+        . "$SHUTDOWN_UI_DIR/shutdown_ui.sh"
+        if shutdown_ui_load_env; then
+            sd_card_repair_if_dirty
+        else
+            echo "stage2: shutdown UI env missing, repair skipped"
+        fi
+    else
+        echo "stage2: card not cleanly unmounted or nothing staged, repair skipped"
     fi
 fi
 
@@ -384,8 +420,10 @@ elif [ "$STRICT_UNMOUNT" != "1" ]; then
     # escalation below is only worth its risk where the recovery it protects
     # against - a card left read-only by a wedged init - is reachable.
     if [ "$WANT_REBOOT" -eq 1 ]; then
+        echo "stage2: rebooting (original path)"
         reboot
     else
+        echo "stage2: powering off (original path)"
         poweroff
     fi
     exit 0
