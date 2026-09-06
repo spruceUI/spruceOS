@@ -272,8 +272,9 @@ kill_remaining_background_processes() {
 }
 
 clean_up_flags() {
-    # Set flag to trigger autoresume on boot if appropriate
-    if flag_check "in_menu"; then
+    # Set flag to trigger autoresume on boot if appropriate. USB Storage Mode
+    # counts as the menu: there is nothing to resume into.
+    if flag_check "in_menu" || usb_storage_exit; then
         flag_remove "save_active"
         log_message "save_active cleared by save_poweroff: shutdown initiated from menu"
     else
@@ -437,7 +438,16 @@ if ! usb_storage_exit && ! flag_check "in_menu"; then
     close_non_emu_cmd_to_run
 fi
 
-if ! usb_storage_exit; then
+if usb_storage_exit; then
+    # The app is what cmd_to_run.sh launched, so principal.sh recorded it as
+    # the last game. It is not resumable: a boot that auto-resumed into USB
+    # Storage Mode sat in the app with no network services up (measured on
+    # the TSPS, 2026-09-05). Drop the lastgame record now, the way a
+    # non-emulator command is dropped, and let clean_up_flags treat this as a
+    # shutdown from the menu so save_active is cleared rather than set.
+    close_non_emu_cmd_to_run
+    rm -f -- "${FLAGS_DIR}/lastgame.lock"
+else
     display_appropriate_icon_and_message
     dim_screen_and_do_syncthing_check
 fi
