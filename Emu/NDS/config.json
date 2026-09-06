@@ -122,6 +122,7 @@
         "None",
         "Antialiasing",
         "Bilinear",
+        "Subtle Grid",
         "Chunky Grid",
         "Extra Chunky"
       ],

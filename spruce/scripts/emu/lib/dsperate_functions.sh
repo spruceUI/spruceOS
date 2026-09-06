@@ -219,6 +219,7 @@ run_dsperate() {
 		"None") ;;
 		"Antialiasing") set -- "$@" --aa --seam blend ;;
 		"Bilinear") set -- "$@" --linear ;;
+		"Subtle Grid") set -- "$@" --lcd-grid 0.15 ;;
 		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
 	esac

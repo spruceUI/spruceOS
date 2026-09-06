@@ -20,6 +20,8 @@
 
 - RA cfg overhaul for older devices on newer RA builds - missing some entries
 - reset config tasks for more standalone emulators
+- spruce settings should allow Menu button as hotkey enabler in RA on XX
+- some hotkeys missing or wrong in RA on XX
 
 --- OTA ------------------------------------------------------------------------
 
