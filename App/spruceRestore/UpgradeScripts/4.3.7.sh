@@ -49,7 +49,8 @@
 #
 #   - PPSSPP keeps its per-platform controls in Saves/.config/ppsspp, seeded
 #     once from Emu/PSP/default_configs. Only the CubeXX had shipped files;
-#     the RG28XX, XX640480 and XX720480 files are copied in when absent so
+#     the RG28XX, XX640480, XX720480 and the three stickless / one-stick
+#     platforms' files are copied in when absent so
 #     those models stop launching PPSSPP on its built-in defaults. An existing
 #     file is the user's and is left alone.
 #
@@ -169,7 +170,7 @@ PSP_DEFAULTS="/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM"
 
 if [ -d "$PSP_LIVE" ]; then
     copied=0
-    for plat in AnbernicRG28XX AnbernicXX640480 AnbernicXX720480; do
+    for plat in AnbernicRG28XX AnbernicXX640480 AnbernicXX640480NoStick AnbernicXX640480OneStick AnbernicXX720480 AnbernicXX720480NoStick; do
         for kind in controls ppsspp; do
             src="$PSP_DEFAULTS/$kind-$plat.ini"
             dst="$PSP_LIVE/$kind-$plat.ini"

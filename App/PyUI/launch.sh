@@ -130,7 +130,7 @@ case "$PLATFORM" in
 ############################################################
 # Anbernic RG XX line (Allwinner H700)
 ############################################################
-    "AnbernicXX720480" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
+    "AnbernicXX720480" | "AnbernicXX720480NoStick" | "AnbernicXX640480" | "AnbernicXX640480NoStick" | "AnbernicXX640480OneStick" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
         # BaseOS ships no SDL2 and no python: use the aarch64 pair we already
         # bundle. MainUI is the bind-mounted alias of python3.10 set up in
         # device_init - spruce greps for that process name.
@@ -163,6 +163,12 @@ case "$PLATFORM" in
 
         if [ "$PLATFORM" = "AnbernicXX720480" ]; then
             DEVICE="ANBERNIC_RGXX720480"
+        elif [ "$PLATFORM" = "AnbernicXX720480NoStick" ]; then
+            DEVICE="ANBERNIC_RGXX720480NOSTICK"
+        elif [ "$PLATFORM" = "AnbernicXX640480NoStick" ]; then
+            DEVICE="ANBERNIC_RGXX640480NOSTICK"
+        elif [ "$PLATFORM" = "AnbernicXX640480OneStick" ]; then
+            DEVICE="ANBERNIC_RGXX640480ONESTICK"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then

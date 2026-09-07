@@ -103,6 +103,9 @@ folders="
 /mnt/SDCARD/Emu/NDS/config/drastic-AnbernicRGCubeXX.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX720480.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480NoStick.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480OneStick.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX720480NoStick.cfg
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings_A30.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
@@ -117,6 +120,9 @@ folders="
 /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRGCubeXX.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX720480.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480NoStick.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480OneStick.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX720480NoStick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg

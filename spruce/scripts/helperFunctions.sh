@@ -61,10 +61,17 @@ case $INFO in
     *0xd03*)                                    # H700
         export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
+        # One platform per panel AND pad layout (Brick / Brick Pro precedent):
+        # every config ships static per platform, so models whose sticks and
+        # trigger numbering differ cannot share one. This case is the only
+        # place that names models; each platform cfg states its layout.
         case $BASEOS_TARGET in
             rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
             rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
-            rg34xx|rg34xxsp|rgsp)   export PLATFORM="AnbernicXX720480" ;;
+            rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
+            rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
+            rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
+            rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
             *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
@@ -104,7 +111,10 @@ device_names() {
         Zero28)           echo "MAGICX_ZERO28" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480NOSTICK";  echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480ONESTICK"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX720480) echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX720480NoStick)  echo "ANBERNIC_RGXX720480NOSTICK";  echo "ANBERNIC_RGXX" ;;
         AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
         AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
     esac

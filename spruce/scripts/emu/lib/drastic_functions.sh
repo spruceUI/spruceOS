@@ -73,6 +73,15 @@ run_drastic_AnbernicRG28XX() {
 run_drastic_AnbernicXX640480() {
 	run_drastic_AnbernicRGXX
 }
+run_drastic_AnbernicXX640480NoStick() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX640480OneStick() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX720480NoStick() {
+	run_drastic_AnbernicRGXX
+}
 
 ##### A30 #####
 
