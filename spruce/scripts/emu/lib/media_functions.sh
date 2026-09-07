@@ -73,6 +73,11 @@ run_ffplay() {
 	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
+		# gptokeyb speaks SDL's positional names; the H700 pad needs spruce's map
+		# to be a game controller at all.
+		case "$PLATFORM" in
+			"Anbernic"*) export_sdl_gamecontroller_map positional ;;
+		esac
 		/mnt/SDCARD/spruce/bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
 		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -loglevel 24 -i "$ROM_FILE" > $(emu_log_file) 2>&1

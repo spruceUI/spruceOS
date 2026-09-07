@@ -39,6 +39,10 @@ _set_scummvm_platform() {
 		"Anbernic"*)
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-anbernic/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			# gamecontrollerdb.txt has no row for this pad (one GUID, three
+			# trigger layouts), so hand SDL spruce's per-layout map. Label-named,
+			# like the db's TRIMUI/MIYOO rows: A is the button marked A.
+			export_sdl_gamecontroller_map
 			;;
 		"A30")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
