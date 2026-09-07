@@ -326,28 +326,33 @@ set_default_ra_hotkeys() {
     # Every XX platform launches on its own retroarch-$PLATFORM.cfg, like the
     # rest of the fleet (the line used to share one universal cfg, and before
     # that this appended a stray hotkeys-only file, SPR-MED-030). The values
-    # are the fleet layout in the udev/joydev numbering the platform cfgs are
-    # written in: MENU modifier, + B exit, + A screenshot, + X menu, + Y fps,
-    # + L1/R1 load/save, + L2/R2 slow-motion/fast-forward, + UP shader,
-    # + LEFT/RIGHT state slot. apply_xx_hotkeys_from_autoconfig translates
-    # them for the driver in use on the next launch, so this only has to
-    # restore the udev literals it recognises.
+    # are the fleet layout in the numbering of the staged mali SDL2 the 64-bit
+    # build reads the pad through - the numbering the platform cfgs ship in:
+    # MENU modifier, + B exit, + A screenshot, + X menu, + Y fps, + L1/R1
+    # load/save, + L2/R2 slow-motion/fast-forward, + UP shader, + LEFT/RIGHT
+    # state slot. Only the triggers move with the pad layout: stickless models
+    # have no stick-click keys ahead of them. Nothing rewrites these at
+    # launch; the 32-bit build's overlay carries its own linuxraw copy.
     RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    case "$XX_PAD_LAYOUT" in
+        nostick) l2_btn="12"; r2_btn="13" ;;
+        *)       l2_btn="13"; r2_btn="14" ;;
+    esac
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
     update_ra_config_file_with_new_setting "$RA_FILE" \
-        "input_enable_hotkey_btn = \"8\"" \
-        "input_exit_emulator_btn = \"1\"" \
-        "input_screenshot_btn = \"0\"" \
+        "input_enable_hotkey_btn = \"11\"" \
+        "input_exit_emulator_btn = \"4\"" \
+        "input_screenshot_btn = \"3\"" \
         "input_menu_toggle = \"f1\"" \
-        "input_menu_toggle_btn = \"3\"" \
-        "input_fps_toggle_btn = \"2\"" \
-        "input_load_state_btn = \"4\"" \
-        "input_save_state_btn = \"5\"" \
-        "input_toggle_slowmotion_btn = \"10\"" \
+        "input_menu_toggle_btn = \"6\"" \
+        "input_fps_toggle_btn = \"5\"" \
+        "input_load_state_btn = \"7\"" \
+        "input_save_state_btn = \"8\"" \
+        "input_toggle_slowmotion_btn = \"$l2_btn\"" \
         "input_toggle_slowmotion_axis = \"nul\"" \
-        "input_toggle_fast_forward_btn = \"11\"" \
+        "input_toggle_fast_forward_btn = \"$r2_btn\"" \
         "input_toggle_fast_forward_axis = \"nul\"" \
         "input_shader_toggle_btn = \"h0up\"" \
         "input_shader_toggle_axis = \"nul\"" \
