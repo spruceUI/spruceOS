@@ -26,7 +26,7 @@ cd "$RA_DIR/"
 RA_PARAMS="-v --config ${PLATFORM_CFG}"
 
 # Same BaseOS overlay and joypad autoconfig a game launch gets. Without it this
-# app ran on the universal cfg's sdl2 joypad driver, which sees no pad on
+# app ran on the platform cfg's sdl2 joypad driver, which sees no pad on
 # BaseOS, so the frontend came up with dead controls.
 apply_baseos_ra_overlay
 

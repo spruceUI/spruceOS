@@ -323,16 +323,16 @@ set_event_arg_for_idlemon() {
 }
 
 set_default_ra_hotkeys() {
-    # The XX line launches every platform on the shared universal cfg, not on
-    # retroarch-$PLATFORM.cfg (which exists for none of the four platforms -
-    # this used to append a stray hotkeys-only file, SPR-MED-030). The values
-    # are the fleet layout in the udev/joydev numbering the universal cfg is
+    # Every XX platform launches on its own retroarch-$PLATFORM.cfg, like the
+    # rest of the fleet (the line used to share one universal cfg, and before
+    # that this appended a stray hotkeys-only file, SPR-MED-030). The values
+    # are the fleet layout in the udev/joydev numbering the platform cfgs are
     # written in: MENU modifier, + B exit, + A screenshot, + X menu, + Y fps,
     # + L1/R1 load/save, + L2/R2 slow-motion/fast-forward, + UP shader,
     # + LEFT/RIGHT state slot. apply_xx_hotkeys_from_autoconfig translates
     # them for the driver in use on the next launch, so this only has to
     # restore the udev literals it recognises.
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg"
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

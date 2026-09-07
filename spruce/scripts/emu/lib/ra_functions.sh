@@ -46,10 +46,13 @@ setup_rumble_env() {
 }
 
 prepare_ra_config() {
-	case "$PLATFORM" in
-    	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
-		*) 			 export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
-	esac
+	# One cfg per platform, the fleet layout since the 2025-04 restructure:
+	# the card carries every platform's file and the device picks its own, so
+	# a card moved between models never launches on another model's saved
+	# state. The XX line used to share retroarch-AnbernicRG_XX-universal.cfg;
+	# 4.3.7.sh carries a restored copy of that file into the current
+	# platform's cfg once, then removes it.
+	export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
 	# Set up RetroAchievements based on spruceUI config
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
@@ -150,32 +153,11 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
-	# Handle resolution and rotation for Anbernic H700 devices
-	case "$PLATFORM" in
-		*"Anbernic"*)
-			TMP_CFG="$(mktemp)"
-			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
-				rot="1"
-				vid_x="640"
-				vid_y="480"
-			else
-				rot="0"
-				vid_x="0"
-				vid_y="0"
-			fi
-
-			if sed \
-				-e "s|^video_rotation.*|video_rotation = \"$rot\"|" \
-				-e "s|^video_fullscreen_x.*|video_fullscreen_x = \"$vid_x\"|" \
-				-e "s|^video_fullscreen_y.*|video_fullscreen_y = \"$vid_y\"|" \
-				"$PLATFORM_CFG" > "$TMP_CFG"; then
-				mv "$TMP_CFG" "$PLATFORM_CFG"
-			else
-				rm -f "$TMP_CFG"
-			fi
-			;;
-		*) ;;
-	esac
+	# Rotation and fullscreen size used to be forced into the XX line's shared
+	# cfg on every launch, because one file served a portrait RG28XX and three
+	# landscape models. Each platform cfg now ships with its own values, and
+	# 4.3.7.sh sets them once on a cfg it carries over, so a rotation the user
+	# picks inside RetroArch stays picked - as on every other platform.
 	sync
 }
 
@@ -296,8 +278,8 @@ input_start_btn = "7"'
 
 # RetroArch's hotkey binds are RAW joypad indices - unlike the player binds,
 # they do not go through the joypad autoconfig - so no single number in the
-# shared universal cfg can suit every driver this line runs. udev (the numbers
-# the universal cfg is written in) and linuxraw agree on the buttons but not on
+# shipped platform cfg can suit every driver this line runs. udev (the numbers
+# the platform cfgs are written in) and linuxraw agree on the buttons but not on
 # the d-pad (hat vs axes); the 64-bit SDL2 build numbers everything three
 # higher and interleaves the stick clicks with the triggers.
 #
@@ -396,15 +378,15 @@ apply_xx_hotkeys_from_autoconfig() {
 	rm -f "$SEDF"
 }
 
-# BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
-# Overlay the sdl2 input drivers on top without touching the shared cfg. The
+# BaseOS has no udevd, so the platform cfg's udev input drivers find no pad.
+# Overlay the sdl2 input drivers on top without touching the platform cfg. The
 # 32-bit build gets its own overlay: its SDL2 cannot see the pad here, so it
 # drives the joypad through linuxraw instead. One overlay either way, because
 # only the last --appendconfig would win.
 #
 # Shared rather than inlined in run_retroarch because the standalone RetroArch
 # app launchers build their own command line and skipped all of this. The 32-bit
-# app was therefore launching with the universal cfg's sdl2 joypad driver, which
+# app was therefore launching with the platform cfg's sdl2 joypad driver, which
 # cannot see the pad on BaseOS - so it had no controls at all, while the same
 # binary launched with a game worked fine.
 #

@@ -1,5 +1,5 @@
-# BaseOS overlay for the 32-bit RetroArch, layered over
-# retroarch-AnbernicRG_XX-universal.cfg with --appendconfig. The 64-bit build
+# BaseOS overlay for the 32-bit RetroArch, layered over the platform cfg
+# (retroarch-$PLATFORM.cfg) with --appendconfig. The 64-bit build
 # uses retroarch-AnbernicRG_XX-baseos.cfg instead; only one of the two is ever
 # applied, since the last --appendconfig would win anyway.
 #

@@ -199,7 +199,12 @@ class AnbernicXXCommon(DeviceCommon):
 
             selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
 
-            shutil.copyfile("/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg", "/mnt/SDCARD/RetroArch/retroarch.cfg")
+            # One cfg per platform, like the shell launcher. PLATFORM is exported
+            # by the runtime that starts PyUI; the fallback is the family's widest
+            # panel, which is also what the shared cfg used to describe.
+            platform = os.environ.get("PLATFORM", "AnbernicXX720480")
+            platform_cfg = "/mnt/SDCARD/RetroArch/platform/" + "retroarch-" + platform + ".cfg"
+            shutil.copyfile(platform_cfg, "/mnt/SDCARD/RetroArch/retroarch.cfg")
             cmds = [
                     "/mnt/SDCARD/RetroArch/ra64.universal",
                     "-v",

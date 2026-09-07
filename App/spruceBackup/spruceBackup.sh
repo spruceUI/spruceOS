@@ -113,7 +113,10 @@ folders="
 /mnt/SDCARD/RetroArch/.retroarch/shaders
 /mnt/SDCARD/RetroArch/.retroarch/cheats
 /mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg
-/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRGCubeXX.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX720480.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg
