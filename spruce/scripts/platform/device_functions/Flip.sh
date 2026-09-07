@@ -13,6 +13,7 @@
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/usb_wifi_dongle.sh"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/flip-system.json"
@@ -184,6 +185,15 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
+    # The onboard radio rides through the suspend as it always has. A USB
+    # dongle's driver does not: remember it, drop the clients bound to its
+    # wlan0 and unload it; enable_wifi reloads it on the way back once the
+    # dongle has re-enumerated (usb_wifi_wait_after_resume).
+    if usb_wifi_dongle_active; then
+        usb_wifi_note_sleep
+        usb_wifi_stop_clients
+        usb_wifi_tear_down
+    fi
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -192,6 +202,11 @@ device_enter_sleep() {
 device_exit_sleep() {
     fix_sleep_sound_bug
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    # A dongle that was the radio gets a bounded wait to re-enumerate, then the
+    # system json decides whether WiFi comes back (the boot path's rule).
+    if usb_wifi_wait_after_resume; then
+        enable_or_disable_wifi_per_system_json
+    fi
 }
 
 device_lid_sensor_ready() {
@@ -262,6 +277,12 @@ launch_startup_watchdogs(){
     # The name is kinda confusing. I think it monitors for headphones?
     stop_running_watchdog /mnt/SDCARD/spruce/flip/mixer_watchdog.sh
     /mnt/SDCARD/spruce/flip/mixer_watchdog.sh &
+
+    # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh); Flip.cfg opts in.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
+    if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+        /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+    fi
 
     #BT is broken so don't bother with it
     #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
@@ -446,13 +467,53 @@ device_cleanup_after_ports_run() {
 }
 
 
-device_wifi_power_on() { 
+# --- WiFi radio -------------------------------------------------------------
+# The onboard RTL8733BU is a USB chip whose driver is built into the kernel, so
+# it cannot be unloaded; its power rail can be. utils/usb_wifi_dongle.sh calls
+# these two when a supported USB dongle on the USB-C port takes over (the rail
+# goes off, the chip and its wlan0 vanish, the dongle's interface becomes
+# wlan0) and when the dongle is gone again (rail on, wlan0 returns). Flip.cfg
+# opts in with WIFI_USB_MODULES_DIR. Without a dongle every function below
+# does exactly what it did before: the rail.
+device_usb_wifi_onboard_release() {
+    echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_usb_wifi_onboard_restore() {
     echo 1 > /sys/class/rkwifi/wifi_power
     sleep 1
 }
 
-device_wifi_power_off() { 
+device_wifi_power_on() {
+    if usb_wifi_bring_up; then
+        return 0
+    fi
+    if ! usb_wifi_dongle_present >/dev/null 2>&1; then
+        usb_wifi_tear_down
+    fi
+    usb_wifi_onboard_restore
+}
+
+device_wifi_power_off() {
+    # A dongle's driver stays loaded with its interface down (cheap to turn
+    # back on; the watchdog unloads it when the dongle is pulled). The rail is
+    # written 0 either way: with a dongle it already is.
     echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_ensure_wifi_interface() {
+    [ -d /sys/class/net/wlan0 ] && return 0
+    if usb_wifi_dongle_active; then
+        _left=5
+        while [ "$_left" -gt 0 ]; do
+            [ -d /sys/class/net/wlan0 ] && return 0
+            sleep 1
+            _left=$((_left - 1))
+        done
+        log_message "USB WiFi: dongle active but wlan0 missing"
+        return 1
+    fi
+    usb_wifi_onboard_restore
 }
 
 device_system_handles_sdcard_unmount() {
