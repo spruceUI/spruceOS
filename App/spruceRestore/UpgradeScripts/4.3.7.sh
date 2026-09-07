@@ -30,18 +30,21 @@
 #     sdl2. The platform cfgs now ship the fleet layout in the 64-bit build's
 #     sdl2 numbering and nothing rewrites it at launch, so a cfg still in an
 #     old numbering (both put exit-emulator on "1"; sdl2 has "4") gets the
-#     shipped set once, with the modifier mapped to the same control. No user
+#     shipped set once, with the modifier moved to SELECT (a Start literal
+#     stays Start). No user
 #     hotkey choice can be lost here: the old launcher overwrote them all
 #     every launch anyway.
 #
-#   - The MODIFIER under the "Custom" option: on cards updated from 4.3.6 the
-#     cfg holds either the old shipped "6" (never translated under Custom,
-#     which is why the modifier was X on the 64-bit build - SPR-MED-094) or
-#     the "9" the old Select translation wrote. Both are spruce's doing, not
-#     the user's, so they move to the shipped default MENU (sdl2 "11").
-#     Anything else is a value the user chose in RetroArch and stays. A user
-#     whose spruce option is Select or Start is re-bound by the launcher on
-#     every launch regardless, so the rewrite is harmless there too.
+#   - The MODIFIER under the "Custom" option: SELECT (sdl2 "9") is the shipped
+#     modifier on this line, as on the Flip, the Mini and the RGB30. A cfg can
+#     still hold a modifier spruce itself wrote earlier: the old shipped udev
+#     "6" (never translated under Custom, which is why the modifier was X on
+#     the 64-bit build - SPR-MED-094), the udev MENU "8", or the sdl2 MENU
+#     "11" the 2026-09-06 nightlies shipped and carried. None is a user
+#     choice, so they move to "9". Anything else is a value the user chose
+#     in RetroArch and stays. A user whose spruce option is Menu, Select or
+#     Start is re-bound by the launcher on every launch regardless, so the
+#     rewrite is harmless there too.
 #
 #     The option is read from the BACKUP copy of spruce-config.json: this runs
 #     before restore_spruce_config merges the user's values into the new file,
@@ -61,7 +64,7 @@
 # launch.
 #
 # Idempotent: a second pass finds no universal cfg, no udev driver, exit-emulator
-# on "4" and the modifier on "11", and finds the ini files present. Never fails
+# on "4" and the modifier on "9", and finds the ini files present. Never fails
 # the restore.
 #
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -147,9 +150,8 @@ if [ -f "$RA_CFG" ] && grep -q '^input_exit_emulator_btn = "1"$' "$RA_CFG"; then
     esac
     old_modifier="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$RA_CFG" | head -n 1)"
     case "$old_modifier" in
-        6) new_modifier="9" ;;
         7) new_modifier="10" ;;
-        *) new_modifier="11" ;;
+        *) new_modifier="9" ;;
     esac
     if sed \
         -e "s/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = \"$new_modifier\"/" \
@@ -184,11 +186,11 @@ if [ -f "$RA_CFG" ]; then
     done
     current="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$RA_CFG" | head -n 1)"
     case "$option:$current" in
-        Custom:6|Custom:9|:6|:9)
-            if sed 's/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = "11"/' "$RA_CFG" > "$RA_CFG.tmp" \
+        Custom:6|Custom:8|Custom:11|:6|:8|:11)
+            if sed 's/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = "9"/' "$RA_CFG" > "$RA_CFG.tmp" \
                && [ -s "$RA_CFG.tmp" ]; then
                 mv -f "$RA_CFG.tmp" "$RA_CFG"
-                log_message "4.3.7: RetroArch modifier moved from spruce default $current to MENU (11)"
+                log_message "4.3.7: RetroArch modifier moved from spruce default $current to SELECT (9)"
             else
                 rm -f "$RA_CFG.tmp"
                 log_message "4.3.7: could not rewrite $RA_CFG - the modifier stays at $current"

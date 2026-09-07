@@ -170,7 +170,8 @@ prepare_ra_config() {
 # through linuxraw, whose numbering differs, so it gets a shipped per-platform
 # overlay (retroarch-<PLATFORM>-32bit.cfg: linuxraw driver, binds, hotkeys,
 # config saving off) plus a tiny modifier overlay per spruce option, appended
-# with RetroArch's "|" delimiter; Custom falls back to MENU there.
+# with RetroArch's "|" delimiter; Custom falls back to SELECT there, the
+# shipped modifier on this line.
 #
 # Shared rather than inlined in run_retroarch because the standalone RetroArch
 # app launchers build their own command line and skipped all of this. The 32-bit
@@ -190,7 +191,8 @@ apply_baseos_ra_overlay() {
 	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
 		"Select") modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
 		"Start")  modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-start.cfg" ;;
-		*)        modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-menu.cfg" ;;
+		"Menu")   modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-menu.cfg" ;;
+		*)        modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
 	esac
 	[ -f "$modifier" ] && overlay="$overlay|$modifier"
 	RA_PARAMS="${RA_PARAMS} --appendconfig $overlay"

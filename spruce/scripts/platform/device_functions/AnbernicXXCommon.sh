@@ -328,7 +328,7 @@ set_default_ra_hotkeys() {
     # that this appended a stray hotkeys-only file, SPR-MED-030). The values
     # are the fleet layout in the numbering of the staged mali SDL2 the 64-bit
     # build reads the pad through - the numbering the platform cfgs ship in:
-    # MENU modifier, + B exit, + A screenshot, + X menu, + Y fps, + L1/R1
+    # SELECT modifier (9), + B exit, + A screenshot, + X menu, + Y fps, + L1/R1
     # load/save, + L2/R2 slow-motion/fast-forward, + UP shader, + LEFT/RIGHT
     # state slot. Only the triggers move with the pad layout: stickless models
     # have no stick-click keys ahead of them. Nothing rewrites these at
@@ -342,7 +342,7 @@ set_default_ra_hotkeys() {
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
     update_ra_config_file_with_new_setting "$RA_FILE" \
-        "input_enable_hotkey_btn = \"11\"" \
+        "input_enable_hotkey_btn = \"9\"" \
         "input_exit_emulator_btn = \"4\"" \
         "input_screenshot_btn = \"3\"" \
         "input_menu_toggle = \"f1\"" \
