@@ -80,6 +80,46 @@ build_mupen_args() {
 	export EMU_VIDEO_PLUGIN="$SA_PLUGIN"
 }
 
+# Anbernic RG XX (H700): the pad is read through the staged mali SDL2, whose
+# raw joystick numbering is +3 over udev (A b3 ... MENU b11), with the
+# stick-click keys interleaving the triggers per XX_PAD_LAYOUT. Three things
+# make the fleet's N64 layout hold here:
+#   - gptokeyb2's defkeys.gptk speaks SDL's positional names, so hand it
+#     spruce's POSITIONAL map (a = bottom button -> N64 A, like every other
+#     arm64 device on SDL's built-in X360 map);
+#   - mupen's own input-sdl plugin matches InputAutoCfg.ini by joystick name,
+#     so [Linux: ANBERNIC-keys] carries the two-stick numbers and "Z Trig"
+#     is rewritten for stickless models, whose L2 is b12;
+#   - the [CoreEvents] joypad hotkeys in the shared mupen64plus.cfg are
+#     Xbox-360-numbered (J0B8 = guide) and cannot serve this pad, so the
+#     same chords are passed as --set overrides in this pad's numbering:
+#     MENU (b11) + START stop, + R1 save, + L1 load, + hat slot, + B reset,
+#     + Y screenshot, + X pause, + A mute, + SELECT speed limiter.
+# The --set overrides live in run_mupen_standalone, appended to the
+# positional parameters after $ARGS is split, because "Joy Mapping Stop"
+# carries spaces and cannot travel through a word-split string.
+apply_xx_mupen_pad() {
+	case "$PLATFORM" in
+		"Anbernic"*) ;;
+		*) return 0 ;;
+	esac
+	export_sdl_gamecontroller_map positional
+
+	case "$XX_PAD_LAYOUT" in
+		nostick) ztrig="button(12)" ;;
+		*)       ztrig="button(13)" ;;
+	esac
+	AC="$HOME/InputAutoCfg.ini"
+	if [ -f "$AC" ]; then
+		awk -v z="$ztrig" '
+			/^\[/ { in_xx = ($0 == "[Linux: ANBERNIC-keys]") }
+			in_xx && /^Z Trig = / { print "Z Trig = " z; next }
+			{ print }
+		' "$AC" > "$AC.tmp" && mv "$AC.tmp" "$AC"
+	fi
+
+}
+
 run_mupen_standalone() {
 
 	export HOME="$EMU_DIR/${MUPEN_DIR:-mupen64plus}"
@@ -118,6 +158,22 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	while true; do
 		build_mupen_args
 
+		set -- $ARGS
+		case "$PLATFORM" in
+			"Anbernic"*)
+				apply_xx_mupen_pad
+				set -- "$@" \
+					--set "CoreEvents[Joy Mapping Stop]=J0B11/B10" \
+					--set "CoreEvents[Joy Mapping Save State]=J0B11/B8" \
+					--set "CoreEvents[Joy Mapping Load State]=J0B11/B7" \
+					--set "CoreEvents[Joy Mapping Increment Slot]=J0B11/H0V2" \
+					--set "CoreEvents[Joy Mapping Reset]=J0B11/B4" \
+					--set "CoreEvents[Joy Mapping Screenshot]=J0B11/B5" \
+					--set "CoreEvents[Joy Mapping Pause]=J0B11/B6" \
+					--set "CoreEvents[Joy Mapping Mute]=J0B11/B3" \
+					--set "CoreEvents[Joy Mapping Speed Limiter Toggle]=J0B11/B9"
+				;;
+		esac
 		if [ "$PLATFORM" = "A30" ]; then
 			export M64P_ROTATE=1
 			./a30_input_shim /dev/input/event3 &
@@ -127,7 +183,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 			sleep 0.3
 		fi
 
-		./mupen64plus $ARGS "$ROM_PATH" > $(emu_log_file) 2>&1
+		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
 
 		if [ "$PLATFORM" = "A30" ]; then
 			kill -9 $(pidof a30_input_shim) 2>/dev/null
