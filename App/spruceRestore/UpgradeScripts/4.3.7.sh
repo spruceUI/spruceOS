@@ -1,25 +1,47 @@
 #!/bin/sh
 #
-# Anbernic RG XX line: carry the fleet pad layout onto cards that update.
+# Anbernic RG XX line: one RetroArch cfg per platform, and the fleet pad layout
+# carried onto cards that update.
 #
 # spruceRestore extracts the user's backup over the new payload before this
-# runs, and that backup contains RetroArch/platform/retroarch-AnbernicRG_XX-
-# universal.cfg and the whole PPSSPP config tree under Saves. So the two files
-# the parity change edits never arrive on an existing card by themselves:
+# runs. Two things in that backup need help:
 #
-#   - The universal cfg's hotkey ACTION binds do not matter: ra_functions.sh's
-#     apply_xx_hotkeys_from_autoconfig rewrites every one of them by name from
-#     the autoconfig on each launch. The MODIFIER is the exception. Under the
-#     "Custom" option the launcher only translates the udev literals spruce
-#     itself wrote, and on cards updated from 4.3.6 the cfg holds either the
-#     old shipped "6" (never translated under Custom, which is why the
-#     modifier was X on the 64-bit build - SPR-MED-094) or the "9" the old
-#     Select translation wrote. Both are spruce's doing, not the user's, so
-#     they move to the new shipped default MENU (udev "8"), which the launcher
-#     turns into 11 for sdl2 and leaves at 8 for linuxraw. Anything else is a
-#     value the user chose in RetroArch and stays. A user whose spruce option
-#     is Select or Start is re-bound by name on every launch regardless, so
-#     the rewrite is harmless there too.
+#   - Until this release the four XX platforms launched RetroArch on one shared
+#     file, RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg, and the
+#     backup list carried it. The fleet precedent since the 2025-04 restructure
+#     is one cfg per platform, picked by $PLATFORM at launch, so a card that
+#     moves between models never launches on another model's saved state. The
+#     payload now ships retroarch-<PLATFORM>.cfg (+ .bak) for all four models
+#     and the launcher, reset task and backup list use those. A restored
+#     universal cfg is the user's RetroArch state (config_save_on_exit writes
+#     everything back into it), so it is COPIED over this platform's shipped
+#     cfg rather than dropped - the user's settings carry over, the other three
+#     platforms keep the shipped defaults, and "Reset RetroArch config" (the
+#     .bak, never backed up) is the way back to the defaults. The rotation and
+#     fullscreen size are set for this platform once during the copy: the
+#     launcher no longer forces them on every launch, so a value RetroArch
+#     saved on another model must not ride along. The universal pair is then
+#     removed: RetroArch/ is never deleted by the updater, so nothing else
+#     would.
+#
+#   - Until this release the launcher rewrote every hotkey at each launch, so
+#     a carried-over cfg holds whatever numbering the last launch used: udev
+#     literals (never launched), linuxraw (last run on the 32-bit build) or
+#     sdl2. The platform cfgs now ship the fleet layout in the 64-bit build's
+#     sdl2 numbering and nothing rewrites it at launch, so a cfg still in an
+#     old numbering (both put exit-emulator on "1"; sdl2 has "4") gets the
+#     shipped set once, with the modifier mapped to the same control. No user
+#     hotkey choice can be lost here: the old launcher overwrote them all
+#     every launch anyway.
+#
+#   - The MODIFIER under the "Custom" option: on cards updated from 4.3.6 the
+#     cfg holds either the old shipped "6" (never translated under Custom,
+#     which is why the modifier was X on the 64-bit build - SPR-MED-094) or
+#     the "9" the old Select translation wrote. Both are spruce's doing, not
+#     the user's, so they move to the shipped default MENU (sdl2 "11").
+#     Anything else is a value the user chose in RetroArch and stays. A user
+#     whose spruce option is Select or Start is re-bound by the launcher on
+#     every launch regardless, so the rewrite is harmless there too.
 #
 #     The option is read from the BACKUP copy of spruce-config.json: this runs
 #     before restore_spruce_config merges the user's values into the new file,
@@ -32,11 +54,14 @@
 #     file is the user's and is left alone.
 #
 # Nothing else in the change needs carrying: the DraStic, mupen64plus and
-# PCSX files live in Emu/ directories the updater replaces, and the PCSX and
-# YabaSanshiro pad sections are regenerated at every launch.
+# PCSX files live in Emu/ directories the updater replaces (the XX DraStic
+# cfgs are in the backup list, and "Reset DraStic config" restores their
+# .bak), and the PCSX and YabaSanshiro pad sections are regenerated at every
+# launch.
 #
-# Idempotent: a second pass finds "8" and finds the ini files present. Never
-# fails the restore.
+# Idempotent: a second pass finds no universal cfg, finds exit-emulator on "4"
+# and the modifier on "11", and finds the ini files present. Never fails the
+# restore.
 #
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -48,11 +73,69 @@ case "$PLATFORM" in
         ;;
 esac
 
-# --- RetroArch modifier -------------------------------------------------------
-RA_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg"
+RA_PLATFORM_DIR="/mnt/SDCARD/RetroArch/platform"
+RA_CFG="$RA_PLATFORM_DIR/retroarch-$PLATFORM.cfg"
+RA_UNIVERSAL="$RA_PLATFORM_DIR/retroarch-AnbernicRG_XX-universal.cfg"
 CONFIG_BACKUP="/mnt/SDCARD/Saves/spruce/backups/spruce-config.json"
 CONFIG_LIVE="/mnt/SDCARD/Saves/spruce/spruce-config.json"
 
+# --- Universal cfg -> this platform's cfg -------------------------------------
+if [ -f "$RA_UNIVERSAL" ]; then
+    if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
+        rot="1"; vid_x="640"; vid_y="480"
+    else
+        rot="0"; vid_x="0"; vid_y="0"
+    fi
+    if sed \
+        -e "s|^video_rotation = .*|video_rotation = \"$rot\"|" \
+        -e "s|^video_fullscreen_x = .*|video_fullscreen_x = \"$vid_x\"|" \
+        -e "s|^video_fullscreen_y = .*|video_fullscreen_y = \"$vid_y\"|" \
+        "$RA_UNIVERSAL" > "$RA_CFG.tmp" && [ -s "$RA_CFG.tmp" ]; then
+        mv -f "$RA_CFG.tmp" "$RA_CFG"
+        rm -f "$RA_UNIVERSAL" "$RA_UNIVERSAL.bak"
+        log_message "4.3.7: RetroArch settings carried from the universal cfg into ${RA_CFG##*/} (rotation $rot, fullscreen ${vid_x}x${vid_y}); universal pair removed"
+    else
+        rm -f "$RA_CFG.tmp"
+        log_message "4.3.7: could not carry the universal cfg into ${RA_CFG##*/} - the shipped cfg stays, the universal cfg is left in place"
+    fi
+fi
+
+# --- Hotkeys in the 64-bit build's numbering, once ----------------------------
+if [ -f "$RA_CFG" ] && grep -q '^input_exit_emulator_btn = "1"$' "$RA_CFG"; then
+    case "$XX_PAD_LAYOUT" in
+        nostick) l2_btn="12"; r2_btn="13" ;;
+        *)       l2_btn="13"; r2_btn="14" ;;
+    esac
+    old_modifier="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$RA_CFG" | head -n 1)"
+    case "$old_modifier" in
+        6) new_modifier="9" ;;
+        7) new_modifier="10" ;;
+        *) new_modifier="11" ;;
+    esac
+    if sed \
+        -e "s/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = \"$new_modifier\"/" \
+        -e 's/^input_exit_emulator_btn = .*/input_exit_emulator_btn = "4"/' \
+        -e 's/^input_screenshot_btn = .*/input_screenshot_btn = "3"/' \
+        -e 's/^input_menu_toggle_btn = .*/input_menu_toggle_btn = "6"/' \
+        -e 's/^input_fps_toggle_btn = .*/input_fps_toggle_btn = "5"/' \
+        -e 's/^input_load_state_btn = .*/input_load_state_btn = "7"/' \
+        -e 's/^input_save_state_btn = .*/input_save_state_btn = "8"/' \
+        -e "s/^input_toggle_slowmotion_btn = .*/input_toggle_slowmotion_btn = \"$l2_btn\"/" \
+        -e "s/^input_toggle_fast_forward_btn = .*/input_toggle_fast_forward_btn = \"$r2_btn\"/" \
+        -e 's/^input_shader_toggle_btn = .*/input_shader_toggle_btn = "h0up"/' \
+        -e 's/^input_state_slot_decrease_btn = .*/input_state_slot_decrease_btn = "h0left"/' \
+        -e 's/^input_state_slot_increase_btn = .*/input_state_slot_increase_btn = "h0right"/' \
+        -e 's/^input_\(exit_emulator\|screenshot\|menu_toggle\|fps_toggle\|load_state\|save_state\|toggle_slowmotion\|toggle_fast_forward\|shader_toggle\|state_slot_decrease\|state_slot_increase\)_axis = .*/input_\1_axis = "nul"/' \
+        "$RA_CFG" > "$RA_CFG.tmp" && [ -s "$RA_CFG.tmp" ]; then
+        mv -f "$RA_CFG.tmp" "$RA_CFG"
+        log_message "4.3.7: RetroArch hotkeys moved from the old launcher numbering to the shipped sdl2 set (modifier $old_modifier -> $new_modifier)"
+    else
+        rm -f "$RA_CFG.tmp"
+        log_message "4.3.7: could not rewrite the hotkeys in $RA_CFG - they stay in the old numbering"
+    fi
+fi
+
+# --- RetroArch modifier -------------------------------------------------------
 if [ -f "$RA_CFG" ]; then
     option=""
     for cfg in "$CONFIG_BACKUP" "$CONFIG_LIVE"; do
@@ -63,10 +146,10 @@ if [ -f "$RA_CFG" ]; then
     current="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$RA_CFG" | head -n 1)"
     case "$option:$current" in
         Custom:6|Custom:9|:6|:9)
-            if sed 's/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = "8"/' "$RA_CFG" > "$RA_CFG.tmp" \
+            if sed 's/^input_enable_hotkey_btn = .*/input_enable_hotkey_btn = "11"/' "$RA_CFG" > "$RA_CFG.tmp" \
                && [ -s "$RA_CFG.tmp" ]; then
                 mv -f "$RA_CFG.tmp" "$RA_CFG"
-                log_message "4.3.7: RetroArch modifier moved from spruce default $current to MENU (8)"
+                log_message "4.3.7: RetroArch modifier moved from spruce default $current to MENU (11)"
             else
                 rm -f "$RA_CFG.tmp"
                 log_message "4.3.7: could not rewrite $RA_CFG - the modifier stays at $current"
@@ -77,7 +160,7 @@ if [ -f "$RA_CFG" ]; then
             ;;
     esac
 else
-    log_message "4.3.7: no universal RetroArch cfg on this card, skipping the modifier"
+    log_message "4.3.7: no ${RA_CFG##*/} on this card, skipping the modifier"
 fi
 
 # --- PPSSPP per-platform configs ---------------------------------------------
