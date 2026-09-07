@@ -182,15 +182,17 @@ prepare_ra_config() {
 # Every H700 Anbernic pad reports the same SDL name ("ANBERNIC-keys") and GUID,
 # so RetroArch cannot pick a per-model autoconfig by itself, and it re-applies
 # the name-matched autoconfig when the pad connects (overriding any --appendconfig
-# binds). So write the autoconfig that matches the detected model before launch.
+# binds). So write the autoconfig that matches the detected layout before launch.
 # Face/dpad/shoulders/start/select and the left stick are identical across the
 # line; only triggers and stick-clicks move. Indices verified on the CubeXX and
-# cross-checked against MustardOS's per-model sdl_map.
+# cross-checked against MustardOS's per-model sdl_map; the layout itself comes
+# from XX_PAD_LAYOUT in AnbernicXXCommon.cfg, the one place that classifies
+# models.
 write_baseos_ra_autoconfig() {
 	ac="$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
 	[ -d "${ac%/*}" ] || return 0
 
-	# Shared across every model
+	# Shared across every layout
 	common='input_driver = "sdl2"
 input_device = "ANBERNIC-keys"
 input_vendor_id = "1"
@@ -212,17 +214,19 @@ input_l_x_minus_axis = "-0"
 input_l_y_plus_axis = "+1"
 input_l_y_minus_axis = "-1"'
 
-	# Name the stickless models and let everything else take the stick layout.
-	# Most of the XX line has sticks, so an unrecognised or future target is
-	# likelier to be right that way round than the reverse.
-	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-		rg28xx|rg34xx|rg35xxplus|rg35xxsp|rgsp)
-			# Stickless models: no L3/R3 or right stick, L2/R2 stay at b12/b13.
+	case "$XX_PAD_LAYOUT" in
+		nostick)
+			# No L3/R3 or right stick, L2/R2 at b12/b13.
 			printf '%s\ninput_l2_btn = "12"\ninput_r2_btn = "13"\n' "$common" > "$ac"
 			;;
+		1stick)
+			# RG40XX V: L3 at b12 shifts L2/R2 to b13/b14; there is no R3 and
+			# b15 is the MENU tap pulse (KEY_GOTO), so nothing may bind it.
+			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\n' "$common" > "$ac"
+			;;
 		*)
-			# Analog-stick models: L3/R3 take b12/b15, L2/R2 shift to b13/b14,
-			# and there is a right stick on axes 2/3.
+			# Two sticks: L3/R3 take b12/b15, L2/R2 shift to b13/b14, and there
+			# is a right stick on axes 2/3.
 			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\ninput_r3_btn = "15"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\n' "$common" > "$ac"
 			;;
 	esac
@@ -236,20 +240,23 @@ input_l_y_minus_axis = "-1"'
 #
 # linuxraw numbers buttons in kernel order, matching neither the udev nor the
 # sdl2 profile, and linuxraw_joypad.c has no hat support at all, so the d-pad
-# binds as axes rather than h0. The stick-model numbers below are not guesses:
-# they were read straight out of the kernel's own joydev tables on a CubeXX with
+# binds as axes rather than h0. The two-stick numbers are not guesses: they were
+# read straight out of the kernel's own joydev tables on a CubeXX with
 # JSIOCGBTNMAP and JSIOCGAXMAP, then matched to the evdev codes this line
 # reports in AnbernicXXCommon.cfg.
 #
-# The stickless numbers ARE derived rather than measured. Those models omit L3
-# (evdev 313) and R3 (316) and the four stick axes, and joydev assigns indices
-# in ascending evdev-code order, so everything above MENU shifts down by one and
-# the d-pad lands on axes 0/1. Worth checking on a stickless unit.
+# The stickless and one-stick numbers ARE derived rather than measured. Those
+# models omit R3 (evdev 316) and, on stickless models, L3 (313) and the stick
+# axes; joydev assigns indices in ascending evdev-code order, so everything
+# above MENU shifts down by one per missing key. Stickless pads still report
+# ABS_RX/RY/RZ ahead of the hat (measured on an RG SP: axes=5, only 3 and 4
+# ever move), and the one-stick RG40XX V is assumed to report the same six axes
+# as the two-stick models. Worth checking on a V.
 write_baseos_ra_autoconfig_linuxraw() {
 	ac="$RA_DIR/.retroarch/autoconfig/linuxraw/ANBERNIC-keys.cfg"
 	mkdir -p "${ac%/*}" 2>/dev/null || return 0
 
-	# Shared across every model. RetroArch reports this pad as (0/0).
+	# Shared across every layout. RetroArch reports this pad as (0/0).
 	common='input_driver = "linuxraw"
 input_device = "ANBERNIC-keys"
 input_vendor_id = "0"
@@ -263,87 +270,115 @@ input_r_btn = "5"
 input_select_btn = "6"
 input_start_btn = "7"'
 
-	# Stickless models named; everything else, known or new, takes the stick
-	# layout. See write_baseos_ra_autoconfig for the reasoning.
-	case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-		rg28xx|rg34xx|rg35xxplus|rg35xxsp|rgsp)
-			# Stickless models: no L3/R3, so L2/R2 shift to 9/10.
-			#
-			# The d-pad is still axes 3 and 4, NOT 0 and 1. joydev numbers axes
-			# by ascending ABS code, and these pads report ABS_RX, ABS_RY,
-			# ABS_RZ, ABS_HAT0X, ABS_HAT0Y - so the hat lands at 3/4 with three
-			# unused axes ahead of it, rather than at 0/1 as you would expect
-			# from "no sticks means the d-pad is the only axis pair". Measured
-			# on an RG SP: axes=5, and only 3 and 4 ever move.
+	case "$XX_PAD_LAYOUT" in
+		nostick)
+			# No L3/R3, so L2/R2 shift to 9/10; hat on axes 3/4 behind three
+			# unused stick-shaped axes.
 			printf '%s\ninput_l2_btn = "9"\ninput_r2_btn = "10"\ninput_left_axis = "-3"\ninput_right_axis = "+3"\ninput_up_axis = "-4"\ninput_down_axis = "+4"\n' "$common" > "$ac"
 			;;
+		1stick)
+			# L3 at 9, L2/R2 at 10/11, no R3 (12 would be the MENU tap pulse);
+			# left stick on axes 0/1, hat on 4/5.
+			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
+			;;
 		*)
-			# Analog-stick models: L3/L2/R2/R3 at 9-12, sticks on axes 0-3,
-			# d-pad on axes 4/5.
+			# Two sticks: L3/L2/R2/R3 at 9-12, sticks on axes 0-3, hat on 4/5.
 			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_r3_btn = "12"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
 			;;
 	esac
 }
 
-# RetroArch's hotkey binds are RAW joypad button indices - unlike the player
-# binds, they do not go through the joypad autoconfig - so the one number in
-# AnbernicXXCommon.cfg cannot suit every driver this line runs.
+# RetroArch's hotkey binds are RAW joypad indices - unlike the player binds,
+# they do not go through the joypad autoconfig - so no single number in the
+# shared universal cfg can suit every driver this line runs. udev (the numbers
+# the universal cfg is written in) and linuxraw agree on the buttons but not on
+# the d-pad (hat vs axes); the 64-bit SDL2 build numbers everything three
+# higher and interleaves the stick clicks with the triggers.
 #
-# udev and linuxraw number this pad identically, so the stock image and the
-# 32-bit BaseOS build both take the shipped value. The 64-bit build drives the
-# pad through SDL2, which enumerates the volume and power keys on this node
-# before the pad's own buttons and so numbers everything three higher. Select is
-# 6 under udev and 9 under SDL2 - which is why the default landed on X for
-# anyone on BaseOS with the 64-bit build, the configuration most XX users have.
+# So every hotkey is rewritten by NAME out of the autoconfig RetroArch is about
+# to load, whichever driver that is. The layout is the fleet's arm64 standard:
+#   modifier + B exit, + A screenshot, + X menu, + Y fps, + L1 load, + R1 save,
+#   + L2 slow-motion, + R2 fast-forward, + UP shader, + LEFT/RIGHT state slot.
+# A bind whose control the autoconfig does not carry is nulled, so a stickless
+# unit never inherits a stick model's number.
 #
-# The action binds carry the same offset, so they move too. Their shipped values
-# describe a coherent layout under udev numbering - menu on X, exit on A, load on
-# L1, save on R1, fps on Y, fast forward on R2, matching what every other spruce
-# device binds - and that is the layout reproduced here. Untranslated, the menu
-# landed on A and exit and fps fell on the volume keys, which are not on the pad.
+# The modifier follows the spruce menu option: Select/Start bind by name. Custom
+# means "leave what RetroArch has" - except when the cfg still holds the udev
+# literal spruce itself wrote (RA_SELECT_VAL/RA_START_VAL), which under SDL2 is
+# the X button and under linuxraw the pad's SELECT/START; that literal is spruce
+# state, not a user choice, and is translated the same way. Anything else is a
+# value the user set inside RetroArch and is left alone. RetroArch saves the
+# translated numbers back on exit, so the next launch sees them as user values
+# and the translation is a no-op from then on.
 #
-# Read every number out of the sdl2 autoconfig RetroArch is about to load, by
-# name, so these cannot drift away from the player binds and so the triggers come
-# out right - the offset is not a flat +3 for them, since the stick-click binds
-# interleave. prepare_ra_config has already written the udev-numbered values;
-# this corrects them once the binary is known, which is why it lives here rather
-# than there.
-#
-# "Menu" and "Custom" are deliberately left alone: no model on this line has a
-# Menu button, and Custom exists so the user can bind it inside RetroArch.
-apply_xx_hotkey_for_driver() {
+# Requires PLATFORM_CFG (the cfg RetroArch is launched with) and the platform
+# cfg's RA_SELECT_VAL/RA_START_VAL.
+apply_xx_hotkeys_from_autoconfig() {
 	ac="$1"
 	[ -f "$ac" ] || return 0
 	[ -f "$PLATFORM_CFG" ] || return 0
 
-	_btn() { sed -n "s/^input_$2_btn = \"\([0-9]*\)\".*/\1/p" "$1" | head -n 1; }
+	# Value of an autoconfig bind by control name: "input_<ctl>_btn" first,
+	# then "input_<ctl>_axis" (the linuxraw d-pad). Prints "kind value".
+	_bind() {
+		v="$(sed -n "s/^input_$1_btn = \"\([^\"]*\)\".*/\1/p" "$ac" | head -n 1)"
+		if [ -n "$v" ]; then echo "btn $v"; return; fi
+		v="$(sed -n "s/^input_$1_axis = \"\([^\"]*\)\".*/\1/p" "$ac" | head -n 1)"
+		[ -n "$v" ] && echo "axis $v"
+	}
+	# Append sed lines that put hotkey $1 on control $2: whichever of the
+	# _btn/_axis pair the autoconfig uses gets the value, the other gets nul.
+	# A script file rather than -e arguments, because the expressions carry
+	# spaces and busybox sed has no escape for them.
+	_put() {
+		b="$(_bind "$2")"
+		case "$b" in
+			"btn "*)  bv="${b#btn }"; av="nul" ;;
+			"axis "*) bv="nul"; av="${b#axis }" ;;
+			*)        bv="nul"; av="nul" ;;
+		esac
+		printf 's|^input_%s_btn = .*|input_%s_btn = "%s"|\ns|^input_%s_axis = .*|input_%s_axis = "%s"|\n' \
+			"$1" "$1" "$bv" "$1" "$1" "$av" >> "$SEDF"
+	}
 
+	SEDF="$(mktemp)"
+	_put exit_emulator b
+	_put screenshot a
+	_put menu_toggle x
+	_put fps_toggle y
+	_put load_state l
+	_put save_state r
+	_put toggle_slowmotion l2
+	_put toggle_fast_forward r2
+	_put shader_toggle up
+	_put state_slot_decrease left
+	_put state_slot_increase right
+
+	mod=""; modname="unchanged"
 	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")" in
-		"Select") mod="$(_btn "$ac" select)"; modname="Select" ;;
-		"Start")  mod="$(_btn "$ac" start)";  modname="Start" ;;
-		*)        mod=""; modname="unchanged" ;;
+		"Select") mod="$(_bind select)"; modname="Select" ;;
+		"Start")  mod="$(_bind start)";  modname="Start" ;;
+		*)
+			cur="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$PLATFORM_CFG" | head -n 1)"
+			if [ -n "$RA_SELECT_VAL" ] && [ "$cur" = "$RA_SELECT_VAL" ]; then
+				mod="$(_bind select)"; modname="Custom(spruce default Select)"
+			elif [ -n "$RA_START_VAL" ] && [ "$cur" = "$RA_START_VAL" ]; then
+				mod="$(_bind start)"; modname="Custom(spruce default Start)"
+			fi
+			;;
+	esac
+	case "$mod" in
+		"btn "*) printf 's|^input_enable_hotkey_btn = .*|input_enable_hotkey_btn = "%s"|\n' "${mod#btn }" >> "$SEDF" ;;
 	esac
 
-	hk_a="$(_btn "$ac" a)"; hk_y="$(_btn "$ac" y)"; hk_x="$(_btn "$ac" x)"
-	hk_l="$(_btn "$ac" l)"; hk_r="$(_btn "$ac" r)"; hk_r2="$(_btn "$ac" r2)"
-
-	set --
-	[ -n "$mod"   ] && set -- "$@" -e "s|^input_enable_hotkey_btn = .*|input_enable_hotkey_btn = \"$mod\"|"
-	[ -n "$hk_a"  ] && set -- "$@" -e "s|^input_exit_emulator_btn = .*|input_exit_emulator_btn = \"$hk_a\"|"
-	[ -n "$hk_y"  ] && set -- "$@" -e "s|^input_fps_toggle_btn = .*|input_fps_toggle_btn = \"$hk_y\"|"
-	[ -n "$hk_x"  ] && set -- "$@" -e "s|^input_menu_toggle_btn = .*|input_menu_toggle_btn = \"$hk_x\"|"
-	[ -n "$hk_l"  ] && set -- "$@" -e "s|^input_load_state_btn = .*|input_load_state_btn = \"$hk_l\"|"
-	[ -n "$hk_r"  ] && set -- "$@" -e "s|^input_save_state_btn = .*|input_save_state_btn = \"$hk_r\"|"
-	[ -n "$hk_r2" ] && set -- "$@" -e "s|^input_toggle_fast_forward_btn = .*|input_toggle_fast_forward_btn = \"$hk_r2\"|"
-	[ $# -eq 0 ] && return 0
-
 	TMP_CFG="$(mktemp)"
-	if sed "$@" "$PLATFORM_CFG" > "$TMP_CFG"; then
+	if sed -f "$SEDF" "$PLATFORM_CFG" > "$TMP_CFG"; then
 		mv "$TMP_CFG" "$PLATFORM_CFG"
-		log_message "ra hotkeys renumbered for sdl2: enable=$modname($mod) exit=$hk_a menu=$hk_x load=$hk_l save=$hk_r fps=$hk_y ff=$hk_r2" -v
+		log_message "ra hotkeys bound by name from ${ac##*/autoconfig/}: modifier=$modname exit=$(_bind b) shot=$(_bind a) menu=$(_bind x) fps=$(_bind y) load=$(_bind l) save=$(_bind r) slow=$(_bind l2) ff=$(_bind r2) shader=$(_bind up) slot=$(_bind left)/$(_bind right)" -v
 	else
 		rm -f "$TMP_CFG"
 	fi
+	rm -f "$SEDF"
 }
 
 # BaseOS has no udevd, so the universal cfg's udev input drivers find no pad.
@@ -371,13 +406,12 @@ apply_baseos_ra_overlay() {
 	RA_PARAMS="${RA_PARAMS} --appendconfig ${RA_DIR}/platform/$baseos_overlay"
 	case "$RA_BIN" in
 		ra32.*)
-			# linuxraw numbers the pad exactly as udev does, so the shipped
-			# RA_SELECT_VAL/RA_START_VAL already suit it - nothing to correct.
 			write_baseos_ra_autoconfig_linuxraw
+			apply_xx_hotkeys_from_autoconfig "$RA_DIR/.retroarch/autoconfig/linuxraw/ANBERNIC-keys.cfg"
 			;;
 		*)
 			write_baseos_ra_autoconfig
-			apply_xx_hotkey_for_driver "$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
+			apply_xx_hotkeys_from_autoconfig "$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
 			;;
 	esac
 }
