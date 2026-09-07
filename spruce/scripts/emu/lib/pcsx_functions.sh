@@ -31,7 +31,7 @@ run_pcsx_standalone() {
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
 	case "$PLATFORM" in
-		"Anbernic"*) write_xx_pcsx_binds ;;
+		"Anbernic"*) seed_xx_pcsx_binds ;;
 	esac
 
 	"./${PCSX_BIN:-pcsx_64}" -cdfile "$ROM_FILE" -load 1 > $(emu_log_file) 2>&1
@@ -46,14 +46,36 @@ run_pcsx_standalone() {
 # them, then the MENU tap pulse), sticks on the first axes, and the d-pad hat
 # as the LAST two axes. libpicofe names a button 0xA0+index, and an axis
 # 0xA0 + <number of buttons> + axis*2 (+1 for the positive half). The names
-# therefore shift with the layout, so the section is written per launch from
-# XX_PAD_LAYOUT rather than shipped.
+# therefore shift with the layout, so the section is a shipped default per
+# pad layout (Emu/PS/xx-pad/pcsx-binds-<layout>.cfg), appended once when
+# pcsx.cfg has no ANBERNIC-keys section: a bind changed inside the emulator
+# stays. A card moved to a model with another layout keeps the old section;
+# "Reset PCSX config" restores the shipped pcsx.cfg and the next launch seeds
+# the right one.
 #
 # Layout matches the fleet's X360 section by position: Cross on the bottom
 # button (B), Circle on A, Square on Y, Triangle on X; both sticks where they
 # exist. Derived from the joydev tables measured on a CubeXX and RG SP, not
 # yet run against pcsx_64 on the device.
-write_xx_pcsx_binds() {
+seed_xx_pcsx_binds() {
+	cfg="$HOME/.pcsx/pcsx.cfg"
+	[ -f "$cfg" ] || return 0
+	grep -q '^binddev = sdl:ANBERNIC-keys$' "$cfg" && return 0
+	src="$EMU_DIR/xx-pad/pcsx-binds-${XX_PAD_LAYOUT:-2stick}.cfg"
+	if [ -f "$src" ]; then
+		{ printf '\n'; cat "$src"; } >> "$cfg"
+	else
+		# Fallback only: no shipped section for this layout. Not reached
+		# while Emu/PS/xx-pad ships one per layout.
+		log_message "xx pcsx binds: no shipped section for layout ${XX_PAD_LAYOUT:-2stick}, generating a fallback"
+		generate_xx_pcsx_binds_fallback
+	fi
+}
+
+# Fallback generator for seed_xx_pcsx_binds - the table the shipped sections
+# were rendered from. Appends the ANBERNIC-keys section; the caller has already
+# established that none exists.
+generate_xx_pcsx_binds_fallback() {
 	cfg="$HOME/.pcsx/pcsx.cfg"
 	[ -f "$cfg" ] || return 0
 
@@ -76,9 +98,6 @@ bind_analog = 3' ;;
 	# axis name = 0xA0 + nb + axis*2 (+1 positive)
 	_ax() { printf '\\x%02X' $((0xA0 + nb + $1 * 2 + $2)); }
 
-	# Drop any earlier ANBERNIC-keys section (everything from its binddev to
-	# the next binddev), then append the fresh one.
-	awk 'BEGIN{skip=0} /^binddev = /{skip = ($0 == "binddev = sdl:ANBERNIC-keys")} !skip{print}' "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
 	{
 		printf '\nbinddev = sdl:ANBERNIC-keys\n'
 		printf 'bind \\xA1 = player1 cross\nbind \\xA0 = player1 circle\nbind \\xA2 = player1 square\nbind \\xA3 = player1 triangle\n'
