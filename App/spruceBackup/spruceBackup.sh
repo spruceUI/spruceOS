@@ -99,6 +99,10 @@ folders="
 /mnt/SDCARD/Emu/NDS/config/drastic-SmartProS.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Flip.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Pixel2.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicRG28XX.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicRGCubeXX.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX720480.cfg
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings_A30.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
