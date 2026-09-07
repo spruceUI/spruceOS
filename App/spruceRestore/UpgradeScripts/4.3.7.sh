@@ -60,9 +60,9 @@
 # .bak), and the PCSX and YabaSanshiro pad sections are regenerated at every
 # launch.
 #
-# Idempotent: a second pass finds no universal cfg, finds exit-emulator on "4"
-# and the modifier on "11", and finds the ini files present. Never fails the
-# restore.
+# Idempotent: a second pass finds no universal cfg, no udev driver, exit-emulator
+# on "4" and the modifier on "11", and finds the ini files present. Never fails
+# the restore.
 #
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -98,6 +98,44 @@ if [ -f "$RA_UNIVERSAL" ]; then
     else
         rm -f "$RA_CFG.tmp"
         log_message "4.3.7: could not carry the universal cfg into ${RA_CFG##*/} - the shipped cfg stays, the universal cfg is left in place"
+    fi
+fi
+
+# --- Drivers and pad binds the platform cfg must carry itself ----------------
+# Under the old scheme the sdl2 drivers came from a --appendconfig overlay and
+# the built-in pad's binds from a name-matched autoconfig, so a universal cfg
+# carried over above holds udev drivers and no player binds: RetroArch never
+# had those values to save. Overlay and autoconfig are gone (the cfg owns them
+# now, Brick precedent), so a carried cfg would start with no pad at all.
+# Splice the shipped values for exactly those keys from the platform's .bak,
+# plus the fleet hotkey binds: the drivers were never the user's choice
+# (spruce forced them every launch), the built-in pad's binds never lived in
+# the cfg, and the old launcher rewrote every hotkey at every launch for
+# whichever model last ran the card - so a carried cfg's triggers may be
+# another layout's, and none of them is a user value. The modifier stays: under
+# Custom it can be the user's (the block below handles spruce's own literals).
+# Everything else stays the user's. udev is the tell: no XX cfg ships it any
+# more and BaseOS has no udevd, so a cfg holding it cannot see the pad. Also
+# repairs a cfg an earlier run of this script carried.
+if [ -f "$RA_CFG" ] && [ -f "$RA_CFG.bak" ] && grep -q '^input_joypad_driver = "udev"$' "$RA_CFG"; then
+    if awk '
+        NR == FNR {
+            if ($0 ~ /^(input_driver|input_joypad_driver|video_context_driver|input_player1_[a-z0-9_]+|input_(exit_emulator|screenshot|menu_toggle|fps_toggle|load_state|save_state|toggle_slowmotion|toggle_fast_forward|shader_toggle|state_slot_decrease|state_slot_increase)_(btn|axis)) = /) {
+                split($0, kv, " = "); want[kv[1]] = $0
+            }
+            next
+        }
+        {
+            split($0, kv, " = ")
+            if (kv[1] in want) { print want[kv[1]]; seen[kv[1]] = 1 } else print
+        }
+        END { for (k in want) if (!(k in seen)) print want[k] }
+    ' "$RA_CFG.bak" "$RA_CFG" > "$RA_CFG.tmp" && [ -s "$RA_CFG.tmp" ]; then
+        mv -f "$RA_CFG.tmp" "$RA_CFG"
+        log_message "4.3.7: sdl2 drivers, the built-in pad's binds and the fleet hotkeys spliced into ${RA_CFG##*/} from the shipped cfg (the carried cfg held udev and no binds)"
+    else
+        rm -f "$RA_CFG.tmp"
+        log_message "4.3.7: could not splice drivers and binds into $RA_CFG - RetroArch may start with no pad; run Reset RetroArch config"
     fi
 fi
 
