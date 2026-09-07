@@ -72,6 +72,8 @@ kill_drastic() {
     DRASTIC_COMBO_PID=$!
 
     killall -q -15 drastic drastic64
+    sleep 4
+    killall -q -9 drastic drastic64
 }
 
 kill_ppsspp() {
