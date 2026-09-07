@@ -338,6 +338,14 @@ device_needs_strict_unmount() {
 # module and names its interface wlan0, so everything downstream (supplicant,
 # DHCP, PyUI's status and quality readers) works unchanged. No dongle, or a
 # dongle whose module will not load, means the onboard radio exactly as before.
+#
+# Defined only for a cfg that opted in (the platform cfg is sourced before
+# this file). This file is also sourced by RGB30.sh and Zero28.sh for its
+# TrimUI helpers - the RGB30 after defining its own nmcli radio hooks - and an
+# unconditional definition here would shadow those and turn its WiFi toggle
+# into a no-op.
+if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+
 device_wifi_power_on() {
     if usb_wifi_bring_up; then
         return 0
@@ -372,3 +380,5 @@ device_ensure_wifi_interface() {
     fi
     usb_wifi_onboard_restore
 }
+
+fi # WIFI_USB_MODULES_DIR
