@@ -46,8 +46,8 @@ run_yabasanshiro() {
 }
 # Anbernic RG XX (H700). yabasanshiro reads the pad as a raw SDL joystick keyed
 # by GUID, and every model shares one GUID while the trigger indices differ by
-# layout, so the keymap entry is a shipped default per pad layout
-# (Emu/SATURN/xx-pad/keymap-<layout>.json), merged into keymapv2.json once,
+# layout, so the keymap entry is a shipped default per platform
+# (Emu/SATURN/xx-pad/keymap-<PLATFORM>.json), merged into keymapv2.json once,
 # when the file has no ANBERNIC-keys entry: a bind changed inside the emulator
 # stays. Raw indices under the staged mali SDL2: A 3, B 4, Y 5, X 6, L1 7,
 # R1 8, SELECT 9, START 10, MENU 11, then L3 12 / L2 13 / R2 14 / R3 15 on
@@ -61,13 +61,13 @@ seed_xx_yaba_keymap() {
 	if jq -e --arg key "$key" 'has($key) and .player1.deviceName == "ANBERNIC-keys"' "$KEYMAP_FILE" >/dev/null 2>&1; then
 		return 0
 	fi
-	src="$EMU_DIR/xx-pad/keymap-${XX_PAD_LAYOUT:-2stick}.json"
+	src="$EMU_DIR/xx-pad/keymap-$PLATFORM.json"
 	if [ -f "$src" ]; then
 		jq --slurpfile seed "$src" '. + $seed[0] | .player1.deviceName = "ANBERNIC-keys"' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
 	else
-		# Fallback only: no shipped entry for this layout. Not reached while
-		# Emu/SATURN/xx-pad ships one per layout.
-		log_message "xx saturn keymap: no shipped entry for layout ${XX_PAD_LAYOUT:-2stick}, generating a fallback"
+		# Fallback only: no shipped entry for this platform. Not reached while
+		# Emu/SATURN/xx-pad ships one per platform.
+		log_message "xx saturn keymap: no shipped entry for $PLATFORM, generating a fallback from layout ${XX_PAD_LAYOUT:-2stick}"
 		generate_xx_yaba_keymap_fallback
 	fi
 }

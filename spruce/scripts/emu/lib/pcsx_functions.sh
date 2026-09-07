@@ -47,7 +47,7 @@ run_pcsx_standalone() {
 # as the LAST two axes. libpicofe names a button 0xA0+index, and an axis
 # 0xA0 + <number of buttons> + axis*2 (+1 for the positive half). The names
 # therefore shift with the layout, so the section is a shipped default per
-# pad layout (Emu/PS/xx-pad/pcsx-binds-<layout>.cfg), appended once when
+# platform (Emu/PS/xx-pad/pcsx-binds-<PLATFORM>.cfg), appended once when
 # pcsx.cfg has no ANBERNIC-keys section: a bind changed inside the emulator
 # stays. A card moved to a model with another layout keeps the old section;
 # "Reset PCSX config" restores the shipped pcsx.cfg and the next launch seeds
@@ -61,13 +61,13 @@ seed_xx_pcsx_binds() {
 	cfg="$HOME/.pcsx/pcsx.cfg"
 	[ -f "$cfg" ] || return 0
 	grep -q '^binddev = sdl:ANBERNIC-keys$' "$cfg" && return 0
-	src="$EMU_DIR/xx-pad/pcsx-binds-${XX_PAD_LAYOUT:-2stick}.cfg"
+	src="$EMU_DIR/xx-pad/pcsx-binds-$PLATFORM.cfg"
 	if [ -f "$src" ]; then
 		{ printf '\n'; cat "$src"; } >> "$cfg"
 	else
-		# Fallback only: no shipped section for this layout. Not reached
-		# while Emu/PS/xx-pad ships one per layout.
-		log_message "xx pcsx binds: no shipped section for layout ${XX_PAD_LAYOUT:-2stick}, generating a fallback"
+		# Fallback only: no shipped section for this platform. Not reached
+		# while Emu/PS/xx-pad ships one per platform.
+		log_message "xx pcsx binds: no shipped section for $PLATFORM, generating a fallback from layout ${XX_PAD_LAYOUT:-2stick}"
 		generate_xx_pcsx_binds_fallback
 	fi
 }

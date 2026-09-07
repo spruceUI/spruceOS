@@ -89,8 +89,9 @@ build_mupen_args() {
 #     arm64 device on SDL's built-in X360 map);
 #   - mupen's own input-sdl plugin matches InputAutoCfg.ini by joystick name,
 #     and the table is mupen's read-only asset, so it ships per pad layout
-#     under xx-pad/ (stickless models have L2 at b12, so their "Z Trig"
-#     differs) and the layout's copy is put in place before launch;
+#     under xx-pad/ per platform (stickless models have L2 at b12, so
+#     their "Z Trig" differs) and the platform's copy is put in place
+#     before launch;
 #   - the [CoreEvents] joypad hotkeys in the shared mupen64plus.cfg are
 #     Xbox-360-numbered (J0B8 = guide) and cannot serve this pad, so the
 #     same chords are passed as --set overrides in this pad's numbering:
@@ -106,21 +107,17 @@ apply_xx_mupen_pad() {
 	esac
 	export_sdl_gamecontroller_map positional
 
-	# InputAutoCfg.ini is a shipped default set, one file per pad layout (the
-	# one-stick RG40XX V has the two-stick trigger numbers); nothing is
-	# computed here, the layout's file is copied over the live table.
-	case "$XX_PAD_LAYOUT" in
-		nostick) variant="nostick" ;;
-		*)       variant="2stick" ;;
-	esac
-	src="$HOME/xx-pad/InputAutoCfg-$variant.ini"
+	# InputAutoCfg.ini is a shipped default set, one file per platform;
+	# nothing is computed here, the platform's file is copied over the live
+	# table.
+	src="$HOME/xx-pad/InputAutoCfg-$PLATFORM.ini"
 	AC="$HOME/InputAutoCfg.ini"
 	if [ -f "$src" ]; then
 		cp -f "$src" "$AC"
 	elif [ -f "$AC" ]; then
-		# Fallback only: no shipped table for this layout, so fix up the
-		# one trigger that moves. Not reached while xx-pad/ ships both.
-		log_message "xx mupen pad: no shipped InputAutoCfg for $variant, rewriting Z Trig as a fallback"
+		# Fallback only: no shipped table for this platform, so fix up the
+		# one trigger that moves. Not reached while xx-pad/ ships one per platform.
+		log_message "xx mupen pad: no shipped InputAutoCfg for $PLATFORM, rewriting Z Trig as a fallback"
 		case "$XX_PAD_LAYOUT" in
 			nostick) ztrig="button(12)" ;;
 			*)       ztrig="button(13)" ;;
