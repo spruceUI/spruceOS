@@ -444,7 +444,7 @@
                 "options": [
                     "Select",
                     "Start",
-                    { "label": "Menu", "devices": ["MIYOO_A30", "MIYOO_FLIP"] },
+                    { "label": "Menu", "devices": ["MIYOO_A30", "MIYOO_FLIP", "ANBERNIC_RGXX"] },
                     "Custom"
                 ],
                 "selected": "Custom"

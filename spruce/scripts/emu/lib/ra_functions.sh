@@ -192,8 +192,12 @@ write_baseos_ra_autoconfig() {
 	ac="$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
 	[ -d "${ac%/*}" ] || return 0
 
-	# Shared across every layout
+	# Shared across every layout. The comment line records MENU's index for
+	# apply_xx_hotkeys_from_autoconfig: RetroArch has no player bind for a
+	# MENU/guide button, so the autoconfig vocabulary cannot carry it, and
+	# RetroArch skips comment lines when it reads the file.
 	common='input_driver = "sdl2"
+# spruce_menu_index = "11"
 input_device = "ANBERNIC-keys"
 input_vendor_id = "1"
 input_product_id = "1"
@@ -256,8 +260,10 @@ write_baseos_ra_autoconfig_linuxraw() {
 	ac="$RA_DIR/.retroarch/autoconfig/linuxraw/ANBERNIC-keys.cfg"
 	mkdir -p "${ac%/*}" 2>/dev/null || return 0
 
-	# Shared across every layout. RetroArch reports this pad as (0/0).
+	# Shared across every layout. RetroArch reports this pad as (0/0). The
+	# comment line records MENU's index (see write_baseos_ra_autoconfig).
 	common='input_driver = "linuxraw"
+# spruce_menu_index = "8"
 input_device = "ANBERNIC-keys"
 input_vendor_id = "0"
 input_product_id = "0"
@@ -302,12 +308,13 @@ input_start_btn = "7"'
 # A bind whose control the autoconfig does not carry is nulled, so a stickless
 # unit never inherits a stick model's number.
 #
-# The modifier follows the spruce menu option: Select/Start bind by name. Custom
-# means "leave what RetroArch has" - except when the cfg still holds the udev
-# literal spruce itself wrote (RA_SELECT_VAL/RA_START_VAL), which under SDL2 is
-# the X button and under linuxraw the pad's SELECT/START; that literal is spruce
-# state, not a user choice, and is translated the same way. Anything else is a
-# value the user set inside RetroArch and is left alone. RetroArch saves the
+# The modifier follows the spruce menu option: Menu/Select/Start bind by name,
+# MENU being the fleet default and the shipped value. Custom means "leave what
+# RetroArch has" - except when the cfg still holds a udev literal spruce itself
+# wrote (RA_HOME_VAL/RA_SELECT_VAL/RA_START_VAL), which under SDL2 lands three
+# buttons off; that literal is spruce state, not a user choice, and is
+# translated the same way. Anything else is a value the user set inside
+# RetroArch and is left alone. RetroArch saves the
 # translated numbers back on exit, so the next launch sees them as user values
 # and the translation is a no-op from then on.
 #
@@ -321,6 +328,11 @@ apply_xx_hotkeys_from_autoconfig() {
 	# Value of an autoconfig bind by control name: "input_<ctl>_btn" first,
 	# then "input_<ctl>_axis" (the linuxraw d-pad). Prints "kind value".
 	_bind() {
+		if [ "$1" = "menu" ]; then
+			v="$(sed -n 's/^# spruce_menu_index = "\([^"]*\)".*/\1/p' "$ac" | head -n 1)"
+			[ -n "$v" ] && echo "btn $v"
+			return
+		fi
 		v="$(sed -n "s/^input_$1_btn = \"\([^\"]*\)\".*/\1/p" "$ac" | head -n 1)"
 		if [ -n "$v" ]; then echo "btn $v"; return; fi
 		v="$(sed -n "s/^input_$1_axis = \"\([^\"]*\)\".*/\1/p" "$ac" | head -n 1)"
@@ -355,12 +367,15 @@ apply_xx_hotkeys_from_autoconfig() {
 	_put state_slot_increase right
 
 	mod=""; modname="unchanged"
-	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Select")" in
+	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
+		"Menu")   mod="$(_bind menu)";   modname="Menu" ;;
 		"Select") mod="$(_bind select)"; modname="Select" ;;
 		"Start")  mod="$(_bind start)";  modname="Start" ;;
 		*)
 			cur="$(sed -n 's/^input_enable_hotkey_btn = "\([^"]*\)".*/\1/p' "$PLATFORM_CFG" | head -n 1)"
-			if [ -n "$RA_SELECT_VAL" ] && [ "$cur" = "$RA_SELECT_VAL" ]; then
+			if [ -n "$RA_HOME_VAL" ] && [ "$cur" = "$RA_HOME_VAL" ]; then
+				mod="$(_bind menu)"; modname="Custom(spruce default Menu)"
+			elif [ -n "$RA_SELECT_VAL" ] && [ "$cur" = "$RA_SELECT_VAL" ]; then
 				mod="$(_bind select)"; modname="Custom(spruce default Select)"
 			elif [ -n "$RA_START_VAL" ] && [ "$cur" = "$RA_START_VAL" ]; then
 				mod="$(_bind start)"; modname="Custom(spruce default Start)"
