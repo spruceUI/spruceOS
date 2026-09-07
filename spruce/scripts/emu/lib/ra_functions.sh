@@ -161,134 +161,16 @@ prepare_ra_config() {
 	sync
 }
 
-# Every H700 Anbernic pad reports the same SDL name ("ANBERNIC-keys") and GUID,
-# so RetroArch cannot pick a per-model autoconfig by itself, and it re-applies
-# the name-matched autoconfig when the pad connects (overriding any --appendconfig
-# binds). The autoconfigs are a shipped default set - one file per pad layout
-# per joypad driver under RetroArch/platform/autoconfig-xx/ - and the launcher
-# copies the layout's pair into place, the way DraStic and PPSSPP pick their
-# shipped per-platform file. Nothing is computed at launch. Face/dpad/
-# shoulders/start/select and the left stick are identical across the line;
-# only triggers and stick-clicks move. Indices verified on the CubeXX and
-# cross-checked against MustardOS's per-model sdl_map; the layout itself comes
-# from XX_PAD_LAYOUT in AnbernicXXCommon.cfg, the one place that classifies
-# models. Requires RA_DIR.
-select_xx_ra_autoconfig() {
-	for drv in sdl2 linuxraw; do
-		src="$RA_DIR/platform/autoconfig-xx/${XX_PAD_LAYOUT:-2stick}/$drv/ANBERNIC-keys.cfg"
-		dst="$RA_DIR/.retroarch/autoconfig/$drv/ANBERNIC-keys.cfg"
-		mkdir -p "${dst%/*}" 2>/dev/null || continue
-		if [ -f "$src" ]; then
-			cp -f "$src" "$dst"
-		else
-			# Fallback only: the shipped default set has no file for this
-			# layout and driver, so render one from the same tables. Not
-			# reached while the static set ships.
-			log_message "xx autoconfig: no shipped $drv file for layout ${XX_PAD_LAYOUT:-2stick}, generating a fallback"
-			case "$drv" in
-				sdl2)     generate_xx_ra_autoconfig_sdl2_fallback ;;
-				linuxraw) generate_xx_ra_autoconfig_linuxraw_fallback ;;
-			esac
-		fi
-	done
-}
-
-# Fallback generators for select_xx_ra_autoconfig - the tables the shipped
-# default set was rendered from. Kept so a layout the set does not cover
-# still gets a pad; never reached while RetroArch/platform/autoconfig-xx/
-# ships a file for every layout and driver. The stickless and one-stick
-# linuxraw numbers are derived rather than measured (see the linuxraw arm).
-generate_xx_ra_autoconfig_sdl2_fallback() {
-	ac="$RA_DIR/.retroarch/autoconfig/sdl2/ANBERNIC-keys.cfg"
-	[ -d "${ac%/*}" ] || return 0
-
-	# Shared across every layout.
-	common='input_driver = "sdl2"
-input_device = "ANBERNIC-keys"
-input_vendor_id = "1"
-input_product_id = "1"
-input_a_btn = "3"
-input_b_btn = "4"
-input_x_btn = "6"
-input_y_btn = "5"
-input_l_btn = "7"
-input_r_btn = "8"
-input_select_btn = "9"
-input_start_btn = "10"
-input_up_btn = "h0up"
-input_down_btn = "h0down"
-input_left_btn = "h0left"
-input_right_btn = "h0right"
-input_l_x_plus_axis = "+0"
-input_l_x_minus_axis = "-0"
-input_l_y_plus_axis = "+1"
-input_l_y_minus_axis = "-1"'
-
-	case "$XX_PAD_LAYOUT" in
-		nostick)
-			# No L3/R3 or right stick, L2/R2 at b12/b13.
-			printf '%s\ninput_l2_btn = "12"\ninput_r2_btn = "13"\n' "$common" > "$ac"
-			;;
-		1stick)
-			# RG40XX V: L3 at b12 shifts L2/R2 to b13/b14; there is no R3 and
-			# b15 is the MENU tap pulse (KEY_GOTO), so nothing may bind it.
-			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\n' "$common" > "$ac"
-			;;
-		*)
-			# Two sticks: L3/R3 take b12/b15, L2/R2 shift to b13/b14, and there
-			# is a right stick on axes 2/3.
-			printf '%s\ninput_l2_btn = "13"\ninput_r2_btn = "14"\ninput_l3_btn = "12"\ninput_r3_btn = "15"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\n' "$common" > "$ac"
-			;;
-	esac
-}
-
-generate_xx_ra_autoconfig_linuxraw_fallback() {
-	ac="$RA_DIR/.retroarch/autoconfig/linuxraw/ANBERNIC-keys.cfg"
-	mkdir -p "${ac%/*}" 2>/dev/null || return 0
-
-	# Shared across every layout. RetroArch reports this pad as (0/0).
-	common='input_driver = "linuxraw"
-input_device = "ANBERNIC-keys"
-input_vendor_id = "0"
-input_product_id = "0"
-input_a_btn = "0"
-input_b_btn = "1"
-input_y_btn = "2"
-input_x_btn = "3"
-input_l_btn = "4"
-input_r_btn = "5"
-input_select_btn = "6"
-input_start_btn = "7"'
-
-	case "$XX_PAD_LAYOUT" in
-		nostick)
-			# No L3/R3, so L2/R2 shift to 9/10; hat on axes 3/4 behind three
-			# unused stick-shaped axes.
-			printf '%s\ninput_l2_btn = "9"\ninput_r2_btn = "10"\ninput_left_axis = "-3"\ninput_right_axis = "+3"\ninput_up_axis = "-4"\ninput_down_axis = "+4"\n' "$common" > "$ac"
-			;;
-		1stick)
-			# L3 at 9, L2/R2 at 10/11, no R3 (12 would be the MENU tap pulse);
-			# left stick on axes 0/1, hat on 4/5.
-			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
-			;;
-		*)
-			# Two sticks: L3/L2/R2/R3 at 9-12, sticks on axes 0-3, hat on 4/5.
-			printf '%s\ninput_l3_btn = "9"\ninput_l2_btn = "10"\ninput_r2_btn = "11"\ninput_r3_btn = "12"\ninput_l_x_plus_axis = "+0"\ninput_l_x_minus_axis = "-0"\ninput_l_y_plus_axis = "+1"\ninput_l_y_minus_axis = "-1"\ninput_r_x_plus_axis = "+2"\ninput_r_x_minus_axis = "-2"\ninput_r_y_plus_axis = "+3"\ninput_r_y_minus_axis = "-3"\ninput_left_axis = "-4"\ninput_right_axis = "+4"\ninput_up_axis = "-5"\ninput_down_axis = "+5"\n' "$common" > "$ac"
-			;;
-	esac
-}
-
-# BaseOS has no udevd, so the platform cfg's udev input drivers find no pad.
-# Overlay the sdl2 input drivers on top without touching the platform cfg. The
-# 32-bit build gets its own overlays, one per pad layout: its SDL2 cannot see
-# the pad here, so it drives the joypad through linuxraw, whose numbering is
-# not the sdl2 numbering the platform cfg's hotkeys ship in - so the 32-bit
-# overlay also carries the fleet hotkeys in linuxraw numbering and turns config
-# saving off for that session, keeping the linuxraw numbers out of the
-# platform cfg. The modifier follows the spruce menu option through a second,
-# tiny overlay (RetroArch takes several --appendconfig files delimited by
-# "|"); Custom falls back to MENU there, since a modifier chosen inside the
-# 64-bit build is an sdl2 number linuxraw cannot use.
+# Anbernic RG XX under BaseOS. The platform cfg carries the sdl2 drivers and
+# the built-in pad's player binds (no autoconfig ships for "ANBERNIC-keys":
+# every model reports the same name, so a name-matched profile could not tell
+# a stickless pad from a two-stick one - the Brick precedent, whose cfg binds
+# its pad the same way). The 64-bit build therefore needs nothing here. The
+# 32-bit build cannot see the pad through its SDL2 (no udevd) and reads it
+# through linuxraw, whose numbering differs, so it gets a shipped per-platform
+# overlay (retroarch-<PLATFORM>-32bit.cfg: linuxraw driver, binds, hotkeys,
+# config saving off) plus a tiny modifier overlay per spruce option, appended
+# with RetroArch's "|" delimiter; Custom falls back to MENU there.
 #
 # Shared rather than inlined in run_retroarch because the standalone RetroArch
 # app launchers build their own command line and skipped all of this. The 32-bit
@@ -299,28 +181,19 @@ input_start_btn = "7"'
 # Requires RA_BIN and RA_DIR; appends to RA_PARAMS.
 apply_baseos_ra_overlay() {
 	[ -n "$SPRUCE_BASEOS" ] || return 0
-
 	case "$RA_BIN" in
-		ra32.*)
-			baseos_overlay="retroarch-AnbernicRG_XX-baseos32-${XX_PAD_LAYOUT:-2stick}.cfg"
-			[ -f "$RA_DIR/platform/$baseos_overlay" ] || baseos_overlay="retroarch-AnbernicRG_XX-baseos32-2stick.cfg"
-			case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
-				"Select") modifier_overlay="retroarch-AnbernicRG_XX-baseos32-modifier-select.cfg" ;;
-				"Start")  modifier_overlay="retroarch-AnbernicRG_XX-baseos32-modifier-start.cfg" ;;
-				*)        modifier_overlay="retroarch-AnbernicRG_XX-baseos32-modifier-menu.cfg" ;;
-			esac
-			;;
-		*)
-			baseos_overlay="retroarch-AnbernicRG_XX-baseos.cfg"
-			modifier_overlay=""
-			;;
+		ra32.*) ;;
+		*) return 0 ;;
 	esac
-	[ -f "$RA_DIR/platform/$baseos_overlay" ] || return 0
-
-	appended="${RA_DIR}/platform/$baseos_overlay"
-	[ -n "$modifier_overlay" ] && [ -f "$RA_DIR/platform/$modifier_overlay" ] && appended="$appended|${RA_DIR}/platform/$modifier_overlay"
-	RA_PARAMS="${RA_PARAMS} --appendconfig $appended"
-	select_xx_ra_autoconfig
+	overlay="$RA_DIR/platform/retroarch-$PLATFORM-32bit.cfg"
+	[ -f "$overlay" ] || return 0
+	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
+		"Select") modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
+		"Start")  modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-start.cfg" ;;
+		*)        modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-menu.cfg" ;;
+	esac
+	[ -f "$modifier" ] && overlay="$overlay|$modifier"
+	RA_PARAMS="${RA_PARAMS} --appendconfig $overlay"
 }
 
 run_retroarch() {
