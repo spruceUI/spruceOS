@@ -1,0 +1,177 @@
+{
+  "0_Xbox 360 Controller_030000005e0400008e02000014010000": {
+    "a": {
+      "id": 2,
+      "type": "button",
+      "value": 1
+    },
+    "analogleft": {
+      "id": 4,
+      "type": "axis",
+      "value": 0
+    },
+    "analogright": {
+      "id": 5,
+      "type": "axis",
+      "value": 0
+    },
+    "analogx": {
+      "id": 0,
+      "type": "axis",
+      "value": 0
+    },
+    "analogy": {
+      "id": 1,
+      "type": "axis",
+      "value": 0
+    },
+    "b": {
+      "id": 0,
+      "type": "button",
+      "value": 1
+    },
+    "c": {
+      "id": 1,
+      "type": "button",
+      "value": 1
+    },
+    "down": {
+      "id": 0,
+      "type": "hat",
+      "value": 4
+    },
+    "l": {
+      "id": 4,
+      "type": "button",
+      "value": 1
+    },
+    "left": {
+      "id": 0,
+      "type": "hat",
+      "value": 8
+    },
+    "r": {
+      "id": 5,
+      "type": "button",
+      "value": 1
+    },
+    "right": {
+      "id": 0,
+      "type": "hat",
+      "value": 2
+    },
+    "select": {
+      "id": 6,
+      "type": "button",
+      "value": 1
+    },
+    "start": {
+      "id": 7,
+      "type": "button",
+      "value": 1
+    },
+    "up": {
+      "id": 0,
+      "type": "hat",
+      "value": 1
+    },
+    "x": {
+      "id": 2,
+      "type": "axis",
+      "value": 1
+    },
+    "y": {
+      "id": 3,
+      "type": "button",
+      "value": 1
+    },
+    "z": {
+      "id": 5,
+      "type": "axis",
+      "value": 1
+    }
+  },
+  "0_Xbox 360 Controller_0300a3845e0400008e02000014010000": {
+    "a": {
+      "id": 1,
+      "type": "button",
+      "value": 1
+    },
+    "analogx": {
+      "id": 0,
+      "type": "axis",
+      "value": 1
+    },
+    "analogy": {
+      "id": 1,
+      "type": "axis",
+      "value": -1
+    },
+    "b": {
+      "id": 0,
+      "type": "button",
+      "value": 1
+    },
+    "c": {
+      "id": 2,
+      "type": "axis",
+      "value": 1
+    },
+    "down": {
+      "id": 0,
+      "type": "hat",
+      "value": 4
+    },
+    "l": {
+      "id": 4,
+      "type": "button",
+      "value": 1
+    },
+    "left": {
+      "id": 0,
+      "type": "hat",
+      "value": 8
+    },
+    "r": {
+      "id": 5,
+      "type": "button",
+      "value": 1
+    },
+    "right": {
+      "id": 0,
+      "type": "hat",
+      "value": 2
+    },
+    "start": {
+      "id": 7,
+      "type": "button",
+      "value": 1
+    },
+    "up": {
+      "id": 0,
+      "type": "hat",
+      "value": 1
+    },
+    "x": {
+      "id": 3,
+      "type": "button",
+      "value": 1
+    },
+    "y": {
+      "id": 2,
+      "type": "button",
+      "value": 1
+    },
+    "z": {
+      "id": 5,
+      "type": "axis",
+      "value": 1
+    }
+  },
+  "player1": {
+    "DeviceID": 0,
+    "deviceGUID": "0300a3845e0400008e02000014010000",
+    "deviceName": "Xbox 360 Controller",
+    "padmode": 0
+  }
+}
