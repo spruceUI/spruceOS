@@ -323,28 +323,40 @@ set_event_arg_for_idlemon() {
 }
 
 set_default_ra_hotkeys() {
-        
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    # The XX line launches every platform on the shared universal cfg, not on
+    # retroarch-$PLATFORM.cfg (which exists for none of the four platforms -
+    # this used to append a stray hotkeys-only file, SPR-MED-030). The values
+    # are the fleet layout in the udev/joydev numbering the universal cfg is
+    # written in: MENU modifier, + B exit, + A screenshot, + X menu, + Y fps,
+    # + L1/R1 load/save, + L2/R2 slow-motion/fast-forward, + UP shader,
+    # + LEFT/RIGHT state slot. apply_xx_hotkeys_from_autoconfig translates
+    # them for the driver in use on the next launch, so this only has to
+    # restore the udev literals it recognises.
+    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
-    # Update RetroArch config with default values
     update_ra_config_file_with_new_setting "$RA_FILE" \
-        "input_enable_hotkey_btn = \"4\"" \
-        "input_exit_emulator_btn = \"0\"" \
-        "input_fps_toggle_btn = \"2\"" \
-        "input_load_state_btn = \"9\"" \
-        "input_menu_toggle = \"escape\"" \
+        "input_enable_hotkey_btn = \"8\"" \
+        "input_exit_emulator_btn = \"1\"" \
+        "input_screenshot_btn = \"0\"" \
+        "input_menu_toggle = \"f1\"" \
         "input_menu_toggle_btn = \"3\"" \
-        "input_quit_gamepad_combo = \"0\"" \
-        "input_save_state_btn = \"10\"" \
-        "input_screenshot_btn = \"1\"" \
-        "input_shader_toggle_btn = \"11\"" \
-        "input_state_slot_decrease_btn = \"13\"" \
-        "input_state_slot_increase_btn = \"14\"" \
-        "input_toggle_slowmotion_axis = \"+4\"" \
-        "input_toggle_fast_forward_axis = \"+5\""
-
+        "input_fps_toggle_btn = \"2\"" \
+        "input_load_state_btn = \"4\"" \
+        "input_save_state_btn = \"5\"" \
+        "input_toggle_slowmotion_btn = \"10\"" \
+        "input_toggle_slowmotion_axis = \"nul\"" \
+        "input_toggle_fast_forward_btn = \"11\"" \
+        "input_toggle_fast_forward_axis = \"nul\"" \
+        "input_shader_toggle_btn = \"h0up\"" \
+        "input_shader_toggle_axis = \"nul\"" \
+        "input_state_slot_decrease_btn = \"h0left\"" \
+        "input_state_slot_decrease_axis = \"nul\"" \
+        "input_state_slot_increase_btn = \"h0right\"" \
+        "input_state_slot_increase_axis = \"nul\"" \
+        "input_menu_toggle_gamepad_combo = \"0\"" \
+        "input_quit_gamepad_combo = \"0\""
 }
 
 new_execution_loop() {
