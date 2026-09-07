@@ -45,6 +45,14 @@ WIFI_USB_DONGLE_STATE="${WIFI_USB_DONGLE_STATE:-/tmp/wifi_usb_dongle}"
 WIFI_USB_DONGLE_FAILED="${WIFI_USB_DONGLE_FAILED:-/tmp/wifi_usb_dongle_failed}"
 # How long to wait for the driver's probe to create the interface after insmod.
 WIFI_USB_IFACE_WAIT="${WIFI_USB_IFACE_WAIT:-8}"
+# Written by usb_wifi_note_sleep when the dongle is the radio going into a
+# suspend, consumed by usb_wifi_wait_after_resume on the way back: the USB host
+# controller resumes a few seconds before the dongle re-enumerates (3.3 s on
+# the Brick, 2026-09-07), and without this the wake hook found no dongle,
+# brought the onboard radio up, and the watchdog swapped back ten seconds
+# later - a whole xradio firmware cycle for nothing.
+WIFI_USB_DONGLE_SLEEPING="${WIFI_USB_DONGLE_SLEEPING:-/tmp/wifi_usb_dongle_sleeping}"
+WIFI_USB_RESUME_WAIT="${WIFI_USB_RESUME_WAIT:-6}"
 
 # USB ids per module, straight from the modules' own device tables
 # (modinfo -F alias <module>.ko, lower-cased vvvv:pppp). Regenerate when a
@@ -229,6 +237,37 @@ usb_wifi_onboard_restore() {
         _left=$((_left - 1))
     done
     [ -d /sys/class/net/wlan0 ]
+}
+
+# Going to sleep with the dongle as the radio: remember it, so the wake side
+# (and the watchdog, which must not read the resume gap as an unplug) can
+# give it time to come back on the bus. Call before usb_wifi_tear_down.
+usb_wifi_note_sleep() {
+    if usb_wifi_dongle_active; then
+        usb_wifi_dongle_present > "$WIFI_USB_DONGLE_SLEEPING" 2>/dev/null
+    else
+        rm -f "$WIFI_USB_DONGLE_SLEEPING" 2>/dev/null
+    fi
+}
+
+# Back from a suspend: if the dongle was the radio, wait (bounded) for it to
+# re-enumerate before anyone decides which radio to bring up. Clears the
+# marker either way. 0 = dongle on the bus now, 1 = not (unplugged in sleep).
+usb_wifi_wait_after_resume() {
+    [ -r "$WIFI_USB_DONGLE_SLEEPING" ] || { usb_wifi_dongle_present >/dev/null 2>&1; return $?; }
+    _left="$WIFI_USB_RESUME_WAIT"
+    while :; do
+        if usb_wifi_dongle_present >/dev/null 2>&1; then
+            rm -f "$WIFI_USB_DONGLE_SLEEPING" 2>/dev/null
+            return 0
+        fi
+        [ "$_left" -gt 0 ] || break
+        sleep 1
+        _left=$((_left - 1))
+    done
+    log_message "USB WiFi: dongle $(cat "$WIFI_USB_DONGLE_SLEEPING" 2>/dev/null) not back on the bus ${WIFI_USB_RESUME_WAIT}s after resume - onboard radio"
+    rm -f "$WIFI_USB_DONGLE_SLEEPING" 2>/dev/null
+    return 1
 }
 
 # Called by usb_wifi_watchdog.sh: "arrived <id>" / "removed <id>". Only swaps

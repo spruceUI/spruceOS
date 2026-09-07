@@ -34,6 +34,12 @@ while [ ! -e "$STOP_FILE" ]; do
     sleep "$POLL_INTERVAL"
     cur="$(usb_wifi_dongle_present 2>/dev/null)" || cur=""
     [ "$cur" = "$last" ] && continue
+    # The resume gap is not an unplug: while the wake hook is waiting for the
+    # dongle to re-enumerate (usb_wifi_wait_after_resume owns that decision),
+    # an empty bus is "not back yet". The marker goes away when it decides.
+    if [ -z "$cur" ] && [ -e "$WIFI_USB_DONGLE_SLEEPING" ]; then
+        continue
+    fi
     if [ -n "$cur" ]; then
         usb_wifi_hotplug_event arrived "$cur"
     else

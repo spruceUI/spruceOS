@@ -54,7 +54,9 @@ device_enter_sleep() {
 
     disable_wifi
     # Whichever driver is the radio comes out for the suspend: a USB dongle's
-    # module (it is reloaded by enable_wifi on the way back) or the onboard one.
+    # module (it is reloaded by enable_wifi on the way back, after the resume
+    # wait usb_wifi_note_sleep arms) or the onboard one.
+    usb_wifi_note_sleep
     usb_wifi_tear_down
     usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan
     save_sleep_info "$IDLE_TIMEOUT" || return 1
@@ -65,7 +67,9 @@ device_enter_sleep() {
 
 device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
-    if usb_wifi_dongle_present >/dev/null 2>&1; then
+    # A dongle that was the radio gets a bounded wait to re-enumerate: the host
+    # controller is back before the device is.
+    if usb_wifi_wait_after_resume; then
         # The dongle is the radio: enable_wifi (device_wifi_power_on) loads its
         # driver and gives it wlan0; loading xradio first would only take the
         # name and have to be unloaded again. Both drivers are out after the
