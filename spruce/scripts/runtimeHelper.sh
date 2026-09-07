@@ -547,7 +547,7 @@ auto_resume_game() {
     # moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
     # copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
     MOVE_OR_COPY=cp
-    if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
+    # if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
 
     # runtimeHelper producer contract:
     # stage once and hand off; principal.sh owns execution and cleanup.
