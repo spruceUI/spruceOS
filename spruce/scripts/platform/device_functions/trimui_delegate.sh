@@ -242,6 +242,15 @@ launch_trimui_startup_watchdogs() {
     /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
 
+    # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh). Only the devices
+    # whose cfg points at dongle modules run it; the script itself exits at
+    # once without WIFI_USB_MODULES_DIR, but there is no point starting it.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
+    if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+        /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n usb_wifi_watchdog.sh &
+    fi
+
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 

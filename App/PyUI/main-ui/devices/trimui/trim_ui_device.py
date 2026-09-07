@@ -233,8 +233,60 @@ class TrimUIDevice(DeviceCommon):
     def disable_wifi(self):
         MiyooTrimCommon.disable_wifi(self)
 
+    # A USB WiFi dongle on the USB-C port replaces the onboard XR829 while it
+    # is plugged in (spruce/scripts/platform/device_functions/utils/
+    # usb_wifi_dongle.sh, launched for the A133P line by its cfgs). The shell's
+    # enable_wifi is the only path that does the swap - unload xradio_wlan,
+    # load the dongle's module, name its interface wlan0 - so the WiFi toggle
+    # hands the bring-up to it whenever a supported dongle is on the bus and
+    # keeps the historic Python path otherwise. WIFI_USB_IDS is exported by
+    # that contract; a device launched without it (the Smart Pro S, a PyUI run
+    # outside spruce) never sees a dongle here.
+    USB_SYS = "/sys/bus/usb/devices"
+
+    def _usb_wifi_dongle_present(self):
+        ids = {i.lower() for i in os.environ.get("WIFI_USB_IDS", "").split()}
+        if not ids:
+            return False
+        try:
+            for dev in os.listdir(self.USB_SYS):
+                base = os.path.join(self.USB_SYS, dev)
+                try:
+                    with open(os.path.join(base, "idVendor")) as f:
+                        vendor = f.read().strip().lower()
+                    with open(os.path.join(base, "idProduct")) as f:
+                        product = f.read().strip().lower()
+                except OSError:
+                    continue
+                if f"{vendor}:{product}" in ids:
+                    return True
+        except OSError:
+            pass
+        return False
+
     def enable_wifi(self):
-        MiyooTrimCommon.enable_wifi(self)
+        if not self._usb_wifi_dongle_present():
+            MiyooTrimCommon.enable_wifi(self)
+            return
+        # Same bookkeeping as the Python path, then the shell does the rest:
+        # bus check, driver swap, wlan0, supplicant, DHCP, network services.
+        # Popen, not run: the swap waits on driver probes and must not block
+        # the UI.
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
+        if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
+            PyUiLogger.get_logger().error(f"{self.SPRUCE_HELPER_FUNCTIONS} missing; cannot bring WiFi up")
+            return
+        try:
+            subprocess.Popen(
+                ["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && enable_wifi"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            PyUiLogger.get_logger().info("USB WiFi dongle present; bring-up handed to the shell enable_wifi")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
+        self.get_wifi_status.force_refresh()
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):

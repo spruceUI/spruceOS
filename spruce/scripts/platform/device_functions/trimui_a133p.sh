@@ -8,6 +8,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/usb_wifi_dongle.sh"
 
 
 ###############################################################################
@@ -52,7 +53,10 @@ device_enter_sleep() {
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
     disable_wifi
-    rmmod xradio_wlan
+    # Whichever driver is the radio comes out for the suspend: a USB dongle's
+    # module (it is reloaded by enable_wifi on the way back) or the onboard one.
+    usb_wifi_tear_down
+    usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -61,6 +65,15 @@ device_enter_sleep() {
 
 device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
+    if usb_wifi_dongle_present >/dev/null 2>&1; then
+        # The dongle is the radio: enable_wifi (device_wifi_power_on) loads its
+        # driver and gives it wlan0; loading xradio first would only take the
+        # name and have to be unloaded again. Both drivers are out after the
+        # suspend, so this has to run whenever the user wants WiFi - the
+        # system json is that answer, exactly as at boot.
+        enable_or_disable_wifi_per_system_json
+        return 0
+    fi
     modprobe xradio_wlan
     if [ -f /tmp/wifi_on ]; then
         # wait for wlan0 to appear (up to ~5s)
@@ -311,4 +324,47 @@ device_system_handles_sdcard_unmount() {
 # Brick the same night, at a cost of a few seconds.
 device_needs_strict_unmount() {
     return 0
+}
+
+# --- WiFi radio -------------------------------------------------------------
+# The A133P line's onboard radio is the XR829 (xradio_wlan owns wlan0, loaded
+# by the stock init). A supported USB dongle on the USB-C port takes over
+# through utils/usb_wifi_dongle.sh: the cfg sets WIFI_USB_MODULES_DIR and
+# WIFI_ONBOARD_MODULE, and the contract unloads xradio_wlan, loads the dongle's
+# module and names its interface wlan0, so everything downstream (supplicant,
+# DHCP, PyUI's status and quality readers) works unchanged. No dongle, or a
+# dongle whose module will not load, means the onboard radio exactly as before.
+device_wifi_power_on() {
+    if usb_wifi_bring_up; then
+        return 0
+    fi
+    # Onboard path. A dongle module left loaded by an earlier session state
+    # (the dongle was pulled while WiFi was off, say) goes first so it cannot
+    # hold the wlan0 name.
+    if ! usb_wifi_dongle_present >/dev/null 2>&1; then
+        usb_wifi_tear_down
+    fi
+    usb_wifi_onboard_restore
+}
+
+# "Off" on this line has always been disable_wifi's ifconfig down: the onboard
+# driver stays loaded (sleep unloads it separately) and so does a dongle's -
+# cheap to turn back on, and the watchdog unloads it when the dongle is pulled.
+device_wifi_power_off() {
+    return 0
+}
+
+device_ensure_wifi_interface() {
+    [ -d /sys/class/net/wlan0 ] && return 0
+    if usb_wifi_dongle_active; then
+        _left=5
+        while [ "$_left" -gt 0 ]; do
+            [ -d /sys/class/net/wlan0 ] && return 0
+            sleep 1
+            _left=$((_left - 1))
+        done
+        log_message "USB WiFi: dongle active but wlan0 missing"
+        return 1
+    fi
+    usb_wifi_onboard_restore
 }
