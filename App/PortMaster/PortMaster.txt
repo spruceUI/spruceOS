@@ -240,7 +240,12 @@ export TERM=linux
 # cat /dev/zero > /dev/fb0 2>/dev/null
 # cat /dev/zero > /dev/fb0 2>/dev/null
 
-pm_message "Starting PortMaster."
+# Upstream calls pm_message here, but pm_message lives in funcs.txt and this
+# script never sources it - upstream's generic PortMaster.sh has the same shape,
+# so it is "command not found" on every firmware. Sourcing funcs.txt just for
+# this would spin up a whole dialog pugwash to show one splash line right
+# before the real pugwash starts. Print it instead.
+echo "Starting PortMaster."
 
 $ESUDO chmod -R +x .
 
