@@ -111,6 +111,41 @@ class DeviceCommon(AbstractDevice):
             self.system_config.save_config()
             self._set_lumination_to_config()
 
+    # Screensaver backlight. The panel is the largest single load on a handheld
+    # (measured on the Flip: ~400 mW between backlight level 1 and 10), and a
+    # screensaver drawing a dark frame at full backlight saves nothing. Level 1
+    # keeps the screen faintly visible so a lit device still reads as "on".
+    #
+    # Dimming changes only the in-memory level; the user's level is remembered
+    # here and written back on restore. Written back, not just re-read: the
+    # shell brightness hotkeys (buttons_watchdog) derive the level from the raw
+    # backlight value, so a key pressed while dimmed would save a level computed
+    # from the dimmed value. Restore wins over that.
+    SCREENSAVER_BACKLIGHT_LEVEL = 1
+    _screensaver_saved_backlight = None
+
+    def dim_backlight_for_screensaver(self):
+        if not hasattr(self, "_set_lumination_to_config"):
+            return False
+        self.system_config.reload_config()
+        level = self.system_config.backlight
+        if level <= self.SCREENSAVER_BACKLIGHT_LEVEL:
+            return False
+        self._screensaver_saved_backlight = level
+        self.system_config.set_backlight(self.SCREENSAVER_BACKLIGHT_LEVEL)
+        self._set_lumination_to_config()
+        return True
+
+    def restore_backlight_after_screensaver(self):
+        saved = self._screensaver_saved_backlight
+        self._screensaver_saved_backlight = None
+        # Fresh copy first so a volume change made meanwhile is not clobbered.
+        self.system_config.reload_config()
+        if saved is not None:
+            self.system_config.set_backlight(saved)
+            self.system_config.save_config()
+        self._set_lumination_to_config()
+
     def lower_contrast(self):
         self.system_config.reload_config()
         if(self.system_config.contrast > 1): # don't allow 0 contrast
