@@ -33,12 +33,28 @@ launch_sleep_helper_once() {
     done
 }
 
+# The setting is read with jq, which is a fork of a real binary. This loop runs
+# every 0.5 s for the life of the device, in menu and in game, so it only
+# re-reads when spruce-config.json has actually changed: -nt is a shell builtin
+# and costs nothing. The lid state is read with `read`, also a builtin, for the
+# same reason. Measured on the Flip: this loop was two forks per half second.
+CONFIG_FILE="/mnt/SDCARD/Saves/spruce/spruce-config.json"
+CONFIG_STAMP="/tmp/lid_watchdog_config_stamp"
+lid_sleep_enabled="True"
+read_lid_setting() {
+    lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
+    touch "$CONFIG_STAMP"
+}
+read_lid_setting
+
 while true; do
     # Read current lid state (1 = open, 0 = closed)
     current_state=$(device_lid_open)
 
-    # check lid sleep spruce setting
-    lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
+    # check lid sleep spruce setting, only when the config file changed
+    if [ "$CONFIG_FILE" -nt "$CONFIG_STAMP" ]; then
+        read_lid_setting
+    fi
 
     case "$lid_sleep_enabled" in
         "True")

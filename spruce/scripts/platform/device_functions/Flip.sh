@@ -199,7 +199,11 @@ device_lid_sensor_ready() {
 }
 
 device_lid_open(){
-    head -c 1 "/sys/devices/platform/hall-mh248/hallvalue" 2>/dev/null
+    # First character of hallvalue (1 = open, 0 = closed). Read with the shell
+    # builtin, not head: lid_watchdog_v2 calls this twice a second forever.
+    _hall=""
+    read -r _hall < "/sys/devices/platform/hall-mh248/hallvalue" 2>/dev/null
+    printf '%s' "${_hall%"${_hall#?}"}"
 }
 
 get_current_volume() {
