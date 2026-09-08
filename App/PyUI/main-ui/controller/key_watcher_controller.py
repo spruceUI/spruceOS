@@ -54,7 +54,10 @@ class KeyWatcherController(ControllerInterface):
             self.fd = None
         
         self.last_held_input = None
-        self.lock = threading.Lock()  # add a lock
+        # A Condition, not a bare Lock: get_input() sleeps on it and the reader
+        # thread wakes it on a press, so an idle menu costs no wakeups at all.
+        # It used to poll the queue every 5 ms (~200 wakeups/s doing nothing).
+        self.lock = threading.Condition()
         self.input_polling_thread = threading.Thread(target=self.poll_keyboard, daemon=True)
         self.input_polling_thread.start()
         self.print_key_changes = False
@@ -155,10 +158,11 @@ class KeyWatcherController(ControllerInterface):
                                 if mapped_event.controller_input not in self.held_controller_inputs:
                                     self.input_queue.append(mapped_event.controller_input)
                                 self.held_controller_inputs[mapped_event.controller_input] = now
+                                self.lock.notify_all()
                         elif mapped_event.key_state == KeyState.RELEASE:
                             with self.lock:
                                 self.key_change(mapped_event.controller_input,"RELEASE")
-                            self.held_controller_inputs.pop(mapped_event.controller_input, None)
+                                self.held_controller_inputs.pop(mapped_event.controller_input, None)
                 else:
                     #logger.error("No mapping for event: %s", key_event)
                     pass
@@ -176,25 +180,26 @@ class KeyWatcherController(ControllerInterface):
             print(f"KEY,{controller_input},{direction}")
 
     def get_input(self, timeoutInMilliseconds):
-        start_time = time.time()
-        timeout = timeoutInMilliseconds / 1000.0
-        do_get_input = True
-        while do_get_input:
-            with self.lock:
+        deadline = time.monotonic() + timeoutInMilliseconds / 1000.0
+        with self.lock:
+            while True:
                 # First, check the event queue
                 if self.input_queue:
                     value = self.input_queue.popleft()
                     self.last_held_input = value
                     return value
-                
+
                 # Fallback: return the first currently held key
                 if self.held_controller_inputs:
                     value = next(iter(self.held_controller_inputs))
                     self.last_held_input = value
                     return value
 
-            time.sleep(0.005)
-            do_get_input = (time.time() - start_time) < timeout
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                # Released while waiting; woken early by a press, else by the timeout.
+                self.lock.wait(remaining)
 
         self.last_held_input = None
         return None
