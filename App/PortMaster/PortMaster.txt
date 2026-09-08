@@ -8,6 +8,12 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
   export HOME="/mnt/SDCARD"
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
+  # pugwash and harbourmaster start with "#!/usr/bin/env python3", so which
+  # interpreter they get is whatever PATH says. The stock firmware's Python
+  # (/usr/bin/python3 on the Flip, Buildroot 3.10) has the xml package
+  # stripped out and harbourmaster imports it. Run pugwash through the bundled
+  # interpreter by name so PATH order can never send it to the stock one.
+  PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
   export LD_PRELOAD=""
   controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
   directory="/mnt/SDCARD/Roms/PORTS/"
@@ -254,7 +260,11 @@ $ESUDO rm -f "${controlfolder}/.pugwash-reboot"
 # launch.sh reports and clears the flag afterwards. pugwash writes it to
 # HM_TOOLS_DIR/PortMaster/.pugwash-reboot using the config.py it loaded at
 # start - ours - so it always lands here, not in upstream's tools dir.
-$ESUDO ./pugwash
+if [ -x "$PM_PYTHON" ]; then
+  $ESUDO "$PM_PYTHON" ./pugwash
+else
+  $ESUDO ./pugwash
+fi
 
 unset LD_LIBRARY_PATH
 unset SDL_GAMECONTROLLERCONFIG

@@ -9,6 +9,14 @@ CUR_TTY=/dev/null
 if [ -d "/mnt/SDCARD/spruce" ]; then
   export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
   export directory="/mnt/SDCARD/Roms/PORTS/"
+  # Ports reach pugwash and harbourmaster through PortMasterDialog.txt, which
+  # is upstream's file and runs "$controlfolder/pugwash" as-is, so its
+  # "#!/usr/bin/env python3" is resolved by PATH. The bundled interpreter has
+  # to be first: the stock firmware's /usr/bin/python3 (Buildroot 3.10 on the
+  # Flip) has the xml package stripped out and harbourmaster imports it. Put
+  # it in front of whatever the launcher already prepended, and export the
+  # path by name for anything that would rather not rely on PATH at all.
+  export PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
 else
