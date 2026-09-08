@@ -1,0 +1,8 @@
+{
+  "label": "Battery Monitor",
+  "icon": "battery.png",
+  "launch": "launch.sh",
+  "description": "Toggle background battery/CPU logging to Saves/spruce/battery_monitor.csv",
+  "devices": ["MIYOO_FLIP"],
+  "hideInSimpleMode": true
+}
