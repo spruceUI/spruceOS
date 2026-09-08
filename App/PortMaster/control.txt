@@ -8,7 +8,8 @@ CUR_TTY=/dev/null
 
 if [ -d "/mnt/SDCARD/spruce" ]; then
   export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  export directory="/mnt/SDCARD/Roms/PORTS/"
+  directory="${PORTS_DIR:-/mnt/SDCARD/Roms/PORTS}"
+	export directory="${directory%/}/"
   # Ports reach pugwash and harbourmaster through PortMasterDialog.txt, which
   # is upstream's file and runs "$controlfolder/pugwash" as-is, so its
   # "#!/usr/bin/env python3" is resolved by PATH. The bundled interpreter has

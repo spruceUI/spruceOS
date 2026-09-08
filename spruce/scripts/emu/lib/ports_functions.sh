@@ -20,7 +20,7 @@ extract_game_dir(){
     # If gamedir_name ends with a slash, remove the slash
     gamedir_line="${gamedir_line%/}"
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
-    game_dir="/mnt/SDCARD/Roms/PORTS/${gamedir_line##*/}"
+    game_dir="${PORTS_DIR:-/mnt/SDCARD/Roms/PORTS}/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
     echo "${game_dir%\"}"
 }
@@ -69,12 +69,65 @@ set_port_abxy_scheme() {
     fi
 }
 
+portmaster_mount_is_active() {
+    awk -v target="$1" '
+        $2 == target {
+            found = 1
+        }
+        END {
+            exit(found ? 0 : 1)
+        }
+    ' /proc/mounts
+}
+
+portmaster_cleanup_dynamic_bind() {
+    if [ "$PORTS_BIND_CREATED" = "true" ]; then
+        if umount "$PORTS_BIND_TARGET"; then
+            log_message "Dual SD: removed bind from $PORTS_BIND_TARGET"
+            PORTS_BIND_CREATED=false
+        else
+            log_message "Dual SD: could not unmount $PORTS_BIND_TARGET"
+        fi
+    fi
+}
+
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
+
+    #
+    # PortMaster launchers expect:
+    #
+    #   $PORTS_DIR/ports/game
+    #
+    # The actual game folders are directly inside PORTS, so reproduce
+    # spruce's PORTS -> PORTS/ports compatibility bind when necessary.
+    #
+    PORTS_BIND_TARGET="$PORTS_DIR/ports"
+    PORTS_BIND_CREATED=false
+
+    mkdir -p "$PORTS_BIND_TARGET"
+
+    if portmaster_mount_is_active "$PORTS_BIND_TARGET"; then
+        log_message "PortMaster compatibility bind already active: $PORTS_BIND_TARGET"
+    else
+        if mount --bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
+            PORTS_BIND_CREATED=true
+            log_message "Dual SD: mounted $PORTS_DIR on $PORTS_BIND_TARGET"
+        else
+            log_message "Dual SD: failed to mount $PORTS_DIR on $PORTS_BIND_TARGET"
+            return 1
+        fi
+    fi
+
+    #
+    # Attempt cleanup when the launcher exits or receives a normal signal.
+    #
+    trap 'portmaster_cleanup_dynamic_bind' EXIT
+    trap 'portmaster_cleanup_dynamic_bind; exit 1' HUP INT TERM
+	
     device_prepare_for_ports_run
 
     # Setup variables
-    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
 	export LC_ALL=C
@@ -93,10 +146,16 @@ run_port() {
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
-        "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
+		"$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        SID=$!
+        echo "$SID" > /tmp/last_port_sid
+        wait "$SID"
+        rm -f /tmp/last_port_sid
     else
         if [ "$MOUNT_BIND" = true ]; then
-            mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python
+            mount --bind \
+                /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
+                /mnt/SDCARD/Persistent/portmaster/bin/python
         fi
 
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
@@ -114,6 +173,9 @@ run_port() {
         wait "$SID"
         rm -f /tmp/last_port_sid
     fi
+
+	portmaster_cleanup_dynamic_bind
+    trap - EXIT HUP INT TERM
 
     device_cleanup_after_ports_run
 }
