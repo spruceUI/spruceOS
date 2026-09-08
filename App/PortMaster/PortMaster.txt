@@ -89,6 +89,14 @@ export SDL_GAMECONTROLLERCONFIG_FILE="/usr/lib/gamecontrollerdb.txt"
 
 source "$controlfolder/device_info.txt"
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
+# device_info.txt identifies TrimUI devices by their stock rootfs, and
+# mod_TrimUI.txt then exports HOME=/mnt/SDCARD/Data/home - stock TrimUI's
+# layout, which does not exist on a spruce card (its mkdir has no -p). Put
+# HOME back where spruce keeps it so pm_dialog.txt and anything else
+# HOME-relative has somewhere to land.
+if [ -d "/mnt/SDCARD/spruce" ]; then
+  export HOME="/mnt/SDCARD"
+fi
 
 ## TODO: Change to PortMaster/tty when Johnnyonflame merges the changes in,
 CUR_TTY=/dev/tty0
