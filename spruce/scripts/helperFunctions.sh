@@ -111,10 +111,10 @@ device_names() {
         Zero28)           echo "MAGICX_ZERO28" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
-        AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480NOSTICK";  echo "ANBERNIC_RGXX" ;;
-        AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480ONESTICK"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX720480) echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
-        AnbernicXX720480NoStick)  echo "ANBERNIC_RGXX720480NOSTICK";  echo "ANBERNIC_RGXX" ;;
+        AnbernicXX720480NoStick)  echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
         AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
         AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
     esac

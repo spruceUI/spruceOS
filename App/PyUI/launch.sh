@@ -164,11 +164,13 @@ case "$PLATFORM" in
         if [ "$PLATFORM" = "AnbernicXX720480" ]; then
             DEVICE="ANBERNIC_RGXX720480"
         elif [ "$PLATFORM" = "AnbernicXX720480NoStick" ]; then
-            DEVICE="ANBERNIC_RGXX720480NOSTICK"
+            # The pad-layout platforms are a shell-side split; PyUI has nothing
+            # that differs by sticks, so they share the panel's identity.
+            DEVICE="ANBERNIC_RGXX720480"
         elif [ "$PLATFORM" = "AnbernicXX640480NoStick" ]; then
-            DEVICE="ANBERNIC_RGXX640480NOSTICK"
+            DEVICE="ANBERNIC_RGXX640480"
         elif [ "$PLATFORM" = "AnbernicXX640480OneStick" ]; then
-            DEVICE="ANBERNIC_RGXX640480ONESTICK"
+            DEVICE="ANBERNIC_RGXX640480"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then

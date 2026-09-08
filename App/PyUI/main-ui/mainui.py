@@ -117,15 +117,6 @@ def initialize_device(device, main_ui_mode):
     elif "ANBERNIC_RGXX640480" == device:
         from devices.anbernic.anbernic_xx_640_x_480 import Anbernic640x480
         Device.init(Anbernic640x480(main_ui_mode))
-    elif "ANBERNIC_RGXX640480NOSTICK" == device:
-        from devices.anbernic.anbernic_xx_640_x_480_nostick import Anbernic640x480NoStick
-        Device.init(Anbernic640x480NoStick(main_ui_mode))
-    elif "ANBERNIC_RGXX640480ONESTICK" == device:
-        from devices.anbernic.anbernic_xx_640_x_480_onestick import Anbernic640x480OneStick
-        Device.init(Anbernic640x480OneStick(main_ui_mode))
-    elif "ANBERNIC_RGXX720480NOSTICK" == device:
-        from devices.anbernic.anbernic_xx_720_x_480_nostick import Anbernic720x480NoStick
-        Device.init(Anbernic720x480NoStick(main_ui_mode))
     elif "ANBERNIC_MUOS" == device:
         from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
         Device.init(MuosAnbernicRGXX(device))        
