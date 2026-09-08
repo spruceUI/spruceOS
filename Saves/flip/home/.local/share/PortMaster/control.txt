@@ -8,8 +8,10 @@ CUR_TTY=/dev/null
 
 if [ -d "/mnt/SDCARD/spruce" ]; then
   export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+  # PORTS_DIR is exported by spruce's port launcher; on the Flip it can be
+  # the second card. Everything else is the default.
   directory="${PORTS_DIR:-/mnt/SDCARD/Roms/PORTS}"
-	export directory="${directory%/}/"
+  export directory="${directory%/}/"
   export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
   export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
 else

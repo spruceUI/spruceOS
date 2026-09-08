@@ -94,43 +94,49 @@ portmaster_cleanup_dynamic_bind() {
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
 
-    #
-    # PortMaster launchers expect:
-    #
-    #   $PORTS_DIR/ports/game
-    #
-    # The actual game folders are directly inside PORTS, so reproduce
-    # spruce's PORTS -> PORTS/ports compatibility bind when necessary.
-    #
-    PORTS_BIND_TARGET="$PORTS_DIR/ports"
+    # Where the port's game folder lives. Every device keeps ports on the
+    # spruce card, and its PORTS -> PORTS/ports compatibility bind is made at
+    # boot by the platform's device_init. The one exception is the Flip: it is
+    # the only device where a second card carries ROMs (stock mounts it at
+    # /media/sdcard1), and a port launched from there needs the same bind on
+    # that card and control.txt's $directory pointing at it. PORTS_DIR is
+    # exported for control.txt; the canonical /mnt/SDCARD string is kept for
+    # the first card so nothing a port has already seen changes.
+    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
+    PORTS_BIND_TARGET=""
     PORTS_BIND_CREATED=false
+    if [ "$PLATFORM" = "Flip" ]; then
+        case "$ROM_FILE" in
+            /media/sdcard1/*|"$(readlink -f /media/sdcard1 2>/dev/null)"/*)
+                PORTS_DIR="$(dirname "$ROM_FILE")"
+                ;;
+        esac
+    fi
+    export PORTS_DIR
 
-    mkdir -p "$PORTS_BIND_TARGET"
-
-    if portmaster_mount_is_active "$PORTS_BIND_TARGET"; then
-        log_message "PortMaster compatibility bind already active: $PORTS_BIND_TARGET"
-    else
-        if mount --bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
+    if [ "$PORTS_DIR" != "/mnt/SDCARD/Roms/PORTS" ]; then
+        PORTS_BIND_TARGET="$PORTS_DIR/ports"
+        mkdir -p "$PORTS_BIND_TARGET"
+        if portmaster_mount_is_active "$PORTS_BIND_TARGET"; then
+            log_message "Dual SD: bind already active at $PORTS_BIND_TARGET"
+        elif mount --bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
             PORTS_BIND_CREATED=true
             log_message "Dual SD: mounted $PORTS_DIR on $PORTS_BIND_TARGET"
         else
             log_message "Dual SD: failed to mount $PORTS_DIR on $PORTS_BIND_TARGET"
             return 1
         fi
+        # Remove the bind however the port ends. The signal traps only clean
+        # up; the launcher's own teardown below still runs.
+        trap 'portmaster_cleanup_dynamic_bind' EXIT HUP INT TERM
     fi
 
-    #
-    # Attempt cleanup when the launcher exits or receives a normal signal.
-    #
-    trap 'portmaster_cleanup_dynamic_bind' EXIT
-    trap 'portmaster_cleanup_dynamic_bind; exit 1' HUP INT TERM
-	
     device_prepare_for_ports_run
 
     # Setup variables
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-	export LC_ALL=C
+    export LC_ALL=C
     # TODO: Remove this when portmaster updates spruce detection
     if [ "$PLATFORM" = "Pixel2" ]; then
         PM_DIR="/mnt/SDCARD/Roms/PORTS/PortMaster"
@@ -146,11 +152,7 @@ run_port() {
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
-		"$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
-        SID=$!
-        echo "$SID" > /tmp/last_port_sid
-        wait "$SID"
-        rm -f /tmp/last_port_sid
+        "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
         if [ "$MOUNT_BIND" = true ]; then
             mount --bind \
@@ -174,8 +176,10 @@ run_port() {
         rm -f /tmp/last_port_sid
     fi
 
-	portmaster_cleanup_dynamic_bind
-    trap - EXIT HUP INT TERM
+    if [ -n "$PORTS_BIND_TARGET" ]; then
+        portmaster_cleanup_dynamic_bind
+        trap - EXIT HUP INT TERM
+    fi
 
     device_cleanup_after_ports_run
 }
