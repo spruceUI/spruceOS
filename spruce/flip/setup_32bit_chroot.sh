@@ -11,7 +11,9 @@ mount --bind /proc /mnt/SDCARD/Persistent/.32bit_chroot/proc
 mount --bind /var/run /mnt/SDCARD/Persistent/.32bit_chroot/var/run
 mount --bind /mnt/sdcard /mnt/SDCARD/Persistent/.32bit_chroot/sdcard
 mount --bind /mnt/sdcard /mnt/SDCARD/Persistent/.32bit_chroot/mnt/sdcard
-mount --bind /mnt/SDCARD/Roms/PORTS/ /mnt/SDCARD/Persistent/.32bit_chroot/SDCARD/Roms/PORTS/
-mount --bind /mnt/SDCARD/Persistent/.32bit_chroot/SDCARD/Roms/PORTS/ /mnt/SDCARD/Persistent/.32bit_chroot/mnt/SDCARD/Roms/PORTS/ports/
+# The rootfs image carries a /SDCARD/Roms/PORTS mount point; the card's
+# folder is Roms/ports now. Inside the chroot /mnt/SDCARD is the card itself,
+# so Roms/ports/<game> resolves there directly and needs no second bind.
+mount --bind /mnt/SDCARD/Roms/ports/ /mnt/SDCARD/Persistent/.32bit_chroot/SDCARD/Roms/PORTS/
 
 chroot /mnt/SDCARD/Persistent/.32bit_chroot /bin/sh -c "/mnt/SDCARD/spruce/flip/mount_muOS.sh"

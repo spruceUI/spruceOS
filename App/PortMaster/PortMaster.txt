@@ -16,7 +16,8 @@ if [ -d "/mnt/SDCARD/spruce" ]; then
   PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
   export LD_PRELOAD=""
   controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  directory="/mnt/SDCARD/Roms/PORTS/"
+  # Parent of the ports folder (Roms/ports): launchers add /ports/<game>.
+  directory="/mnt/SDCARD/Roms/"
 
 
   INFO=$(cat /proc/cpuinfo 2> /dev/null)
@@ -110,10 +111,9 @@ source "$controlfolder/utils/pmsplash.txt"
 ## Autoinstallation Code
 # This will automatically install zips found within the `PortMaster/autoinstall` / `ports/autoinstall` directory using harbourmaster
 AUTOINSTALL_DIR_1="$controlfolder/autoinstall"
-# Upstream's second autoinstall dir is "$directory/ports/autoinstall", which on
-# its own layout is <ports drive>/ports/autoinstall. Here $directory IS the
-# ports dir, so that would put a "ports" folder inside Roms/PORTS where the rom
-# list would show it. Use the PortMaster one for both.
+# Upstream's second autoinstall dir is "$directory/ports/autoinstall", which
+# here is Roms/ports/autoinstall - a folder the rom list would show. Use the
+# PortMaster one for both.
 AUTOINSTALL_DIR_2="$AUTOINSTALL_DIR_1"
 
 if [ ! -d "$AUTOINSTALL_DIR_2" ]; then

@@ -465,27 +465,10 @@ setup_for_retroarch() {
     echo "$RA_BIN"
 }
 
-# PortMaster ports location.
-#
-# harbourmaster installs a port's files flat into Roms/PORTS, but every port
-# script computes GAMEDIR=/$directory/ports/<name>, and spruce's control.txt
-# sets directory=/mnt/SDCARD/Roms/PORTS - so they look one level deeper, in
-# Roms/PORTS/ports. Every other PortMaster device reconciles that by binding
-# Roms/PORTS onto Roms/PORTS/ports (Flip.sh, SmartProS.sh, AnbernicXXCommon.sh,
-# trimui_a133p.sh); this device had no such hook, so every port died on
-# "cd: .../ports/<name>: No such file or directory".
-#
-# Done here rather than in a boot-time mount block because this is the hook
-# run_port already calls, and it keeps the mount to the one moment it is
-# needed. Guarded so repeated launches do not stack binds - mountpoint(1) is
-# not in this base, so test the mount table.
+# Nothing to prepare any more: the Roms/PORTS -> Roms/PORTS/ports bind this
+# used to make is gone (the folder is Roms/ports, see ports_migration.sh).
 device_prepare_for_ports_run() {
-    mkdir -p /mnt/SDCARD/Roms/PORTS/ports
-    if ! grep -q " /mnt/SDCARD/Roms/PORTS/ports " /proc/mounts; then
-        mount --bind /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS/ports \
-            && log_message "RGB30: bound Roms/PORTS onto Roms/PORTS/ports for ports run" -v \
-            || log_message "RGB30: failed to bind Roms/PORTS/ports - ports will not find their files"
-    fi
+    :
 }
 
 device_cleanup_after_ports_run() {

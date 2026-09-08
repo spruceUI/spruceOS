@@ -20,7 +20,7 @@ extract_game_dir(){
     # If gamedir_name ends with a slash, remove the slash
     gamedir_line="${gamedir_line%/}"
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
-    game_dir="${PORTS_DIR:-/mnt/SDCARD/Roms/PORTS}/${gamedir_line##*/}"
+    game_dir="${PORTS_DIR:-/mnt/SDCARD/Roms/ports}/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
     echo "${game_dir%\"}"
 }
@@ -69,42 +69,16 @@ set_port_abxy_scheme() {
     fi
 }
 
-portmaster_mount_is_active() {
-    awk -v target="$1" '
-        $2 == target {
-            found = 1
-        }
-        END {
-            exit(found ? 0 : 1)
-        }
-    ' /proc/mounts
-}
-
-portmaster_cleanup_dynamic_bind() {
-    if [ "$PORTS_BIND_CREATED" = "true" ]; then
-        if umount "$PORTS_BIND_TARGET"; then
-            log_message "Dual SD: removed bind from $PORTS_BIND_TARGET"
-            PORTS_BIND_CREATED=false
-        else
-            log_message "Dual SD: could not unmount $PORTS_BIND_TARGET"
-        fi
-    fi
-}
-
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
 
-    # Where the port's game folder lives. Every device keeps ports on the
-    # spruce card, and its PORTS -> PORTS/ports compatibility bind is made at
-    # boot by the platform's device_init. The one exception is the Flip: it is
-    # the only device where a second card carries ROMs (stock mounts it at
-    # /media/sdcard1), and a port launched from there needs the same bind on
-    # that card and control.txt's $directory pointing at it. PORTS_DIR is
-    # exported for control.txt; the canonical /mnt/SDCARD string is kept for
-    # the first card so nothing a port has already seen changes.
-    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
-    PORTS_BIND_TARGET=""
-    PORTS_BIND_CREATED=false
+    # Where the port's game folder lives. Every launcher computes
+    # GAMEDIR=/$directory/ports/<game> with $directory the ports drive, and
+    # control.txt derives $directory from this (its parent). The folder is
+    # named ports for exactly that reason - see ports_migration.sh. On the
+    # Flip a port can come from the second card, the only device where a
+    # second card carries ROMs (stock mounts it at /media/sdcard1).
+    PORTS_DIR=/mnt/SDCARD/Roms/ports
     if [ "$PLATFORM" = "Flip" ]; then
         case "$ROM_FILE" in
             /media/sdcard1/*|"$(readlink -f /media/sdcard1 2>/dev/null)"/*)
@@ -114,23 +88,6 @@ run_port() {
     fi
     export PORTS_DIR
 
-    if [ "$PORTS_DIR" != "/mnt/SDCARD/Roms/PORTS" ]; then
-        PORTS_BIND_TARGET="$PORTS_DIR/ports"
-        mkdir -p "$PORTS_BIND_TARGET"
-        if portmaster_mount_is_active "$PORTS_BIND_TARGET"; then
-            log_message "Dual SD: bind already active at $PORTS_BIND_TARGET"
-        elif mount --bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
-            PORTS_BIND_CREATED=true
-            log_message "Dual SD: mounted $PORTS_DIR on $PORTS_BIND_TARGET"
-        else
-            log_message "Dual SD: failed to mount $PORTS_DIR on $PORTS_BIND_TARGET"
-            return 1
-        fi
-        # Remove the bind however the port ends. The signal traps only clean
-        # up; the launcher's own teardown below still runs.
-        trap 'portmaster_cleanup_dynamic_bind' EXIT HUP INT TERM
-    fi
-
     device_prepare_for_ports_run
 
     # Setup variables
@@ -139,7 +96,7 @@ run_port() {
     export LC_ALL=C
     # TODO: Remove this when portmaster updates spruce detection
     if [ "$PLATFORM" = "Pixel2" ]; then
-        PM_DIR="/mnt/SDCARD/Roms/PORTS/PortMaster"
+        PM_DIR="/mnt/SDCARD/Roms/ports/PortMaster"
         MOUNT_BIND=false
     else
         PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
@@ -176,11 +133,6 @@ run_port() {
         rm -f /tmp/last_port_sid
     fi
 
-    if [ -n "$PORTS_BIND_TARGET" ]; then
-        portmaster_cleanup_dynamic_bind
-        trap - EXIT HUP INT TERM
-    fi
-
     device_cleanup_after_ports_run
 }
 
@@ -192,15 +144,12 @@ run_A30_port() {
     mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
-    # make A30PORTS accessible from PORTS for backwards compatibility
-    mkdir -p /mnt/SDCARD/Roms/PORTS
-    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
-
-    # launch the actual game
+    # A30 port scripts address their files as /mnt/SDCARD/Roms/A30PORTS/...
+    # (ports_migration.sh rewrote the old Roms/PORTS form, and the Nursery
+    # rewrites new downloads), so no bind is needed here any more.
     cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$ROM_FILE" 
 
     # clean up and back up any RA config modifications
-    umount /mnt/SDCARD/Roms/PORTS
     umount /mnt/SDCARD/RetroArch/retroarch
 }

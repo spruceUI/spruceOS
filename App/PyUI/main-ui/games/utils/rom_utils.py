@@ -15,6 +15,9 @@ class RomUtils:
     def __init__(self, roms_path):
         self.roms_path = roms_path
         self.emu_dir_to_rom_dir_non_matching = {
+            # Lowercase on purpose: PortMaster launchers look in
+            # <drive>/ports/<game>, see spruce/scripts/ports_migration.sh.
+            "PORTS": "ports",
             "PPSSPP": "PSP",
             "FFPLAY":"FFMPEG",
             "MPV":"FFMPEG",

@@ -312,6 +312,25 @@ ensure_dev_shm() {
     fi
 }
 
+# Move the CONTENTS of directory $1 into directory $2, merging where a
+# subdirectory already exists on both sides. Uses rename, so on one
+# filesystem it is instant whatever the size; falls back to copy+delete only
+# when rename is refused. Recursion runs in a subshell so the loop variables
+# of the caller survive (POSIX sh has no locals).
+merge_dir() {
+    mkdir -p "$2"
+    for _entry in "$1"/* "$1"/.[!.]*; do
+        [ -e "$_entry" ] || continue
+        _name="${_entry##*/}"
+        if [ -d "$_entry" ] && [ ! -L "$_entry" ] && [ -d "$2/$_name" ]; then
+            ( merge_dir "$_entry" "$2/$_name" )
+            rmdir "$_entry" 2>/dev/null
+        else
+            mv -f "$_entry" "$2/$_name" 2>/dev/null || { cp -a "$_entry" "$2/$_name" && rm -rf "$_entry"; }
+        fi
+    done
+}
+
 flag_check() {
     local flag_name="$1"
     if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then

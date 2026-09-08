@@ -351,9 +351,8 @@ runtime_mounts_Flip() {
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
-	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
+    # No Roms/PORTS -> Roms/PORTS/ports bind any more: the folder is named
+    # ports and control.txt points the launchers at Roms/ (ports_migration.sh).
 	
 	# Treat /spruce/flip/ as the 'root' for any application that needs it.
 	# (i.e. PortMaster looks here for config information which is device specific)

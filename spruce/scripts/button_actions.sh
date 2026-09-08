@@ -21,7 +21,7 @@ kill_port(){
     # case, not [[ ]]: this file is #!/bin/sh and on the RGB30 that is dash,
     # where [[ is "not found".
     case "$CMD" in
-    *"/Roms/PORTS/"*)
+    *"/Roms/ports/"*)
         rm -f /tmp/menubtn
 
         capture_screen

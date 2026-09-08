@@ -34,6 +34,14 @@ log_message "---------Starting up---------"
 run_sd_card_fix_if_triggered    # do this before anything else
 
 set_performance
+# Roms/PORTS -> Roms/ports, on the first boot after an install or update
+# only (the flag ships in every release and OTA). Before device_init: the
+# Flip's 32-bit chroot binds the ports folder, and nothing may create a
+# lowercase sibling while the old folder still exists.
+if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
+    . /mnt/SDCARD/spruce/scripts/ports_migration.sh
+    migrate_ports_dir
+fi
 device_init
 ensure_dev_shm
 { sleep 1.5; set_volume_to_config; } &

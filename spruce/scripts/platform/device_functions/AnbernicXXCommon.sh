@@ -190,13 +190,8 @@ runtime_mounts_anbernic_34xxsp() {
         chmod +x "$MAINUI"
     fi
 
-    # PortMaster ports location. Ports and harbourmaster both expect a "ports"
-    # directory inside the ports root, which on spruce is Roms/PORTS itself.
-    # -o bind for the same BusyBox reason as the MainUI mount above: --bind is
-    # a util-linux long option this mount does not take, and the failure is
-    # silent.
-    mkdir -p /mnt/SDCARD/Roms/PORTS/ports
-    mount -o bind /mnt/SDCARD/Roms/PORTS /mnt/SDCARD/Roms/PORTS/ports
+    # No Roms/PORTS -> Roms/PORTS/ports bind any more: the folder is named
+    # ports and control.txt points the launchers at Roms/ (ports_migration.sh).
 }
 
 # Everything device_init does that is true of the whole XX line. Kept separate

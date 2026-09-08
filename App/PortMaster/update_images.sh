@@ -1,6 +1,6 @@
 #!/bin/bash
 #Directory to search in
-directory="/mnt/SDCARD/Roms/PORTS"
+directory="/mnt/SDCARD/Roms/ports"
 
 mkdir -p "$directory/Imgs"
 

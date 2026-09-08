@@ -85,7 +85,7 @@ case "$PLATFORM" in
     Pixel2)
         /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
         /mnt/SDCARD/App/PortMaster/update_images.sh > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
-        rm /mnt/SDCARD/Roms/PORTS/gamelist.*
+        rm /mnt/SDCARD/Roms/ports/gamelist.*
         exit 0
         ;;
 esac
@@ -122,7 +122,8 @@ sed -i \
     -e 's|/mnt/sdcard/spruce|/mnt/SDCARD/spruce|' \
     -e 's|/mnt/sdcard/Persistent/portmaster|/mnt/SDCARD/Persistent/portmaster|' \
     -e 's|/mnt/SDCARD/Roms/\.portmaster|/mnt/SDCARD/Persistent/portmaster|' \
-    -e 's|/mnt/SDCARD/Roms/PORTS64|/mnt/SDCARD/Roms/PORTS|' \
+    -e 's|/mnt/SDCARD/Roms/PORTS64|/mnt/SDCARD/Roms/ports|' \
+    -e 's|/mnt/SDCARD/Roms/PORTS\([^0-9A-Za-z_]\)|/mnt/SDCARD/Roms/ports\1|g' \
     "$PM_DIR/pylibs/harbourmaster/config.py"
 cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
 # ...and again under a name the updater does not own. bash reads a script
