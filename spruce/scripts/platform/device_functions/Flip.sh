@@ -104,8 +104,18 @@ are_headphones_plugged_in() {
 }
 
 
+# The stored level (.vol, 0..20), always printed as a number. `.vol // 0`
+# covers a missing key (a first boot, a legacy seed); the pattern covers a
+# damaged json, a missing file or a failing jq. Every caller feeds the result
+# straight into arithmetic or a numeric test (set_volume, fix_sleep_sound_bug,
+# volume_up/down, mixer_watchdog), and /bin/sh is bash here: the old bare
+# `jq -r '.vol'` handed them the string "null", which aborts those.
 get_volume_level() {
-    jq -r '.vol' "$SYSTEM_JSON"
+    stored_level="$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$stored_level" in
+        ''|*[!0-9]*) stored_level=0 ;;
+    esac
+    printf '%s\n' "$stored_level"
 }
 
 set_volume() {
