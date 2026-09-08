@@ -151,20 +151,45 @@ set_volume() {
     fi
 }
 
+# Codec reset after a suspend: Playback Path (numid 2) OFF and SPK Volume
+# (numid 5) 0, the route re-selected, then the stored level re-applied. The
+# reset used to be skipped when the stored level was 0, leaving a codec that
+# had just come back from suspend in whatever state it woke in - the next
+# volume-up then started from that unknown state instead of from the reset
+# one. Now every wake resets; at level 0 the route stays OFF (set_volume 0).
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
 
+    log_message "Restoring volume to ${config_volume}"
+    amixer cset numid=2 0
+    amixer cset numid=5 0
     if [ "$config_volume" -ne 0 ]; then
-        log_message "Restoring volume to ${config_volume}"
-        amixer cset numid=2 0
-        amixer cset numid=5 0
         if are_headphones_plugged_in; then
             amixer cset numid=2 3
         else
             amixer cset numid=2 2
         fi
-        set_volume "$(( config_volume ))"
     fi
+    set_volume "$(( config_volume ))"
+}
+
+# The headphone-jack edge handler behind spruce/flip/mixer_watchdog.sh.
+#
+# sleep_helper mutes with `set_volume 0 false` on the way into sleep and
+# restores the stored level itself on wake (reading the jack afresh), and its
+# marker directory spans that whole window: created before the mute, removed
+# after the restore. A jack edge seen inside the window must not re-apply the
+# stored level: that un-mutes a device that is meant to be silent (a timer
+# wake into poweroff, for one) and rewrites .vol behind sleep_helper's back.
+# Skipping is safe because the wake-side restore reads the jack again.
+SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
+
+reapply_volume_on_jack_edge() {
+    if [ -e "$SLEEP_HELPER_MARKER" ]; then
+        log_message "mixer watchdog: jack changed while sleep_helper owns the volume; leaving the mute alone" -v
+        return 0
+    fi
+    set_volume "$(( $(get_volume_level) ))"
 }
 
 volume_down() {
