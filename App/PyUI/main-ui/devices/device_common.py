@@ -248,7 +248,6 @@ class DeviceCommon(AbstractDevice):
         self.wifi_error = False
         self.last_successful_ping_time = time.time()
         fail_count = 0
-        restart_count = 0
         while True:
             if self.is_wifi_enabled():
                 if self.wifi_error or not self.is_wifi_up():
@@ -259,23 +258,25 @@ class DeviceCommon(AbstractDevice):
                     self.stop_wifi_services()
                     self.start_wifi_services(foreground_call=False)
                 else:
+                    # A failed ping means the internet is unreachable, not that
+                    # the radio is broken. It used to stop/start the WiFi stack
+                    # after four misses and switch WiFi off in the user's
+                    # settings after five restarts, so a home internet outage
+                    # or a captive portal cycled the radio every ~50 s and then
+                    # turned it off. Measured on the Flip 2026-09-06: a new
+                    # wpa_supplicant every 50 s and a ~200 mA draw spike each
+                    # time. Only a vanished wlan0 (above) restarts anything now;
+                    # the ping just records the state for the status icon.
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
                             self.last_successful_ping_time = time.time()
+                            if fail_count > 0:
+                                PyUiLogger.get_logger().info("WiFi connection is back")
                             fail_count = 0
-                            restart_count = 0
                         else:
-                            PyUiLogger.get_logger().error("WiFi connection looks to be down")
-                            fail_count+=1
-                            if(fail_count > 3):
-                                if(restart_count > 5):
-                                    PyUiLogger.get_logger().error("Cannot get WiFi connection so disabling WiFi")
-                                    self.disable_wifi()
-                                else:
-                                    PyUiLogger.get_logger().error("Going to reinitialize WiFi")
-                                    restart_count += 1
-                                    self.wifi_error = True
-
+                            fail_count += 1
+                            if fail_count == 1:
+                                PyUiLogger.get_logger().error("WiFi is associated but the internet is unreachable; leaving the radio alone")
 
             time.sleep(10)
 
