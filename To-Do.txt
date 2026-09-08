@@ -22,6 +22,10 @@
 - reset config tasks for more standalone emulators
 - spruce settings should allow Menu button as hotkey enabler in RA on XX
 - some hotkeys missing or wrong in RA on XX
+- fake08 patches from TL
+- XX - polish shutdown paths - LEDs on, screen dim/off
+- XX - bootlogo app needs polish - add "bootlogo applied successfully" message
+
 
 --- OTA ------------------------------------------------------------------------
 
