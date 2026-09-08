@@ -26,14 +26,6 @@ else
     exec >> "$GAMEDIR/log.txt" 2>&1
 fi
 
-if [ -f /mnt/SDCARD/spruce/twig ]; then
-	GODOT_OPTS=${GODOT_OPTS//-f/}
-    if ! glxinfo | grep "OpenGL version string"; then
-		pck_filename="SongoLibmaliWarning.pck"
-    fi
-fi
-
-
 # Theoretically the mount should only exist once, the loop is on the off chance
 # something goes horribly wrong. Its important to be sure its unmounted or else
 # closing the lid of the clamshell will be ignored after the app exit, until
