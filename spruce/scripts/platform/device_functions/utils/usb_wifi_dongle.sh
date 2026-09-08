@@ -15,6 +15,14 @@
 #                          the shell and PyUI WiFi paths assume wlan0 throughout,
 #                          and renaming the dongle beats teaching thirty call
 #                          sites about a second interface.
+#   device_usb_wifi_onboard_release / device_usb_wifi_onboard_restore
+#                          optional device-file overrides for radios whose driver
+#                          is built into the kernel and cannot be unloaded: the
+#                          Miyoo Flip's RTL8733BU goes away when its power rail
+#                          (/sys/class/rkwifi/wifi_power) is written 0 and comes
+#                          back on 1. When defined they replace the rmmod /
+#                          modprobe of WIFI_ONBOARD_MODULE; the contract still
+#                          waits for wlan0 to leave and to return.
 #
 # Model, borrowed from the RG28XX's bus-first USB radio contract
 # (AnbernicXXCommon.sh): look at the USB bus, and only then touch a driver.
@@ -166,13 +174,10 @@ usb_wifi_bring_up() {
         return 1
     fi
 
-    # Free the wlan0 name: the onboard driver goes, and so do the clients that
+    # Free the wlan0 name: the onboard radio goes, and so do the clients that
     # were bound to its interface.
     usb_wifi_stop_clients
-    if [ -n "$WIFI_ONBOARD_MODULE" ] && usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
-        rmmod "$WIFI_ONBOARD_MODULE" 2>/dev/null
-        log_message "USB WiFi: $_id on the bus - onboard $WIFI_ONBOARD_MODULE unloaded in its favour"
-    fi
+    usb_wifi_onboard_release "$_id"
 
     if ! usb_wifi_module_loaded "$_mod"; then
         if ! insmod "$WIFI_USB_MODULES_DIR/$_mod.ko" 2>/tmp/wifi_usb_insmod_err; then
@@ -223,12 +228,39 @@ usb_wifi_tear_down() {
     rm -f "$WIFI_USB_DONGLE_STATE" 2>/dev/null
 }
 
-# Put the onboard driver back if it is not loaded and wait for its wlan0.
+# Take the onboard radio away so the dongle can have wlan0: unload its module,
+# or run the device's own release (a power rail) and wait for wlan0 to leave.
+usb_wifi_onboard_release() {
+    if command -v device_usb_wifi_onboard_release >/dev/null 2>&1; then
+        device_usb_wifi_onboard_release
+        _left=5
+        while [ "$_left" -gt 0 ] && [ -d /sys/class/net/wlan0 ]; do
+            sleep 1
+            _left=$((_left - 1))
+        done
+        log_message "USB WiFi: ${1:-dongle} on the bus - onboard radio released in its favour$([ -d /sys/class/net/wlan0 ] && echo ' (wlan0 still present)')"
+        return 0
+    fi
+    if [ -n "$WIFI_ONBOARD_MODULE" ] && usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
+        rmmod "$WIFI_ONBOARD_MODULE" 2>/dev/null
+        log_message "USB WiFi: ${1:-dongle} on the bus - onboard $WIFI_ONBOARD_MODULE unloaded in its favour"
+    fi
+}
+
+# Put the onboard radio back (module reload, or the device's own restore) if
+# its wlan0 is not there, and wait for it.
 usb_wifi_onboard_restore() {
-    [ -n "$WIFI_ONBOARD_MODULE" ] || return 0
-    if ! usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
-        modprobe "$WIFI_ONBOARD_MODULE" 2>/dev/null
-        log_message "USB WiFi: onboard $WIFI_ONBOARD_MODULE reloaded"
+    if command -v device_usb_wifi_onboard_restore >/dev/null 2>&1; then
+        if [ ! -d /sys/class/net/wlan0 ]; then
+            device_usb_wifi_onboard_restore
+            log_message "USB WiFi: onboard radio restored"
+        fi
+    else
+        [ -n "$WIFI_ONBOARD_MODULE" ] || return 0
+        if ! usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
+            modprobe "$WIFI_ONBOARD_MODULE" 2>/dev/null
+            log_message "USB WiFi: onboard $WIFI_ONBOARD_MODULE reloaded"
+        fi
     fi
     _left=5
     while [ "$_left" -gt 0 ]; do

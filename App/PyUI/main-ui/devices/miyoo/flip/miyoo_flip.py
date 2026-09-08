@@ -291,13 +291,115 @@ class MiyooFlip(MiyooDevice):
             return int(f.read().strip()) 
         return 0
     
+    # A USB WiFi dongle on the USB-C port replaces the onboard RTL8733BU while
+    # it is plugged in (spruce/scripts/platform/device_functions/utils/
+    # usb_wifi_dongle.sh, opted in by Flip.cfg). The shell's enable_wifi is the
+    # only path that does the swap - power the onboard chip's rail off, load
+    # the dongle's module, name its interface wlan0 - so the WiFi toggle hands
+    # the bring-up to it whenever a supported dongle is on the bus, and while
+    # the dongle is the radio (the shell's /tmp/wifi_usb_dongle marker) the
+    # rail must stay off: PyUI's own service restarts would otherwise power the
+    # onboard chip back on beside the dongle. WIFI_USB_IDS is exported by the
+    # contract; a PyUI launched without it never sees a dongle here.
+    USB_SYS = "/sys/bus/usb/devices"
+    USB_DONGLE_STATE = "/tmp/wifi_usb_dongle"
+    USB_DONGLE_FAILED = "/tmp/wifi_usb_dongle_failed"
+    SLEEP_HELPER_MARKER = "/tmp/sleep_helper_started"
+
+    def _usb_wifi_dongle_present(self):
+        """A supported dongle is on the bus - one the shell will drive. A
+        dongle whose module refused this session (the shell's failed list)
+        is invisible here: the shell keeps the onboard radio for it and
+        PyUI runs its historic path."""
+        ids = {i.lower() for i in os.environ.get("WIFI_USB_IDS", "").split()}
+        if not ids:
+            return False
+        try:
+            with open(self.USB_DONGLE_FAILED) as f:
+                ids -= {line.strip().lower() for line in f}
+        except OSError:
+            pass
+        try:
+            for dev in os.listdir(self.USB_SYS):
+                base = os.path.join(self.USB_SYS, dev)
+                try:
+                    with open(os.path.join(base, "idVendor")) as f:
+                        vendor = f.read().strip().lower()
+                    with open(os.path.join(base, "idProduct")) as f:
+                        product = f.read().strip().lower()
+                except OSError:
+                    continue
+                if f"{vendor}:{product}" in ids:
+                    return True
+        except OSError:
+            pass
+        return False
+
+    def _usb_wifi_dongle_active(self):
+        return os.path.exists(self.USB_DONGLE_STATE)
+
     def set_wifi_power(self, value):
         caller = inspect.stack()[1].function
+        # The rail stays off whenever a supported dongle is on the bus, not
+        # only while the shell's marker says the dongle is the radio: the
+        # marker is gone between device_enter_sleep's teardown and the
+        # wake-side reload, and a rail write in that window (the monitor's
+        # restart, 2026-09-08) brought the onboard chip back as wlan1 beside
+        # the dongle. The shell restores the rail itself when a dongle's
+        # module refuses, so PyUI never has to.
+        if str(value) == "1" and (self._usb_wifi_dongle_present() or self._usb_wifi_dongle_active()):
+            PyUiLogger.get_logger().info(
+                f"Called from {caller}: leaving /sys/class/rkwifi/wifi_power off - a USB dongle is the radio"
+            )
+            return
         PyUiLogger.get_logger().info(
             f"Called from {caller}: Setting /sys/class/rkwifi/wifi_power to {str(value)}"
         )
         with open('/sys/class/rkwifi/wifi_power', 'w') as f:
             f.write(str(value))
+
+    def restart_wifi_services(self):
+        """The monitor saw wlan0 go away. Under a dongle that is the shell
+        contract's own doing - device_enter_sleep unloads the driver for the
+        suspend and enable_wifi reloads it on the way back, the watchdog
+        swaps radios on unplug - and PyUI's stop/start in that window
+        re-powered the onboard rail (wlan1 beside the dongle, 2026-09-08).
+        Stay out while a dongle is on the bus or sleep_helper is still
+        working through a wake; otherwise give a swap in flight one more
+        monitor cycle (an unplug takes the shell ~8 s, the monitor polls
+        every 10 s) before restarting the historic way."""
+        if self._usb_wifi_dongle_present() or os.path.exists(self.SLEEP_HELPER_MARKER):
+            PyUiLogger.get_logger().info("WiFi restart left to the shell contract (USB dongle on the bus or a wake in flight)")
+            self._wifi_down_since = None
+            return
+        now = time.time()
+        first = getattr(self, "_wifi_down_since", None)
+        if first is None or now - first > 30:
+            self._wifi_down_since = now
+            PyUiLogger.get_logger().info("wlan0 is down; giving a radio swap one monitor cycle before restarting")
+            return
+        self._wifi_down_since = None
+        super().restart_wifi_services()
+
+    def enable_wifi(self):
+        if not self._usb_wifi_dongle_present():
+            super().enable_wifi()
+            return
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
+        if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
+            PyUiLogger.get_logger().error(f"{self.SPRUCE_HELPER_FUNCTIONS} missing; cannot bring WiFi up")
+            return
+        try:
+            subprocess.Popen(
+                ["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && enable_wifi"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            PyUiLogger.get_logger().info("USB WiFi dongle present; bring-up handed to the shell enable_wifi")
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
+        self.get_wifi_status.force_refresh()
 
     def get_bluetooth_scanner(self):
         return BluetoothScanner()
