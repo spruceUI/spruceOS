@@ -292,6 +292,26 @@ flag_add() {
 # Check if a flag exists
 # Usage: flag_check "flag_name"
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
+# that shows a message through PortMasterDialog.txt) puts its FIFOs under
+# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
+# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
+# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
+# mounted there each boot; nothing on the device's flash is touched. No-op
+# on firmware that already mounts one (Flip, Debian bases).
+ensure_dev_shm() {
+    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+        return 0
+    fi
+    mkdir -p /dev/shm 2>/dev/null || return 1
+    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
+        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
+    else
+        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
+        return 1
+    fi
+}
+
 flag_check() {
     local flag_name="$1"
     if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then
