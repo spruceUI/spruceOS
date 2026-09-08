@@ -15,23 +15,6 @@
 
 
 
-DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
-
-dsperate_bios_missing() {
-	_missing=""
-	for _f in bios9.bin bios7.bin firmware.bin; do
-		[ -f "$DSPERATE_BIOS_DIR/$_f" ] || _missing="$_missing $_f"
-	done
-	echo "$_missing"
-}
-
-display_dsperate_bios_message() {
-	start_pyui_message_writer
-	log_and_display_message "DSperate needs a DS BIOS dump.\nMissing from BIOS/nds:$1\nDumps are not included."
-	sleep 6
-	stop_pyui_message_writer
-}
-
 seed_dsperate_config() {
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
@@ -180,14 +163,6 @@ run_dsperate() {
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 	export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 
-	_missing="$(dsperate_bios_missing)"
-	if [ -n "$_missing" ]; then
-		log_message "DSperate: missing BIOS:$_missing"
-		mkdir -p "$DSPERATE_BIOS_DIR"
-		display_dsperate_bios_message "$_missing"
-		return 1
-	fi
-
 	seed_dsperate_config
 
 	# DSperate opens Gamepads and Keyboards, but not joysticks so SDL needs to
@@ -215,9 +190,6 @@ run_dsperate() {
 
 	# shared arguments for all DSperate invocations
 	set -- "$_rom" \
-		--bios9 "$DSPERATE_BIOS_DIR/bios9.bin" \
-		--bios7 "$DSPERATE_BIOS_DIR/bios7.bin" \
-		--firmware "$DSPERATE_BIOS_DIR/firmware.bin" \
 		--fullscreen
 
 	_state="$(get_state_path "$_rom")"
