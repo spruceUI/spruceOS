@@ -229,6 +229,14 @@ class DeviceCommon(AbstractDevice):
         result = ProcessRunner.run(["ip", "link", "show", "wlan0"], print=False)
         return "UP" in result.stdout
 
+    def restart_wifi_services(self):
+        """The monitor's answer to wlan0 going away: stop and start our own
+        services. A device whose radio is owned by something else at times
+        (the Flip under a USB dongle) overrides this."""
+        PyUiLogger.get_logger().info("Restarting WiFi services")
+        self.stop_wifi_services()
+        self.start_wifi_services(foreground_call=False)
+
     def wifi_error_detected(self):
         self.wifi_error = True
         
@@ -255,9 +263,7 @@ class DeviceCommon(AbstractDevice):
                     self.wifi_error = False
                     fail_count = 0
                     PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
-                    PyUiLogger.get_logger().info("Restarting WiFi services")
-                    self.stop_wifi_services()
-                    self.start_wifi_services(foreground_call=False)
+                    self.restart_wifi_services()
                 else:
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
