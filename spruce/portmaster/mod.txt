@@ -1,0 +1,90 @@
+#!/bin/bash
+# Sourced by PortMaster's mod_spruce.txt inside every port's shell, right
+# after control.txt. The one hook that runs in the port's own shell before
+# the game starts, so this is where a device's ports get their libraries.
+[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+case "$PLATFORM" in
+Anbernic*)
+    # Keep gptokeyb on the mali SDL2 while the game gets the vendor one below.
+    #
+    # gptokeyb reads the PAD, and only dll-mali carries NextUI's H700 joystick
+    # classification patch, so it has to stay on that build - confirmed live, it
+    # translates the pad correctly today. The game reads the KEYBOARD gptokeyb
+    # injects, and needs the vendor SDL2 for it. Two processes, two SDL2s; the
+    # same split App/Gallery/launch.sh makes for the same reason.
+    #
+    # $LD_LIBRARY_PATH is expanded here, at source time, so these keep the whole
+    # ports path and merely put dll-mali in front of it.
+    GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+    GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH $controlfolder/gptokeyb $ESUDOKILL"
+
+    # Pick the SDL2 this port needs, before it sources any runtime.
+    #
+    # There are two kinds of port on this line and they want opposite things:
+    #
+    #   gptokeyb given a -c mapping file - the port is KEYBOARD driven. gptokeyb
+    #   turns the pad into keystrokes on a uinput device and the game reads that.
+    #   dll-mali does not deliver them: a port under it had SDL_EVDEV_DEVICES set
+    #   correctly at the node and still only ever opened the pad. The vendor
+    #   build does, through libudev, whose enumeration reads sysfs and so works
+    #   with no udevd running.
+    #
+    #   gptokeyb given no -c - it is only there for the quit hotkey, and the game
+    #   reads the PAD itself through SDL_GameController. That needs dll-mali: the
+    #   map in AnbernicXXCommon.cfg was measured against its enumeration, and the
+    #   vendor build numbers the same buttons differently, so the game opens the
+    #   pad and no button does what it should.
+    #
+    # Checked against every port tested on hardware: 100 Lil Jumps and Banana
+    # Duck pass -c and want the vendor build; Apoc Runner and Apotris do not and
+    # want dll-mali. Getting this backwards is silent - the game runs perfectly
+    # and ignores the controls - so it is worth re-reading the port rather than
+    # assuming.
+    #
+    # $0 is the port script itself, because this file is sourced by it. This
+    # runs before the port sources its runtime, which matters: love.txt bakes
+    # the current LD_LIBRARY_PATH into LOVE_RUN, so changing it later is too late.
+    #
+    # A WELL-FORMED -c only, space and all. Banana Duck ships
+    # `$GPTOKEYB "$LOVE_GPTK"-c "./bananaduck.gptk"` with the space missing, so
+    # gptokeyb takes "love.aarch64-c" as the program name and never loads the
+    # gptk - it injects nothing. Matching that loosely would hand the port the
+    # vendor build and leave it with neither working keys nor a correctly
+    # enumerated pad. Falling through to dll-mali at least gives the game the
+    # pad. The typo is upstream's and worth reporting.
+    if grep -qE '\$GPTOKEYB2?[^&|;]*[[:space:]]-c[[:space:]]' "$0" 2>/dev/null; then
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH"
+    fi
+
+    # Ports call this between backgrounding gptokeyb and starting the game.
+    #
+    # gptokeyb injects keystrokes through a uinput keyboard that appears seconds
+    # before the game starts, and SDL has to find it. SDL_EVDEV_DEVICES names
+    # the node outright and skips discovery. The node number is not fixed, so
+    # match on the name gptokeyb gives it: gptokeyb2 registers "Fake Keyboard
+    # Mouse", gptokeyb1 "Fake Keyboard".
+    #
+    # Honest caveat: kept because it was part of the configuration verified
+    # working, NOT because it is proven load-bearing - the vendor SDL2 the game
+    # loads discovers input through libudev and probably ignores this.
+    pm_platform_helper() {
+        [ -n "$SDL_EVDEV_DEVICES" ] && return 0
+        i=0
+        while [ "$i" -lt 30 ]; do
+            for d in /sys/class/input/event*; do
+                [ -r "$d/device/name" ] || continue
+                case "$(cat "$d/device/name" 2>/dev/null)" in
+                    "Fake Keyboard Mouse"|"Fake Keyboard")
+                        export SDL_EVDEV_DEVICES="/dev/input/$(basename "$d")"
+                        return 0
+                        ;;
+                esac
+            done
+            i=$((i + 1))
+            sleep 0.1
+        done
+        return 0
+    }
+    ;;
+esac

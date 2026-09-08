@@ -3,84 +3,23 @@
 # SPDX-License-Identifier: MIT
 #
 
-## HRMMM
-if [ -d "/mnt/SDCARD/spruce" ]; then
-  export HOME="/mnt/SDCARD"
-  export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
-  export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
-  # pugwash and harbourmaster start with "#!/usr/bin/env python3", so which
-  # interpreter they get is whatever PATH says. The stock firmware's Python
-  # (/usr/bin/python3 on the Flip, Buildroot 3.10) has the xml package
-  # stripped out and harbourmaster imports it. Run pugwash through the bundled
-  # interpreter by name so PATH order can never send it to the stock one.
-  PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
-  export LD_PRELOAD=""
-  controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  # Parent of the ports folder (Roms/ports): launchers add /ports/<game>.
-  directory="/mnt/SDCARD/Roms/"
+# spruce's PortMaster launcher. Sets where PortMaster lives and which Python
+# runs it, then hands anything device-specific to the card
+# (spruce/portmaster/portmaster.txt) before the shared start-up below.
 
+export HOME="/mnt/SDCARD"
+export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
+export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
+# pugwash and harbourmaster start with "#!/usr/bin/env python3"; run pugwash
+# through the bundled interpreter by name so PATH order can never send it to a
+# stock python3 that is missing pieces.
+PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
+export LD_PRELOAD=""
+controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+# Parent of the ports folder (Roms/ports): launchers add /ports/<game>.
+directory="/mnt/SDCARD/Roms/"
 
-  INFO=$(cat /proc/cpuinfo 2> /dev/null)
-  case $INFO in
-      *"sun8i"*) export PLATFORM="A30" ;;
-      *"TG5040"*)	export PLATFORM="SmartPro" ;;
-      *"TG3040"*)	export PLATFORM="Brick"	;;
-      *"TG4040"*)	export PLATFORM="BrickPro"	;;
-      *"TG5050"*)	export PLATFORM="SmartProS"	;;
-      *"0xd05"*)
-          # RK3566 and the Flip's A55 both report 0xd05, so this test cannot
-          # tell an RGB30 from a Miyoo Flip - the same collision
-          # helperFunctions.sh resolves by reading OS_NAME. Without this the
-          # RGB30 was detected as a Flip and handed the Flip's bundled SDL2,
-          # which cannot create a GBM/EGL surface on this Mali blob: every
-          # window creation failed with "Can't window GBM/EGL surfaces" and
-          # the GUI died before drawing.
-          case "$(grep -a '^OS_NAME=' /etc/os-release 2>/dev/null)" in
-              *DARKMOSS*) export PLATFORM="RGB30" ;;
-              *)          export PLATFORM="Flip" ;;
-          esac
-          ;;
-      *) export PLATFORM="MiyooMini" ;;
-  esac
-
-  #ENV Variables
-  case "$PLATFORM" in
-      Flip|SmartProS)
-          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
-          ;;
-      Brick|SmartPro|BrickPro)
-          export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
-          ;;
-      RGB30)
-          # dArkOS built the base's SDL2 against this exact Mali blob, so use
-          # it rather than a spruce-bundled one. launch.sh sets the same value;
-          # it is repeated here because this file runs later and would
-          # otherwise overwrite it.
-          export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu"
-          ;;
-  esac
-else
-  export HOME="/root"
-  export LD_PRELOAD=""
-  controlfolder="/mnt/sdcard/MIYOO_EX/PortMaster"
-  directory="/mnt/sdcard/MIYOO_EX"
-  
-  # MIYOO_EXtra shit i need.
-  export PATH="/mnt/sdcard/MIYOO_EX/bin:$PATH"
-  export LD_LIBRARY_PATH="/mnt/sdcard/MIYOO_EX/lib:$LD_LIBRARY_PATH"
-  export PYSDL2_DLL_PATH="/mnt/sdcard/MIYOO_EX/lib/"
-
-  ## Python 3 runtime.
-  mkdir -p $HOME/python3
-
-  if [ -d $HOME/python3/bin ]; then
-    umount $HOME/python3
-  fi
-
-  mount /mnt/sdcard/MIYOO_EX/python_3.11.squashfs $HOME/python3
-  source $HOME/python3/bin/activate
-
-fi
+[ -f /mnt/SDCARD/spruce/portmaster/portmaster.txt ] && source /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
 
 ESUDO=""
@@ -90,14 +29,10 @@ export SDL_GAMECONTROLLERCONFIG_FILE="/usr/lib/gamecontrollerdb.txt"
 
 source "$controlfolder/device_info.txt"
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
-# device_info.txt identifies TrimUI devices by their stock rootfs, and
-# mod_TrimUI.txt then exports HOME=/mnt/SDCARD/Data/home - stock TrimUI's
-# layout, which does not exist on a spruce card (its mkdir has no -p). Put
-# HOME back where spruce keeps it so pm_dialog.txt and anything else
-# HOME-relative has somewhere to land.
-if [ -d "/mnt/SDCARD/spruce" ]; then
-  export HOME="/mnt/SDCARD"
-fi
+# A stock mod_<CFW>.txt (mod_TrimUI.txt) can be sourced above when a
+# self-update put it back before launch.sh re-staged ours; it moves HOME to a
+# stock-only folder. Put it back.
+export HOME="/mnt/SDCARD"
 
 ## TODO: Change to PortMaster/tty when Johnnyonflame merges the changes in,
 CUR_TTY=/dev/tty0

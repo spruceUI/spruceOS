@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# SPDX-License-Identifier: MIT
+#
+# Sourced by every port right after control.txt (as mod_${CFW_NAME}.txt), and
+# by PortMaster.txt. What is the same on every spruce device lives here; what
+# a particular board needs lives on the card in spruce/portmaster/mod.txt.
+
+CUR_TTY="/dev/null"
+GODOT2_OPTS="-r ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} -f"
+GODOT_OPTS="--resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} -f"
+
+# PortMaster's dialog pipe is not running when a port starts, so the funcs.txt
+# pm_message would fail. Ports only use it for progress lines; print them.
+pm_message() {
+    echo "$1" > "$CUR_TTY"
+}
+
+pm_platform_helper() {
+    if [ -e "$PM_PIPE" ]; then
+        PortMasterDialogExit
+    fi
+    printf ""
+}
+
+[ -f /mnt/SDCARD/spruce/portmaster/mod.txt ] && source /mnt/SDCARD/spruce/portmaster/mod.txt

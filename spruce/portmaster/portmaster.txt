@@ -1,0 +1,35 @@
+#!/bin/bash
+# Sourced by PortMaster's spruce PortMaster.txt (and by App/PortMaster/launch.sh)
+# before pugwash starts. Everything the GUI needs that differs per device.
+[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+# Which SDL2 pysdl2 loads for pugwash. Each of these was found the hard way:
+# the Flip/TSPS bundle carries its own; the TrimUI A133 line has a build in
+# spruce/brick/sdl2; the Anbernic XX uses the mali build PyUI ships; the RGB30
+# uses the base's, built by dArkOS against its own Mali blob.
+case "$PLATFORM" in
+    Flip|SmartProS)         export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;
+    Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
+    Anbernic*)              export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
+    RGB30)                  export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
+esac
+
+# spruce's own Python tree ahead of everything except the bundled bin the
+# PortMaster file already put first; not on the RGB30, whose base has all of it.
+case "$PLATFORM" in
+    RGB30) ;;
+    *) export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
+esac
+
+case "$PLATFORM" in
+    Flip|SmartProS|Brick|SmartPro|BrickPro)
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+        ;;
+    Anbernic*)
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
+        export_sdl_gamecontroller_map
+        ;;
+    RGB30)
+        export_sdl_gamecontroller_map
+        ;;
+esac

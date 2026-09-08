@@ -1,0 +1,7 @@
+#!/bin/bash
+# Sourced by PortMaster's spruce control.txt inside every port's shell, after
+# it has set controlfolder, directory, PATH (bundled Python first),
+# LD_LIBRARY_PATH (bundled lib first) and PM_PYTHON. Per-device additions for
+# ports go here. Today there are none: the port launcher (ports_functions.sh)
+# already exports the device's library path and pad map before the port runs.
+[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
