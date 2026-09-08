@@ -16,4 +16,8 @@
 . /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
 
 sync_system_time
+# This is the user asking, from Time Settings, so detect again even if it
+# already ran this boot.
+rm -f "$TZ_AUTO_DONE_FLAG"
+sync_timezone_from_network
 exit 0

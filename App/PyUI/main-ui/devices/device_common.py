@@ -581,6 +581,14 @@ class DeviceCommon(AbstractDevice):
     def supports_timezone_setting(self):
         return os.path.isdir(self.get_zoneinfo_dir())
 
+    def supports_automatic_timezone(self):
+        """
+        Whether timeFunctions.sh may pick the zone from the network location
+        and this class will apply it from the shared config. False on a device
+        whose timezone lives in its own system layer (the Pixel 2).
+        """
+        return self.supports_timezone_setting() and self.supports_wifi()
+
     def apply_timezone(self, timezone):
         """
         Point this process at the chosen zone and make it take effect now.
@@ -599,8 +607,40 @@ class DeviceCommon(AbstractDevice):
 
         os.environ["TZ"] = f":{zone_file}"
         time.tzset()
+        self._applied_timezone = timezone
         PyUiLogger.get_logger().info(f"Applied timezone {timezone} from {zone_file}")
         return True
+
+    def _watch_shared_timezone(self):
+        """
+        timeFunctions.sh writes an automatically detected zone into the
+        shared config once the network is up, from outside this process. TZ
+        lives only in our environment, so watch the file and re-apply. Cheap:
+        one stat every few seconds. The file is created empty first so the
+        watcher has something to stat; an empty file still means "no zone".
+        """
+        try:
+            from devices.utils.file_watcher import FileWatcher
+            system_config = self.get_system_config()
+            path = getattr(system_config, "SHARED_CONFIG_PATH", None)
+            if not path:
+                return
+            if not os.path.isfile(path):
+                system_config._write_shared(system_config._read_shared())
+            FileWatcher().start_file_watcher(path, self._on_shared_timezone_changed, interval=3.0)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not watch shared config for timezone changes: {e}")
+
+    def _on_shared_timezone_changed(self):
+        try:
+            system_config = self.get_system_config()
+            if not getattr(system_config, "has_timezone", lambda: False)():
+                return
+            timezone = system_config.get_timezone()
+            if timezone and timezone != getattr(self, "_applied_timezone", None):
+                DeviceCommon.apply_timezone(self, timezone)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not re-apply timezone: {e}")
 
     def restore_saved_timezone(self):
         """
@@ -616,6 +656,9 @@ class DeviceCommon(AbstractDevice):
         """
         if not os.path.isdir(self.get_zoneinfo_dir()):
             return
+
+        if self.supports_automatic_timezone():
+            self._watch_shared_timezone()
 
         try:
             system_config = self.get_system_config()

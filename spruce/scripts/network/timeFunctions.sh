@@ -202,3 +202,156 @@ sync_system_time() {
 	log_message "Time sync: could not determine the time - HTTPS will keep failing with 'certificate is not yet valid'"
 	return 1
 }
+
+
+# ---------------------------------------------------------------------------
+# Automatic timezone
+#
+# A handheld has no idea where it is, but its public IP does. Once the network
+# is up (and the clock is sane, see above) ask a geolocation service for the
+# IANA zone name and, if it is one we ship in spruce/zoneinfo, save it to the
+# card-global shared-system.json that the UI reads its zone from. PyUI watches
+# that file and applies the zone without a restart.
+#
+# Several providers, tried in order, first valid answer wins. No single host is
+# reachable from everywhere (some countries block whole providers), and any of
+# these can disappear. Plain-HTTP ones first: they work even if the clock is
+# still wrong, HTTPS ones only after sync_system_time has done its job. A
+# failure anywhere means "leave the zone alone", never a wrong zone.
+#
+# Honours the same "Sync Time via Network" toggle as the clock, and the
+# timezone mode: "manual" (the user picked a zone in Time Settings) is never
+# overwritten. Runs once per boot; a failed attempt may retry on the next
+# network-up.
+# ---------------------------------------------------------------------------
+TZ_SHARED_CONFIG=/mnt/SDCARD/Saves/spruce/shared-system.json
+TZ_ZONEINFO_DIR=/mnt/SDCARD/spruce/zoneinfo
+TZ_AUTO_DONE_FLAG=/tmp/timezone_auto_done
+TZ_PROVIDERS="http://ip-api.com/json/?fields=timezone|json
+http://ipwho.is/?fields=timezone.id|jsonid
+https://ipapi.co/timezone|text
+https://ipinfo.io/timezone|text
+http://worldtimeapi.org/api/ip|json"
+
+# auto or manual. A zone saved with no mode recorded predates this feature and
+# was picked by hand, so it counts as manual; nothing saved at all is auto.
+timezone_mode() {
+	command -v jq >/dev/null 2>&1 || { echo auto; return; }
+	[ -f "$TZ_SHARED_CONFIG" ] || { echo auto; return; }
+	_mode="$(jq -r '.timezoneMode' "$TZ_SHARED_CONFIG" 2>/dev/null)"
+	case "$_mode" in
+	auto | manual) echo "$_mode"; return ;;
+	esac
+	_tz="$(jq -r '.timezone' "$TZ_SHARED_CONFIG" 2>/dev/null)"
+	case "$_tz" in
+	'' | null) echo auto ;;
+	*) echo manual ;;
+	esac
+}
+
+fetch_http_body() {
+	if command -v curl >/dev/null 2>&1; then
+		run_with_time_limit 20 curl -s --connect-timeout 8 -m 15 "$1" 2>/dev/null
+	elif command -v wget >/dev/null 2>&1; then
+		run_with_time_limit 20 wget -q -T 15 -O - "$1" 2>/dev/null
+	else
+		return 1
+	fi
+}
+
+# Only what could be a zone name we ship: Area/Location[/Sub], safe characters,
+# and the file has to exist. Anything else, including error bodies and HTML
+# from a captive portal, is rejected.
+timezone_is_valid() {
+	case "$1" in
+	*/*) ;;
+	*) return 1 ;;
+	esac
+	case "$1" in
+	*[!A-Za-z0-9_/+-]* | */../* | /* | */) return 1 ;;
+	esac
+	[ "${#1}" -le 64 ] || return 1
+	[ -f "$TZ_ZONEINFO_DIR/$1" ]
+}
+
+# $1 = url, $2 = json ("timezone":"X"), jsonid ("timezone":{"id":"X"}) or text
+# (the zone on the first line). Prints the zone or fails.
+timezone_from_provider() {
+	_body="$(fetch_http_body "$1")" || return 1
+	[ -n "$_body" ] || return 1
+	_body="$(printf '%s' "$_body" | tr -d '\n\r')"
+	case "$2" in
+	json) _tz="$(printf '%s' "$_body" | sed -n 's/.*"timezone"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)" ;;
+	jsonid) _tz="$(printf '%s' "$_body" | sed -n 's/.*"timezone"[[:space:]]*:[[:space:]]*{[[:space:]]*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)" ;;
+	text) _tz="$(printf '%s' "$_body" | head -n 1 | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')" ;;
+	*) return 1 ;;
+	esac
+	timezone_is_valid "$_tz" || return 1
+	echo "$_tz"
+}
+
+sync_timezone_from_network() {
+	# First, so the repeat calls (every return to the menu from a game) cost
+	# nothing once this boot has an answer.
+	[ -f "$TZ_AUTO_DONE_FLAG" ] && return 0
+	[ -d "$TZ_ZONEINFO_DIR" ] || return 0
+	command -v jq >/dev/null 2>&1 || return 0
+	# The Pixel 2 keeps its zone in its own system layer (tz-data.service),
+	# which PyUI's shared-config path does not write. Left alone on purpose.
+	[ "$PLATFORM" = "Pixel2" ] && return 0
+	if ! time_sync_is_enabled; then
+		log_message "Timezone: network sync turned off in Time Settings, leaving the zone alone" -v
+		return 0
+	fi
+	if [ "$(timezone_mode)" != "auto" ]; then
+		log_message "Timezone: set by hand, leaving it alone" -v
+		return 0
+	fi
+
+	_found=""
+	_old_ifs="$IFS"; IFS='
+'
+	for _entry in $TZ_PROVIDERS; do
+		IFS="$_old_ifs"
+		_url="${_entry%%|*}"
+		_kind="${_entry##*|}"
+		if _found="$(timezone_from_provider "$_url" "$_kind")"; then
+			log_message "Timezone: $_found from $(echo "$_url" | cut -d/ -f3)" -v
+			break
+		fi
+		_found=""
+	done
+	IFS="$_old_ifs"
+
+	if [ -z "$_found" ]; then
+		log_message "Timezone: no geolocation provider answered, leaving the zone alone"
+		return 1
+	fi
+
+	_current=""
+	[ -f "$TZ_SHARED_CONFIG" ] && _current="$(jq -r '.timezone // empty' "$TZ_SHARED_CONFIG" 2>/dev/null)"
+	if [ "$_current" = "$_found" ]; then
+		log_message "Timezone: already $_found" -v
+		touch "$TZ_AUTO_DONE_FLAG"
+		return 0
+	fi
+
+	# Same care PyUI takes writing this file: whole file or nothing.
+	_dir="$(dirname "$TZ_SHARED_CONFIG")"
+	mkdir -p "$_dir"
+	_tmp="$_dir/.shared-system.json.tmp.$$"
+	if [ -f "$TZ_SHARED_CONFIG" ]; then
+		jq --arg tz "$_found" '.timezone = $tz | .timezoneMode = "auto"' "$TZ_SHARED_CONFIG" > "$_tmp" 2>/dev/null
+	else
+		jq -n --arg tz "$_found" '{timezone: $tz, timezoneMode: "auto"}' > "$_tmp" 2>/dev/null
+	fi
+	if [ -s "$_tmp" ] && jq -e . "$_tmp" >/dev/null 2>&1; then
+		mv -f "$_tmp" "$TZ_SHARED_CONFIG" && sync
+		log_message "Timezone: set to $_found automatically${_current:+ (was $_current)}"
+		touch "$TZ_AUTO_DONE_FLAG"
+		return 0
+	fi
+	rm -f "$_tmp"
+	log_message "Timezone: could not write $TZ_SHARED_CONFIG"
+	return 1
+}

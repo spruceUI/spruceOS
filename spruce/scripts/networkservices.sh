@@ -77,6 +77,8 @@ connect_services() {
 	# the clock is already sane, and this is the first point where the network
 	# is known to be up.
 	sync_system_time
+	# After the clock: the HTTPS providers in the chain need it right.
+	sync_timezone_from_network
 
 	# Samba check
 	if [ "$samba_enabled" = "True" ]; then

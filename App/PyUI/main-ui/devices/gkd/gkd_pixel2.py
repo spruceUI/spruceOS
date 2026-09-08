@@ -153,6 +153,11 @@ class GKDPixel2(GKDDevice):
     def supports_timezone_setting(self):
         return True
 
+    def supports_automatic_timezone(self):
+        # The zone here lives in /storage/.cache and tz-data.service, which the
+        # shared-config path does not write. Left alone on purpose.
+        return False
+
     def prompt_timezone_update(self):
         timezone_menu = TimezoneMenu()
         tz = timezone_menu.ask_user_for_timezone(timezone_menu.list_timezone_files('/usr/share/zoneinfo', verify_via_datetime=True))

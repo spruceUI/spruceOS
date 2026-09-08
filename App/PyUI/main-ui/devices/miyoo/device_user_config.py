@@ -389,9 +389,27 @@ class DeviceUserConfig:
         """
         return bool(self._read_timezone())
 
-    def set_timezone(self, value):
+    # "auto": picked from the network location by timeFunctions.sh once the
+    # network is up. "manual": the user chose it in Time Settings and it is
+    # never overwritten. A zone saved before modes existed was chosen by hand.
+    TIMEZONE_MODE_KEY = "timezoneMode"
+
+    def get_timezone_mode(self):
+        shared = self._read_shared()
+        mode = shared.get(self.TIMEZONE_MODE_KEY)
+        if mode in ("auto", "manual"):
+            return mode
+        return "manual" if shared.get(self.TIMEZONE_KEY) else "auto"
+
+    def set_timezone_mode(self, mode):
+        shared = self._read_shared()
+        shared[self.TIMEZONE_MODE_KEY] = mode
+        self._write_shared(shared)
+
+    def set_timezone(self, value, mode="manual"):
         shared = self._read_shared()
         shared[self.TIMEZONE_KEY] = value
+        shared[self.TIMEZONE_MODE_KEY] = mode
         self._write_shared(shared)
 
     def play_button_press_sound(self):
