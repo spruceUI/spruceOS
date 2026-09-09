@@ -1,6 +1,6 @@
 #!/bin/bash
 # GUI launch hook: which SDL2 pysdl2 loads, and library paths, per device.
-[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+command -v export_sdl_gamecontroller_map >/dev/null 2>&1 || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 case "$PLATFORM" in
     Flip|SmartProS)          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;

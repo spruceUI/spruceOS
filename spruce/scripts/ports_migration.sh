@@ -15,6 +15,16 @@ ports_dir_names() {
 normalize_ports_dir() {
     _root="$1"
     [ -d "$_root" ] || return 0
+    # A power cut between the two mv's below leaves the games here.
+    if [ -d "$_root/.ports.migrating" ]; then
+        if ls -1 "$_root" | grep -qx ports; then
+            merge_dir "$_root/.ports.migrating" "$_root/ports"
+            rmdir "$_root/.ports.migrating" 2>/dev/null
+        else
+            mv "$_root/.ports.migrating" "$_root/ports"
+        fi
+        log_message "Ports migration: recovered an interrupted rename under $_root"
+    fi
     _names="$(ports_dir_names "$_root")"
     _has_upper=0; _has_lower=0
     echo "$_names" | grep -qx PORTS && _has_upper=1
@@ -46,7 +56,10 @@ normalize_ports_dir() {
 
 migrate_ports_dir() {
     log_message "Ports migration: starting"
-    normalize_ports_dir /mnt/SDCARD/Roms
+    if ! normalize_ports_dir /mnt/SDCARD/Roms; then
+        log_message "Ports migration: leaving the flag so the next boot retries"
+        return 1
+    fi
     [ -d /media/sdcard1/Roms ] && normalize_ports_dir /media/sdcard1/Roms
 
     for _f in /mnt/SDCARD/Saves/pyui-recents.json /mnt/SDCARD/Saves/pyui-state.json /mnt/SDCARD/Saves/spruce/gtt.json; do
