@@ -53,61 +53,7 @@ get_video_effect() {
 	echo "$_setting"
 }
 
-# returns 0=true or 1=false; for now, no per-game override logic in place.
-is_autoload_enabled() {
-	_setting="$(jq -r '.menuOptions.dsperateAutoLoad.selected // "Enabled"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
 
-    _override=$(jq -r --arg game "$GAME" ".menuOptions.dsperateAutoLoad.overrides[\$game]" "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")
-    if [ -n "$_override" ] && [ "$_override" != "null" ]; then
-        _setting="$_override"
-    fi
-
-	[ "$_setting" = "Enabled" ]
-}
-
-get_integer_scale_setting() {
-	_setting="$(jq -r '.menuOptions.dsperateIntegerScale.selected // "Off"' "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")"
-
-    _override=$(jq -r --arg game "$GAME" ".menuOptions.dsperateIntegerScale.overrides[\$game]" "${EMU_JSON_PATH:-/mnt/SDCARD/Emu/NDS/config.json}")
-    if [ -n "$_override" ] && [ "$_override" != "null" ]; then
-        _setting="$_override"
-    fi
-
-	echo "$_setting"
-}
-
-# The NDS header carries a four-character game code at offset 12, and DSperate
-# names the auto slot after it, so the launcher has to read it the same way to
-# know which file to resume from. Only the two containers DSperate itself
-# opens are handled: a .7z has already been unpacked by prepare_dsperate_rom
-# before this is called, and nothing on the card can read a .rar.
-get_game_code() {
-	case "$1" in
-	*.nds | *.NDS)
-		dd if="$1" bs=1 skip=12 count=4 2>/dev/null
-		;;
-	*.zip | *.ZIP)
-		"$(get_python_path)" -c "
-import sys, zipfile
-with zipfile.ZipFile(sys.argv[1]) as z:
-    for name in z.namelist():
-        if name.lower().endswith('.nds'):
-            sys.stdout.write(z.open(name).read(16)[12:16].decode('latin-1'))
-            break
-" "$1" 2>/dev/null
-		;;
-	esac
-}
-
-# Empty when the code cannot be read: a .rar, an archive with no .nds inside,
-# or a header full of junk. The caller has to check, because falling back to a
-# bare ".auto.dss" would be both a path DSperate never writes and one every
-# game would share.
-get_state_path() {
-	_code="$(get_game_code "$1" | tr -dc 'A-Za-z0-9#_-')"
-	[ -n "$_code" ] || return 0
-	echo "/mnt/SDCARD/Saves/states/dsperate/${_code}.auto.dss"
-}
 
 # DSperate reads .nds and .zip itself (the vendored miniz in core/cart/zip.cpp),
 # so .7z is the only container that needs unpacking. NDS extlist also offers
@@ -192,11 +138,6 @@ run_dsperate() {
 	set -- "$_rom" \
 		--fullscreen
 
-	_state="$(get_state_path "$_rom")"
-	if [ -n "$_state" ] && [ -f "$_state" ] && is_autoload_enabled; then
-		set -- "$@" --load-state "$_state"
-	fi
-
 	_video_effect="$(get_video_effect)"
 	case "$_video_effect" in
 		"None") ;;
@@ -205,13 +146,6 @@ run_dsperate() {
 		"Subtle Grid") set -- "$@" --lcd-grid 0.15 ;;
 		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
-	esac
-
-	_integer_scale="$(get_integer_scale_setting)"
-	case "$_integer_scale" in
-		"Off") set -- "$@" --integer-scale off ;;
-		"Under") set -- "$@" --integer-scale under ;;
-		"Over") set -- "$@" --integer-scale over ;;
 	esac
 
 	# The game switcher's thumbnail, written by DSperate itself with the auto
