@@ -1,6 +1,6 @@
 #!/bin/sh
 # PortMaster app launcher. Stages spruce's three PortMaster files unless the
-# bundle already ships PortMaster/spruce/ (upstream merged).
+# bundle itself knows spruce (upstream merged).
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -38,8 +38,13 @@ sed -i \
     -e 's|/mnt/SDCARD/Roms/PORTS\([^0-9A-Za-z_]\)|/mnt/SDCARD/Roms/ports\1|g' \
     "$PM_DIR/pylibs/harbourmaster/config.py"
 
-if [ -f "$PM_DIR/spruce/control.txt" ]; then
+# A self-update extracts over the bundle without deleting spruce/, so test the
+# files it does replace.
+if grep -q 'CFW_NAME="spruce"' "$PM_DIR/device_info.txt" 2>/dev/null \
+    && grep -q "PlatformSpruce" "$PM_DIR/pylibs/harbourmaster/platform.py" 2>/dev/null; then
     LAUNCHER="$PM_DIR/PortMaster.sh"
+    # The update that brought PlatformSpruce ran the old platform's post-install.
+    cp "$PM_DIR/spruce/PortMaster.txt" "$LAUNCHER" && chmod +x "$LAUNCHER"
 else
     rm -f "$PM_DIR/miyoo/PortMaster.txt" "$PM_DIR/miyoo/control.txt"
     cp "$OURS/PortMaster.txt" "$PM_DIR/miyoo/PortMaster.txt"
