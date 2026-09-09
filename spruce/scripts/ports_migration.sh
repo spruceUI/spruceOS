@@ -49,7 +49,7 @@ migrate_ports_dir() {
     normalize_ports_dir /mnt/SDCARD/Roms
     [ -d /media/sdcard1/Roms ] && normalize_ports_dir /media/sdcard1/Roms
 
-    for _f in /mnt/SDCARD/Saves/pyui-recents.json /mnt/SDCARD/Saves/pyui-state.json; do
+    for _f in /mnt/SDCARD/Saves/pyui-recents.json /mnt/SDCARD/Saves/pyui-state.json /mnt/SDCARD/Saves/spruce/gtt.json; do
         [ -f "$_f" ] && sed -i 's|/Roms/PORTS/|/Roms/ports/|g' "$_f"
     done
 
