@@ -8,10 +8,8 @@ class MiyooFlipPoller:
         self.device = device
 
     def check_audio(self):
-        # The headphone jack belongs to the shell: spruce/flip/mixer_watchdog.sh
-        # re-applies route and gain through Flip.sh on every GPIO edge. A
-        # route-only write from here landed the codec on the driver's raw
-        # stored gain with nothing to correct it (SPR-MED-204, SPR-LOW-172).
+        # The jack is the shell's (spruce/flip/mixer_watchdog.sh); a route-only write
+        # from here landed the codec on the raw stored gain.
         if(time.time() - self.last_run_time > 3):
             time.sleep(1) #wait for full wake up
             PyUiLogger.get_logger().info("Running fixes for sleep sound bug")

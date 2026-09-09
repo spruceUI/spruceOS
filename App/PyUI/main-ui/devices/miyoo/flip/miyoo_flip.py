@@ -415,14 +415,8 @@ class MiyooFlip(MiyooDevice):
         # When running in MainUI mode we do not want to mess with the volume 
         if(PyUiConfig.mimic_miyoo_mainui_mode()):
             return
-        # One implementation for the device: the shell's fix_sleep_sound_bug
-        # (Flip.sh), the same codec reset device_exit_sleep runs on wake. This
-        # used to inject a volume-down/up key pair instead, which went through
-        # buttons_watchdog into set_volume twice (persisting .vol twice),
-        # compared the stored 0..100 value against 20, and stepped a muted
-        # device 0->1->0 before every launch. Skipped while sleep_helper owns
-        # the volume: its marker spans the mute and the wake-side restore, and
-        # the shell wake path has already run this very function by then.
+        # One implementation: the shell's fix_sleep_sound_bug (Flip.sh), skipped while
+        # sleep_helper owns the volume (its own wake path runs it).
         if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
             return
         try:

@@ -104,12 +104,8 @@ are_headphones_plugged_in() {
 }
 
 
-# The stored level (.vol, 0..20), always printed as a number. `.vol // 0`
-# covers a missing key (a first boot, a legacy seed); the pattern covers a
-# damaged json, a missing file or a failing jq. Every caller feeds the result
-# straight into arithmetic or a numeric test (set_volume, fix_sleep_sound_bug,
-# volume_up/down, mixer_watchdog), and /bin/sh is bash here: the old bare
-# `jq -r '.vol'` handed them the string "null", which aborts those.
+# The stored level (.vol, 0..20), always a number: a missing key, damaged json
+# or failing jq must not hand "null" to the arithmetic callers.
 get_volume_level() {
     stored_level="$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)"
     case "$stored_level" in
@@ -118,25 +114,8 @@ get_volume_level() {
     printf '%s\n' "$stored_level"
 }
 
-# The only writer of the route and the gain for a non-zero level.
-# $1 = Playback Path item (numid 2: 2 SPK, 3 HP), $2 = SPK Volume 0..100 (numid 5).
-#
-# Miyoo's SPK Volume control (rk817_spk_volume_put) stores the value it is
-# given and writes the DAC gain register as 100 - value; a rewrite of the
-# value it already holds is a no-op. The vendor route code, unchanged, copies
-# that stored value into the same register UNINVERTED on every Playback Path
-# write that lands on SPK, and a fixed headphone copy on HP. So a route write
-# lands the codec at the raw stored value - 0 dB when the value was 0 - a
-# level written before the route does not survive it, and a level written
-# after it is ignored when it equals what was stored. Measured on the codec
-# regmap, 2026-09-08 (docs/research/flip-audio/wake-gain-burst-plan-20260908.md).
-#
-# Hence, on a route change: go through OFF (silent), park the stored value
-# where the route lands at the minimum gain, open the route, then write the
-# level - a change by construction - all in ONE amixer process, so the
-# landing lasts microseconds rather than a fork. When the route is already
-# the wanted one the level write alone is right: a change writes the
-# register, a same value is a correct no-op.
+# Route and gain for a non-zero level: $1 = Playback Path (2 SPK, 3 HP), $2 = SPK Volume.
+# A route write lands on the driver's raw stored gain: open it from OFF, parked at the minimum.
 flip_apply_route_and_gain() {
     wanted_route="$1"
     gain="$2"
@@ -174,18 +153,8 @@ set_volume() {
     fi
 }
 
-# Codec reset after a suspend: Playback Path (numid 2) OFF and SPK Volume
-# (numid 5) 0, then the stored level re-applied. OFF is what guarantees the
-# power-up: after rk817_suspend the hardware is down while the driver may
-# still cache the route as open, and it only powers up on an OFF-to-route
-# transition. The route itself is opened by set_volume (see
-# flip_apply_route_and_gain); opening it here first used to land the codec at
-# 0 dB for the whole of set_volume's preamble - the "loud on wake, then it
-# drops" report. The reset used to be skipped when the stored level was 0,
-# leaving a codec that had just come back from suspend in whatever state it
-# woke in - the next volume-up then started from that unknown state instead
-# of from the reset one. Now every wake resets; at level 0 the route stays
-# OFF (set_volume 0).
+# Codec reset after suspend: OFF forces the power-up the driver skips on resume,
+# then set_volume re-applies the stored level and opens the route safely.
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
 
@@ -195,20 +164,8 @@ fix_sleep_sound_bug() {
     set_volume "$(( config_volume ))"
 }
 
-# The headphone-jack edge handler behind spruce/flip/mixer_watchdog.sh.
-#
-# sleep_helper mutes with `set_volume 0 false` on the way into sleep and
-# restores the stored level itself on wake (reading the jack afresh), and its
-# marker directory spans that whole window: created before the mute, removed
-# about two seconds after the restore. A jack edge seen inside the window
-# must not re-apply the stored level - that un-mutes a device meant to be
-# silent (a timer wake into poweroff, for one) and rewrites .vol behind
-# sleep_helper's back - but it must not be forgotten either: it is the only
-# edge there will be. So wait for the marker to clear, then apply; the apply
-# reads the jack at that moment, which also reconciles anything that moved
-# during the wait. The wait is bounded (6 s covers sleep_helper's restore and
-# hold); when it expires the device is powering off, or still on its way into
-# suspend, in which case the wait simply continues after resume.
+# Jack-edge handler behind spruce/flip/mixer_watchdog.sh: the mute must hold while
+# sleep_helper's marker exists, but the edge is the only one, so wait it out, then apply.
 SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
 
 reapply_volume_on_jack_edge() {

@@ -4,12 +4,8 @@
 
 JACK_PATH=/sys/class/gpio/gpio150/value
 
-# Listen before every apply, the first one included. gpiowait exits on the
-# next edge of the jack GPIO, so a watcher armed BEFORE the handling catches
-# an edge that lands while the codec is being written (or while the handler
-# waits for sleep_helper to let go), and the boot-time apply below reads the
-# jack with the watcher already up. Handling an edge that turns out to change
-# nothing costs one no-op gain write (Flip.sh flip_apply_route_and_gain).
+# Arm the watcher before every apply, the first one included: an edge during
+# the handling is caught by the watcher that is already up.
 /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
 PID_GPIO=$!
 set_volume "$(( $(get_volume_level) ))"
@@ -23,7 +19,6 @@ while true; do
     [ -e "$JACK_PATH" ] || sleep 1
     /mnt/SDCARD/spruce/bin64/gpiowait $JACK_PATH &
     PID_GPIO=$!
-    # Re-applies the stored level and route once sleep_helper (if active)
-    # has let go of the volume (Flip.sh reapply_volume_on_jack_edge).
+    # Flip.sh reapply_volume_on_jack_edge: applies once sleep_helper (if active) lets go.
     reapply_volume_on_jack_edge
 done
