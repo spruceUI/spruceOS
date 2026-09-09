@@ -1,27 +1,15 @@
 
 import time
-from devices.utils.process_runner import ProcessRunner
 from utils.logger import PyUiLogger
 
 
 class MiyooFlipPoller:
     def __init__(self, device):
-        self.headphone_status = None
         self.device = device
 
     def check_audio(self):
-        
-        try:
-            new_headphone_status = self.device.get_device().are_headphones_plugged_in()
-            if(new_headphone_status != self.headphone_status):
-                self.headphone_status = new_headphone_status
-                if(self.headphone_status):
-                    ProcessRunner.run(["amixer","sset","Playback Path","HP"])
-                else:
-                    ProcessRunner.run(["amixer","sset","Playback Path","SPK"])
-        except:
-            pass
-
+        # The jack is the shell's (spruce/flip/mixer_watchdog.sh); a route-only write
+        # from here landed the codec on the raw stored gain.
         if(time.time() - self.last_run_time > 3):
             time.sleep(1) #wait for full wake up
             PyUiLogger.get_logger().info("Running fixes for sleep sound bug")

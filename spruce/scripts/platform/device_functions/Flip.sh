@@ -104,8 +104,30 @@ are_headphones_plugged_in() {
 }
 
 
+# The stored level (.vol, 0..20), always a number: a missing key, damaged json
+# or failing jq must not hand "null" to the arithmetic callers.
 get_volume_level() {
-    jq -r '.vol' "$SYSTEM_JSON"
+    stored_level="$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$stored_level" in
+        ''|*[!0-9]*) stored_level=0 ;;
+    esac
+    printf '%s\n' "$stored_level"
+}
+
+# Route and gain for a non-zero level: $1 = Playback Path (2 SPK, 3 HP), $2 = SPK Volume.
+# A route write lands on the driver's raw stored gain: open it from OFF, parked at the minimum.
+flip_apply_route_and_gain() {
+    wanted_route="$1"
+    gain="$2"
+    current_route=$(amixer cget numid=2 2>/dev/null | sed -n 's/.*: values=//p')
+    if [ "$current_route" = "$wanted_route" ]; then
+        amixer cset numid=5 "$gain" >/dev/null 2>&1
+    else
+        park=100
+        [ "$gain" -eq 100 ] && park=95
+        printf 'cset numid=2 0\ncset numid=5 %s\ncset numid=2 %s\ncset numid=5 %s\n' \
+            "$park" "$wanted_route" "$gain" | amixer -s >/dev/null 2>&1
+    fi
 }
 
 set_volume() {
@@ -118,20 +140,10 @@ set_volume() {
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
-        #TODO can we prevent peaking audio if going from 0 to non-0?
-
-        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
-
         if are_headphones_plugged_in; then
-            amixer sset "Playback Path" "HP" >/dev/null 2>&1
+            flip_apply_route_and_gain 3 "$VOLUME_RAW"
         else
-            amixer sset "Playback Path" "SPK" >/dev/null 2>&1
-        fi
-
-        # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
-        if [ "$VOLUME_RAW" -eq 5 ]; then
-            amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
+            flip_apply_route_and_gain 2 "$VOLUME_RAW"
         fi
     fi
 
@@ -141,20 +153,32 @@ set_volume() {
     fi
 }
 
+# Codec reset after suspend: OFF forces the power-up the driver skips on resume,
+# then set_volume re-applies the stored level and opens the route safely.
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
 
-    if [ "$config_volume" -ne 0 ]; then
-        log_message "Restoring volume to ${config_volume}"
-        amixer cset numid=2 0
-        amixer cset numid=5 0
-        if are_headphones_plugged_in; then
-            amixer cset numid=2 3
-        else
-            amixer cset numid=2 2
+    log_message "Restoring volume to ${config_volume}"
+    amixer cset numid=2 0
+    amixer cset numid=5 0
+    set_volume "$(( config_volume ))"
+}
+
+# Jack-edge handler behind spruce/flip/mixer_watchdog.sh: the mute must hold while
+# sleep_helper's marker exists, but the edge is the only one, so wait it out, then apply.
+SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
+
+reapply_volume_on_jack_edge() {
+    waited=0
+    while [ -e "$SLEEP_HELPER_MARKER" ]; do
+        if [ "$waited" -ge 30 ]; then
+            log_message "mixer watchdog: jack changed while sleep_helper owns the volume; leaving the mute alone" -v
+            return 0
         fi
-        set_volume "$(( config_volume ))"
-    fi
+        sleep 0.2
+        waited=$((waited + 1))
+    done
+    set_volume "$(( $(get_volume_level) ))"
 }
 
 volume_down() {

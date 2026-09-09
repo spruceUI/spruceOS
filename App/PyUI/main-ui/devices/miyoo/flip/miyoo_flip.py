@@ -413,14 +413,22 @@ class MiyooFlip(MiyooDevice):
 
     def fix_sleep_sound_bug(self):
         # When running in MainUI mode we do not want to mess with the volume 
-        if(not PyUiConfig.mimic_miyoo_mainui_mode()):
-            config_volume = self.system_config.get_volume()
-            if(config_volume == 20):
-                self.volume_down()
-                self.volume_up()
-            else:
-                self.volume_up()
-                self.volume_down()
+        if(PyUiConfig.mimic_miyoo_mainui_mode()):
+            return
+        # One implementation: the shell's fix_sleep_sound_bug (Flip.sh), skipped while
+        # sleep_helper owns the volume (its own wake path runs it).
+        if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
+            return
+        try:
+            subprocess.run(
+                ["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && {{ [ -e /tmp/sleep_helper_started ] || fix_sleep_sound_bug; }}"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+                timeout=10,
+            )
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not run the shell fix_sleep_sound_bug: {e}")
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
         return MiyooTrimCommon.run_game(self,rom_info)
