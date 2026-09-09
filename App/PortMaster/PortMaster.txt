@@ -23,7 +23,7 @@ directory="/mnt/SDCARD/Roms/"
 
 
 ESUDO=""
-ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
+ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k"
 export SDL_GAMECONTROLLERCONFIG_FILE="/usr/lib/gamecontrollerdb.txt"
 # export SDL_GAMECONTROLLERCONFIG=$(grep "Deeplay" "/usr/lib/gamecontrollerdb.txt")
 
@@ -217,4 +217,3 @@ fi
 unset LD_LIBRARY_PATH
 unset SDL_GAMECONTROLLERCONFIG
 PATH="$OLD_PATH"
-
