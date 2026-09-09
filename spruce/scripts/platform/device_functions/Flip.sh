@@ -200,17 +200,27 @@ fix_sleep_sound_bug() {
 # sleep_helper mutes with `set_volume 0 false` on the way into sleep and
 # restores the stored level itself on wake (reading the jack afresh), and its
 # marker directory spans that whole window: created before the mute, removed
-# after the restore. A jack edge seen inside the window must not re-apply the
-# stored level: that un-mutes a device that is meant to be silent (a timer
-# wake into poweroff, for one) and rewrites .vol behind sleep_helper's back.
-# Skipping is safe because the wake-side restore reads the jack again.
+# about two seconds after the restore. A jack edge seen inside the window
+# must not re-apply the stored level - that un-mutes a device meant to be
+# silent (a timer wake into poweroff, for one) and rewrites .vol behind
+# sleep_helper's back - but it must not be forgotten either: it is the only
+# edge there will be. So wait for the marker to clear, then apply; the apply
+# reads the jack at that moment, which also reconciles anything that moved
+# during the wait. The wait is bounded (6 s covers sleep_helper's restore and
+# hold); when it expires the device is powering off, or still on its way into
+# suspend, in which case the wait simply continues after resume.
 SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
 
 reapply_volume_on_jack_edge() {
-    if [ -e "$SLEEP_HELPER_MARKER" ]; then
-        log_message "mixer watchdog: jack changed while sleep_helper owns the volume; leaving the mute alone" -v
-        return 0
-    fi
+    waited=0
+    while [ -e "$SLEEP_HELPER_MARKER" ]; do
+        if [ "$waited" -ge 30 ]; then
+            log_message "mixer watchdog: jack changed while sleep_helper owns the volume; leaving the mute alone" -v
+            return 0
+        fi
+        sleep 0.2
+        waited=$((waited + 1))
+    done
     set_volume "$(( $(get_volume_level) ))"
 }
 
