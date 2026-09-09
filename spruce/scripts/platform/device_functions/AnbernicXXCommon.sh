@@ -190,8 +190,6 @@ runtime_mounts_anbernic_34xxsp() {
         chmod +x "$MAINUI"
     fi
 
-    # No Roms/PORTS -> Roms/PORTS/ports bind any more: the folder is named
-    # ports and control.txt points the launchers at Roms/ (ports_migration.sh).
 }
 
 # Everything device_init does that is true of the whole XX line. Kept separate

@@ -72,12 +72,7 @@ set_port_abxy_scheme() {
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
 
-    # Where the port's game folder lives. Every launcher computes
-    # GAMEDIR=/$directory/ports/<game> with $directory the ports drive, and
-    # control.txt derives $directory from this (its parent). The folder is
-    # named ports for exactly that reason - see ports_migration.sh. On the
-    # Flip a port can come from the second card, the only device where a
-    # second card carries ROMs (stock mounts it at /media/sdcard1).
+    # Flip only: a port may live on the second card.
     PORTS_DIR=/mnt/SDCARD/Roms/ports
     if [ "$PLATFORM" = "Flip" ]; then
         case "$ROM_FILE" in
@@ -144,9 +139,6 @@ run_A30_port() {
     mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
-    # A30 port scripts address their files as /mnt/SDCARD/Roms/A30PORTS/...
-    # (ports_migration.sh rewrote the old Roms/PORTS form, and the Nursery
-    # rewrites new downloads), so no bind is needed here any more.
     cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$ROM_FILE" 
 

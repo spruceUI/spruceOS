@@ -3,22 +3,15 @@
 # SPDX-License-Identifier: MIT
 #
 
-# spruce's PortMaster launcher. Sets where PortMaster lives and which Python
-# runs it, then hands anything device-specific to the card
-# (spruce/portmaster/portmaster.txt) before the shared start-up below.
-
 export HOME="/mnt/SDCARD"
 export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
-# pugwash and harbourmaster start with "#!/usr/bin/env python3"; run pugwash
-# through the bundled interpreter by name so PATH order can never send it to a
-# stock python3 that is missing pieces.
 PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
 export LD_PRELOAD=""
 controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-# Parent of the ports folder (Roms/ports): launchers add /ports/<game>.
 directory="/mnt/SDCARD/Roms/"
 
+# Device-specific settings live on the spruce card.
 [ -f /mnt/SDCARD/spruce/portmaster/portmaster.txt ] && source /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
 
@@ -29,9 +22,6 @@ export SDL_GAMECONTROLLERCONFIG_FILE="/usr/lib/gamecontrollerdb.txt"
 
 source "$controlfolder/device_info.txt"
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
-# A stock mod_<CFW>.txt (mod_TrimUI.txt) can be sourced above when a
-# self-update put it back before launch.sh re-staged ours; it moves HOME to a
-# stock-only folder. Put it back.
 export HOME="/mnt/SDCARD"
 
 ## TODO: Change to PortMaster/tty when Johnnyonflame merges the changes in,
@@ -46,9 +36,6 @@ source "$controlfolder/utils/pmsplash.txt"
 ## Autoinstallation Code
 # This will automatically install zips found within the `PortMaster/autoinstall` / `ports/autoinstall` directory using harbourmaster
 AUTOINSTALL_DIR_1="$controlfolder/autoinstall"
-# Upstream's second autoinstall dir is "$directory/ports/autoinstall", which
-# here is Roms/ports/autoinstall - a folder the rom list would show. Use the
-# PortMaster one for both.
 AUTOINSTALL_DIR_2="$AUTOINSTALL_DIR_1"
 
 if [ ! -d "$AUTOINSTALL_DIR_2" ]; then
@@ -183,31 +170,12 @@ export TERM=linux
 # cat /dev/zero > /dev/fb0 2>/dev/null
 # cat /dev/zero > /dev/fb0 2>/dev/null
 
-# Upstream calls pm_message here, but pm_message lives in funcs.txt and this
-# script never sources it - upstream's generic PortMaster.sh has the same shape,
-# so it is "command not found" on every firmware. Sourcing funcs.txt just for
-# this would spin up a whole dialog pugwash to show one splash line right
-# before the real pugwash starts. Print it instead.
 echo "Starting PortMaster."
 
 $ESUDO chmod -R +x .
 
 $ESUDO rm -f "${controlfolder}/.pugwash-reboot"
-# Run pugwash once and exit, even when it asks to be restarted. Upstream loops
-# here while .pugwash-reboot exists.
-#
-# pugwash's self-update rewrites the files launch.sh stages into this tree -
-# config.py, control.txt and the copy of this script - and then drops
-# .pugwash-reboot to ask for a restart. Restarting from in here never returns
-# to launch.sh, so nothing re-stages those overrides and the second pugwash
-# comes up on UPSTREAM's config.py: HM_TOOLS_DIR becomes Roms/.portmaster, so
-# it reads a fresh config and loses our theme, and ports install to
-# Roms/PORTS64 where spruce's gamelist never looks. Exiting instead sends the
-# user back through launch.sh next time, which re-stages everything.
-#
-# launch.sh reports and clears the flag afterwards. pugwash writes it to
-# HM_TOOLS_DIR/PortMaster/.pugwash-reboot using the config.py it loaded at
-# start - ours - so it always lands here, not in upstream's tools dir.
+# Run once; a self-update asks for a restart, spruce relaunches instead.
 if [ -x "$PM_PYTHON" ]; then
   $ESUDO "$PM_PYTHON" ./pugwash
 else

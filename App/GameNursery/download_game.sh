@@ -46,10 +46,7 @@ fi
 
 # attempt to unzip the game
 log_and_display_message "Now installing $GAME_NAME!"
-# Unpack beside the download first, then move into place: a zip built with
-# the older Roms/PORTS layout must land in Roms/ports, never as a sibling
-# folder differing only by case. TMP_DIR is on the card, so the moves are
-# renames.
+# Unpack beside the download, then move into place (renames; TMP_DIR is on the card).
 rm -rf "$TMP_DIR/extract"; mkdir -p "$TMP_DIR/extract"
 cd "$TMP_DIR/extract"
 if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
@@ -59,10 +56,7 @@ if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
     sleep 4
 	exit 1
 else
-	# The catalogue's ports are A30 ports and their zips carry the old
-	# Roms/PORTS layout. On the A30 they belong in A30PORTS, with their
-	# scripts' hardcoded /mnt/SDCARD/Roms/PORTS/ paths pointed there too, so
-	# no bind is needed at launch; anywhere else Roms/PORTS means Roms/ports.
+	# Old zips use Roms/PORTS: A30 ports go to A30PORTS, everything else to Roms/ports.
 	if [ -d "$TMP_DIR/extract/Roms/PORTS" ]; then
 		if [ "$PLATFORM" = "A30" ]; then
 			for _s in "$TMP_DIR/extract/Roms/PORTS"/*.sh; do

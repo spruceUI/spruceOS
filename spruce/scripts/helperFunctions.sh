@@ -312,11 +312,7 @@ ensure_dev_shm() {
     fi
 }
 
-# Move the CONTENTS of directory $1 into directory $2, merging where a
-# subdirectory already exists on both sides. Uses rename, so on one
-# filesystem it is instant whatever the size; falls back to copy+delete only
-# when rename is refused. Recursion runs in a subshell so the loop variables
-# of the caller survive (POSIX sh has no locals).
+# Move the contents of $1 into $2, merging shared subdirs. Rename-based.
 merge_dir() {
     mkdir -p "$2"
     for _entry in "$1"/* "$1"/.[!.]*; do

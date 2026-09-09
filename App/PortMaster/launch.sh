@@ -1,12 +1,6 @@
 #!/bin/sh
-# spruce's PortMaster app launcher.
-#
-# PortMaster identifies a firmware and runs that firmware's control.txt,
-# PortMaster.txt and mod_<CFW>.txt. Until PortMaster ships a PortMaster/spruce/
-# set of its own, spruce stages the three files from App/PortMaster/ into the
-# bundle on every launch (a self-update puts upstream's back). Those three are
-# small on purpose: each ends by sourcing a hook on the card under
-# spruce/portmaster/, which is where everything device-specific lives.
+# PortMaster app launcher. Stages spruce's three PortMaster files unless the
+# bundle already ships PortMaster/spruce/ (upstream merged).
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -23,12 +17,9 @@ if [ "$PLATFORM" = "Pixel2" ]; then
     exit 0
 fi
 
-# The same device environment PortMaster.txt applies before pugwash; applied
-# here too so the pylibs unpack below runs under it. Safe to source twice.
 . /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
-# A self-update leaves pylibs.zip for the next start to unpack. Do it here,
-# with the bundled Python, so the config.py patch below lands on the new tree.
+# Unpack a self-update's pylibs.zip before patching config.py below.
 if [ -f "$PM_DIR/pylibs.zip" ]; then
     log_message "PortMaster: unpacking pylibs.zip left by a self-update"
     rm -rf "$PM_DIR/pylibs" "$PM_DIR/exlibs"
@@ -38,10 +29,7 @@ if [ -f "$PM_DIR/pylibs.zip" ]; then
         && rm -f "$PM_DIR/pylibs.zip"
 fi
 
-# harbourmaster's spruce branch in config.py still carries the paths from the
-# 2025 upstream PR, which never matched a shipping spruce. Patch whatever
-# pugwash version is on the card rather than shipping a copy of the file, so
-# pylibs always stays self-consistent.
+# config.py's spruce paths (from upstream #237) never matched spruce; patch in place.
 sed -i \
     -e 's|/mnt/sdcard/spruce|/mnt/SDCARD/spruce|' \
     -e 's|/mnt/sdcard/Persistent/portmaster|/mnt/SDCARD/Persistent/portmaster|' \
@@ -51,7 +39,6 @@ sed -i \
     "$PM_DIR/pylibs/harbourmaster/config.py"
 
 if [ -f "$PM_DIR/spruce/control.txt" ]; then
-    # PortMaster knows spruce: its PlatformSpruce installed these itself.
     LAUNCHER="$PM_DIR/PortMaster.sh"
 else
     rm -f "$PM_DIR/miyoo/PortMaster.txt" "$PM_DIR/miyoo/control.txt"
@@ -60,16 +47,12 @@ else
     chmod +x "$PM_DIR/miyoo/spruce_portmaster.sh"
     cp "$OURS/control.txt" "$PM_DIR/miyoo/control.txt"
 
-    # Every port probes $XDG_DATA_HOME/PortMaster/control.txt first; under
-    # spruce that is this path, so it must always be our control.txt.
+    # Ports probe $XDG_DATA_HOME/PortMaster/control.txt first.
     rm -f "$HOME/.local/share/PortMaster/control.txt"
     mkdir -p "$HOME/.local/share/PortMaster"
     cp "$OURS/control.txt" "$HOME/.local/share/PortMaster/control.txt"
 
-    # Ports and PortMaster.txt source mod_${CFW_NAME}.txt, whatever
-    # device_info.txt decides this firmware is called (Miyoo, TrimUI, Base OS,
-    # Unknown on the RGB30...). Stage ours under that name so spruce's hook
-    # runs on every device, and under its own name for when upstream learns it.
+    # Ports source mod_${CFW_NAME}.txt, whatever device_info.txt calls this firmware.
     CFW_NAME="$(bash -c ". \"$PM_DIR/device_info.txt\" >/dev/null 2>&1; printf '%s' \"\$CFW_NAME\"")"
     [ -n "$CFW_NAME" ] || CFW_NAME="Unknown"
     cp "$OURS/mod_spruce.txt" "$PM_DIR/mod_${CFW_NAME}.txt"
@@ -80,9 +63,6 @@ fi
 
 cd "$(dirname "$LAUNCHER")" && "$LAUNCHER" > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
 
-# A self-update asks for a restart by dropping this flag. PortMaster.txt exits
-# instead of restarting, so the next launch comes back through here and
-# re-stages everything against the new pugwash.
 PM_REBOOT_FLAG="$PM_DIR/.pugwash-reboot"
 if [ -f "$PM_REBOOT_FLAG" ]; then
     log_message "PortMaster updated itself and asked to restart; exiting so the next launch re-applies spruce's config"

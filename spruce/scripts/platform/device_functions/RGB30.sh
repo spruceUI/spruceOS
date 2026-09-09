@@ -465,8 +465,6 @@ setup_for_retroarch() {
     echo "$RA_BIN"
 }
 
-# Nothing to prepare any more: the Roms/PORTS -> Roms/PORTS/ports bind this
-# used to make is gone (the folder is Roms/ports, see ports_migration.sh).
 device_prepare_for_ports_run() {
     :
 }

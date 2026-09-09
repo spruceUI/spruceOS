@@ -175,8 +175,6 @@ init_gpio_a133p() {
 }
 
 runtime_mounts_a133p() {
-    # No Roms/PORTS -> Roms/PORTS/ports bind any more: the folder is named
-    # ports and control.txt points the launchers at Roms/ (ports_migration.sh).
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
