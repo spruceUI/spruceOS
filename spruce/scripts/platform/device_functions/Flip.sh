@@ -118,6 +118,39 @@ get_volume_level() {
     printf '%s\n' "$stored_level"
 }
 
+# The only writer of the route and the gain for a non-zero level.
+# $1 = Playback Path item (numid 2: 2 SPK, 3 HP), $2 = SPK Volume 0..100 (numid 5).
+#
+# Miyoo's SPK Volume control (rk817_spk_volume_put) stores the value it is
+# given and writes the DAC gain register as 100 - value; a rewrite of the
+# value it already holds is a no-op. The vendor route code, unchanged, copies
+# that stored value into the same register UNINVERTED on every Playback Path
+# write that lands on SPK, and a fixed headphone copy on HP. So a route write
+# lands the codec at the raw stored value - 0 dB when the value was 0 - a
+# level written before the route does not survive it, and a level written
+# after it is ignored when it equals what was stored. Measured on the codec
+# regmap, 2026-09-08 (docs/research/flip-audio/wake-gain-burst-plan-20260908.md).
+#
+# Hence, on a route change: go through OFF (silent), park the stored value
+# where the route lands at the minimum gain, open the route, then write the
+# level - a change by construction - all in ONE amixer process, so the
+# landing lasts microseconds rather than a fork. When the route is already
+# the wanted one the level write alone is right: a change writes the
+# register, a same value is a correct no-op.
+flip_apply_route_and_gain() {
+    wanted_route="$1"
+    gain="$2"
+    current_route=$(amixer cget numid=2 2>/dev/null | sed -n 's/.*: values=//p')
+    if [ "$current_route" = "$wanted_route" ]; then
+        amixer cset numid=5 "$gain" >/dev/null 2>&1
+    else
+        park=100
+        [ "$gain" -eq 100 ] && park=95
+        printf 'cset numid=2 0\ncset numid=5 %s\ncset numid=2 %s\ncset numid=5 %s\n' \
+            "$park" "$wanted_route" "$gain" | amixer -s >/dev/null 2>&1
+    fi
+}
+
 set_volume() {
     VOLUME_LV="$1"
     SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
@@ -128,20 +161,10 @@ set_volume() {
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
-        #TODO can we prevent peaking audio if going from 0 to non-0?
-
-        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
-
         if are_headphones_plugged_in; then
-            amixer sset "Playback Path" "HP" >/dev/null 2>&1
+            flip_apply_route_and_gain 3 "$VOLUME_RAW"
         else
-            amixer sset "Playback Path" "SPK" >/dev/null 2>&1
-        fi
-
-        # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
-        if [ "$VOLUME_RAW" -eq 5 ]; then
-            amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
+            flip_apply_route_and_gain 2 "$VOLUME_RAW"
         fi
     fi
 
@@ -152,24 +175,23 @@ set_volume() {
 }
 
 # Codec reset after a suspend: Playback Path (numid 2) OFF and SPK Volume
-# (numid 5) 0, the route re-selected, then the stored level re-applied. The
-# reset used to be skipped when the stored level was 0, leaving a codec that
-# had just come back from suspend in whatever state it woke in - the next
-# volume-up then started from that unknown state instead of from the reset
-# one. Now every wake resets; at level 0 the route stays OFF (set_volume 0).
+# (numid 5) 0, then the stored level re-applied. OFF is what guarantees the
+# power-up: after rk817_suspend the hardware is down while the driver may
+# still cache the route as open, and it only powers up on an OFF-to-route
+# transition. The route itself is opened by set_volume (see
+# flip_apply_route_and_gain); opening it here first used to land the codec at
+# 0 dB for the whole of set_volume's preamble - the "loud on wake, then it
+# drops" report. The reset used to be skipped when the stored level was 0,
+# leaving a codec that had just come back from suspend in whatever state it
+# woke in - the next volume-up then started from that unknown state instead
+# of from the reset one. Now every wake resets; at level 0 the route stays
+# OFF (set_volume 0).
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
 
     log_message "Restoring volume to ${config_volume}"
     amixer cset numid=2 0
     amixer cset numid=5 0
-    if [ "$config_volume" -ne 0 ]; then
-        if are_headphones_plugged_in; then
-            amixer cset numid=2 3
-        else
-            amixer cset numid=2 2
-        fi
-    fi
     set_volume "$(( config_volume ))"
 }
 
