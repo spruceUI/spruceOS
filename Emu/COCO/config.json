@@ -1,0 +1,31 @@
+{
+    "label": "COCO",
+    "icon": "coco.png",
+    "iconsel": "coco_sel.png",
+    "themecolor": "64A8BD",
+    "launch": "../../spruce/scripts/emu/standard_launch.sh",
+    "subfolder_launch_file": "xroar",
+    "extlist": "ccc|cas",
+    "launchlist": [],
+    "menuOptions": {
+        "Governor": {
+            "display": "CPU Mode",
+            "options": [
+                "Smart",
+                "Performance",
+                "Overclock"
+            ],
+            "selected": "Smart",
+            "overrides": {}
+        }
+    },
+    "sortOrder": 1300,
+    "brand": "Tandy",
+    "type": "pc",
+    "releaseYear": 1980,
+    "default_emulator": "xroar",
+    "scaling_min_freq": 1008000,
+    "alternativeFolderNames": [
+        "coco"
+    ]
+}
