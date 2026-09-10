@@ -15,6 +15,8 @@
 
 
 
+. /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
+
 seed_dsperate_config() {
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
 	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
@@ -40,6 +42,33 @@ seed_dsperate_config() {
 		cp -f "$EMU_DIR/dsperate-configs/one-stick.ini" "$_cfg_one_stick"
 		log_message "DSperate: seeded config from one-stick.ini"
 	fi
+	for _f in "$_cfg_a30" "$_cfg_no_sticks" "$_cfg_one_stick" "$_cfg_two_sticks"; do
+		[ -f "$_f" ] && ! grep -q '^\[cheevos\]' "$_f" && printf '\n[cheevos]\nenabled = true\n' >> "$_f"
+	done
+}
+
+# Hand DSperate the spruce RetroAchievements sign-in as a username + token
+# file it only reads (DS_CHEEVOS_CFW_CONFIG); its own in-menu sign-in wins.
+prepare_dsperate_cheevos() {
+	_cfw="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
+	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+	case "$rac_mode" in
+		Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$_cfw"; return 0; } ;;
+		*) rm -f "$_cfw"; return 0 ;;
+	esac
+	if ! grep -qx "cheevos_username = \"$rac_user\"" "$_cfw" 2>/dev/null; then
+		rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+		_token="$(rac_login_token "$rac_user" "$rac_pass")"
+		if [ -n "$_token" ]; then
+			printf 'cheevos_username = "%s"\ncheevos_token = "%s"\n' "$rac_user" "$_token" > "$_cfw"
+			log_message "DSperate: fetched a RetroAchievements token for $rac_user"
+		else
+			rm -f "$_cfw"
+			log_message "DSperate: RetroAchievements login failed for $rac_user"
+		fi
+	fi
+	[ -f "$_cfw" ] && export DS_CHEEVOS_CFW_CONFIG="$_cfw"
 }
 
 get_video_effect() {
@@ -109,6 +138,7 @@ run_dsperate() {
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 
 	seed_dsperate_config
+	prepare_dsperate_cheevos
 
 	# DSperate opens Gamepads and Keyboards, but not joysticks so SDL needs to
 	# be able to see them. DSperate also binds by SDL position (DS A = pad "b").
