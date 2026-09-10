@@ -197,7 +197,9 @@ run_dsperate() {
 		case "$DEVICE_NUM_ANALOG_STICKS" in
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"  ;;
 			"1") _config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"  ;;
-			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
+			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
+				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
+				;;
 		esac
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
