@@ -161,6 +161,7 @@ run_dsperate() {
 
 	if [ "$PLATFORM" = "A30" ]; then
 		export DS_ROTATE=270
+		export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
 	else
 		case "$DEVICE_NUM_ANALOG_STICKS" in
