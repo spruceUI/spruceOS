@@ -78,6 +78,17 @@ _set_scummvm_platform() {
 	fi
 }
 
+# ScummVM's virtual mouse is left-stick only. On stickless XX units have the
+# stock kernel report the d-pad as the stick while ScummVM runs (muOS does the
+# same). Only around the run itself: _set_scummvm_platform is also called by
+# sync_game_id after exit, so it must not own this.
+_xx_dpad_swap() {
+	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+	case "$PLATFORM" in "Anbernic"*) ;; *) return ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return
+	echo "$1" > "$XX_DPAD_SWAP"
+}
+
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
@@ -89,7 +100,9 @@ run_scummvm_menu() {
 
 	export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 	export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
@@ -122,7 +135,9 @@ run_scummvm() {
 	if [ -f "$SAVE_DIR/$game_id.s00" ]; then
 		SAVE_SLOT_ARG="--save-slot=0"
 	fi
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" $SAVE_SLOT_ARG --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
