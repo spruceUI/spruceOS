@@ -299,6 +299,16 @@ flag_add() {
 # autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
 # mounted there each boot; nothing on the device's flash is touched. No-op
 # on firmware that already mounts one (Flip, Debian bases).
+ensure_dev_fd() {
+    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
+        _dev="/dev/${_pair%%:*}"
+        [ -e "$_dev" ] && continue
+        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
+            && log_message "Linked $_dev (stock firmware had none)" \
+            || log_message "Could not create $_dev"
+    done
+}
+
 ensure_dev_shm() {
     if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
         return 0
