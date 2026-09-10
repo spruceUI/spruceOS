@@ -195,12 +195,15 @@ run_drastic_MiyooMini() {
 
 ### BRICK PRO ###
 
-run_drastic_BrickPro(){ # todo: fix trngaje
+run_drastic_BrickPro(){
     if [ "$CORE" = "DraStic-original" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
 		run_drastic64
 	elif [ "$CORE" = "DraStic-Steward" ]; then
 		run_drastic_steward_Brick
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
+		run_drastic_trngaje_a133p
 	else
 		display_core_unrecognized_for_platform_message
 	fi
