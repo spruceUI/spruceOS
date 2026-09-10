@@ -66,7 +66,12 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
-
+		
+	"COCO")			
+		. /mnt/SDCARD/spruce/scripts/emu/lib/xroar_functions.sh
+		run_xroar
+		;;
+		
 	"DC"|"NAOMI"|"ATOMISWAVE")
 		case "$CORE" in
 			Flycast-standalone|Flycast2024-standalone)
