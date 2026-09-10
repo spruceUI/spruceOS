@@ -107,7 +107,6 @@ prepare_dsperate_rom() {
 run_dsperate() {
 	export HOME="$EMU_DIR"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
-	export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 
 	seed_dsperate_config
 
@@ -169,6 +168,7 @@ run_dsperate() {
 			"1") _config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"  ;;
 			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
 		esac
+		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 
