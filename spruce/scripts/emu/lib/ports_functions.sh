@@ -107,7 +107,7 @@ run_port() {
         "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
         if [ "$MOUNT_BIND" = true ]; then
-            mount --bind \
+            mount -o bind \
                 /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
                 /mnt/SDCARD/Persistent/portmaster/bin/python
         fi
@@ -136,7 +136,7 @@ run_A30_port() {
     # ensure correct RA bin and config are available
     . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
     touch /mnt/SDCARD/RetroArch/retroarch
-    mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
+    mount -o bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
     cd /mnt/SDCARD/Roms/A30PORTS

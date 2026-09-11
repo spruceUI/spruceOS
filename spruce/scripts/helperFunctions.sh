@@ -1201,6 +1201,15 @@ export_sdl_gamecontroller_map() {
 }
 
 
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+_xx_dpad_swap() {
+	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	echo "$1" > "$XX_DPAD_SWAP"
+}
+
 ##### WIFI HANDLING #####
 
 disable_wifi() {
@@ -1493,6 +1502,12 @@ network_is_connected() {
 }
 
 check_and_connect_wifi() {
+
+    waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
+    if [ "$waiting_enabled" = "False" ]; then
+        log_message "User opted out of waiting to connect, via spruce network settings."
+        return 1
+    fi
 
     timeout=60
     start_time=$(date +%s)

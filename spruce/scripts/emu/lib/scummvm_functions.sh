@@ -78,6 +78,9 @@ _set_scummvm_platform() {
 	fi
 }
 
+# Stickless XX units: _xx_dpad_swap (helperFunctions.sh) makes the d-pad the
+# stick while ScummVM runs, since its virtual mouse is left-stick only. Only
+# around the run: _set_scummvm_platform is also called by sync_game_id.
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
@@ -89,7 +92,9 @@ run_scummvm_menu() {
 
 	export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 	export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
@@ -122,7 +127,9 @@ run_scummvm() {
 	if [ -f "$SAVE_DIR/$game_id.s00" ]; then
 		SAVE_SLOT_ARG="--save-slot=0"
 	fi
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" $SAVE_SLOT_ARG --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 

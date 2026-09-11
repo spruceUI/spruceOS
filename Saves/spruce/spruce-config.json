@@ -179,6 +179,8 @@
                     "Random Game",
                     "Game Switcher",
                     "Splore",
+                    "NDS firmware",
+                    "PPSSPP",
                     "Apotris (GBA)"
                 ],
                 "selected": "spruceUI"
@@ -552,6 +554,15 @@
                 "selected":"False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
+            "enableWaitingToConnect": {
+                "display": "Wait for connection before launching game",
+                "descritpion": "when Syncthing or RAC are enabled",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected":"True"
+            },
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
                 "description": "allows reinstall of same spruce version",
@@ -571,12 +582,12 @@
                            "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
                            "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
                            "ANBERNIC_RGXX640480", "RGB30"],
-                "description": "incremental is faster (developer/tester mode only for now); full can fix broken installs",
+                "description": "incremental is faster (developer mode only); full can fix broken installs",
                 "options": [
                     "Incremental",
                     "Full"
                 ],
-                "selected": "Full"
+                "selected": "Incremental"
             },
             "otaChannel": {
                 "display": "OTA: release channel",
@@ -588,7 +599,7 @@
                            "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
                            "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
                            "ANBERNIC_RGXX640480", "RGB30"],
-                "description": "developer/tester mode only: Nightly follows the nightly builds, Stable follows stable releases",
+                "description": "developer mode only",
                 "options": [
                     "Nightly",
                     "Stable"

@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+#  This template file can be reanamed to match your cassette game filename with a .sh extention and put in the ports folder to launch a specific game directly.
+#  For example if you have Pooyan.cas you could rename this file Pooyan.sh and it will launch the game directly from your ports folder
+#
+
+XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+
+if [ -d "/opt/system/Tools/PortMaster/" ]; then
+  controlfolder="/opt/system/Tools/PortMaster"
+elif [ -d "/opt/tools/PortMaster/" ]; then
+  controlfolder="/opt/tools/PortMaster"
+elif [ -d "$XDG_DATA_HOME/PortMaster/" ]; then
+  controlfolder="$XDG_DATA_HOME/PortMaster"
+else
+  controlfolder="/roms/ports/PortMaster"
+fi
+
+source $controlfolder/control.txt
+
+get_controls
+
+gamedir="/$directory/ports/xroar"
+# Get the script's basename without the path
+script_basename=$(basename "${0%.*}")
+
+# Enable logging
+> "$gamedir/log_${script_basename}.txt" && exec > >(tee "$gamedir/log_${script_basename}.txt") 2>&1
+
+export LD_LIBRARY_PATH="$gamedir/libs.${DEVICE_ARCH}:$LD_LIBRARY_PATH"
+cd "$gamedir/"
+
+# Grab text output...
+$ESUDO chmod 666 /dev/tty0
+printf "\033c" > /dev/tty0
+
+# Setup biosdir
+bind_directories ~/.xroar/roms "$gamedir/bios"
+
+# Construct the gptkfile by appending .gptk
+gptk_file="gptk/${script_basename}.gptk"
+
+# Check if the target file exists
+if [ -f "./${gptk_file}" ]; then
+$GPTOKEYB "xroar.${DEVICE_ARCH}" -c ./${gptk_file} &
+else
+$GPTOKEYB "xroar.${DEVICE_ARCH}" -c ./gptk/xroar.gptk &
+fi
+
+./xroar.${DEVICE_ARCH} -fs -default-machine coco2bus ./gamedata/${script_basename}.cas # 2>&1 | tee $GAMEDIR/log.txt
+
+$ESUDO kill -9 $(pidof gptokeyb)
+$ESUDO systemctl restart oga_events &
+# Disable console
+printf "\033c" >> /dev/tty1

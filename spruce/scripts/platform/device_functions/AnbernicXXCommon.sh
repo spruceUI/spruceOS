@@ -77,23 +77,88 @@ get_firstboot_key() {
 }
 
 ###############################################################################
-WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+# Arm the sleep alarm on sunxi-rtc, found by name: the PCF8563 (rtc0, hwclock's
+# clock) cannot wake the SoC, so its alarm never fired (SPR-HIGH-052).
+RTC_SYS="${RTC_SYS:-/sys/class/rtc}"
+WAKE_ALARM_PATH="$RTC_SYS/rtc0/wakealarm"
+# Set while our alarm is outstanding, so an empty wakealarm means "it fired".
+WAKE_ALARM_ARMED_FLAG="${WAKE_ALARM_ARMED_FLAG:-/tmp/sleep_wake_alarm_armed}"
+
+find_wake_alarm_path() {
+    _wake_fallback=""
+    for _rtc in "$RTC_SYS"/rtc*; do
+        [ -e "$_rtc/wakealarm" ] || continue
+        if [ "$(cat "$_rtc/name" 2>/dev/null)" = "sunxi-rtc" ]; then
+            echo "$_rtc/wakealarm"
+            return 0
+        fi
+        if [ -z "$_wake_fallback" ] && [ "$(cat "$_rtc/device/power/wakeup" 2>/dev/null)" = "enabled" ]; then
+            _wake_fallback="$_rtc/wakealarm"
+        fi
+    done
+    echo "${_wake_fallback:-$RTC_SYS/rtc0/wakealarm}"
+}
 
 trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
 
+# A poweroff on USB power comes straight back as a charger boot into spruce, so a
+# sleep on USB runs with the "Off" timeout instead (re-checked at the deadline below).
+USB_POWER_ONLINE="${USB_POWER_ONLINE:-/sys/class/power_supply/axp2202-usb/online}"
+
+usb_power_online() {
+    [ "$(cat "$USB_POWER_ONLINE" 2>/dev/null)" = "1" ]
+}
+
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
+    if usb_power_online; then
+        log_message "On USB power: sleeping without the ${IDLE_TIMEOUT}s shutdown timer"
+        IDLE_TIMEOUT=2592000
+    fi
+    WAKE_ALARM_PATH="$(find_wake_alarm_path)"
+    rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    [ -e "$WAKE_ALARM_PATH" ] && touch "$WAKE_ALARM_ARMED_FLAG"
     trigger_device_sleep
 }
 
 device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    rm -f "$WAKE_ALARM_ARMED_FLAG"
+}
+
+# Decide by the alarm, not the clock (the two RTCs drift): an armed alarm that has
+# fired is the timer, one still pending with the lid open is the user. Lid shut: clock.
+device_woke_via_timer() {
+    if [ -f "$WAKE_ALARM_ARMED_FLAG" ] && [ -e "$WAKE_ALARM_PATH" ]; then
+        if [ -z "$(cat "$WAKE_ALARM_PATH" 2>/dev/null)" ]; then
+            if usb_power_online; then
+                # Plugged in since the sleep began: re-arm "Off" and keep sleeping
+                # rather than power off into a charger boot. Stdout is captured here.
+                log_message "On USB power at the sleep deadline: not shutting down" >/dev/null
+                save_sleep_info 2592000 >/dev/null && set_wake_alarm 2592000 "$WAKE_ALARM_PATH" >/dev/null
+                echo "false"
+                return
+            fi
+            echo "true"
+            return
+        fi
+        if [ "$(device_lid_open)" = "1" ]; then
+            echo "false"
+            return
+        fi
+    fi
+    _remaining="$(compute_remaining_sleep_time)" || { echo "false"; return; }
+    if [ -n "$_remaining" ] && [ "$_remaining" -le 10 ]; then
+        echo "true"
+    else
+        echo "false"
+    fi
 }
 
 send_virtual_key_L3() {
@@ -144,23 +209,6 @@ launch_startup_watchdogs(){
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
     fi
 }
-
-WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
-
-trigger_device_sleep() {
-    echo -n mem >/sys/power/state
-}
-
-device_enter_sleep() {
-    IDLE_TIMEOUT="$1"
-    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-
-    save_sleep_info "$IDLE_TIMEOUT" || return 1
-    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
-    trigger_device_sleep
-}
-
-
 
 take_screenshot() {
     log_message "Unable to doso on 34xxsp currently"

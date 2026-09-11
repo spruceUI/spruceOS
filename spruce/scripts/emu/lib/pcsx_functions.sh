@@ -25,7 +25,7 @@ run_pcsx_standalone() {
 	export HOME="$EMU_DIR"
 
 	mkdir -p "$HOME/.pcsx/bios"
-	mount --bind /mnt/SDCARD/BIOS "$HOME/.pcsx/bios"
+	mount -o bind /mnt/SDCARD/BIOS "$HOME/.pcsx/bios"
 
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh

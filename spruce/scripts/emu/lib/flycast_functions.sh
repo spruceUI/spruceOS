@@ -46,8 +46,9 @@ run_flycast_standalone() {
 	mkdir -p "$HOME/bios"
 	mkdir -p "$HOME/data"
 	mkdir -p "/mnt/SDCARD/BIOS/dc"
-	mount --bind /mnt/SDCARD/BIOS/dc $HOME/bios
-	mount --bind /mnt/SDCARD/BIOS/dc $HOME/data
+	# -o bind, not --bind: the BaseOS BusyBox mount does not take the long form.
+	mount -o bind /mnt/SDCARD/BIOS/dc $HOME/bios
+	mount -o bind /mnt/SDCARD/BIOS/dc $HOME/data
 
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh

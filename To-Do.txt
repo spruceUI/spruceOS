@@ -25,6 +25,7 @@
 - fake08 patches from TL
 - XX - polish shutdown paths - LEDs on, screen dim/off
 - XX - bootlogo app needs polish - add "bootlogo applied successfully" message
+- attach check_and_connect_wifi() to dsperate exec paths when appropriate;
 
 
 --- OTA ------------------------------------------------------------------------
