@@ -84,9 +84,10 @@ build_mupen_args() {
 # raw joystick numbering is +3 over udev (A b3 ... MENU b11), with the
 # stick-click keys interleaving the triggers per XX_PAD_LAYOUT. Three things
 # make the fleet's N64 layout hold here:
-#   - gptokeyb2's defkeys.gptk speaks SDL's positional names, so hand it
-#     spruce's POSITIONAL map (a = bottom button -> N64 A, like every other
-#     arm64 device on SDL's built-in X360 map);
+#   - gptokeyb2 is not started: the mali SDL2 has no evdev keyboard path, so
+#     its keystrokes never arrive. Every N64 button is a raw joystick binding
+#     in the pad table instead (the positional map still goes to SDL for
+#     anything that asks);
 #   - mupen's own input-sdl plugin matches InputAutoCfg.ini by joystick name,
 #     and the table is mupen's read-only asset, so it ships per pad layout
 #     under xx-pad/ per platform (stickless models have L2 at b12, so
@@ -184,22 +185,33 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 					--set "CoreEvents[Joy Mapping Speed Limiter Toggle]=J0B11/B9"
 				;;
 		esac
-		if [ "$PLATFORM" = "A30" ]; then
-			export M64P_ROTATE=1
-			./a30_input_shim /dev/input/event3 &
-			sleep 0.3
-		else
-			./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
-			sleep 0.3
-		fi
+		case "$PLATFORM" in
+			"A30")
+				export M64P_ROTATE=1
+				./a30_input_shim /dev/input/event3 &
+				sleep 0.3
+				;;
+			"Anbernic"*)
+				# No gptokeyb2: the mali SDL2 has no evdev keyboard path, so
+				# its keystrokes never arrive. The pad table is all raw joystick.
+				;;
+			*)
+				./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
+				sleep 0.3
+				;;
+		esac
 
+		# Stickless XX: the N64 stick is axes 0/1, which have no stick behind
+		# them there, so let the d-pad drive them for the run.
+		_xx_dpad_swap 2
 		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
+		_xx_dpad_swap 0
 
-		if [ "$PLATFORM" = "A30" ]; then
-			kill -9 $(pidof a30_input_shim) 2>/dev/null
-		else
-			kill -9 $(pidof gptokeyb2)
-		fi
+		case "$PLATFORM" in
+			"A30") kill -9 $(pidof a30_input_shim) 2>/dev/null ;;
+			"Anbernic"*) ;;
+			*) kill -9 $(pidof gptokeyb2) ;;
+		esac
 
 		# Restart loop: overlay writes /tmp/mupen_restart when user selects Restart
 		if [ -f /tmp/mupen_restart ]; then

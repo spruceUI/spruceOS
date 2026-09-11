@@ -1186,6 +1186,15 @@ export_sdl_gamecontroller_map() {
 }
 
 
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+_xx_dpad_swap() {
+	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	echo "$1" > "$XX_DPAD_SWAP"
+}
+
 ##### WIFI HANDLING #####
 
 disable_wifi() {
