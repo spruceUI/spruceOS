@@ -612,6 +612,9 @@ set_up_boot_action() {
                 log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
                 echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
                 ;;
+            "PPSSPP")
+                echo "\"/mnt/SDCARD/App/PPSSPP/launch.sh\"" > /tmp/cmd_to_run.sh
+                ;;
             "Apotris"*)
                 log_message "Sun mode engaged."
                 GAME_PATH=/mnt/SDCARD/Roms/GBA/Apotris.gba
