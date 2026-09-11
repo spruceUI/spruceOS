@@ -552,6 +552,15 @@
                 "selected":"False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
+            "enableWaitingToConnect": {
+                "display": "Wait for connection before launching game",
+                "descritpion": "when Syncthing or RAC are enabled",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected":"True"
+            },
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
                 "description": "allows reinstall of same spruce version",

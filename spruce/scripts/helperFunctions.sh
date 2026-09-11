@@ -1488,6 +1488,12 @@ network_is_connected() {
 
 check_and_connect_wifi() {
 
+    waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
+    if [ "$waiting_enabled" = "False" ]; then
+        log_message "User opted out of waiting to connect, via spruce network settings."
+        return 1
+    fi
+
     timeout=60
     start_time=$(date +%s)
 
