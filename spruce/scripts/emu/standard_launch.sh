@@ -111,7 +111,7 @@ case $EMU_NAME in
 		;;
 
 	"NDS")
-		if [ "$CORE" = "DSperate" ]; then
+		if [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
 		else
