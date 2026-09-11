@@ -108,6 +108,19 @@ apply_xx_mupen_pad() {
 	esac
 	export_sdl_gamecontroller_map positional
 
+	# The overlay menu navigates on raw joystick indices and defaults to the
+	# X360 numbering (b0/b1 confirm/back), which here are the ESC and VOL-
+	# phantom keys: no way to back out of a submenu. Hand it this pad's numbers
+	# and names (EMU_OVERLAY_BTNMAP / EMU_OVERLAY_BTNLABELS, read by the overlay).
+	export EMU_OVERLAY_BTNMAP="a=3,b=4,l1=7,r1=8,menu=11,select=9,up=-1,down=-1,left=-1,right=-1"
+	labels="Esc,Vol-,Vol+,A,B,Y,X,L1,R1,Select,Start,Menu"
+	case "$XX_PAD_LAYOUT" in
+		nostick) labels="$labels,L2,R2" ;;
+		1stick)  labels="$labels,L3,L2,R2" ;;
+		*)       labels="$labels,L3,L2,R2,R3" ;;
+	esac
+	export EMU_OVERLAY_BTNLABELS="$labels"
+
 	# InputAutoCfg.ini is a shipped default set, one file per platform;
 	# nothing is computed here, the platform's file is copied over the live
 	# table.
