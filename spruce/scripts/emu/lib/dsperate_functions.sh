@@ -14,8 +14,24 @@
 #   run_dsperate
 
 
-
 . /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
+
+DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
+
+dsperate_bios_missing() {
+	_missing=""
+	for _f in bios9.bin bios7.bin firmware.bin; do
+		[ -f "$DSPERATE_BIOS_DIR/$_f" ] || _missing="$_missing $_f"
+	done
+	echo "$_missing"
+}
+
+display_dsperate_bios_message() {
+	start_pyui_message_writer
+	log_and_display_message "DSperate needs a DS BIOS dump.\nMissing from BIOS/nds:$1\nDumps are not included."
+	sleep 6
+	stop_pyui_message_writer
+}
 
 seed_dsperate_config() {
 	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
@@ -136,6 +152,16 @@ prepare_dsperate_rom() {
 run_dsperate() {
 	export HOME="$EMU_DIR"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
+
+	if [ "$GAME" = "BootMenu.nds" ]; then
+		_missing="$(dsperate_bios_missing)"
+		if [ -n "$_missing" ]; then
+			log_message "DSperate: missing BIOS:$_missing"
+			mkdir -p "$DSPERATE_BIOS_DIR"
+			display_dsperate_bios_message "$_missing"
+			return 1
+		fi
+	fi
 
 	seed_dsperate_config
 	prepare_dsperate_cheevos
