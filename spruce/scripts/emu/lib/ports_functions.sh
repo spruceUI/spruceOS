@@ -119,7 +119,7 @@ run_port() {
         mkdir -p "$PORTS_BIND_TARGET"
         if portmaster_mount_is_active "$PORTS_BIND_TARGET"; then
             log_message "Dual SD: bind already active at $PORTS_BIND_TARGET"
-        elif mount --bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
+        elif mount -o bind "$PORTS_DIR" "$PORTS_BIND_TARGET"; then
             PORTS_BIND_CREATED=true
             log_message "Dual SD: mounted $PORTS_DIR on $PORTS_BIND_TARGET"
         else
@@ -155,7 +155,7 @@ run_port() {
         "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
         if [ "$MOUNT_BIND" = true ]; then
-            mount --bind \
+            mount -o bind \
                 /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
                 /mnt/SDCARD/Persistent/portmaster/bin/python
         fi
@@ -189,12 +189,12 @@ run_A30_port() {
     # ensure correct RA bin and config are available
     . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
     touch /mnt/SDCARD/RetroArch/retroarch
-    mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
+    mount -o bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
     # make A30PORTS accessible from PORTS for backwards compatibility
     mkdir -p /mnt/SDCARD/Roms/PORTS
-    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
+    mount -o bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
 
     # launch the actual game
     cd /mnt/SDCARD/Roms/A30PORTS

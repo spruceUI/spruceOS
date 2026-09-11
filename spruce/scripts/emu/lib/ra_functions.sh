@@ -437,7 +437,7 @@ ready_architecture_dependent_states() {
             fi
 
             [ ! -d "$DIR_BASE" ] && mkdir -p "$DIR_BASE"
-            mount --bind "$DIR_SUFFIX" "$DIR_BASE"
+            mount -o bind "$DIR_SUFFIX" "$DIR_BASE"
         done
     done
 }

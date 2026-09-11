@@ -49,7 +49,7 @@ run_ppsspp() {
 	mkdir -p "$SS_DIR"
 
 	move_screenshots_if_present
-	mount --bind "$SS_DIR" "$PSP_SS_DIR"
+	mount -o bind "$SS_DIR" "$PSP_SS_DIR"
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
