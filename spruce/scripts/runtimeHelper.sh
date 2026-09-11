@@ -608,6 +608,10 @@ set_up_boot_action() {
                     log_message "Pico-8 binaries not found; booting to spruceUI instead."
                 fi
                 ;;
+            "NDS firmware")
+                log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
+                echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
+                ;;
             "Apotris"*)
                 log_message "Sun mode engaged."
                 GAME_PATH=/mnt/SDCARD/Roms/GBA/Apotris.gba
