@@ -106,15 +106,13 @@ run_pico8() {
 		# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
 		export_sdl_gamecontroller_map
 
-		# The RG28XX mounts its panel turned, exactly like the A30 - both report
-		# DISPLAY_ROTATION 270 with the same 640x480 geometry - so it needs the
-		# same transform. Keyed on the rotation rather than the model so the rest
-		# of the line, which is all 0, keeps the upright setting.
-		if [ "$DISPLAY_ROTATION" = "270" ]; then
-			sed 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
-		else
-			sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
-		fi
+		# The RG28XX panel is mounted turned (DISPLAY_ROTATION 270), but unlike
+		# the A30 the mali-fbdev SDL2 rotates it itself and presents a landscape
+		# 640x480 desktop, so PICO-8 must not transform on top of that: keep
+		# transform_screen 0 on the whole line and size the stretch to the
+		# desktop, not the panel.
+		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+		[ "$STRETCH" = "True" ] && SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
 	else
