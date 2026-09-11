@@ -40,6 +40,7 @@ seed_dsperate_config() {
 	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
 	_cfg_one_stick="$_cfg_dir/one-stick.ini"
 	_cfg_two_sticks="$_cfg_dir/two-sticks.ini"
+	_cfg_boot_menu="$_cfg_dir/games/BootMenu.ini"
 
 	mkdir -p "$_cfg_dir"
 	if [ ! -f "$_cfg_two_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/two-sticks.ini" ]; then
@@ -58,9 +59,11 @@ seed_dsperate_config() {
 		cp -f "$EMU_DIR/dsperate-configs/one-stick.ini" "$_cfg_one_stick"
 		log_message "DSperate: seeded config from one-stick.ini"
 	fi
-	for _f in "$_cfg_a30" "$_cfg_no_sticks" "$_cfg_one_stick" "$_cfg_two_sticks"; do
-		[ -f "$_f" ] && ! grep -q '^\[cheevos\]' "$_f" && printf '\n[cheevos]\nenabled = true\n' >> "$_f"
-	done
+	if [ ! -f "$_cfg_boot_menu" ] && [ -f "$EMU_DIR/dsperate-configs/BootMenu.ini" ]; then
+		mkdir -p /mnt/SDCARD/Saves/dsperate/games/
+		cp -f "$EMU_DIR/dsperate-configs/BootMenu.ini" "$_cfg_boot_menu"
+		log_message "DSperate: seeded config from BootMenu.ini"
+	fi
 }
 
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
