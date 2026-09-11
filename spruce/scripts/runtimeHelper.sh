@@ -436,6 +436,16 @@ set_volume_to_config() {
     [ -n "$vol" ] && set_volume "$vol"
 }
 
+# hardwareservice and the trimui blobs reset the mixer when they finish init, and
+# how long that takes moves with boot load, so one delayed restore can land first.
+restore_volume_after_audio_service() {
+    for _vol_delay in 1.5 2 4 8; do
+        sleep "$_vol_delay"
+        [ -e /tmp/sleep_helper_started ] && return 0   # a sleep owns the mixer
+        set_volume_to_config
+    done
+}
+
 UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
 
 read_unpack_state() {

@@ -42,7 +42,7 @@ fi
 device_init
 ensure_dev_shm
 ensure_dev_fd
-{ sleep 1.5; set_volume_to_config; } &
+restore_volume_after_audio_service &
 # Check if WiFi is enabled and bring up network services if so
 enable_or_disable_wifi_per_system_json &
 
