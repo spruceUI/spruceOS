@@ -1,0 +1,55 @@
+{
+  "label": "J2ME",
+  "icon": "j2me.png",
+  "iconsel": "j2me_sel.png",
+  "themecolor": "e76f00",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "jar|kjx",
+  "launchlist": [],
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_BRICK_PRO",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "RGB30"
+  ],
+  "requiredfiles": [
+    [
+      "/mnt/SDCARD/Emu/J2ME/freej2me_plus_libretro.so"
+    ],
+    [
+      "/mnt/SDCARD/Emu/J2ME/jre/bin/java"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/freej2me_plus-lr.jar"
+    ]
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 3150,
+  "brand": "other",
+  "type": "handheld",
+  "releaseYear": 2000,
+  "default_emulator": "freej2me_plus",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": [
+    "j2me",
+    "java",
+    "JAVA",
+    "midp",
+    "mobile"
+  ]
+}

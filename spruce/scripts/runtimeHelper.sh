@@ -293,7 +293,21 @@ check_for_update_file() {
     fi
 
     echo "Searching for update file"
-    UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{print $2, $0}' | sort -n | tail -n1 | cut -d' ' -f2-)
+    # Pad each version field into a fixed-width key before sorting. The old
+    # awk -F'V' | sort -n keyed on "4.4.0.7z", so sort -n only ever read the
+    # leading 4.4, every candidate tied, and 4.4.10 lost to 4.4.9.
+    UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk '
+        {
+            v = $0
+            sub(/.*\/spruceV/, "", v)
+            sub(/\.7z$/, "", v)
+            n = split(v, part, ".")
+            key = ""
+            for (i = 1; i <= 4; i++) {
+                key = key sprintf("%05d", (i <= n ? part[i] : 0) + 0)
+            }
+            print key "\t" $0
+        }' | sort | tail -n1 | cut -f2-)
     echo "Found update file: $UPDATE_FILE"
 
     if [ -z "$UPDATE_FILE" ]; then

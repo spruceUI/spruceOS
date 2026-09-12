@@ -140,6 +140,13 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"J2ME")
+		# The core execvp's "java"; fonts come from the JRE's own
+		# fontconfig.properties, so nothing else needs setting up here.
+		export PATH="$EMU_DIR/jre/bin:$PATH"
+		run_retroarch
+		;;
+
 	"OPENBOR")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/openbor_functions.sh
 		run_openbor
