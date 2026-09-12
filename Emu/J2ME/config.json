@@ -18,10 +18,12 @@
   ],
   "requiredfiles": [
     [
-      "/mnt/SDCARD/Emu/J2ME/freej2me_plus_libretro.so"
+      "/mnt/SDCARD/RetroArch/.retroarch/cores64/freej2me_plus_libretro.so",
+      "/mnt/SDCARD/RetroArch/.retroarch/cores/freej2me_plus_libretro.so"
     ],
     [
-      "/mnt/SDCARD/Emu/J2ME/jre/bin/java"
+      "/mnt/SDCARD/Emu/J2ME/jre/bin/java",
+      "/mnt/SDCARD/Emu/J2ME/jre32/bin/java"
     ],
     [
       "/mnt/SDCARD/BIOS/freej2me_plus-lr.jar"

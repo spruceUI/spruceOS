@@ -143,7 +143,11 @@ case $EMU_NAME in
 	"J2ME")
 		# The core execvp's "java"; fonts come from the JRE's own
 		# fontconfig.properties, so nothing else needs setting up here.
-		export PATH="$EMU_DIR/jre/bin:$PATH"
+		if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+			export PATH="$EMU_DIR/jre32/bin:$PATH"
+		else
+			export PATH="$EMU_DIR/jre/bin:$PATH"
+		fi
 		run_retroarch
 		;;
 
