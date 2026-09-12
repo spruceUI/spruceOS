@@ -33,7 +33,6 @@ delete_list_from_dir() {
 
 
 # exclude BootLogo app in case someone wants to keep their own custom logos
-# exclude fn_editor in case someone makes their own custom button/switch scripts
 # exclude PortMaster app (can we do away with Persistent/ now?)
 # exclude RandomGame to retain the list of last 5 random games played
 APP_DIR="/mnt/SDCARD/App"
@@ -43,6 +42,7 @@ APP_DELETE_LIST="
 -Updater
 Credits
 FileManagement
+fn_editor
 GameNursery
 MiyooGamelist
 PixelReader

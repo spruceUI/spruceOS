@@ -20,7 +20,7 @@ extract_game_dir(){
     # If gamedir_name ends with a slash, remove the slash
     gamedir_line="${gamedir_line%/}"
     # Extract everything after the last '/' in the GAMEDIR line and assign it to game_dir
-    game_dir="/mnt/SDCARD/Roms/PORTS/${gamedir_line##*/}"
+    game_dir="${PORTS_DIR:-/mnt/SDCARD/Roms/ports}/${gamedir_line##*/}"
     # If game_dir ends with a quote, remove the quote
     echo "${game_dir%\"}"
 }
@@ -51,20 +51,47 @@ set_port_abxy_scheme() {
     else
         cp "/mnt/SDCARD/Emu/PORTS/gamecontrollerdb_nintendo.txt" "$PM_DIR/gamecontrollerdb.txt"
     fi
+
+    # Neither db above has an entry for the Anbernic XX pad, and adding one
+    # would not work: every model on the line reports the same GUID and name,
+    # so a single row cannot get the triggers right on both the stick and the
+    # stickless halves. AnbernicXXCommon.cfg already selects the correct map by
+    # BASEOS_TARGET - pass it through the env hint instead, which SDL applies
+    # after the db file and so wins. No-op on every other device.
+    #
+    # The two conventions line up with the two db files: the 360 file is the
+    # stock SDL db, where "a" is the South button, and the nintendo file is the
+    # same db with a/b and x/y swapped so "a" is the button marked A.
+    if [ "$PORT_CONTROL" = "X360" ]; then
+        export_sdl_gamecontroller_map positional
+    else
+        export_sdl_gamecontroller_map
+    fi
 }
 
 run_port() {
     log_message "Running port on $PLATFORM w/ ($PLATFORM_ARCHITECTURE)"
+
+    # Flip only: a port may live on the second card.
+    PORTS_DIR=/mnt/SDCARD/Roms/ports
+    if [ "$PLATFORM" = "Flip" ]; then
+        case "$ROM_FILE" in
+            /media/sdcard1/*|"$(readlink -f /media/sdcard1 2>/dev/null)"/*)
+                PORTS_DIR="$(dirname "$ROM_FILE")"
+                ;;
+        esac
+    fi
+    export PORTS_DIR
+
     device_prepare_for_ports_run
 
     # Setup variables
-    PORTS_DIR=/mnt/SDCARD/Roms/PORTS
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
-	export LC_ALL=C
+    export LC_ALL=C
     # TODO: Remove this when portmaster updates spruce detection
     if [ "$PLATFORM" = "Pixel2" ]; then
-        PM_DIR="/mnt/SDCARD/Roms/PORTS/PortMaster"
+        PM_DIR="/mnt/SDCARD/Roms/ports/PortMaster"
         MOUNT_BIND=false
     else
         PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
@@ -77,14 +104,24 @@ run_port() {
     if [ $? -eq 1 ]; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
-        "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
         if [ "$MOUNT_BIND" = true ]; then
-            mount --bind /mnt/SDCARD/Persistent/portmaster/bin/python3.10 /mnt/SDCARD/Persistent/portmaster/bin/python
+            mount -o bind \
+                /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
+                /mnt/SDCARD/Persistent/portmaster/bin/python
         fi
 
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
-        setsid "$ROM_FILE" &> /mnt/SDCARD/Saves/spruce/port.log &
+        # "&>" is bash-only. This script is #!/bin/sh, and on the Debian-based
+        # dArkMoss that is dash, which parses it as two commands: the port
+        # backgrounded, then a separate backgrounded null command holding the
+        # redirect. $! then captured that null command, which exits at once, so
+        # the wait below returned immediately, run_port returned, and
+        # principal.sh brought PyUI back up on top of a still-running port -
+        # the UI and the port fighting over the display. Measured: under dash
+        # the wait returned in 0s, under bash in the full 8s.
+        setsid "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
         SID=$!
         echo "$SID" > /tmp/last_port_sid
         wait "$SID"
@@ -99,18 +136,12 @@ run_A30_port() {
     # ensure correct RA bin and config are available
     . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
     touch /mnt/SDCARD/RetroArch/retroarch
-    mount --bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
+    mount -o bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
-    # make A30PORTS accessible from PORTS for backwards compatibility
-    mkdir -p /mnt/SDCARD/Roms/PORTS
-    mount --bind /mnt/SDCARD/Roms/A30PORTS /mnt/SDCARD/Roms/PORTS
-
-    # launch the actual game
     cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$ROM_FILE" 
 
     # clean up and back up any RA config modifications
-    umount /mnt/SDCARD/Roms/PORTS
     umount /mnt/SDCARD/RetroArch/retroarch
 }

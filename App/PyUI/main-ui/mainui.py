@@ -102,12 +102,15 @@ def initialize_device(device, main_ui_mode):
     elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
         from devices.miyoo.a30.miyoo_a30 import MiyooA30
         Device.init(MiyooA30(device, main_ui_mode))
-    elif "ANBERNIC_RG34XXSP" == device:
-        from devices.anbernic.anbernic_rg34xxsp import AnbernicRG34xxSP
-        Device.init(AnbernicRG34xxSP(main_ui_mode))
+    elif "ANBERNIC_RGXX720480" == device:
+        from devices.anbernic.anbernic_xx_720_x_480 import Anbernic720x480
+        Device.init(Anbernic720x480(main_ui_mode))
     elif "ANBERNIC_RG28XX" == device:
         from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
         Device.init(AnbernicRG28xx(main_ui_mode))
+    elif "MINILOONG_POCKET1" == device:
+        from devices.miniloong.miniloong_pocket1 import MiniloongPocket1
+        Device.init(MiniloongPocket1(device, main_ui_mode))
     elif "ANBERNIC_RGCUBEXX" == device:
         from devices.anbernic.anbernic_rgcubexx import AnbernicRGCubeXX
         Device.init(AnbernicRGCubeXX(main_ui_mode))
@@ -120,6 +123,9 @@ def initialize_device(device, main_ui_mode):
     elif "ROCKNIX_RGDS" == device:
         from devices.rocknix.rocknix_rgds import RocknixRgds
         Device.init(RocknixRgds(device))        
+    elif "RGB30" == device:
+        from devices.rgb30.rgb30 import Rgb30
+        Device.init(Rgb30(device))
     elif "GKD_PIXEL2" == device:
         from devices.gkd.gkd_pixel2 import GKDPixel2
         Device.init(GKDPixel2(device, main_ui_mode))

@@ -1733,3 +1733,7 @@ class Theme():
     @classmethod
     def get_screensaver_low_power(cls):
         return cls._data.get("screensaver", {}).get("lowPowerWhileIdle", True)
+
+    @classmethod
+    def get_screensaver_dim_backlight(cls):
+        return cls._data.get("screensaver", {}).get("dimBacklight", True)

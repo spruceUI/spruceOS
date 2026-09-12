@@ -99,6 +99,13 @@ folders="
 /mnt/SDCARD/Emu/NDS/config/drastic-SmartProS.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Flip.cfg
 /mnt/SDCARD/Emu/NDS/config/drastic-Pixel2.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicRG28XX.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicRGCubeXX.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX720480.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480NoStick.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX640480OneStick.cfg
+/mnt/SDCARD/Emu/NDS/config/drastic-AnbernicXX720480NoStick.cfg
 /mnt/SDCARD/Emu/NDS/savestates
 /mnt/SDCARD/Emu/NDS/resources/settings_A30.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
@@ -109,7 +116,13 @@ folders="
 /mnt/SDCARD/RetroArch/.retroarch/shaders
 /mnt/SDCARD/RetroArch/.retroarch/cheats
 /mnt/SDCARD/RetroArch/platform/retroarch-A30.cfg
-/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG28XX.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRGCubeXX.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX720480.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480NoStick.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX640480OneStick.cfg
+/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicXX720480NoStick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Brick.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-Flip.cfg
 /mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg
@@ -165,12 +178,20 @@ backup_theme_configs
 log_message "Creating 7z archive"
 7zr a -spf -mmt=2 "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 
-if [ $? -eq 0 ]; then  
+backup_rc=$?  # Capture immediately. The old code re-read $? in the elif, which
+              # by then held the exit of the first `[ ]` test - so a hard 7zr
+              # failure (exit 2+) was mis-reported as "completed with warnings"
+              # and the script still returned 0.
+
+if [ "$backup_rc" -eq 0 ]; then
     display_image_and_text "$ICON_PATH" 25 25 "Backup completed successfully! Backups can be found in the Saves/spruce/backups/ directory." 75
-elif [ $? -eq 1 ]; then # exit code 1 is with warnings, but still creates an archive.
+elif [ "$backup_rc" -eq 1 ]; then # 1 = warnings, archive still created
     display_image_and_text "$ICON_PATH" 25 25 "Backup completed but with warnings. Check Saves/spruce/spruceBackup.log for more details. Backups can be found in the Saves/spruce/backups/ directory." 75
-else                    # exit codes 2+ are various actual failures
+else                              # 2+ = a real failure
+    log_message "Backup failed: 7zr exit code $backup_rc"
     display_image_and_text "$BAD_IMG" 25 25 "Backup failed. Check Saves/spruce/spruceBackup.log for more details." 75
+    rm -f "$temp_file"
+    exit "$backup_rc"             # propagate so the updater can abort before it deletes anything
 fi
 
 rm "$temp_file"

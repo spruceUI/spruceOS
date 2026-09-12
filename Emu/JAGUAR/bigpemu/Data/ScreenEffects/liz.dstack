@@ -1,0 +1,271 @@
+{
+	"DickPostStack": {
+		"UserOptions": [
+			{
+				"Constant": "sDesaturateAmount2",
+				"Type": "float",
+				"Description": "Desaturation",
+				"DefaultVal": 1.0,
+				"MinVal": 0.0,
+				"MaxVal": 1.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sDesaturateAmount",
+				"Type": "float",
+				"Description": "Diamond Desaturation",
+				"DefaultVal": 0.85,
+				"MinVal": 0.0,
+				"MaxVal": 1.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sDesaturateExponent",
+				"Type": "float",
+				"Description": "Diamond Desaturation Exponent",
+				"DefaultVal": 1.25,
+				"MinVal": 0.03125,
+				"MaxVal": 64.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sLizBias",
+				"Type": "float",
+				"Description": "Diamond Bias",
+				"DefaultVal": 0.25,
+				"MinVal": 0.0,
+				"MaxVal": 1.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sLizScale",
+				"Type": "float",
+				"Description": "Diamond Scale",
+				"DefaultVal": 2.0,
+				"MinVal": 0.0,
+				"MaxVal": 16.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sLizExponent",
+				"Type": "float",
+				"Description": "Diamond Exponent",
+				"DefaultVal": 1.5,
+				"MinVal": 0.03125,
+				"MaxVal": 64.0,
+				"StepVal": 0.01
+			}
+		],
+		"Textures": [
+            {
+				"Name": "sDeliciousDiamonds",
+                "Path": "liz/white_diamonds.png",
+                "WrapMode": "Repeat",
+                "TexFilter": "Linear",
+                "WantMips": true
+            }
+		],
+		"CommonDataBlocks": [
+			{
+				"Name": "UBO",
+				"Type": "ConstantBuffer",
+				"Location": 0,
+				"Size": 64,
+				"DataProviders": [
+					{
+						"Name": "mMVP",
+						"Type": "float4x4",
+						"Offset": 0,
+						"SourceType": "MVP"
+					}
+				]
+			}
+		],
+		"Passes": [
+			{
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "UnfilteredScreen",
+				"RTScale": 1.0,
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sTargetAreaOffsets",
+								"Type": "float4",
+								"SourceType": "TargetAreaOffsets"
+							}
+						]
+					}
+				],				
+				"PixelGLSL": "util/copypass_tolin_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "util/copypass_tolin_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "util/copypass_tolin_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"Name": "BlurBase",
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "PreviousPass",
+				"RTScale": 1.0,
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sDesaturateAmount",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sDesaturateExponent",
+								"Type": "float",
+								"SourceType": "UserOption"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "util/desaturate_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "util/desaturate_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "util/desaturate_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},			
+			{
+				"Name": "BlurBase",
+				"RTFormat": "R16G16B16A16_FLOAT",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "PreviousPass",
+				"RTScale": 1.0,
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sRTSize",
+								"Type": "float4",
+								"SourceType": "RTSize"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "oh_my_gauss/blur_h_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "oh_my_gauss/blur_h_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "oh_my_gauss/blur_h_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_v_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_v_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_v_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_h_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_h_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_h_ps.dxbc"
+			},
+			{
+				"InheritPass": "BlurBase",
+				"PixelGLSL": "oh_my_gauss/blur_v_ps.glsl",
+				"PixelESSL": "oh_my_gauss/blur_v_ps.essl",
+				"PixelDXBC": "oh_my_gauss/blur_v_ps.dxbc"
+			},
+			{
+				"RTFormat": "R8G8B8A8_UNORM",
+				"RTTexFilter": "Linear",
+				"RTSizeType": "Backbuffer",
+				"RTScale": 1.0,				
+				"TextureProviders": [
+					{
+						"Name": "sBloomTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					},
+					{
+						"Name": "sScreenTex",
+						"Type": "2D",
+						"SourceType": "UnfilteredScreenTex"
+					},
+					{
+						"Name": "sDeliciousDiamonds",
+						"Type": "2D",
+						"SourceType": "NamedTex"
+					}					
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sTime",
+								"Type": "float",
+								"SourceType": "Time"
+							},
+							{
+								"Name": "sDesaturateAmount2",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sLizBias",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sLizScale",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sLizExponent",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sLizScriptBasedBias",
+								"Type": "float",
+								"SourceType": "ScriptOption"
+							}
+						]
+					}
+				],
+				"PixelGLSL": "liz/lizmix.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "liz/lizmix.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "liz/lizmix.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			}
+		]
+	}
+}

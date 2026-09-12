@@ -42,22 +42,36 @@ class MiyooGameList:
 
             base_dir = os.path.dirname(xml_file)
             for game in root.findall('game'):
-                game_id = game.get('id')
-                source = game.get('source')
+                try:
+                    game_id = game.get('id')
+                    source = game.get('source')
 
-                path = game.findtext('path')
-                image = game.findtext('image')
-                name = game.findtext('name')
+                    path = game.findtext('path')
+                    image = game.findtext('image')
+                    name = game.findtext('name')
 
-                if path.startswith('./'):
-                    file_name = path[2:]
-                else:
-                    file_name = path
+                    if path is None:
+                        PyUiLogger.get_logger().warning(
+                            f"Skipping <game> without <path> in '{xml_file}' (name={name!r})"
+                        )
+                        continue
 
-                # Make image path relative to the XML file's directory
-                image_path = os.path.join(base_dir, image[2:] if image.startswith('./') else image)
-                entry = GameEntry(game_id, source, path, image_path, name)
-                self.games_by_file_name[file_name] = entry
+                    if path.startswith('./'):
+                        file_name = path[2:]
+                    else:
+                        file_name = path
+
+                    # Make image path relative to the XML file's directory
+                    if image is None:
+                        image_path = None
+                    else:
+                        image_path = os.path.join(base_dir, image[2:] if image.startswith('./') else image)
+                    entry = GameEntry(game_id, source, path, image_path, name)
+                    self.games_by_file_name[file_name] = entry
+                except Exception as e:
+                    PyUiLogger.get_logger().warning(
+                        f"Skipping malformed <game> entry in '{xml_file}': {e}"
+                    )
 
         except Exception as e:
             import traceback

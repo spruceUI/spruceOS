@@ -3,142 +3,151 @@
 # SPDX-License-Identifier: MIT
 #
 
-## HRMMM
-if [ -d "/mnt/SDCARD/spruce" ]; then
-  export HOME="/mnt/SDCARD"
-  export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
-  export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
-  export LD_PRELOAD=""
-  controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-  directory="/mnt/SDCARD/Roms/PORTS/"
+export HOME="/mnt/SDCARD"
+export PATH="/mnt/SDCARD/Persistent/portmaster/bin/:$PATH"
+export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/lib:$LD_LIBRARY_PATH"
+PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
+export LD_PRELOAD=""
+controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+directory="/mnt/SDCARD/Roms/"
 
-
-  INFO=$(cat /proc/cpuinfo 2> /dev/null)
-  case $INFO in
-      *"sun8i"*) export PLATFORM="A30" ;;
-      *"TG5040"*)	export PLATFORM="SmartPro" ;;
-      *"TG3040"*)	export PLATFORM="Brick"	;;
-      *"TG4040"*)	export PLATFORM="BrickPro"	;;
-      *"TG5050"*)	export PLATFORM="SmartProS"	;;
-      *"0xd05"*) export PLATFORM="Flip" ;;
-      *) export PLATFORM="MiyooMini" ;;
-  esac
-
-  #ENV Variables
-  case "$PLATFORM" in
-      Flip|SmartProS)
-          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/"
-          ;;
-      Brick|SmartPro|BrickPro)
-          export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
-          ;;
-  esac
-else
-  export HOME="/root"
-  export LD_PRELOAD=""
-  controlfolder="/mnt/SDCARD/MIYOO_EX/PortMaster"
-  directory="/mnt/SDCARD/MIYOO_EX"
-  
-  # MIYOO_EXtra shit i need.
-  export PATH="/mnt/SDCARD/MIYOO_EX/bin:$PATH"
-  export LD_LIBRARY_PATH="/mnt/SDCARD/MIYOO_EX/lib:$LD_LIBRARY_PATH"
-  export PYSDL2_DLL_PATH="/mnt/SDCARD/MIYOO_EX/lib/"
-  ## Python 3 runtime.
-  mkdir -p $HOME/python3
-
-  if [ -d $HOME/python3/bin ]; then
-    umount $HOME/python3
-  fi
-
-  mount /mnt/SDCARD/MIYOO_EX/python_3.11.squashfs $HOME/python3
-  source $HOME/python3/bin/activate
-
-fi
-
+# Device-specific settings live on the spruce card.
+[ -f /mnt/SDCARD/spruce/portmaster/portmaster.txt ] && source /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
 
 ESUDO=""
-ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k" 
+ESUDOKILL="-1" # for 351Elec and EmuELEC use "-1" (numeric one) or "-k"
 export SDL_GAMECONTROLLERCONFIG_FILE="/usr/lib/gamecontrollerdb.txt"
 # export SDL_GAMECONTROLLERCONFIG=$(grep "Deeplay" "/usr/lib/gamecontrollerdb.txt")
 
 source "$controlfolder/device_info.txt"
 [ -f "${controlfolder}/mod_${CFW_NAME}.txt" ] && source "${controlfolder}/mod_${CFW_NAME}.txt"
+export HOME="/mnt/SDCARD"
 
 ## TODO: Change to PortMaster/tty when Johnnyonflame merges the changes in,
 CUR_TTY=/dev/tty0
 
 cd "$controlfolder"
 
-exec > >(tee "$controlfolder/log.txt") 2>&1
+> "$controlfolder/log.txt" && exec > >(tee "$controlfolder/log.txt") 2>&1
 
 source "$controlfolder/utils/pmsplash.txt"
 
 ## Autoinstallation Code
-# This will automatically install zips found within the PortMaster/autoinstall directory using harbourmaster
-AUTOINSTALL=$(find "$controlfolder/autoinstall" -type f \( -name "*.zip" -o -name "*.squashfs" \))
-if [ -n "$AUTOINSTALL" ]; then
+# This will automatically install zips found within the `PortMaster/autoinstall` / `ports/autoinstall` directory using harbourmaster
+AUTOINSTALL_DIR_1="$controlfolder/autoinstall"
+AUTOINSTALL_DIR_2="$AUTOINSTALL_DIR_1"
+
+if [ ! -d "$AUTOINSTALL_DIR_2" ]; then
+  mkdir -p "$AUTOINSTALL_DIR_2"
+fi
+
+# Check if there are any files to process before starting the dialog
+AUTOINSTALL_FILES=$(find "$AUTOINSTALL_DIR_1" "$AUTOINSTALL_DIR_2" -type f \( -name "*.zip" -o -name "*.squashfs" \) 2>/dev/null)
+
+if [ -n "$AUTOINSTALL_FILES" ]; then
   source "$controlfolder/PortMasterDialog.txt"
 
   GW=$(PortMasterIPCheck)
   PortMasterDialogInit "no-check"
 
   PortMasterDialog "messages_begin"
-
   PortMasterDialog "message" "Auto-installation"
 
-  # Install the latest runtimes.zip
-  if [ -f "$controlfolder/autoinstall/runtimes.zip" ]; then
-    PortMasterDialog "message" "- Installing runtimes.zip, this could take a minute or two."
-    $ESUDO unzip -o "$controlfolder/autoinstall/runtimes.zip" -d "$controlfolder/libs"
-    $ESUDO rm -f "$controlfolder/autoinstall/runtimes.zip"
-    PortMasterDialog "message" "- SUCCESS: runtimes.zip"
-  fi
-
-  for file_name in "$controlfolder/autoinstall"/*.squashfs
-  do
-    if [ ! -f "$file_name" ]; then
-      continue
+  # 1. Install PortMaster.zip first
+  for autoinstall_dir in "$AUTOINSTALL_DIR_1" "$AUTOINSTALL_DIR_2"; do
+    if [ -f "$autoinstall_dir/PortMaster.zip" ]; then
+      if [ "$(PortMasterDialogResult "install" "$autoinstall_dir/PortMaster.zip")" = "OKAY" ]; then
+        $ESUDO rm -f "$autoinstall_dir/PortMaster.zip"
+        PortMasterDialog "message" "- SUCCESS: PortMaster.zip"
+      else
+        PortMasterDialog "message" "- FAILURE: PortMaster.zip"
+      fi
+      break # Stop after finding and processing the first one
     fi
-
-    $ESUDO mv -f "$file_name" "$controlfolder/libs"
-    PortMasterDialog "message" "- SUCCESS: $(basename $file_name)"
   done
 
-  for file_name in "$controlfolder/autoinstall"/*.zip
-  do
-    if [ ! -f "$file_name" ]; then
-      continue
+  # 2. Install runtimes.zip and/or runtimes.{full,popular}.${DEVICE_ARCH}.zip
+  for autoinstall_dir in "$AUTOINSTALL_DIR_1" "$AUTOINSTALL_DIR_2"; do
+    if [ -f "$autoinstall_dir/runtimes.zip" ]; then
+      # Old runtimes.zip do not include an architecture comment.
+      ZIP_COMMENT="$(unzip -z "$file_name" | tail -n1 | cut -d' ' -f1)"
+      if [ "$ZIP_COMMENT" = "${DEVICE_ARCH}" ] || [ "$ZIP_COMMENT" = "Archive:" ]; then
+        PortMasterDialog "message" "- Installing runtimes.zip."
+        $ESUDO unzip -o "$autoinstall_dir/runtimes.zip" -d "$controlfolder/libs" | while IFS= read -r line; do
+          case "$line" in
+            *'inflating:'*|*'extracting:'*)
+              filename=$(echo "$line" | awk '{print $2}')
+              PortMasterDialog "message" " - $(basename $filename)"
+              ;;
+          esac
+        done
+        $ESUDO rm -f "$autoinstall_dir/runtimes.zip"
+        PortMasterDialog "message" "- SUCCESS: runtimes.zip"
+      else
+        PortMasterDialogMessageBox "Unable to install runtime.zip, it is for the wrong architecture.\n\nDeleting file from autoinstall/."
+        $ESUDO rm -f "$autoinstall_dir/runtimes.zip"
+      fi
     fi
 
-    if [[ "$(basename $file_name)" == "PortMaster.zip" ]]; then
-      continue
+    if ls "$autoinstall_dir"/runtimes*.zip >/dev/null 2>&1; then
+      for file_name in "$autoinstall_dir"/runtimes*.zip; do
+        if [ -f "$file_name" ]; then
+          # Newer runtimes.full.ARCH.zip and friends includes the architecture as a comment.
+          if [ "$(unzip -z "$file_name" | tail -n1 | cut -d' ' -f1)" = "${DEVICE_ARCH}" ]; then
+            PortMasterDialog "message" "- Installing $(basename "$file_name")."
+            $ESUDO unzip -o "$file_name" -d "$controlfolder/libs" | while IFS= read -r line; do
+              case "$line" in
+                *'inflating:'*|*'extracting:'*)
+                  filename=$(echo "$line" | awk '{print $2}')
+                  PortMasterDialog "message" " - $(basename $filename)"
+                  ;;
+              esac
+            done
+            $ESUDO rm -f "$file_name"
+            PortMasterDialog "message" "- SUCCESS: $(basename "$file_name")"
+          else
+            PortMasterDialogMessageBox "Unable to install $(basename "$file_name"), it is for the wrong architecture.\n\nDeleting file from autoinstall directory."
+            $ESUDO rm -f "$file_name"
+          fi
+        fi
+      done
     fi
-
-    if [[ $(PortMasterDialogResult "install" "$file_name") == "OKAY" ]]; then
-      $ESUDO rm -f "$file_name"
-      PortMasterDialog "message" "- SUCCESS: $(basename $file_name)"
-    else
-      PortMasterDialog "message" "- FAILURE: $(basename $file_name)"
-    fi
-
-    touch "$controlfolder/.muos-refresh"
   done
 
-  if [ -f "$controlfolder/autoinstall/PortMaster.zip" ]; then
-    if [ ! -f "$file_name" ]; then
-      continue
+  # 3. Install *.squashfs files
+  for autoinstall_dir in "$AUTOINSTALL_DIR_1" "$AUTOINSTALL_DIR_2"; do
+    if ls "$autoinstall_dir"/*.squashfs >/dev/null 2>&1; then
+      for file_name in "$autoinstall_dir"/*.squashfs; do
+        if [ -f "$file_name" ]; then
+            $ESUDO mv -f "$file_name" "$controlfolder/libs"
+            PortMasterDialog "message" "- SUCCESS: $(basename "$file_name")"
+        fi
+      done
     fi
+  done
 
-    file_name="$controlfolder/autoinstall/PortMaster.zip"
+  # 4. Install remaining *.zip files
+  for autoinstall_dir in "$AUTOINSTALL_DIR_1" "$AUTOINSTALL_DIR_2"; do
+    if ls "$autoinstall_dir"/*.zip >/dev/null 2>&1; then
+      for file_name in "$autoinstall_dir"/*.zip; do
+        # Skip files we've already processed
+        base_file=$(basename "$file_name")
+        if [ "$base_file" = "PortMaster.zip" ]; then
+          continue
+        fi
 
-    if [[ $(PortMasterDialogResult "install" "$file_name") == "OKAY" ]]; then
-      $ESUDO rm -f "$file_name"
-      PortMasterDialog "message" "- SUCCESS: $(basename $file_name)"
-    else
-      PortMasterDialog "message" "- FAILURE: $(basename $file_name)"
+        if [ -f "$file_name" ]; then
+            if [ "$(PortMasterDialogResult "install" "$file_name")" = "OKAY" ]; then
+              $ESUDO rm -f "$file_name"
+              PortMasterDialog "message" "- SUCCESS: $base_file"
+            else
+              PortMasterDialog "message" "- FAILURE: $base_file"
+            fi
+        fi
+      done
     fi
-  fi
+  done
 
   PortMasterDialog "messages_end"
   if [ -z "$GW" ]; then
@@ -161,23 +170,18 @@ export TERM=linux
 # cat /dev/zero > /dev/fb0 2>/dev/null
 # cat /dev/zero > /dev/fb0 2>/dev/null
 
-pm_message "Starting PortMaster."
+echo "Starting PortMaster."
 
 $ESUDO chmod -R +x .
 
 $ESUDO rm -f "${controlfolder}/.pugwash-reboot"
-while true; do
+# Run once; a self-update asks for a restart, spruce relaunches instead.
+if [ -x "$PM_PYTHON" ]; then
+  $ESUDO "$PM_PYTHON" ./pugwash
+else
   $ESUDO ./pugwash
-
-  # Do it twice, it's just as nice!
-  if [ ! -f "${controlfolder}/.pugwash-reboot" ]; then
-    break;
-  fi
-
-  $ESUDO rm -f "${controlfolder}/.pugwash-reboot"
-done
+fi
 
 unset LD_LIBRARY_PATH
 unset SDL_GAMECONTROLLERCONFIG
 PATH="$OLD_PATH"
-

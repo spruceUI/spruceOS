@@ -32,8 +32,12 @@ class PyUiState:
     def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, 'w') as f:
+            tmp_path = f"{filepath}.tmp"
+            with open(tmp_path, 'w') as f:
                 json.dump(cls._data, f, indent=4)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, filepath)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write state to {filepath}: {e}")
 

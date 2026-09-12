@@ -73,6 +73,11 @@ run_ffplay() {
 	else
 		export PATH="$EMU_DIR"/bin64:"$PATH"
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$EMU_DIR"/lib64
+		# gptokeyb speaks SDL's positional names; the H700 pad needs spruce's map
+		# to be a game controller at all.
+		case "$PLATFORM" in
+			"Anbernic"*) export_sdl_gamecontroller_map positional ;;
+		esac
 		/mnt/SDCARD/spruce/bin64/gptokeyb -k "ffplay" -c "./bin64/ffplay.gptk" &
 		sleep 1
 		ffplay -x $DISPLAY_WIDTH -y $DISPLAY_HEIGHT -fs -loglevel 24 -i "$ROM_FILE" > $(emu_log_file) 2>&1
@@ -81,10 +86,42 @@ run_ffplay() {
 	kill -9 "$(pidof gptokeyb)"
 }
 
+set_hw_vo() {
+	# wlshm: software decoding
+	# dmabuf-wayland: hardware decoding
+
+	FILE_INFO=$(ffprobe -v quiet -print_format csv -select_streams v:0 -show_entries stream=pix_fmt,codec_name $1)
+	CODEC=$(echo $FILE_INFO | cut -d"," -f2)
+	FORMAT=$(echo $FILE_INFO | cut -d"," -f3)
+
+	# 10/12 bit pixel format
+	case "$FORMAT" in
+		*10le|*12le|*16le)
+			echo "wlshm"
+			return
+			;;
+	esac
+
+	# Supported codecs
+	case "$CODEC" in
+		h264|hevc)
+			echo "dmabuf-wayland"
+			return
+			;;
+		*)
+			echo "wlshm"
+			return
+			;;
+	esac
+}
+
 run_mpv() {
 	# pixel 2 only
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
+
+	VO=$(set_hw_vo "$ROM_FILE")
+	log_message "run_mpv: Using $VO"
 
 	INPUT_CONF="/tmp/mpv_input.conf"
 	printf 'VOLUME_UP ignore\nVOLUME_DOWN ignore' > $INPUT_CONF
@@ -93,7 +130,7 @@ run_mpv() {
 	sleep 0.5
 
 	/usr/bin/mpv --profile=fast --fs --geometry="640x480" --hwdec=rkmpp \
-				 --vo=dmabuf-wayland --swapchain-depth=8 \
+				 --vo=$VO --swapchain-depth=8 \
 				 --input-conf=$INPUT_CONF --msg-level=all=warn \
 				"$ROM_FILE" > $(emu_log_file) 2>&1
 

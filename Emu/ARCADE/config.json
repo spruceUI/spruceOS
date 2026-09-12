@@ -28,16 +28,14 @@
       "overrides": {},
       "devices": [
         "MIYOO_A30",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX"
       ]
     },
     "raBuild": {
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+        "ANBERNIC_RGXX"
       ],
       "options": ["64-bit", "32-bit"],
       "selected": "64-bit",
@@ -57,6 +55,7 @@
         "MIYOO_FLIP",
         "GKD_PIXEL2",
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO",
         "TRIMUI_SMART_PRO_S"
       ]

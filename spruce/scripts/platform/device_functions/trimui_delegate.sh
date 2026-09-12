@@ -72,6 +72,20 @@ rgb_led_trimui() {
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
 	[ "$disable" = "True" ] && return 0
 
+	# ...and if the switch or an Fn key has turned the LEDs off. That action
+	# writes black directly, which lasts only until something else writes a
+	# colour - and principal.sh calls set_rgb_in_menu on EVERY return to the
+	# menu, while led_effect re-colours them on every game launch. Both come
+	# through here, so without this the LEDs came back on the moment you left a
+	# game and stayed on until the switch was cycled.
+	#
+	# Deliberately not the disableLEDs setting itself: that is the user's own
+	# "off in all contexts" preference, and a physical switch should not
+	# silently rewrite it. /tmp, so it clears on reboot - which matches the
+	# action, since scene.sh only runs on an actual flip and nothing re-applies
+	# the switch position at boot.
+	flag_check "leds_forced_off" && return 0
+
     # get and set peak rgb brightness
     max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "False")"
     echo "$max_scale" > "/sys/class/led_anim/max_scale"
@@ -224,8 +238,20 @@ launch_trimui_startup_watchdogs() {
     # /tmp/system/set_volume (the stock firmware on the Brick, spruce's own hold
     # loop on the Smart Pro and Smart Pro S) so the in-UI volume bar tracks the
     # hardware Volume +/- keys, including while a key is held.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh
     /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
+
+    # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh). Only the devices
+    # whose cfg points at dongle modules run it; the script itself exits at
+    # once without WIFI_USB_MODULES_DIR, but there is no point starting it.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
+    if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+        /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n usb_wifi_watchdog.sh &
+    fi
+
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 launch_startup_watchdogs() {

@@ -1,0 +1,284 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+layout(std140) uniform UBO
+{
+    highp mat4 MVP;
+} global;
+
+struct Push
+{
+    highp vec4 SourceSize;
+    highp vec4 OriginalSize;
+    highp vec4 OutputSize;
+    uint FrameCount;
+    highp float XBR_Y_WEIGHT;
+    highp float XBR_EQ_THRESHOLD;
+    highp float XBR_LV1_COEFFICIENT;
+    highp float XBR_LV2_COEFFICIENT;
+    highp float small_details;
+};
+
+uniform Push params;
+
+uniform highp sampler2D Source;
+
+in highp vec2 texCoord;
+in highp vec4 t1;
+in highp vec4 t2;
+in highp vec4 t3;
+in highp vec4 t4;
+in highp vec4 t5;
+in highp vec4 t6;
+in highp vec4 t7;
+layout(location = 0) out highp vec4 FragColor;
+
+highp vec4 diff(highp vec4 A, highp vec4 B)
+{
+    return vec4(notEqual(A, B));
+}
+
+highp vec4 df(highp vec4 A, highp vec4 B)
+{
+    return vec4(abs(A - B));
+}
+
+highp vec4 eq(highp vec4 A, highp vec4 B)
+{
+    highp vec4 param = A;
+    highp vec4 param_1 = B;
+    return step(df(param, param_1), vec4(params.XBR_EQ_THRESHOLD));
+}
+
+highp vec4 neq(highp vec4 A, highp vec4 B)
+{
+    highp vec4 param = A;
+    highp vec4 param_1 = B;
+    return vec4(1.0) - eq(param, param_1);
+}
+
+highp vec4 wd(highp vec4 a, highp vec4 b, highp vec4 c, highp vec4 d, highp vec4 e, highp vec4 f, highp vec4 g, highp vec4 h)
+{
+    highp vec4 param = a;
+    highp vec4 param_1 = b;
+    highp vec4 param_2 = a;
+    highp vec4 param_3 = c;
+    highp vec4 param_4 = d;
+    highp vec4 param_5 = e;
+    highp vec4 param_6 = d;
+    highp vec4 param_7 = f;
+    highp vec4 param_8 = g;
+    highp vec4 param_9 = h;
+    return (((df(param, param_1) + df(param_2, param_3)) + df(param_4, param_5)) + df(param_6, param_7)) + (df(param_8, param_9) * 4.0);
+}
+
+highp vec4 weighted_distance(highp vec4 a, highp vec4 b, highp vec4 c, highp vec4 d, highp vec4 e, highp vec4 f, highp vec4 g, highp vec4 h, highp vec4 i, highp vec4 j, highp vec4 k, highp vec4 l)
+{
+    highp vec4 param = a;
+    highp vec4 param_1 = b;
+    highp vec4 param_2 = a;
+    highp vec4 param_3 = c;
+    highp vec4 param_4 = d;
+    highp vec4 param_5 = e;
+    highp vec4 param_6 = d;
+    highp vec4 param_7 = f;
+    highp vec4 param_8 = i;
+    highp vec4 param_9 = j;
+    highp vec4 param_10 = k;
+    highp vec4 param_11 = l;
+    highp vec4 param_12 = g;
+    highp vec4 param_13 = h;
+    return (((((df(param, param_1) + df(param_2, param_3)) + df(param_4, param_5)) + df(param_6, param_7)) + df(param_8, param_9)) + df(param_10, param_11)) + (df(param_12, param_13) * 2.0);
+}
+
+highp float c_df(highp vec3 c1, highp vec3 c2)
+{
+    highp vec3 df_1 = abs(c1 - c2);
+    return (df_1.x + df_1.y) + df_1.z;
+}
+
+void main()
+{
+    highp vec2 fp = fract(texCoord * params.SourceSize.xy);
+    highp vec3 A1 = texture(Source, t1.xw).xyz;
+    highp vec3 B1 = texture(Source, t1.yw).xyz;
+    highp vec3 C1 = texture(Source, t1.zw).xyz;
+    highp vec3 A = texture(Source, t2.xw).xyz;
+    highp vec3 B = texture(Source, t2.yw).xyz;
+    highp vec3 C = texture(Source, t2.zw).xyz;
+    highp vec3 D = texture(Source, t3.xw).xyz;
+    highp vec3 E = texture(Source, t3.yw).xyz;
+    highp vec3 F = texture(Source, t3.zw).xyz;
+    highp vec3 G = texture(Source, t4.xw).xyz;
+    highp vec3 H = texture(Source, t4.yw).xyz;
+    highp vec3 I = texture(Source, t4.zw).xyz;
+    highp vec3 G5 = texture(Source, t5.xw).xyz;
+    highp vec3 H5 = texture(Source, t5.yw).xyz;
+    highp vec3 I5 = texture(Source, t5.zw).xyz;
+    highp vec3 A0 = texture(Source, t6.xy).xyz;
+    highp vec3 D0 = texture(Source, t6.xz).xyz;
+    highp vec3 G0 = texture(Source, t6.xw).xyz;
+    highp vec3 C4 = texture(Source, t7.xy).xyz;
+    highp vec3 F4 = texture(Source, t7.xz).xyz;
+    highp vec3 I4 = texture(Source, t7.xw).xyz;
+    highp vec4 b = vec4(dot(B, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(D, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(H, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(F, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+    highp vec4 c = vec4(dot(C, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(A, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(G, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(I, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+    highp vec4 d = b.yzwx;
+    highp vec4 e = vec4(dot(E, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+    highp vec4 f = b.wxyz;
+    highp vec4 g = c.zwxy;
+    highp vec4 h = b.zwxy;
+    highp vec4 i = c.wxyz;
+    highp float y_weight = params.XBR_Y_WEIGHT;
+    highp vec4 i4;
+    highp vec4 i5;
+    highp vec4 h5;
+    if (params.small_details < 0.5)
+    {
+        i4 = vec4(dot(I4, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(C1, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(A0, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(G5, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+        i5 = vec4(dot(I5, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(C4, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(A1, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(G0, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+        h5 = vec4(dot(H5, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(F4, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(B1, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)), dot(D0, vec3(14.35200023651123046875, 28.1760005950927734375, 5.4720001220703125)));
+    }
+    else
+    {
+        i4 = (vec3(0.2125999927520751953125, 0.715200006961822509765625, 0.072200000286102294921875) * y_weight) * mat4x3(vec3(I4), vec3(C1), vec3(A0), vec3(G5));
+        i5 = (vec3(0.2125999927520751953125, 0.715200006961822509765625, 0.072200000286102294921875) * y_weight) * mat4x3(vec3(I5), vec3(C4), vec3(A1), vec3(G0));
+        h5 = (vec3(0.2125999927520751953125, 0.715200006961822509765625, 0.072200000286102294921875) * y_weight) * mat4x3(vec3(H5), vec3(F4), vec3(B1), vec3(D0));
+    }
+    highp vec4 f4 = h5.yzwx;
+    highp vec4 fx = (vec4(1.0, -1.0, -1.0, 1.0) * fp.y) + (vec4(1.0, 1.0, -1.0, -1.0) * fp.x);
+    highp vec4 fx_l = (vec4(1.0, -1.0, -1.0, 1.0) * fp.y) + (vec4(0.5, 2.0, -0.5, -2.0) * fp.x);
+    highp vec4 fx_u = (vec4(1.0, -1.0, -1.0, 1.0) * fp.y) + (vec4(2.0, 0.5, -2.0, -0.5) * fp.x);
+    highp vec4 param = e;
+    highp vec4 param_1 = f;
+    highp vec4 param_2 = e;
+    highp vec4 param_3 = h;
+    highp vec4 _564 = diff(param, param_1) * diff(param_2, param_3);
+    highp vec4 irlv0 = _564;
+    highp vec4 irlv1 = _564;
+    highp vec4 param_4 = f;
+    highp vec4 param_5 = b;
+    highp vec4 param_6 = f;
+    highp vec4 param_7 = c;
+    highp vec4 param_8 = h;
+    highp vec4 param_9 = d;
+    highp vec4 param_10 = h;
+    highp vec4 param_11 = g;
+    highp vec4 param_12 = e;
+    highp vec4 param_13 = i;
+    highp vec4 param_14 = f;
+    highp vec4 param_15 = f4;
+    highp vec4 param_16 = f;
+    highp vec4 param_17 = i4;
+    highp vec4 param_18 = h;
+    highp vec4 param_19 = h5;
+    highp vec4 param_20 = h;
+    highp vec4 param_21 = i5;
+    highp vec4 param_22 = e;
+    highp vec4 param_23 = g;
+    highp vec4 param_24 = e;
+    highp vec4 param_25 = c;
+    irlv1 = irlv0 * (((((neq(param_4, param_5) * neq(param_6, param_7)) + (neq(param_8, param_9) * neq(param_10, param_11))) + (eq(param_12, param_13) * ((neq(param_14, param_15) * neq(param_16, param_17)) + (neq(param_18, param_19) * neq(param_20, param_21))))) + eq(param_22, param_23)) + eq(param_24, param_25));
+    highp vec4 param_26 = e;
+    highp vec4 param_27 = g;
+    highp vec4 param_28 = d;
+    highp vec4 param_29 = g;
+    highp vec4 irlv2l = diff(param_26, param_27) * diff(param_28, param_29);
+    highp vec4 param_30 = e;
+    highp vec4 param_31 = c;
+    highp vec4 param_32 = b;
+    highp vec4 param_33 = c;
+    highp vec4 irlv2u = diff(param_30, param_31) * diff(param_32, param_33);
+    highp vec4 fx45i = clamp((((fx + vec4(0.3333333432674407958984375)) - vec4(1.5, 0.5, -0.5, 0.5)) - vec4(0.25)) / vec4(0.666666686534881591796875), vec4(0.0), vec4(1.0));
+    highp vec4 fx45 = clamp(((fx + vec4(0.3333333432674407958984375)) - vec4(1.5, 0.5, -0.5, 0.5)) / vec4(0.666666686534881591796875), vec4(0.0), vec4(1.0));
+    highp vec4 fx30 = clamp(((fx_l + vec4(0.16666667163372039794921875, 0.3333333432674407958984375, 0.16666667163372039794921875, 0.3333333432674407958984375)) - vec4(1.0, 1.0, -0.5, 0.0)) / vec4(0.3333333432674407958984375, 0.666666686534881591796875, 0.3333333432674407958984375, 0.666666686534881591796875), vec4(0.0), vec4(1.0));
+    highp vec4 fx60 = clamp(((fx_u + vec4(0.3333333432674407958984375, 0.16666667163372039794921875, 0.3333333432674407958984375, 0.16666667163372039794921875)) - vec4(2.0, 0.0, -1.0, 0.5)) / vec4(0.666666686534881591796875, 0.3333333432674407958984375, 0.666666686534881591796875, 0.3333333432674407958984375), vec4(0.0), vec4(1.0));
+    highp vec4 wd1;
+    highp vec4 wd2;
+    if (params.small_details < 0.5)
+    {
+        highp vec4 param_34 = e;
+        highp vec4 param_35 = c;
+        highp vec4 param_36 = g;
+        highp vec4 param_37 = i;
+        highp vec4 param_38 = h5;
+        highp vec4 param_39 = f4;
+        highp vec4 param_40 = h;
+        highp vec4 param_41 = f;
+        wd1 = wd(param_34, param_35, param_36, param_37, param_38, param_39, param_40, param_41);
+        highp vec4 param_42 = h;
+        highp vec4 param_43 = d;
+        highp vec4 param_44 = i5;
+        highp vec4 param_45 = f;
+        highp vec4 param_46 = i4;
+        highp vec4 param_47 = b;
+        highp vec4 param_48 = e;
+        highp vec4 param_49 = i;
+        wd2 = wd(param_42, param_43, param_44, param_45, param_46, param_47, param_48, param_49);
+    }
+    else
+    {
+        highp vec4 param_50 = e;
+        highp vec4 param_51 = c;
+        highp vec4 param_52 = g;
+        highp vec4 param_53 = i;
+        highp vec4 param_54 = f4;
+        highp vec4 param_55 = h5;
+        highp vec4 param_56 = h;
+        highp vec4 param_57 = f;
+        highp vec4 param_58 = b;
+        highp vec4 param_59 = d;
+        highp vec4 param_60 = i4;
+        highp vec4 param_61 = i5;
+        wd1 = weighted_distance(param_50, param_51, param_52, param_53, param_54, param_55, param_56, param_57, param_58, param_59, param_60, param_61);
+        highp vec4 param_62 = h;
+        highp vec4 param_63 = d;
+        highp vec4 param_64 = i5;
+        highp vec4 param_65 = f;
+        highp vec4 param_66 = b;
+        highp vec4 param_67 = i4;
+        highp vec4 param_68 = e;
+        highp vec4 param_69 = i;
+        highp vec4 param_70 = g;
+        highp vec4 param_71 = h5;
+        highp vec4 param_72 = c;
+        highp vec4 param_73 = f4;
+        wd2 = weighted_distance(param_62, param_63, param_64, param_65, param_66, param_67, param_68, param_69, param_70, param_71, param_72, param_73);
+    }
+    highp vec4 edri = step(wd1, wd2) * irlv0;
+    highp vec4 edr = step(wd1 + vec4(0.100000001490116119384765625), wd2) * step(vec4(0.5), irlv1);
+    highp vec4 param_74 = f;
+    highp vec4 param_75 = g;
+    highp vec4 param_76 = h;
+    highp vec4 param_77 = c;
+    highp vec4 edr_l = (step(df(param_74, param_75) * params.XBR_LV2_COEFFICIENT, df(param_76, param_77)) * irlv2l) * edr;
+    highp vec4 param_78 = h;
+    highp vec4 param_79 = c;
+    highp vec4 param_80 = f;
+    highp vec4 param_81 = g;
+    highp vec4 edr_u = (step(df(param_78, param_79) * params.XBR_LV2_COEFFICIENT, df(param_80, param_81)) * irlv2u) * edr;
+    fx45 = edr * fx45;
+    fx30 = edr_l * fx30;
+    fx60 = edr_u * fx60;
+    fx45i = edri * fx45i;
+    highp vec4 param_82 = e;
+    highp vec4 param_83 = f;
+    highp vec4 param_84 = e;
+    highp vec4 param_85 = h;
+    highp vec4 px = step(df(param_82, param_83), df(param_84, param_85));
+    highp vec4 maximos = max(max(fx30, fx60), max(fx45, fx45i));
+    highp vec3 res1 = E;
+    res1 = mix(res1, mix(H, F, vec3(px.x)), vec3(maximos.x));
+    res1 = mix(res1, mix(B, D, vec3(px.z)), vec3(maximos.z));
+    highp vec3 res2 = E;
+    res2 = mix(res2, mix(F, B, vec3(px.y)), vec3(maximos.y));
+    res2 = mix(res2, mix(D, H, vec3(px.w)), vec3(maximos.w));
+    highp vec3 param_86 = E;
+    highp vec3 param_87 = res1;
+    highp vec3 param_88 = E;
+    highp vec3 param_89 = res2;
+    highp vec3 res = mix(res1, res2, vec3(step(c_df(param_86, param_87), c_df(param_88, param_89))));
+    FragColor = vec4(res, 1.0);
+}
+

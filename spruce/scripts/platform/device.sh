@@ -185,6 +185,15 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
+# Which "first_boot_<key>" flag gates the firstboot lane for this device.
+# Unlike its neighbours here this is a real default, not a missing-function stub:
+# every platform needs a working value, and per-platform is the right answer for
+# all but the Anbernic XX family, which overrides it to share one flag across
+# models so moving a card between them does not re-run firstboot.
+get_firstboot_key() {
+    echo "$PLATFORM"
+}
+
 device_specific_wake_from_sleep() {
     log_message "Missing device_specific_wake_from_sleep function"
 }
@@ -316,12 +325,39 @@ device_home_button_pressed() {
     log_message "Missing device_home_button_pressed function" -v
 }
 
+# Current position of the physical switch, in the same 1/0 convention
+# /usr/trimui/bin/scene.sh uses: 1 = switch on, 0 = switch off.
+#
+# Echo nothing when the device cannot read it. apply-switch-action treats an
+# empty answer as "do not touch the LEDs/radio at boot", which is the behaviour
+# every device had before this existed - so a device with no reader is no worse
+# off, it just does not get the boot-time apply.
+device_get_switch_position() {
+    echo ""
+}
+
+# True when the OS underneath spruce owns the radio end to end - association
+# and DHCP both - so spruce must not start a wpa_supplicant or a DHCP client of
+# its own alongside it. Default false: every device that manages WiFi through
+# spruce keeps the existing behaviour.
+device_manages_own_wifi() {
+    return 1
+}
+
 device_wifi_power_on() { 
     log_message "Missing device_wifi_power_on function" -v
 }
 
-device_wifi_power_off() { 
+device_wifi_power_off() {
     log_message "Missing device_wifi_power_off function" -v
+}
+
+# Give a device a chance to bring its wireless interface back when it is not
+# there. Default is to do nothing: on most devices the interface either exists
+# or the radio is genuinely absent, and only SDIO parts that fail to enumerate
+# need recovering.
+device_ensure_wifi_interface() {
+    return 0
 }
 
 device_system_handles_sdcard_unmount() {
@@ -329,6 +365,49 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
     return 0
+}
+
+device_needs_strict_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    #
+    # Whether save_poweroff_stage2.sh should take its strict unmount path:
+    # resolve the mount point from /proc/mounts rather than guessing it from
+    # cpuinfo, kill cwd/exe holders as well as fd holders, retry the umount, and
+    # escalate the power command if init does not act on it.
+    #
+    # That path exists for the Anbernic XX under BaseOS, where the old code
+    # matched nothing and unmounted nothing. Every other device already had a
+    # shutdown that worked, and stage 2 is the last thing that runs before the
+    # power is cut - the worst place in the tree to carry a change no one has
+    # tested on that hardware. So it is off by default and each device opts in.
+    return 1
+}
+
+device_power_transition_bypasses_init() {
+    # return 0 = true
+    # return non-zero = false
+    #
+    # Whether `poweroff`/`reboot` can be trusted to do anything on this device.
+    # The busybox applets only signal PID 1 and return; if init is blocked for
+    # the whole Spruce session (the Miniloong's rcS is held by the boot
+    # supervisor, S49spruce -> session.sh -> runtime.sh) those signals are never
+    # serviced and the device just sits there with its card unmounted. A device
+    # answering true tells stage 2 to skip the plain applets and the 10 s waits
+    # on them, take the filesystems down the REISUB way (sysrq s/u/s) and call
+    # the forced form straight away, which is reboot(2) and needs no init.
+    # Only meaningful together with device_needs_strict_unmount. Default off.
+    return 1
+}
+
+device_prepare_for_reboot() {
+    # Runs on the reboot path only, after apps are closed and before stage 2
+    # takes the card away - the last moment the device layer is still on hand.
+    # For hardware where the plain kernel restart does not come back: the
+    # Miniloong's rk817 is configured to power-cycle every rail on a SoC reset
+    # ("reset the dev", pmic-reset-func 0) and the unit stays off, so it flips
+    # the PMIC to register-only reset first (SPR-HIGH-051). Default: nothing.
+    :
 }
 
 device_write_default_asound_rc() {
@@ -371,7 +450,58 @@ device_get_hw_epoch() {
 }
 
 device_extra_wifi_setup() {
-    # Do these need to be unique per device? Don't have a way 
+    # Do these need to be unique per device? Don't have a way
     # to test currently
     log_message "Missing device_extra_wifi_setup function" -v
+}
+
+# Which DHCP client this device uses, and how to stop it.
+#
+# These exist because a device that needs a different client had nowhere to say
+# so: enable_wifi hardcoded udhcpc, and the only per-device hook was
+# device_extra_wifi_setup, which runs *in addition to* it rather than instead of
+# it. The Anbernic XX line used that hook to run "dhclient wlan0" - a binary
+# that is not installed on that platform - so it logged a DHCP client it never
+# actually started, on top of the udhcpc that was really doing the work.
+#
+# The default is the udhcpc invocation enable_wifi used to run inline, so every
+# device that does not override these behaves exactly as before. The "already
+# running" guard lives in the hook rather than the caller because the check is
+# client-specific.
+device_start_dhcp_client() {
+    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+}
+
+device_stop_dhcp_client() {
+    killall -9 udhcpc 2>/dev/null
+}
+
+# ---------------------------------------------------------------------------
+# Boot-session hooks (see spruce/scripts/boot/session.sh).
+#
+# The on-card session supervisor calls these around runtime.sh. Defaults are
+# no-ops so every platform behaves exactly as before the supervisor existed;
+# a device opts in by overriding them in its device_functions file.
+# ---------------------------------------------------------------------------
+
+# Extra preflight before runtime.sh is started. Return non-zero to refuse the
+# boot (the supervisor then hands the device to stock); log the reason first.
+device_boot_preflight() {
+    return 0
+}
+
+# Runs once per boot before runtime.sh, after platform detection. The place for
+# work the stock firmware would have done and Spruce now owns (codec init,
+# compositor decisions, remounts) - not for watchdogs, which belong in
+# launch_startup_watchdogs.
+device_boot_pre_session() {
+    return 0
+}
+
+# How to hand this boot to the vendor UI when Spruce cannot or will not run.
+# Print a command line to exec, or nothing when the rootfs stub owns that hand-off
+# (the supervisor then just returns to it). The Flip prints its stock launcher;
+# devices whose stub blocks the stock init script leave this empty.
+device_stock_ui_command() {
+    printf ''
 }

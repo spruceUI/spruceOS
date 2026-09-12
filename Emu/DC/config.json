@@ -22,6 +22,18 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "Flycast-standalone",
+        "Flycast-libretro"
+      ],
+      "selected": "Flycast-standalone",
+      "overrides": {}
+    },
     "Emulator_A30": {
       "display": "Retroarch Core",
       "devices": [
@@ -38,10 +50,12 @@
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480","ANBERNIC_RGCUBEXX"
+        "ANBERNIC_RGXX"
       ],
-      "options": ["64-bit", "32-bit"],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
       "selected": "64-bit",
       "overrides": {}
     },
@@ -53,11 +67,12 @@
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX"
       ],
       "options": [
         "Flycast-libretro",
+        "Flycast2024-libretro",
+        "Flycast2021-libretro",
         "Flycast-standalone"
       ],
       "selected": "Flycast-libretro",
@@ -91,8 +106,8 @@
     "MIYOO_A30",
     "MIYOO_FLIP",
     "GKD_PIXEL2",
-    "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-    "ANBERNIC_RGXX640480"
+    "ANBERNIC_RGXX",
+    "RGB30"
   ],
   "alternativeFolderNames": [
     "DREAMCAST",

@@ -18,6 +18,10 @@ if [ -f "$HOME/config.ini" ]; then
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
 fi
 
+# GLES window on the Mali blob. The Miniloong Pocket 1 has the same GLES-only
+# Mali-G52 as the RGB30, so it needs the same context or vtree fails to open one.
+{ [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "Miniloong" ]; } && export VTREE_GLES=1
+
 case "$PLATFORM" in
     "SmartPro"* | "BrickPro") export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
     * )           export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
@@ -30,7 +34,7 @@ case "$PLATFORM" in
         sync
         killall -q -USR2 joystickinput
         ;;
-    "Brick"|"BrickPro"|"Flip"|"SmartPro"|"SmartProS"|"Pixel2")
+    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30")
         ./vtree.aarch64 >"$HOME/log.txt" 2>&1
         sync
         ;;
@@ -47,8 +51,16 @@ case "$PLATFORM" in
         sync
         ;;
     "Anbernic"*)
-        cd "/mnt/vendor/bin/fileM"
-        /mnt/vendor/bin/fileM/dinguxCommand_en.dge
+        # Nothing on this device ships an SDL GameController mapping for
+        # "ANBERNIC-keys", so without one the pad enumerates and nothing
+        # responds. Positional rather than the default label-named form: vtree
+        # carries spruce's nintendo-button-labels patch and already swaps A<->B
+        # and X<->Y itself, so the label-named map corrected twice and landed
+        # back where it started. See export_sdl_gamecontroller_map in
+        # helperFunctions.sh for what the two forms mean.
+        export_sdl_gamecontroller_map positional
+        ./vtree.aarch64 >"$HOME/log.txt" 2>&1
+        sync
         ;;
     *)
         echo "File Management: unsupported PLATFORM=$PLATFORM" >&2

@@ -20,11 +20,20 @@
 # brightness), so this watchdog just executes the launch path as-is, exactly as
 # keymon did.
 #
-# Key codes: on the Brick the left/right Fn keys report as $B_L3 (1 317) and
-# $B_R3 (1 318) on $EVENT_PATH_READ_INPUTS_SPRUCE (event3). The Brick has no
-# analog sticks, so 317/318 are exclusively the Fn keys here (the B_L3/B_R3
-# naming is inherited from the shared TrimUI config). The node is read
-# non-exclusively, alongside the home/buttons watchdogs that already read it.
+# Key codes come from the platform config as FN_KEY_LEFT / FN_KEY_RIGHT, because
+# the two devices with Fn keys do NOT agree on them:
+#
+#   Brick     317/318 (BTN_THUMBL/BTN_THUMBR) - it has no analog sticks, so those
+#             codes are wired to the Fn keys and nothing else reports them
+#   Brick Pro 59/60 (KEY_F1/KEY_F2) - it HAS sticks, and 317/318 are its genuine
+#             stick clicks
+#
+# Both measured on hardware. This used to match $B_L3/$B_R3, which are 317/318 on
+# both devices - correct on the Brick by luck, and on the Brick Pro would have
+# fired the Fn action on every stick click.
+#
+# The node is read non-exclusively, alongside the home/buttons watchdogs that
+# already read it.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -47,6 +56,12 @@ run_fnkey() {
     "$action" &
 }
 
+if [ -z "$FN_KEY_LEFT" ] || [ -z "$FN_KEY_RIGHT" ]; then
+    # An empty code would make the case pattern "key  1" match far too much.
+    log_message "fnkey_watchdog.sh: FN_KEY_LEFT/FN_KEY_RIGHT unset for $PLATFORM, not starting"
+    exit 0
+fi
+
 log_message "fnkey_watchdog.sh: Started up."
 
 # Outer loop restarts the reader if the getevent pipe ever exits, so the
@@ -54,8 +69,8 @@ log_message "fnkey_watchdog.sh: Started up."
 while true; do
     getevent -pid $$ "$EVENT_PATH_READ_INPUTS_SPRUCE" | while read line; do
         case $line in
-            *"key $B_L3 1"*) run_fnkey "$F1_LAUNCH" left ;;
-            *"key $B_R3 1"*) run_fnkey "$F2_LAUNCH" right ;;
+            *"key $FN_KEY_LEFT 1"*)  run_fnkey "$F1_LAUNCH" left ;;
+            *"key $FN_KEY_RIGHT 1"*) run_fnkey "$F2_LAUNCH" right ;;
         esac
     done
     log_message "fnkey_watchdog.sh: getevent pipe exited, restarting..."

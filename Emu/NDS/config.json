@@ -18,69 +18,47 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_A30": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "DraStic-Steward",
+        "DSperate"
+      ],
+      "selected": "DraStic-Steward",
+      "overrides": {}
+    },
     "Emulator_Flip": {
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
-      ],
-      "options": [
-        "DraStic-original",
-        "DraStic-Steward",
-        "DraStic-trngaje"
-      ],
-      "selected": "DraStic-original",
-      "overrides": {}
-    },
-    "Emulator_Brick": {
-      "display": "Emulator",
-      "devices": [
         "TRIMUI_BRICK"
       ],
       "options": [
         "DraStic-original",
         "DraStic-Steward",
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
-      "selected": "DraStic-original",
-      "overrides": {}
-    },
-    "Emulator_BrickPro": {
-      "display": "Emulator",
-      "devices": [
-        "TRIMUI_BRICK_PRO"
-      ],
-      "options": [
-        "DraStic-Steward",
-        "DraStic-original"
-      ],
-      "selected": "DraStic-Steward",
+      "selected": "DSperate",
       "overrides": {}
     },
     "Emulator_SmartPro": {
       "display": "Emulator",
       "devices": [
-        "TRIMUI_SMART_PRO"
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_BRICK_PRO"
       ],
       "options": [
         "DraStic-original",
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
-      "selected": "DraStic-original",
+      "selected": "DSperate",
       "overrides": {}
-    },
-    "Emulator_SmartProS": {
-        "display": "Emulator",
-        "devices": [
-            "TRIMUI_SMART_PRO_S"
-        ],
-        "options": [
-            "DraStic-original",
-            "DraStic-trngaje"
-        ],
-        "selected": "DraStic-trngaje",
-        "overrides": {}
     },
     "Emulator_Pixel2": {
       "display": "Emulator",
@@ -88,9 +66,47 @@
         "GKD_PIXEL2"
       ],
       "options": [
-        "DraStic-trngaje"
+        "DraStic-trngaje",
+        "DSperate"
       ],
       "selected": "DraStic-trngaje",
+      "overrides": {}
+    },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30",
+        "ANBERNIC_RGXX"
+      ],
+      "options": [
+        "DSperate",
+        "DraStic-original"
+      ],
+      "selected": "DSperate",
+      "overrides": {}
+    },
+    "dsperateVideoEffect": {
+      "display": "DSperate: Video Effect",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RGXX",
+        "GKD_PIXEL2",
+        "RGB30",
+        "MIYOO_A30"
+      ],
+      "options": [
+        "None",
+        "Antialiasing",
+        "Bilinear",
+        "Subtle Grid",
+        "Chunky Grid",
+        "Extra Chunky"
+      ],
+      "selected": "None",
       "overrides": {}
     }
   },

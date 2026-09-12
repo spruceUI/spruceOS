@@ -1,0 +1,118 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+struct PushVarsPS
+{
+    highp float sTime;
+    highp float sDesaturateAmount2;
+    highp float sLizBias;
+    highp float sLizScale;
+    highp float sLizExponent;
+    highp float sLizScriptBasedBias;
+};
+
+uniform PushVarsPS pushvars;
+
+uniform highp sampler2D sBloomTex;
+uniform highp sampler2D sDeliciousDiamonds;
+uniform highp sampler2D sScreenTex;
+
+in highp vec2 ilUV;
+layout(location = 0) out highp vec4 outColor0;
+
+highp vec3 to_linear_approx(highp vec3 clr)
+{
+    highp float toLinear = 2.2000000476837158203125;
+    return pow(clr, vec3(toLinear));
+}
+
+highp vec4 to_linear_approx(highp vec4 clr)
+{
+    highp vec3 param = clr.xyz;
+    return vec4(to_linear_approx(param), clr.w);
+}
+
+highp float rgb_to_lightness(highp vec3 rgb)
+{
+    highp float l = ((rgb.x * 0.2125999927520751953125) + (rgb.y * 0.715200006961822509765625)) + (rgb.z * 0.072200000286102294921875);
+    highp float kTransitionPoint = 0.008856452070176601409912109375;
+    highp float kSlope = 903.29632568359375;
+    highp float _99;
+    if (l > kTransitionPoint)
+    {
+        _99 = (116.0 * pow(l, 0.3333333432674407958984375)) - 16.0;
+    }
+    else
+    {
+        _99 = l * kSlope;
+    }
+    highp float lStar = _99 * 0.00999999977648258209228515625;
+    return lStar;
+}
+
+highp vec3 to_gamma_approx(highp vec3 clr)
+{
+    highp float toGamma = 0.4545454680919647216796875;
+    return pow(clr, vec3(toGamma));
+}
+
+highp vec4 to_gamma_approx(highp vec4 clr)
+{
+    highp vec3 param = clr.xyz;
+    return vec4(to_gamma_approx(param), clr.w);
+}
+
+void main()
+{
+    highp vec4 bloomSample = texture(sBloomTex, ilUV);
+    highp vec4 _130 = bloomSample;
+    highp vec3 _148 = max(_130.xyz - vec3(pushvars.sLizBias + pushvars.sLizScriptBasedBias), vec3(0.0));
+    bloomSample.x = _148.x;
+    bloomSample.y = _148.y;
+    bloomSample.z = _148.z;
+    highp vec4 _155 = bloomSample;
+    highp vec3 _161 = pow(_155.xyz, vec3(pushvars.sLizExponent));
+    bloomSample.x = _161.x;
+    bloomSample.y = _161.y;
+    bloomSample.z = _161.z;
+    highp vec4 _172 = bloomSample;
+    highp vec3 _174 = _172.xyz * vec3(pushvars.sLizScale);
+    bloomSample.x = _174.x;
+    bloomSample.y = _174.y;
+    bloomSample.z = _174.z;
+    highp float sT05 = sin(pushvars.sTime * 0.5);
+    highp vec2 uvTime = vec2(sT05, cos(pushvars.sTime * 1.0)) * 0.02500000037252902984619140625;
+    highp float lizFade = 2.0 + (sT05 * 1.0);
+    highp vec4 param = texture(sDeliciousDiamonds, (ilUV * vec2(0.89999997615814208984375 + (sT05 * 0.100000001490116119384765625), 1.0)) + uvTime);
+    highp vec4 diamondSample = to_linear_approx(param);
+    highp vec4 _220 = diamondSample;
+    highp vec3 _223 = _220.xyz * lizFade;
+    diamondSample.x = _223.x;
+    diamondSample.y = _223.y;
+    diamondSample.z = _223.z;
+    highp vec4 _232 = bloomSample;
+    highp vec3 _234 = _232.xyz * diamondSample.xyz;
+    bloomSample.x = _234.x;
+    bloomSample.y = _234.y;
+    bloomSample.z = _234.z;
+    highp vec4 param_1 = texture(sScreenTex, ilUV);
+    highp vec4 srcSample = to_linear_approx(param_1);
+    highp vec3 param_2 = srcSample.xyz;
+    highp float lStar = rgb_to_lightness(param_2);
+    lStar *= lStar;
+    lStar *= lStar;
+    highp vec4 _259 = srcSample;
+    highp vec3 _269 = mix(_259.xyz, vec3(lStar, lStar, lStar), vec3(pushvars.sDesaturateAmount2));
+    srcSample.x = _269.x;
+    srcSample.y = _269.y;
+    srcSample.z = _269.z;
+    highp vec4 _276 = srcSample;
+    highp vec3 _282 = min(_276.xyz + bloomSample.xyz, vec3(1.0));
+    srcSample.x = _282.x;
+    srcSample.y = _282.y;
+    srcSample.z = _282.z;
+    highp vec4 param_3 = srcSample;
+    outColor0 = to_gamma_approx(param_3);
+}
+

@@ -208,7 +208,7 @@ class MiyooA30(MiyooDevice):
     def take_snapshot(self, path):
         return None
     
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
         if self.is_wifi_enabled():
             try:
@@ -262,9 +262,6 @@ class MiyooA30(MiyooDevice):
 
     def reboot_cmd(self):
         return None
-
-    def get_wpa_supplicant_conf_path(self):
-        return PyUiConfig.get_wpa_supplicant_conf_file_location("/config/wpa_supplicant.conf")
 
     def get_volume(self):
         return self.system_config.get_volume()

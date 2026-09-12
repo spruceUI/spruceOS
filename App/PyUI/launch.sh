@@ -54,7 +54,7 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Brick / SmartPro / SmartProS
+# Brick / BrickPro / SmartPro / SmartProS
 ############################################################
     "Brick" | "BrickPro" | "SmartPro" | "SmartProS" )
         tinymix set 9 1
@@ -128,14 +128,49 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Anbernic RG34XXSP
+# Anbernic RG XX line (Allwinner H700)
 ############################################################
-    "AnbernicRG34XXSP" | "AnbernicXX640480" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
-        export PYSDL2_DLL_PATH=/usr/lib/aarch64-linux-gnu/
-        export LD_LIBRARY_PATH=/usr/lib32:/usr/lib:/mnt/vendor/lib
-    
-        if [ "$PLATFORM" = "AnbernicRG34XXSP" ]; then
-            DEVICE="ANBERNIC_RG34XXSP"
+    "AnbernicXX720480" | "AnbernicXX720480NoStick" | "AnbernicXX640480" | "AnbernicXX640480NoStick" | "AnbernicXX640480OneStick" | "AnbernicRG28XX" | "AnbernicRGCubeXX" )
+        # BaseOS ships no SDL2 and no python: use the aarch64 pair we already
+        # bundle. MainUI is the bind-mounted alias of python3.10 set up in
+        # device_init - spruce greps for that process name.
+        #
+        # Our usual SDL2 only speaks KMSDRM and wayland. BaseOS has neither
+        # libdrm/libgbm nor wayland - its mali blob is the fbdev winsys build -
+        # so that SDL2 falls back to the dummy driver and renders nowhere.
+        # Prefer a mali-fbdev SDL2 when one is staged alongside.
+        PYUI_DLL=/mnt/SDCARD/App/PyUI/dll
+        [ -f /mnt/SDCARD/App/PyUI/dll-mali/libSDL2-2.0.so.0 ] && PYUI_DLL=/mnt/SDCARD/App/PyUI/dll-mali
+
+        export PYSDL2_DLL_PATH="$PYUI_DLL"
+        export LD_LIBRARY_PATH="$PYUI_DLL:/mnt/SDCARD/spruce/flip/lib:/usr/lib"
+        PYUI_BIN=/mnt/SDCARD/spruce/flip/bin/MainUI
+
+        # BaseOS runs no udev and no mdev - devtmpfs creates the nodes and
+        # nothing else is listening. SDL's joystick layer goes looking for
+        # udev during SDL_Init and hangs there, which strands PyUI before it
+        # ever opens the display. BaseOS documents this and NextUI sets the
+        # same variable.
+        export SDL_JOYSTICK_DISABLE_UDEV=1
+
+        # Name the driver rather than letting SDL probe: the mali build is
+        # the only backend on this box that can reach the panel, and a
+        # failure to select it should be a loud error, not a silent
+        # fallback to dummy.
+        case "$PYUI_DLL" in
+            *dll-mali) export SDL_VIDEODRIVER=mali ;;
+        esac
+
+        if [ "$PLATFORM" = "AnbernicXX720480" ]; then
+            DEVICE="ANBERNIC_RGXX720480"
+        elif [ "$PLATFORM" = "AnbernicXX720480NoStick" ]; then
+            # The pad-layout platforms are a shell-side split; PyUI has nothing
+            # that differs by sticks, so they share the panel's identity.
+            DEVICE="ANBERNIC_RGXX720480"
+        elif [ "$PLATFORM" = "AnbernicXX640480NoStick" ]; then
+            DEVICE="ANBERNIC_RGXX640480"
+        elif [ "$PLATFORM" = "AnbernicXX640480OneStick" ]; then
+            DEVICE="ANBERNIC_RGXX640480"
         elif [ "$PLATFORM" = "AnbernicRG28XX" ]; then
             DEVICE="ANBERNIC_RG28XX"
         elif [ "$PLATFORM" = "AnbernicXX640480" ]; then
@@ -146,9 +181,79 @@ case "$PLATFORM" in
             DEVICE="ANBERNIC_RGXX640480"
         fi
 
-        python3 \
+        "$PYUI_BIN" \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
             -device "$DEVICE" \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
+
+    ;;
+
+############################################################
+# Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
+############################################################
+    "Miniloong" )
+        # Same aarch64 payload as the Flip (spruce/flip): our own KMSDRM SDL2
+        # and the Mali-G52 blob the firmware ships. Stock Weston is stopped by
+        # device_init when MINILOONG_STOP_WESTON=1 (the default), otherwise
+        # the Wayland driver is selected here.
+        export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
+        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib:/lib"
+        if [ "${MINILOONG_STOP_WESTON:-1}" = "1" ]; then
+            export SDL_VIDEODRIVER=kmsdrm
+        else
+            export SDL_VIDEODRIVER=wayland
+            export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/var/run}"
+        fi
+        export SDL_AUDIODRIVER=alsa
+
+        log_message "Starting PyUI on $PLATFORM"
+        /mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device MINILOONG_POCKET1 \
+            -logDir /mnt/SDCARD/Saves/spruce \
+            -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
+            -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
+    ;;
+
+    "RGB30" )
+        # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
+        # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
+        # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
+        # backend, so the mali-fbdev dance the H700 line needs does not apply.
+        # Use our normal dll.
+        #
+        # The blob is GLES-only: it advertises no desktop GL EGL config at all.
+        # That is handled in PyUI, not here - Device.wants_gles_context() ->
+        # display.py asks SDL for an ES profile before the window is made. There
+        # is no environment variable for SDL's gl_config.profile_mask, so it has
+        # to be code.
+        export PYSDL2_DLL_PATH=/mnt/SDCARD/App/PyUI/dll
+        # /usr/lib/aarch64-linux-gnu, not /usr/lib: on Debian aarch64 that is
+        # where libEGL, libgbm and libMali actually live.
+        #
+        # NOTE, not yet acted on: flip/lib sits ahead of the system path here,
+        # and on a Debian base that is backwards. Measured against the card, the
+        # bundled SDL2 and python3.10 need nothing from flip/lib but glibc, and
+        # of the stdlib extension modules only Tkinter does - while flip/lib
+        # carries 59 buster-era libraries trixie also has, among them libsystemd
+        # (LIBSYSTEMD_245 against the base's 257), libwayland-client and
+        # libdecor-0, all of which SDL2 dlopens. Nothing PyUI or RetroArch calls
+        # is actually broken by it today, which is why this is a note and not a
+        # change: this exact ordering is the one PyUI is known to boot with, and
+        # swapping it is a deliberate test, not a tidy-up.
+        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib/aarch64-linux-gnu"
+
+        # MinUI's own launcher sets these on this hardware, which is the best
+        # evidence available that they are the working combination.
+        export SDL_VIDEODRIVER=kmsdrm
+        export SDL_AUDIODRIVER=alsa
+
+        log_message "Starting PyUI on $PLATFORM"
+        /mnt/SDCARD/spruce/flip/bin/MainUI \
+            /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
+            -device RGB30 \
             -logDir /mnt/SDCARD/Saves/spruce \
             -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"

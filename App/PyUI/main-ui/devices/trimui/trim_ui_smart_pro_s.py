@@ -60,9 +60,7 @@ class TrimUISmartProS(TrimUIDevice):
                 Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
                 volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
                 volume_key_polling_thread.start()
-                self.power_key_watcher = KeyWatcher("/dev/input/event0")
-                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-                power_key_polling_thread.start()
+                self.power_key_watcher = self.volume_key_watcher
                 
         super().__init__()
 
@@ -154,6 +152,23 @@ class TrimUISmartProS(TrimUIDevice):
             if(old_volume != self.mainui_volume):
                 Display.volume_changed(self.mainui_volume * 5)
 
+            # Something outside this process - the physical switch's
+            # scene-wifi.sh, today - can flip .wifi in this same file while
+            # PyUI is already running. self.system_config only reflects what
+            # PyUI itself last wrote, so without this, monitor_wifi()'s
+            # self-heal loop keeps believing WiFi should still be in whatever
+            # state it was in at startup: it sees wlan0 go down, doesn't know
+            # the radio was turned off on purpose, and switches it back on
+            # within one poll (up to ~10s). Reloading here - this callback
+            # already runs on every change to this file - keeps
+            # is_wifi_enabled() and the status caches honest with whatever
+            # last touched it, switch or otherwise.
+            old_wifi_enabled = self.system_config.is_wifi_enabled()
+            self.system_config.reload_config()
+            if old_wifi_enabled != self.system_config.is_wifi_enabled():
+                self.get_wifi_status.force_refresh()
+                self.get_ip_addr_text.force_refresh()
+
         except Exception as e:
             PyUiLogger.get_logger().warning(f"Error reading {path}: {e}")
             return None
@@ -173,36 +188,6 @@ class TrimUISmartProS(TrimUIDevice):
                             stdout=subprocess.DEVNULL,
                             stderr=subprocess.DEVNULL)
         self.system_config.set_bluetooth(1)
-
-    def _signal_osd_quit(self):
-        os.makedirs("/tmp/trimui_osd", exist_ok=True)
-        open("/tmp/trimui_osd/osdd_quit", "a").close()
-
-    def _wpa_supplicant_quit(self):
-        ProcessRunner.run(["killall", "wpa_supplicant"])  
-
-    def _prepare_for_power_action(self):
-        self._signal_osd_quit()
-        self._wpa_supplicant_quit()
-        time.sleep(1)
-
-    def power_off(self):
-        Display.display_message(Language.label("poweringOff", "Powering off..."))
-        self._prepare_for_power_action()
-        time.sleep(1)
-        super().power_off()
-        # So we dont update the display while shutting down
-        time.sleep(10)
-
-
-    def reboot(self):
-        Display.display_message(Language.label("rebooting", "Rebooting..."))
-        self._prepare_for_power_action()
-        time.sleep(1)
-        super().reboot()
-        # So we dont update the display while rebooting
-        time.sleep(10)
-
 
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)

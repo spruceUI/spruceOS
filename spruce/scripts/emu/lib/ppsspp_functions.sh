@@ -49,16 +49,33 @@ run_ppsspp() {
 	mkdir -p "$SS_DIR"
 
 	move_screenshots_if_present
-	mount --bind "$SS_DIR" "$PSP_SS_DIR"
+	mount -o bind "$SS_DIR" "$PSP_SS_DIR"
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
-	# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
 	case "$PLATFORM" in
+		# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
 		"Brick"|"SmartPro"|"BrickPro")
 			export SDL_VIDEODRIVER=mali
 			"$EMU_DIR/setalpha" 0
 			rm -f "$PSP_DIR/FailedGraphicsBackends.txt"
+			;;
+		# The Anbernic pad has no SDL gamecontroller mapping on this rootfs, so
+		# PPSSPP falls back to raw joystick indices and every button lands wrong
+		# (the same reason RetroArch needed an sdl2 autoconfig). Registering the
+		# mapping makes SDL_IsGameController true, so PPSSPP maps by SDL button
+		# name and the shipped controls-*.ini works unchanged. POSITIONAL, like
+		# every other arm64 device (the Flip and the TrimUI line run on SDL's
+		# built-in X360 map): PPSSPP puts Cross on SDL A, and SDL A must be the
+		# bottom button for Cross to sit where the PSP has it, and for the
+		# controls-*.ini hotkeys to read SELECT+B exit / SELECT+A screenshot /
+		# SELECT+X pause as they do fleet-wide. The label-named map put Cross
+		# on the right-hand A button instead. Video also needs the mali driver,
+		# as on the PowerVR devices. Mapping GUID/indices verified on CubeXX;
+		# matches MustardOS.
+		"Anbernic"*)
+			export SDL_VIDEODRIVER=mali
+			export_sdl_gamecontroller_map positional
 			;;
 	esac
 
@@ -70,9 +87,9 @@ run_ppsspp() {
 
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	if [ -z "$ROM_FILE" ]; then
-		"$PPSSPPSDL" --fullscreen > $(emu_log_file) 2>&1
+		"$PPSSPPSDL" --fullscreen > "$(emu_log_file)" 2>&1
 	else
-		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > $(emu_log_file) 2>&1
+		"$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > "$(emu_log_file)" 2>&1
 	fi
 
 	umount "$PSP_SS_DIR"

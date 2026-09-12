@@ -38,6 +38,11 @@ vibrate() {
         shift
     done
 
+    # "Off" is one of the four options the setting offers and it has to be
+    # honoured here. Falling through leaves it to whatever follows, which on
+    # some platforms drives the motor anyway and on others just makes noise.
+    [ "$intensity" = "Off" ] && return 0
+
     case "$intensity" in
             "Weak")   echo  50 > /sys/class/motor/max_scale ;;
             "Medium") echo  75 > /sys/class/motor/max_scale ;;
@@ -59,6 +64,18 @@ rgb_led() {
 }
 
 # used in principal.sh
+# The switch is "DIP Switch PL11" on this SoC - gpio363, not the a133p line's
+# gpio243, which does not exist here. init_gpio_SmartProS leaves it commented out
+# because trimui_inputd owns the pin, but that also means trimui_inputd has
+# already exported it, so it can simply be read.
+#
+# Verified on hardware that the raw value is the same 1/0 trimui_scened hands
+# scene.sh, by flipping the switch with the action set to "LED off": LEDs off
+# reads 1, LEDs on reads 0.
+device_get_switch_position() {
+    cat /sys/class/gpio/gpio363/value 2>/dev/null
+}
+
 enable_or_disable_rgb() {
     enable_file="/sys/class/led_anim/enable"
     disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
@@ -231,9 +248,6 @@ init_gpio_SmartProS() {
 }
 
 runtime_mounts_SmartProS() {
-	# PortMaster ports location
-    mkdir -p /mnt/SDCARD/Roms/PORTS/ports/ 
-    mount --bind /mnt/SDCARD/Roms/PORTS/ /mnt/SDCARD/Roms/PORTS/ports/
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
@@ -278,8 +292,10 @@ device_init() {
     device_run_thermal_process
 
     # Install the configured switch action into /usr/trimui/scene so the physical
-    # switch follows Settings -> Button Settings -> Switch action.
-    /mnt/SDCARD/spruce/smartpros/bin/apply-switch-action --now
+    # switch follows Settings -> Button Settings -> Switch action. --now also
+    # adopts, once, whatever action was already installed - on the Brick line that
+    # is whatever the old fn_editor app last wrote, and it outlives the SD card.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
 
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
@@ -477,8 +493,8 @@ set_backlight() {
     echo "$val_255" > /sys/class/backlight/backlight0/brightness
 
     # update device system json
-    tmp=$(mktemp)
-    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
 
@@ -486,4 +502,14 @@ device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
     return 1 # SmartProS leaves dirty bit set?
+}
+
+# Strict unmount by default (SPR-MED-199). Measured 2026-09-06: the original
+# single umount fails here on the fan script's python (exe on the card) and on
+# hciattach/bluetoothd (cwd on the card), holders the fd-only sweep never
+# sees, and falls back to a lazy detach. The strict path took the card off
+# cleanly in every run of 2026-09-05/06 (USB Storage Mode session, T5-3 to
+# T5-7) at a cost of a few seconds.
+device_needs_strict_unmount() {
+    return 0
 }

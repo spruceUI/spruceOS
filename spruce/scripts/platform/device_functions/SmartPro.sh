@@ -46,13 +46,22 @@ device_init() {
 
     version="$(get_fw_version)"
     if [ "$version" != "1.1.0" ]; then
-        run_trimui_osdd
+        # Same reasoning as the Brick line - PyUI draws its own popups, so the
+        # stock ones are duplicate clutter. The firmware check above is kept:
+        # it predates this and guards something separate.
+        run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
+        [ "$run_osd" = "True" ] && run_trimui_osdd
     fi
 
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
         chmod +x /bin/bash
     fi
+    # Install the configured switch action into /usr/trimui/scene so the physical
+    # switch follows Settings -> Button Settings -> Switch action. --now also
+    # adopts, once, whatever action was already installed - on the Brick line that
+    # is whatever the old fn_editor app last wrote, and it outlives the SD card.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
 }
 
 send_menu_button_to_retroarch() {
@@ -79,6 +88,10 @@ vibrate() {
         esac
         shift
     done
+
+    # "Off" is a real option, not an invalid value - handle it before the
+    # catch-all below starts calling it invalid on every vibrate.
+    [ "$intensity" = "Off" ] && return 0
 
     case "$intensity" in
         Strong)

@@ -1,0 +1,8 @@
+Redistribution
+License: GNU GPL version 3 or later <http://www.gnu.org/licenses/gpl-3.0.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Binary packages may be linked against SDL.
+
+Source from https://www.6809.org.uk/xroar/  xroar@6809.org.uk

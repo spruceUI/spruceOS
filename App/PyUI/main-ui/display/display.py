@@ -96,6 +96,7 @@ class Display:
     _screensaver_active = False
     _screensaver_lowered_cpu = False
     _screensaver_saved_lumination = None
+    _screensaver_dimmed = False
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
@@ -225,6 +226,16 @@ class Display:
     def _init_display(cls):
         with log_timing("sdl2.ext.init", PyUiLogger.get_logger()):    
             sdl2.ext.init(controller=False)
+
+        # After sdl2.ext.init, never before: SDL_Init calls
+        # SDL_GL_ResetAttributes and would wipe anything set earlier. Before
+        # the window, because that is when the EGL config is chosen.
+        if Device.get_device().wants_gles_context():
+            sdl2.SDL_GL_SetAttribute(
+                sdl2.SDL_GL_CONTEXT_PROFILE_MASK,
+                sdl2.SDL_GL_CONTEXT_PROFILE_ES
+            )
+            PyUiLogger.get_logger().info("Requesting an OpenGL ES EGL config")
 
         with log_timing("sdl2.SDL_DisplayMode", PyUiLogger.get_logger()):    
             display_mode = sdl2.SDL_DisplayMode()
@@ -1055,10 +1066,23 @@ class Display:
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Could not lower CPU for screensaver: {e}")
 
+        if Theme.get_screensaver_dim_backlight() and not ScreenSaver.is_animating():
+            try:
+                cls._screensaver_dimmed = Device.get_device().dim_backlight_for_screensaver()
+            except Exception as e:
+                PyUiLogger.get_logger().warning(f"Could not dim backlight for screensaver: {e}")
+
     @classmethod
     def restore_from_blank(cls):
         if not cls._screensaver_active:
             return
+
+        if cls._screensaver_dimmed:
+            cls._screensaver_dimmed = False
+            try:
+                Device.get_device().restore_backlight_after_screensaver()
+            except Exception as e:
+                PyUiLogger.get_logger().warning(f"Could not restore backlight after screensaver: {e}")
 
         # Before anything redraws, so waking up doesn't happen at idle clocks.
         if cls._screensaver_lowered_cpu:

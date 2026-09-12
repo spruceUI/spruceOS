@@ -1,8 +1,6 @@
 #!/bin/sh
-
-# We control wpa_supplicant, not the system
-systemctl stop wpa_supplicant
-systemctl disable wpa_supplicant
-systemctl mask wpa_supplicant
+#
+# spruce entry point for the Anbernic H700 line. Reached from
+# .system/h700/paks/MinUI.pak/launch.sh, which is the path BaseOS execs.
 
 /mnt/SDCARD/spruce/scripts/runtime.sh

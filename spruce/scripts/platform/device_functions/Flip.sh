@@ -13,6 +13,7 @@
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/usb_wifi_dongle.sh"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/flip-system.json"
@@ -103,8 +104,30 @@ are_headphones_plugged_in() {
 }
 
 
+# The stored level (.vol, 0..20), always a number: a missing key, damaged json
+# or failing jq must not hand "null" to the arithmetic callers.
 get_volume_level() {
-    jq -r '.vol' "$SYSTEM_JSON"
+    stored_level="$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$stored_level" in
+        ''|*[!0-9]*) stored_level=0 ;;
+    esac
+    printf '%s\n' "$stored_level"
+}
+
+# Route and gain for a non-zero level: $1 = Playback Path (2 SPK, 3 HP), $2 = SPK Volume.
+# A route write lands on the driver's raw stored gain: open it from OFF, parked at the minimum.
+flip_apply_route_and_gain() {
+    wanted_route="$1"
+    gain="$2"
+    current_route=$(amixer cget numid=2 2>/dev/null | sed -n 's/.*: values=//p')
+    if [ "$current_route" = "$wanted_route" ]; then
+        amixer cset numid=5 "$gain" >/dev/null 2>&1
+    else
+        park=100
+        [ "$gain" -eq 100 ] && park=95
+        printf 'cset numid=2 0\ncset numid=5 %s\ncset numid=2 %s\ncset numid=5 %s\n' \
+            "$park" "$wanted_route" "$gain" | amixer -s >/dev/null 2>&1
+    fi
 }
 
 set_volume() {
@@ -117,20 +140,10 @@ set_volume() {
     if [ "$VOLUME_RAW" -eq 0 ]; then
         amixer sset "Playback Path" "OFF" >/dev/null 2>&1
     else
-        #TODO can we prevent peaking audio if going from 0 to non-0?
-
-        amixer cset "name='SPK Volume'" "$VOLUME_RAW" >/dev/null 2>&1
-
         if are_headphones_plugged_in; then
-            amixer sset "Playback Path" "HP" >/dev/null 2>&1
+            flip_apply_route_and_gain 3 "$VOLUME_RAW"
         else
-            amixer sset "Playback Path" "SPK" >/dev/null 2>&1
-        fi
-
-        # Volume of '5' doesn't always work so go to 10 then '5' and it seems to
-        if [ "$VOLUME_RAW" -eq 5 ]; then
-            amixer cset "name='SPK Volume'" 10 >/dev/null 2>&1
-            amixer cset "name='SPK Volume'" 5 >/dev/null 2>&1
+            flip_apply_route_and_gain 2 "$VOLUME_RAW"
         fi
     fi
 
@@ -140,20 +153,32 @@ set_volume() {
     fi
 }
 
+# Codec reset after suspend: OFF forces the power-up the driver skips on resume,
+# then set_volume re-applies the stored level and opens the route safely.
 fix_sleep_sound_bug() {
     config_volume=$(get_volume_level)
 
-    if [ "$config_volume" -ne 0 ]; then
-        log_message "Restoring volume to ${config_volume}"
-        amixer cset numid=2 0
-        amixer cset numid=5 0
-        if are_headphones_plugged_in; then
-            amixer cset numid=2 3
-        else
-            amixer cset numid=2 2
+    log_message "Restoring volume to ${config_volume}"
+    amixer cset numid=2 0
+    amixer cset numid=5 0
+    set_volume "$(( config_volume ))"
+}
+
+# Jack-edge handler behind spruce/flip/mixer_watchdog.sh: the mute must hold while
+# sleep_helper's marker exists, but the edge is the only one, so wait it out, then apply.
+SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
+
+reapply_volume_on_jack_edge() {
+    waited=0
+    while [ -e "$SLEEP_HELPER_MARKER" ]; do
+        if [ "$waited" -ge 30 ]; then
+            log_message "mixer watchdog: jack changed while sleep_helper owns the volume; leaving the mute alone" -v
+            return 0
         fi
-        set_volume "$(( config_volume ))"
-    fi
+        sleep 0.2
+        waited=$((waited + 1))
+    done
+    set_volume "$(( $(get_volume_level) ))"
 }
 
 volume_down() {
@@ -184,6 +209,15 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
+    # The onboard radio rides through the suspend as it always has. A USB
+    # dongle's driver does not: remember it, drop the clients bound to its
+    # wlan0 and unload it; enable_wifi reloads it on the way back once the
+    # dongle has re-enumerated (usb_wifi_wait_after_resume).
+    if usb_wifi_dongle_active; then
+        usb_wifi_note_sleep
+        usb_wifi_stop_clients
+        usb_wifi_tear_down
+    fi
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -192,6 +226,11 @@ device_enter_sleep() {
 device_exit_sleep() {
     fix_sleep_sound_bug
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    # A dongle that was the radio gets a bounded wait to re-enumerate, then the
+    # system json decides whether WiFi comes back (the boot path's rule).
+    if usb_wifi_wait_after_resume; then
+        enable_or_disable_wifi_per_system_json
+    fi
 }
 
 device_lid_sensor_ready() {
@@ -260,7 +299,14 @@ launch_startup_watchdogs(){
 
     # Why do we need this on flip? What exactly does it do?
     # The name is kinda confusing. I think it monitors for headphones?
+    stop_running_watchdog /mnt/SDCARD/spruce/flip/mixer_watchdog.sh
     /mnt/SDCARD/spruce/flip/mixer_watchdog.sh &
+
+    # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh); Flip.cfg opts in.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
+    if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+        /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+    fi
 
     #BT is broken so don't bother with it
     #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
@@ -329,9 +375,6 @@ runtime_mounts_Flip() {
     /mnt/sdcard/spruce/flip/setup_32bit_libs.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
     /mnt/sdcard/spruce/flip/bind_glibc.sh >> /mnt/sdcard/Saves/spruce/spruce.log 2>&1
 
-	# PortMaster ports location
-    mkdir -p /mnt/sdcard/Roms/PORTS/ports/ 
-    mount --bind /mnt/sdcard/Roms/PORTS/ /mnt/sdcard/Roms/PORTS/ports/
 	
 	# Treat /spruce/flip/ as the 'root' for any application that needs it.
 	# (i.e. PortMaster looks here for config information which is device specific)
@@ -386,7 +429,10 @@ device_init() {
     # Unlike on other devices, our .tmp_update hook on the Flip enters us before the vendor firmware update.
     perform_fw_update_Flip
 
-    killall runmiyoo.sh   
+    # runmiyoo.sh is this process's ancestor when the boot session supervisor
+    # is in use (SPR-MED-168): killing it would kill the fall-through to stock.
+    # Without the supervisor the old behaviour stays.
+    [ -n "$SPRUCE_BOOT_SESSION" ] || killall runmiyoo.sh
     /mnt/SDCARD/spruce/flip/bind-new-libmali.sh
 
 }
@@ -442,13 +488,53 @@ device_cleanup_after_ports_run() {
 }
 
 
-device_wifi_power_on() { 
+# --- WiFi radio -------------------------------------------------------------
+# The onboard RTL8733BU is a USB chip whose driver is built into the kernel, so
+# it cannot be unloaded; its power rail can be. utils/usb_wifi_dongle.sh calls
+# these two when a supported USB dongle on the USB-C port takes over (the rail
+# goes off, the chip and its wlan0 vanish, the dongle's interface becomes
+# wlan0) and when the dongle is gone again (rail on, wlan0 returns). Flip.cfg
+# opts in with WIFI_USB_MODULES_DIR. Without a dongle every function below
+# does exactly what it did before: the rail.
+device_usb_wifi_onboard_release() {
+    echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_usb_wifi_onboard_restore() {
     echo 1 > /sys/class/rkwifi/wifi_power
     sleep 1
 }
 
-device_wifi_power_off() { 
+device_wifi_power_on() {
+    if usb_wifi_bring_up; then
+        return 0
+    fi
+    if ! usb_wifi_dongle_present >/dev/null 2>&1; then
+        usb_wifi_tear_down
+    fi
+    usb_wifi_onboard_restore
+}
+
+device_wifi_power_off() {
+    # A dongle's driver stays loaded with its interface down (cheap to turn
+    # back on; the watchdog unloads it when the dongle is pulled). The rail is
+    # written 0 either way: with a dongle it already is.
     echo 0 > /sys/class/rkwifi/wifi_power
+}
+
+device_ensure_wifi_interface() {
+    [ -d /sys/class/net/wlan0 ] && return 0
+    if usb_wifi_dongle_active; then
+        _left=5
+        while [ "$_left" -gt 0 ]; do
+            [ -d /sys/class/net/wlan0 ] && return 0
+            sleep 1
+            _left=$((_left - 1))
+        done
+        log_message "USB WiFi: dongle active but wlan0 missing"
+        return 1
+    fi
+    usb_wifi_onboard_restore
 }
 
 device_system_handles_sdcard_unmount() {
@@ -506,4 +592,11 @@ ctl.!default {
 }
 EOF
     fi
+}
+
+# The boot session hands a failed boot to the vendor UI through this. The
+# stock launcher script is re-entrant and still present after our hook install
+# (my355/init.sh renames it rather than replacing it).
+device_stock_ui_command() {
+    printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
 }

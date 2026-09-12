@@ -48,7 +48,7 @@ class DeviceCommon(AbstractDevice):
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
                     self.power_off()
-                elif(Controller.last_input() == ControllerInput.X and self.reboot_cmd is not None):
+                elif(Controller.last_input() == ControllerInput.X and self.reboot_cmd() is not None):
                     self.reboot()
                 elif(Controller.last_input() == ControllerInput.B):
                     return
@@ -110,6 +110,41 @@ class DeviceCommon(AbstractDevice):
             self.system_config.set_backlight(self.system_config.backlight + 1)
             self.system_config.save_config()
             self._set_lumination_to_config()
+
+    # Screensaver backlight. The panel is the largest single load on a handheld
+    # (measured on the Flip: ~400 mW between backlight level 1 and 10), and a
+    # screensaver drawing a dark frame at full backlight saves nothing. Level 1
+    # keeps the screen faintly visible so a lit device still reads as "on".
+    #
+    # Dimming changes only the in-memory level; the user's level is remembered
+    # here and written back on restore. Written back, not just re-read: the
+    # shell brightness hotkeys (buttons_watchdog) derive the level from the raw
+    # backlight value, so a key pressed while dimmed would save a level computed
+    # from the dimmed value. Restore wins over that.
+    SCREENSAVER_BACKLIGHT_LEVEL = 1
+    _screensaver_saved_backlight = None
+
+    def dim_backlight_for_screensaver(self):
+        if not hasattr(self, "_set_lumination_to_config"):
+            return False
+        self.system_config.reload_config()
+        level = self.system_config.backlight
+        if level <= self.SCREENSAVER_BACKLIGHT_LEVEL:
+            return False
+        self._screensaver_saved_backlight = level
+        self.system_config.set_backlight(self.SCREENSAVER_BACKLIGHT_LEVEL)
+        self._set_lumination_to_config()
+        return True
+
+    def restore_backlight_after_screensaver(self):
+        saved = self._screensaver_saved_backlight
+        self._screensaver_saved_backlight = None
+        # Fresh copy first so a volume change made meanwhile is not clobbered.
+        self.system_config.reload_config()
+        if saved is not None:
+            self.system_config.set_backlight(saved)
+            self.system_config.save_config()
+        self._set_lumination_to_config()
 
     def lower_contrast(self):
         self.system_config.reload_config()
@@ -194,6 +229,14 @@ class DeviceCommon(AbstractDevice):
         result = ProcessRunner.run(["ip", "link", "show", "wlan0"], print=False)
         return "UP" in result.stdout
 
+    def restart_wifi_services(self):
+        """The monitor's answer to wlan0 going away: stop and start our own
+        services. A device whose radio is owned by something else at times
+        (the Flip under a USB dongle) overrides this."""
+        PyUiLogger.get_logger().info("Restarting WiFi services")
+        self.stop_wifi_services()
+        self.start_wifi_services(foreground_call=False)
+
     def wifi_error_detected(self):
         self.wifi_error = True
         
@@ -220,9 +263,7 @@ class DeviceCommon(AbstractDevice):
                     self.wifi_error = False
                     fail_count = 0
                     PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
-                    PyUiLogger.get_logger().info("Restarting WiFi services")
-                    self.stop_wifi_services()
-                    self.start_wifi_services(foreground_call=False)
+                    self.restart_wifi_services()
                 else:
                     if time.time() - self.last_successful_ping_time > 30:
                         if(self.connection_seems_up()):
@@ -244,7 +285,7 @@ class DeviceCommon(AbstractDevice):
 
             time.sleep(10)
 
-    @throttle.limit_refresh(15)
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_status(self):
         if not self.is_wifi_enabled():
             return WifiStatus.OFF
@@ -253,6 +294,7 @@ class DeviceCommon(AbstractDevice):
             Language.label("wifiStatusOff", "Off"),
             Language.label("wifiStatusError", "Error"),
             Language.label("wifiStatusConnecting", "Connecting"),
+            Language.label("wifiStatusNoNetwork", "No network selected"),
         ]:
             return WifiStatus.OFF
 
@@ -316,8 +358,166 @@ class DeviceCommon(AbstractDevice):
                 Display.display_message(Language.label("startingIpAssignment", "Starting ip address assignment process"))
             self.start_udhcpc()
 
+    # spruce's networkservices.sh starts Samba, SSH, SFTPGo, Syncthing and the
+    # landing page, and syncs the clock, once the network is actually up. It runs
+    # from principal.sh at boot and again on every return to the menu from a game -
+    # but PyUI brings WiFi up through its own Python path, so turning WiFi on from
+    # the menu left all of that waiting for the next game exit. The clock is the
+    # worst of it: until it is set, every HTTPS request fails as "certificate not
+    # yet valid", because these devices have no battery-backed RTC.
+    #
+    # Safe to fire and forget. The script waits for the connection itself, so
+    # calling it before wlan0 has an address is fine; it holds a lock so a second
+    # copy exits immediately; and it skips services that are already running.
+    # Detached, because it blocks until the network appears.
+    NETWORK_SERVICES_SCRIPT = "/mnt/SDCARD/spruce/scripts/networkservices.sh"
 
-    @throttle.limit_refresh(10)
+    def _run_network_services(self, *args):
+        if not os.path.exists(self.NETWORK_SERVICES_SCRIPT):
+            # Not a spruce userland (muOS, Rocknix) - nothing of ours to start.
+            return
+        try:
+            subprocess.Popen(
+                [self.NETWORK_SERVICES_SCRIPT, *args],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to launch networkservices.sh: {e}")
+
+    def start_network_services(self):
+        self._run_network_services()
+
+    def stop_network_services(self):
+        self._run_network_services("off")
+
+
+    # Saved networks live on the card, not on the handheld, so a password
+    # entered on one device is enough for every device the card is moved to.
+    # This is the path the shell has always used - see WPA_SUPPLICANT_FILE in
+    # helperFunctions.sh - and PyUI used to disagree with it, writing to
+    # internal flash while the device booted its supplicant from the card.
+    #
+    # Saves/spruce is untracked, so an update never extracts a default over it.
+    # Hosts that manage WiFi another way override this and return None.
+    WPA_SUPPLICANT_CONF = "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+
+    def get_wpa_supplicant_conf_path(self):
+        return PyUiConfig.get_wpa_supplicant_conf_file_location(
+            DeviceCommon.WPA_SUPPLICANT_CONF
+        )
+
+    def wifi_connect(self, ssid: str, password):
+        """Apply a network selection. password is None for an open network.
+
+        Default is the wpa_supplicant behaviour the WiFi menu used to do inline:
+        write a network block to wpa_supplicant.conf and tell wpa_cli to reload.
+        Hosts that manage WiFi another way (NetworkManager on the RGB30, connman
+        on the GKD Pixel 2) override this.
+        """
+        from devices.utils.process_runner import ProcessRunner
+        conf_path = self.get_wpa_supplicant_conf_path()
+        if password is None:
+            pw_line = "key_mgmt=NONE"
+        else:
+            pw_line = 'psk="' + password + '"'
+        self._write_wpa_supplicant_block(conf_path, ssid, pw_line)
+        try:
+            ProcessRunner.run(["wpa_cli", "reconfigure"])
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"wpa_cli reconfigure failed: {e}")
+
+    def _write_wpa_supplicant_block(self, file_path, ssid, pw_line):
+        try:
+            try:
+                with open(file_path, "r") as f:
+                    lines = f.readlines()
+            except FileNotFoundError:
+                lines = []
+
+            header_lines = []
+            networks = []
+            current_block = []
+            in_block = False
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith("network={"):
+                    in_block = True
+                    current_block = [line]
+                elif in_block:
+                    current_block.append(line)
+                    if stripped == "}":
+                        networks.append(current_block)
+                        current_block = []
+                        in_block = False
+                else:
+                    header_lines.append(line)
+
+            # Written raw, deliberately - wpa_supplicant does no backslash
+            # unescaping in plain quoted strings.
+            new_block = ["network={\n", f'    ssid="{ssid}"\n', f"    {pw_line}\n", "}\n"]
+
+            # Drop any existing block for this ssid, then append the new one.
+            kept = []
+            for block in networks:
+                if not any(f'ssid="{ssid}"' in bl for bl in block):
+                    kept.append(block)
+            parent = os.path.dirname(file_path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+            with open(file_path, "w") as f:
+                for line in header_lines:
+                    f.write(line)
+                for block in kept:
+                    f.write("\n")
+                    for line in block:
+                        f.write(line)
+                f.write("\n")
+                for line in new_block:
+                    f.write(line)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
+
+    # Deadline (time.time()) until which the WiFi status caches refresh every
+    # second instead of every 10-15 s; see utils/throttle.limit_refresh.
+    _wifi_settle_until = 0.0
+
+    def note_wifi_change(self, settle_seconds=60):
+        """The user just toggled WiFi or picked a network: drop the throttled
+        status caches now and keep them fast while the join settles, so the
+        Settings row and the top-bar icon follow the link within a second."""
+        self._wifi_settle_until = time.time() + settle_seconds
+        for name in ("get_wifi_status", "get_ip_addr_text", "_get_ip_addr_text", "get_wifi_connection_quality_info"):
+            for cls in type(self).__mro__:
+                fn = cls.__dict__.get(name)
+                force = getattr(fn, "force_refresh", None)
+                if force:
+                    force()
+
+    def wifi_has_saved_network(self):
+        """True when the device's wpa_supplicant.conf holds at least one network block.
+
+        A read error answers True: never claim "no network" on a guess.
+        """
+        try:
+            with open(self.get_wpa_supplicant_conf_path()) as f:
+                return any(line.strip().startswith("network=") for line in f)
+        except Exception:
+            return True
+
+    def wifi_pending_text(self):
+        """Status for a radio that is on but has no address.
+
+        "Connecting" used to cover two very different states: joining a saved
+        network, and having no network to join at all (a fresh card, a cleared
+        conf). The second is the one people can act on - open the network list -
+        so say so instead of implying a join that will never finish.
+        """
+        if not self.wifi_has_saved_network():
+            return Language.label("wifiStatusNoNetwork", "No network selected")
+        return Language.label("wifiStatusConnecting", "Connecting")
+
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
         import subprocess
 
@@ -340,7 +540,7 @@ class DeviceCommon(AbstractDevice):
                 if line.startswith("inet "):
                     return line.split()[1].split("/")[0]
 
-            return Language.label("wifiStatusConnecting", "Connecting")
+            return self.wifi_pending_text()
 
         except Exception:
             return Language.label("wifiStatusError", "Error")    
@@ -387,6 +587,14 @@ class DeviceCommon(AbstractDevice):
     def supports_timezone_setting(self):
         return os.path.isdir(self.get_zoneinfo_dir())
 
+    def supports_automatic_timezone(self):
+        """
+        Whether timeFunctions.sh may pick the zone from the network location
+        and this class will apply it from the shared config. False on a device
+        whose timezone lives in its own system layer (the Pixel 2).
+        """
+        return self.supports_timezone_setting() and self.supports_wifi()
+
     def apply_timezone(self, timezone):
         """
         Point this process at the chosen zone and make it take effect now.
@@ -405,8 +613,40 @@ class DeviceCommon(AbstractDevice):
 
         os.environ["TZ"] = f":{zone_file}"
         time.tzset()
+        self._applied_timezone = timezone
         PyUiLogger.get_logger().info(f"Applied timezone {timezone} from {zone_file}")
         return True
+
+    def _watch_shared_timezone(self):
+        """
+        timeFunctions.sh writes an automatically detected zone into the
+        shared config once the network is up, from outside this process. TZ
+        lives only in our environment, so watch the file and re-apply. Cheap:
+        one stat every few seconds. The file is created empty first so the
+        watcher has something to stat; an empty file still means "no zone".
+        """
+        try:
+            from devices.utils.file_watcher import FileWatcher
+            system_config = self.get_system_config()
+            path = getattr(system_config, "SHARED_CONFIG_PATH", None)
+            if not path:
+                return
+            if not os.path.isfile(path):
+                system_config._write_shared(system_config._read_shared())
+            FileWatcher().start_file_watcher(path, self._on_shared_timezone_changed, interval=3.0)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not watch shared config for timezone changes: {e}")
+
+    def _on_shared_timezone_changed(self):
+        try:
+            system_config = self.get_system_config()
+            if not getattr(system_config, "has_timezone", lambda: False)():
+                return
+            timezone = system_config.get_timezone()
+            if timezone and timezone != getattr(self, "_applied_timezone", None):
+                DeviceCommon.apply_timezone(self, timezone)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Could not re-apply timezone: {e}")
 
     def restore_saved_timezone(self):
         """
@@ -422,6 +662,9 @@ class DeviceCommon(AbstractDevice):
         """
         if not os.path.isdir(self.get_zoneinfo_dir()):
             return
+
+        if self.supports_automatic_timezone():
+            self._watch_shared_timezone()
 
         try:
             system_config = self.get_system_config()
@@ -677,12 +920,40 @@ class DeviceCommon(AbstractDevice):
     def uses_deinit_v2(self):
         # Need to test 1 at a time to ensure it works
         return False
+
+    def wants_gles_context(self):
+        """
+        Ask SDL for an OpenGL ES EGL config rather than a desktop GL one.
+
+        On KMSDRM, SDL picks the EGL config for its window from
+        gl_config.profile_mask. Left at the default it asks for
+        EGL_OPENGL_BIT, and a GPU that only does GLES advertises no such
+        config - so eglChooseConfig matches nothing and window creation fails
+        with "Can't window GBM/EGL surfaces", naming neither GL nor the
+        config as the cause.
+
+        Almost certainly right for every device here, since they are all
+        GLES-only ARM parts, but left off by default: the ones that already
+        work are not worth risking to tidy this up, and it can be widened per
+        device as each is actually tested.
+        """
+        return False
     
-    def get_selected_emulator(self, menu_options: dict, device_name: str):
+    def get_device_names(self):
+        """Every name this device answers to in a config "devices" list.
+
+        Almost every device answers to exactly one - its model name. A
+        family whose models share a hardware platform overrides this to
+        report a family token alongside the model name, so a single config
+        entry covers the whole line and a new model needs no config edits.
+        """
+        return [self.get_device_name()]
+
+    def get_selected_emulator(self, menu_options: dict):
         for key, option in menu_options.items():
             if key.startswith("Emulator"):
                 devices = option.get("devices", [])
-                if device_name in devices:
+                if any(name in devices for name in self.get_device_names()):
                     return option.get("selected")
         if menu_options.get("Emulator"):
             return menu_options["Emulator"].get("selected")

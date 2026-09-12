@@ -26,8 +26,15 @@ class PyUiConfig:
     def _write_to_file(cls, filepath):
         try:
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            with open(filepath, 'w') as f:
+            # Stage beside the target and rename: a truncating in-place write
+            # loses the whole config if power is cut mid-write, and this file
+            # is rewritten on every settings change.
+            tmp_path = f"{filepath}.tmp"
+            with open(tmp_path, 'w') as f:
                 json.dump(cls._data, f, indent=4)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, filepath)
             PyUiLogger.get_logger().info(f"Settings saved to {filepath}")
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to write settings to {filepath}: {e}")
@@ -113,6 +120,19 @@ class PyUiConfig:
     @classmethod
     def set_show_all_game_systems(cls, value):
         cls._data["showAllGameSystems"] = value
+        cls.save()
+
+    @classmethod
+    def sync_time_via_network(cls):
+        # On by default: these handhelds have no battery-backed RTC, so without
+        # this a cold boot sits years in the past and every HTTPS request fails
+        # with "certificate is not yet valid". Off is a real choice though -
+        # some games read the clock, so a user may want it held where they set it.
+        return cls.get("syncTimeViaNetwork",True)
+
+    @classmethod
+    def set_sync_time_via_network(cls, value):
+        cls._data["syncTimeViaNetwork"] = value
         cls.save()
 
     @classmethod

@@ -1,0 +1,28 @@
+#!/bin/bash
+# GUI launch hook: which SDL2 pysdl2 loads, and library paths, per device.
+command -v export_sdl_gamecontroller_map >/dev/null 2>&1 || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+case "$PLATFORM" in
+    Flip|SmartProS)          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;
+    Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
+    Anbernic*)               export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
+    RGB30)                   export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
+esac
+
+case "$PLATFORM" in
+    RGB30) ;;
+    *) export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
+esac
+
+case "$PLATFORM" in
+    Flip|SmartProS|Brick|SmartPro|BrickPro)
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+        ;;
+    Anbernic*)
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
+        export_sdl_gamecontroller_map positional
+        ;;
+    RGB30)
+        export_sdl_gamecontroller_map positional
+        ;;
+esac

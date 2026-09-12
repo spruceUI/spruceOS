@@ -15,6 +15,13 @@
 
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
+export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
+# Where PyUI wrote saved networks before they became card-global: all on the
+# handheld's own storage, which is why a card carrying a password from another
+# device used to arrive with nothing. enable_wifi adopts from these, and
+# clearwifi.sh has to clear them too or a "forget all networks" would simply be
+# re-imported on the next boot. Keep the two uses reading this one list.
+export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 
 # Export for enabling SSL support in CURL
@@ -24,35 +31,48 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 
 case $INFO in
-    *sun8i*) export PLATFORM="A30" ;;
+    *sun8i*) export PLATFORM="A30" ;;           # A33
     *TG5040*) export PLATFORM="SmartPro" ;;
     *TG3040*) export PLATFORM="Brick" ;;
     *TG5050*) export PLATFORM="SmartProS" ;;
     *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*) export PLATFORM="Flip" ;;
-    *0xd04*) export PLATFORM="Pixel2" ;;
-    *0xd03*)
-        CMDLINE=$(cat /proc/cmdline)
-
-        case $CMDLINE in
-            *lcd_type=boe*)
-                if grep -qi "RGcubexx" /mnt/vendor/oem/board.ini ; then
-                    export PLATFORM="AnbernicRGCubeXX"
-                else
-                    export PLATFORM="AnbernicRG34XXSP"
-                fi
-                ;;
-            *lcd_type=old*)
-                #TODO handle cube?
-                if strings /mnt/vendor/bin/dmenu.bin 2>/dev/null | grep -q '^RG28xx'; then
-                    export PLATFORM="AnbernicRG28XX"
-                else
-                    export PLATFORM="AnbernicXX640480"
-                fi
-                ;;
-            *)
-                export PLATFORM="AnbernicXX640480"
-                ;;
+    *0xd05*)                                    # RK3566
+        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+            # The kernel names the board in the device tree.
+            DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
+            case "$DT_MODEL" in
+                *RGB30*) export PLATFORM="RGB30" ;;
+                *) export PLATFORM="RGB30" ;;
+            esac
+        elif [ -x /loong/loong_daemon ]; then
+            # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
+            # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
+            # cannot tell them apart. The vendor's stock launcher daemon is the
+            # reliable discriminator: it is present only on the loong firmware
+            # and Spruce is about to replace its boot path anyway. The device
+            # tree model string ("MIYOO RK3566 355 V10 Board" on the Flip) can
+            # corroborate once captured on a board, but the daemon is the key.
+            export PLATFORM="Miniloong"
+        else
+            export PLATFORM="Flip"
+        fi
+        ;;
+    *0xd04*) export PLATFORM="Pixel2" ;;        # RK3326
+    *0xd03*)                                    # H700
+        export SPRUCE_BASEOS=1
+        BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
+        # One platform per panel AND pad layout (Brick / Brick Pro precedent):
+        # every config ships static per platform, so models whose sticks and
+        # trigger numbering differ cannot share one. This case is the only
+        # place that names models; each platform cfg states its layout.
+        case $BASEOS_TARGET in
+            rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
+            rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
+            rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
+            rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
+            rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
+            rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
+            *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
     *) 
@@ -66,6 +86,39 @@ esac
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
+
+# Every name this device answers to in an Emu config.json "devices" list, most
+# specific first. Mirrors PyUI's Device.get_device_names(): almost every device
+# answers to one name, and the Anbernic XX line also answers to a family token
+# so a single config entry covers the whole line.
+#
+# MUST stay in step with App/PyUI/launch.sh, which passes these same names to
+# PyUI as -device. When the two disagree, the UI writes the user's emulator
+# choice into one menuOption and the launcher reads a different one - which is
+# exactly the bug this exists to prevent. Defined here, after the device
+# functions are sourced, because the Mini resolves its variant at runtime.
+device_names() {
+    case "$PLATFORM" in
+        A30)              echo "MIYOO_A30" ;;
+        Brick)            echo "TRIMUI_BRICK" ;;
+        BrickPro)         echo "TRIMUI_BRICK_PRO" ;;
+        SmartPro)         echo "TRIMUI_SMART_PRO" ;;
+        SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
+        Flip)             echo "MIYOO_FLIP" ;;
+        Pixel2)           echo "GKD_PIXEL2" ;;
+        RGB30)            echo "RGB30" ;;
+        Miniloong)        echo "MINILOONG_POCKET1" ;;
+        Zero28)           echo "MAGICX_ZERO28" ;;
+        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
+        AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX720480) echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicXX720480NoStick)  echo "ANBERNIC_RGXX720480"; echo "ANBERNIC_RGXX" ;;
+        AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
+        AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
+    esac
+}
 
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
@@ -86,7 +139,7 @@ acknowledge() {
             esac
         fi
 
-        # Prevent CPU pegging
+        # Prevent CPU pegging (giggity)
         sleep 0.1
     done
 
@@ -239,6 +292,51 @@ flag_add() {
 # Check if a flag exists
 # Usage: flag_check "flag_name"
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
+# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
+# that shows a message through PortMasterDialog.txt) puts its FIFOs under
+# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
+# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
+# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
+# mounted there each boot; nothing on the device's flash is touched. No-op
+# on firmware that already mounts one (Flip, Debian bases).
+ensure_dev_fd() {
+    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
+        _dev="/dev/${_pair%%:*}"
+        [ -e "$_dev" ] && continue
+        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
+            && log_message "Linked $_dev (stock firmware had none)" \
+            || log_message "Could not create $_dev"
+    done
+}
+
+ensure_dev_shm() {
+    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+        return 0
+    fi
+    mkdir -p /dev/shm 2>/dev/null || return 1
+    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
+        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
+    else
+        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
+        return 1
+    fi
+}
+
+# Move the contents of $1 into $2, merging shared subdirs. Rename-based.
+merge_dir() {
+    mkdir -p "$2"
+    for _entry in "$1"/* "$1"/.[!.]*; do
+        [ -e "$_entry" ] || continue
+        _name="${_entry##*/}"
+        if [ -d "$_entry" ] && [ ! -L "$_entry" ] && [ -d "$2/$_name" ]; then
+            ( merge_dir "$_entry" "$2/$_name" )
+            rmdir "$_entry" 2>/dev/null
+        else
+            mv -f "$_entry" "$2/$_name" 2>/dev/null || { cp -a "$_entry" "$2/$_name" && rm -rf "$_entry"; }
+        fi
+    done
+}
+
 flag_check() {
     local flag_name="$1"
     if [ -f "$FLAGS_DIR/${flag_name}" ] || [ -f "$FLAGS_DIR/${flag_name}.lock" ] || [ -f "/tmp/${flag_name}.lock" ]; then
@@ -370,11 +468,6 @@ get_current_theme() {
     fi
 }
 
-
-get_event() {
-    "/mnt/SDCARD/spruce/bin/getevent" $EVENT_PATH_READ_INPUTS_SPRUCE
-}
-
 get_version() {
     spruce_file="/mnt/SDCARD/spruce/spruce"
 
@@ -390,8 +483,8 @@ get_version() {
         return 1
     fi
 
-    # Updated regex to handle both beta and nightly versions
-    # e.g., 3.3.2-Beta or 3.3.1-20250123
+    # Updated regex to handle nightly versions
+    # e.g., 3.3.1-20250123
     if echo "$version" | grep -qE '^[0-9]+\.[0-9]+(\.[0-9]+)*(-([A-Za-z]+|[0-9]{8}))?$'; then
         echo "$version"
         return 0
@@ -412,7 +505,7 @@ get_version_complex() {
 
     version_pattern="/mnt/SDCARD/${base_version}-*"
     
-    # Find any matching version file (beta or nightly)
+    # Find any matching version file (nightly)
     test_file=$(ls $version_pattern 2>/dev/null | head -n 1)
 
     if [ -n "$test_file" ]; then
@@ -556,75 +649,17 @@ read_only_check() {
         return 0
     else
         log_message "SD card does not appear to be read only"
-        # clean up test file and continue to next stage of RO check just cuz.
+        # A passing write test is authoritative: the card is writable. Return
+        # that now rather than falling through to the mount-line check below.
+        # That check reports read-only whenever SD_DEV is absent from the mount
+        # table, because an `if` with no matching branch and no else exits 0 -
+        # so on a base whose TF2 device node does not match SD_DEV, a perfectly
+        # writable card is called read-only forever and repairSD loops.
         rm -f "$TEST_FILE"
-    fi
-
-    if [ -n "$MNT_LINE" ]; then
-        MNT_STATUS=$(echo "$MNT_LINE" | cut -d'(' -f2 | cut -d',' -f1)
-        if [ "$MNT_STATUS" = "ro" ]; then
-            log_message "SD card is mounted as RO. Attempting to remount."
-            mount -o remount,rw "$SD_DEV" "$SD_MOUNTPOINT"
-            return 0
-        else
-            log_message "SD card is not read-only."
-            return 1
-        fi
+        return 1
     fi
 }
 
-# Toggle screen recording with audio
-# Usage: record_video [output_file] [timeout_minutes]
-# If no output file is specified, defaults to /mnt/SDCARD/Roms/MEDIA/recording_YYYY-MM-DD_HH-MM-SS.mp4
-# If no timeout is specified, defaults to 5 minutes
-record_video() {
-    if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-        # Stop recording if one is in progress
-        vibrate 200 &
-        pid=$(cat "/tmp/ffmpeg_recording.pid")
-        kill "$pid" 2>/dev/null
-        rm "/tmp/ffmpeg_recording.pid"
-        flag_remove "setting_cpu"
-        log_message "Stopped recording" -v
-        sleep 1
-        display -t "Recording stopped" -d 3
-    else
-        # Start new recording
-        output_file="$1"
-        timeout_minutes="${2:-5}"  # Default to 5 minutes if not specified
-        date_str=$(date +%Y-%m-%d_%H-%M-%S)
-        set_performance
-        # Prevent the CPU from being clocked down while recording
-        flag_add "setting_cpu" --tmp
-
-        # If no output file specified, create one with timestamp
-        if [ -z "$output_file" ]; then
-            output_file="/mnt/SDCARD/Roms/MEDIA/recording_${date_str}.mp4"
-        fi
-
-        vibrate &
-        sleep 0.1
-        vibrate &
-        # Start ffmpeg recording
-        ffmpeg -f fbdev -framerate 30 -i /dev/fb0 -f alsa -ac 1 -i default \
-            -c:v libx264 -filter:v "transpose=1" -preset ultrafast -b:v 1500k -pix_fmt yuv420p \
-            -c:a aac -b:a 80k -ac 1 \
-            -t $((timeout_minutes * 60)) "$output_file" &
-
-        # Store PID for later use
-        echo $! > "/tmp/ffmpeg_recording.pid"
-
-        log_message "Started recording to: $output_file (timeout: ${timeout_minutes}m)" -v
-
-        # Set up automatic stop after timeout
-        (
-            sleep $((timeout_minutes * 60))
-            if [ -f "/tmp/ffmpeg_recording.pid" ]; then
-                record_video
-            fi
-        ) &
-    fi
-}
 
 run_upgrade_scripts() {
     UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
@@ -729,10 +764,15 @@ start_pyui_message_writer() {
     log_message "Starting Real Time message listener on port 50980"
     /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
 
-    # Optional wait for the listener file
     if [ "$wait_for_listener" != "0" ]; then
         log_message "Waiting for realtime_message_network_listener to appear..."
+        listener_tries=0
         while [ ! -e "/mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt" ]; do
+            listener_tries=$((listener_tries + 1))
+            if [ "$listener_tries" -ge 150 ]; then
+                log_message "Realtime message listener never appeared after 15s; continuing without it."
+                return 1
+            fi
             sleep 0.1
         done
         log_message "Realtime message network listener detected."
@@ -762,7 +802,7 @@ kill_pyui_message_writer() {
 
 stop_pyui_message_writer() {
     kill_pyui_message_writer
-    freemma &>/dev/null # I don't think we have this bin on any spruce devices
+    freemma >/dev/null 2>&1 # I don't think we have this bin on any spruce devices
 }
 
 display_message() {
@@ -783,14 +823,29 @@ except Exception as e:
 ' "$message"
 }
 
+json_escape() {
+    # Callers write a two-character \n where they want a line break - that is the
+    # convention at every display_* call site in the tree, and before this
+    # function existed the sequence passed straight into the JSON string and
+    # decoded to a real newline. Escaping backslashes without undoing it first
+    # doubles it, and the UI draws a literal \n instead of breaking the line.
+    #
+    # So fold it back to a real newline up front; the awk below re-emits it as a
+    # JSON \n. The replacement is a backslash-newline rather than \n because
+    # busybox sed does not read \n in the RHS as a newline.
+    printf '%s' "$1" | sed -e 's/\\n/\
+/g' -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
+        -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
+}
+
 log_and_display_message(){
     log_message "$1"
-    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_option_list(){
     log_message "Display option list $1"
-    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$1")"
+    display_message "$(printf '{"cmd":"OPTION_LIST","args":["%s"]}' "$(json_escape "$1")")"
 }
 
 display_text_with_percentage_bar(){
@@ -799,15 +854,58 @@ display_text_with_percentage_bar(){
     # $3 = Optional bottom text
     log_message "Display text with percentage bar $1 $2"
     if [ $# -eq 2 ]; then
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$1" "$2")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s"]}' "$(json_escape "$1")" "$2")"
     else
-        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$1" "$2" "$3")"
+        display_message "$(printf '{"cmd":"TEXT_WITH_PERCENTAGE_BAR","args":["%s","%s","%s"]}' "$(json_escape "$1")" "$2" "$(json_escape "$3")")"
+    fi
+}
+
+# BaseOS ships busybox wget as /usr/bin/wget. It rejects every GNU long option
+# outright - --quiet, --no-check-certificate and --max-redirect each make it
+# print its usage block and exit non-zero - and even with busybox-safe flags it
+# cannot finish an HTTPS transfer, because there is no ssl_helper on the system:
+# it connects, prints "note: TLS certificate validation not implemented", then
+# writes nothing. The GNU wget we ship in spruce/bin64 is no escape either - on
+# BaseOS it will not load, for want of libpcre.so.1 and then libuuid.so.1.
+#
+# curl is present and working on every platform we ship, so it is the transport
+# here, with busybox-safe wget kept as a fallback. Certificates are verified
+# against the bundled CA file (SSL_CERT_FILE) first; only a TLS failure retries
+# with -k, which preserves the --no-check-certificate behaviour these downloads
+# have always had on firmware whose TLS stack cannot use the bundle.
+download_url_to_file() {
+    # $1 = remote url, $2 = destination path
+    if command -v curl >/dev/null 2>&1; then
+        # -f so an HTTP error exits non-zero and leaves no file behind, which is
+        # what wget did and what every caller here assumes. curl's own message
+        # goes to the log rather than to stderr, where it would paint over the
+        # UI the calling app is drawing.
+        curl_error="$(curl -sSL -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
+        curl_result=$?
+        case "$curl_result" in
+            35|51|58|59|60|77)
+                log_message "download_url_to_file: TLS verification failed for $1 (curl $curl_result: $curl_error); retrying without certificate verification"
+                curl_error="$(curl -sSLk -f --connect-timeout 15 -o "$2" "$1" 2>&1)"
+                curl_result=$?
+                ;;
+        esac
+        [ "$curl_result" -ne 0 ] && log_message "download_url_to_file: curl failed for $1 - $curl_error"
+        return "$curl_result"
+    else
+        wget -q -O "$2" "$1"
     fi
 }
 
 get_remote_filesize_bytes() {
     url="$1"
-    wget --spider --server-response --no-check-certificate "$url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    if command -v curl >/dev/null 2>&1; then
+        # Headers only, following redirects. A GitHub release asset 302s to a
+        # storage host, so several Content-Length lines come back and the last
+        # one belongs to the asset itself.
+        curl -sILk --connect-timeout 15 "$url" 2>/dev/null | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    else
+        wget -S --spider -q -O /dev/null "$url" 2>&1 | grep -i 'Content-Length' | tail -n1 | awk '{print $2}' | tr -d '\r\n'
+    fi
 }
 
 download_and_display_progress() {
@@ -821,9 +919,15 @@ download_and_display_progress() {
         final_size_bytes="$(get_remote_filesize_bytes "$remote_url")"
     fi
 
+    download_url_to_file "$remote_url" "$local_path" &
+    download_pid=$!
+
 	{
 		sleep 0.1
-		while ps | grep '[w]get' >/dev/null; do
+		# Watch the transfer we started rather than asking whether any wget is
+		# running - that global match also caught unrelated downloads, and it
+		# stopped seeing this one at all once the transport was no longer wget.
+		while kill -0 "$download_pid" 2>/dev/null; do
 			current_size=$(ls -ln "$local_path" 2>/dev/null | awk '{print $5}')
 			[ -z "$current_size" ] && current_size=0
 			[ -z "$final_size_bytes" ] && final_size_bytes=1
@@ -835,7 +939,13 @@ download_and_display_progress() {
 			sleep 0.1
 		done 
 	} &
-	if ! wget --quiet --no-check-certificate --output-document="$local_path" "$remote_url"; then
+	progress_pid=$!
+
+	wait "$download_pid"
+	download_result=$?
+	wait "$progress_pid" 2>/dev/null
+
+	if [ "$download_result" -ne 0 ]; then
 		display_image_and_text "$BAD_IMG" 35 25 "Unable to download $display_name. Please try again later." 75
 		sleep 4
 		rm -f "$local_path" 2>/dev/null
@@ -877,7 +987,7 @@ display_image_and_text() {
 
     display_message "$(printf \
         '{"cmd":"IMAGE_AND_TEXT","args":["%s","%s","%s","%s","%s"]}' \
-        "$img" "$text" "$size" "$img_y" "$text_y"
+        "$(json_escape "$img")" "$(json_escape "$text")" "$size" "$img_y" "$text_y"
     )"
 }
 
@@ -1044,6 +1154,62 @@ extract_7z_with_progress() {
 }
 
 
+##### SDL GAMECONTROLLER MAPPING #####
+
+# Hand SDL a GameController mapping for the built-in pad.
+#
+# Nothing on BaseOS ships one. Every H700 Anbernic reports the same GUID and the
+# name "ANBERNIC-keys", so SDL cannot pick a per-model mapping by itself either -
+# AnbernicXXCommon.cfg selects the right one by BASEOS_TARGET and leaves it in
+# SDL_GAMECONTROLLER_MAP. Without it a pad enumerates as a plain joystick with
+# is_gamecontroller false, and anything driving input through SDL_GameController
+# silently does nothing: PPSSPP, PICO-8, vtree and gptokeyb have all hit this.
+#
+# There are two forms and picking the wrong one is not a failure, it is a
+# symmetric swap - A and B doing each other's job, Y doing what X should - which
+# is easy to misread as a broken mapping rather than the wrong convention:
+#
+#   (default)     label-named. "a" is the button *marked* A. What RetroArch and
+#                 PPSSPP want, since A is confirm on a Nintendo layout.
+#   positional    SDL's own convention: a South, b East, x West, y North. What
+#                 an app wants when it speaks raw SDL - gptokeyb's .gptk files -
+#                 or when it already applies its own Nintendo correction, as
+#                 vtree does with spruce's nintendo-button-labels patch.
+#
+# Only the four face buttons differ between the two; shoulders, triggers, stick
+# clicks and the d-pad are identical. Safe to call anywhere: it is a no-op when
+# SDL_GAMECONTROLLER_MAP is unset, which is every non-BaseOS device.
+#
+# Usage:
+#   export_sdl_gamecontroller_map              # label-named
+#   export_sdl_gamecontroller_map positional   # SDL convention
+export_sdl_gamecontroller_map() {
+    [ -n "$SDL_GAMECONTROLLER_MAP" ] || return 0
+
+    case "$1" in
+        positional)
+            SDL_GAMECONTROLLERCONFIG="$(printf '%s' "$SDL_GAMECONTROLLER_MAP" \
+                | sed -e 's/a:\([^,]*\),b:\([^,]*\)/a:\2,b:\1/' \
+                      -e 's/x:\([^,]*\),y:\([^,]*\)/x:\2,y:\1/')"
+            ;;
+        *)
+            SDL_GAMECONTROLLERCONFIG="$SDL_GAMECONTROLLER_MAP"
+            ;;
+    esac
+
+    export SDL_GAMECONTROLLERCONFIG
+}
+
+
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+_xx_dpad_swap() {
+	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	echo "$1" > "$XX_DPAD_SWAP"
+}
+
 ##### WIFI HANDLING #####
 
 disable_wifi() {
@@ -1051,44 +1217,228 @@ disable_wifi() {
     rm -f /tmp/wifion           2>/dev/null
     touch /tmp/wifioff          2>/dev/null
     killall -9 wpa_supplicant   2>/dev/null
-    killall -9 udhcpc           2>/dev/null
+    # Stop whichever client this device actually started. Naming udhcpc here
+    # only works for as long as every device uses udhcpc; a device that
+    # overrides device_start_dhcp_client would have been left with its client
+    # still holding the interface after "WiFi off".
+    device_stop_dhcp_client
     log_message "WiFi turned off"
     device_wifi_power_off
 }
 
+# Read the -c argument out of a running wpa_supplicant's cmdline. Accepts both
+# "-c /path" and "-cpath"; prints nothing if there is no -c.
+wpa_conf_path_of_pid() {
+    [ -n "$1" ] || return 0
+    tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | awk '
+        prev == "-c" { print; exit }
+        /^-c./       { sub(/^-c/, ""); print; exit }
+        { prev = $0 }
+    '
+}
+
+# Merge the network blocks of another wpa_supplicant.conf into ours, skipping
+# any SSID we already have. Used when taking the radio over from whatever
+# brought it up before us.
+#
+# Nothing here may log block contents: they hold pre-shared keys in the clear.
+# Only counts and paths are logged.
+import_wpa_networks_from() {
+    FOREIGN_CONF="$1"
+
+    [ -n "$FOREIGN_CONF" ] || return 0
+    [ -f "$FOREIGN_CONF" ] || return 0
+    [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
+    [ "$FOREIGN_CONF" = "$WPA_SUPPLICANT_FILE" ] && return 0
+
+    TMP_IMPORT="/tmp/wpa_import.$$"
+    awk -v ours="$WPA_SUPPLICANT_FILE" '
+        BEGIN {
+            while ((getline line < ours) > 0) {
+                if (line ~ /^[ \t]*ssid=/) {
+                    sub(/^[ \t]*ssid=/, "", line)
+                    have[line] = 1
+                }
+            }
+            close(ours)
+        }
+        # No brace in either regex: busybox awk parses an unescaped { as the
+        # start of an interval expression and rejects the whole pattern with
+        # "Invalid contents of {}". Matching "network=" is enough to open a
+        # block, and $1 == "}" closes one whatever the indentation.
+        /^[ \t]*network[ \t]*=/ { inblock = 1; n = 0; ssid = "" }
+        inblock {
+            buf[n++] = $0
+            if ($0 ~ /^[ \t]*ssid=/) { ssid = $0; sub(/^[ \t]*ssid=/, "", ssid) }
+            if ($1 == "}") {
+                inblock = 0
+                if (ssid != "" && !(ssid in have)) {
+                    have[ssid] = 1
+                    printf "\n"
+                    for (i = 0; i < n; i++) print buf[i]
+                }
+            }
+        }
+    ' "$FOREIGN_CONF" > "$TMP_IMPORT" 2>/dev/null
+
+    NEW_COUNT=$(grep -c '^[[:space:]]*network[[:space:]]*=' "$TMP_IMPORT" 2>/dev/null)
+    if [ "${NEW_COUNT:-0}" -gt 0 ]; then
+        cat "$TMP_IMPORT" >> "$WPA_SUPPLICANT_FILE"
+        log_message "Imported $NEW_COUNT network(s) from $FOREIGN_CONF"
+    else
+        log_message "No new networks to import from $FOREIGN_CONF"
+    fi
+    rm -f "$TMP_IMPORT"
+}
+
 enable_wifi() {
+    # A device without a radio has nothing to power, recover, associate or
+    # lease. Refusing here covers every path in: boot, game exit, the settings
+    # toggle, restart_wifi and check_and_connect_wifi.
+    if ! wifi_available_on_device; then
+        log_message "WiFi: enable requested on a device without a radio - ignored"
+        return 1
+    fi
+
     device_wifi_power_on
+
+    # power_on may have just discovered the radio is unusable (a module that
+    # refuses to load marks the session radio-less); stop before building a
+    # supplicant/DHCP stack on a wlan0 that cannot exist.
+    if ! wifi_available_on_device; then
+        log_message "WiFi: radio became unavailable during power-on - stopping"
+        return 1
+    fi
+
+    # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
+    # not - the radio fails to enumerate and the interface is never created -
+    # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
+    # nothing. Give the device a chance to bring it back first.
+    device_ensure_wifi_interface
 
     rm -f /tmp/wifioff          2>/dev/null
     touch /tmp/wifion           2>/dev/null
     ifconfig wlan0 up           2>/dev/null
 
+    # Some hosts own the radio themselves. On the RGB30 that is connman, which
+    # does association AND DHCP, so starting our own wpa_supplicant against it
+    # is two daemons fighting over one interface - the same class of mistake
+    # the Anbernic XX line made by running dhclient beside udhcpc.
+    if device_manages_own_wifi; then
+        log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
+        /mnt/SDCARD/spruce/scripts/networkservices.sh &
+        device_extra_wifi_setup
+        return 0
+    fi
+
+    # wpa_supplicant refuses to start without its config file, and every start
+    # below passes -c without checking that the file is there. It fails in the
+    # background where nobody sees it, udhcpc starts anyway so the interface
+    # looks half alive, and the UI sits on "Scanning for networks..." forever -
+    # the scanner is only "wpa_cli scan", and wpa_cli has no daemon to ask.
+    #
+    # Seed the same two lines PyUI writes rather than assume something else
+    # created it. ctrl_interface is what wpa_cli connects to; update_config=1
+    # lets wpa_supplicant persist networks added from the UI.
+    if [ -n "$WPA_SUPPLICANT_FILE" ] && [ ! -f "$WPA_SUPPLICANT_FILE" ]; then
+        mkdir -p "$(dirname "$WPA_SUPPLICANT_FILE")" 2>/dev/null
+        printf 'ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n' > "$WPA_SUPPLICANT_FILE"
+        log_message "Created missing $WPA_SUPPLICANT_FILE"
+    fi
+
+    # Adopt networks from the places PyUI used to write before saved networks
+    # became card-global. Each path is somewhere on the handheld's own storage,
+    # so a card carrying a password from another device found nothing here and
+    # the user had to type it again.
+    #
+    # import_wpa_networks_from skips any SSID we already hold, so this is
+    # idempotent and runs every boot on purpose rather than once: it keeps
+    # working for someone who later joins a network through the stock firmware
+    # UI, which still writes these files. Absent paths cost nothing.
+    #
+    # Deliberately NOT including the vendor /etc/wifi/wpa_supplicant.conf - the
+    # takeover below already imports from whatever supplicant is running, and
+    # the vendor file can hold factory defaults we do not want to adopt.
+    for _legacy_conf in $WPA_LEGACY_CONFS; do
+        [ -f "$_legacy_conf" ] && import_wpa_networks_from "$_legacy_conf"
+    done
+
     # check if WPA supplicant needs to be started or restarted
+    # pgrep can return SEVERAL pids: a stale supplicant from a previous config
+    # and a fresh one can both match. The old single-pid form redirected
+    # /proc/$WPA_PID/cmdline with a multi-word variable, which fails outright,
+    # so a wrong-config supplicant survived and the UI never associated.
     WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
     if [ -n "$WPA_PID" ]; then
-        WPA_CMDLINE=$(tr '\0' ' ' < /proc/$WPA_PID/cmdline)
-        if ! echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-            log_message "wpa_supplicant using wrong config; restarting with $WPA_SUPPLICANT_FILE"
-            kill -9 "$WPA_PID" 2>/dev/null
+        WPA_CORRECT_RUNNING=0
+        for wpa_pid in $WPA_PID; do
+            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
+            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
+                WPA_CORRECT_RUNNING=1
+            else
+                # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
+                # that is the OS underneath us, and it is very likely ASSOCIATED
+                # RIGHT NOW. spruce takes ownership here by design, but taking it by
+                # killing that process and starting ours against a config that may
+                # hold no networks at all just drops a working connection, and the
+                # user sees WiFi die a few seconds into boot for no reason.
+                #
+                # Carry its networks across first, then take over.
+                log_message "wpa_supplicant $wpa_pid using wrong config; taking over with $WPA_SUPPLICANT_FILE"
+                import_wpa_networks_from "$(wpa_conf_path_of_pid "$wpa_pid")"
+                kill -9 "$wpa_pid" 2>/dev/null
+            fi
+        done
+        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
+            log_message "wpa_supplicant was running with the correct conf file already"
+        else
             sleep 1
             wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
             log_message "wpa_supplicant was running with the wrong conf so restarted"
-        else
-            log_message "wpa_supplicant was running with the correct conf file already"
         fi
     else    # wpa_supplicant was not running at all, so start it
         wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
         log_message "Launching wpa_supplicant"
     fi
-    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+    device_start_dhcp_client
     /mnt/SDCARD/spruce/scripts/networkservices.sh &
     log_message "WiFi turned on"
 
     device_extra_wifi_setup
 }
 
+# Does this device have a WiFi radio at all? A STATIC hardware question,
+# deliberately separate from device_wifi_is_available: that older hook answers
+# a LIVE question on some devices (the Pixel2 returns false whenever wlan0 is
+# not up yet - correct for check_and_connect_wifi's "is there a network right
+# now", and exactly wrong for deciding whether to bring the radio up, since
+# enable_wifi is what puts the interface up in the first place). Only a device
+# whose radio genuinely does not work answers device_has_wifi_radio false
+# (today: the RG28XX, SPR-MED-177); everywhere else - including platforms that
+# never define it - the answer is yes and nothing changes. The system json's
+# "wifi" flag is the USER's preference and is only consulted once the hardware
+# is there.
+wifi_available_on_device() {
+    if command -v device_has_wifi_radio >/dev/null 2>&1; then
+        device_has_wifi_radio
+    else
+        return 0
+    fi
+}
+
 enable_or_disable_wifi_per_system_json() {
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+    if ! wifi_available_on_device; then
+        log_message "WiFi: not available on this device, radio path left alone" -v
+        return 0
+    fi
+    # PyUI writes SYSTEM_JSON from its shipped default, and on a first boot it
+    # may not exist yet when this runs. An unreadable value must mean off: an
+    # empty string fails -eq with status 2, which the else branch reads as on.
+    wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$wifi_want" in
+        ''|*[!0-9]*) wifi_want=0 ;;
+    esac
+    if [ "$wifi_want" -eq 0 ]; then
         disable_wifi
     else
         enable_wifi
@@ -1103,18 +1453,48 @@ restart_wifi() {
     enable_wifi
 }
 
+# Does this interface hold an address?
+#
+# Ask iproute2 and net-tools both, and believe either. An ifconfig-only version
+# always answered "no address" on Debian, which does not ship net-tools:
+# network_is_connected never returned true, networkservices.sh waited on it
+# forever, and SSH, Samba, SFTPGo, syncthing and time sync were never started.
+# Nothing logged an error - that loop waits indefinitely on purpose.
+#
+# Believing only ip would trade that for the same bug on any busybox device
+# whose ip applet does not take these options, so ask both.
+iface_has_address() {
+    _iface="$1"
+
+    [ -n "$_iface" ] || return 1
+
+    if command -v ip >/dev/null 2>&1; then
+        if ip -o addr show dev "$_iface" 2>/dev/null | grep -q "inet"; then
+            return 0
+        fi
+    fi
+
+    if command -v ifconfig >/dev/null 2>&1; then
+        if ifconfig "$_iface" 2>/dev/null | grep -qE "inet |inet6 "; then
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
 network_is_connected() {
     CHECK_ETH="${1:-false}" # Defaults to false if no argument
 
 	iface_up=false
     wifi_iface=$(ls /sys/class/net/ | grep wlan | head -1)
 
-    if ifconfig "$wifi_iface" | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+    if iface_has_address "$wifi_iface"; then
         iface_up=true
     fi
 
     if [ "$CHECK_ETH" = true ]; then
-        if ifconfig eth0 | grep -qE "inet |inet6 " >/dev/null 2>&1; then
+        if iface_has_address eth0; then
             iface_up=true
         fi
     fi
@@ -1129,6 +1509,12 @@ network_is_connected() {
 }
 
 check_and_connect_wifi() {
+
+    waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
+    if [ "$waiting_enabled" = "False" ]; then
+        log_message "User opted out of waiting to connect, via spruce network settings."
+        return 1
+    fi
 
     timeout=60
     start_time=$(date +%s)

@@ -64,7 +64,10 @@ restore_spruce_config() {
 
 restore_theme_configs() {
     local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
-    [ -d "$backup_root" ] || log_message "No theme configs to restore." && return 1
+    if [ ! -d "$backup_root" ]; then
+        log_message "No theme configs to restore."
+        return 1
+    fi
 
     for theme_name in "$backup_root"/*; do
         [ -d "$theme_name" ] || continue

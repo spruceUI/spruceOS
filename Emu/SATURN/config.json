@@ -22,6 +22,19 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "Emulator_RGB30": {
+      "display": "Emulator",
+      "devices": [
+        "RGB30"
+      ],
+      "options": [
+        "yabasanshiro-standalone-hle",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro_a133p_libretro"
+      ],
+      "selected": "yabasanshiro-standalone-hle",
+      "overrides": {}
+    },
     "Emulator_Flip": {
       "display": "Emulator",
       "options": [
@@ -31,8 +44,7 @@
       ],
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-        "ANBERNIC_RGXX640480"
+        "ANBERNIC_RGXX"
       ],
       "selected": "yabasanshiro_libretro",
       "overrides": {}
@@ -72,6 +84,7 @@
       ],
       "devices": [
         "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
         "TRIMUI_SMART_PRO"
       ],
       "selected": "yabasanshiro_a133p_libretro",
@@ -86,12 +99,13 @@
   "scaling_min_freq": 1008000,
   "devices": [
     "TRIMUI_BRICK",
+    "TRIMUI_BRICK_PRO",
     "TRIMUI_SMART_PRO",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "GKD_PIXEL2",
-    "ANBERNIC_RG34XXSP","ANBERNIC_RG28XX",
-    "ANBERNIC_RGXX640480"
+    "ANBERNIC_RGXX",
+    "RGB30"
   ],
   "alternativeFolderNames": [
     "saturn",

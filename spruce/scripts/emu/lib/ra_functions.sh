@@ -46,10 +46,13 @@ setup_rumble_env() {
 }
 
 prepare_ra_config() {
-	case "$PLATFORM" in
-    	"Anbernic"*) export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-AnbernicRG_XX-universal.cfg" ;;
-		*) 			 export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" ;;
-	esac
+	# One cfg per platform, the fleet layout since the 2025-04 restructure:
+	# the card carries every platform's file and the device picks its own, so
+	# a card moved between models never launches on another model's saved
+	# state. The XX line used to share retroarch-AnbernicRG_XX-universal.cfg;
+	# 4.3.7.sh carries a restored copy of that file into the current
+	# platform's cfg once, then removes it.
+	export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
 
 	# Set up RetroAchievements based on spruceUI config
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
@@ -150,40 +153,69 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
-	# Handle resolution and rotation for Anbernic H700 devices
-	case "$PLATFORM" in
-		*"Anbernic"*)
-			TMP_CFG="$(mktemp)"
-			if [ "$PLATFORM" = "AnbernicRG28XX" ]; then
-				rot="1"
-			else
-				rot="0"
-			fi
-			if sed -e "s|^video_rotation.*|video_rotation = \"$rot\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
-				mv "$TMP_CFG" "$PLATFORM_CFG"
-			else
-				rm -f "$TMP_CFG"
-			fi
-			;;
-		*) ;;
-	esac
+	# Rotation and fullscreen size used to be forced into the XX line's shared
+	# cfg on every launch, because one file served a portrait RG28XX and three
+	# landscape models. Each platform cfg now ships with its own values, and
+	# 4.3.7.sh sets them once on a cfg it carries over, so a rotation the user
+	# picks inside RetroArch stays picked - as on every other platform.
 	sync
+}
+
+# Anbernic RG XX under BaseOS. The platform cfg carries the sdl2 drivers and
+# the built-in pad's player binds (no autoconfig ships for "ANBERNIC-keys":
+# every model reports the same name, so a name-matched profile could not tell
+# a stickless pad from a two-stick one - the Brick precedent, whose cfg binds
+# its pad the same way). The 64-bit build therefore needs nothing here. The
+# 32-bit build cannot see the pad through its SDL2 (no udevd) and reads it
+# through linuxraw, whose numbering differs, so it gets a shipped per-platform
+# overlay (retroarch-<PLATFORM>-32bit.cfg: linuxraw driver, binds, hotkeys,
+# config saving off) plus a tiny modifier overlay per spruce option, appended
+# with RetroArch's "|" delimiter; Custom falls back to SELECT there, the
+# shipped modifier on this line.
+#
+# Shared rather than inlined in run_retroarch because the standalone RetroArch
+# app launchers build their own command line and skipped all of this. The 32-bit
+# app was therefore launching with the platform cfg's sdl2 joypad driver, which
+# cannot see the pad on BaseOS - so it had no controls at all, while the same
+# binary launched with a game worked fine.
+#
+# Requires RA_BIN and RA_DIR; appends to RA_PARAMS.
+apply_baseos_ra_overlay() {
+	[ -n "$SPRUCE_BASEOS" ] || return 0
+	case "$RA_BIN" in
+		ra32.*) ;;
+		*) return 0 ;;
+	esac
+	overlay="$RA_DIR/platform/retroarch-$PLATFORM-32bit.cfg"
+	[ -f "$overlay" ] || return 0
+	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
+		"Select") modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
+		"Start")  modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-start.cfg" ;;
+		"Menu")   modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-menu.cfg" ;;
+		*)        modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
+	esac
+	[ -f "$modifier" ] && overlay="$overlay|$modifier"
+	RA_PARAMS="${RA_PARAMS} --appendconfig $overlay"
 }
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
-	# Apply per-game or system-wide RA build selection
+	# Apply per-game or system-wide RA build selection. The binary names are
+	# device-overridable because "64-bit" is not always the universal build -
+	# Anbernic XX under BaseOS runs the H700-tuned ra64.h700. Hardcoding the
+	# name here would quietly swap that back for the generic binary, which
+	# still runs, so the only symptom would be lost performance.
 	case "$RA_BUILD" in
-		"32-bit") export RA_BIN="ra32.universal" ;;
-		"64-bit") export RA_BIN="ra64.universal" ;;
+		"32-bit") export RA_BIN="${RA_BIN_32:-ra32.universal}" ;;
+		"64-bit") export RA_BIN="${RA_BIN_64:-ra64.universal}" ;;
 	esac
 
 	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
 
 	# Sync IGM flag file with config setting
 	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
-	if [ "$use_igm" = "True" ] && [ "$CORE" != "dosbox_pure" ]; then
+	if [ "$use_igm" = "True" ]; then
 		touch "$IGM_FLAG"
 	else
 		rm -f "$IGM_FLAG"
@@ -215,10 +247,12 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"A30"|"MiyooMini"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"A30"|"MiyooMini"|"RGB30"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
+
+	apply_baseos_ra_overlay
 
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
@@ -403,7 +437,7 @@ ready_architecture_dependent_states() {
             fi
 
             [ ! -d "$DIR_BASE" ] && mkdir -p "$DIR_BASE"
-            mount --bind "$DIR_SUFFIX" "$DIR_BASE"
+            mount -o bind "$DIR_SUFFIX" "$DIR_BASE"
         done
     done
 }

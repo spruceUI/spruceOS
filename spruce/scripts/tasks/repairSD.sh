@@ -286,6 +286,7 @@ if [ "$1" = "run" ]; then
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             poweroff
+            exit 1
         fi
         
         /tmp/sdfix/fsck.fat -av "$SD_DEV"

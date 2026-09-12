@@ -8,6 +8,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/usb_wifi_dongle.sh"
 
 
 ###############################################################################
@@ -23,6 +24,17 @@ vibrate() {
 
 rgb_led() {
     rgb_led_trimui "$@"
+}
+
+# The switch is "DIP Switch PH19" on this SoC, exported as gpio243 by each
+# device's init_gpio_a133p. Its raw value is the same 1/0 that trimui_scened
+# hands scene.sh, so it passes straight through.
+#
+# The Smart Pro S deliberately has no override for this: it is a different SoC
+# and exports no switch GPIO, so it keeps the empty default and skips the
+# boot-time apply.
+device_get_switch_position() {
+    cat /sys/class/gpio/gpio243/value 2>/dev/null
 }
 
 # used in principal.sh
@@ -41,7 +53,12 @@ device_enter_sleep() {
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
     disable_wifi
-    rmmod xradio_wlan
+    # Whichever driver is the radio comes out for the suspend: a USB dongle's
+    # module (it is reloaded by enable_wifi on the way back, after the resume
+    # wait usb_wifi_note_sleep arms) or the onboard one.
+    usb_wifi_note_sleep
+    usb_wifi_tear_down
+    usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
@@ -50,6 +67,17 @@ device_enter_sleep() {
 
 device_exit_sleep(){
     clear_wake_alarm $WAKE_ALARM_PATH
+    # A dongle that was the radio gets a bounded wait to re-enumerate: the host
+    # controller is back before the device is.
+    if usb_wifi_wait_after_resume; then
+        # The dongle is the radio: enable_wifi (device_wifi_power_on) loads its
+        # driver and gives it wlan0; loading xradio first would only take the
+        # name and have to be unloaded again. Both drivers are out after the
+        # suspend, so this has to run whenever the user wants WiFi - the
+        # system json is that answer, exactly as at boot.
+        enable_or_disable_wifi_per_system_json
+        return 0
+    fi
     modprobe xradio_wlan
     if [ -f /tmp/wifi_on ]; then
         # wait for wlan0 to appear (up to ~5s)
@@ -147,9 +175,6 @@ init_gpio_a133p() {
 }
 
 runtime_mounts_a133p() {
-	# PortMaster ports location
-    mkdir -p /mnt/SDCARD/Roms/PORTS/ports/ 
-    mount --bind /mnt/SDCARD/Roms/PORTS/ /mnt/SDCARD/Roms/PORTS/ports/
 
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
@@ -279,8 +304,8 @@ except Exception as e:
     traceback.print_exc()
 EOF
 
-    tmp=$(mktemp)
-    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON"
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
 
@@ -289,3 +314,68 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1 # Brick/SmartPro leaves dirty bit set?
 }
+
+# Strict unmount by default (SPR-MED-199). Measured 2026-09-06 with stage 2's
+# per-shutdown log: on every TrimUI A133P device the original single umount
+# fails on holders the fd-only sweep cannot see - orphaned getevents from the
+# power-button watchdog on the Brick, Brick Pro and Smart Pro - and falls back
+# to a lazy detach that leaves the FAT dirty flag set. The strict path (cwd,
+# exe and mapping holders, a sweep between retries, remount-ro, a holder dump
+# on failure) took the card off cleanly on the Smart Pro S, Smart Pro and
+# Brick the same night, at a cost of a few seconds.
+device_needs_strict_unmount() {
+    return 0
+}
+
+# --- WiFi radio -------------------------------------------------------------
+# The A133P line's onboard radio is the XR829 (xradio_wlan owns wlan0, loaded
+# by the stock init). A supported USB dongle on the USB-C port takes over
+# through utils/usb_wifi_dongle.sh: the cfg sets WIFI_USB_MODULES_DIR and
+# WIFI_ONBOARD_MODULE, and the contract unloads xradio_wlan, loads the dongle's
+# module and names its interface wlan0, so everything downstream (supplicant,
+# DHCP, PyUI's status and quality readers) works unchanged. No dongle, or a
+# dongle whose module will not load, means the onboard radio exactly as before.
+#
+# Defined only for a cfg that opted in (the platform cfg is sourced before
+# this file). This file is also sourced by RGB30.sh and Zero28.sh for its
+# TrimUI helpers - the RGB30 after defining its own nmcli radio hooks - and an
+# unconditional definition here would shadow those and turn its WiFi toggle
+# into a no-op.
+if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+
+device_wifi_power_on() {
+    if usb_wifi_bring_up; then
+        return 0
+    fi
+    # Onboard path. A dongle module left loaded by an earlier session state
+    # (the dongle was pulled while WiFi was off, say) goes first so it cannot
+    # hold the wlan0 name.
+    if ! usb_wifi_dongle_present >/dev/null 2>&1; then
+        usb_wifi_tear_down
+    fi
+    usb_wifi_onboard_restore
+}
+
+# "Off" on this line has always been disable_wifi's ifconfig down: the onboard
+# driver stays loaded (sleep unloads it separately) and so does a dongle's -
+# cheap to turn back on, and the watchdog unloads it when the dongle is pulled.
+device_wifi_power_off() {
+    return 0
+}
+
+device_ensure_wifi_interface() {
+    [ -d /sys/class/net/wlan0 ] && return 0
+    if usb_wifi_dongle_active; then
+        _left=5
+        while [ "$_left" -gt 0 ]; do
+            [ -d /sys/class/net/wlan0 ] && return 0
+            sleep 1
+            _left=$((_left - 1))
+        done
+        log_message "USB WiFi: dongle active but wlan0 missing"
+        return 1
+    fi
+    usb_wifi_onboard_restore
+}
+
+fi # WIFI_USB_MODULES_DIR

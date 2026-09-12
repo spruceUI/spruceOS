@@ -1,0 +1,84 @@
+{
+  "0_ANBERNIC-keys_19000000010000000100000000010000": {
+    "a": {
+      "id": 3,
+      "type": "button",
+      "value": 1
+    },
+    "b": {
+      "id": 4,
+      "type": "button",
+      "value": 1
+    },
+    "c": {
+      "id": 12,
+      "type": "button",
+      "value": 1
+    },
+    "x": {
+      "id": 6,
+      "type": "button",
+      "value": 1
+    },
+    "y": {
+      "id": 5,
+      "type": "button",
+      "value": 1
+    },
+    "z": {
+      "id": 13,
+      "type": "button",
+      "value": 1
+    },
+    "l": {
+      "id": 7,
+      "type": "button",
+      "value": 1
+    },
+    "r": {
+      "id": 8,
+      "type": "button",
+      "value": 1
+    },
+    "select": {
+      "id": 9,
+      "type": "button",
+      "value": 1
+    },
+    "start": {
+      "id": 10,
+      "type": "button",
+      "value": 1
+    },
+    "up": {
+      "id": 0,
+      "type": "hat",
+      "value": 1
+    },
+    "right": {
+      "id": 0,
+      "type": "hat",
+      "value": 2
+    },
+    "down": {
+      "id": 0,
+      "type": "hat",
+      "value": 4
+    },
+    "left": {
+      "id": 0,
+      "type": "hat",
+      "value": 8
+    },
+    "analogx": {
+      "id": 0,
+      "type": "axis",
+      "value": 1
+    },
+    "analogy": {
+      "id": 1,
+      "type": "axis",
+      "value": -1
+    }
+  }
+}

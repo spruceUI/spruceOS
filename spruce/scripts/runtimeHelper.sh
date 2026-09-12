@@ -41,11 +41,31 @@ check_and_handle_firmware_app() {
     fi
 }
 
+# Download the OTA release info into "$TMP_DIR/spruce". Certificates are
+# verified first (SSL_CERT_FILE); only a TLS failure retries with -k, the
+# same way downloader.sh does it.
+fetch_release_info() {
+    curl -sS -f --connect-timeout 15 -o "$TMP_DIR/spruce" "$1" 2>"$TMP_DIR/curl_error"
+    fetch_rc=$?
+    case "$fetch_rc" in
+        35|51|58|59|60|77)
+            log_message "Update Check: TLS verification failed for $1 (curl $fetch_rc); retrying without certificate verification"
+            curl -k -sS -f --connect-timeout 15 -o "$TMP_DIR/spruce" "$1" 2>"$TMP_DIR/curl_error"
+            fetch_rc=$?
+            ;;
+    esac
+    [ "$fetch_rc" -eq 0 ] && grep -q "RELEASE_VERSION=" "$TMP_DIR/spruce"
+}
+
 check_for_update() {
 
     SD_CARD="/mnt/SDCARD"
     OTA_URL="https://spruceui.github.io/OTA/spruce"
-    TMP_DIR="$SD_CARD/App/-OTA/tmp"
+    OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
+    OTA_URL_BACKUP_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceSource/refs/heads/main/OTA/spruce"
+    # Not App/-OTA/tmp: that directory holds a pending "install later"
+    # queue for the EZ Updater, and this function removes its own scratch dir.
+    TMP_DIR="$SD_CARD/App/-OTA/check_tmp"
     CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
     should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
@@ -55,6 +75,12 @@ check_for_update() {
 
     timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     check_interval=86400  # 24 hours in seconds
+    # Developer/tester devices follow nightlies, which can be rebuilt several
+    # times a day; waiting 24 h after a prompt would flag a rebuild a day
+    # late. Check on every boot instead (one small fetch with mirrors).
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
+        check_interval=0
+    fi
 
     # If update was previously prompted, check the timestamp
     if flag_check "update_prompted"; then
@@ -76,6 +102,13 @@ check_for_update() {
 
     # Update timestamp for next check
     date +%s > "$timestamp_file"
+
+    # No radio, no network, no check - and none of the three 20-second waits.
+    if ! wifi_available_on_device; then
+        log_message "Update Check: device has no WiFi, skipping."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
 
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
@@ -102,7 +135,7 @@ check_for_update() {
     done
 
     # Get current version based on mode
-    if flag_check "developer_mode" || flag_check "tester_mode" || flag_check "beta"; then
+    if flag_check "developer_mode" || flag_check "tester_mode"; then
         CURRENT_VERSION=$(get_version_complex)
     else
         CURRENT_VERSION=$(get_version)
@@ -113,7 +146,7 @@ check_for_update() {
     log_message "Update Check: Current version: $CURRENT_VERSION"
 
     # Download and parse the release info file
-    if ! curl -s -o "$TMP_DIR/spruce" "$OTA_URL"; then
+    if ! fetch_release_info "$OTA_URL" && ! fetch_release_info "$OTA_URL_BACKUP" && ! fetch_release_info "$OTA_URL_BACKUP_BACKUP"; then
         log_message "Update Check: Failed to download release info"
         rm -rf "$TMP_DIR"
         return 1
@@ -122,31 +155,47 @@ check_for_update() {
     # Extract version info from downloaded file
     RELEASE_VERSION=$(sed -n 's/RELEASE_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
-    BETA_VERSION=$(sed -n 's/BETA_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
+    NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
 
     # Set target version based on developer/tester mode
     TARGET_VERSION="$RELEASE_VERSION"
-    if flag_check "beta"; then
-        TARGET_VERSION="$BETA_VERSION"
-    fi
 
     if flag_check "developer_mode" || flag_check "tester_mode"; then
-        TARGET_VERSION="$NIGHTLY_VERSION"
+        # Same rule as downloader.sh: "OTA: release channel" = Stable keeps a
+        # developer/tester device on stable releases.
+        if [ "$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")" != "Stable" ]; then
+            TARGET_VERSION="$NIGHTLY_VERSION"
+        fi
     fi
 
-    # Compare versions, handling nightly date format and beta versions
+    # Compare versions
     log_message "Update Check: Comparing versions: $TARGET_VERSION vs $CURRENT_VERSION"
     
-    # Extract base version, date, and beta status
+    # Extract base version and date status
     current_base_version=$(echo "$CURRENT_VERSION" | cut -d'-' -f1)
     current_suffix=$(echo "$CURRENT_VERSION" | cut -d'-' -f2 -s)
-    current_is_beta=$(echo "$current_suffix" | grep -q "Beta" && echo "1" || echo "0")
     current_date=$(echo "$current_suffix" | grep -qE "^[0-9]{8}$" && echo "$current_suffix" || echo "")
 
     target_base_version=$(echo "$TARGET_VERSION" | cut -d'-' -f1)
     target_suffix=$(echo "$TARGET_VERSION" | cut -d'-' -f2 -s)
-    target_is_beta=$(echo "$target_suffix" | grep -q "Beta" && echo "1" || echo "0")
     target_date=$(echo "$target_suffix" | grep -qE "^[0-9]{8}$" && echo "$target_suffix" || echo "")
+
+    # Build identity of the installed nightly, mirroring
+    # installed_nightly_build() in App/-OTA/downloader.sh: the commit in
+    # /mnt/SDCARD/commits_nightly.txt (shipped by every nightly package)
+    # against NIGHTLY_COMMIT from the feed. Several nightlies built on one
+    # day share a version string, so a different build of the installed
+    # version counts as an update. Unknown on either side = no opinion.
+    current_build=""
+    if [ -n "$current_date" ]; then
+        current_build=$(sed -n 's/^Last commit: *//p' /mnt/SDCARD/commits_nightly.txt 2>/dev/null | head -n 1 | tr -d '[:space:]' | tr 'A-F' 'a-f')
+    fi
+    target_build=""
+    [ "$TARGET_VERSION" = "$NIGHTLY_VERSION" ] && target_build="$NIGHTLY_COMMIT"
+    nightly_rebuilt=0
+    if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ] && [ -n "$current_build" ] && [ -n "$target_build" ] && [ "$current_build" != "$target_build" ]; then
+        nightly_rebuilt=1
+    fi
 
     update_available=0
     
@@ -162,15 +211,11 @@ check_for_update() {
             # For testers/developers, nightlies are updates
             if [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
                 update_available=1
-            fi
-        elif flag_check "beta"; then
-            # Beta mode logic
-            if [ "$current_is_beta" = "1" ]; then
-                # Currently on beta, only higher base versions are updates
-                update_available=0
-            elif [ "$target_is_beta" = "1" ]; then
-                # Not on beta, but target is beta - consider it an update
+            elif [ "$nightly_rebuilt" = "1" ]; then
+                log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
                 update_available=1
+            elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
+                log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
             fi
         fi
     fi
@@ -178,10 +223,12 @@ check_for_update() {
     if [ $update_available -eq 1 ]; then
         log_message "Update Check: Update available"
         # Update is available - show app and set label and description
-        jq --arg ver "$TARGET_VERSION" '
+        available_text="Version $TARGET_VERSION is available"
+        [ "$nightly_rebuilt" = "1" ] && available_text="A new build of version $TARGET_VERSION ($(printf '%s' "$target_build" | cut -c1-7)) is available"
+        jq --arg desc "$available_text" '
           (if ."#label" then del(."#label") else . end)
           | .label = "Update Available"
-          | .description = "Version \($ver) is available"
+          | .description = $desc
         ' "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
         rm -rf "$TMP_DIR"
 
@@ -190,12 +237,15 @@ check_for_update() {
             # First time seeing this update
             flag_add "update_available"
             flag_add "update_prompted"
-            echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+            # Line 1: version prompted; line 2: its build (nightly commit), so
+            # a same-day rebuild of an already prompted nightly prompts again.
+            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
             echo "$TARGET_VERSION" > "$(flag_path update_available)"
         else
-            # Get version from previous prompt
-            prompted_version=$(cat "$(flag_path update_prompted)")
-            
+            # Get version (and build) from previous prompt
+            prompted_version=$(head -n 1 "$(flag_path update_prompted)" | tr -d '[:space:]')
+            prompted_build=$(sed -n '2p' "$(flag_path update_prompted)" | tr -d '[:space:]')
+
             # Compare versions (using same logic as above)
             prompted_base_version=$(echo "$prompted_version" | cut -d'-' -f1)
             prompted_date=$(echo "$prompted_version" | cut -d'-' -f2 -s)
@@ -205,12 +255,14 @@ check_for_update() {
                 newer_than_prompted=1
             elif [ -n "$prompted_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$prompted_date" ]; then
                 newer_than_prompted=1
+            elif [ "$nightly_rebuilt" = "1" ] && [ "$prompted_version" = "$TARGET_VERSION" ] && [ "$prompted_build" != "$target_build" ]; then
+                newer_than_prompted=1
             fi
 
             if [ $newer_than_prompted -eq 1 ]; then
-                # New version is newer than previously prompted version
+                # New version (or build) is newer than previously prompted
                 flag_add "update_available"
-                echo "$TARGET_VERSION" > "$(flag_path update_prompted)"
+                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
                 echo "$TARGET_VERSION" > "$(flag_path update_available)"
             fi
         fi
@@ -233,6 +285,13 @@ update_checker(){
 }
 
 check_for_update_file() {
+    # An incremental OTA leaves spruceOTA-*.7z archives plus a queue file
+    # rather than a spruceV*.7z, and "install later" must survive a reboot.
+    if [ -f /mnt/SDCARD/App/-OTA/tmp/ota_queue ]; then
+        echo "Pending OTA queue found"
+        return 0
+    fi
+
     echo "Searching for update file"
     UPDATE_FILE=$(find /mnt/SDCARD/ -maxdepth 1 -name "spruceV*.7z" | awk -F'V' '{print $2, $0}' | sort -n | tail -n1 | cut -d' ' -f2-)
     echo "Found update file: $UPDATE_FILE"
@@ -322,7 +381,9 @@ unstage_archive() {
     ARC_DIR="/mnt/SDCARD/spruce/archives"
     STAGED_ARCHIVE="$1"
     TARGET="$2"
-    if [ -z "$TARGET_FOLDER" ] || [ "$TARGET_FOLDER" != "preCmd" ]; then TARGET="preMenu"; fi
+    # Only the two unpacker lanes are valid targets; anything else lands in
+    # the pre-menu lane.
+    if [ "$TARGET" != "preCmd" ]; then TARGET="preMenu"; fi
 
     if [ -f "$ARC_DIR/staging/$STAGED_ARCHIVE" ]; then
         log_message "$STAGED_ARCHIVE detected in spruce/archives/staging. Moving into place!"
@@ -330,20 +391,24 @@ unstage_archive() {
     fi
 }
 
+# These archives have always unpacked in the pre-menu lane: the target
+# argument used to be ignored, so "preCmd" here never took effect. Keep them
+# in preMenu; moving any of them to the background pre_cmd lane is a
+# deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
     if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
-        unstage_archive "overlays_640x480.7z" "preCmd"
+        unstage_archive "overlays_640x480.7z" "preMenu"
     elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
-        unstage_archive "overlays_1024x768.7z" "preCmd"
+        unstage_archive "overlays_1024x768.7z" "preMenu"
     fi
     if [ "$DEVICE_CAN_USE_EXTERNAL_CONTROLLER" = "true" ]; then
-        unstage_archive "autoconfig.7z" "preCmd"
+        unstage_archive "autoconfig.7z" "preMenu"
     fi
     if [ "$DEVICE_USES_64_BIT_RA" = "true" ]; then
-        unstage_archive "cores64.7z" "preCmd"
+        unstage_archive "cores64.7z" "preMenu"
     fi
     if [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || [ "$DEVICE_USES_64_BIT_RA" != "true" ]; then
-        unstage_archive "cores32.7z" "preCmd"
+        unstage_archive "cores32.7z" "preMenu"
     fi
 }
 
@@ -369,6 +434,16 @@ Go to Apps and look for 'Update Available'" --okay
 set_volume_to_config() {
     vol=$(jq -r '.vol // empty' "$SYSTEM_JSON")
     [ -n "$vol" ] && set_volume "$vol"
+}
+
+# hardwareservice and the trimui blobs reset the mixer when they finish init, and
+# how long that takes moves with boot load, so one delayed restore can land first.
+restore_volume_after_audio_service() {
+    for _vol_delay in 1.5 2 4 8; do
+        sleep "$_vol_delay"
+        [ -e /tmp/sleep_helper_started ] && return 0   # a sleep owns the mixer
+        set_volume_to_config
+    done
 }
 
 UNPACK_STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
@@ -482,7 +557,7 @@ auto_resume_game() {
     # moving rather than copying prevents you from repeatedly reloading into a corrupted NDS save state;
     # copying is necessary for repeated save+shutdown/autoresume chaining though and is preferred when safe.
     MOVE_OR_COPY=cp
-    if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
+    # if grep -q "Roms/NDS" "${FLAGS_DIR}/lastgame.lock"; then MOVE_OR_COPY=mv; fi
 
     # runtimeHelper producer contract:
     # stage once and hand off; principal.sh owns execution and cleanup.
@@ -542,6 +617,13 @@ set_up_boot_action() {
                 else
                     log_message "Pico-8 binaries not found; booting to spruceUI instead."
                 fi
+                ;;
+            "NDS firmware")
+                log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
+                echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
+                ;;
+            "PPSSPP")
+                echo "\"/mnt/SDCARD/App/PPSSPP/launch.sh\"" > /tmp/cmd_to_run.sh
                 ;;
             "Apotris"*)
                 log_message "Sun mode engaged."

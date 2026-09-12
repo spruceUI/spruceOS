@@ -1,0 +1,17 @@
+#version 300 es
+
+layout(std140) uniform UBO
+{
+    mat4 mMVP;
+} sUBOConstants;
+
+out vec2 ilUV;
+layout(location = 1) in vec2 inVertexUV;
+layout(location = 0) in vec4 inVertexPos;
+
+void main()
+{
+    ilUV = inVertexUV;
+    gl_Position = sUBOConstants.mMVP * inVertexPos;
+}
+

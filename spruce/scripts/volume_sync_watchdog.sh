@@ -77,6 +77,27 @@ read_current() {
 # Silent Mode unmute. Cheap enough to run on every key event, even held.
 sync_value() {
     new_vol="$1"
+
+    # Ignore everything while sleep_helper owns the volume. It mutes with
+    # `set_volume 0 false` on the way into sleep and restores the level on wake,
+    # and that `false` means "do not persist this". But the flag only suppresses
+    # set_volume's own write to .vol - the command file is written either way,
+    # and this watchdog is a separate process that cannot tell a transient system
+    # mute from the user reaching for the volume key. Mirroring it wrote
+    # "vol": 0 into SYSTEM_JSON, which is exactly what wake and the next boot
+    # restore from, so the level was lost for good and the device came up silent.
+    #
+    # Keyed on sleep_helper's existing marker, which spans the whole sleep and
+    # wake sequence: created before the mute, removed after the volume is
+    # restored. Nothing new to clean up, and /tmp clears it if sleep_helper dies.
+    # The wake-side restore calls set_volume with SAVE_TO_CONFIG=true, which
+    # writes .vol directly, so suppressing the mirror here costs nothing.
+    #
+    # Note this deliberately does NOT key on SAVE_TO_CONFIG=false in general -
+    # buttons_watchdog steps with that same flag while a volume key is held, and
+    # mirroring those is this watchdog's whole purpose.
+    [ -e /tmp/sleep_helper_started ] && return 0
+
     [ "$new_vol" = "$last_seen" ] && return 0
     last_seen="$new_vol"
     if [ "$new_vol" != "$(get_volume_level)" ]; then

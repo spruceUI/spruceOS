@@ -10,18 +10,33 @@ BG_TREE="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 SAVE_IMG="/mnt/SDCARD/spruce/imgs/save.png"
 
 EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
+ra64.h700 ra32.h700 \
 retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
-flycast flycast2024 yabasanshiro yabasanshiro.trimui \
+flycast flycast2024 yabasanshiro yabasanshiro.trimui dsperate dsperate.a30 \
 mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
 
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
 
-if [ "$1" = "--reboot" ]; then
-    s2_arg="--reboot";
-else
-    s2_arg=""
-fi
+# --reboot        reboot instead of powering off
+# --usb-storage   the USB Storage Mode app is handing over: no emulator, no
+#                 shutdown screen, no syncthing wait, and the mass-storage
+#                 gadget is released here, after stage 2 is staged (see
+#                 usb_storage_release_gadget)
+# --usb-storage-export  the app hands over BEFORE anything is exported: same
+#                 skips as --usb-storage, nothing to release here, and stage 2
+#                 is told to unmount strictly and then run the export session
+#                 from /tmp (usb_session_run) before it reboots
+s2_arg=""
+USB_STORAGE_EXIT=0
+USB_STORAGE_EXPORT=0
+for arg in "$@"; do
+    case "$arg" in
+        --reboot) s2_arg="--reboot" ;;
+        --usb-storage) USB_STORAGE_EXIT=1 ;;
+        --usb-storage-export) USB_STORAGE_EXIT=1; USB_STORAGE_EXPORT=1; s2_arg="--reboot" ;;
+    esac
+done
 
 ##### FUNCTION DEFINITIONS ####################
 
@@ -263,8 +278,9 @@ kill_remaining_background_processes() {
 }
 
 clean_up_flags() {
-    # Set flag to trigger autoresume on boot if appropriate
-    if flag_check "in_menu"; then
+    # Set flag to trigger autoresume on boot if appropriate. USB Storage Mode
+    # counts as the menu: there is nothing to resume into.
+    if flag_check "in_menu" || usb_storage_exit; then
         flag_remove "save_active"
         log_message "save_active cleared by save_poweroff: shutdown initiated from menu"
     else
@@ -276,20 +292,100 @@ clean_up_flags() {
     flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 }
 
+# Stage 2 must be copied off the card BEFORE anything is unmounted. On the
+# Miniloong the card is at /mnt/sdcard and /mnt/SDCARD is a separate BIND mount
+# (the Flip's /mnt/SDCARD is a symlink), so unmount_all - which spares only
+# $SD_MOUNTPOINT - takes /mnt/SDCARD away and the copy below found nothing:
+# stage 2 never ran there, the fallback ran the power-off command for a
+# reboot too, and three shutdown attempts left the device on its unmounted
+# card (SPR-HIGH-051, 2026-08-28 and 2026-09-04). Called right after the
+# starting breadcrumb, while every path is still mounted.
+stage_shutdown_stage_2() {
+    if [ -e "$STAGE_2_SD_PATH" ]; then
+        if cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null; then
+            chmod +x "$STAGE_2_TMP_PATH"
+            log_message "save_poweroff.sh: staged stage 2 at $STAGE_2_TMP_PATH"
+        else
+            log_message "save_poweroff.sh: WARNING could not stage stage 2 to /tmp"
+        fi
+    else
+        log_message "save_poweroff.sh: WARNING stage 2 script missing at $STAGE_2_SD_PATH"
+    fi
+}
+
+usb_storage_exit() {
+    [ "$USB_STORAGE_EXIT" = "1" ]
+}
+
+# Release the USB mass-storage gadget on behalf of App/USBStorageMode.
+#
+# Closing the LUN closes the card's block device, and on TrimUI stock udev's
+# block `watch` rule turns that close into a synthesized `change` uevent that
+# /sbin/mdev answers with /etc/mdev/sdcard_remove: `umount -l` of the card,
+# `rm -rf` of its mount point, `rm -f /mnt/SDCARD` (SPR-HIGH-053, measured on
+# the Smart Pro S). From that instant nothing on the card can be reached by
+# path. So this runs only after stage 2 is staged into /tmp and every helper
+# that needs the card has had its turn; what follows it (unmount_all, the
+# stage-2 hand-off) works from memory and /tmp.
+usb_storage_release_gadget() {
+    hook=/mnt/SDCARD/App/USBStorageMode/usb_gadget.sh
+    if [ ! -f "$hook" ]; then
+        log_message "save_poweroff.sh: WARNING usb gadget hook missing at $hook"
+        return 1
+    fi
+    . "$hook"
+    if ! usb_gadget_platform_setup; then
+        log_message "save_poweroff.sh: WARNING no USB gadget table for $PLATFORM"
+        return 1
+    fi
+    log_message "save_poweroff.sh: releasing the USB mass-storage gadget ($PLATFORM)"
+    usb_gadget_release
+    log_message "save_poweroff.sh: USB gadget released"
+}
+
 exec_shutdown_stage_2() {
     log_message "Running stage 2 of save_poweroff from /tmp."
     sync
-    if [ -e "$STAGE_2_SD_PATH" ]; then
-        cp $STAGE_2_SD_PATH $STAGE_2_TMP_PATH
-        chmod +x $STAGE_2_TMP_PATH
+    # Prefer the copy staged before the unmounts; fall back to copying now.
+    if [ ! -x "$STAGE_2_TMP_PATH" ] && [ -e "$STAGE_2_SD_PATH" ]; then
+        cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null && chmod +x "$STAGE_2_TMP_PATH"
+    fi
+    if [ -x "$STAGE_2_TMP_PATH" ]; then
         # Reset environment BEFORE exec so the new shell interpreter
         # doesn't load shared libraries from the SD card
         export PATH=/usr/bin:/usr/sbin:/bin:/sbin
         unset LD_LIBRARY_PATH
+        # Stage 2 runs from /tmp with the card gone, so it cannot source the
+        # device layer to ask this itself. Answer it here, while we still can,
+        # and hand the answer over in the environment.
+        if device_needs_strict_unmount; then
+            export SPRUCE_STRICT_UNMOUNT=1
+        else
+            export SPRUCE_STRICT_UNMOUNT=0
+        fi
+        if device_power_transition_bypasses_init; then
+            export SPRUCE_FORCE_POWER_TRANSITION=1
+        else
+            export SPRUCE_FORCE_POWER_TRANSITION=0
+        fi
+        # The export session needs a card that is really gone, so the strict
+        # unmount is forced regardless of the platform default.
+        if [ "$USB_STORAGE_EXPORT" = "1" ]; then
+            export SPRUCE_STRICT_UNMOUNT=1
+            export SPRUCE_USB_EXPORT=1
+        else
+            export SPRUCE_USB_EXPORT=0
+        fi
         exec "$STAGE_2_TMP_PATH" "$s2_arg"
     else
-        log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
-        run_poweroff_cmd
+        # No stage 2 at all: still honour what was asked for.
+        if [ "$s2_arg" = "--reboot" ]; then
+            log_message "ERROR: Stage 2 script missing! Executing device_run_reboot_cmd() instead."
+            device_run_reboot_cmd
+        else
+            log_message "ERROR: Stage 2 script missing! Executing run_poweroff_cmd() instead."
+            run_poweroff_cmd
+        fi
     fi
 }
 
@@ -297,16 +393,18 @@ exec_shutdown_stage_2() {
 ##### PREVENT RE-ENTRY IF ALREADY RUNNING #####
     #######################################
 
-PIDFILE="/tmp/save_poweroff.pid"
-if [ -f "$PIDFILE" ]; then
-    oldpid="$(cat "$PIDFILE")"
+LOCKDIR="/tmp/save_poweroff.lock"
+PIDFILE="$LOCKDIR/pid"
+if ! mkdir "$LOCKDIR" 2>/dev/null; then
+    oldpid="$(cat "$PIDFILE" 2>/dev/null)"
     if [ -n "$oldpid" ] && kill -0 "$oldpid" 2>/dev/null; then
-    log_message "save_poweroff.sh called in duplicate. Ignoring second call."
+        log_message "save_poweroff.sh called in duplicate. Ignoring second call."
         exit 0
     fi
+    log_message "save_poweroff.sh reclaiming stale lock (owner ${oldpid:-unknown} gone)."
 fi
 echo $$ > "$PIDFILE"
-trap 'rm -f "$PIDFILE"' EXIT INT TERM
+trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = "$$" ] && rm -rf "$LOCKDIR"' EXIT INT TERM
 
 
 
@@ -314,12 +412,39 @@ trap 'rm -f "$PIDFILE"' EXIT INT TERM
 ################### MAIN ######################
                   ########
 
+# BaseOS runs the frontend session from an inittab respawn entry, so killing
+# runtime.sh below only makes init start another one - and that fresh session
+# races this shutdown. It is not merely noise: its read_only_check sees the card
+# we just remounted read-only and runs `mount -o remount,rw` to "repair" it,
+# undoing the clean unmount seconds before the power command. Observed exactly
+# that - the respawned session logged two lines, went silent as the card went
+# read-only, and the next boot still reported a dirty filesystem.
+#
+# Raise a flag runtime.sh checks on startup so the respawned session exits at
+# once. It lives in /tmp, so a real boot never sees it.
+#
+# Only where the strict path applies. Nothing else in the fleet respawns its
+# frontend from init, so the flag would never be read there - and a flag that is
+# never read is still a flag that can be left behind by an aborted shutdown and
+# make the next runtime.sh exit for no reason.
+if device_needs_strict_unmount; then
+    flag_add "shutting_down" --tmp
+fi
+
+# Breadcrumbs. Without them a hang anywhere in the shutdown path is
+# indistinguishable from the script never having run at all - the log simply
+# stops, which is exactly how the RGB30 lockup first presented. These are three
+# writes on a path that ends in a poweroff; they cost nothing.
+log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
+stage_shutdown_stage_2
+
 blink_led_if_applicable
 device_prepare_for_poweroff
+log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 
-if ! flag_check "in_menu"; then
+if ! usb_storage_exit && ! flag_check "in_menu"; then
     attempt_to_close_emu_gracefully
     wait_for_graceful_emu_exit
     sync
@@ -327,14 +452,40 @@ if ! flag_check "in_menu"; then
     close_non_emu_cmd_to_run
 fi
 
-display_appropriate_icon_and_message
-dim_screen_and_do_syncthing_check
+if usb_storage_exit; then
+    # The app is what cmd_to_run.sh launched, so principal.sh recorded it as
+    # the last game. It is not resumable: a boot that auto-resumed into USB
+    # Storage Mode sat in the app with no network services up (measured on
+    # the TSPS, 2026-09-05). Drop the lastgame record now, the way a
+    # non-emulator command is dropped, and let clean_up_flags treat this as a
+    # shutdown from the menu so save_active is cleared rather than set.
+    close_non_emu_cmd_to_run
+    rm -f -- "${FLAGS_DIR}/lastgame.lock"
+else
+    display_appropriate_icon_and_message
+    dim_screen_and_do_syncthing_check
+fi
 clean_up_flags
 alsactl store 2>/dev/null
 kill_remaining_background_processes
 
 # Systemd handles graceful shutdown on the pixel2
-if device_system_handles_sdcard_unmount; then
+# Reboot-only preparation while the device functions are still reachable
+# (stage 2 runs from /tmp with the card gone). See device_prepare_for_reboot.
+if [ "$s2_arg" = "--reboot" ]; then
+    device_prepare_for_reboot
+fi
+
+# USB Storage Mode: the gadget goes last among the things that need the card,
+# and before any power command - the card may vanish the moment it is released.
+if usb_storage_exit && [ "$USB_STORAGE_EXPORT" != "1" ]; then
+    usb_storage_release_gadget
+fi
+
+# The export session must reach stage 2 even where the system would handle
+# the unmount at a real power-off; the app only takes this path where spruce
+# owns the card, this is the second line of defence.
+if [ "$USB_STORAGE_EXPORT" != "1" ] && device_system_handles_sdcard_unmount; then
 
     if [ "$s2_arg" = "--reboot" ]; then
         device_run_reboot_cmd

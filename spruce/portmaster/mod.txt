@@ -1,0 +1,37 @@
+#!/bin/bash
+# Port-shell hook, after control.txt.
+[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+case "$PLATFORM" in
+Anbernic*)
+    # gptokeyb needs dll-mali (only build that classifies the pad).
+    GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+    GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH $controlfolder/gptokeyb $ESUDOKILL"
+
+    # Keyboard-driven ports (gptokeyb -c) need the vendor SDL2; pad-driven ones need dll-mali.
+    # Must run before the port sources its runtime (love.txt bakes LD_LIBRARY_PATH in).
+    if grep -qE '\$GPTOKEYB2?[^&|;]*[[:space:]]-c[[:space:]]' "$0" 2>/dev/null; then
+        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH"
+    fi
+
+    # Point SDL at gptokeyb's uinput keyboard once it appears.
+    pm_platform_helper() {
+        [ -n "$SDL_EVDEV_DEVICES" ] && return 0
+        i=0
+        while [ "$i" -lt 30 ]; do
+            for d in /sys/class/input/event*; do
+                [ -r "$d/device/name" ] || continue
+                case "$(cat "$d/device/name" 2>/dev/null)" in
+                    "Fake Keyboard Mouse"|"Fake Keyboard")
+                        export SDL_EVDEV_DEVICES="/dev/input/$(basename "$d")"
+                        return 0
+                        ;;
+                esac
+            done
+            i=$((i + 1))
+            sleep 0.1
+        done
+        return 0
+    }
+    ;;
+esac

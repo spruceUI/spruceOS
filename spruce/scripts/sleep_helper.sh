@@ -2,9 +2,9 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ -e /tmp/sleep_helper_started ]; then
+if ! mkdir /tmp/sleep_helper_started 2>/dev/null; then
     log_message "Sleep helper already active, skipping. /tmp/sleep_helper_started exists" -v
-    exit 0 
+    exit 0
 fi
 
 current_app="$(get_current_app)"
@@ -13,7 +13,6 @@ log_activity_event "$current_app" "STOP"
 log_message "Sleep helper starting up..."
 rm -f /tmp/power_pressed_flag
 
-touch /tmp/sleep_helper_started
 START_TIME=$(date +%s)
 getevent $EVENT_PATH_POWER | while read -r line; do
     CURRENT_TIME=$(date +%s)
@@ -43,7 +42,8 @@ power_button_pressed() {
 
 cleanup() {
     kill "${GET_EVENT_PID:-}" 2>/dev/null
-    rm -f /tmp/sleep_helper_started /tmp/power_pressed_flag
+    rmdir /tmp/sleep_helper_started 2>/dev/null
+    rm -f /tmp/power_pressed_flag
 }
 
 # Clean up on exit
@@ -105,7 +105,7 @@ run_timeout_poweroff() {
     "$POWER_OFF_SCRIPT"
     poweroff_status=$?
     if [ "$poweroff_status" -eq 0 ]; then
-        rm -f /tmp/sleep_helper_started
+        rmdir /tmp/sleep_helper_started 2>/dev/null
         exit 0
     fi
 
@@ -217,7 +217,7 @@ esac
 kill "$GET_EVENT_PID" 2>/dev/null
 
 sleep 2 #don't allow resleeping for a few seconds
-rm -f /tmp/sleep_helper_started
+rmdir /tmp/sleep_helper_started 2>/dev/null
 
 # Restart idle timer if needed (idlemon_mm checks for it)
 /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &

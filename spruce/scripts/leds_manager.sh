@@ -7,6 +7,7 @@ LEDS_STATE=(false false false false false)
 leds_audio() {
   turn_off_led 0
 
+  export HOME="/storage"
   cava -p /storage/.config/cava/config | while read value; do
     # echo $value
     if [ $value -lt 25 ] ; then

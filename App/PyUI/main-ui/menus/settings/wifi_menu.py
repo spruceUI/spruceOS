@@ -29,79 +29,10 @@ class WifiMenu:
     def wifi_adjust(self):
         if Device.get_device().is_wifi_enabled():
             Device.get_device().disable_wifi()
+            Device.get_device().note_wifi_change()
         else:
             Device.get_device().enable_wifi()
-
-
-    def write_wpa_supplicant_conf(self, ssid: str, pw_line: str):
-        file_path = Device.get_device().get_wpa_supplicant_conf_path()
-
-        try:
-            try:
-                with open(file_path, "r") as f:
-                    lines = f.readlines()
-            except FileNotFoundError:
-                lines = []
-
-            header_lines = []
-            networks = []
-
-            current_block = []
-            in_block = False
-
-            # --- Parse file ---
-            for line in lines:
-                stripped = line.strip()
-
-                if stripped.startswith("network={"):
-                    in_block = True
-                    current_block = [line]
-                elif in_block:
-                    current_block.append(line)
-                    if stripped == "}":
-                        networks.append(current_block)
-                        current_block = []
-                        in_block = False
-                else:
-                    header_lines.append(line)
-
-            # --- Build new network block ---
-            new_block = [
-                "network={\n",
-                f'    ssid="{ssid}"\n',
-                f"    {pw_line}\n",
-                "}\n",
-            ]
-
-            # --- Replace or append ---
-            found = False
-            for i, block in enumerate(networks):
-                for line in block:
-                    if f'ssid="{ssid}"' in line:
-                        networks[i] = new_block
-                        found = True
-                        break
-                if found:
-                    break
-
-            if not found:
-                networks.append(new_block)
-
-            # --- Write back ---
-            with open(file_path, "w") as f:
-                for line in header_lines:
-                    f.write(line)
-
-                if header_lines and not header_lines[-1].endswith("\n"):
-                    f.write("\n")
-
-                for block in networks:
-                    f.write("\n")
-                    for line in block:
-                        f.write(line)
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
+            Device.get_device().note_wifi_change()
 
 
     def reload_wpa_supplicant_config(self):
@@ -114,23 +45,28 @@ class WifiMenu:
 
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
+        # The password prompt stays here (it is UI); applying the selection is
+        # the device's job, so a host with its own network stack can do it that
+        # way. The default
+        # device implementation is the wpa_supplicant behaviour this method used
+        # to inline.
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password()):
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
-                self.write_wpa_supplicant_conf(net.ssid, "psk=\""+password+"\"")
                 Display.display_message(
                     Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
                     .replace("{ssid}", net.ssid)
                     .replace("{password}", password),
                     duration_ms=5000,
                 )
+                Device.get_device().wifi_connect(net.ssid, password)
+                Device.get_device().note_wifi_change()
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
-        else:   
-            self.write_wpa_supplicant_conf(net.ssid, "key_mgmt=NONE")
-
-        self.reload_wpa_supplicant_config()
+        else:
+            Device.get_device().wifi_connect(net.ssid, None)
+            Device.get_device().note_wifi_change()
 
     def _build_options(
         self,

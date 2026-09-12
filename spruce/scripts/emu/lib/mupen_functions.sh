@@ -35,6 +35,20 @@ build_mupen_args() {
 	G_WIDTH=$((DISPLAY_HEIGHT * 4 / 3))
 	G_HEIGHT=$DISPLAY_HEIGHT
 
+	# That assumes a panel at least as wide as 4:3, which every device had until
+	# the RGB30: it is square at 720x720, so the canvas came out 960 wide and
+	# 240px of the picture hung off the right edge. The centering branch below
+	# cannot help - it only fires when the panel is WIDER than the canvas.
+	#
+	# Fit to width instead and shorten the canvas to keep 4:3. Provably a no-op
+	# on every other device, where DISPLAY_HEIGHT*4/3 is already <= DISPLAY_WIDTH
+	# (Brick/BrickPro 1024x768 -> 1024, SmartPro/S 1280x720 -> 960, Flip/Pixel2
+	# 640x480 -> 640).
+	if [ "$G_WIDTH" -gt "$DISPLAY_WIDTH" ]; then
+		G_WIDTH=$DISPLAY_WIDTH
+		G_HEIGHT=$((DISPLAY_WIDTH * 3 / 4))
+	fi
+
 	# Read video plugin from overlay config (written to [SpruceOS] section)
 	# Values: 0=GLideN64, 1=Rice, 2=Glide64mk2
 	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
@@ -64,6 +78,70 @@ build_mupen_args() {
 	fi
 
 	export EMU_VIDEO_PLUGIN="$SA_PLUGIN"
+}
+
+# Anbernic RG XX (H700): the pad is read through the staged mali SDL2, whose
+# raw joystick numbering is +3 over udev (A b3 ... MENU b11), with the
+# stick-click keys interleaving the triggers per XX_PAD_LAYOUT. Three things
+# make the fleet's N64 layout hold here:
+#   - gptokeyb2 is not started: the mali SDL2 has no evdev keyboard path, so
+#     its keystrokes never arrive. Every N64 button is a raw joystick binding
+#     in the pad table instead (the positional map still goes to SDL for
+#     anything that asks);
+#   - mupen's own input-sdl plugin matches InputAutoCfg.ini by joystick name,
+#     and the table is mupen's read-only asset, so it ships per pad layout
+#     under xx-pad/ per platform (stickless models have L2 at b12, so
+#     their "Z Trig" differs) and the platform's copy is put in place
+#     before launch;
+#   - the [CoreEvents] joypad hotkeys in the shared mupen64plus.cfg are
+#     Xbox-360-numbered (J0B8 = guide) and cannot serve this pad, so the
+#     same chords are passed as --set overrides in this pad's numbering:
+#     MENU (b11) + START stop, + R1 save, + L1 load, + hat slot, + B reset,
+#     + Y screenshot, + X pause, + A mute, + SELECT speed limiter.
+# The --set overrides live in run_mupen_standalone, appended to the
+# positional parameters after $ARGS is split, because "Joy Mapping Stop"
+# carries spaces and cannot travel through a word-split string.
+apply_xx_mupen_pad() {
+	case "$PLATFORM" in
+		"Anbernic"*) ;;
+		*) return 0 ;;
+	esac
+	export_sdl_gamecontroller_map positional
+
+	# The overlay menu navigates on raw joystick indices and defaults to the
+	# X360 numbering (b0/b1 confirm/back), which here are the ESC and VOL-
+	# phantom keys: no way to back out of a submenu. Hand it this pad's numbers
+	# and names (EMU_OVERLAY_BTNMAP / EMU_OVERLAY_BTNLABELS, read by the overlay).
+	export EMU_OVERLAY_BTNMAP="a=3,b=4,l1=7,r1=8,menu=11,select=9,up=-1,down=-1,left=-1,right=-1"
+	labels="Esc,Vol-,Vol+,A,B,Y,X,L1,R1,Select,Start,Menu"
+	case "$XX_PAD_LAYOUT" in
+		nostick) labels="$labels,L2,R2" ;;
+		1stick)  labels="$labels,L3,L2,R2" ;;
+		*)       labels="$labels,L3,L2,R2,R3" ;;
+	esac
+	export EMU_OVERLAY_BTNLABELS="$labels"
+
+	# InputAutoCfg.ini is a shipped default set, one file per platform;
+	# nothing is computed here, the platform's file is copied over the live
+	# table.
+	src="$HOME/xx-pad/InputAutoCfg-$PLATFORM.ini"
+	AC="$HOME/InputAutoCfg.ini"
+	if [ -f "$src" ]; then
+		cp -f "$src" "$AC"
+	elif [ -f "$AC" ]; then
+		# Fallback only: no shipped table for this platform, so fix up the
+		# one trigger that moves. Not reached while xx-pad/ ships one per platform.
+		log_message "xx mupen pad: no shipped InputAutoCfg for $PLATFORM, rewriting Z Trig as a fallback"
+		case "$XX_PAD_LAYOUT" in
+			nostick) ztrig="button(12)" ;;
+			*)       ztrig="button(13)" ;;
+		esac
+		awk -v z="$ztrig" '
+			/^\[/ { in_xx = ($0 == "[Linux: ANBERNIC-keys]") }
+			in_xx && /^Z Trig = / { print "Z Trig = " z; next }
+			{ print }
+		' "$AC" > "$AC.tmp" && mv "$AC.tmp" "$AC"
+	fi
 }
 
 run_mupen_standalone() {
@@ -104,22 +182,49 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	while true; do
 		build_mupen_args
 
-		if [ "$PLATFORM" = "A30" ]; then
-			export M64P_ROTATE=1
-			./a30_input_shim /dev/input/event3 &
-			sleep 0.3
-		else
-			./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
-			sleep 0.3
-		fi
+		set -- $ARGS
+		case "$PLATFORM" in
+			"Anbernic"*)
+				apply_xx_mupen_pad
+				set -- "$@" \
+					--set "CoreEvents[Joy Mapping Stop]=J0B11/B10" \
+					--set "CoreEvents[Joy Mapping Save State]=J0B11/B8" \
+					--set "CoreEvents[Joy Mapping Load State]=J0B11/B7" \
+					--set "CoreEvents[Joy Mapping Increment Slot]=J0B11/H0V2" \
+					--set "CoreEvents[Joy Mapping Reset]=J0B11/B4" \
+					--set "CoreEvents[Joy Mapping Screenshot]=J0B11/B5" \
+					--set "CoreEvents[Joy Mapping Pause]=J0B11/B6" \
+					--set "CoreEvents[Joy Mapping Mute]=J0B11/B3" \
+					--set "CoreEvents[Joy Mapping Speed Limiter Toggle]=J0B11/B9"
+				;;
+		esac
+		case "$PLATFORM" in
+			"A30")
+				export M64P_ROTATE=1
+				./a30_input_shim /dev/input/event3 &
+				sleep 0.3
+				;;
+			"Anbernic"*)
+				# No gptokeyb2: the mali SDL2 has no evdev keyboard path, so
+				# its keystrokes never arrive. The pad table is all raw joystick.
+				;;
+			*)
+				./gptokeyb2 "mupen64plus" -c "./defkeys.gptk" &
+				sleep 0.3
+				;;
+		esac
 
-		./mupen64plus $ARGS "$ROM_PATH" > $(emu_log_file) 2>&1
+		# Stickless XX: the N64 stick is axes 0/1, which have no stick behind
+		# them there, so let the d-pad drive them for the run.
+		_xx_dpad_swap 2
+		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
+		_xx_dpad_swap 0
 
-		if [ "$PLATFORM" = "A30" ]; then
-			kill -9 $(pidof a30_input_shim) 2>/dev/null
-		else
-			kill -9 $(pidof gptokeyb2)
-		fi
+		case "$PLATFORM" in
+			"A30") kill -9 $(pidof a30_input_shim) 2>/dev/null ;;
+			"Anbernic"*) ;;
+			*) kill -9 $(pidof gptokeyb2) ;;
+		esac
 
 		# Restart loop: overlay writes /tmp/mupen_restart when user selects Restart
 		if [ -f /tmp/mupen_restart ]; then

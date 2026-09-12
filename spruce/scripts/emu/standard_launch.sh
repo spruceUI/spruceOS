@@ -66,20 +66,23 @@ case $EMU_NAME in
 			run_retroarch
 		fi
 		;;
-
+		
+	"COCO")			
+		. /mnt/SDCARD/spruce/scripts/emu/lib/xroar_functions.sh
+		run_xroar
+		;;
+		
 	"DC"|"NAOMI"|"ATOMISWAVE")
-		if [ "$CORE" = "Flycast-standalone" ] || [ "$CORE" = "Flycast2024-standalone" ]; then
-			. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
-			run_flycast_standalone
-		elif [ "$CORE" = "Flycast-libretro" ]; then
-			export CORE="flycast"
-			run_retroarch
-		elif [ "$CORE" = "Flycast2021-libretro" ]; then
-			export CORE="flycast2021"
-			run_retroarch
-		else
-			run_retroarch
-		fi
+		case "$CORE" in
+			Flycast-standalone|Flycast2024-standalone)
+				. /mnt/SDCARD/spruce/scripts/emu/lib/flycast_functions.sh
+				run_flycast_standalone
+				;;
+			Flycast-libretro)      export CORE="flycast";     run_retroarch ;;
+			Flycast2021-libretro)  export CORE="flycast2021"; run_retroarch ;;
+			Flycast2024-libretro)  export CORE="flycast2024"; run_retroarch ;;
+			*)                     run_retroarch ;;
+		esac
 		;;
 
 	"GB"*)
@@ -108,8 +111,13 @@ case $EMU_NAME in
 		;;
 
 	"NDS")
-		. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
-		run_drastic
+		if [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate
+		else
+			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
+			run_drastic
+		fi
 		;;
 
 	"N64")
@@ -120,6 +128,15 @@ case $EMU_NAME in
 			load_n64_controller_profile
 			run_retroarch
 			save_custom_n64_controller_profile
+		fi
+		;;
+
+	"JAGUAR")
+		if [ "$CORE" = "bigpemu-standalone" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/bigpemu_functions.sh
+			run_bigpemu_standalone
+		else
+			run_retroarch
 		fi
 		;;
 

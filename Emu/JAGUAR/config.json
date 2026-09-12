@@ -1,0 +1,79 @@
+{
+  "label": "Atari Jaguar",
+  "icon": "jaguar.png",
+  "iconsel": "jaguar_sel.png",
+  "themecolor": "4fa1d5",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "j64|jag|rom|abs|cof|bin|cue|cdi|prg|iso|zip|7z",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Retroarch Core",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "km_vjag_xtreme_amped",
+        "virtualjaguar"
+      ],
+      "selected": "km_vjag_xtreme_amped",
+      "overrides": {}
+    },
+    "Emulator_MiyooMini": {
+      "display": "Retroarch Core",
+      "options": [
+        "km_vjag_xtreme_amped",
+        "virtualjaguar"
+      ],
+      "selected": "km_vjag_xtreme_amped",
+      "overrides": {},
+      "devices": [
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
+      ]
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_SMART_PRO",
+        "TRIMUI_SMART_PRO_S",
+        "TRIMUI_BRICK",
+        "TRIMUI_BRICK_PRO",
+        "GKD_PIXEL2",
+        "ANBERNIC_RGXX",
+        "RGB30"
+      ],
+      "options": [
+        "bigpemu-standalone",
+        "virtualjaguar"
+      ],
+      "selected": "bigpemu-standalone",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 1000,
+  "brand": "Atari",
+  "type": "homeconsole",
+  "releaseYear": 1993,
+  "default_emulator": "virtualjaguar",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": [
+    "jaguar",
+    "Atari Jaguar",
+    "jag",
+    "JAG"
+  ]
+}

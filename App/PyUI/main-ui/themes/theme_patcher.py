@@ -116,7 +116,7 @@ class ThemePatcher():
         Display.clear("Theme Patch")
         Display.display_message_multiline([
             f"Theme is missing correctly sized assets so patching",
-            f"Scale factor is {scale}"
+            f"Scale factor is {scale}",
             f"Patching main assets"
         ])
         Display.present()
@@ -129,7 +129,7 @@ class ThemePatcher():
         Display.clear("Theme Patch")
         Display.display_message_multiline([
             f"Theme is missing correctly sized assets so patching",
-            f"Scale factor is {scale}"
+            f"Scale factor is {scale}",
             f"Patching icons"
         ])
         Display.present()

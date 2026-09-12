@@ -4,7 +4,6 @@ import sys
 from devices.device import Device
 from menus.games.roms_menu_common import RomsMenuCommon
 from menus.games.utils.recents_manager import RecentsManager
-from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from utils.consts import RECENTS
@@ -29,12 +28,14 @@ class RecentsMenu(RomsMenuCommon):
     def _get_rom_list(self) -> list[GridOrListEntry]:
         rom_list = []
         recents : list[RomInfo] = self.get_rom_list()[:self.get_amount_of_recents_to_allow()]
-        get_image_path_fn = get_rom_select_options_builder().get_image_path
+        builder = get_rom_select_options_builder()
+        get_image_path_fn = builder.get_image_path
 
         for rom_info in recents:
-            display_name = rom_info.display_name
-            if(display_name is None):
-                display_name =  RomFileNameUtils.get_rom_name_without_extensions(rom_info.game_system, rom_info.rom_file_path)
+            # gamelist.xml wins over the name stored when the game was played;
+            # see FavoritesMenu for why the stored one goes stale.
+            game_entry = builder.get_game_entry(rom_info)
+            display_name = builder.resolve_display_name(rom_info, game_entry)
             system = self._extract_game_system(rom_info.rom_file_path)
 
             # Remove any trailing " (System)" groups
@@ -49,7 +50,7 @@ class RecentsMenu(RomsMenuCommon):
                         folder_name="Recents",
                         game_system=rom_info.game_system,
                         rom_file_path=rom_info.rom_file_path,
-                        game_entry=None,
+                        game_entry=game_entry,
                         prefer_savestate_screenshot=self.prefer_savestate_screenshot(),
                         get_image_path_fn=get_image_path_fn,
                         get_favorite_icon=None

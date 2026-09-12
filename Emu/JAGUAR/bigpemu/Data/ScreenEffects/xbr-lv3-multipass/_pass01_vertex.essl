@@ -1,0 +1,34 @@
+#version 300 es
+
+layout(std140) uniform UBO
+{
+    mat4 MVP;
+} global;
+
+struct Push
+{
+    vec4 SourceSize;
+    vec4 OriginalSize;
+    vec4 OutputSize;
+    uint FrameCount;
+};
+
+uniform Push params;
+
+layout(location = 0) in vec4 Position;
+out vec2 vTexCoord;
+layout(location = 1) in vec2 TexCoord;
+out vec4 t1;
+out vec2 delta;
+
+void main()
+{
+    gl_Position = global.MVP * Position;
+    vTexCoord = TexCoord * 1.00039994716644287109375;
+    vec2 ps = vec2(1.0 / params.OriginalSize.x, 1.0 / params.OriginalSize.y);
+    float dx = ps.x;
+    float dy = ps.y;
+    t1 = vec4(dx, 0.0, 0.0, dy);
+    delta = vec2(params.SourceSize.x / params.OutputSize.x, (0.5 * params.SourceSize.x) / params.OutputSize.x);
+}
+

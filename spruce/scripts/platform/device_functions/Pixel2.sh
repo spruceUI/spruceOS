@@ -93,14 +93,35 @@ disable_swap() {
     fi
 }
 
+setup_network_services() {
+    systemctl start network-base
+    systemctl start systemd-resolved
+    systemctl start NetworkManager
+    systemctl start iwd
+
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        WIFI_STATUS=$(jq -r '.wifi' "$SYSTEM_JSON")
+    else
+        WIFI_STATUS=0
+    fi
+
+    if [ "$WIFI_STATUS" -eq 1 ]; then
+        device_wifi_power_on
+    else
+        device_wifi_power_off
+    fi
+}
+
 device_init() {
     sync_volume_level
     disable_swap
     set_loading_screen &
+    setup_network_services &
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event2"
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 check_if_fw_needs_update() {
@@ -131,7 +152,11 @@ post_pyui_exit(){
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "true"
-    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
+    # Same per-start-of-frontend dedupe the common launcher applies to its own
+    # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
+    # not stack a second theme_watchdog / leds_manager on the first.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/theme_watchdog.sh
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/leds_manager.sh
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
     /mnt/SDCARD/spruce/scripts/leds_manager.sh &
@@ -228,20 +253,10 @@ map_mainui_volume_to_system_value() {
     esac
 }
 
-restore_audio() {
-    AUDIO_SINK=$(pactl list sinks short | grep rk817 | cut -c 0-2)
-    pactl suspend-sink "$AUDIO_SINK" 1
-
-    /mnt/SDCARD/spruce/scripts/headphones_watchdog.sh &
-}
-
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_enter_sleep() {
     turn_off_screen
-
-    amixer -c0 sset "Playback Path" "OFF"
-    pkill gpiomon
 
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -255,7 +270,6 @@ device_exit_sleep() {
     backlight=$(current_backlight)
     set_backlight $backlight
     turn_on_screen
-    restore_audio
 
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
@@ -300,6 +314,12 @@ vibrate() {
         shift
     done
 
+
+    # "Off" is one of the four options the setting offers and it has to be
+    # honoured here. Falling through leaves it to whatever follows, which on
+    # some platforms drives the motor anyway and on others just makes noise.
+    [ "$intensity" = "Off" ] && return 0
+
     case "$intensity" in
             "Weak")   intensity=0x2000 ;;
             "Medium") intensity=0x8000 ;;
@@ -334,7 +354,7 @@ map_mainui_brightness_to_system_value() {
 set_backlight() {
     new_bl="$1"
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
-    if (( $new_bl >= 0 )) && (( $new_bl <= 10 )); then
+    if [ "$new_bl" -ge 0 ] 2>/dev/null && [ "$new_bl" -le 10 ] 2>/dev/null; then
         echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi

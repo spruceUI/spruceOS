@@ -1,0 +1,77 @@
+{
+    "DickPostStack": {
+        "UserOptions": [
+            {
+                "Constant": "sGamma",
+                "Type": "float",
+                "Description": "Gamma (exponent)",
+                "DefaultVal": 1.0,
+                "MinVal": 0.01,
+                "MaxVal": 16.0,
+                "StepVal": 0.01
+            },
+            {
+                "Constant": "sScale",
+                "Type": "float",
+                "Description": "Scale",
+                "DefaultVal": 1.0,
+                "MinVal": 0.01,
+                "MaxVal": 16.0,
+                "StepVal": 0.01
+            }
+		],
+		"Textures": [],
+        "CommonDataBlocks": [
+            {
+                "Name": "UBO",
+                "Type": "ConstantBuffer",
+                "Location": 0,
+                "Size": 64,
+                "DataProviders": [
+                    {
+                        "Name": "mMVP",
+                        "Type": "float4x4",
+                        "Offset": 0,
+                        "SourceType": "MVP"
+                    }
+                ]
+			}
+		],
+        "Passes": [
+            {
+                "RTFormat": "R8G8B8A8_UNORM",
+                "RTSizeType": "UnfilteredScreen",
+                "TextureProviders": [
+                    {
+                        "Name": "sTex",
+                        "Type": "2D",
+                        "SourceType": "UnfilteredScreenTex"
+                    }
+                ],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sGamma",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sScale",
+								"Type": "float",
+								"SourceType": "UserOption"
+							}
+						]
+					}
+				],
+                "PixelGLSL": "gamma/gamma_ps.glsl",
+                "VertexGLSL": "util/copypass_vs.glsl",
+                "PixelESSL": "gamma/gamma_ps.essl",
+                "VertexESSL": "util/copypass_vs.essl",
+                "PixelDXBC": "gamma/gamma_ps.dxbc",
+                "VertexDXBC": "util/copypass_vs.dxbc"
+            }
+		]
+	}
+}

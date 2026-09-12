@@ -30,7 +30,7 @@ run_openbor() {
 	mkdir -p "$SS_DIR"
 
 	move_screenshots_if_present
-	mount --bind "$SS_DIR" "$HOME/ScreenShots"
+	mount -o bind "$SS_DIR" "$HOME/ScreenShots"
 
 	if [ "$PLATFORM" = "Flip" ]; then
 

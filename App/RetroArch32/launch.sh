@@ -25,6 +25,11 @@ mv "$TMP_CFG" "$PLATFORM_CFG"
 cd "$RA_DIR/"
 RA_PARAMS="-v --config ${PLATFORM_CFG}"
 
+# Same 32-bit overlay a game launch gets. Without it this app ran on the
+# platform cfg's sdl2 joypad driver, which sees no pad on BaseOS, so the
+# frontend came up with dead controls.
+apply_baseos_ra_overlay
+
 HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS
 
 auto_regen_tmp_update

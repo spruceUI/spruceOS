@@ -19,7 +19,7 @@ else
 fi
 
 # get auth token from RAC server
-if spruce/scripts/emu/psp_rac_auth.sh "$rac_user" "$rac_pass"; then
+if /mnt/SDCARD/spruce/scripts/emu/psp_rac_auth.sh "$rac_user" "$rac_pass"; then
     log_and_display_message "Authorization token for PPSSPP successfully retrieved!"
 else
     log_and_display_message "Unable to get authorization from RAC server. Please check your credentials in spruce's RetroAchievements settings and try again."

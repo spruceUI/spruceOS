@@ -88,7 +88,7 @@ class AppMenu:
             for app in device_apps:
                 hidden = AppsManager.is_hidden(app) and not self.show_all_apps
                 devices = app.get_devices()
-                supported_device = not devices or Device.get_device().get_device_name() in devices
+                supported_device = Device.supports_device(devices)
                 allowed_in_mode = not system_config.simple_mode_enabled() or not app.get_hide_in_simple_mode()
                 if(allowed_in_mode and app.get_label() is not None and not hidden and supported_device):
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())

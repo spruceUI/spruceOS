@@ -39,6 +39,6 @@ class FavoritesManager:
         return cls._favoritesManager.get_games()
 
     @classmethod
-    def sort_favorites_alphabetically(cls):
+    def sort_favorites_alphabetically(cls, display_name_fn=None):
         cls._wait_for_init()
-        return cls._favoritesManager.sort_alphabetically()
+        return cls._favoritesManager.sort_alphabetically(display_name_fn)

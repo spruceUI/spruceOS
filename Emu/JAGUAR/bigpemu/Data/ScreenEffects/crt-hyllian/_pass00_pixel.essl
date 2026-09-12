@@ -1,0 +1,88 @@
+#version 300 es
+precision mediump float;
+precision highp int;
+
+layout(std140) uniform UBO
+{
+    highp mat4 MVP;
+    highp vec4 OutputSize;
+    highp vec4 OriginalSize;
+    highp vec4 SourceSize;
+} global;
+
+struct Push
+{
+    highp float PHOSPHOR;
+    highp float VSCANLINES;
+    highp float InputGamma;
+    highp float OutputGamma;
+    highp float SHARPNESS;
+    highp float COLOR_BOOST;
+    highp float RED_BOOST;
+    highp float GREEN_BOOST;
+    highp float BLUE_BOOST;
+    highp float SCANLINES_STRENGTH;
+    highp float BEAM_MIN_WIDTH;
+    highp float BEAM_MAX_WIDTH;
+    highp float CRT_ANTI_RINGING;
+};
+
+uniform Push param;
+
+uniform highp sampler2D Source;
+
+in highp vec2 vTexCoord;
+layout(location = 0) out highp vec4 FragColor;
+highp float B;
+highp float C;
+highp mat4 invX;
+
+void main()
+{
+    B = 0.0;
+    C = 0.5;
+    invX = mat4(vec4(((-B) - (6.0 * C)) / 6.0, ((3.0 * B) + (12.0 * C)) / 6.0, (((-3.0) * B) - (6.0 * C)) / 6.0, B / 6.0), vec4(((12.0 - (9.0 * B)) - (6.0 * C)) / 6.0, (((-18.0) + (12.0 * B)) + (6.0 * C)) / 6.0, 0.0, (6.0 - (2.0 * B)) / 6.0), vec4((-((12.0 - (9.0 * B)) - (6.0 * C))) / 6.0, ((18.0 - (15.0 * B)) - (12.0 * C)) / 6.0, ((3.0 * B) + (6.0 * C)) / 6.0, B / 6.0), vec4((B + (6.0 * C)) / 6.0, -C, 0.0, 0.0));
+    highp vec2 TextureSize = vec2(param.SHARPNESS * global.SourceSize.x, global.SourceSize.y);
+    highp vec2 dx = mix(vec2(1.0 / TextureSize.x, 0.0), vec2(0.0, 1.0 / TextureSize.y), vec2(param.VSCANLINES));
+    highp vec2 dy = mix(vec2(0.0, 1.0 / TextureSize.y), vec2(1.0 / TextureSize.x, 0.0), vec2(param.VSCANLINES));
+    highp vec2 pix_coord = (vTexCoord * TextureSize) + vec2(-0.5, 0.5);
+    highp vec2 tc = mix((floor(pix_coord) + vec2(0.5)) / TextureSize, (floor(pix_coord) + vec2(1.0, -0.5)) / TextureSize, vec2(param.VSCANLINES));
+    highp vec2 fp = mix(fract(pix_coord), fract(pix_coord.yx), vec2(param.VSCANLINES));
+    highp vec3 c00 = pow(texture(Source, (tc - dx) - dy).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c01 = pow(texture(Source, tc - dy).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c02 = pow(texture(Source, (tc + dx) - dy).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c03 = pow(texture(Source, (tc + (dx * 2.0)) - dy).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c10 = pow(texture(Source, tc - dx).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c11 = pow(texture(Source, tc).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c12 = pow(texture(Source, tc + dx).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 c13 = pow(texture(Source, tc + (dx * 2.0)).xyz, vec3(param.InputGamma, param.InputGamma, param.InputGamma));
+    highp vec3 min_sample = min(min(c01, c11), min(c02, c12));
+    highp vec3 max_sample = max(max(c01, c11), max(c02, c12));
+    highp mat4x3 color_matrix0 = mat4x3(vec3(c00), vec3(c01), vec3(c02), vec3(c03));
+    highp mat4x3 color_matrix1 = mat4x3(vec3(c10), vec3(c11), vec3(c12), vec3(c13));
+    highp vec4 invX_Px = vec4((fp.x * fp.x) * fp.x, fp.x * fp.x, fp.x, 1.0) * invX;
+    highp vec3 color0 = color_matrix0 * invX_Px;
+    highp vec3 color1 = color_matrix1 * invX_Px;
+    highp vec3 aux = color0;
+    color0 = clamp(color0, min_sample, max_sample);
+    color0 = mix(aux, color0, vec3(param.CRT_ANTI_RINGING));
+    aux = color1;
+    color1 = clamp(color1, min_sample, max_sample);
+    color1 = mix(aux, color1, vec3(param.CRT_ANTI_RINGING));
+    highp float pos0 = fp.y;
+    highp float pos1 = 1.0 - fp.y;
+    highp vec3 lum0 = mix(vec3(param.BEAM_MIN_WIDTH), vec3(param.BEAM_MAX_WIDTH), color0);
+    highp vec3 lum1 = mix(vec3(param.BEAM_MIN_WIDTH), vec3(param.BEAM_MAX_WIDTH), color1);
+    highp vec3 d0 = clamp(vec3(pos0) / (lum0 + vec3(1.0000000116860974230803549289703e-07)), vec3(0.0), vec3(1.0));
+    highp vec3 d1 = clamp(vec3(pos1) / (lum1 + vec3(1.0000000116860974230803549289703e-07)), vec3(0.0), vec3(1.0));
+    d0 = exp((d0 * ((-10.0) * param.SCANLINES_STRENGTH)) * d0);
+    d1 = exp((d1 * ((-10.0) * param.SCANLINES_STRENGTH)) * d1);
+    highp vec3 color = clamp((color0 * d0) + (color1 * d1), vec3(0.0), vec3(1.0));
+    color *= (vec3(param.RED_BOOST, param.GREEN_BOOST, param.BLUE_BOOST) * param.COLOR_BOOST);
+    highp float mod_factor = mix(vTexCoord.x * global.OutputSize.x, vTexCoord.y * global.OutputSize.y, param.VSCANLINES);
+    highp vec3 dotMaskWeights = mix(vec3(1.0, 0.699999988079071044921875, 1.0), vec3(0.699999988079071044921875, 1.0, 0.699999988079071044921875), vec3(floor(mod(mod_factor, 2.0))));
+    color *= mix(vec3(1.0), dotMaskWeights, vec3(param.PHOSPHOR));
+    color = pow(color, vec3(1.0 / param.OutputGamma, 1.0 / param.OutputGamma, 1.0 / param.OutputGamma));
+    FragColor = vec4(color, 1.0);
+}
+

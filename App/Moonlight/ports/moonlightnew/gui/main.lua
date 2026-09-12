@@ -1323,6 +1323,14 @@ end
 function writeSelectedApp(selectedApp, bitrate, resolution, framerate, codec, remote)
     -- Split resolution string into width and height
     local width, height = resolution:match("(%d+)x(%d+)")
+    if not width or not height then
+        -- A nil here used to blow up on the .. concatenation below. It must
+        -- not reach the args table instead: a nil in a table constructor is
+        -- dropped rather than stored, so table.concat would quietly write a
+        -- truncated argument list and moonlight would fail for no clear reason.
+        print("Error: Could not parse resolution " .. tostring(resolution))
+        return
+    end
     
     -- Read IP address from ip.txt
     local ipFile = io.open(ipFilePath, "r")  -- Adjusted IP file path
@@ -1336,16 +1344,40 @@ function writeSelectedApp(selectedApp, bitrate, resolution, framerate, codec, re
     end
     
     
-    -- Construct the command string with app name, bitrate, resolution, framerate, codec, remote, and IP address
-    local command = 'stream -platform sdl -app "' .. selectedApp .. '" ' ..
-                    '-keydir "$GAMEDIR/keys" ' ..
-                    '-bitrate ' .. bitrate .. ' ' ..
-                    '-width ' .. width .. ' ' ..
-                    '-height ' .. height .. ' ' ..
-                    '-fps ' .. framerate .. ' ' ..
-                    '-codec ' .. codec .. ' ' ..
-                    '-remote ' .. remote .. ' ' ..
-                    '-quitappafter ' .. ipAddress
+    -- ip.txt is read with "*all", so it carries whatever trailing newline the
+    -- writer left. That has to go before the value becomes an argument.
+    ipAddress = ipAddress:gsub("%s+$", "")
+
+    -- One argument per line. launch.sh reads this back with
+    -- `while IFS= read -r`, so an app name with spaces ("Steam Big Picture")
+    -- arrives as a single argument and nothing here is expanded by a shell.
+    -- The old form wrote shell syntax - embedded quotes and a literal
+    -- $GAMEDIR - which only worked because launch.sh ran it through eval.
+    --
+    -- "stream" and -keydir are prepended by launch.sh: it is what knows
+    -- GAMEDIR, and this file has no way to resolve it.
+    -- Same reasoning as the resolution guard: any nil here would be dropped by
+    -- the table constructor rather than stored, silently truncating the
+    -- argument list. The old .. concatenation raised on nil; keep it loud.
+    if not selectedApp or not bitrate or not framerate or not codec
+            or not remote or ipAddress == "" then
+        print("Error: incomplete stream settings; not writing command.txt")
+        return
+    end
+
+    local args = {
+        "-platform", "sdl",
+        "-app", selectedApp,
+        "-bitrate", bitrate,
+        "-width", width,
+        "-height", height,
+        "-fps", framerate,
+        "-codec", codec,
+        "-remote", remote,
+        "-quitappafter",
+        ipAddress,
+    }
+    local command = table.concat(args, "\n") .. "\n"
 
     local file = io.open("moonlight/command.txt", "w")
     if file then

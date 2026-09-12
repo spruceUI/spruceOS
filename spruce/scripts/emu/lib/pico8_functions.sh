@@ -65,14 +65,76 @@ run_pico8() {
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
+	elif [ "${PLATFORM#Anbernic}" != "$PLATFORM" ]; then
+		PICO8_BINARY="pico8_64"
+
+		# dll-mali's SDL2 lists only "mali dummy offscreen", so naming mali
+		# saves a probe and stops a future SDL2 picking something else.
+		export SDL_VIDEODRIVER=mali
+
+		# PICO-8 downloads through libcurl, or through wget when config.txt
+		# sets use_wget - which spruce ships as 1. BaseOS has no libcurl, so
+		# wget is the only path, and BaseOS's wget is busybox, which cannot
+		# do TLS: zero bytes for any https URL. Every cart fetch is https,
+		# so Splore browsed fine but no cart would ever load, failing with
+		# "could not connect to bbs". Put a curl-backed wget shim first on
+		# PATH - curl is present and statically linked with its own SSL.
+		# Scoped to this launch, so nothing else sees the shim.
+		[ -x "$EMU_DIR/bin/wget" ] && export PATH="$EMU_DIR/bin:$PATH"
+
+		# PICO-8 asks SDL_Init for the sensor subsystem, which dll-mali is
+		# not built with, and SDL_Init is all-or-nothing - so it dies with
+		# "FATAL ERROR: Unable to initialize SDL" before drawing anything.
+		# Probed subsystem by subsystem on a CubeXX: TIMER, AUDIO, VIDEO,
+		# JOYSTICK, HAPTIC, GAMECONTROLLER and EVENTS all initialise and
+		# only SENSOR fails, so masking that one bit is the whole fix. The
+		# shim does exactly that and nothing else; source sits beside it in
+		# Emu/PICO8/src.
+		#
+		# The alternative was the stock Anbernic SDL2, which does have
+		# sensors - but it finds zero joysticks under BaseOS with udev on,
+		# with udev disabled, and with SDL_JOYSTICK_DEVICE naming the node.
+		# dll-mali finds the pad because it carries NextUI's H700 joystick
+		# classification patch, which exists because these pads report no
+		# ABS_X/ABS_Y for stock heuristics to latch onto.
+		[ -f "$HOME/lib-h700/libsdl_sensor_shim.so" ] && \
+			export LD_PRELOAD="$HOME/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
+
+		# None of the shipped sdl_controllers.* profiles cover
+		# ANBERNIC-keys, so without this PICO-8 would see the pad but have
+		# no GameController mapping for it. Same handoff ppsspp_functions.sh
+		# does: AnbernicXXCommon.cfg picks the map by BASEOS_TARGET.
+		export_sdl_gamecontroller_map
+
+		# The RG28XX panel is mounted turned (DISPLAY_ROTATION 270), but unlike
+		# the A30 the mali-fbdev SDL2 rotates it itself and presents a landscape
+		# 640x480 desktop, so PICO-8 must not transform on top of that: keep
+		# transform_screen 0 on the whole line and size the stretch to the
+		# desktop, not the panel.
+		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+		[ "$STRETCH" = "True" ] && SCALING="-draw_rect 0,0,$DISPLAY_WIDTH,$DISPLAY_HEIGHT"
+		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
+
 	else
 		PICO8_BINARY="pico8_64"
+
+		# use_wget is 1, so PICO-8 shells out to wget for every cart fetch.
+		# spruce/bin64/wget is first on PATH but is linked against
+		# libpcre.so.1, which the RGB30's dArkMoss base does not ship - it
+		# exits 127 with zero bytes and Splore fails "could not connect to
+		# bbs". curl is present and works, so route downloads through the
+		# same curl-backed wget shim Anbernic uses.
+		[ -x "$EMU_DIR/bin/wget" ] && command -v curl >/dev/null 2>&1 && \
+			export PATH="$EMU_DIR/bin:$PATH"
+
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 	fi
 
 	if [ "${GAME##*.}" = "splore" ]; then
-		check_and_connect_wifi
+		if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -ne 0 ]; then
+			check_and_connect_wifi
+		fi
 		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > $(emu_log_file) 2>&1
 	else
 		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > $(emu_log_file) 2>&1
@@ -111,6 +173,12 @@ load_pico8_control_profile() {
 			;;
 		"Pixel2")
 			export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH
+			;;
+		"Anbernic"*)
+			# Nothing to add. Under BaseOS the SDL2 PICO-8 needs is the
+			# mali-fbdev build in dll-mali, which AnbernicXXCommon.cfg already
+			# has on LD_LIBRARY_PATH; run_pico8 preloads a shim so its missing
+			# sensor subsystem does not abort startup.
 			;;
 	esac
 

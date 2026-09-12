@@ -1,0 +1,39 @@
+#version 300 es
+
+layout(std140) uniform UBO
+{
+    mat4 MVP;
+    vec4 OutputSize;
+    vec4 OriginalSize;
+    vec4 SourceSize;
+} global;
+
+struct Push
+{
+    float PHOSPHOR;
+    float VSCANLINES;
+    float InputGamma;
+    float OutputGamma;
+    float SHARPNESS;
+    float COLOR_BOOST;
+    float RED_BOOST;
+    float GREEN_BOOST;
+    float BLUE_BOOST;
+    float SCANLINES_STRENGTH;
+    float BEAM_MIN_WIDTH;
+    float BEAM_MAX_WIDTH;
+    float CRT_ANTI_RINGING;
+};
+
+uniform Push param;
+
+layout(location = 0) in vec4 Position;
+out vec2 vTexCoord;
+layout(location = 1) in vec2 TexCoord;
+
+void main()
+{
+    gl_Position = global.MVP * Position;
+    vTexCoord = TexCoord;
+}
+

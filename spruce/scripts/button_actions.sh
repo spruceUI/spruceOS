@@ -18,7 +18,10 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
-    if [[ "$CMD" == *"/Roms/PORTS/"* ]]; then
+    # case, not [[ ]]: this file is #!/bin/sh and on the RGB30 that is dash,
+    # where [[ is "not found".
+    case "$CMD" in
+    *"/Roms/ports/"*)
         rm -f /tmp/menubtn
 
         capture_screen
@@ -27,8 +30,8 @@ kill_port(){
         kill -TERM -"$SID" 2>/dev/null
         sleep 2
         kill -9 -"$SID" 2>/dev/null
-
-    fi
+        ;;
+    esac
 }
 
 # TODO bypass all of this if drastic original as killall -15 does not work on it
@@ -66,15 +69,23 @@ kill_drastic() {
         echo $B_MENU 0  # MENU release
         echo 0 0 0      # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_DRASTIC &
+    DRASTIC_COMBO_PID=$!
 
     killall -q -15 drastic drastic64
+    sleep 4
+    killall -q -9 drastic drastic64
 }
 
 kill_ppsspp() {
 	log_message "button_actions.sh: Killing PPSSPP!"
 
     # Send SIGUSR1 to trigger save-and-quit (saves state then exits cleanly)
-    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
+    # ${PSP_BIN} as well as the explicit list: the platform .cfg names the binary
+    # this device actually runs, so a new device works without editing this line.
+    # The explicit names stay because several platforms share one build under a
+    # name that is not their PLATFORM (Brick and BrickPro both run
+    # PPSSPPSDL_TrimUI). killall -q on a name that does not exist is a no-op.
+    killall -q -USR1 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2 PPSSPPSDL_h700 ${PSP_BIN}
 }
 
 kill_scummvm() {
@@ -111,7 +122,34 @@ kill_pcsx() {
 
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
-    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
+    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
+}
+
+kill_dsperate() {
+	log_message "button_actions.sh: Killing DSperate!"
+	# SIGTERM first and give it a moment: DSperate writes the battery save on
+	# a launcher's SIGTERM, so -9 straight away loses the last save.
+	# Both names: killall matches the process name exactly, and the A30 runs
+	# dsperate.a30. The dispatcher above finds it either way because plain
+	# pgrep matches on a substring, so this used to route here and then signal
+	# nothing at all - the game switcher could not close it.
+	killall -q -15 dsperate dsperate.a30
+	sleep 3
+	killall -q -9 dsperate dsperate.a30
+}
+
+kill_bigpemu() {
+	log_message "button_actions.sh: Killing BigPEmu!"
+    killall -q -9 gptokeyb2
+    killall -q -15 bigpemu
+    sleep 1
+    killall -q -9 bigpemu
+}
+
+kill_vtree() {
+    killall -q -15 vtree.a30 vtree.mini vtree.aarch64
+    sleep 2
+    killall -q -9 vtree.a30 vtree.mini vtree.aarch64
 }
 
 kill_emulator() {
@@ -127,6 +165,12 @@ kill_emulator() {
         kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
+    elif pgrep dsperate >/dev/null; then
+        kill_dsperate
+    elif pgrep -f "bigpemu" >/dev/null; then
+        kill_bigpemu
+    elif pgrep -f "vtree" >/dev/null; then
+        kill_vtree
     else
         kill_ra_and_standard_emulators
     fi
@@ -144,7 +188,13 @@ update_gameswitcher_json() {
     rom_file_path=$(readlink -f "$rom_file_path")
     # Keep consistent between devices
     # TODO move to device so we don't make this a giant list of regexs
-    rom_file_path="${rom_file_path//\/sdcard\//\/SDCARD\/}"
+    # sed, not ${var//a/b}: that is a bashism, and on the RGB30 /bin/sh is dash,
+    # where it is a fatal "Bad substitution". This function runs inside the
+    # ( ... ) & subshell in homebutton_watchdog.sh, so the abort was silent and
+    # took kill_emulator - the very next line of prepare_game_switcher - with
+    # it. Symptom: hold-home logged "Performing hold-home action: Game Switcher"
+    # and the game just kept running, for every emulator on that device.
+    rom_file_path=$(printf '%s' "$rom_file_path" | sed 's|/sdcard/|/SDCARD/|g')
     case "$rom_file_path" in
         /mnt/SDCARD/mmc*/?*)
             rom_file_path="/mnt/SDCARD/${rom_file_path#*/mnt/SDCARD/mmc*/}"
@@ -243,7 +293,7 @@ perform_action() {
         ;;
     "Emulator menu")
         if pgrep -f "./PPSSPPSDL" >/dev/null; then
-            killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2
+            killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2 PPSSPPSDL_h700 ${PSP_BIN}
         elif pgrep -f "pcsx_64|pcsx_a30|pcsx_mini" >/dev/null; then
             killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
         elif pgrep -f "mupen64plus" >/dev/null; then
@@ -275,5 +325,7 @@ perform_action() {
             log_message "button_actions.sh: $1 is an unknown action to perform"
             ;;
     esac
+    [ -n "$DRASTIC_COMBO_PID" ] && wait "$DRASTIC_COMBO_PID" 2>/dev/null
+    DRASTIC_COMBO_PID=""
     killall sendevent
 }

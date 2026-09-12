@@ -296,6 +296,7 @@
     "sdcardReadOnlyWarning": "Warning: /mnt/SDCARD is read-only. Please check your SD card.",
     "wifiStatusOff": "Off",
     "wifiStatusConnecting": "Connecting",
+    "wifiStatusNoNetwork": "No network selected",
     "wifiStatusError": "Error",
     "aboutIpAddress": "IP Address",
     "aboutMacAddress": "Mac Address",

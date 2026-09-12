@@ -1,0 +1,45 @@
+#!/bin/sh
+# Drive a latching switch action from a momentary Fn key press.
+#
+# The switch and the Fn keys reach the same actions through different contracts.
+# trimui_scened hands scene.sh the switch's new position and it passes 1 or 0 to
+# every script in /usr/trimui/scene/, so the scene-*.sh actions are written as
+# "case $1 in 1) on ;; 0) off ;; esac". fnkey_watchdog.sh instead runs its action
+# with NO argument at all, because an Fn key has no position to report - so
+# pointing a key straight at one of those scripts matches neither case and does
+# nothing.
+#
+# This remembers the state per key and per action and hands the script the
+# opposite each press, which turns any of them into a toggle.
+#
+# Usage: fn-toggle <scene-script-name> <state-key>
+#   e.g. fn-toggle scene-silent.sh f1
+#
+# State lives in /tmp, so every action starts "off" after a reboot. That matches
+# the actions themselves: they restore volume, LED colour and the radio from
+# spruce's own settings at boot, so "off" is genuinely where they start.
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+SELF_DIR="/mnt/SDCARD/spruce/scripts/FN_Button"
+SCRIPT="$1"
+STATE_KEY="$2"
+
+if [ -z "$SCRIPT" ] || [ -z "$STATE_KEY" ]; then
+    log_message "fn-toggle: usage: fn-toggle <scene-script> <state-key>"
+    exit 1
+fi
+
+TARGET="$SELF_DIR/$SCRIPT"
+if [ ! -x "$TARGET" ]; then
+    log_message "fn-toggle: no such action script: $TARGET"
+    exit 1
+fi
+
+STATE_FILE="/tmp/spruce_fn_${STATE_KEY}_${SCRIPT}.state"
+cur="$(cat "$STATE_FILE" 2>/dev/null)"
+[ "$cur" = "1" ] && new=0 || new=1
+
+echo "$new" > "$STATE_FILE" 2>/dev/null
+log_message "fn-toggle: $STATE_KEY -> $SCRIPT $new"
+"$TARGET" "$new"

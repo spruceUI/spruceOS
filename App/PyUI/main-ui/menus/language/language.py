@@ -696,6 +696,10 @@ class Language:
         return cls._data.get("showAmPm","Show AM/PM")
 
     @classmethod
+    def sync_time_via_network(cls):
+        return cls._data.get("syncTimeViaNetwork","Sync Time via Network")
+
+    @classmethod
     def game_sel_menu(cls):
         return cls._data.get("gameSelMenu","Game Sel Menu")
 

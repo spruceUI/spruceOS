@@ -56,6 +56,11 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             current = Theme._data.get("screensaver", {}).get("lowPowerWhileIdle", True)
             self._set_screensaver_prop("lowPowerWhileIdle", not current)
 
+    def toggle_dim_backlight(self, input):
+        if input in (ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT):
+            current = Theme._data.get("screensaver", {}).get("dimBacklight", True)
+            self._set_screensaver_prop("dimBacklight", not current)
+
     def change_overlay_opacity(self, input):
         current = Theme._data.get("screensaver", {}).get("overlayOpacity", 0.3)
         if ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input:
@@ -459,6 +464,19 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
                 description=Language.get("screensaverLowPowerDesc", "Slow the CPU down while the screensaver is showing (skipped for animated backgrounds)"),
                 icon=None,
                 value=self.toggle_low_power
+            )
+        )
+
+        dim_backlight = self._get_screensaver_prop("dimBacklight", True)
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverDimBacklight", "Dim backlight while idle"),
+                value_text="<    " + (Language.get("on", "On") if dim_backlight else Language.get("off", "Off")) + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverDimBacklightDesc", "Turn the backlight down while the screensaver is showing (skipped for animated backgrounds)"),
+                icon=None,
+                value=self.toggle_dim_backlight
             )
         )
 

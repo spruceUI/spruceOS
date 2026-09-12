@@ -1,0 +1,120 @@
+{
+	"DickPostStack": {
+		"UserOptions": [
+			{
+				"Constant": "sHCurve",
+				"Type": "float",
+				"Description": "Horizontal Curve",
+				"DefaultVal": 2.0,
+				"MinVal": 0.1,
+				"MaxVal": 128.0,
+				"StepVal": 0.1
+			},
+			{
+				"Constant": "sHBias",
+				"Type": "float",
+				"Description": "Horizontal Bias",
+				"DefaultVal": 0.95,
+				"MinVal": 0.01,
+				"MaxVal": 1.0,
+				"StepVal": 0.01
+			},
+			{
+				"Constant": "sVCurve",
+				"Type": "float",
+				"Description": "Vertical Curve",
+				"DefaultVal": 2.0,
+				"MinVal": 0.1,
+				"MaxVal": 128.0,
+				"StepVal": 0.1
+			},
+			{
+				"Constant": "sVBias",
+				"Type": "float",
+				"Description": "Vertical Bias",
+				"DefaultVal": 0.95,
+				"MinVal": 0.01,
+				"MaxVal": 1.0,
+				"StepVal": 0.01
+			}
+		],
+		"Textures": [],
+		"CommonDataBlocks": [
+			{
+				"Name": "UBO",
+				"Type": "ConstantBuffer",
+				"Location": 0,
+				"Size": 64,
+				"DataProviders": [
+					{
+						"Name": "mMVP",
+						"Type": "float4x4",
+						"Offset": 0,
+						"SourceType": "MVP"
+					}
+				]
+			}
+		],
+		"Passes": [
+			{
+				"BlendMode": "Alpha",
+				"RTFormat": "R8G8B8A8_UNORM",
+				"RTexWrapMode": "ClampToEdge",
+				"RTTexFilter": "Point",
+				"RTGenMips": false,
+				"RTSizeType": "TargetArea",
+				"RTScale": 1.0,
+				"TextureProviders": [
+					{
+						"Name": "sTex",
+						"Type": "2D",
+						"SourceType": "PreviousPass"
+					}
+				],
+				"DataBlocks": [
+					{
+						"Type": "Loose",
+						"DataProviders": [
+							{
+								"Name": "sScreenSize",
+								"Type": "float4",
+								"SourceType": "UnfilteredScreenSize"
+							},
+							{
+								"Name": "sHCurve",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sHBias",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sVCurve",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sVBias",
+								"Type": "float",
+								"SourceType": "UserOption"
+							},
+							{
+								"Name": "sBoundaryFade",
+								"Type": "float",
+								"InlineData": 0.0
+							}
+						]
+					}
+				],
+				"PixelGLSL": "warping/warping_ps.glsl",
+				"VertexGLSL": "util/copypass_vs.glsl",
+				"PixelESSL": "warping/warping_ps.essl",
+				"VertexESSL": "util/copypass_vs.essl",
+				"PixelDXBC": "warping/warping_ps.dxbc",
+				"VertexDXBC": "util/copypass_vs.dxbc"
+			}
+		]
+	}
+}

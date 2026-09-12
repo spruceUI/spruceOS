@@ -1,0 +1,48 @@
+#version 300 es
+
+layout(std140) uniform UBO
+{
+    mat4 MVP;
+} global;
+
+struct Push
+{
+    vec4 SourceSize;
+    vec4 OriginalSize;
+    vec4 OutputSize;
+    uint FrameCount;
+    float XBR_Y_WEIGHT;
+    float XBR_EQ_THRESHOLD;
+    float XBR_LV1_COEFFICIENT;
+    float XBR_LV2_COEFFICIENT;
+    float small_details;
+};
+
+uniform Push params;
+
+layout(location = 0) in vec4 Position;
+out vec2 texCoord;
+layout(location = 1) in vec2 TexCoord;
+out vec4 t1;
+out vec4 t2;
+out vec4 t3;
+out vec4 t4;
+out vec4 t5;
+out vec4 t6;
+out vec4 t7;
+
+void main()
+{
+    gl_Position = global.MVP * Position;
+    texCoord = TexCoord;
+    float dx = params.SourceSize.z;
+    float dy = params.SourceSize.w;
+    t1 = TexCoord.xxxy + vec4(-dx, 0.0, dx, (-2.0) * dy);
+    t2 = TexCoord.xxxy + vec4(-dx, 0.0, dx, -dy);
+    t3 = TexCoord.xxxy + vec4(-dx, 0.0, dx, 0.0);
+    t4 = TexCoord.xxxy + vec4(-dx, 0.0, dx, dy);
+    t5 = TexCoord.xxxy + vec4(-dx, 0.0, dx, 2.0 * dy);
+    t6 = TexCoord.xyyy + vec4((-2.0) * dx, -dy, 0.0, dy);
+    t7 = TexCoord.xyyy + vec4(2.0 * dx, -dy, 0.0, dy);
+}
+

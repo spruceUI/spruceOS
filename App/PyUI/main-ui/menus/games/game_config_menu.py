@@ -116,9 +116,9 @@ class GameConfigMenu:
         if(ControllerInput.A == input_value):
 
             # Miyoo handles this strangley
-            # Example rom /mnt/SDCARD/Roms/PORTS/PokeMMO.sh               
-            # example arg /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
-            # /media/sdcard0/Emu/PORTS/../../Roms/PORTS/PokeMMO.sh
+            # Example rom /mnt/SDCARD/Roms/ports/PokeMMO.sh               
+            # example arg /media/sdcard0/Emu/PORTS/../../Roms/ports/PokeMMO.sh
+            # /media/sdcard0/Emu/PORTS/../../Roms/ports/PokeMMO.sh
             # NOTE: Switching to /mnt as it works on brick and flip despite
             # it not being 1:1 it should work out
             game_file_name = os.path.basename(self.game.rom_file_path)
@@ -190,7 +190,7 @@ class GameConfigMenu:
             if(not Device.get_device().get_system_config().simple_mode_enabled()):
                 for config_option in self.game_system.game_system_config.get_launchlist():
                     devices = config_option.get("devices")
-                    supported_device = not devices or Device.get_device().get_device_name() in devices
+                    supported_device = Device.supports_device(devices)
                     if(supported_device):
                         config_list.append(
                         GridOrListEntry(
@@ -213,7 +213,7 @@ class GameConfigMenu:
                 overridable_entries = []
                 for name, option in menu_options.items():
                     devices = option.get("devices")
-                    supported_device = not devices or Device.get_device().get_device_name() in devices
+                    supported_device = Device.supports_device(devices)
                     if(supported_device):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
                         display_name = Language.menu_option_display(option.get('display'))

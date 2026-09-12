@@ -179,6 +179,8 @@
                     "Random Game",
                     "Game Switcher",
                     "Splore",
+                    "NDS firmware",
+                    "PPSSPP",
                     "Apotris (GBA)"
                 ],
                 "selected": "spruceUI"
@@ -228,10 +230,14 @@
             "useZRAM":{
                 "devices": [
                     "MIYOO_FLIP",
-                    "GKD_PIXEL2"
+                    "GKD_PIXEL2",
+                    "TRIMUI_BRICK",
+                    "TRIMUI_BRICK_PRO",
+                    "TRIMUI_SMART_PRO",
+                    "TRIMUI_SMART_PRO_S"
                 ],
-                "display": "Use ZRAM",
-                "description": "reboot to apply",
+                "display": "Enable ZRAM",
+                "description": "50% of device RAM; reboot to apply",
                 "options": [
                     "True",
                     "False"
@@ -248,17 +254,6 @@
                     "512MB"
                 ],
                 "selected": "Off"
-            },
-            "globalScreenshotShortcut": {
-                "display": "Global sceenshot shortcut",
-                "description": "reboot to apply",
-                "options": [
-                    "Off",
-                    "L2+R2+Y",
-                    "L2+R2+X",
-                    "L2+R2+DOWN"
-                ],
-                "selected": "L2+R2+Y"
             },
             "overclockSpeedMiyooMini": {
                 "devices": ["MIYOO_MINI",
@@ -288,9 +283,9 @@
                 "selected": "1392"
             },
             "trimuiOSD": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Run TrimUI OSD",
-                "description": "Early Alpha",
+                "description": "Stock TrimUI popups for volume, brightness and the switch. PyUI draws its own.",
                 "options": [
                     "True",
                     "False"
@@ -309,10 +304,21 @@
                     "High"
                 ],
                 "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
-                "selected": "Medium"
+                "selected": "Adaptive"
             }
         },
         "Button Settings": {
+            "brightnessHotkey": {
+                "display": "Brightness hotkey",
+                "description": "Which button combo adjusts screen brightness",
+                "options": [
+                    "Start + L/R",
+                    "Menu + Vol",
+                    "Both",
+                    "Off"
+                ],
+                "selected": "Both"
+            },
             "homeAction": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
                 "display": "Home button action",
@@ -327,18 +333,72 @@
                 ],
                 "selected": "Game Switcher"
             },
+            "menuButton": {
+                "devices": ["RGB30"],
+                "display": "Menu button",
+                "description": "Which stick click opens the menu",
+                "options": [
+                    "L3",
+                    "R3"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
+                "selected": "L3"
+            },
+            "fnF1Action": {
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
+                "display": "Left Fn key action",
+                "description": "What pressing the left Fn key does",
+                "options": [
+                    "LED off",
+                    "Quiet Mode",
+                    "Silent Mode",
+                    "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    "Nothing"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f1",
+                "selected": "Nothing"
+            },
+            "fnF2Action": {
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
+                "display": "Right Fn key action",
+                "description": "What pressing the right Fn key does",
+                "options": [
+                    "LED off",
+                    "Quiet Mode",
+                    "Silent Mode",
+                    "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    "Nothing"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-fnkey-action f2",
+                "selected": "Nothing"
+            },
             "switchAction": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Switch action",
                 "description": "What flipping the physical switch does",
                 "options": [
                     "LED off",
                     "Quiet Mode",
                     "Silent Mode",
+                    "WiFi off",
+                    { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
                     "Nothing"
                 ],
-                "changeCmd": "/mnt/SDCARD/spruce/smartpros/bin/apply-switch-action",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",
                 "selected": "LED off"
+            },
+            "globalScreenshotShortcut": {
+                "display": "Global sceenshot shortcut",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "L2+R2+Y",
+                    "L2+R2+X",
+                    "L2+R2+DOWN"
+                ],
+                "selected": "L2+R2+Y"
             }
         },
         "Emulator Settings": {
@@ -382,14 +442,14 @@
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "ANBERNIC_RGXX"],
                 "options": [
                     "Select",
                     "Start",
-                    "Menu",
+                    { "label": "Menu", "devices": ["MIYOO_A30", "MIYOO_FLIP", "ANBERNIC_RGXX"] },
                     "Custom"
                 ],
-                "selected": "Select"
+                "selected": "Custom"
             },
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
@@ -401,7 +461,7 @@
                     "Menu",
                     "Custom"
                 ],
-                "selected": "Menu"
+                "selected": "Custom"
             },
             "raAutoSave": {
                 "display": "RA: auto save state on close",
@@ -461,7 +521,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh samba"
             },
             "enableSSH": {
                 "display": "Enable SSH",
@@ -470,7 +531,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh ssh"
             },
             "enableSyncthing": {
                 "display": "Enable Syncthing",
@@ -479,7 +541,8 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh syncthing"
             },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
@@ -488,7 +551,17 @@
                     "True",
                     "False"
                 ],
-                "selected":"False"
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
+            },
+            "enableWaitingToConnect": {
+                "display": "Wait for connection before launching game",
+                "descritpion": "when Syncthing or RAC are enabled",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected":"True"
             },
             "otaSkipVersionCheck": {
                 "display": "OTA: skip version check",
@@ -498,6 +571,40 @@
                     "False"
                 ],
                 "selected":"False"
+            },
+            "otaUpdateType": {
+                "display": "OTA: update type",
+                "devices":["MIYOO_FLIP", "MIYOO_MINI",
+                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
+                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
+                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
+                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
+                           "ANBERNIC_RGXX640480", "RGB30"],
+                "description": "incremental is faster (developer mode only); full can fix broken installs",
+                "options": [
+                    "Incremental",
+                    "Full"
+                ],
+                "selected": "Incremental"
+            },
+            "otaChannel": {
+                "display": "OTA: release channel",
+                "devices":["MIYOO_FLIP", "MIYOO_MINI",
+                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
+                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
+                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
+                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
+                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
+                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
+                           "ANBERNIC_RGXX640480", "RGB30"],
+                "description": "developer mode only",
+                "options": [
+                    "Nightly",
+                    "Stable"
+                ],
+                "selected": "Nightly"
             }
         },
         "Proxy Settings": {

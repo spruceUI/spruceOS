@@ -58,23 +58,28 @@ display_core_unrecognized_for_platform_message() {
 # Can we move these run_drastic's into their respective devicefunctions.sh so we dont have to remember
 # to come here to add DS support?
 run_drastic_AnbernicRGXX() {
-	ready_arch_32_states
-	/mnt/vendor/deep/drastic-modify/launch.sh "$ROM_FILE" > $(emu_log_file) 2>&1
-	# Don't see any benefit to the below one, just seems worse in every way so not even adding
-	#/mnt/vendor/deep/drastic/drastic "$ROM_FILE" > $(emu_log_file) 2>&1
-	stash_arch_32_states
+	run_drastic64
 }
 
 run_drastic_AnbernicRGCubeXX() {
 	run_drastic_AnbernicRGXX
 }
-run_drastic_AnbernicRG34XXSP() {
+run_drastic_AnbernicXX720480() {
 	run_drastic_AnbernicRGXX
 }
 run_drastic_AnbernicRG28XX() {
 	run_drastic_AnbernicRGXX
 }
 run_drastic_AnbernicXX640480() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX640480NoStick() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX640480OneStick() {
+	run_drastic_AnbernicRGXX
+}
+run_drastic_AnbernicXX720480NoStick() {
 	run_drastic_AnbernicRGXX
 }
 
@@ -190,12 +195,15 @@ run_drastic_MiyooMini() {
 
 ### BRICK PRO ###
 
-run_drastic_BrickPro(){ # todo: fix trngaje
+run_drastic_BrickPro(){
     if [ "$CORE" = "DraStic-original" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
 		run_drastic64
 	elif [ "$CORE" = "DraStic-Steward" ]; then
 		run_drastic_steward_Brick
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
+		run_drastic_trngaje_a133p
 	else
 		display_core_unrecognized_for_platform_message
 	fi

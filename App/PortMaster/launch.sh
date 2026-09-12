@@ -1,65 +1,91 @@
 #!/bin/sh
+# PortMaster app launcher. Stages spruce's three PortMaster files unless the
+# bundle itself knows spruce (upstream merged).
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-case $INFO in
-    *"sun8i"*) export PLATFORM="A30" ;;
-    *"TG5040"*)	export PLATFORM="SmartPro" ;;
-    *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG4040"*)	export PLATFORM="BrickPro"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;
-    *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) export PLATFORM="MiyooMini" ;;
-esac
+export HOME="/mnt/SDCARD/Saves/flip/home"
+PM_ROOT="/mnt/SDCARD/Persistent/portmaster"
+PM_DIR="$PM_ROOT/PortMaster"
+OURS="/mnt/SDCARD/App/PortMaster"
 
-#ENV Variables
-case "$PLATFORM" in
-    Flip|SmartProS)
-        export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/site-packages/sdl2dll/dll"
-        export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
-        export HOME="/mnt/SDCARD/Saves/flip/home"
-        ;;
-    Brick|SmartPro|BrickPro)
-        export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2"
-        export PATH="/mnt/SDCARD/spruce/flip/bin:/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
-        export HOME="/mnt/SDCARD/Saves/flip/home"
-        ;;
-    Pixel2)
-        export HOME="/mnt/SDCARD/Saves/flip/home"
-        /usr/bin/start_portmaster.sh &> /mnt/SDCARD/Saves/spruce/portmaster.log
-        /mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
-        rm /mnt/SDCARD/Roms/PORTS/gamelist.*
-        exit 0
-        ;;
-esac
+if [ "$PLATFORM" = "Pixel2" ]; then
+    # The Pixel 2 runs PortMaster's own layout untouched.
+    /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
+    "$OURS/update_images.sh" > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
+    rm -f /mnt/SDCARD/Roms/ports/gamelist.*
+    exit 0
+fi
 
-# Until PM-GUI is updated we need to override where spruce stores things
-# Just replacing the entire file. This should go away soon
-rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
-rm /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
-rm /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
-cp /mnt/SDCARD/App/PortMaster/PortMaster.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/PortMaster.txt
-cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/control.txt
-cp /mnt/SDCARD/App/PortMaster/config.py /mnt/SDCARD/Persistent/portmaster/PortMaster/pylibs/harbourmaster/config.py
+. /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
-rm /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
-cp /mnt/SDCARD/App/PortMaster/control.txt /mnt/SDCARD/Saves/flip/home/.local/share/PortMaster/control.txt
+# Unpack a self-update's pylibs.zip before patching config.py below.
+if [ -f "$PM_DIR/pylibs.zip" ]; then
+    log_message "PortMaster: unpacking pylibs.zip left by a self-update"
+    rm -rf "$PM_DIR/pylibs" "$PM_DIR/exlibs"
+    LD_LIBRARY_PATH="$PM_ROOT/lib:$LD_LIBRARY_PATH" \
+        "$PM_ROOT/bin/python3" -m zipfile -e "$PM_DIR/pylibs.zip" "$PM_DIR" \
+        && md5sum "$PM_DIR/pylibs.zip" | cut -d' ' -f1 > "$PM_DIR/pylibs.zip.md5" \
+        && rm -f "$PM_DIR/pylibs.zip"
+fi
 
-#Launch port master
-cd /mnt/SDCARD/Persistent/portmaster/PortMaster/miyoo/
+# config.py's spruce paths (from upstream #237) never matched spruce; patch in place.
+sed -i \
+    -e 's|/mnt/sdcard/spruce|/mnt/SDCARD/spruce|' \
+    -e 's|/mnt/sdcard/Persistent/portmaster|/mnt/SDCARD/Persistent/portmaster|' \
+    -e 's|/mnt/SDCARD/Roms/\.portmaster|/mnt/SDCARD/Persistent/portmaster|' \
+    -e 's|/mnt/SDCARD/Roms/PORTS64|/mnt/SDCARD/Roms/ports|' \
+    -e 's|/mnt/SDCARD/Roms/PORTS\([^0-9A-Za-z_]\)|/mnt/SDCARD/Roms/ports\1|g' \
+    "$PM_DIR/pylibs/harbourmaster/config.py"
 
-cp "/mnt/SDCARD/App/PortMaster/.portmaster/device_info_Miyoo_Miyoo Flip.txt" "/mnt/SDCARD/Saves/flip/home/device_info_Miyoo_Miyoo Flip.txt"
+# hardware.py names the firmware from /usr/trimui, /usr/miyoo and friends and has
+# no spruce test, so PlatformSpruce is never the platform harbour.py picks.
+sed -i \
+    -e "s|info.setdefault('name', 'Unknown')|info['name'] = 'spruce' if Path('/mnt/SDCARD/spruce').is_dir() else info.get('name', 'Unknown')|" \
+    "$PM_DIR/pylibs/harbourmaster/hardware.py"
 
-./PortMaster.txt &> /mnt/SDCARD/Saves/spruce/portmaster.log
+# Every device hands pugwash a positional pad, so it needs the same A/B
+# correction as the other platforms to land on spruce's Nintendo labels.
+sed -i \
+    -e '/^class PlatformSpruce/,/^class /{s|^    WANT_XBOX_FIX = False|    WANT_XBOX_FIX = True|}' \
+    "$PM_DIR/pylibs/harbourmaster/platform.py"
 
-# Fix images to be spruce compatible
-/mnt/SDCARD/App/PortMaster/update_images.sh &> /mnt/SDCARD/Saves/spruce/updated_images.log
+# A self-update extracts over the bundle without deleting spruce/, so test the
+# files it does replace.
+if grep -q 'CFW_NAME="spruce"' "$PM_DIR/device_info.txt" 2>/dev/null \
+    && grep -q "PlatformSpruce" "$PM_DIR/pylibs/harbourmaster/platform.py" 2>/dev/null; then
+    LAUNCHER="$PM_DIR/PortMaster.sh"
+    # The update that brought PlatformSpruce ran the old platform's post-install,
+    # and before the hardware.py patch above the trimui/miyoo platform owned these.
+    cp "$PM_DIR/spruce/PortMaster.txt" "$LAUNCHER" && chmod +x "$LAUNCHER"
+    cp "$PM_DIR/spruce/control.txt" "$PM_DIR/control.txt"
+else
+    rm -f "$PM_DIR/miyoo/PortMaster.txt" "$PM_DIR/miyoo/control.txt"
+    cp "$OURS/PortMaster.txt" "$PM_DIR/miyoo/PortMaster.txt"
+    cp "$OURS/PortMaster.txt" "$PM_DIR/miyoo/spruce_portmaster.sh"
+    chmod +x "$PM_DIR/miyoo/spruce_portmaster.sh"
+    cp "$OURS/control.txt" "$PM_DIR/miyoo/control.txt"
 
-# Hide pm_message for miyoo as it creates some issues for us (jpg and broken ports)
-FILE="/mnt/SDCARD/Persistent/portmaster/PortMaster/mod_Miyoo.txt"
-grep -q '^pm_message()' "$FILE" 2>/dev/null || \
-echo 'pm_message() { echo "$1" > "$CUR_TTY"; }' >> "$FILE"
+    # Ports probe $XDG_DATA_HOME/PortMaster/control.txt first.
+    rm -f "$HOME/.local/share/PortMaster/control.txt"
+    mkdir -p "$HOME/.local/share/PortMaster"
+    cp "$OURS/control.txt" "$HOME/.local/share/PortMaster/control.txt"
+
+    # Ports source mod_${CFW_NAME}.txt, whatever device_info.txt calls this firmware.
+    CFW_NAME="$(bash -c ". \"$PM_DIR/device_info.txt\" >/dev/null 2>&1; printf '%s' \"\$CFW_NAME\"")"
+    [ -n "$CFW_NAME" ] || CFW_NAME="Unknown"
+    cp "$OURS/mod_spruce.txt" "$PM_DIR/mod_${CFW_NAME}.txt"
+    cp "$OURS/mod_spruce.txt" "$PM_DIR/mod_spruce.txt"
+
+    LAUNCHER="$PM_DIR/miyoo/spruce_portmaster.sh"
+fi
+
+cd "$(dirname "$LAUNCHER")" && "$LAUNCHER" > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
+
+PM_REBOOT_FLAG="$PM_DIR/.pugwash-reboot"
+if [ -f "$PM_REBOOT_FLAG" ]; then
+    log_message "PortMaster updated itself and asked to restart; exiting so the next launch re-applies spruce's config"
+    rm -f "$PM_REBOOT_FLAG"
+fi
+
+"$OURS/update_images.sh" > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1

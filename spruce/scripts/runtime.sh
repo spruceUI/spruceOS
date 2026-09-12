@@ -19,14 +19,30 @@ SPRUCE_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 export HOME="/mnt/SDCARD"
 
+# A shutdown is in progress and init respawned us. Leave immediately - before
+# rotate_logs, which would destroy the log of the shutdown, and long before
+# read_only_check, which would remount the card read-write and undo the clean
+# unmount save_poweroff.sh just performed.
+if flag_check "shutting_down"; then
+    exit 0
+fi
+
 rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
 
 run_sd_card_fix_if_triggered    # do this before anything else
+
 set_performance
+# Roms/PORTS -> Roms/ports on the first boot after an install/update; before device_init.
+if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
+    . /mnt/SDCARD/spruce/scripts/ports_migration.sh
+    migrate_ports_dir
+fi
 device_init
-{ sleep 1.5; set_volume_to_config; } &
+ensure_dev_shm
+ensure_dev_fd
+restore_volume_after_audio_service &
 # Check if WiFi is enabled and bring up network services if so
 enable_or_disable_wifi_per_system_json &
 
@@ -43,7 +59,7 @@ check_and_hide_update_app &
 # closing UX because only runtime knows when every required foreground unpack step has
 # finished. firstboot may return success, warning, or failure; runtime chooses the closing
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
-if flag_check "first_boot_${PLATFORM}"; then
+if flag_check "first_boot_$(get_firstboot_key)"; then
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
 

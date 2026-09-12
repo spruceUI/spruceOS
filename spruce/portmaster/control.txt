@@ -1,0 +1,3 @@
+#!/bin/bash
+# Port-shell hook. Nothing device-specific needed here yet.
+[ -n "$PLATFORM" ] || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh

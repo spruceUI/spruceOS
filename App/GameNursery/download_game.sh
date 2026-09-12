@@ -32,7 +32,10 @@ fi
 # initialize temporary nursery file directory
 
 mkdir "$TMP_DIR" 2>/dev/null
-cd "$TMP_DIR"
+if ! cd "$TMP_DIR"; then
+    log_and_display_message "Could not enter download directory. Aborting."
+    exit 1
+fi
 rm -r ./* 2>/dev/null
 
 # attempt to download the game
@@ -43,13 +46,30 @@ fi
 
 # attempt to unzip the game
 log_and_display_message "Now installing $GAME_NAME!"
-cd "/mnt/SDCARD"
+# Unpack beside the download, then move into place (renames; TMP_DIR is on the card).
+rm -rf "$TMP_DIR/extract"; mkdir -p "$TMP_DIR/extract"
+cd "$TMP_DIR/extract"
 if ! 7zr x -y -scsUTF-8 "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1; then
 	log_and_display_message "Unable to extract $GAME_NAME. Please try again later."
 	rm -f "$TMP_DIR/$ZIP_NAME" >/dev/null 2>&1
+	rm -rf "$TMP_DIR/extract"
     sleep 4
 	exit 1
 else
+	# Old zips use Roms/PORTS: A30 ports go to A30PORTS, everything else to Roms/ports.
+	if [ -d "$TMP_DIR/extract/Roms/PORTS" ]; then
+		if [ "$PLATFORM" = "A30" ]; then
+			for _s in "$TMP_DIR/extract/Roms/PORTS"/*.sh; do
+				[ -f "$_s" ] && sed -i 's|/mnt/SDCARD/Roms/PORTS/|/mnt/SDCARD/Roms/A30PORTS/|g' "$_s"
+			done
+			merge_dir "$TMP_DIR/extract/Roms/PORTS" "$TMP_DIR/extract/Roms/A30PORTS"
+		else
+			merge_dir "$TMP_DIR/extract/Roms/PORTS" "$TMP_DIR/extract/Roms/ports"
+		fi
+		rmdir "$TMP_DIR/extract/Roms/PORTS" 2>/dev/null
+	fi
+	merge_dir "$TMP_DIR/extract" "/mnt/SDCARD"
+	rm -rf "$TMP_DIR/extract"
 	if [ "$REQUIRES_FILES" = "true" ]; then
 		log_and_display_message "$GAME_NAME installed! Note: this game requires additional files to play."
 	else

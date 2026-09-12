@@ -5,69 +5,58 @@
 
 # Sets SCUMMVM_BIN, SCUMMVM_CONFIG, DEFAULT_CONFIG based on PLATFORM
 _set_scummvm_platform() {
+
+	SCUMMVM_BIN="$EMU_DIR/scummvm.64" # override in case statement only if needed
+
 	case "$PLATFORM" in
 		"Flip")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"SmartPro")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsp/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsp/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"SmartProS")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsps/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-tsps/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"Brick")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brick/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			touch /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 			SCUMMVM_BRICK_JOYSTICK=1
 			;;
 		"BrickPro")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brickpro/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-brickpro/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 		"Pixel2")
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-pixel2/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-pixel2/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			enable_dpad_to_analog
 			;;
 		"Anbernic"*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-anbernic/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-anbernic/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
+			# gamecontrollerdb.txt has no row for this pad (one GUID, three
+			# trigger layouts), so hand SDL spruce's per-layout map. Label-named,
+			# like the db's TRIMUI/MIYOO rows: A is the button marked A.
+			export_sdl_gamecontroller_map
 			;;
 		"A30")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.a30"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-a30/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-a30/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/liba30:$LD_LIBRARY_PATH"
 			export DISPLAY_ROTATION=270
 			;;
 		"MiyooMini")
 			SCUMMVM_BIN="$EMU_DIR/scummvm.mini"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-mini/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-mini/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/libmini:$LD_LIBRARY_PATH"
 			;;
 		*)
-			SCUMMVM_BIN="$EMU_DIR/scummvm.64"
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-flip/scummvm.ini"
-			DEFAULT_CONFIG="$EMU_DIR/.config/scummvm-flip/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
 	esac
@@ -89,6 +78,9 @@ _set_scummvm_platform() {
 	fi
 }
 
+# Stickless XX units: _xx_dpad_swap (helperFunctions.sh) makes the d-pad the
+# stick while ScummVM runs, since its virtual mouse is left-stick only. Only
+# around the run: _set_scummvm_platform is also called by sync_game_id.
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
@@ -100,7 +92,9 @@ run_scummvm_menu() {
 
 	export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 	export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
@@ -133,7 +127,9 @@ run_scummvm() {
 	if [ -f "$SAVE_DIR/$game_id.s00" ]; then
 		SAVE_SLOT_ARG="--save-slot=0"
 	fi
+	_xx_dpad_swap 2
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" $SAVE_SLOT_ARG --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
+	_xx_dpad_swap 0
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 

@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# wget shim for PICO-8 on BaseOS, backed by curl.
+#
+# PICO-8 downloads through libcurl by default, or through wget when config.txt
+# sets use_wget (spruce ships it as 1). BaseOS has no libcurl at all, so the
+# wget path is the only one available - and BaseOS's wget is busybox, which
+# cannot do TLS. It prints "note: TLS certificate validation not implemented"
+# and writes zero bytes for any https URL. Everything PICO-8 fetches to load a
+# cart is https, either carts.lexaloffle.com directly or bbs/get_cart.php after
+# lexaloffle redirects http to https, so every cart load failed with PICO-8's
+# own error: "could not connect to bbs" (stat(107) == -3).
+#
+# Measured on a CubeXX, same URL: busybox wget 0 bytes, curl 1212 bytes.
+#
+# curl is present on BaseOS and statically linked with its own OpenSSL, so it
+# handles the TLS and the redirect that busybox wget cannot. This translates
+# the only two command shapes PICO-8 uses, taken from the binary's own strings:
+#
+#     wget "%s" -q -O "%s"
+#     wget "%s" -q -O "%s" --post-file=%s
+#
+# run_pico8 puts this directory first on PATH for Anbernic under BaseOS only,
+# so nothing else on the system picks it up.
+
+url=""
+out=""
+postfile=""
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        -O)
+            out="$2"
+            shift
+            ;;
+        -O*)
+            out="${1#-O}"
+            ;;
+        --post-file=*)
+            postfile="${1#--post-file=}"
+            ;;
+        --post-file)
+            postfile="$2"
+            shift
+            ;;
+        -q|-c|-S|--spider|--no-check-certificate)
+            # Accepted and ignored: quiet is curl's default with -s, and the
+            # rest have no bearing on how PICO-8 uses this.
+            ;;
+        -*)
+            # Unknown flag. Ignore rather than fail, so a future PICO-8 that
+            # adds an option still downloads instead of silently breaking.
+            ;;
+        *)
+            [ -z "$url" ] && url="$1"
+            ;;
+    esac
+    shift
+done
+
+[ -n "$url" ] || exit 1
+
+# -L to follow the http->https redirect, -f so an HTTP error exits non-zero and
+# writes nothing, which is what wget does and what PICO-8 expects - without it a
+# 404 page would be saved as though it were a cart.
+set -- -sL -f
+
+[ -n "$out" ] && set -- "$@" -o "$out"
+[ -n "$postfile" ] && set -- "$@" --data-binary "@$postfile"
+
+exec curl "$@" "$url"

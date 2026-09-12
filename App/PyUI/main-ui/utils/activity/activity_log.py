@@ -25,6 +25,7 @@ class ActivityLog:
                     pass  # silently ignore bad lines
 
         # sort globally by timestamp
+        self.events = [e for e in self.events if isinstance(e, dict) and isinstance(e.get("ts"), (int, float))]
         self.events.sort(key=lambda e: e["ts"])
 
     def _build_intervals(self):

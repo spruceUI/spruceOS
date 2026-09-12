@@ -108,8 +108,12 @@ class CollectionsManager:
         ]
 
         try:
-            with open(file_path, 'w') as f:
+            tmp_path = f"{file_path}.tmp"
+            with open(tmp_path, 'w') as f:
                 json.dump(data, f, indent=4)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, file_path)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to save collections file: {e}")
 

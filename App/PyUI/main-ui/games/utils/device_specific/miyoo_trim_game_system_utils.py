@@ -173,7 +173,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
                and (self.contains_needed_files(game_system_config) 
                                                    or PyUiConfig.show_all_game_systems())):
                 devices = game_system_config.get_devices()
-                supported_device = not devices or Device.get_device().get_device_name() in devices
+                supported_device = Device.supports_device(devices)
 
                 if(supported_device):
                     folder_paths = self.build_paths_array(folder, game_system_config)
