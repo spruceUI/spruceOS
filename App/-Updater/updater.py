@@ -1569,11 +1569,12 @@ def run_backup():
         "Running spruceBackup"
     )
 
+    # No timeout: the backup grows with the user's own saves and configs, and
+    # killing it part way just blocks the update behind a half-written archive.
     try:
 
         result = subprocess.run(
-            [backup_script],
-            timeout=300
+            [backup_script]
         )
 
         if result.returncode != 0:
@@ -1585,10 +1586,7 @@ def run_backup():
 
             return False
 
-    except (
-        OSError,
-        subprocess.TimeoutExpired
-    ) as exc:
+    except OSError as exc:
 
         log.error(
             f"spruceBackup failed: {exc}"
@@ -1610,11 +1608,12 @@ def run_restore():
         "Running spruceRestore"
     )
 
+    # Same as the backup: no timeout. This one unpacks the user's data back
+    # over a fresh install, so being killed half way is worse than being slow.
     try:
 
         result = subprocess.run(
-            [restore_script],
-            timeout=300
+            [restore_script]
         )
 
         if result.returncode != 0:
@@ -1626,10 +1625,7 @@ def run_restore():
 
             return False
 
-    except (
-        OSError,
-        subprocess.TimeoutExpired
-    ) as exc:
+    except OSError as exc:
 
         log.error(
             f"spruceRestore failed: {exc}"
