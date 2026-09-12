@@ -17,7 +17,7 @@ run_xroar() {
 
 XROAR_BIN="xroar"
 
-LD_LIBRARY_PATH="$EMU_DIR/libs:$LD_LIBRARY_PATH"
+LD_LIBRARY_PATH="$EMU_DIR/libs.aarch64:$LD_LIBRARY_PATH"
 export LD_LIBRARY_PATH
 
 XR_GPTK="$EMU_DIR/gptk"
@@ -29,6 +29,6 @@ GPTK_SP="${XR_GPTK}/${GAME_BN}.gptk"
 
 /mnt/SDCARD/Persistent/portmaster/PortMaster/gptokeyb -k "$XROAR_BIN" -c "$GPTK_SP" &
 
-"$EMU_DIR/$XROAR_BIN" -c "$EMU_DIR/$XROAR_BIN.conf" -default-machine coco2bus "$ROM_FILE"
+"$EMU_DIR/$XROAR_BIN" -c "$EMU_DIR/$XROAR_BIN.conf" -default-machine coco2bus "$ROM_FILE" > "$(emu_log_file)" 2>&1
 
 }
