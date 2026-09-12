@@ -20,9 +20,9 @@ case "$PLATFORM" in
         ;;
     Anbernic*)
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
-        export_sdl_gamecontroller_map
+        export_sdl_gamecontroller_map positional
         ;;
     RGB30)
-        export_sdl_gamecontroller_map
+        export_sdl_gamecontroller_map positional
         ;;
 esac

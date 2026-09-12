@@ -1431,7 +1431,14 @@ enable_or_disable_wifi_per_system_json() {
         log_message "WiFi: not available on this device, radio path left alone" -v
         return 0
     fi
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+    # PyUI writes SYSTEM_JSON from its shipped default, and on a first boot it
+    # may not exist yet when this runs. An unreadable value must mean off: an
+    # empty string fails -eq with status 2, which the else branch reads as on.
+    wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$wifi_want" in
+        ''|*[!0-9]*) wifi_want=0 ;;
+    esac
+    if [ "$wifi_want" -eq 0 ]; then
         disable_wifi
     else
         enable_wifi

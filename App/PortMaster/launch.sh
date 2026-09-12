@@ -38,13 +38,27 @@ sed -i \
     -e 's|/mnt/SDCARD/Roms/PORTS\([^0-9A-Za-z_]\)|/mnt/SDCARD/Roms/ports\1|g' \
     "$PM_DIR/pylibs/harbourmaster/config.py"
 
+# hardware.py names the firmware from /usr/trimui, /usr/miyoo and friends and has
+# no spruce test, so PlatformSpruce is never the platform harbour.py picks.
+sed -i \
+    -e "s|info.setdefault('name', 'Unknown')|info['name'] = 'spruce' if Path('/mnt/SDCARD/spruce').is_dir() else info.get('name', 'Unknown')|" \
+    "$PM_DIR/pylibs/harbourmaster/hardware.py"
+
+# Every device hands pugwash a positional pad, so it needs the same A/B
+# correction as the other platforms to land on spruce's Nintendo labels.
+sed -i \
+    -e '/^class PlatformSpruce/,/^class /{s|^    WANT_XBOX_FIX = False|    WANT_XBOX_FIX = True|}' \
+    "$PM_DIR/pylibs/harbourmaster/platform.py"
+
 # A self-update extracts over the bundle without deleting spruce/, so test the
 # files it does replace.
 if grep -q 'CFW_NAME="spruce"' "$PM_DIR/device_info.txt" 2>/dev/null \
     && grep -q "PlatformSpruce" "$PM_DIR/pylibs/harbourmaster/platform.py" 2>/dev/null; then
     LAUNCHER="$PM_DIR/PortMaster.sh"
-    # The update that brought PlatformSpruce ran the old platform's post-install.
+    # The update that brought PlatformSpruce ran the old platform's post-install,
+    # and before the hardware.py patch above the trimui/miyoo platform owned these.
     cp "$PM_DIR/spruce/PortMaster.txt" "$LAUNCHER" && chmod +x "$LAUNCHER"
+    cp "$PM_DIR/spruce/control.txt" "$PM_DIR/control.txt"
 else
     rm -f "$PM_DIR/miyoo/PortMaster.txt" "$PM_DIR/miyoo/control.txt"
     cp "$OURS/PortMaster.txt" "$PM_DIR/miyoo/PortMaster.txt"
