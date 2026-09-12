@@ -231,6 +231,7 @@ run_dsperate() {
 			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
 		esac
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
+		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 
