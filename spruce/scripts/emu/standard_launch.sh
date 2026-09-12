@@ -143,6 +143,9 @@ case $EMU_NAME in
 	"J2ME")
 		# The core execvp's "java"; fonts come from the JRE's own
 		# fontconfig.properties, so nothing else needs setting up here.
+		# The devices have no writable home, so java.util.prefs fails and then
+		# retries every 30s. Point it at tmpfs instead.
+		export JAVA_TOOL_OPTIONS="-Duser.home=/tmp"
 		if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
 			export PATH="$EMU_DIR/jre32/bin:$PATH"
 		else
