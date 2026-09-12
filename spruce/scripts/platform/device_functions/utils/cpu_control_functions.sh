@@ -152,11 +152,13 @@ set_smart() {
             echo "$scaling_max_freq" > "$CPU_4_DIR/scaling_max_freq"
         fi
 
-        echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
-        echo "$SMART_UP_THRESH" > $CONSERVATIVE_POLICY_DIR/up_threshold
-        echo "$SMART_FREQ_STEP" > $CONSERVATIVE_POLICY_DIR/freq_step
-        echo "$SMART_DOWN_FACTOR" > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
-        echo "$SMART_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
+        if [ -d "$CONSERVATIVE_POLICY_DIR" ]; then
+            echo "$SMART_DOWN_THRESH" > $CONSERVATIVE_POLICY_DIR/down_threshold
+            echo "$SMART_UP_THRESH" > $CONSERVATIVE_POLICY_DIR/up_threshold
+            echo "$SMART_FREQ_STEP" > $CONSERVATIVE_POLICY_DIR/freq_step
+            echo "$SMART_DOWN_FACTOR" > $CONSERVATIVE_POLICY_DIR/sampling_down_factor
+            echo "$SMART_SAMPLING_RATE" > $CONSERVATIVE_POLICY_DIR/sampling_rate
+        fi
 
         if [ -d "$GPU_GOVENOR_DIR" ]; then
             echo "$GPU_SMART_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
