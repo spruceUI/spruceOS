@@ -105,7 +105,7 @@ leds_battery() {
       turn_on_led 4
     fi
 
-    sleep 10
+    sleep 5
   done
 }
 

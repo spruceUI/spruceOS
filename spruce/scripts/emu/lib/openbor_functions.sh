@@ -53,6 +53,22 @@ run_openbor() {
 		fi
 		killall -q -USR1 joystickinput
 
+	elif [ "$PLATFORM" = "Pixel2" ]; then
+
+		if [ "$GAME" = "Final Fight LNS.pak" ]; then
+			LNS_SAVE="/mnt/SDCARD/Saves/saves/OPENBOR/Saves/Final Fight LNS.cfg"
+
+			# Copy default save with controller mappings
+			if [ ! -f "$LNS_SAVE" ]; then
+				mkdir -p "/mnt/SDCARD/Saves/saves/OPENBOR/Saves/"
+				cp $EMU_DIR/default-fflns.cfg "$LNS_SAVE"
+			fi
+
+			$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
+		else
+			$EMU_DIR/OpenBOR_Pixel2 "$ROM_FILE" > $(emu_log_file) 2>&1
+		fi
+
 	else # TrimUI Brick, SmartPro, or SmartProS
 
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
