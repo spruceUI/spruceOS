@@ -176,7 +176,10 @@ log_message "Backing up theme config files"
 backup_theme_configs
 
 log_message "Creating 7z archive"
-7zr a -spf -mmt=2 "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
+# -mx=1: most of what we back up is already compressed - overlay and shader
+# PNGs, theme and emu backup archives - so the LZMA2 effort buys little.
+# Measured on the stock overlay+shaders set: 30M at -mx=5 vs 31M at -mx=1.
+7zr a -spf -mmt=2 -mx=1 "$seven_z_file" @"$temp_file" -xr'!*/overlay/drkhrse/*' -xr'!*/overlay/Jeltron/*' -xr'!*/overlay/Perfect/*' -xr'!*/overlay/Onion-Spruce/*' 2>> "$log_file"
 
 backup_rc=$?  # Capture immediately. The old code re-read $? in the elif, which
               # by then held the exit of the first `[ ]` test - so a hard 7zr
