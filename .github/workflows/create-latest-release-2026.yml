@@ -461,9 +461,11 @@ jobs:
             | Anbernic RGXX+ series | Stable |
             | Powkiddy RGB30        | In Development, testers wanted! |
 
-            > **Anbernic RGXX+ series:** these devices need a modified TF1 image, which you can grab [here](https://github.com/spruceUI/RGXX-images/releases/tag/images). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+            > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             > **Powkiddy RGB30:** this device needs dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            >**BaseOS and DarkMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
 
             # What's New
 
