@@ -70,6 +70,7 @@ esac
 
 ticks=0
 empty_pid_ticks=0
+dead_holder=""
 locked=0
 while :; do
     if mkdir "$WIFI_LOCK" 2>/dev/null; then
@@ -79,18 +80,26 @@ while :; do
     holder="$(cat "$WIFI_LOCK/pid" 2>/dev/null)"
     if [ -z "$holder" ]; then
         # The holder writes its pid just after mkdir; only an empty pid that stays empty is stale
+        dead_holder=""
         empty_pid_ticks=$((empty_pid_ticks + 1))
-        if [ "$empty_pid_ticks" -gt 4 ]; then
+        if [ "$empty_pid_ticks" -gt 10 ]; then
             log_message "wifi.sh: clearing a lock with no holder"
             rm -rf "$WIFI_LOCK"
+            empty_pid_ticks=0
             continue
         fi
-    elif ! wifi_sh_is_running "$holder"; then
+    elif wifi_sh_is_running "$holder"; then
+        empty_pid_ticks=0
+        dead_holder=""
+    elif [ "$holder" = "$dead_holder" ]; then
+        # Dead on two checks in a row. A holder that was only releasing is gone by the second
+        # check, and one seen dead once may already be someone else's fresh lock.
         log_message "wifi.sh: clearing stale lock from $holder"
         rm -rf "$WIFI_LOCK"
+        dead_holder=""
         continue
     else
-        empty_pid_ticks=0
+        dead_holder="$holder"
     fi
     ticks=$((ticks + 1))
     [ "$ticks" -ge "$max_ticks" ] && break
