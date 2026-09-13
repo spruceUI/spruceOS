@@ -271,6 +271,17 @@ device_stop_dhcp_client() {
     return 0
 }
 
+# NetworkManager keeps the profile and reconnects on its own from then on. Its
+# error output echoes the password back, so none of it is kept.
+device_wifi_connect() {
+    command -v nmcli >/dev/null 2>&1 || return 1
+    if [ -n "$2" ]; then
+        nmcli -w 45 device wifi connect "$1" password "$2" >/dev/null 2>&1
+    else
+        nmcli -w 45 device wifi connect "$1" >/dev/null 2>&1
+    fi
+}
+
   #################
 #####   AUDIO   #####
   #################
@@ -854,6 +865,7 @@ rgb30_wifi_up() {
     _conf="/mnt/SDCARD/Saves/spruce/rgb30_wifi.conf"
 
     [ -f "$_conf" ] || return 0
+    wifi_setting_wanted || return 0
     command -v nmcli >/dev/null 2>&1 || return 0
 
     _ssid="$(sed -n 's/^SSID=//p' "$_conf" | head -1)"
