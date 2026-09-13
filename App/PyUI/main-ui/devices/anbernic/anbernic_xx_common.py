@@ -378,6 +378,17 @@ class AnbernicXXCommon(DeviceCommon):
     def get_save_state_image(self, rom_info: RomInfo):
         return self.get_game_system_utils().get_save_state_image(rom_info)
 
+    # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        for key, option in game_system_config.get_menu_options().items():
+            if key.startswith("Emulator") and any(name in (option.get("devices") or []) for name in self.get_device_names()):
+                return game_system_config.get_effective_menu_selection(key, rom_file_path)
+        return game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+
+    # Same suffixed state folder names the TrimUI and Miyoo classes check; a missing one is just a failed exists()
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name + "-64", core_name + "-32"]
+
     def supports_brightness_calibration(self):
         return False
 

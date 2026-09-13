@@ -211,7 +211,8 @@ launch_startup_watchdogs(){
 }
 
 take_screenshot() {
-    log_message "Unable to doso on 34xxsp currently"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
 }
 
 runtime_mounts_anbernic_34xxsp() {
