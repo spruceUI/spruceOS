@@ -649,58 +649,35 @@ class AnbernicXXCommon(DeviceCommon):
         self.system_config.save_config()
         self.stop_network_services()
         PyUiLogger.get_logger().info("Stopping WiFi Services")
-        ProcessRunner.run(['killall', '-15', 'wpa_supplicant'])
-        time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
-        time.sleep(0.1)  
-        # udhcpc, not dhclient. There is no dhclient on this platform - not in
-        # PATH, not anywhere on the filesystem - so these killalls matched
-        # nothing and the real client survived every "WiFi off". Verified on a
-        # CubeXX: udhcpc kept the same PID straight through an off/on cycle.
-        ProcessRunner.run(['killall', '-15', 'udhcpc'])
-        time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-9', 'udhcpc'])
-        time.sleep(0.1)  
-         
+        # The shell also unloads the driver, which is why enable_wifi has to go through the shell too
+        self._run_shell_wifi()
+
     def enable_wifi(self):
         self.system_config.set_wifi(1)
         self.system_config.save_config()
-        # Before the "already running" return below, not after it - that path
-        # still means WiFi is on, and the services still need starting.
-        self.start_network_services()
-        try:
-            # Only the supplicant is skipped when it is already up - the DHCP
-            # client is started unconditionally below. udhcpc exits on its own
-            # when it gives up (-t 5 failed discovers), and it leaves
-            # wpa_supplicant running when it does, so an early return here would
-            # make "turn WiFi on" the one action that cannot recover an
-            # interface that has associated but has no address.
-            if 'wpa_supplicant' not in self.get_running_processes().stdout:
-                # Also here, not just at startup: this is the call that actually
-                # consumes the file, and it has to survive the config being
-                # cleared or removed while the device is running - "Forget all
-                # WiFi networks" rewrites it, and a user can delete it off the
-                # card.
-                self.ensure_wpa_supplicant_conf()
+        # Repairs a cleared or deleted conf before the supplicant reads it
+        self.ensure_wpa_supplicant_conf()
+        # The shell reloads the driver the boot check or disable_wifi unloaded, waits for wlan0,
+        # clears /tmp/wifioff, then starts wpa_supplicant, udhcpc and networkservices.sh
+        self._run_shell_wifi()
 
-                # If not running, start it in the background
-                subprocess.Popen([
-                    'wpa_supplicant',
-                    '-B',
-                    '-D', 'nl80211',
-                    '-i', 'wlan0',
-                    '-c', self.get_wpa_supplicant_conf_path()
-                ])
-                time.sleep(0.5)  # Wait for it to initialize
-                PyUiLogger.get_logger().info("wpa_supplicant started.")
+    _shell_wifi_lock = threading.Lock()
+    # SDIO recovery can rail-cycle for about a minute; past this a stuck run stops holding the lock
+    SHELL_WIFI_TIMEOUT = 180
 
-            # Was subprocess.Popen(['dhclient', 'wlan0']), which raised
-            # FileNotFoundError into the except below - so this logged "Error
-            # starting wpa_supplicant" and started no DHCP client at all.
-            self.start_udhcpc()
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
+    def _run_shell_wifi(self):
+        def worker():
+            with AnbernicXXCommon._shell_wifi_lock:
+                # Decided under the lock from the saved setting, so queued toggles end in the last one
+                action = "enable_wifi" if self.is_wifi_enabled() else "disable_wifi"
+                try:
+                    subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && {action}"],
+                                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                   timeout=self.SHELL_WIFI_TIMEOUT)
+                    PyUiLogger.get_logger().info(f"Shell {action} finished")
+                except Exception as e:
+                    PyUiLogger.get_logger().error(f"Shell {action} failed: {e}")
+        threading.Thread(target=worker, daemon=True).start()
 
     def uses_deinit_v2(self):
         return True

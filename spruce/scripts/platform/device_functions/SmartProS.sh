@@ -391,17 +391,14 @@ WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_exit_sleep(){
     restore_cores_online
-    if [ -f /tmp/wifi_on ]; then
-        # wait for wlan0 to appear (up to ~5s)
+    # Sleep ran disable_wifi, which clears /tmp/wifion, so only the saved setting says whether WiFi was on
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
         for _ in 1 2 3 4 5; do
             ip link show wlan0 >/dev/null 2>&1 && break
             sleep 1
         done
-
-        if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            enable_or_disable_wifi_per_system_json
-        fi
     fi
+    enable_or_disable_wifi_per_system_json
     device_run_tsps_blobs
     device_run_thermal_process
     (

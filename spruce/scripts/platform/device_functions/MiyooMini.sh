@@ -383,6 +383,11 @@ is_mini_og() {
     fi
 }
 
+# The OG Mini and V4 have no radio; without this the shipped wifi=1 sends them through enable_wifi
+device_has_wifi_radio() {
+    ! is_mini_og
+}
+
 has_v4_screen() {
     grep -q "752x560p" /sys/class/graphics/fb0/modes >/dev/null 2>&1
 }

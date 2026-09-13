@@ -1213,15 +1213,20 @@ _xx_dpad_swap() {
 ##### WIFI HANDLING #####
 
 disable_wifi() {
-    ifconfig wlan0 down         2>/dev/null
     rm -f /tmp/wifion           2>/dev/null
     touch /tmp/wifioff          2>/dev/null
-    killall -9 wpa_supplicant   2>/dev/null
-    # Stop whichever client this device actually started. Naming udhcpc here
-    # only works for as long as every device uses udhcpc; a device that
-    # overrides device_start_dhcp_client would have been left with its client
-    # still holding the interface after "WiFi off".
-    device_stop_dhcp_client
+    # A host that owns the radio (NetworkManager on the RGB30) runs its own
+    # supplicant and DHCP client and has no ifconfig; killing its supplicant
+    # would break it, so only the power call below applies there.
+    if ! device_manages_own_wifi; then
+        ifconfig wlan0 down         2>/dev/null
+        killall -9 wpa_supplicant   2>/dev/null
+        # Stop whichever client this device actually started. Naming udhcpc here
+        # only works for as long as every device uses udhcpc; a device that
+        # overrides device_start_dhcp_client would have been left with its client
+        # still holding the interface after "WiFi off".
+        device_stop_dhcp_client
+    fi
     log_message "WiFi turned off"
     device_wifi_power_off
 }
@@ -1432,9 +1437,13 @@ enable_or_disable_wifi_per_system_json() {
         return 0
     fi
     # PyUI writes SYSTEM_JSON from its shipped default, and on a first boot it
-    # may not exist yet when this runs. An unreadable value must mean off: an
-    # empty string fails -eq with status 2, which the else branch reads as on.
+    # may not exist yet when this runs, so read that default instead. With
+    # neither readable it must mean off: an empty string fails -eq with status 2,
+    # which the else branch reads as on.
     wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    if [ -z "$wifi_want" ] && [ -n "$SYSTEM_JSON_DEFAULT" ]; then
+        wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON_DEFAULT" 2>/dev/null)"
+    fi
     case "$wifi_want" in
         ''|*[!0-9]*) wifi_want=0 ;;
     esac

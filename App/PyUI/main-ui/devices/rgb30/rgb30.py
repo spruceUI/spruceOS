@@ -323,10 +323,17 @@ class Rgb30(DeviceCommon):
             PyUiLogger.get_logger().error(f"rfkill is_wifi_enabled failed: {e}")
         return False
 
+    # Saved as well, or the next boot or game exit applies the stale setting and undoes the toggle
     def enable_wifi(self):
+        self.system_config.reload_config()
+        self.system_config.set_wifi(1)
+        self.system_config.save_config()
         ProcessRunner.run(["nmcli", "radio", "wifi", "on"], timeout=10)
 
     def disable_wifi(self):
+        self.system_config.reload_config()
+        self.system_config.set_wifi(0)
+        self.system_config.save_config()
         ProcessRunner.run(["nmcli", "radio", "wifi", "off"], timeout=10)
 
     def get_new_wifi_scanner(self):

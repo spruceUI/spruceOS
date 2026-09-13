@@ -2,36 +2,33 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-if [ -n "$WPA_SUPPLICANT_FILE" ] ; then
-    # Bring the Wi-Fi interface down
-    ifconfig wlan0 down
-    sleep 2  
-    killall wpa_supplicant
-    device_stop_dhcp_client
+WPA_HEADER="ctrl_interface=DIR=/var/run/wpa_supplicant
+update_config=1"
 
-    # Remove all networks
-    echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" | tee "$WPA_SUPPLICANT_FILE" "${WPA_SUPPLICANT_FILE}.tmp"
+if command -v nmcli >/dev/null 2>&1 && { device_manages_own_wifi || [ -z "$WPA_SUPPLICANT_FILE" ]; }; then
+    # NetworkManager keeps its own profiles. Match on TYPE: an inactive profile has no DEVICE.
+    nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r uuid type; do
+        [ "$type" = "802-11-wireless" ] && nmcli connection delete uuid "$uuid" >/dev/null 2>&1
+    done
+elif [ -n "$WPA_SUPPLICANT_FILE" ]; then
+    killall wpa_supplicant 2>/dev/null
+    device_stop_dhcp_client
+    sleep 1
+
+    printf '%s\n' "$WPA_HEADER" > "$WPA_SUPPLICANT_FILE"
 
     # And from the pre-card-global locations, or enable_wifi's adoption sweep
     # would import every one of them straight back on the next boot and the
     # user's "forget all networks" would silently undo itself.
     for _legacy_conf in $WPA_LEGACY_CONFS; do
         [ -f "$_legacy_conf" ] || continue
-        echo -e "ctrl_interface=DIR=/var/run/wpa_supplicant\nupdate_config=1" > "$_legacy_conf"
+        printf '%s\n' "$WPA_HEADER" > "$_legacy_conf"
         log_message "Wifi: cleared saved networks from $_legacy_conf"
     done
 
-    # Bring up interface to avoid issues with MainUI
-    ifconfig wlan0 up
-elif [ -d /storage/.config/NetworkManager/ ] ; then # NetworkManager
-    rfkill block wifi
-
-    NUUID=$(nmcli -t -f UUID,DEVICE connection show | grep wlan | cut -d : -f 1)
-    echo "$NUUID" | while IFS= read -r line ; do
-        nmcli connection delete uuid "$line"
-    done
-
-    rfkill unblock wifi
+    # Bring WiFi back as the setting says, or the network list has no supplicant
+    # to scan with. Detached, since enable_wifi can wait on the radio for seconds.
+    ( enable_or_disable_wifi_per_system_json ) </dev/null >/dev/null 2>&1 &
 fi
 
 log_message "Wifi: All networks forgotten by request of user."
