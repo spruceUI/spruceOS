@@ -60,6 +60,12 @@ class PilImageUtils(ImageUtils):
         img.save(output_path)
         PyUiLogger().get_logger().info(f"Scaled: {input_path} to {output_path} -> {new_width}x{new_height}")
 
+    def create_solid_color_image(self, output_path, r, g, b, width, height):
+        try:
+            Image.new("RGBA", (width, height), (r, g, b, 255)).save(output_path)
+        except Exception as e:
+            PyUiLogger().get_logger().error(f"Error creating {output_path}: {e}")
+
     def get_image_dimensions(self, path):
         try:
             with Image.open(path) as img:
