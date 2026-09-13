@@ -39,8 +39,28 @@ dropbear_generate_keys() {
 # leaves established sessions alone, so taking the port over does not disconnect
 # whoever is already logged in.
 ssh_listener_pid() {
-    netstat -ltnp 2>/dev/null |
-        awk '$4 ~ /:22$/ { split($NF, a, "/"); if (a[1] ~ /^[0-9]+$/) { print a[1]; exit } }'
+    _pid="$(netstat -ltnp 2>/dev/null |
+        awk '$4 ~ /:22$/ { split($NF, a, "/"); if (a[1] ~ /^[0-9]+$/) { print a[1]; exit } }')"
+    [ -n "$_pid" ] && { echo "$_pid"; return 0; }
+
+    # busybox is often built without netstat's -p, so the column we parse above
+    # holds the state rather than a pid and the takeover silently does nothing -
+    # that is how the Flip ended up with the stock dropbear still on port 22 and
+    # spruce SSH logging "did not take port 22". Fall back to /proc: find the
+    # listening socket's inode, then whoever holds that socket open.
+    _inode="$(awk '$4 == "0A" && $2 ~ /:0016$/ { print $10; exit }' \
+        /proc/net/tcp /proc/net/tcp6 2>/dev/null)"
+    [ -z "$_inode" ] && return 1
+
+    for _fd in /proc/[0-9]*/fd/*; do
+        [ -e "$_fd" ] || continue
+        if [ "$(readlink "$_fd" 2>/dev/null)" = "socket:[$_inode]" ]; then
+            _p="${_fd#/proc/}"
+            echo "${_p%%/*}"
+            return 0
+        fi
+    done
+    return 1
 }
 
 # True if the given pid is spruce's own SSH daemon.
