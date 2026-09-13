@@ -22,7 +22,6 @@ class MuosAnbernicRGXX(MuosDevice):
 
 
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 

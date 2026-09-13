@@ -81,15 +81,6 @@ class MiniloongPocket1(DeviceCommon):
         self.miyoo_games_file_parser = MiyooGamesFileParser()
         DeviceCommon.__init__(self)
         if main_ui_mode:
-            # Wifi keeper, exactly like every other wifi-capable Spruce device
-            # (Flip, A30, GKD, TrimUI): monitor_wifi() is the boot-time bring-up
-            # AND self-heal. It keys off is_wifi_enabled() (the config), so with
-            # wifi=1 seeded it brings the radio up on its first iteration and
-            # restarts it if wlan0 disappears. Without this thread the toggle had
-            # nothing driving the stack and the config never took effect.
-            if PyUiConfig.enable_wifi_monitor():
-                PyUiLogger.get_logger().info("Starting wifi monitor")
-                threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             self._start_key_watchers()
 
@@ -379,7 +370,7 @@ class MiniloongPocket1(DeviceCommon):
         # not live operstate. Reading operstate here made the toggle label and
         # wifi_adjust() read the state at different instants during associate/
         # deassociate, so a press could do the opposite of the label and the menu
-        # looked frozen at "Off". monitor_wifi() also keys off this value.
+        # looked frozen at "Off".
         return self.system_config.is_wifi_enabled()
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:

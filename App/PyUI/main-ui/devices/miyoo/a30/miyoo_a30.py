@@ -44,7 +44,6 @@ class MiyooA30(MiyooDevice):
             miyoo_stock_json_file = script_dir.parent / 'stock/a30.json'
             ConfigCopier.ensure_config(MiyooA30.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
 
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
             #self.hardware_poller = MiyooFlipPoller(self)
             #threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()

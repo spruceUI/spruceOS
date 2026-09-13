@@ -75,7 +75,8 @@ launch_common_startup_watchdogs_v2() {
         /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
+        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh \
+        /mnt/SDCARD/spruce/scripts/wifi_watchdog.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -97,6 +98,11 @@ launch_common_startup_watchdogs_v2() {
     if [ "$HAS_LID" = "true" ]; then
         /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
         pin_cpu "$SYSTEM_CPU" -n lid_watchdog_v2.sh &
+    fi
+
+    if device_wifi_watchdog_enabled; then
+        /mnt/SDCARD/spruce/scripts/wifi_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n wifi_watchdog.sh &
     fi
 
 

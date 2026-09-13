@@ -408,6 +408,11 @@ device_wifi_power_off() {
     return 0
 }
 
+# Nothing ever watched the Mini's link, and a restart here re-powers the chip
+device_wifi_watchdog_enabled() {
+    return 1
+}
+
 # The Mini's udhcpc needs its own script to set the address
 device_start_dhcp_client() {
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3

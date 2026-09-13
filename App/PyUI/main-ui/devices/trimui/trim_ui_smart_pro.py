@@ -40,7 +40,6 @@ class TrimUISmartPro(TrimUIDevice):
 
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)

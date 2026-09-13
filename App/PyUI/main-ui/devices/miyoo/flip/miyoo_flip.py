@@ -126,11 +126,6 @@ class MiyooFlip(MiyooDevice):
         self._set_brightness_to_config()
         self._set_hue_to_config()
         self.init_gpio()
-
-        if(PyUiConfig.enable_wifi_monitor() and include_wifi):
-            PyUiLogger.get_logger().info(f"Starting wifi monitor")
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
-
         self.init_bluetooth()
 
     def init_bluetooth(self):

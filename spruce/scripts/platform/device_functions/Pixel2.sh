@@ -171,6 +171,12 @@ device_get_battery_percent() {
 	cat "$BATTERY/capacity"
 }
 
+# The OS network stack started in setup_network_services owns the radio; spruce
+# must not start a wpa_supplicant or DHCP client beside it
+device_manages_own_wifi() {
+    return 0
+}
+
 device_wifi_power_on() {
     rfkill unblock wifi
     sleep 1

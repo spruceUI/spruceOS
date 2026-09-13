@@ -1,9 +1,6 @@
 
 
-import fcntl
 import os
-import socket
-import struct
 import subprocess
 import sys
 import tempfile
@@ -227,73 +224,6 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    def is_wifi_up(self):
-        result = ProcessRunner.run(["ip", "link", "show", "wlan0"], print=False)
-        return "UP" in result.stdout
-
-    def restart_wifi_services(self):
-        PyUiLogger.get_logger().info("Restarting WiFi services")
-        self._run_wifi_script("restart")
-
-    def wifi_error_detected(self):
-        self.wifi_error = True
-        
-    def connection_seems_up(self):
-        try:
-            result = ProcessRunner.run(
-                ["ping", "-c", "1", "1.1.1.1"],
-                timeout=1,
-                print=False)
-            
-            return not ("Network is unreachable") in result.stderr
-
-        except subprocess.TimeoutExpired:
-            return False
-    
-    def _wlan0_has_ipv4(self):
-        # An address means the link works; a LAN without internet or with ICMP blocked is not broken WiFi
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-                fcntl.ioctl(s.fileno(), 0x8915, struct.pack("256s", b"wlan0"))  # SIOCGIFADDR
-            return True
-        except OSError:
-            return False
-
-    MONITOR_RESTART_LIMIT = 5
-    MONITOR_BACKOFF_SECONDS = 600
-
-    def monitor_wifi(self):
-        self.wifi_error = False
-        last_healthy = time.time()
-        restart_count = 0
-        while True:
-            if not self.is_wifi_enabled():
-                # Off is the user's choice; start counting afresh when they turn it back on
-                self.wifi_error = False
-                last_healthy = time.time()
-                restart_count = 0
-            elif self.wifi_error or not self.is_wifi_up():
-                self.wifi_error = False
-                PyUiLogger.get_logger().error("Detected wlan0 disappeared, restarting wifi services")
-                self.restart_wifi_services()
-            elif self._wlan0_has_ipv4() or not self.wifi_has_saved_network():
-                last_healthy = time.time()
-                restart_count = 0
-            else:
-                down_for = time.time() - last_healthy
-                if restart_count < self.MONITOR_RESTART_LIMIT and down_for > 60:
-                    restart_count += 1
-                    PyUiLogger.get_logger().error(
-                        f"No address on wlan0 for {int(down_for)}s, restarting WiFi ({restart_count}/{self.MONITOR_RESTART_LIMIT})")
-                    last_healthy = time.time()
-                    self.restart_wifi_services()
-                elif restart_count >= self.MONITOR_RESTART_LIMIT and down_for > self.MONITOR_BACKOFF_SECONDS:
-                    # Never switch WiFi off on the user's behalf; just retry far less often
-                    restart_count = 0
-                    last_healthy = time.time()
-
-            time.sleep(10)
-
     @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_status(self):
         if not self.is_wifi_enabled():

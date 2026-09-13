@@ -40,9 +40,8 @@ class TrimUIDevice(DeviceCommon):
 
         # Something outside this process - the physical switch's
         # scene-wifi.sh, today - can flip .wifi in this same file while PyUI
-        # is already running. reload_config() above already picks up the
-        # fresh value, so monitor_wifi()'s self-heal loop won't fight the
-        # switch by turning WiFi back on - but the WiFi status caches still
+        # is already running. reload_config() above picks up the fresh
+        # value, but the WiFi status caches still
         # need an explicit nudge so the WiFi menu/top bar icon catch up
         # immediately instead of waiting on their own throttle window.
         if(old_wifi_enabled != self.system_config.is_wifi_enabled()):
