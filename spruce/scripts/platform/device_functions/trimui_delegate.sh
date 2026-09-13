@@ -275,8 +275,13 @@ run_trimui_blobs() {
             continue
         fi
 
-        LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-        log_message "Started $blob"
+        bin="./$blob"
+        if [ "$blob" = "trimui_inputd" ] && [ -x "$TRIMUI_INPUTD_PATCHED" ]; then
+            bin="$TRIMUI_INPUTD_PATCHED"
+        fi
+
+        LD_LIBRARY_PATH=/usr/trimui/lib "$bin" &
+        log_message "Started $bin"
         sleep 0.05
     done
 }
