@@ -388,6 +388,31 @@ device_has_wifi_radio() {
     ! is_mini_og
 }
 
+# The RTL8188FU driver loads from the card and axp_test powers the radio. Only
+# when wlan0 is missing: re-powering a live radio would drop the connection.
+device_wifi_power_on() {
+    is_mini_og && return 1
+    [ -d /sys/class/net/wlan0 ] && return 0
+    grep -q "^8188fu " /proc/modules 2>/dev/null || insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko 2>/dev/null
+    ifconfig lo up 2>/dev/null
+    /customer/app/axp_test wifion >/dev/null 2>&1
+    _left=10
+    while [ ! -d /sys/class/net/wlan0 ] && [ "$_left" -gt 0 ]; do
+        sleep 1
+        _left=$((_left - 1))
+    done
+}
+
+# disable_wifi's ifconfig down is all that has ever turned it off
+device_wifi_power_off() {
+    return 0
+}
+
+# The Mini's udhcpc needs its own script to set the address
+device_start_dhcp_client() {
+    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3
+}
+
 has_v4_screen() {
     grep -q "752x560p" /sys/class/graphics/fb0/modes >/dev/null 2>&1
 }

@@ -87,7 +87,6 @@ class MiniloongPocket1(DeviceCommon):
             # wifi=1 seeded it brings the radio up on its first iteration and
             # restarts it if wlan0 disappears. Without this thread the toggle had
             # nothing driving the stack and the config never took effect.
-            self.ensure_wpa_supplicant_conf()
             if PyUiConfig.enable_wifi_monitor():
                 PyUiLogger.get_logger().info("Starting wifi monitor")
                 threading.Thread(target=self.monitor_wifi, daemon=True).start()
@@ -369,11 +368,8 @@ class MiniloongPocket1(DeviceCommon):
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
 
-    # ---- wifi: owned by the stock S40network/dhcpcd; menu not wired yet (MLP1-008) ----
+    # ---- wifi: spruce's wifi.sh owns the radio; PyUI scans and reads status ----
 
-    # WiFi: Spruce-managed (the shell owns wpa_supplicant + udhcpc; see Miniloong.sh
-    # device_manages_own_wifi=false). PyUI scans/connects via wpa_cli. UNVERIFIED
-    # against the on-device stack (wlan0 present, driver, wpa_cli available) - MLP1-008.
     def supports_wifi(self):
         return True
 
@@ -385,104 +381,6 @@ class MiniloongPocket1(DeviceCommon):
         # deassociate, so a press could do the opposite of the label and the menu
         # looked frozen at "Off". monitor_wifi() also keys off this value.
         return self.system_config.is_wifi_enabled()
-
-    def set_wifi_power(self, value):
-        # Admin up/down the interface. start_wifi_services() calls this first.
-        try:
-            ProcessRunner.run(["ifconfig", "wlan0", "up" if value else "down"], timeout=10)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Miniloong set_wifi_power({value}) failed: {e}")
-
-    def start_wpa_supplicant(self):
-        # nl80211 is the Miniloong's mac80211 driver (RTL8723DS) - same args the
-        # Miyoo/Trim family uses. -B daemonizes; guard against a second instance.
-        try:
-            if "wpa_supplicant" in self.get_running_processes().stdout:
-                return
-            subprocess.Popen([
-                "wpa_supplicant", "-B", "-D", "nl80211", "-i", "wlan0",
-                "-c", self.get_wpa_supplicant_conf_path(),
-            ])
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Miniloong start_wpa_supplicant failed: {e}")
-
-    def stop_wifi_services(self):
-        for proc in ("wpa_supplicant", "udhcpc"):
-            try:
-                ProcessRunner.run(["killall", "-9", proc], timeout=10)
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Miniloong stop_wifi_services {proc}: {e}")
-
-    def enable_wifi(self):
-        # Persist intent first so is_wifi_enabled() (and the toggle label) flips
-        # to On immediately, then bring the stack up on a daemon thread: the
-        # bring-up (ifconfig up -> wpa_supplicant -> udhcpc, then networkservices)
-        # can stall on a slow associate, and doing it on the UI thread froze the
-        # device.
-        self.system_config.reload_config()
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        def _up():
-            try:
-                self.start_wifi_services(foreground_call=False)
-                self.start_network_services()
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Miniloong enable_wifi bring-up failed: {e}")
-        threading.Thread(target=_up, daemon=True).start()
-
-    def disable_wifi(self):
-        self.system_config.reload_config()
-        self.system_config.set_wifi(0)
-        self.system_config.save_config()
-        def _down():
-            try:
-                self.stop_wifi_services()
-                self.stop_network_services()
-                ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=10)
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Miniloong disable_wifi tear-down failed: {e}")
-        threading.Thread(target=_down, daemon=True).start()
-
-    def get_new_wifi_scanner(self):
-        from devices.wifi.wifi_scanner import WiFiScanner
-        return WiFiScanner(interface="wlan0")
-
-    def wifi_connect(self, ssid, password):
-        # Add/enable the network through wpa_cli and persist it; udhcpc then leases.
-        # Runs on a daemon thread so udhcpc's wait cannot freeze the wifi menu.
-        threading.Thread(target=self._wifi_connect_worker, args=(ssid, password), daemon=True).start()
-
-    def _wifi_connect_worker(self, ssid, password):
-        try:
-            nid = (ProcessRunner.run(["wpa_cli", "-i", "wlan0", "add_network"], timeout=5).stdout or "").strip().splitlines()[-1]
-            def setn(k, v):
-                ProcessRunner.run(["wpa_cli", "-i", "wlan0", "set_network", nid, k, v], timeout=5)
-            setn("ssid", f'"{ssid}"')
-            if password:
-                setn("psk", f'"{password}"')
-            else:
-                setn("key_mgmt", "NONE")
-            ProcessRunner.run(["wpa_cli", "-i", "wlan0", "enable_network", nid], timeout=10)
-            ProcessRunner.run(["wpa_cli", "-i", "wlan0", "save_config"], timeout=5)
-            ProcessRunner.run(["udhcpc", "-i", "wlan0", "-b", "-t", "5", "-T", "3"], timeout=30)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Miniloong wifi_connect failed: {e}")
-
-    def ensure_wpa_supplicant_conf(self):
-        # wpa_supplicant reads the whole file at startup and exits on the first
-        # parse error, so a missing/broken conf shows up as "scanning forever".
-        # Guarantee a minimal valid one exists (ctrl_interface lets wpa_cli talk
-        # to it; update_config=1 lets wifi_connect() persist saved networks).
-        try:
-            conf = Path(self.get_wpa_supplicant_conf_path())
-            conf.parent.mkdir(parents=True, exist_ok=True)
-            if not conf.exists():
-                conf.write_text(
-                    "ctrl_interface=/var/run/wpa_supplicant\n"
-                    "update_config=1\n\n"
-                )
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Miniloong ensure_wpa_supplicant_conf failed: {e}")
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         # RSSI from wpa_cli signal_poll (RSSI=-46 / LINKSPEED=72 / NOISE=9999 /

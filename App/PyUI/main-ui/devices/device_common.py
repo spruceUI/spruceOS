@@ -232,12 +232,8 @@ class DeviceCommon(AbstractDevice):
         return "UP" in result.stdout
 
     def restart_wifi_services(self):
-        """The monitor's answer to wlan0 going away: stop and start our own
-        services. A device whose radio is owned by something else at times
-        (the Flip under a USB dongle) overrides this."""
         PyUiLogger.get_logger().info("Restarting WiFi services")
-        self.stop_wifi_services()
-        self.start_wifi_services(foreground_call=False)
+        self._run_wifi_script("restart")
 
     def wifi_error_detected(self):
         self.wifi_error = True
@@ -339,71 +335,6 @@ class DeviceCommon(AbstractDevice):
         return subprocess.run(['ps', '-f'], capture_output=True, text=True)
 
 
-    def start_udhcpc(self):
-        try:
-            # Check if wpa_supplicant is running using ps -f
-            result = self.get_running_processes()
-            if 'udhcpc' in result.stdout:
-                return
-
-            # If not running, start it in the background
-            subprocess.Popen([
-                'udhcpc',
-                '-i', 'wlan0'
-            ])
-            time.sleep(0.5)  # Wait for it to initialize
-            PyUiLogger.get_logger().info("udhcpc started.")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
-
-    def start_wifi_services(self, foreground_call=False):
-        if not self.connection_seems_up():
-            PyUiLogger.get_logger().info("Starting WiFi Services")
-            if(foreground_call):
-                Display.display_message(Language.label("turningOnWifiPower", "Turning on WiFi Power"))
-                
-            self.set_wifi_power(1)
-            time.sleep(1)  
-            if(foreground_call):
-                Display.display_message(Language.label("startingWifiProcess", "Starting WiFi process"))
-            self.start_wpa_supplicant()
-            if(foreground_call):
-                Display.display_message(Language.label("startingIpAssignment", "Starting ip address assignment process"))
-            self.start_udhcpc()
-
-    # spruce's networkservices.sh starts Samba, SSH, SFTPGo, Syncthing and the
-    # landing page, and syncs the clock, once the network is actually up. It runs
-    # from principal.sh at boot and again on every return to the menu from a game -
-    # but PyUI brings WiFi up through its own Python path, so turning WiFi on from
-    # the menu left all of that waiting for the next game exit. The clock is the
-    # worst of it: until it is set, every HTTPS request fails as "certificate not
-    # yet valid", because these devices have no battery-backed RTC.
-    #
-    # Safe to fire and forget. The script waits for the connection itself, so
-    # calling it before wlan0 has an address is fine; it holds a lock so a second
-    # copy exits immediately; and it skips services that are already running.
-    # Detached, because it blocks until the network appears.
-    NETWORK_SERVICES_SCRIPT = "/mnt/SDCARD/spruce/scripts/networkservices.sh"
-
-    def _run_network_services(self, *args):
-        if not os.path.exists(self.NETWORK_SERVICES_SCRIPT):
-            # Not a spruce userland (muOS, Rocknix) - nothing of ours to start.
-            return
-        try:
-            subprocess.Popen(
-                [self.NETWORK_SERVICES_SCRIPT, *args],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to launch networkservices.sh: {e}")
-
-    def start_network_services(self):
-        self._run_network_services()
-
-    def stop_network_services(self):
-        self._run_network_services("off")
-
 
     # Saved networks live on the card, not on the handheld, so a password
     # entered on one device is enough for every device the card is moved to.
@@ -420,76 +351,49 @@ class DeviceCommon(AbstractDevice):
             DeviceCommon.WPA_SUPPLICANT_CONF
         )
 
+    # Every radio change goes through spruce's wifi.sh, which runs them one at a
+    # time; PyUI only saves the setting and hands over.
+    WIFI_SCRIPT = "/mnt/SDCARD/spruce/scripts/wifi.sh"
+
+    def _run_wifi_script(self, *args):
+        if not os.path.exists(self.WIFI_SCRIPT):
+            return
+        try:
+            # Returns at once: wifi.sh does the work in a detached copy of itself
+            subprocess.run(["/bin/sh", self.WIFI_SCRIPT, *args],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=10)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"wifi.sh {args[0]} failed: {e}")
+
+    def _save_wifi_setting(self, value):
+        self.system_config.reload_config()
+        self.system_config.set_wifi(value)
+        self.system_config.save_config()
+
+    def enable_wifi(self):
+        self._save_wifi_setting(1)
+        self._run_wifi_script("apply")
+
+    def disable_wifi(self):
+        self._save_wifi_setting(0)
+        self._run_wifi_script("apply")
+
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
-        Default is the wpa_supplicant behaviour the WiFi menu used to do inline:
-        write a network block to wpa_supplicant.conf and tell wpa_cli to reload.
-        Hosts that manage WiFi another way (NetworkManager on the RGB30, connman
-        on the GKD Pixel 2) override this.
+        The password goes to wifi.sh in a private temp file, never on a command line.
         """
-        from devices.utils.process_runner import ProcessRunner
-        conf_path = self.get_wpa_supplicant_conf_path()
-        if password is None:
-            pw_line = "key_mgmt=NONE"
-        else:
-            pw_line = 'psk="' + password + '"'
-        self._write_wpa_supplicant_block(conf_path, ssid, pw_line)
         try:
-            ProcessRunner.run(["wpa_cli", "reconfigure"])
+            fd, request = tempfile.mkstemp(prefix="wifi_connect.", dir="/tmp")
+            with os.fdopen(fd, "w") as f:
+                f.write(ssid + "\n")
+                if password:
+                    f.write(password + "\n")
         except Exception as e:
-            PyUiLogger.get_logger().error(f"wpa_cli reconfigure failed: {e}")
-
-    def _write_wpa_supplicant_block(self, file_path, ssid, pw_line):
-        try:
-            try:
-                with open(file_path, "r") as f:
-                    lines = f.readlines()
-            except FileNotFoundError:
-                lines = []
-
-            header_lines = []
-            networks = []
-            current_block = []
-            in_block = False
-            for line in lines:
-                stripped = line.strip()
-                if stripped.startswith("network={"):
-                    in_block = True
-                    current_block = [line]
-                elif in_block:
-                    current_block.append(line)
-                    if stripped == "}":
-                        networks.append(current_block)
-                        current_block = []
-                        in_block = False
-                else:
-                    header_lines.append(line)
-
-            # Written raw, deliberately - wpa_supplicant does no backslash
-            # unescaping in plain quoted strings.
-            new_block = ["network={\n", f'    ssid="{ssid}"\n', f"    {pw_line}\n", "}\n"]
-
-            # Drop any existing block for this ssid, then append the new one.
-            kept = []
-            for block in networks:
-                if not any(f'ssid="{ssid}"' in bl for bl in block):
-                    kept.append(block)
-            parent = os.path.dirname(file_path)
-            if parent:
-                os.makedirs(parent, exist_ok=True)
-            with open(file_path, "w") as f:
-                for line in header_lines:
-                    f.write(line)
-                for block in kept:
-                    f.write("\n")
-                    for line in block:
-                        f.write(line)
-                f.write("\n")
-                for line in new_block:
-                    f.write(line)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Failed to write wpa_supplicant.conf: {e}")
+            PyUiLogger.get_logger().error(f"Could not write the WiFi connect request: {e}")
+            return
+        self._run_wifi_script("connect", request)
 
     # Deadline (time.time()) until which the WiFi status caches refresh every
     # second instead of every 10-15 s; see utils/throttle.limit_refresh.
