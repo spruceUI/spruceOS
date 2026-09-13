@@ -231,7 +231,11 @@ run_dsperate() {
 			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
 		esac
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
-		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+		# DSperate_flip_lib holds PyUI's SDL2 under the SONAME the loader wants:
+		# spruce/flip/lib ships it as libSDL2-2.0.so, which PyUI loads by name
+		# through ctypes but the loader never finds. DraStic's lib64_Flip build is
+		# patched for DraStic and segfaults dsperate even rendering offscreen.
+		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="$EMU_DIR/DSperate_flip_lib:$LD_LIBRARY_PATH"
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 
