@@ -275,6 +275,13 @@ device_stop_dhcp_client() {
 # error output echoes the password back, so none of it is kept.
 device_wifi_connect() {
     command -v nmcli >/dev/null 2>&1 || return 1
+    # NM 1.52 refuses "device wifi connect" when a profile for the SSID already exists
+    # ("key-mgmt: property is missing"), so replace any saved profile for it
+    nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r _uuid _type; do
+        [ "$_type" = "802-11-wireless" ] || continue
+        [ "$(nmcli -g 802-11-wireless.ssid connection show uuid "$_uuid" 2>/dev/null)" = "$1" ] || continue
+        nmcli connection delete uuid "$_uuid" >/dev/null 2>&1
+    done
     if [ -n "$2" ]; then
         nmcli -w 45 device wifi connect "$1" password "$2" >/dev/null 2>&1
     else
