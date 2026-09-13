@@ -360,6 +360,22 @@ device_ensure_wifi_interface() {
     return 0
 }
 
+# Save a network ($1 SSID, $2 password, empty for an open network) and point the
+# running supplicant at it. Called by wifi.sh connect; never log the password.
+device_wifi_connect() {
+    wpa_add_network "$1" "$2"
+}
+
+# Called by wifi.sh forget-all, which applies the saved setting afterwards.
+device_wifi_forget_all() {
+    wpa_forget_all_networks
+}
+
+# Whether wifi_watchdog.sh restarts a link that has no address. Off where the OS owns the radio.
+device_wifi_watchdog_enabled() {
+    ! device_manages_own_wifi
+}
+
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
