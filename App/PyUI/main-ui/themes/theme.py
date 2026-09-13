@@ -355,9 +355,39 @@ class Theme():
     @classmethod
     def key_bg(cls): return cls._asset("bg-btn-01-n.qoi")
     
+    def key_selected_bg(cls):
+        selected_bg = cls._asset("bg-btn-01-f.qoi", cache_missing=False)
+
+        if selected_bg is not None:
+            return selected_bg
+
+        # Generate a fallback selected-key background using the inverse
+        # of the keyboard's selected text color.
+        selected_color = cls.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD)
+        inverse_color = tuple(255 - channel for channel in selected_color)
+
+        output_image = cls._resolve_png_path(
+            cls._skin_folder,
+            ["bg-btn-01-f.png"]
+        )
+
+        cls.create_key_selected_bg(output_image, inverse_color)
+
+        return output_image    
+
     @classmethod
-    def key_selected_bg(cls): return cls._asset("bg-btn-01-f.qoi")
-    
+    def create_key_selected_bg(cls, output_image, color):
+        image_utils = Device.get_device().get_image_utils()
+
+        image_utils.create_solid_color_image(
+            output_image,
+            color[0],
+            color[1],
+            color[2],
+            10,
+            10
+        )
+
     @classmethod
     def get_list_small_selected_bg(cls): return cls._asset("bg-list-s.qoi")
     
