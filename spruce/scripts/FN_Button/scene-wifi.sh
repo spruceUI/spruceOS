@@ -2,7 +2,7 @@
 # Switch scene action: turn WiFi on/off through spruce's own WiFi system.
 #
 # trimui_scened runs this with arg 1 (switch on -> WiFi off) / 0 (switch off ->
-# WiFi back on). Goes through the same enable_wifi / disable_wifi that boot,
+# WiFi back on). Goes through the same wifi.sh apply that boot,
 # sleep, and Settings -> Network Settings -> WiFi already use, and keeps .wifi
 # in SYSTEM_JSON in sync (the same pattern set_backlight uses for .backlight)
 # so the WiFi menu, the top bar icon, and anything else that reads .wifi (e.g.
@@ -22,10 +22,10 @@ set_wifi_config_value() {
 case "$1" in
     1)
         set_wifi_config_value 0
-        disable_wifi
+        wifi_request apply
         ;;
     0)
         set_wifi_config_value 1
-        enable_wifi
+        wifi_request apply
         ;;
 esac

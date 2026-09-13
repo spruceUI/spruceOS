@@ -1640,6 +1640,11 @@ network_is_connected() {
 }
 
 check_and_connect_wifi() {
+    # Shutdown's Syncthing check calls this whatever the setting says; never turn WiFi on against it
+    if ! wifi_setting_wanted; then
+        log_message "WiFi is off in settings, not connecting"
+        return 1
+    fi
 
     waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
     if [ "$waiting_enabled" = "False" ]; then
@@ -1663,7 +1668,7 @@ check_and_connect_wifi() {
 
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
-    restart_wifi
+    wifi_request restart
 
     display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
         "Waiting to connect....\nPress START to continue anyway." 75

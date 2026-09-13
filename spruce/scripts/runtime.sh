@@ -44,7 +44,7 @@ ensure_dev_shm
 ensure_dev_fd
 restore_volume_after_audio_service &
 # Check if WiFi is enabled and bring up network services if so
-enable_or_disable_wifi_per_system_json &
+wifi_request apply
 
 # Flag cleanup
 flag_remove "log_verbose" &

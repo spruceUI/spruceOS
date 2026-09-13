@@ -7,11 +7,10 @@
 #   flag_add
 #   log_message
 #   check_and_connect_wifi
+#   wifi_request
 #   start_syncthing_process
 #
 # External binaries:
-#   ifconfig
-#   killall
 #   /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh
 #   /mnt/SDCARD/spruce/scripts/networkservices.sh
 #
@@ -64,12 +63,8 @@ handle_network_services() {
 		/mnt/SDCARD/spruce/scripts/networkservices.sh off
 
 		if [ "$disable_wifi_in_game" = "True" ]; then
-			if network_is_connected; then
-				device_wifi_power_off
-				ifconfig wlan0 down &
-			fi
-			killall wpa_supplicant
-			device_stop_dhcp_client
+			# Off without changing the setting; the apply at game exit brings it back
+			wifi_request suspend
 		fi
 	fi
 }
