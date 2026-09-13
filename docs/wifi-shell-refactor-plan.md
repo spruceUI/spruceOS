@@ -2,7 +2,66 @@
 
 Plan for moving every WiFi action out of PyUI into spruce's shell scripts.
 Branch: `refactor/wifi-shell-owns-radio`, cut from Development at `ce04b7e9f`.
-Nothing here is implemented yet.
+
+## Status
+
+Implemented on the branch. **Nothing has been run on hardware yet**; the shell
+pieces were only stub-tested on a PC (lock ordering, queued toggles, stale lock,
+connect parsing, conf repair, watchdog timing).
+
+| Phase | Commit |
+|---|---|
+| 1. `wifi.sh`, connect/forget hooks, conf repair | `b8dc7393a` |
+| 2. Shell callers go through `wifi.sh` | `2e80f904a` |
+| 3. PyUI toggle and connect: Flip, A30, Mini, TrimUI, Anbernic XX, Miniloong | `0a948ac9e` |
+| 4. `wifi_watchdog.sh` replaces `monitor_wifi` | `37d4461b5` |
+| 5. RGB30, Mini boot script, adbd app | `e1c8aef37` |
+| 6. Cleanup: dead stubs and helpers, failed signal reads show no signal | last commit |
+
+Where the questions at the end are still open, this is what was built:
+
+- **Watchdog:** kept, with the old monitor's rules. It is off on the Anbernic XX line
+  (never had one), the Mini (a restart re-powers the chip) and wherever the OS
+  owns the radio (RGB30, Pixel 2).
+- **`.wifi`:** PyUI keeps writing it.
+- **Connect feedback:** unchanged; the status row shows the address or
+  "Connecting". `/tmp/wifi_state` is written but PyUI does not read it yet.
+- **Pixel 2:** the shell now treats the OS as owning the radio. The PyUI connman
+  toggle and menu are untouched until the stack question is answered.
+- **Single-network forget:** not added.
+
+Changes from the plan below:
+
+- `device_wifi_connect` takes the password as an argument. It stays inside the
+  shell worker, which reads the request file and deletes it before anything else.
+  Only the RGB30's `nmcli` sees it on a command line, as it did before.
+- In-game WiFi off is now a full `suspend`. Before, it killed the supplicant and
+  only cut power when connected. On the XX line the driver is now unloaded until
+  game exit.
+- `clearwifi.sh` stays as a one-line wrapper, so the task list entry is unchanged.
+- The Mini's `device_wifi_power_off` only relies on `ifconfig down`, as PyUI did.
+  `axp_test wifioff` was not added without a device to check it on.
+
+### Hardware checks for this branch
+
+On top of **Must not regress** below:
+
+- **All devices:**
+  - Toggle WiFi five times quickly; it ends in the last state shown.
+  - Join a network whose password has spaces or quotes.
+  - Try a wrong password.
+  - Forget all.
+  - Check `sh /mnt/SDCARD/spruce/scripts/wifi.sh status` over SSH.
+  - Check spruce.log for `wifi.sh:` lines.
+- **TrimUI and Flip:** sleep with WiFi on, then wake. Repeat with a USB dongle.
+- **Any device:** set in-game WiFi off, launch a game, exit, and WiFi comes back.
+- **Mini Plus or Mini Flip:** cold boot with WiFi on, toggle off then on, and join a
+  network.
+- **RGB30:** join from the list, toggle, and a game exit keeps WiFi off.
+- **Watchdog (Brick Pro or Flip):**
+  - Turn the router off; a restart is logged about every minute, up to five.
+  - Turn the router back on; WiFi reconnects.
+  - During sleep there are no restarts.
 
 ## Goal
 
@@ -118,7 +177,7 @@ Existing hooks stay as they are. New ones, with defaults in `platform/device.sh`
 
 | Hook | Default | Overridden by |
 |---|---|---|
-| `device_wifi_connect <ssid> <password-file>` | replace the SSID's block in `$WPA_SUPPLICANT_FILE`, then `wpa_cli -i wlan0 reconfigure` and select it | RGB30 (`nmcli device wifi connect`), Pixel 2 |
+| `device_wifi_connect <ssid> <password>` | replace the SSID's block in `$WPA_SUPPLICANT_FILE`, then `wpa_cli -i wlan0 reconfigure` and select it | RGB30 (`nmcli device wifi connect`), Pixel 2 |
 | `device_wifi_forget_all` | today's `clearwifi.sh` wpa branch, legacy confs included | RGB30 (delete `802-11-wireless` profiles), Pixel 2 |
 | `device_wifi_watchdog_enabled` | yes when spruce manages WiFi | no on RGB30 and Pixel 2 |
 

@@ -161,11 +161,11 @@ class MiyooDevice(DeviceCommon):
                     link_quality=link_quality
                 )
             else:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
         
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()

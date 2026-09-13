@@ -185,15 +185,15 @@ class TrimUIDevice(DeviceCommon):
             output = result.stdout.strip()
 
             if "Not connected." in output or result.returncode != 0:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
-            signal_level = 0
             link_quality = 0  # This won't be available directly via iw, unless you derive it
 
-            # Extract signal level (in dBm)
+            # Extract signal level (in dBm); no reading is no signal, not full bars
             signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
-            if signal_match:
-                signal_level = int(signal_match.group(1))
+            if not signal_match:
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+            signal_level = int(signal_match.group(1))
 
             # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
             # Example rough mapping:
@@ -212,7 +212,7 @@ class TrimUIDevice(DeviceCommon):
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
              
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()

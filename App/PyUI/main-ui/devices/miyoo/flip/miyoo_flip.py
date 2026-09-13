@@ -403,7 +403,7 @@ class MiyooFlip(MiyooDevice):
             wifi_connection_quality_info = self.get_wifi_connection_quality_info()
             # Composite score out of 100 based on weighted contribution
             # Adjust weights as needed based on empirical testing
-            if(wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0):
+            if(wifi_connection_quality_info.signal_level <= -200 or (wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0)):
                 return WifiStatus.OFF
             else:
                 score = (

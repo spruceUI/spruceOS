@@ -1298,8 +1298,7 @@ import_wpa_networks_from() {
 
 enable_wifi() {
     # A device without a radio has nothing to power, recover, associate or
-    # lease. Refusing here covers every path in: boot, game exit, the settings
-    # toggle, restart_wifi and check_and_connect_wifi.
+    # lease. Refusing here covers every path in, since they all go through wifi.sh.
     if ! wifi_available_on_device; then
         log_message "WiFi: enable requested on a device without a radio - ignored"
         return 1
@@ -1562,26 +1561,6 @@ update_config=1"
         printf '%s\n' "$_wpa_header" > "$_legacy_conf"
         log_message "Wifi: cleared saved networks from $_legacy_conf"
     done
-}
-
-enable_or_disable_wifi_per_system_json() {
-    if ! wifi_available_on_device; then
-        log_message "WiFi: not available on this device, radio path left alone" -v
-        return 0
-    fi
-    if wifi_setting_wanted; then
-        enable_wifi
-    else
-        disable_wifi
-    fi
-}
-
-restart_wifi() {
-    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
-    log_message "Restarting Wi-Fi interface wlan0"
-    disable_wifi
-    sleep 1
-    enable_wifi
 }
 
 # Does this interface hold an address?

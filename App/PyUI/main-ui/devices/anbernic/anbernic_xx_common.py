@@ -490,7 +490,7 @@ class AnbernicXXCommon(DeviceCommon):
     @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         if(not self.is_wifi_enabled()):
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
         # /proc/net/wireless - the two sources every other device uses - so this
@@ -513,7 +513,7 @@ class AnbernicXXCommon(DeviceCommon):
             output = result.stdout or ""
 
             if result.returncode != 0 or "FAIL" in output:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             signal_level = 0
             noise_level = 0
@@ -539,7 +539,7 @@ class AnbernicXXCommon(DeviceCommon):
             # signal_level still 0 would map to the top of the scale below, so a
             # reading we could not parse would show as a full-strength signal.
             if not have_signal:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             # Same dBm -> 0..70 mapping the other devices use, so the status bar
             # thresholds behave identically across the fleet.
@@ -558,7 +558,7 @@ class AnbernicXXCommon(DeviceCommon):
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
     @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def _get_ip_addr_text(self):
