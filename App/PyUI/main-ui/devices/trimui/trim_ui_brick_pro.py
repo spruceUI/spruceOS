@@ -122,7 +122,10 @@ class TrimUIBrickPro(TrimUIDevice):
 
     def get_controller_interface(self):
         return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
-    
+
+    def supports_analog_calibration(self):
+        return True
+
     def get_device_name(self):
         return self.device_name
         

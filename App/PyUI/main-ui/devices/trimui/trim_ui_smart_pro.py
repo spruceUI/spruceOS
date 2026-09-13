@@ -1,3 +1,4 @@
+import os
 import subprocess
 import math
 from pathlib import Path
@@ -120,7 +121,24 @@ class TrimUISmartPro(TrimUIDevice):
 
     def get_controller_interface(self):
         return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
-    
+
+    def supports_analog_calibration(self):
+        return True
+
+    # This inputd has no cal_update; it only reads joypad*.config at startup.
+    def apply_stick_calibration(self):
+        subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && restart_trimui_inputd"],
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=30, check=True)
+        watcher = getattr(self, "volume_key_watcher", None)
+        if watcher is not None:
+            old_fd = watcher.fd
+            watcher.fd = os.open(watcher.event_path, os.O_RDONLY | os.O_NONBLOCK)
+            try:
+                os.close(old_fd)
+            except OSError:
+                pass
+
     def get_device_name(self):
         return self.device_name
         

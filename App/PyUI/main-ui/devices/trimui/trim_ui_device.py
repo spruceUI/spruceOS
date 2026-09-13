@@ -350,7 +350,13 @@ class TrimUIDevice(DeviceCommon):
         pass
 
     def calibrate_sticks(self):
-        pass
+        from controller.controller import Controller
+        from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
+        TrimUIStickCalibrator(Controller.controller_interface.event_path, self.apply_stick_calibration).run()
+
+    def apply_stick_calibration(self):
+        from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
+        TrimUIStickCalibrator.reload_via_cal_update()
 
     def supports_analog_calibration(self):
         return False
