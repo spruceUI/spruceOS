@@ -26,18 +26,31 @@ Where the questions at the end are still open, this is what was built:
 - **`.wifi`:** PyUI keeps writing it.
 - **Connect feedback:** unchanged; the status row shows the address or
   "Connecting". `/tmp/wifi_state` is written but PyUI does not read it yet.
-- **Pixel 2:** the shell now treats the OS as owning the radio. The PyUI connman
-  toggle and menu are untouched until the stack question is answered.
+- **Pixel 2:** the shell treats the OS as owning the radio, and the connman calls
+  PyUI's toggle and menu used to make now live in `Pixel2.sh` hooks
+  (`device_wifi_power_on`/`_off` wrap rfkill with the connmanctl calls,
+  `device_wifi_connect` resolves the service id and writes the config file).
+  Untested on hardware; the stack question is still open.
 - **Single-network forget:** not added.
 
 Changes from the plan below:
 
-- `device_wifi_connect` takes the password as an argument. It stays inside the
-  shell worker, which reads the request file and deletes it before anything else.
-  Only the RGB30's `nmcli` sees it on a command line, as it did before.
+- `device_wifi_connect` takes the password as an argument. PyUI pipes the SSID
+  and password to `wifi.sh connect` on stdin and knows no file protocol; the
+  front process stores them in a private `/tmp/wifi_connect.$$` for its worker,
+  which reads and deletes it before anything else. Only the RGB30's `nmcli` and
+  the Pixel 2's `connmanctl` see the password on a command line, as before.
+- TrimUI's PyUI class no longer kills `wpa_supplicant` at power off and reboot:
+  `save_poweroff.sh` runs `device_prepare_for_poweroff`, may still need WiFi for
+  the Syncthing shutdown sync, and kills the supplicant itself before the unmount.
+- `WifiMenu.reload_wpa_supplicant_config`, an uncalled `wpa_cli reconfigure`, is
+  gone; the menu has no way left to talk to the supplicant except through
+  the scanner's reads.
 - In-game WiFi off is now a full `suspend`. Before, it killed the supplicant and
   only cut power when connected. On the XX line the driver is now unloaded until
   game exit.
+- PyUI calls `wifi` by name, never by path. `spruce/scripts/bin/wifi` execs
+  `wifi.sh`, and every platform cfg puts `spruce/scripts/bin` first on PATH.
 - `clearwifi.sh` stays as a one-line wrapper, so the task list entry is unchanged.
 - The Mini's `device_wifi_power_off` only relies on `ifconfig down`, as PyUI did.
   `axp_test wifioff` was not added without a device to check it on.
@@ -51,13 +64,16 @@ On top of **Must not regress** below:
   - Join a network whose password has spaces or quotes.
   - Try a wrong password.
   - Forget all.
-  - Check `sh /mnt/SDCARD/spruce/scripts/wifi.sh status` over SSH.
+  - Check `/mnt/SDCARD/spruce/scripts/bin/wifi status` over SSH (SSH shells
+    don't load the platform cfg, so `wifi` alone isn't on their PATH).
   - Check spruce.log for `wifi.sh:` lines.
 - **TrimUI and Flip:** sleep with WiFi on, then wake. Repeat with a USB dongle.
 - **Any device:** set in-game WiFi off, launch a game, exit, and WiFi comes back.
 - **Mini Plus or Mini Flip:** cold boot with WiFi on, toggle off then on, and join a
   network.
 - **RGB30:** join from the list, toggle, and a game exit keeps WiFi off.
+- **Pixel 2:** toggle off and on, join a network, wrong password. Nothing on this
+  device has been run since the connman calls moved into `Pixel2.sh`.
 - **Watchdog (Brick Pro or Flip):**
   - Turn the router off; a restart is logged about every minute, up to five.
   - Turn the router back on; WiFi reconnects.
@@ -161,8 +177,9 @@ Mechanics, following `networkServiceToggle.sh`:
   so PyUI can show why WiFi isn't up without probing hardware. `enable_wifi`
   returns non-zero when power-on or the interface check fails, instead of
   carrying on.
-- **Passwords never appear** in argv, logs or `ps`. PyUI writes the request file
-  with mode 0600, and the worker deletes it before doing anything else.
+- **Passwords never appear** in argv, logs or `ps`. PyUI pipes the network on
+  stdin; `wifi.sh` keeps it in a 0600 file only between its front process and
+  its worker, which deletes the file before doing anything else.
 
 ### Who writes `.wifi`
 
@@ -206,7 +223,7 @@ without one. See the questions below.
 - **`DeviceCommon.enable_wifi` / `disable_wifi`:** one implementation for every
   device. Save `.wifi`, launch `wifi.sh apply`, `note_wifi_change()`. Per-device
   overrides are removed.
-- **`DeviceCommon.wifi_connect`:** write the request file, launch
+- **`DeviceCommon.wifi_connect`:** pipe the SSID and password to
   `wifi.sh connect`.
 - **"Forget all WiFi networks":** the task runs `wifi.sh forget-all`, which
   returns at once, so the menu no longer blocks.
@@ -256,8 +273,8 @@ without one. See the questions below.
 | XX `enable_wifi` / `disable_wifi` / `_run_shell_wifi` | removed |
 | RGB30 `enable_wifi` / `disable_wifi` / `wifi_connect` | removed; the RGB30 hooks do this |
 | Miniloong `enable_wifi` / `disable_wifi` / `wifi_connect` threads | removed |
-| GKD `enable_wifi` / `disable_wifi`, connman menu connect | removed after the Pixel 2 question below |
-| `DeviceCommon.wifi_connect` | request file + `wifi.sh connect` |
+| GKD `enable_wifi` / `disable_wifi`, connman menu connect | removed; the Pixel2.sh hooks carry the connman calls (untested) |
+| `DeviceCommon.wifi_connect` | stdin + `wifi.sh connect` |
 | `monitor_wifi` everywhere | removed once `wifi_watchdog.sh` lands |
 
 ## Per device
@@ -273,7 +290,7 @@ without one. See the questions below.
 | RG28XX | none | keep `supports_wifi` marker reads |
 | RGB30 | `device_wifi_connect` and `device_wifi_forget_all` over nmcli; watchdog off | NetworkManager owns WiFi; no `ifconfig` |
 | Miniloong | none beyond the common work | fix `startup_init` signature |
-| Pixel 2 | `device_manages_own_wifi`; connect/forget hooks for whichever manager really runs | decide connman vs NetworkManager first |
+| Pixel 2 | `device_manages_own_wifi`; power and connect hooks carry the old connman calls; forget still goes to the nmcli branch | decide connman vs NetworkManager, then fix whichever hook is wrong |
 | Zero28 | nothing new | has no PyUI class, so it only gets the shell side |
 | muOS / Rocknix classes | none | PyUI keeps its no-op overrides; removing the monitor stops the stray udhcpc |
 
@@ -317,7 +334,8 @@ Hardware-verified or shipped on 2026-09-13; check each again in the phase that
 touches it.
 
 - XX toggle off then on reloads `8821cs` and gets an address (RG35XXSP).
-- First boot on a platform whose default is WiFi on comes up on (`SYSTEM_JSON_DEFAULT`).
+- First boot of a fresh install comes up with WiFi off on every device; every
+  shipped `*-system.json` has `"wifi": 0`.
 - TrimUI wake reconnects (Brick Pro).
 - Dongle in with WiFi off, then on: connects on the dongle. Dongle out with WiFi
   off, then on: back on the onboard radio (Brick Pro).

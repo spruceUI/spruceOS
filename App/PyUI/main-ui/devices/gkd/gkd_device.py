@@ -179,23 +179,6 @@ class GKDDevice(DeviceCommon):
 
         return "Off"
 
-    def disable_wifi(self):
-        self.system_config.reload_config()
-        self.system_config.set_wifi(0)
-        self.system_config.save_config()
-        ProcessRunner.run(["connmanctl", "disable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
-
-    def enable_wifi(self):
-        self.system_config.reload_config()
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        ProcessRunner.run(["systemctl", "restart", "connman"])
-        ProcessRunner.run(["connmanctl", "enable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
-
     @throttle.limit_refresh(5)
     def get_charge_status(self):
         #Probably need to find the power and not just usb

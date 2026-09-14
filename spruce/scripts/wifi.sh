@@ -6,8 +6,9 @@
 #   apply         make the radio match the saved .wifi setting
 #   restart       off and on again, only if the setting is on
 #   suspend       radio off without changing the setting (sleep, in-game, poweroff)
-#   connect FILE  save the network in FILE (/tmp/wifi_connect.*: SSID line, then
-#                 password line or none), then apply
+#   connect       save the network read from stdin (SSID line, then password
+#                 line, or none for an open network), then apply. A shell caller
+#                 may pass a /tmp/wifi_connect.* file holding those lines instead.
 #   forget-all    clear saved networks, then apply
 #   status        print state lines; takes no lock
 #
@@ -34,10 +35,19 @@ done
 case "$CMD" in
     apply|restart|suspend|connect|forget-all|status) ;;
     *)
-        echo "usage: wifi.sh apply|restart|suspend|connect FILE|forget-all|status [--wait]" >&2
+        echo "usage: wifi.sh apply|restart|suspend|connect [FILE]|forget-all|status [--wait]" >&2
         exit 1
         ;;
 esac
+
+# connect: the network arrives on stdin (PyUI pipes two lines) and the hand-off
+# below cuts stdin, so take it here into a private file for the worker. The
+# worker reads that file and deletes it before it does anything else.
+if [ "$CMD" = "connect" ] && [ -z "$ARG" ] && [ "$WORKER" = 0 ]; then
+    ARG="/tmp/wifi_connect.$$"
+    rm -f "$ARG"
+    ( umask 077; cat > "$ARG" ) || exit 1
+fi
 
 # Hand off before sourcing helperFunctions, so PyUI and game exit get control back at once.
 # Re-exec rather than a ( ) & subshell: the lock records $$, which a subshell shares with its parent.

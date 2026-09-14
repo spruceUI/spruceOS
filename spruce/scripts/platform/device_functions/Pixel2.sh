@@ -177,13 +177,43 @@ device_manages_own_wifi() {
     return 0
 }
 
+# What PyUI's toggle used to run on top of the rfkill switch: a fresh connman
+# with its WiFi technology on. Harmless where connman is not installed.
 device_wifi_power_on() {
     rfkill unblock wifi
+    if command -v connmanctl >/dev/null 2>&1; then
+        systemctl restart connman >/dev/null 2>&1
+        connmanctl enable wifi >/dev/null 2>&1
+    fi
     sleep 1
 }
 
 device_wifi_power_off() {
+    command -v connmanctl >/dev/null 2>&1 && connmanctl disable wifi >/dev/null 2>&1
     rfkill block wifi
+}
+
+# connman joins by its own service id (wifi_<mac>_<hex ssid>_managed_psk) and
+# takes the passphrase from a config file named after the hex SSID. Both are
+# what PyUI's connman menu used to do; the password only goes through printf.
+# Untested: no Pixel 2 on hand.
+device_wifi_connect() {
+    command -v connmanctl >/dev/null 2>&1 || return 1
+    _hex="$(printf '%s' "$1" | od -An -v -tx1 | tr -d ' \n')"
+    _service="$(connmanctl services 2>/dev/null | awk -v key="_${_hex}_" 'index($NF, key) { print $NF; exit }')"
+    if [ -z "$_service" ]; then
+        log_message "WiFi: connman has no service for $1"
+        return 1
+    fi
+    if [ -n "$2" ]; then
+        _conf_dir=/storage/.cache/connman
+        mkdir -p "$_conf_dir" 2>/dev/null
+        {
+            printf '[Settings]\nAutoConnect = true\n\n'
+            printf '[service_%s]\nType = wifi\nName = %s\nPassphrase = %s\n' "$_service" "$1" "$2"
+        } > "$_conf_dir/$_hex.config"
+    fi
+    connmanctl connect "$_service" >/dev/null 2>&1
 }
 
 sync_volume_level() {

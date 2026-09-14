@@ -1,6 +1,7 @@
 
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -281,20 +282,23 @@ class DeviceCommon(AbstractDevice):
             DeviceCommon.WPA_SUPPLICANT_CONF
         )
 
-    # Every radio change goes through spruce's wifi.sh, which runs them one at a
-    # time; PyUI only saves the setting and hands over.
-    WIFI_SCRIPT = "/mnt/SDCARD/spruce/scripts/wifi.sh"
+    # Every radio change goes through spruce's `wifi` command, which runs them one
+    # at a time; PyUI only saves the setting and hands over.
+    WIFI_COMMAND = "wifi"
 
-    def _run_wifi_script(self, *args):
-        if not os.path.exists(self.WIFI_SCRIPT):
+    def _run_wifi_script(self, *args, stdin_text=None):
+        if shutil.which(self.WIFI_COMMAND) is None:
             return
         try:
-            # Returns at once: wifi.sh does the work in a detached copy of itself
-            subprocess.run(["/bin/sh", self.WIFI_SCRIPT, *args],
-                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                           stderr=subprocess.DEVNULL, timeout=10)
+            # Returns at once: wifi does the work in a detached copy of itself
+            run_args = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
+            if stdin_text is None:
+                run_args["stdin"] = subprocess.DEVNULL
+            else:
+                run_args["input"] = stdin_text.encode()
+            subprocess.run([self.WIFI_COMMAND, *args], **run_args)
         except Exception as e:
-            PyUiLogger.get_logger().error(f"wifi.sh {args[0]} failed: {e}")
+            PyUiLogger.get_logger().error(f"wifi {args[0]} failed: {e}")
 
     def _save_wifi_setting(self, value):
         self.system_config.reload_config()
@@ -312,18 +316,10 @@ class DeviceCommon(AbstractDevice):
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
-        The password goes to wifi.sh in a private temp file, never on a command line.
+        The network goes to wifi.sh on stdin, never on a command line; how the
+        shell carries it to its worker is the shell's business.
         """
-        try:
-            fd, request = tempfile.mkstemp(prefix="wifi_connect.", dir="/tmp")
-            with os.fdopen(fd, "w") as f:
-                f.write(ssid + "\n")
-                if password:
-                    f.write(password + "\n")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Could not write the WiFi connect request: {e}")
-            return
-        self._run_wifi_script("connect", request)
+        self._run_wifi_script("connect", stdin_text=f"{ssid}\n{password or ''}\n")
 
     # Deadline (time.time()) until which the WiFi status caches refresh every
     # second instead of every 10-15 s; see utils/throttle.limit_refresh.

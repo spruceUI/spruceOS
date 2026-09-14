@@ -27,7 +27,7 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
     # On a first boot PyUI has not copied its template to Saves/ yet; read the
-    # template it will copy (wifi defaults to 1) instead of skipping the whole
+    # template it will copy instead of skipping the whole
     # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
     system_json="/mnt/SDCARD/Saves/mini-flip-system.json"
     [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/mini-flip-system.json"
