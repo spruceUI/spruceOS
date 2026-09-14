@@ -97,7 +97,7 @@ class MiniloongPocket1(DeviceCommon):
         source = os.path.join(self.script_dir, "miniloong-system.json")
         self._load_system_config("/mnt/SDCARD/Saves/miniloong-system.json", Path(source))
 
-    def startup_init(self):
+    def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
         self._set_volume(self.get_volume())
 
