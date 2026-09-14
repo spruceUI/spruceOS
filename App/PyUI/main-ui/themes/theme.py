@@ -28,6 +28,7 @@ class Theme():
     _default_multiplier = 1.0
     _play_button_press_sounds = True
     _asset_cache = {}  # shared cache for asset + icon lookups
+    _generated_assets = set()  # generated once per path, even if generation failed
     _grid_game_default_size = 140
 
     @classmethod
@@ -356,8 +357,25 @@ class Theme():
     def key_bg(cls): return cls._asset("bg-btn-01-n.qoi")
     
     @classmethod
-    def key_selected_bg(cls): return cls._asset("bg-btn-01-f.qoi")
-    
+    def key_selected_bg(cls):
+        if cls._asset("bg-btn-01-f.qoi", cache_missing=False) is None:
+            cls.create_key_selected_bg()
+        return cls._asset("bg-btn-01-f.qoi")
+
+    @classmethod
+    def create_key_selected_bg(cls):
+        # Black or white by brightness; an inverted mid-tone would be as unreadable as the original
+        r, g, b = cls.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD)
+        luminance = 0.299 * r + 0.587 * g + 0.114 * b
+        color = (0, 0, 0) if luminance > 127 else (255, 255, 255)
+        output_image = cls._resolve_png_path(cls._skin_folder, ["bg-btn-01-f.png"])
+        # A failed attempt caches None, which would otherwise retry on every keyboard redraw
+        if output_image in cls._generated_assets:
+            return
+        cls._generated_assets.add(output_image)
+        PyUiLogger.get_logger().info(f"Creating {output_image} with color {color}")
+        Device.get_device().get_image_utils().create_solid_color_image(output_image, *color, 10, 10)
+
     @classmethod
     def get_list_small_selected_bg(cls): return cls._asset("bg-list-s.qoi")
     
