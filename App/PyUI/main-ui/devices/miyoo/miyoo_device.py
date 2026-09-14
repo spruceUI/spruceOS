@@ -41,9 +41,6 @@ class MiyooDevice(DeviceCommon):
         with open("/sys/power/state", "w") as f:
             f.write("mem")  
 
-    def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
-
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
@@ -164,28 +161,15 @@ class MiyooDevice(DeviceCommon):
                     link_quality=link_quality
                 )
             else:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
         
-    def stop_wifi_services(self):
-        PyUiLogger.get_logger().info(f"Stopping WiFi Services")
-        MiyooTrimCommon.stop_wifi_services(self)
-
-    def start_wpa_supplicant(self):
-        MiyooTrimCommon.start_wpa_supplicant(self)
-
-
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    def disable_wifi(self):
-        MiyooTrimCommon.disable_wifi(self)
-
-    def enable_wifi(self):
-        MiyooTrimCommon.enable_wifi(self)
         
     def get_app_finder(self):
         return MiyooAppFinder()

@@ -43,9 +43,6 @@ class MuosDevice(DeviceCommon):
     def sleep(self):
         ProcessRunner.run(["/opt/muos/script/system/suspend.sh"])
 
-    def ensure_wpa_supplicant_conf(self):
-        pass
-
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
@@ -148,15 +145,6 @@ class MuosDevice(DeviceCommon):
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
-
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()

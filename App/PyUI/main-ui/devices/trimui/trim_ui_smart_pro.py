@@ -40,8 +40,6 @@ class TrimUISmartPro(TrimUIDevice):
 
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self.ensure_wpa_supplicant_conf()
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
@@ -65,10 +63,6 @@ class TrimUISmartPro(TrimUIDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
-        if include_wifi and self.is_wifi_enabled():
-            if not self.connection_seems_up():
-                self.stop_wifi_services()
-            self.start_wifi_services(foreground_call=False)
 
     #Untested
     @throttle.limit_refresh(5)

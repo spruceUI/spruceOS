@@ -104,9 +104,6 @@ class AnbernicXXCommon(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
 
         if(main_ui_mode):
-            # Same point in startup the Miyoo and TrimUI devices do this.
-            self.ensure_wpa_supplicant_conf()
-
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
@@ -130,16 +127,6 @@ class AnbernicXXCommon(DeviceCommon):
 
     def sleep(self):
         pass #TODO
-
-    def ensure_wpa_supplicant_conf(self):
-        # Was a "pass" stub, and nothing called it either, so the file simply
-        # never appeared. wpa_supplicant is started with -c pointing at it and
-        # refuses to run without it; wpa_cli then has no ctrl socket to talk to,
-        # and the scanner - which is nothing but "wpa_cli scan" followed by
-        # "wpa_cli scan_results" - returns empty forever. The visible symptom is
-        # a device that sits on "Scanning for networks..." and never lists one,
-        # with no error anywhere, on any XX device that has never connected.
-        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
@@ -503,7 +490,7 @@ class AnbernicXXCommon(DeviceCommon):
     @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         if(not self.is_wifi_enabled()):
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
         # /proc/net/wireless - the two sources every other device uses - so this
@@ -526,7 +513,7 @@ class AnbernicXXCommon(DeviceCommon):
             output = result.stdout or ""
 
             if result.returncode != 0 or "FAIL" in output:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             signal_level = 0
             noise_level = 0
@@ -552,7 +539,7 @@ class AnbernicXXCommon(DeviceCommon):
             # signal_level still 0 would map to the top of the scale below, so a
             # reading we could not parse would show as a full-strength signal.
             if not have_signal:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             # Same dBm -> 0..70 mapping the other devices use, so the status bar
             # thresholds behave identically across the fleet.
@@ -571,7 +558,7 @@ class AnbernicXXCommon(DeviceCommon):
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
     @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def _get_ip_addr_text(self):
@@ -600,84 +587,5 @@ class AnbernicXXCommon(DeviceCommon):
             return "Off"
         return self._get_ip_addr_text()
              
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
-
-    def start_udhcpc(self):
-        # Overridden rather than inherited so this matches the invocation the
-        # shell side uses in device_start_dhcp_client (device.sh) exactly - one
-        # canonical form of the command on this device. -b matters: without it
-        # udhcpc stays in the foreground as a child of MainUI, which spruce
-        # kills and respawns around every game launch.
-        try:
-            # Match the whole invocation, not the bare name. udhcpc -b forks and
-            # the process we spawned exits immediately, leaving a defunct entry
-            # that ps renders as "[udhcpc]" until Python reaps it on its next
-            # Popen. A bare substring test matches that corpse and skips
-            # starting a real client - and it would do so in exactly the case
-            # below where wpa_supplicant is already up, so no intervening Popen
-            # has cleared it.
-            if 'udhcpc -i wlan0' in self.get_running_processes().stdout:
-                return
-
-            subprocess.Popen([
-                'udhcpc',
-                '-i', 'wlan0',
-                '-b',
-                '-t', '5',
-                '-T', '3'
-            ])
-            time.sleep(0.5)  # Wait for it to initialize
-            PyUiLogger.get_logger().info("udhcpc started.")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
-
-    def start_wifi_services(self):
-        pass
-
-    def is_wifi_enabled(self):
-        return self.system_config.is_wifi_enabled()
-
-    def disable_wifi(self):
-        self.system_config.set_wifi(0)
-        self.system_config.save_config()
-        self.stop_network_services()
-        PyUiLogger.get_logger().info("Stopping WiFi Services")
-        # The shell also unloads the driver, which is why enable_wifi has to go through the shell too
-        self._run_shell_wifi()
-
-    def enable_wifi(self):
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        # Repairs a cleared or deleted conf before the supplicant reads it
-        self.ensure_wpa_supplicant_conf()
-        # The shell reloads the driver the boot check or disable_wifi unloaded, waits for wlan0,
-        # clears /tmp/wifioff, then starts wpa_supplicant, udhcpc and networkservices.sh
-        self._run_shell_wifi()
-
-    _shell_wifi_lock = threading.Lock()
-    # SDIO recovery can rail-cycle for about a minute; past this a stuck run stops holding the lock
-    SHELL_WIFI_TIMEOUT = 180
-
-    def _run_shell_wifi(self):
-        def worker():
-            with AnbernicXXCommon._shell_wifi_lock:
-                # Decided under the lock from the saved setting, so queued toggles end in the last one
-                action = "enable_wifi" if self.is_wifi_enabled() else "disable_wifi"
-                try:
-                    subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && {action}"],
-                                   stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                   timeout=self.SHELL_WIFI_TIMEOUT)
-                    PyUiLogger.get_logger().info(f"Shell {action} finished")
-                except Exception as e:
-                    PyUiLogger.get_logger().error(f"Shell {action} failed: {e}")
-        threading.Thread(target=worker, daemon=True).start()
-
     def uses_deinit_v2(self):
         return True

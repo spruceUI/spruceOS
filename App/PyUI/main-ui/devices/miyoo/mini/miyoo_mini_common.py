@@ -186,14 +186,11 @@ class MiyooMiniCommon(MiyooDevice):
         super().special_input(controller_input, length_in_seconds)
 
     def startup_init(self, include_wifi=True):
-        if(self.is_wifi_enabled()):
-            self.start_wifi_services(foreground_call=False)
         self.on_mainui_config_change()
         self._set_lumination_to_config()
         self._set_contrast_to_config()
         self._set_saturation_to_config()
         self._set_brightness_to_config()
-        self.ensure_wpa_supplicant_conf()
         self.init_gpio()
         if(PyUiConfig.enable_button_watchers()):
             from controller.controller import Controller
@@ -809,7 +806,7 @@ class MiyooMiniCommon(MiyooDevice):
 
                     if result.returncode != 0:
                         # `ip: can't find device 'wlan0'` - the interface does not
-                        # exist. While our own start_wifi_services() is bringing the
+                        # exist. While wifi.sh is bringing the
                         # driver up (it arms the settle window first) that is the
                         # normal state for a few seconds, not an error; the 15 s
                         # cache otherwise pins "Error" on screen long after the
@@ -844,63 +841,6 @@ class MiyooMiniCommon(MiyooDevice):
     def get_battery_percent(self):
         return self.miyoo_mini_specific_model_variables.get_battery_percent()
     
-
-    def start_wifi_services(self,foreground_call=False):
-        if(self.miyoo_mini_specific_model_variables.supports_wifi):
-            try:
-                # Check if system already has an IP address
-                result = ProcessRunner.run(
-                    ["ip", "route", "get", "1"],
-                    print=True,
-                    timeout=1
-                )
-
-                # Extract the last field (the IP) like `awk '{print $NF;exit}'`
-                parts = result.stdout.strip().split()
-                ip = parts[-1] if parts else ""
-
-                if not ip:
-                    # Drop the throttled status caches and refresh every second
-                    # while the join settles, so the Settings row and top-bar icon
-                    # follow the link instead of showing a 15 s stale sample.
-                    self.note_wifi_change()
-                    PyUiLogger.get_logger().info("Wifi is disabled - trying to enable it...")
-                    if(foreground_call):
-                        Display.display_message("Loading WiFi driver\n(May take up to 5s)")
-                    ProcessRunner.run(["insmod", "/mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko"], timeout=5, print=True)
-                    if(foreground_call):
-                        Display.display_message("Starting network loopback interface\n(May take up to 5s)")
-                    ProcessRunner.run(["ifconfig", "lo", "up"], timeout=5, print=True)
-                    if(foreground_call):
-                        Display.display_message("Running miyoo-mini custom wifion script\n(May take up to 10s)")
-                    ProcessRunner.run(["/customer/app/axp_test", "wifion"], timeout=10, print=True)
-                    time.sleep(2)
-                    if(foreground_call):
-                        Display.display_message("Starting wlan0\n(May take up to 3s)")
-                    ProcessRunner.run(["ifconfig", "wlan0", "up"], timeout=3, print=True)
-                    if(foreground_call):
-                        Display.display_message("Starting WiFi process\n(May take up to 20s)")
-                    subprocess.Popen([
-                        "wpa_supplicant",
-                        "-B",
-                        "-D", "nl80211",
-                        "-i", "wlan0",
-                        "-c", self.get_wpa_supplicant_conf_path()
-                    ])
-                    if(foreground_call):
-                        Display.display_message("Starting ip address assignment process\n(May take up to 20s)")
-                    subprocess.Popen(["udhcpc", "-i", "wlan0", "-s", "/etc/init.d/udhcpc.script", "-b"])
-                    time.sleep(3)
-                    os.system("clear")
-
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Error enabling WiFi: {e}")
-
-
-    def set_wifi_power(self, value):
-        if(self.miyoo_mini_specific_model_variables.supports_wifi):
-            if(0 == value):
-                ProcessRunner.run(["ifconfig", "wlan0", "down"], timeout=5)
 
     def get_bluetooth_scanner(self):
         return None

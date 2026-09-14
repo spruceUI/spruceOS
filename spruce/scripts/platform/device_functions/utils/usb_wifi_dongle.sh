@@ -315,17 +315,16 @@ usb_wifi_hotplug_event() {
             [ "$_want" = 1 ] || return 0
             # enable_wifi tries the dongle first and falls back to the onboard radio when it can't be used;
             # returning on a failed bring-up here left neither radio loaded
-            enable_wifi
+            wifi_request apply
             ;;
         removed)
             log_message "USB WiFi: dongle $_eid removed"
             usb_wifi_tear_down
             usb_wifi_stop_clients
             if [ "$_want" = 1 ]; then
-                enable_wifi
+                wifi_request apply
             else
-                # The onboard driver went when the dongle took over; with WiFi off nothing else reloads it,
-                # and PyUI's toggle only restarts the clients on an existing wlan0
+                # The onboard driver went when the dongle took over; with WiFi off nothing else reloads it
                 usb_wifi_onboard_restore >/dev/null 2>&1
             fi
             ;;

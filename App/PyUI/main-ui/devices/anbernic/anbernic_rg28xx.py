@@ -11,9 +11,8 @@ class AnbernicRG28xx(AnbernicXXCommon):
     /tmp/wifi_radio_absent when no adapter was on the USB bus (cleared the
     moment one is seen). supports_wifi keys on both, re-checking the bus
     itself when the absent marker is set, so an adapter plugged in after boot
-    brings the WiFi entry back without a reboot. WiFi on and off come from
-    AnbernicXXCommon, which hands them to the shell under one lock; the shell's
-    enable_wifi is the only path that loads the USB driver.
+    brings the WiFi entry back without a reboot. WiFi on and off go through
+    spruce's wifi.sh, whose enable_wifi is the only path that loads the USB driver.
     """
 
     WIFI_UNAVAILABLE_FLAG = "/tmp/wifi_unavailable"
