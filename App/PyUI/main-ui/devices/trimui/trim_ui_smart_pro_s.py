@@ -49,8 +49,6 @@ class TrimUISmartProS(TrimUIDevice):
                 TrimUISmartProS.VOLUME_FILE, self.on_mainui_config_change, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self.ensure_wpa_supplicant_conf()
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             if(PyUiConfig.enable_button_watchers()):
                 from controller.controller import Controller
@@ -118,7 +116,10 @@ class TrimUISmartProS(TrimUIDevice):
 
     def get_controller_interface(self):
         return KeyWatcherController(event_path="/dev/input/event4", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
-    
+
+    def supports_analog_calibration(self):
+        return True
+
     def get_device_name(self):
         return self.device_name
         
@@ -154,15 +155,8 @@ class TrimUISmartProS(TrimUIDevice):
 
             # Something outside this process - the physical switch's
             # scene-wifi.sh, today - can flip .wifi in this same file while
-            # PyUI is already running. self.system_config only reflects what
-            # PyUI itself last wrote, so without this, monitor_wifi()'s
-            # self-heal loop keeps believing WiFi should still be in whatever
-            # state it was in at startup: it sees wlan0 go down, doesn't know
-            # the radio was turned off on purpose, and switches it back on
-            # within one poll (up to ~10s). Reloading here - this callback
-            # already runs on every change to this file - keeps
-            # is_wifi_enabled() and the status caches honest with whatever
-            # last touched it, switch or otherwise.
+            # PyUI is already running. Reloading here keeps is_wifi_enabled()
+            # and the status caches honest with whatever last touched it.
             old_wifi_enabled = self.system_config.is_wifi_enabled()
             self.system_config.reload_config()
             if old_wifi_enabled != self.system_config.is_wifi_enabled():

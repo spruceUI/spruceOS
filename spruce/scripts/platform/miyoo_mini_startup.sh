@@ -27,7 +27,7 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
     # On a first boot PyUI has not copied its template to Saves/ yet; read the
-    # template it will copy (wifi defaults to 1) instead of skipping the whole
+    # template it will copy instead of skipping the whole
     # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
     system_json="/mnt/SDCARD/Saves/mini-flip-system.json"
     [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/mini-flip-system.json"
@@ -38,13 +38,7 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # is_mini_og in device_functions/MiyooMini.sh: axp_test ships only with the
     # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
-        insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko
-        ifconfig lo up
-        /customer/app/axp_test wifion
-        sleep 2
-        ifconfig wlan0 up
-        wpa_supplicant -B -D nl80211 -i wlan0 -c /mnt/SDCARD/Saves/spruce/wpa_supplicant.conf
-        udhcpc -i wlan0 -s /etc/init.d/udhcpc.script &
+        sh /mnt/SDCARD/spruce/scripts/wifi.sh apply --wait
         adbd &
     fi
 ) &

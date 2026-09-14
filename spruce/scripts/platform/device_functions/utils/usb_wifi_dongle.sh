@@ -181,7 +181,7 @@ usb_wifi_bring_up() {
 
     if ! usb_wifi_module_loaded "$_mod"; then
         if ! insmod "$WIFI_USB_MODULES_DIR/$_mod.ko" 2>/tmp/wifi_usb_insmod_err; then
-            log_message "USB WiFi: insmod $_mod.ko failed: $(head -1 /tmp/wifi_usb_insmod_err 2>/dev/null); kernel: $(dmesg 2>/dev/null | grep -i "$_mod" | tail -1) - onboard radio stays"
+            log_message "USB WiFi: insmod $_mod.ko failed: $(head -1 /tmp/wifi_usb_insmod_err 2>/dev/null); kernel: $(dmesg 2>/dev/null | grep -i "$_mod" | tail -1) - falling back to the onboard radio"
             echo "$_id" >> "$WIFI_USB_DONGLE_FAILED" 2>/dev/null
             rm -f "$WIFI_USB_DONGLE_STATE" 2>/dev/null
             return 1
@@ -191,7 +191,7 @@ usb_wifi_bring_up() {
 
     _if="$(_usb_wifi_wait_iface "$WIFI_USB_IFACE_WAIT")"
     if [ -z "$_if" ]; then
-        log_message "USB WiFi: $_mod loaded but no interface for $_id after ${WIFI_USB_IFACE_WAIT}s - onboard radio stays"
+        log_message "USB WiFi: $_mod loaded but no interface for $_id after ${WIFI_USB_IFACE_WAIT}s - falling back to the onboard radio"
         rmmod "$_mod" 2>/dev/null
         echo "$_id" >> "$WIFI_USB_DONGLE_FAILED" 2>/dev/null
         rm -f "$WIFI_USB_DONGLE_STATE" 2>/dev/null
@@ -202,12 +202,12 @@ usb_wifi_bring_up() {
         # loaded before this contract ran, or a stale wlan0). Rename now that
         # the name is free; if it is not, give up rather than run two radios.
         if [ -d /sys/class/net/wlan0 ]; then
-            log_message "USB WiFi: dongle is $_if but wlan0 still exists - onboard radio stays"
+            log_message "USB WiFi: dongle is $_if but wlan0 still exists - falling back to the onboard radio"
             return 1
         fi
         ip link set "$_if" down 2>/dev/null
         if ! ip link set "$_if" name wlan0 2>/dev/null; then
-            log_message "USB WiFi: could not rename $_if to wlan0 - onboard radio stays"
+            log_message "USB WiFi: could not rename $_if to wlan0 - falling back to the onboard radio"
             return 1
         fi
         log_message "USB WiFi: $_if renamed to wlan0"
@@ -313,15 +313,20 @@ usb_wifi_hotplug_event() {
         arrived)
             log_message "USB WiFi: dongle $_eid arrived ($(usb_wifi_module_for_id "$_eid" 2>/dev/null || echo unknown)); WiFi $([ "$_want" = 1 ] && echo on || echo off)"
             [ "$_want" = 1 ] || return 0
-            usb_wifi_bring_up >/dev/null 2>&1 || return 0
-            enable_wifi
+            # enable_wifi tries the dongle first and falls back to the onboard radio when it can't be used;
+            # returning on a failed bring-up here left neither radio loaded
+            wifi_request apply
             ;;
         removed)
             log_message "USB WiFi: dongle $_eid removed"
             usb_wifi_tear_down
             usb_wifi_stop_clients
-            [ "$_want" = 1 ] || return 0
-            enable_wifi
+            if [ "$_want" = 1 ]; then
+                wifi_request apply
+            else
+                # The onboard driver went when the dongle took over; with WiFi off nothing else reloads it
+                usb_wifi_onboard_restore >/dev/null 2>&1
+            fi
             ;;
     esac
 }

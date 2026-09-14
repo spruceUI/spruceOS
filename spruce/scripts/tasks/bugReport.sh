@@ -479,6 +479,9 @@ SCANEOF
     [ -f /tmp/wifion ]  && echo "/tmp/wifion              : present (spruce believes WiFi is ON)"
     [ -f /tmp/wifioff ] && echo "/tmp/wifioff             : present (spruce believes WiFi is OFF)"
     [ -f /tmp/wifion ] || [ -f /tmp/wifioff ] || echo "wifi flag files          : neither /tmp/wifion nor /tmp/wifioff present"
+    echo "wifi.sh last result      : $(cat /tmp/wifi_state 2>/dev/null || echo '<none>')"
+    [ -e /tmp/wifi_suspended ] && echo "/tmp/wifi_suspended      : present (radio off for sleep or in-game)"
+    [ -d /tmp/spruce_wifi.lock ] && echo "wifi.sh lock             : held by pid $(cat /tmp/spruce_wifi.lock/pid 2>/dev/null)"
     if [ -f "$WPA_SUPPLICANT_FILE" ]; then
         # Count only. The file holds plaintext PSKs and SSIDs and must never be
         # printed, not even the ssid= lines.

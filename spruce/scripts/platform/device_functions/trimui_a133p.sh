@@ -52,7 +52,7 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
-    disable_wifi
+    wifi_request suspend --wait
     # Whichever driver is the radio comes out for the suspend: a USB dongle's
     # module (it is reloaded by enable_wifi on the way back, after the resume
     # wait usb_wifi_note_sleep arms) or the onboard one.
@@ -75,21 +75,18 @@ device_exit_sleep(){
         # name and have to be unloaded again. Both drivers are out after the
         # suspend, so this has to run whenever the user wants WiFi - the
         # system json is that answer, exactly as at boot.
-        enable_or_disable_wifi_per_system_json
+        wifi_request apply --wait
         return 0
     fi
     modprobe xradio_wlan
-    if [ -f /tmp/wifi_on ]; then
-        # wait for wlan0 to appear (up to ~5s)
+    # Sleep turned the radio off without changing the setting, so the setting says whether WiFi was on
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
         for _ in 1 2 3 4 5; do
             ip link show wlan0 >/dev/null 2>&1 && break
             sleep 1
         done
-
-        if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            enable_or_disable_wifi_per_system_json
-        fi
     fi
+    wifi_request apply --wait
 }
 
 get_current_volume() {

@@ -104,9 +104,6 @@ class AnbernicXXCommon(DeviceCommon):
         self.button_remapper = ButtonRemapper(self.system_config)
 
         if(main_ui_mode):
-            # Same point in startup the Miyoo and TrimUI devices do this.
-            self.ensure_wpa_supplicant_conf()
-
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
@@ -130,16 +127,6 @@ class AnbernicXXCommon(DeviceCommon):
 
     def sleep(self):
         pass #TODO
-
-    def ensure_wpa_supplicant_conf(self):
-        # Was a "pass" stub, and nothing called it either, so the file simply
-        # never appeared. wpa_supplicant is started with -c pointing at it and
-        # refuses to run without it; wpa_cli then has no ctrl socket to talk to,
-        # and the scanner - which is nothing but "wpa_cli scan" followed by
-        # "wpa_cli scan_results" - returns empty forever. The visible symptom is
-        # a device that sits on "Scanning for networks..." and never lists one,
-        # with no error anywhere, on any XX device that has never connected.
-        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
@@ -187,54 +174,13 @@ class AnbernicXXCommon(DeviceCommon):
         return self.system_config.get_volume()
     
     def run_game(self, rom_info: RomInfo):
-        if(PyUiConfig.mimic_miyoo_mainui_mode()):
-            MiyooTrimCommon.run_game(self, rom_info)
-        else:
-            from controller.controller import Controller
-            menu_options = rom_info.game_system.game_system_config.get_menu_options()
-            selected_core = self.get_selected_emulator(menu_options)
-            if(selected_core is None):
-                Display.display_message("No core found", 2_000)
-                return
-
-            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-
-            # One cfg per platform, like the shell launcher. PLATFORM is exported
-            # by the runtime that starts PyUI; the fallback is the family's widest
-            # panel, which is also what the shared cfg used to describe.
-            platform = os.environ.get("PLATFORM", "AnbernicXX720480")
-            platform_cfg = "/mnt/SDCARD/RetroArch/platform/" + "retroarch-" + platform + ".cfg"
-            shutil.copyfile(platform_cfg, "/mnt/SDCARD/RetroArch/retroarch.cfg")
-            cmds = [
-                    "/mnt/SDCARD/RetroArch/ra64.universal",
-                    "-v",
-                    "--config", "/mnt/SDCARD/RetroArch/retroarch.cfg",
-                    "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
-                    "-L",selected_core,
-                    rom_info.rom_file_path]
-
-            directory = "/mnt/SDCARD/RetroArch/"
-            PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
-            Display.deinit_display()
-            subprocess.run(cmds, cwd = directory)
-            Display.init()
-
-            Controller.clear_input_queue()
+        MiyooTrimCommon.run_game(self, rom_info)
 
     def run_cmd(self, args, dir = None, is_power_cmd = False):
         MiyooTrimCommon.run_cmd(self, args, dir, is_power_cmd)
             
     def run_app(self, folder,launch):
-        if(PyUiConfig.mimic_miyoo_mainui_mode()):
-            MiyooTrimCommon.run_app(self, folder,launch)
-        else:
-            from controller.controller import Controller
-            directory = os.path.dirname(launch)
-            Display.deinit_display()
-            PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-            subprocess.run([launch], cwd = directory)
-            Display.init()
-            Controller.clear_input_queue()
+        MiyooTrimCommon.run_app(self, folder,launch)
     
     def map_digital_input(self, sdl_input):
         return None
@@ -378,6 +324,17 @@ class AnbernicXXCommon(DeviceCommon):
     def get_save_state_image(self, rom_info: RomInfo):
         return self.get_game_system_utils().get_save_state_image(rom_info)
 
+    # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        for key, option in game_system_config.get_menu_options().items():
+            if key.startswith("Emulator") and any(name in (option.get("devices") or []) for name in self.get_device_names()):
+                return game_system_config.get_effective_menu_selection(key, rom_file_path)
+        return game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+
+    # Same suffixed state folder names the TrimUI and Miyoo classes check; a missing one is just a failed exists()
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name + "-64", core_name + "-32"]
+
     def supports_brightness_calibration(self):
         return False
 
@@ -492,7 +449,7 @@ class AnbernicXXCommon(DeviceCommon):
     @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         if(not self.is_wifi_enabled()):
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
         # /proc/net/wireless - the two sources every other device uses - so this
@@ -515,7 +472,7 @@ class AnbernicXXCommon(DeviceCommon):
             output = result.stdout or ""
 
             if result.returncode != 0 or "FAIL" in output:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             signal_level = 0
             noise_level = 0
@@ -541,7 +498,7 @@ class AnbernicXXCommon(DeviceCommon):
             # signal_level still 0 would map to the top of the scale below, so a
             # reading we could not parse would show as a full-strength signal.
             if not have_signal:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
             # Same dBm -> 0..70 mapping the other devices use, so the status bar
             # thresholds behave identically across the fleet.
@@ -560,7 +517,7 @@ class AnbernicXXCommon(DeviceCommon):
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
     @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def _get_ip_addr_text(self):
@@ -589,107 +546,5 @@ class AnbernicXXCommon(DeviceCommon):
             return "Off"
         return self._get_ip_addr_text()
              
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
-
-    def start_udhcpc(self):
-        # Overridden rather than inherited so this matches the invocation the
-        # shell side uses in device_start_dhcp_client (device.sh) exactly - one
-        # canonical form of the command on this device. -b matters: without it
-        # udhcpc stays in the foreground as a child of MainUI, which spruce
-        # kills and respawns around every game launch.
-        try:
-            # Match the whole invocation, not the bare name. udhcpc -b forks and
-            # the process we spawned exits immediately, leaving a defunct entry
-            # that ps renders as "[udhcpc]" until Python reaps it on its next
-            # Popen. A bare substring test matches that corpse and skips
-            # starting a real client - and it would do so in exactly the case
-            # below where wpa_supplicant is already up, so no intervening Popen
-            # has cleared it.
-            if 'udhcpc -i wlan0' in self.get_running_processes().stdout:
-                return
-
-            subprocess.Popen([
-                'udhcpc',
-                '-i', 'wlan0',
-                '-b',
-                '-t', '5',
-                '-T', '3'
-            ])
-            time.sleep(0.5)  # Wait for it to initialize
-            PyUiLogger.get_logger().info("udhcpc started.")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting udhcpc: {e}")
-
-    def start_wifi_services(self):
-        pass
-
-    def is_wifi_enabled(self):
-        return self.system_config.is_wifi_enabled()
-
-    def disable_wifi(self):
-        self.system_config.set_wifi(0)
-        self.system_config.save_config()
-        self.stop_network_services()
-        PyUiLogger.get_logger().info("Stopping WiFi Services")
-        ProcessRunner.run(['killall', '-15', 'wpa_supplicant'])
-        time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-9', 'wpa_supplicant'])
-        time.sleep(0.1)  
-        # udhcpc, not dhclient. There is no dhclient on this platform - not in
-        # PATH, not anywhere on the filesystem - so these killalls matched
-        # nothing and the real client survived every "WiFi off". Verified on a
-        # CubeXX: udhcpc kept the same PID straight through an off/on cycle.
-        ProcessRunner.run(['killall', '-15', 'udhcpc'])
-        time.sleep(0.1)  
-        ProcessRunner.run(['killall', '-9', 'udhcpc'])
-        time.sleep(0.1)  
-         
-    def enable_wifi(self):
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        # Before the "already running" return below, not after it - that path
-        # still means WiFi is on, and the services still need starting.
-        self.start_network_services()
-        try:
-            # Only the supplicant is skipped when it is already up - the DHCP
-            # client is started unconditionally below. udhcpc exits on its own
-            # when it gives up (-t 5 failed discovers), and it leaves
-            # wpa_supplicant running when it does, so an early return here would
-            # make "turn WiFi on" the one action that cannot recover an
-            # interface that has associated but has no address.
-            if 'wpa_supplicant' not in self.get_running_processes().stdout:
-                # Also here, not just at startup: this is the call that actually
-                # consumes the file, and it has to survive the config being
-                # cleared or removed while the device is running - "Forget all
-                # WiFi networks" rewrites it, and a user can delete it off the
-                # card.
-                self.ensure_wpa_supplicant_conf()
-
-                # If not running, start it in the background
-                subprocess.Popen([
-                    'wpa_supplicant',
-                    '-B',
-                    '-D', 'nl80211',
-                    '-i', 'wlan0',
-                    '-c', self.get_wpa_supplicant_conf_path()
-                ])
-                time.sleep(0.5)  # Wait for it to initialize
-                PyUiLogger.get_logger().info("wpa_supplicant started.")
-
-            # Was subprocess.Popen(['dhclient', 'wlan0']), which raised
-            # FileNotFoundError into the except below - so this logged "Error
-            # starting wpa_supplicant" and started no DHCP client at all.
-            self.start_udhcpc()
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
-
     def uses_deinit_v2(self):
         return True

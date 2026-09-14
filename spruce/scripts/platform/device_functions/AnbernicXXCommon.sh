@@ -211,7 +211,8 @@ launch_startup_watchdogs(){
 }
 
 take_screenshot() {
-    log_message "Unable to doso on 34xxsp currently"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
 }
 
 runtime_mounts_anbernic_34xxsp() {
@@ -705,13 +706,39 @@ wifi_usb_wait_for_radio() {
     return 1
 }
 
+# The port can switch to host mode long after boot (EHCI came up at 40 s on an
+# RG28XX, 2026-09-13), and a dongle can be plugged in late. Watch the bus for a
+# while and apply the WiFi setting once the radio appears, instead of waiting
+# for someone to toggle WiFi.
+WIFI_USB_LATE_WATCH="${WIFI_USB_LATE_WATCH:-120}"
+WIFI_USB_LATE_WATCH_MARK="/tmp/wifi_usb_late_watch"
+
+wifi_usb_watch_for_late_radio() {
+    mkdir "$WIFI_USB_LATE_WATCH_MARK" 2>/dev/null || return 0
+    (
+        trap '' HUP
+        _lw_left="$WIFI_USB_LATE_WATCH"
+        while [ "$_lw_left" -gt 0 ]; do
+            sleep 2
+            _lw_left=$((_lw_left - 2))
+            if wifi_usb_radio_present; then
+                log_message "WiFi: $WIFI_MODULE radio appeared on USB - applying the WiFi setting"
+                wifi_request apply
+                break
+            fi
+        done
+        rmdir "$WIFI_USB_LATE_WATCH_MARK" 2>/dev/null
+    ) </dev/null >/dev/null 2>&1 &
+}
+
 device_wifi_power_on() {
     # Bus-first on USB models: no adapter after the enumeration wait means no
-    # radio this session - no module load, and the availability guards turn
-    # the rest of the WiFi path off instead of starting a supplicant on a
-    # wlan0 that cannot exist.
+    # radio for now - no module load, and the availability guards turn the
+    # rest of the WiFi path off instead of starting a supplicant on a wlan0
+    # that cannot exist.
     if [ "$WIFI_BUS" = "usb" ] && ! wifi_usb_wait_for_radio; then
-        log_message "WiFi: $WIFI_MODULE radio not enumerated on USB after ${WIFI_USB_ENUM_WAIT}s - no radio this session"
+        log_message "WiFi: $WIFI_MODULE radio not enumerated on USB after ${WIFI_USB_ENUM_WAIT}s - watching the bus for ${WIFI_USB_LATE_WATCH}s"
+        wifi_usb_watch_for_late_radio
         return 1
     fi
     if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then

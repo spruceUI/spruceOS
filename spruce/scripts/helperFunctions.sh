@@ -1213,15 +1213,20 @@ _xx_dpad_swap() {
 ##### WIFI HANDLING #####
 
 disable_wifi() {
-    ifconfig wlan0 down         2>/dev/null
     rm -f /tmp/wifion           2>/dev/null
     touch /tmp/wifioff          2>/dev/null
-    killall -9 wpa_supplicant   2>/dev/null
-    # Stop whichever client this device actually started. Naming udhcpc here
-    # only works for as long as every device uses udhcpc; a device that
-    # overrides device_start_dhcp_client would have been left with its client
-    # still holding the interface after "WiFi off".
-    device_stop_dhcp_client
+    # A host that owns the radio (NetworkManager on the RGB30) runs its own
+    # supplicant and DHCP client and has no ifconfig; killing its supplicant
+    # would break it, so only the power call below applies there.
+    if ! device_manages_own_wifi; then
+        ifconfig wlan0 down         2>/dev/null
+        killall -9 wpa_supplicant   2>/dev/null
+        # Stop whichever client this device actually started. Naming udhcpc here
+        # only works for as long as every device uses udhcpc; a device that
+        # overrides device_start_dhcp_client would have been left with its client
+        # still holding the interface after "WiFi off".
+        device_stop_dhcp_client
+    fi
     log_message "WiFi turned off"
     device_wifi_power_off
 }
@@ -1293,8 +1298,7 @@ import_wpa_networks_from() {
 
 enable_wifi() {
     # A device without a radio has nothing to power, recover, associate or
-    # lease. Refusing here covers every path in: boot, game exit, the settings
-    # toggle, restart_wifi and check_and_connect_wifi.
+    # lease. Refusing here covers every path in, since they all go through wifi.sh.
     if ! wifi_available_on_device; then
         log_message "WiFi: enable requested on a device without a radio - ignored"
         return 1
@@ -1314,7 +1318,10 @@ enable_wifi() {
     # not - the radio fails to enumerate and the interface is never created -
     # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
     # nothing. Give the device a chance to bring it back first.
-    device_ensure_wifi_interface
+    if ! device_ensure_wifi_interface; then
+        log_message "WiFi: wlan0 did not come back - stopping"
+        return 1
+    fi
 
     rm -f /tmp/wifioff          2>/dev/null
     touch /tmp/wifion           2>/dev/null
@@ -1331,20 +1338,20 @@ enable_wifi() {
         return 0
     fi
 
-    # wpa_supplicant refuses to start without its config file, and every start
-    # below passes -c without checking that the file is there. It fails in the
-    # background where nobody sees it, udhcpc starts anyway so the interface
-    # looks half alive, and the UI sits on "Scanning for networks..." forever -
-    # the scanner is only "wpa_cli scan", and wpa_cli has no daemon to ask.
-    #
-    # Seed the same two lines PyUI writes rather than assume something else
-    # created it. ctrl_interface is what wpa_cli connects to; update_config=1
-    # lets wpa_supplicant persist networks added from the UI.
-    if [ -n "$WPA_SUPPLICANT_FILE" ] && [ ! -f "$WPA_SUPPLICANT_FILE" ]; then
-        mkdir -p "$(dirname "$WPA_SUPPLICANT_FILE")" 2>/dev/null
-        printf 'ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n' > "$WPA_SUPPLICANT_FILE"
-        log_message "Created missing $WPA_SUPPLICANT_FILE"
+    # Some radios take a moment to create wlan0 after their rail comes up
+    _wlan_wait=5
+    while [ ! -d /sys/class/net/wlan0 ] && [ "$_wlan_wait" -gt 0 ]; do
+        sleep 1
+        _wlan_wait=$((_wlan_wait - 1))
+    done
+    if [ ! -d /sys/class/net/wlan0 ]; then
+        log_message "WiFi: no wlan0 - not starting wpa_supplicant"
+        return 1
     fi
+
+    # wpa_supplicant exits on a missing or unparseable config, and the menu then
+    # scans forever because wpa_cli has no daemon to ask.
+    wpa_conf_ensure
 
     # Adopt networks from the places PyUI used to write before saved networks
     # became card-global. Each path is somewhere on the handheld's own storage,
@@ -1405,6 +1412,7 @@ enable_wifi() {
     log_message "WiFi turned on"
 
     device_extra_wifi_setup
+    return 0
 }
 
 # Does this device have a WiFi radio at all? A STATIC hardware question,
@@ -1426,31 +1434,133 @@ wifi_available_on_device() {
     fi
 }
 
-enable_or_disable_wifi_per_system_json() {
-    if ! wifi_available_on_device; then
-        log_message "WiFi: not available on this device, radio path left alone" -v
-        return 0
-    fi
-    # PyUI writes SYSTEM_JSON from its shipped default, and on a first boot it
-    # may not exist yet when this runs. An unreadable value must mean off: an
-    # empty string fails -eq with status 2, which the else branch reads as on.
-    wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)"
-    case "$wifi_want" in
-        ''|*[!0-9]*) wifi_want=0 ;;
-    esac
-    if [ "$wifi_want" -eq 0 ]; then
-        disable_wifi
-    else
-        enable_wifi
-    fi
+# Every radio change goes through wifi.sh, which runs them one at a time.
+# See wifi.sh for the commands; they return at once unless given --wait.
+wifi_request() {
+    sh /mnt/SDCARD/spruce/scripts/wifi.sh "$@"
 }
 
-restart_wifi() {
-    # Requires PLATFORM and WPA_SUPPLICANT_FILE to be set
-    log_message "Restarting Wi-Fi interface wlan0"
-    disable_wifi
+# Is the saved WiFi setting on? PyUI writes SYSTEM_JSON from its shipped default,
+# and on a first boot it may not exist yet, so read that default instead. With
+# neither readable it means off.
+wifi_setting_wanted() {
+    _wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)"
+    if [ -z "$_wifi_want" ] && [ -n "$SYSTEM_JSON_DEFAULT" ]; then
+        _wifi_want="$(jq -r '.wifi // 0' "$SYSTEM_JSON_DEFAULT" 2>/dev/null)"
+    fi
+    [ "$_wifi_want" = 1 ]
+}
+
+# Print why a wpa_supplicant.conf is unusable, or nothing if it is fine.
+# Conservative on purpose: a false positive costs the user every saved network.
+# No quote checks - wpa_supplicant takes everything between the first and last
+# quote verbatim, so ssid="my"net" is valid.
+wpa_conf_problem() {
+    if ! grep -q '[^[:space:]]' "$1" 2>/dev/null; then
+        echo "file is empty"
+        return
+    fi
+    if ! grep -q 'ctrl_interface' "$1" 2>/dev/null; then
+        echo "no ctrl_interface line, so wpa_cli would have no socket to talk to"
+        return
+    fi
+    # No brace in a regex: busybox awk rejects an unescaped { there
+    awk '
+        { line = $0; gsub(/^[ \t\r]+|[ \t\r]+$/, "", line) }
+        line == "" || substr(line, 1, 1) == "#" { next }
+        substr(line, 1, 9) == "network={" { depth++; next }
+        line == "}" {
+            depth--
+            if (depth < 0) { print "stray closing brace on line " NR; bad = 1; exit }
+        }
+        END { if (!bad && depth != 0) print "a network block is never closed" }
+    ' "$1"
+}
+
+# Make sure WPA_SUPPLICANT_FILE exists and parses. A broken one is moved aside,
+# not deleted: the networks are the user's and the file shows what went wrong.
+wpa_conf_ensure() {
+    [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
+    if [ -f "$WPA_SUPPLICANT_FILE" ]; then
+        _wpa_problem="$(wpa_conf_problem "$WPA_SUPPLICANT_FILE")"
+        [ -n "$_wpa_problem" ] || return 0
+        if ! mv -f "$WPA_SUPPLICANT_FILE" "$WPA_SUPPLICANT_FILE.broken" 2>/dev/null; then
+            log_message "wpa_supplicant.conf is broken ($_wpa_problem) and could not be moved aside"
+            return 1
+        fi
+        log_message "wpa_supplicant.conf could not be parsed ($_wpa_problem); kept it as wpa_supplicant.conf.broken and started a fresh one. Saved networks will need re-entering."
+    else
+        mkdir -p "$(dirname "$WPA_SUPPLICANT_FILE")" 2>/dev/null
+        log_message "Created missing $WPA_SUPPLICANT_FILE"
+    fi
+    printf 'ctrl_interface=/var/run/wpa_supplicant\nupdate_config=1\n\n' > "$WPA_SUPPLICANT_FILE"
+}
+
+# Replace any saved block for SSID $1 with a new one; $2 is the password, empty
+# for an open network. The password only ever goes through printf, a shell
+# builtin, so it never shows up in a process list or the log.
+wpa_add_network() {
+    [ -n "$WPA_SUPPLICANT_FILE" ] && [ -n "$1" ] || return 1
+    wpa_conf_ensure
+    _wpa_tmp="$WPA_SUPPLICANT_FILE.tmp"
+    WPA_ADD_SSID="$1" awk '
+        BEGIN { want = "ssid=\"" ENVIRON["WPA_ADD_SSID"] "\"" }
+        { line = $0; gsub(/^[ \t\r]+|[ \t\r]+$/, "", line) }
+        !inblock && substr(line, 1, 8) == "network=" { inblock = 1; n = 0; drop = 0 }
+        inblock {
+            buf[n++] = $0
+            if (line == want) drop = 1
+            if (line == "}") {
+                inblock = 0
+                if (!drop) for (i = 0; i < n; i++) print buf[i]
+            }
+            next
+        }
+        { print }
+        END { if (inblock) for (i = 0; i < n; i++) print buf[i] }
+    ' "$WPA_SUPPLICANT_FILE" > "$_wpa_tmp" 2>/dev/null || { rm -f "$_wpa_tmp"; return 1; }
+    {
+        printf '\nnetwork={\n'
+        printf '    ssid="%s"\n' "$1"
+        if [ -n "$2" ]; then
+            printf '    psk="%s"\n' "$2"
+        else
+            printf '    key_mgmt=NONE\n'
+        fi
+        printf '}\n'
+    } >> "$_wpa_tmp"
+    mv -f "$_wpa_tmp" "$WPA_SUPPLICANT_FILE" || { rm -f "$_wpa_tmp"; return 1; }
+    wpa_cli -i wlan0 reconfigure >/dev/null 2>&1
+    return 0
+}
+
+wpa_forget_all_networks() {
+    _wpa_header="ctrl_interface=DIR=/var/run/wpa_supplicant
+update_config=1"
+
+    if command -v nmcli >/dev/null 2>&1 && { device_manages_own_wifi || [ -z "$WPA_SUPPLICANT_FILE" ]; }; then
+        # NetworkManager keeps its own profiles. Match on TYPE: an inactive profile has no DEVICE.
+        nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r uuid type; do
+            [ "$type" = "802-11-wireless" ] && nmcli connection delete uuid "$uuid" >/dev/null 2>&1
+        done
+        return 0
+    fi
+    [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
+
+    killall wpa_supplicant 2>/dev/null
+    device_stop_dhcp_client
     sleep 1
-    enable_wifi
+
+    printf '%s\n' "$_wpa_header" > "$WPA_SUPPLICANT_FILE"
+
+    # And from the pre-card-global locations, or enable_wifi's adoption sweep
+    # would import every one of them straight back on the next boot and the
+    # user's "forget all networks" would silently undo itself.
+    for _legacy_conf in $WPA_LEGACY_CONFS; do
+        [ -f "$_legacy_conf" ] || continue
+        printf '%s\n' "$_wpa_header" > "$_legacy_conf"
+        log_message "Wifi: cleared saved networks from $_legacy_conf"
+    done
 }
 
 # Does this interface hold an address?
@@ -1509,6 +1619,11 @@ network_is_connected() {
 }
 
 check_and_connect_wifi() {
+    # Shutdown's Syncthing check calls this whatever the setting says; never turn WiFi on against it
+    if ! wifi_setting_wanted; then
+        log_message "WiFi is off in settings, not connecting"
+        return 1
+    fi
 
     waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
     if [ "$waiting_enabled" = "False" ]; then
@@ -1532,7 +1647,7 @@ check_and_connect_wifi() {
 
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
-    restart_wifi
+    wifi_request restart
 
     display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
         "Waiting to connect....\nPress START to continue anyway." 75

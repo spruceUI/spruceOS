@@ -229,7 +229,7 @@ device_exit_sleep() {
     # A dongle that was the radio gets a bounded wait to re-enumerate, then the
     # system json decides whether WiFi comes back (the boot path's rule).
     if usb_wifi_wait_after_resume; then
-        enable_or_disable_wifi_per_system_json
+        wifi_request apply --wait
     fi
 }
 

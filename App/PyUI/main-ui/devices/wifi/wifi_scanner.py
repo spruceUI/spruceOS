@@ -68,8 +68,8 @@ class WiFiScanner:
 
         result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
         if "Failed to connect to" in (result.stderr or ""):
-            log.error("wlan0 seems broken, restarting and retrying")
-            Device.get_device().wifi_error_detected()
+            # No supplicant to ask yet; wifi.sh may still be bringing the radio up
+            log.error("wpa_supplicant is not answering, retrying")
             self._stop_event.wait(15)
             result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
 
