@@ -1,12 +1,9 @@
 
-from asyncio import subprocess
-import tempfile
 import time
 import os
 import re
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from display.display import Display
 from display.font_purpose import FontPurpose
@@ -33,14 +30,6 @@ class WifiMenu:
         else:
             Device.get_device().enable_wifi()
             Device.get_device().note_wifi_change()
-
-
-    def reload_wpa_supplicant_config(self):
-        try:
-            ProcessRunner.run(["wpa_cli", "reconfigure"])
-            PyUiLogger.get_logger().info("wpa_supplicant.conf reloaded successfully.")
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Error reloading wpa_supplicant.conf: {e}")
 
 
     #TODO add confirmation or failed popups
