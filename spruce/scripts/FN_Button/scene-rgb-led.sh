@@ -29,9 +29,16 @@ case "$1" in
         flag_remove "leds_forced_off"
         rgb_led_trimui lrm12 static "000000"
         flag_add "leds_forced_off" --tmp
+        /usr/trimui/bin/shmvar ledswitch 0 2>/dev/null
+        mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+        echo 0 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
         ;;
     0)  # switch off -> LEDs on (configured colour)
         flag_remove "leds_forced_off"
         rgb_led_trimui lrm12 static "$hex"
+        /usr/trimui/bin/shmvar ledswitch 1 2>/dev/null
+        /usr/trimui/bin/shmvar ledvalue 6 2>/dev/null
+        mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+        echo 1 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
         ;;
 esac

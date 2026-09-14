@@ -54,16 +54,24 @@
 # colour table lives in one place. Pass an explicit name to override the config.
 led_color_hex() {
     name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
-    case "$name" in
-        Red)     echo "FF0000" ;;
-        Green)   echo "00FF00" ;;
-        Blue)    echo "0000FF" ;;
-        Yellow)  echo "FFFF00" ;;
-        Cyan)    echo "00FFFF" ;;
-        Magenta) echo "FF00FF" ;;
-        Orange)  echo "FF8800" ;;
-        *)       echo "FFFFFF" ;;
-    esac
+    if command -v map_color_name_to_hex >/dev/null 2>&1; then
+        map_color_name_to_hex "$name"
+    else
+        case "$name" in
+            "Red")          echo "FF0000" ;;
+            "Pink")         echo "FF3333" ;;
+            "Fuchsia")      echo "FF0022" ;;
+            "Purple")       echo "FF00FF" ;;
+            "Dark Purple")  echo "2200CC" ;;
+            "Blue")         echo "0000FF" ;;
+            "Cyan")         echo "00FFFF" ;;
+            "Teal")         echo "00FF22" ;;
+            "Green")        echo "00FF00" ;;
+            "Yellow")       echo "FFFF00" ;;
+            "Orange")       echo "FF1100" ;;
+            *)              echo "FFFFFF" ;;
+        esac
+    fi
 }
 
 rgb_led_trimui() {
@@ -71,6 +79,11 @@ rgb_led_trimui() {
     # early out if disabled
 	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
 	[ "$disable" = "True" ] && return 0
+
+	# get color, duration, and cycles literally from args 3,4,5, with fallbacks if missing
+	color=${3:-"FFFFFF"}
+	duration=${4:-1000}
+	cycles=${5:-1}
 
 	# ...and if the switch or an Fn key has turned the LEDs off. That action
 	# writes black directly, which lasts only until something else writes a
@@ -84,11 +97,16 @@ rgb_led_trimui() {
 	# silently rewrite it. /tmp, so it clears on reboot - which matches the
 	# action, since scene.sh only runs on an actual flip and nothing re-applies
 	# the switch position at boot.
-	flag_check "leds_forced_off" && return 0
+	if flag_check "leds_forced_off" && [ "$color" != "000000" ] && [ "$2" != "0" ] && [ "$2" != "off" ]; then
+		return 0
+	fi
 
     # get and set peak rgb brightness
-    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "False")"
-    echo "$max_scale" > "/sys/class/led_anim/max_scale"
+    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "25")"
+    if [ -z "$max_scale" ] || [ "$max_scale" = "False" ]; then
+        max_scale="25"
+    fi
+    echo "$max_scale" > "/sys/class/led_anim/max_scale" 2>/dev/null
 
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
@@ -102,15 +120,21 @@ rgb_led_trimui() {
         zones="l r m 1 2"
     fi
 
-    # translate 1 → f1 and 2 → f2
+    # translate 1 → f1 and 2 → f2; also add lr when l or r are targeted (Smart Pro / Smart Pro S joystick ring)
     new_zones=""
+    has_lr=0
     for z in $zones; do
         case "$z" in
             1) new_zones="$new_zones f1" ;;
             2) new_zones="$new_zones f2" ;;
+            l|r)
+                new_zones="$new_zones $z"
+                has_lr=1
+                ;;
             *) new_zones="$new_zones $z" ;;
         esac
     done
+    [ $has_lr -eq 1 ] && new_zones="$new_zones lr"
     zones="$new_zones"
 
     # parse effect to use from second argument
@@ -126,18 +150,20 @@ rgb_led_trimui() {
         *) effect=4 ;;
     esac
 
-    # get color, duration, and cycles literally from args 3,4,5, with fallbacks if missing
-    color=${3:-"FFFFFF"}
-    duration=${4:-1000}
-    cycles=${5:-1}
-
     # do the things
+    chmod -R 777 /sys/class/led_anim 2>/dev/null
+    echo 1 > /sys/class/led_anim/enable 2>/dev/null
    	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
     for zone in $zones; do
-        [ -w "/sys/class/led_anim/effect_rgb_hex_$zone" ] && echo "$color" > "/sys/class/led_anim/effect_rgb_hex_$zone"
-        [ -w "/sys/class/led_anim/effect_cycles_$zone" ] && echo "$cycles" > "/sys/class/led_anim/effect_cycles_$zone"
-        [ -w "/sys/class/led_anim/effect_duration_$zone" ] && echo "$duration" > "/sys/class/led_anim/effect_duration_$zone"
-        [ -w "/sys/class/led_anim/effect_$zone" ] && echo "$effect" > "/sys/class/led_anim/effect_$zone"
+        if [ -w "/sys/class/led_anim/effect_rgb_hex_$zone" ]; then
+            printf "%s " "$color" > "/sys/class/led_anim/effect_rgb_hex_$zone" 2>/dev/null || echo "$color" > "/sys/class/led_anim/effect_rgb_hex_$zone" 2>/dev/null
+        fi
+        [ -w "/sys/class/led_anim/effect_cycles_$zone" ] && echo "$cycles" > "/sys/class/led_anim/effect_cycles_$zone" 2>/dev/null
+        [ -w "/sys/class/led_anim/effect_duration_$zone" ] && echo "$duration" > "/sys/class/led_anim/effect_duration_$zone" 2>/dev/null
+        if [ -w "/sys/class/led_anim/effect_$zone" ]; then
+            echo 0 > "/sys/class/led_anim/effect_$zone" 2>/dev/null
+            echo "$effect" > "/sys/class/led_anim/effect_$zone" 2>/dev/null
+        fi
     done
 }
 
@@ -338,3 +364,129 @@ brightness_up() {
     backlight=$(current_backlight)
     set_backlight $((backlight + 1))
 }
+
+apply_fan_level() {
+    level="$1"
+    case "$level" in
+        -1|"auto"|"Auto")
+            # Auto mode: start Spruce's thermal manager
+            if [ -x /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting ]; then
+                /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting &
+            fi
+            echo -1 > /sys/devices/platform/soc@3000000/soc@3000000:pwm_fan/hwmon/hwmon0/user_max_state 2>/dev/null
+            /usr/trimui/bin/shmvar fanlevel -1 2>/dev/null
+            mkdir -p /tmp/trimui_osd/stepper_fanlevel /tmp/trimui_osd/stepper_fan 2>/dev/null
+            echo -1 > /tmp/trimui_osd/stepper_fanlevel/status 2>/dev/null
+            echo -1 > /tmp/trimui_osd/stepper_fan/status 2>/dev/null
+            log_message "apply_fan_level: Fan set to Auto (-1)"
+            ;;
+        0)
+            # Fan Off
+            /mnt/SDCARD/spruce/smartpros/bin/pkill -9 -f /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog 2>/dev/null || killall -9 thermal-watchdog 2>/dev/null
+            /mnt/SDCARD/spruce/smartpros/bin/pkill -9 -f "adaptive_fan.py" 2>/dev/null
+            killall -9 thermal-watchdog 2>/dev/null
+            for pid in $(ps 2>/dev/null | grep -E "[a]daptive_fan|[t]hermal-watchdog" | awk '{print $1}'); do
+                [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
+            done
+            echo 0 > /sys/class/thermal/cooling_device0/cur_state 2>/dev/null
+            echo 0 > /sys/devices/platform/soc@3000000/soc@3000000:pwm_fan/hwmon/hwmon0/user_max_state 2>/dev/null
+            echo 0 > /tmp/trimui_osd/stepper_fanlevel/cooling_cur_state 2>/dev/null
+            /usr/trimui/bin/shmvar fanlevel 0 2>/dev/null
+            mkdir -p /tmp/trimui_osd/stepper_fanlevel /tmp/trimui_osd/stepper_fan 2>/dev/null
+            echo 0 > /tmp/trimui_osd/stepper_fanlevel/status 2>/dev/null
+            echo 0 > /tmp/trimui_osd/stepper_fan/status 2>/dev/null
+            log_message "apply_fan_level: Fan set to Off (0)"
+            ;;
+        1|2|3|4|5|6)
+            # Manual Fan Level 1..6
+            /mnt/SDCARD/spruce/smartpros/bin/pkill -9 -f /mnt/SDCARD/spruce/smartpros/bin/thermal-watchdog 2>/dev/null || killall -9 thermal-watchdog 2>/dev/null
+            /mnt/SDCARD/spruce/smartpros/bin/pkill -9 -f "adaptive_fan.py" 2>/dev/null
+            killall -9 thermal-watchdog 2>/dev/null
+            for pid in $(ps 2>/dev/null | grep -E "[a]daptive_fan|[t]hermal-watchdog" | awk '{print $1}'); do
+                [ -n "$pid" ] && kill -9 "$pid" 2>/dev/null
+            done
+            case "$level" in
+                1) speed=20 ;;
+                2) speed=22 ;;
+                3) speed=24 ;;
+                4) speed=26 ;;
+                5) speed=28 ;;
+                6) speed=31 ;;
+                *) speed=24 ;;
+            esac
+            # Unlock user_max_state FIRST, otherwise kernel pwm-fan driver rejects cur_state > user_max_state with -EINVAL
+            echo -1 > /sys/devices/platform/soc@3000000/soc@3000000:pwm_fan/hwmon/hwmon0/user_max_state 2>/dev/null
+            echo "$speed" > /sys/class/thermal/cooling_device0/cur_state 2>/dev/null
+            echo "$speed" > /sys/devices/platform/soc@3000000/soc@3000000:pwm_fan/hwmon/hwmon0/user_max_state 2>/dev/null
+            echo "$speed" > /tmp/trimui_osd/stepper_fanlevel/cooling_cur_state 2>/dev/null
+            /usr/trimui/bin/shmvar fanlevel "$level" 2>/dev/null
+            mkdir -p /tmp/trimui_osd/stepper_fanlevel /tmp/trimui_osd/stepper_fan 2>/dev/null
+            echo "$level" > /tmp/trimui_osd/stepper_fanlevel/status 2>/dev/null
+            echo "$level" > /tmp/trimui_osd/stepper_fan/status 2>/dev/null
+            log_message "apply_fan_level: Fan set to Manual Level $level (speed $speed)"
+            ;;
+    esac
+}
+
+save_fan_level() {
+    level="$1"
+    [ -z "$level" ] && return 0
+    if [ -f "$SYSTEM_JSON" ]; then
+        if grep -q '"fanlevel"' "$SYSTEM_JSON"; then
+            sed -i "s/\"fanlevel\":[[:space:]]*-*[0-9]*/\"fanlevel\": $level/" "$SYSTEM_JSON" 2>/dev/null
+        else
+            tmp="${SYSTEM_JSON}.tmp.$$"
+            sed "s/^[[:space:]]*\}/    ,\"fanlevel\": $level\n}/" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+        fi
+    fi
+    if [ -f /mnt/UDISK/system.json ]; then
+        if grep -q '"fanlevel"' /mnt/UDISK/system.json; then
+            sed -i "s/\"fanlevel\":[[:space:]]*-*[0-9]*/\"fanlevel\": $level/" /mnt/UDISK/system.json 2>/dev/null
+        else
+            tmp="/mnt/UDISK/system.json.tmp.$$"
+            sed "s/^[[:space:]]*\}/    ,\"fanlevel\": $level\n}/" /mnt/UDISK/system.json > "$tmp" && mv "$tmp" /mnt/UDISK/system.json || rm -f "$tmp"
+        fi
+    fi
+}
+
+sync_osd_state() {
+    mkdir -p /tmp/trimui_osd/toggle_led /tmp/trimui_osd/toggle_wifi /tmp/trimui_osd/toggle_bt /tmp/trimui_osd/stepper_fanlevel /tmp/trimui_osd/stepper_fan 2>/dev/null
+
+    # 1. LED status
+    if flag_check "leds_forced_off" || [ "$(cat /sys/class/led_anim/max_scale 2>/dev/null)" = "0" ]; then
+        echo 0 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
+        /usr/trimui/bin/shmvar ledswitch 0 2>/dev/null
+    else
+        echo 1 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
+        /usr/trimui/bin/shmvar ledswitch 1 2>/dev/null
+    fi
+    /usr/trimui/bin/shmvar ledvalue 6 2>/dev/null
+
+    # 2. WiFi status
+    if [ -f /tmp/wifion ] || ifconfig wlan0 2>/dev/null | grep -q "UP"; then
+        echo 1 > /tmp/trimui_osd/toggle_wifi/status 2>/dev/null
+        /usr/trimui/bin/shmvar wifiswitch 1 2>/dev/null
+    else
+        echo 0 > /tmp/trimui_osd/toggle_wifi/status 2>/dev/null
+        /usr/trimui/bin/shmvar wifiswitch 0 2>/dev/null
+    fi
+
+    # 3. Bluetooth status
+    if pgrep bluetoothd >/dev/null 2>&1 || pgrep hciattach >/dev/null 2>&1; then
+        echo 1 > /tmp/trimui_osd/toggle_bt/status 2>/dev/null
+        /usr/trimui/bin/shmvar btswitch 1 2>/dev/null
+    else
+        echo 0 > /tmp/trimui_osd/toggle_bt/status 2>/dev/null
+        /usr/trimui/bin/shmvar btswitch 0 2>/dev/null
+    fi
+
+    # 4. Fan level
+    fan_lvl="$(jq -r '.fanlevel // -1' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$fan_lvl" in
+        ''|*[!-0-9]*) fan_lvl=-1 ;;
+    esac
+    echo "$fan_lvl" > /tmp/trimui_osd/stepper_fanlevel/status 2>/dev/null
+    echo "$fan_lvl" > /tmp/trimui_osd/stepper_fan/status 2>/dev/null
+    /usr/trimui/bin/shmvar fanlevel "$fan_lvl" 2>/dev/null
+}
+
