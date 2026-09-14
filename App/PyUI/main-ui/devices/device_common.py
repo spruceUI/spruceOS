@@ -1,6 +1,7 @@
 
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -281,23 +282,23 @@ class DeviceCommon(AbstractDevice):
             DeviceCommon.WPA_SUPPLICANT_CONF
         )
 
-    # Every radio change goes through spruce's wifi.sh, which runs them one at a
-    # time; PyUI only saves the setting and hands over.
-    WIFI_SCRIPT = "/mnt/SDCARD/spruce/scripts/wifi.sh"
+    # Every radio change goes through spruce's `wifi` command, which runs them one
+    # at a time; PyUI only saves the setting and hands over.
+    WIFI_COMMAND = "wifi"
 
     def _run_wifi_script(self, *args, stdin_text=None):
-        if not os.path.exists(self.WIFI_SCRIPT):
+        if shutil.which(self.WIFI_COMMAND) is None:
             return
         try:
-            # Returns at once: wifi.sh does the work in a detached copy of itself
+            # Returns at once: wifi does the work in a detached copy of itself
             run_args = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
             if stdin_text is None:
                 run_args["stdin"] = subprocess.DEVNULL
             else:
                 run_args["input"] = stdin_text.encode()
-            subprocess.run(["/bin/sh", self.WIFI_SCRIPT, *args], **run_args)
+            subprocess.run([self.WIFI_COMMAND, *args], **run_args)
         except Exception as e:
-            PyUiLogger.get_logger().error(f"wifi.sh {args[0]} failed: {e}")
+            PyUiLogger.get_logger().error(f"wifi {args[0]} failed: {e}")
 
     def _save_wifi_setting(self, value):
         self.system_config.reload_config()

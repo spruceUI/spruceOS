@@ -49,6 +49,8 @@ Changes from the plan below:
 - In-game WiFi off is now a full `suspend`. Before, it killed the supplicant and
   only cut power when connected. On the XX line the driver is now unloaded until
   game exit.
+- PyUI calls `wifi` by name, never by path. `spruce/scripts/bin/wifi` execs
+  `wifi.sh`, and every platform cfg puts `spruce/scripts/bin` first on PATH.
 - `clearwifi.sh` stays as a one-line wrapper, so the task list entry is unchanged.
 - The Mini's `device_wifi_power_off` only relies on `ifconfig down`, as PyUI did.
   `axp_test wifioff` was not added without a device to check it on.
@@ -62,7 +64,8 @@ On top of **Must not regress** below:
   - Join a network whose password has spaces or quotes.
   - Try a wrong password.
   - Forget all.
-  - Check `sh /mnt/SDCARD/spruce/scripts/wifi.sh status` over SSH.
+  - Check `/mnt/SDCARD/spruce/scripts/bin/wifi status` over SSH (SSH shells
+    don't load the platform cfg, so `wifi` alone isn't on their PATH).
   - Check spruce.log for `wifi.sh:` lines.
 - **TrimUI and Flip:** sleep with WiFi on, then wake. Repeat with a USB dongle.
 - **Any device:** set in-game WiFi off, launch a game, exit, and WiFi comes back.
