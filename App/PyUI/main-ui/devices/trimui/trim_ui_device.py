@@ -65,23 +65,8 @@ class TrimUIDevice(DeviceCommon):
     def reboot_cmd(self):
         return "reboot"
         
-    # Shared by the Brick, Brick Pro, Smart Pro and Smart Pro S. The
-    # "Powering off" / "Rebooting" message ends the UI, and the trailing sleep
-    # keeps PyUI from drawing over it while the shutdown runs.
-    def _signal_osd_quit(self):
-        os.makedirs("/tmp/trimui_osd", exist_ok=True)
-        open("/tmp/trimui_osd/osdd_quit", "a").close()
-
-    # The radio is save_poweroff.sh's to stop: it runs device_prepare_for_poweroff,
-    # may still need WiFi for the Syncthing shutdown sync, and kills wpa_supplicant
-    # itself before the unmount. PyUI killing it a second earlier only got in the way.
-    def _prepare_for_power_action(self):
-        self._signal_osd_quit()
-        time.sleep(1)
-
     def power_off(self):
         Display.display_message(Language.label("poweringOff", "Powering off..."))
-        self._prepare_for_power_action()
         time.sleep(1)
         super().power_off()
         # So we dont update the display while shutting down

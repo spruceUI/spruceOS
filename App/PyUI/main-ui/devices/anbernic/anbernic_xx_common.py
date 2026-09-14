@@ -174,54 +174,13 @@ class AnbernicXXCommon(DeviceCommon):
         return self.system_config.get_volume()
     
     def run_game(self, rom_info: RomInfo):
-        if(PyUiConfig.mimic_miyoo_mainui_mode()):
-            MiyooTrimCommon.run_game(self, rom_info)
-        else:
-            from controller.controller import Controller
-            menu_options = rom_info.game_system.game_system_config.get_menu_options()
-            selected_core = self.get_selected_emulator(menu_options)
-            if(selected_core is None):
-                Display.display_message("No core found", 2_000)
-                return
-
-            selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"
-
-            # One cfg per platform, like the shell launcher. PLATFORM is exported
-            # by the runtime that starts PyUI; the fallback is the family's widest
-            # panel, which is also what the shared cfg used to describe.
-            platform = os.environ.get("PLATFORM", "AnbernicXX720480")
-            platform_cfg = "/mnt/SDCARD/RetroArch/platform/" + "retroarch-" + platform + ".cfg"
-            shutil.copyfile(platform_cfg, "/mnt/SDCARD/RetroArch/retroarch.cfg")
-            cmds = [
-                    "/mnt/SDCARD/RetroArch/ra64.universal",
-                    "-v",
-                    "--config", "/mnt/SDCARD/RetroArch/retroarch.cfg",
-                    "--log-file","/mnt/SDCARD/Saves/spruce/retroarch.log",
-                    "-L",selected_core,
-                    rom_info.rom_file_path]
-
-            directory = "/mnt/SDCARD/RetroArch/"
-            PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
-            Display.deinit_display()
-            subprocess.run(cmds, cwd = directory)
-            Display.init()
-
-            Controller.clear_input_queue()
+        MiyooTrimCommon.run_game(self, rom_info)
 
     def run_cmd(self, args, dir = None, is_power_cmd = False):
         MiyooTrimCommon.run_cmd(self, args, dir, is_power_cmd)
             
     def run_app(self, folder,launch):
-        if(PyUiConfig.mimic_miyoo_mainui_mode()):
-            MiyooTrimCommon.run_app(self, folder,launch)
-        else:
-            from controller.controller import Controller
-            directory = os.path.dirname(launch)
-            Display.deinit_display()
-            PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-            subprocess.run([launch], cwd = directory)
-            Display.init()
-            Controller.clear_input_queue()
+        MiyooTrimCommon.run_app(self, folder,launch)
     
     def map_digital_input(self, sdl_input):
         return None
