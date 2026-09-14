@@ -1,8 +1,11 @@
+from asyncio import subprocess
 from pathlib import Path
+import configparser
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from devices.gkd.connman_wifi_scanner import WiFiNetwork
+from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from utils.logger import PyUiLogger
@@ -22,30 +25,65 @@ class ConnmanWifiMenu:
             Device.get_device().disable_wifi()
         else:
             Device.get_device().enable_wifi()
-        Device.get_device().note_wifi_change()
+
+
+    def write_connman_conf(self, network: WiFiNetwork, passwd: str):
+        config_folder = Path("/storage/.cache/connman")
+
+        # Build config options
+        config = configparser.RawConfigParser()
+        config.optionxform = lambda option: option
+
+        config.add_section("Settings")
+        config["Settings"]["AutoConnect"] = "true"
+
+        net_section = f"service_{network.id_str}"
+        config.add_section(net_section)
+        config[net_section]["Type"] = "wifi"
+        config[net_section]["Name"] = network.ssid
+        config[net_section]["Passphrase"] = passwd
+
+        filename = network.id_str.split("_")[2]
+        full_path = config_folder.joinpath(filename).with_suffix(".config")
+
+        # Write to file
+        try:
+            with open(full_path, "w") as f:
+                config.write(f)
+
+            PyUiLogger.get_logger().info(
+                f"Installed network '{network.ssid}' into {str(full_path)}"
+            )
+
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"Failed writing {str(full_path)}: {e}")
+
+
+    def connman_connect(self, id_str: str):
+        try:
+            ProcessRunner.run(["connmanctl", "connect", id_str])
+            PyUiLogger.get_logger().info(f"Connected to {id_str}.")
+        except subprocess.CalledProcessError as e:
+            PyUiLogger.get_logger().error(f"Error connecting to {id_str}: {e}")
 
 
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
-        # Same shim as WifiMenu: the prompt is UI, joining is wifi.sh's job, and
-        # the Pixel 2's device_wifi_connect hook does the connman work.
         PyUiLogger.get_logger().info(f"Selected {net.ssid}!")
         if(net.requires_password()):
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
+                self.write_connman_conf(net, password)
                 Display.display_message(
                     Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
                     .replace("{ssid}", net.ssid)
                     .replace("{password}", password),
                     duration_ms=5000,
                 )
-                Device.get_device().wifi_connect(net.ssid, password)
-                Device.get_device().note_wifi_change()
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
-        else:
-            Device.get_device().wifi_connect(net.ssid, None)
-            Device.get_device().note_wifi_change()
+
+        self.connman_connect(net.id_str)
 
     def _build_options(
         self,
