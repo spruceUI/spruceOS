@@ -72,12 +72,11 @@ class TrimUIDevice(DeviceCommon):
         os.makedirs("/tmp/trimui_osd", exist_ok=True)
         open("/tmp/trimui_osd/osdd_quit", "a").close()
 
-    def _wpa_supplicant_quit(self):
-        ProcessRunner.run(["killall", "wpa_supplicant"])
-
+    # The radio is save_poweroff.sh's to stop: it runs device_prepare_for_poweroff,
+    # may still need WiFi for the Syncthing shutdown sync, and kills wpa_supplicant
+    # itself before the unmount. PyUI killing it a second earlier only got in the way.
     def _prepare_for_power_action(self):
         self._signal_osd_quit()
-        self._wpa_supplicant_quit()
         time.sleep(1)
 
     def power_off(self):
