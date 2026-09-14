@@ -1,0 +1,6 @@
+{
+  "verInner": 2147483647,
+  "otaFile": "spruce/miniloong/boot/spruce_probe.bin",
+  "otaHash": "8DB77B1B6A29F9EAE52B3DFD06FBD9CA",
+  "otaCommand": "SDCARD=/mnt/sdcard; LOG=/mnt/sdcard/Saves/spruce/spruce-otacommand.log; mkdir -p /mnt/sdcard/Saves/spruce 2>/dev/null || true; printf 'spruce otaCommand started %s\\n' \"$(date 2>/dev/null)\" >$LOG 2>/dev/null || true; sh $SDCARD/spruce/miniloong/boot/spruce-install.sh >>$LOG 2>&1; printf 'spruce otaCommand returned\\n' >>$LOG 2>/dev/null || true; sync"
+}
