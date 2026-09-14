@@ -71,6 +71,58 @@ init_battery_log() {
     fi
 }
 
+show_low_battery_warning() {
+    display -t "Battery has $CAPACITY% left. Charge or shutdown your device." \
+        --add-image "/mnt/SDCARD/spruce/imgs/displayAcknowledge.png" 1.0 240 middle
+
+    /mnt/SDCARD/spruce/flip/bin/python3 - <<'PY'
+import os
+import fcntl
+import struct
+
+DEVICE = "/dev/input/event5"
+A_BUTTON = 305
+EVIOCGRAB = 0x40044590
+
+fmt = "llHHi"
+size = struct.calcsize(fmt)
+
+fd = os.open(DEVICE, os.O_RDONLY)
+
+try:
+    fcntl.ioctl(fd, EVIOCGRAB, 1)
+
+    while True:
+        data = os.read(fd, size)
+        if len(data) != size:
+            continue
+
+        _, _, ev_type, code, value = struct.unpack(fmt, data)
+
+        if ev_type == 1 and code == A_BUTTON and value == 1:
+
+            while True:
+                data = os.read(fd, size)
+                if len(data) != size:
+                    continue
+
+                _, _, ev_type, code, value = struct.unpack(fmt, data)
+
+                if ev_type == 1 and code == A_BUTTON and value == 0:
+                    break
+
+            break
+
+finally:
+    fcntl.ioctl(fd, EVIOCGRAB, 0)
+    os.close(fd)
+PY
+
+    display_kill
+    sleep 0.5
+    killall -USR1 MainUI 2>/dev/null
+}
+
 hard_shutdown() {
     CAPACITY=$1
     if [ "$CAPACITY" -le 1 ] 2>/dev/null; then
@@ -129,10 +181,14 @@ while true; do
             else
                 if [ "$flag_added" = false ]; then
                     if flag_check "in_menu"; then
-                        display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
-                    else
-                        flag_add "low_battery" --tmp
-                    fi
+                        if [ "$PLATFORM" = "Flip" ]; then
+							show_low_battery_warning
+						else
+							display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
+						fi
+					else
+						flag_add "low_battery" --tmp
+					fi
                     flag_added=true
                 fi
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
