@@ -334,7 +334,8 @@ Hardware-verified or shipped on 2026-09-13; check each again in the phase that
 touches it.
 
 - XX toggle off then on reloads `8821cs` and gets an address (RG35XXSP).
-- First boot on a platform whose default is WiFi on comes up on (`SYSTEM_JSON_DEFAULT`).
+- First boot of a fresh install comes up with WiFi off on every device; every
+  shipped `*-system.json` has `"wifi": 0`.
 - TrimUI wake reconnects (Brick Pro).
 - Dongle in with WiFi off, then on: connects on the dongle. Dongle out with WiFi
   off, then on: back on the onboard radio (Brick Pro).
