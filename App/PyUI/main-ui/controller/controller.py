@@ -1,3 +1,4 @@
+import os
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -396,6 +397,19 @@ class Controller:
         # the view as a plain press and the volume keys have to stay volume keys.
         if(not Controller.menu_vol_brightness_enabled()):
             return False
+
+        # The bash watchdogs (homebutton_watchdog.sh / buttons_watchdog.sh) run
+        # independently of PyUI and read the raw input devices themselves. On
+        # devices where "enableButtonWatchers" is off (e.g. Smart Pro S),
+        # they're the ONLY thing that ever sees a volume key at all, since
+        # PyUI's own volume KeyWatcher thread never starts - so a Menu + Vol
+        # press was never detectable here below. Bash already correctly
+        # detects a vol press interrupting a MENU hold and marks it by
+        # touching /tmp/menubtn_cancelled (see cancel_menu_hold() in
+        # homebutton_watchdog.sh); read that instead of trying to re-derive
+        # the same thing from an input source that may not exist here.
+        if(os.path.exists("/tmp/menubtn_cancelled")):
+            return True
 
         Controller.is_check_for_hotkey = True
         cached_event = Controller.last_controller_input
