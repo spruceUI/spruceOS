@@ -31,7 +31,18 @@ handle_network_services() {
 	syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
 
 	##### RAC Check #####
-	if [ "$disable_wifi_in_game" = "False" ] && grep -q 'cheevos_enable = "true"' /mnt/SDCARD/RetroArch/retroarch.cfg; then
+	# Runs before prepare_ra_config applies the spruce setting, so read that setting;
+	# Manual leaves RetroArch's own per-platform cfg in charge
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
+	case "$rac_mode" in
+		Softcore|Hardcore) cheevos_wanted=true ;;
+		Disabled)          cheevos_wanted=false ;;
+		*)
+			cheevos_wanted=false
+			grep -q 'cheevos_enable = "true"' "/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg" 2>/dev/null && cheevos_wanted=true
+			;;
+	esac
+	if [ "$disable_wifi_in_game" = "False" ] && [ "$cheevos_wanted" = true ]; then
 		log_message "Retro Achievements enabled, WiFi connection needed"
 		wifi_needed=true
 	fi
