@@ -15,15 +15,12 @@ class AnbernicRG28xx(AnbernicXXCommon):
     spruce's wifi.sh, whose enable_wifi is the only path that loads the USB driver.
     """
 
-    WIFI_UNAVAILABLE_FLAG = "/tmp/wifi_unavailable"
-    WIFI_RADIO_ABSENT_FLAG = "/tmp/wifi_radio_absent"
     USB_SYS = "/sys/bus/usb/devices"
     # The ids the payload 8188eu.ko binds (modinfo -F alias); the cfg's
     # WIFI_USB_IDS wins when it is in the environment spruce launched us with.
     USB_IDS = ("0bda:8179", "0bda:0179", "0bda:f179", "2357:010c", "2357:0111",
                "07b8:8179", "2001:330f", "2001:3310", "2001:3311", "2001:331b",
                "0b05:18f0", "7392:b811", "0df6:0076", "056e:4008", "2c4e:0102")
-    SPRUCE_HELPER_FUNCTIONS = "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 
     def __init__(self, main_ui_mode):
         # For now
