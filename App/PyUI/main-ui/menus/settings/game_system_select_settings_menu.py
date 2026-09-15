@@ -19,7 +19,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             PyUiConfig.set_game_system_sort_mode(self.get_next_entry(PyUiConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,-1))
         elif (ControllerInput.DPAD_RIGHT == input):
             PyUiConfig.set_game_system_sort_mode(self.get_next_entry(PyUiConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,+1))
-        elif (ControllerInput.A):
+        elif (ControllerInput.A == input):
             selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(
                 GAME_SYSTEM_SORT_MODE_OPTIONS,
                 Language.label("gameSystemSortModeTitle", "Game System Sort Mode"),

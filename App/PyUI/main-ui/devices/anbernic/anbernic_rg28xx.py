@@ -3,18 +3,6 @@ import os
 
 
 class AnbernicRG28xx(AnbernicXXCommon):
-    """The XX line's portrait-panel model, and the one whose radio is USB.
-
-    The shell side owns the radio verdict. Two markers, set by
-    device_wifi_power_on in AnbernicXXCommon.sh: /tmp/wifi_unavailable when
-    the 8188eu module refused to load (sticky for the session) and
-    /tmp/wifi_radio_absent when no adapter was on the USB bus (cleared the
-    moment one is seen). supports_wifi keys on both, re-checking the bus
-    itself when the absent marker is set, so an adapter plugged in after boot
-    brings the WiFi entry back without a reboot. WiFi on and off go through
-    spruce's wifi.sh, whose enable_wifi is the only path that loads the USB driver.
-    """
-
     USB_SYS = "/sys/bus/usb/devices"
     # The ids the payload 8188eu.ko binds (modinfo -F alias); the cfg's
     # WIFI_USB_IDS wins when it is in the environment spruce launched us with.
@@ -60,8 +48,4 @@ class AnbernicRG28xx(AnbernicXXCommon):
         return False
 
     def supports_wifi(self):
-        if os.path.exists(self.WIFI_UNAVAILABLE_FLAG):
-            return False
-        if os.path.exists(self.WIFI_RADIO_ABSENT_FLAG):
-            return self._usb_radio_present()
-        return True
+        return self._usb_radio_present()
