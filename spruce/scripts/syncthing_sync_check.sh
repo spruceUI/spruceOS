@@ -294,7 +294,6 @@ No progress for ${stall_timeout}s" -i "$BG_TREE"
 
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
-        current_status=""
 
         for device in $devices; do
             local device_name=$(get_device_name "$device")
@@ -318,12 +317,12 @@ No progress for ${stall_timeout}s" -i "$BG_TREE"
                     status="${download_completion}/${upload_completion}%"
                 fi
 
-                current_status="${current_status}${status}"
                 echo "$folder_label:" >> /tmp/sync_display.txt
                 echo "$status" >> /tmp/sync_display.txt
                 echo "" >> /tmp/sync_display.txt
             done
         done
+        current_status="$(cat /tmp/sync_display.txt 2>/dev/null)"
 
         # Check if status has changed
         if [ "$current_status" != "$previous_status" ] && [ -n "$previous_status" ]; then
