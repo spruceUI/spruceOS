@@ -40,16 +40,10 @@ fi
 
 
 
-  #################################
-##### ABRIDGED HELPER FUNCTIONS #####
-  #################################
+  ########################
+##### HELPER FUNCTIONS #####
+  ########################
 
-# Platform facts. runtimeHelper.sh sources helperFunctions.sh and the platform
-# cfg before running us, and exports all of this, so inherit it. Run by hand
-# there is no such environment, so source it off the card - which is still
-# mounted at this point. Either way the cfg stays the single source of truth;
-# this script used to keep a second copy as a cpuinfo table, and every device
-# added since was missing from it.
 resolve_platform_facts() {
     if [ -z "$PLATFORM" ] || [ -z "$SD_MOUNTPOINT" ]; then
         . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -57,13 +51,8 @@ resolve_platform_facts() {
 
     SD_MOUNTPOINT="${SD_MOUNTPOINT:-/mnt/SDCARD}"
 
-    # Ask the kernel which device is mounted there and prefer its answer to the
-    # cfg's, because the node is not fixed: dArkMoss finds the card by label so
-    # its number follows probe order, and BaseOS mounts TF2 if it is there and
-    # TF1's own FAT partition (mmcblk0p7) if it is not - while the XX cfg names
-    # mmcblk1p1 either way. Unmounting a device other than the one mounted here
-    # just fails, and a failed unmount is the whole bug this script keeps hitting.
-    # /mnt/SDCARD is a symlink to /mnt/sdcard on BaseOS, so match on the real path.
+    # The node is not fixed: dArkMoss follows probe order, and BaseOS mounts TF1's
+    # mmcblk0p7 when no TF2 is fitted, while the XX cfg names mmcblk1p1 either way.
     _mount_path=$(readlink -f "$SD_MOUNTPOINT" 2>/dev/null)
     [ -n "$_mount_path" ] || _mount_path="$SD_MOUNTPOINT"
     _mounted_dev=$(awk -v mp="$_mount_path" '$2==mp {print $1; exit}' /proc/mounts 2>/dev/null)
@@ -75,7 +64,6 @@ resolve_platform_facts() {
     DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-480}"
     DISPLAY_ROTATION="${DISPLAY_ROTATION:-0}"
 
-    # Platforms that cannot run display_text.elf set this to "not applicable".
     case "$DISPLAY_TEXT_ELF_WIDTH" in
         ''|*[!0-9]*) TEXT_WIDTH=$((DISPLAY_WIDTH - 80)) ;;
         *)           TEXT_WIDTH="$DISPLAY_TEXT_ELF_WIDTH" ;;
@@ -91,9 +79,6 @@ resolve_platform_facts() {
     fi
 }
 
-# Drop card entries from a colon-separated path list. Once the card is
-# unmounted anything resolved through them is gone - and that includes mount,
-# sync and poweroff on the platforms whose PATH leads with the card.
 strip_card_paths() {
     _out=""
     _old_ifs="$IFS"
@@ -106,9 +91,6 @@ strip_card_paths() {
     echo "$_out"
 }
 
-# Copy everything the repair needs off the card before it goes away: the
-# display tool and its assets, and fsck.fat unless the base system has its own
-# (dArkMoss is Debian and ships one, which outlives the unmount for free).
 stage_repair_tools() {
     mkdir -p "$SDFIX_DIR"
 
@@ -173,9 +155,8 @@ tmp_debug_info() {
 
 }
 
-# Best effort. The Miyoo Mini stubs display() out entirely and the RGB30's
-# display_text.elf dies at SDL_CreateWindow on its Mali blob, so a device that
-# cannot draw still gets its card repaired - silently, with the log to say so.
+# Best effort: the Mini stubs display() out, and the RGB30's display_text.elf
+# dies at SDL_CreateWindow on its Mali blob.
 tmp_display() {
     tmp_display_kill
 
@@ -201,11 +182,8 @@ tmp_display_kill() {
     sleep 0.1
 }
 
-# dArkMoss runs spruce from spruce-launch.service, which has Restart=on-failure
-# and an ExecStartPre that mounts the card. Killing runtime.sh below ends that
-# unit's main process, so without stopping it first systemd remounts the card
-# three seconds into the fsck. KillMode=process means stopping the unit does not
-# take this script with it.
+# dArkMoss's spruce-launch.service is Restart=on-failure with a mount in
+# ExecStartPre, so it remounts the card 3s after runtime.sh is killed below.
 tmp_stop_frontend_service() {
     command -v systemctl >/dev/null 2>&1 || return 0
     if systemctl stop spruce-launch.service 2>/dev/null; then
@@ -213,9 +191,6 @@ tmp_stop_frontend_service() {
     fi
 }
 
-# The list save_poweroff.sh kills before it unmounts, for the same reason: any
-# of these still running holds files open on the card and umount refuses.
-# runtime.sh and principal.sh go first so nothing launches a new app behind us.
 tmp_kill_boot_scripts() {
     echo "Attempting to kill any boot scripts."
     for script in runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
@@ -289,16 +264,7 @@ if [ "$1" = "run" ]; then
         resolve_platform_facts
         echo "platform=$PLATFORM device=$SD_DEV mountpoint=$SD_MOUNTPOINT"
 
-        # Drop the card from the search paths BEFORE staging: spruce ships its
-        # own fsck.fat in spruce/bin, which is on PATH on the Mini and the A30,
-        # so command -v would otherwise settle on the copy that is about to be
-        # unmounted.
-        #
-        # This also means the message below cannot link against SDL on the card,
-        # so devices whose SDL lives there (RGB30, Miniloong, the XX line) repair
-        # without on-screen text. That is the trade on purpose: a display process
-        # holding libraries open on the card is itself a reason umount refuses,
-        # and a silent repair beats a pretty message and a failed unmount.
+        # Strip before staging: spruce's own fsck.fat is on PATH on the Mini and A30.
         PATH="$(strip_card_paths "$PATH")"
         LD_LIBRARY_PATH="$(strip_card_paths "$LD_LIBRARY_PATH")"
         export PATH LD_LIBRARY_PATH
@@ -312,9 +278,6 @@ if [ "$1" = "run" ]; then
         tmp_kill_boot_scripts
         tmp_read_only_check
         tmp_set_performance
-        # The literal path the setting-up phase writes and runtimeHelper checks,
-        # not $SD_MOUNTPOINT: clearing a different path would boot straight back
-        # into the repair.
         rm -f /mnt/SDCARD/FIX_MY_SDCARD
 
         tmp_display "Attempting to repair SD card. This may take some time."
@@ -331,10 +294,6 @@ if [ "$1" = "run" ]; then
             exit 1
         fi
 
-        # Retry rather than give up on the first refusal. systemctl stop returns
-        # before the unit's children are actually gone (it is KillMode=process),
-        # and a watchdog on its way out can hold the card for a moment longer.
-        # Something that never lets go still ends in the failure branch below.
         _umounted=0
         _tries=0
         while [ "$_tries" -lt 10 ]; do
