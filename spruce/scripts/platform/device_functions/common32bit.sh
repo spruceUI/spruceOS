@@ -5,7 +5,7 @@ get_python_path() {
 }
 
 get_sftp_service_name() {
-    echo "sftp-server"
+    echo "sftpgo"
 }
 
 get_ssh_service_name() {
