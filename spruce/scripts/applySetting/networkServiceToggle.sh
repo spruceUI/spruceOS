@@ -126,6 +126,6 @@ done
 echo "$$" >"$LOCK/pid"
 trap 'rm -rf "$LOCK"' EXIT INT TERM
 
-write_landing_page_services
 apply_toggle
+start_darkhttpd_process
 exit 0
