@@ -104,7 +104,7 @@ class MainMenuPopup:
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows)
 
-        while (popup_selection := popup_view.get_selection()):
+        while (popup_selection := popup_view.get_selection(select_controller_inputs=[ControllerInput.A, ControllerInput.MENU])):
             if (popup_selection.get_input() is not None):
                 break
 
