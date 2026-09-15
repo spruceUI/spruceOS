@@ -233,19 +233,6 @@ dim_screen() {
     done
 }
 
-finish_unpacking() {
-    flag="$1"
-    if flag_check "$flag"; then
-        start_pyui_message_writer
-        log_and_display_message "Finishing up unpacking archives.........."
-        while [ -f "$FLAGS_DIR/$flag.lock" ]; do
-            : # null operation (no sleep needed)
-        done
-        flag_remove "silentUnpacker"
-        stop_pyui_message_writer
-    fi
-}
-
 calculate_progress_percent() {
     completed="${1:-0}"
     total="${2:-0}"
