@@ -86,6 +86,10 @@ hard_shutdown() {
             log_message "low_power_warning: battery read $CAPACITY%% not confirmed (re-read $CONFIRM%%); skipping forced shutdown"
             return 0
         fi
+        if ! device_low_battery_shutdown_ok; then
+            log_message "low_power_warning: device declined the forced shutdown at $CAPACITY%%"
+            return 0
+        fi
         flag_add "forced_shutdown" --tmp
         /mnt/SDCARD/spruce/scripts/save_poweroff.sh
         exit

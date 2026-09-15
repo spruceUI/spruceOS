@@ -82,7 +82,9 @@ runtime_mounts_magicx() {
 # simplepad gamepad, the PMIC power key and (Zero 40) the touchscreen enumerate
 # in whatever order the drivers probe. The cfg values stay as fallbacks.
 magicx_resolve_event_paths() {
-    pad=$(magicx_find_event_by_name "*simplepad*" "*[Gg]amepad*" "*[Jj]oystick*" "*joypad*")
+    # The simplepad driver (UART MCU pad) registers its input device as
+    # "magicx-input" (strings in simplepad.ko), not under the generic names.
+    pad=$(magicx_find_event_by_name "*magicx-input*" "*magicx*" "*simplepad*" "*[Gg]amepad*" "*[Jj]oystick*" "*joypad*")
     if [ -n "$pad" ]; then
         export EVENT_PATH_SEND_TO_DRASTIC="$pad"
         export EVENT_PATH_SEND_TO_RA_AND_PPSSPP="$pad"
@@ -120,8 +122,49 @@ device_init() {
 }
 
 # MinUI's zero28 port found some board revisions keep the panel dark after a
-# resume unless the backlight is driven low and back to its level; the wake-up
-# below does that first, then the inherited A133P radio bring-up.
+# resume unless the backlight is driven low and back to its level.
+
+# Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
+# reading with a good voltage becomes an estimate and holds the shutdown off.
+MAGICX_VBAT_EMPTY_MV=3400
+MAGICX_VBAT_FULL_MV=4150
+MAGICX_VBAT_TRUST_MV=3500
+
+magicx_battery_mv() {
+    uv=$(cat "$BATTERY/voltage_now" 2>/dev/null)
+    case "$uv" in ''|*[!0-9]*) echo ""; return 1 ;; esac
+    if [ "$uv" -gt 100000 ]; then echo $((uv / 1000)); else echo "$uv"; fi
+}
+
+device_get_battery_percent() {
+    cap=$(cat "$BATTERY/capacity" 2>/dev/null)
+    case "$cap" in ''|*[!0-9]*) echo "$cap"; return ;; esac
+    if [ "$cap" -le 1 ]; then
+        mv=$(magicx_battery_mv)
+        if [ -n "$mv" ] && [ "$mv" -ge "$MAGICX_VBAT_TRUST_MV" ]; then
+            est=$(( (mv - MAGICX_VBAT_EMPTY_MV) * 100 / (MAGICX_VBAT_FULL_MV - MAGICX_VBAT_EMPTY_MV) ))
+            [ "$est" -gt 100 ] && est=100
+            [ "$est" -lt 2 ] && est=2
+            [ -e /tmp/magicx_gauge_warned ] || { log_message "MagicX battery: gauge says ${cap}% at ${mv} mV; using voltage estimate ${est}%"; touch /tmp/magicx_gauge_warned; }
+            echo "$est"; return
+        fi
+    fi
+    echo "$cap"
+}
+
+device_low_battery_shutdown_ok() {
+    if [ "$(cat /sys/class/power_supply/axp2202-usb/online 2>/dev/null)" = "1" ]; then
+        log_message "MagicX battery: charger online, not forcing a shutdown"
+        return 1
+    fi
+    mv=$(magicx_battery_mv)
+    if [ -n "$mv" ] && [ "$mv" -ge "$MAGICX_VBAT_TRUST_MV" ]; then
+        log_message "MagicX battery: ${mv} mV, gauge not trusted, not forcing a shutdown"
+        return 1
+    fi
+    return 0
+}
+
 magicx_relight_panel() {
     level=$(jq -r '.backlight // 5' "$SYSTEM_JSON" 2>/dev/null)
     case "$level" in ''|*[!0-9]*) level=5 ;; esac

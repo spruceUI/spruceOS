@@ -244,7 +244,7 @@ class Display:
                 width, height = Device.get_device().screen_width(), Device.get_device().screen_height()
             else:
                 width, height = display_mode.w, display_mode.h
-                #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
+                PyUiLogger.get_logger().info(f"Display size: {width}x{height} (device says {Device.get_device().screen_width()}x{Device.get_device().screen_height()} rotation {Device.get_device().screen_rotation()})")
 
         with log_timing("sdl2.ext.Window", PyUiLogger.get_logger()):    
             cls.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)

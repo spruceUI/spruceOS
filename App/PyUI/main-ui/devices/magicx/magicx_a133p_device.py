@@ -7,7 +7,7 @@ from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import KeyWatcherController
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
+from devices.magicx.magicx_key_mapping_provider import MagicXKeyMappingProvider
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.utils.file_watcher import FileWatcher
@@ -125,9 +125,29 @@ class MagicXA133PDevice(TrimUIDevice):
         return FfmpegImageUtils()
 
     # ----- input -----
+    @throttle.limit_refresh(15)
+    def get_battery_percent(self):
+        # Mirrors device_get_battery_percent in magicx_a133p.sh: a 0-1 % gauge
+        # reading with a healthy voltage is replaced by a voltage estimate.
+        try:
+            with open("/sys/class/power_supply/axp2202-battery/capacity", "r") as f:
+                cap = int(f.read().strip())
+        except Exception:
+            return 0
+        if cap <= 1:
+            try:
+                with open("/sys/class/power_supply/axp2202-battery/voltage_now", "r") as f:
+                    v = int(f.read().strip())
+                mv = v // 1000 if v > 100000 else v
+                if mv >= 3500:
+                    return max(2, min(100, (mv - 3400) * 100 // (4150 - 3400)))
+            except Exception:
+                pass
+        return cap
+
     def get_controller_interface(self):
         return KeyWatcherController(event_path=self.pad_event_path,
-                                    mapping_provider=MiyooTrimKeyMappingProvider(),
+                                    mapping_provider=MagicXKeyMappingProvider(),
                                     event_format='llHHi')
 
     def supports_touch(self):
