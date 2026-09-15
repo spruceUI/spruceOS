@@ -43,12 +43,12 @@ class MagicXKeyMappingProvider:
             158: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
             172: ControllerInput.HOME,
         }
-        # Stick direction. DedicatedOS (Zero 40) negates the X axis
-        # ("inverted!", libhookdrastic.c) and leaves Y alone; the DTB gives
-        # the driver joystick1_invert=1. Overridable from the platform cfg
-        # (MAGICX_STICK_INVERT_X / MAGICX_STICK_INVERT_Y) without a rebuild.
-        self.invert_x = _env_flag("MAGICX_STICK_INVERT_X", True)
+        # Stick direction and axis layout differ per board: DedicatedOS (Zero 40) has
+        # horizontal = -ABS_Y, MinUI (Zero 28) plain ABS_X/ABS_Y. Set from the cfg.
+        self.swap_xy = _env_flag("MAGICX_STICK_SWAP_XY", False)
+        self.invert_x = _env_flag("MAGICX_STICK_INVERT_X", False)
         self.invert_y = _env_flag("MAGICX_STICK_INVERT_Y", False)
+        self._reported = set()
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
             self.key_mappings[KeyEvent(1, code, 0)] = [InputResult(ci, KeyState.RELEASE)]
@@ -56,11 +56,23 @@ class MagicXKeyMappingProvider:
 
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
+        if mappings is None and key_event.event_type == 1 and key_event.value == 1 and key_event.code not in self._reported:
+            # Bring-up aid: name every key code this pad sends that the map
+            # does not know, once per code (the Zero 40's MENU, 2026-09-16).
+            self._reported.add(key_event.code)
+            try:
+                from utils.logger import PyUiLogger
+                PyUiLogger.get_logger().info(f"MagicX pad: unmapped key code {key_event.code} pressed")
+            except Exception:
+                pass
         if mappings is None and key_event.event_type == 3 and key_event.code in (0, 1):
-            neg, pos = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT) if key_event.code == 0
+            axis = key_event.code
+            if self.swap_xy:
+                axis = 1 - axis
+            neg, pos = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT) if axis == 0
                         else (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN))
             value = key_event.value
-            if (key_event.code == 0 and self.invert_x) or (key_event.code == 1 and self.invert_y):
+            if (axis == 0 and self.invert_x) or (axis == 1 and self.invert_y):
                 value = -value
             if value < -DEADZONE:
                 return [InputResult(neg, KeyState.PRESS)]
