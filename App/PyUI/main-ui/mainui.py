@@ -126,6 +126,12 @@ def initialize_device(device, main_ui_mode):
     elif "RGB30" == device:
         from devices.rgb30.rgb30 import Rgb30
         Device.init(Rgb30(device))
+    elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
+        from devices.magicx.magicx_zero28 import MagicXZero28
+        Device.init(MagicXZero28(device, main_ui_mode))
+    elif "MAGICX_ZERO40" == device or "SPRUCE_MAGICX_ZERO40" == device:
+        from devices.magicx.magicx_zero40 import MagicXZero40
+        Device.init(MagicXZero40(device, main_ui_mode))
     elif "GKD_PIXEL2" == device:
         from devices.gkd.gkd_pixel2 import GKDPixel2
         Device.init(GKDPixel2(device, main_ui_mode))

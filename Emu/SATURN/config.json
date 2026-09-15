@@ -85,7 +85,9 @@
       "devices": [
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO"
+        "TRIMUI_SMART_PRO",
+        "MAGICX_ZERO28",
+        "MAGICX_ZERO40"
       ],
       "selected": "yabasanshiro_a133p_libretro",
       "overrides": {}
@@ -105,7 +107,9 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40"
   ],
   "alternativeFolderNames": [
     "saturn",

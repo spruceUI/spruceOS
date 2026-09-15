@@ -19,7 +19,12 @@ case $INFO in
     *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) 
         if [ -e /usr/magicx ]; then
-            export PLATFORM="Zero28"
+            # MagicX A133P family on our Tina base: the image names the model in
+            # /usr/magicx/device (zero28 | zero40); images without it are Zero 28.
+            case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+                zero40) export PLATFORM="Zero40" ;;
+                *)      export PLATFORM="Zero28" ;;
+            esac
         else
             export PLATFORM="MiyooMini" 
         fi

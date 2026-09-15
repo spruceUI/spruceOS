@@ -3,12 +3,15 @@
   "icon": "gallery.png",
   "launch": "launch.sh",
   "description": "Screenshots viewer",
-  "devices": ["TRIMUI_BRICK",
-              "TRIMUI_SMART_PRO",
-              "TRIMUI_SMART_PRO_S",
-              "MIYOO_FLIP",
-              "GKD_PIXEL2",
-              "ANBERNIC_RGXX"
-              ],
+  "devices": [
+    "TRIMUI_BRICK",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40"
+  ],
   "hideInSimpleMode": false
 }

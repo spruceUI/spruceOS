@@ -67,7 +67,9 @@
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "MAGICX_ZERO28",
+        "MAGICX_ZERO40"
       ],
       "options": [
         "Flycast-libretro",
@@ -107,7 +109,9 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40"
   ],
   "alternativeFolderNames": [
     "DREAMCAST",

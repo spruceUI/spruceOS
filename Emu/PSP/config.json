@@ -34,7 +34,9 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40"
   ],
   "alternativeFolderNames": [
     "psp",

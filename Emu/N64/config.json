@@ -66,7 +66,9 @@
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
         "GKD_PIXEL2",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "MAGICX_ZERO28",
+        "MAGICX_ZERO40"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
@@ -118,7 +120,9 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40"
   ],
   "alternativeFolderNames": [
     "NINTENDO64",

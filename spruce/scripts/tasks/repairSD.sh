@@ -130,6 +130,19 @@ case $INFO in
         DISPLAY_HEIGHT=720
         DISPLAY_ROTATION=0
         ;;
+    *"sun50iw10p1"*)
+        # MagicX A133P family on our Tina base (TrimUI's kernels report TG*
+        # instead, matched above). The image names the model.
+        case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+            zero40) PLATFORM="Zero40"; TEXT_WIDTH=440;  DISPLAY_WIDTH=480; DISPLAY_HEIGHT=800; DISPLAY_ROTATION=0 ;;
+            *)      PLATFORM="Zero28"; TEXT_WIDTH=600;  DISPLAY_WIDTH=640; DISPLAY_HEIGHT=480; DISPLAY_ROTATION=90 ;;
+        esac
+        LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib"
+        SD_DEV="/dev/mmcblk1p1"
+        BIN_DIR="/mnt/SDCARD/spruce/bin64"
+        MAX_FREQ=1800000
+        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+        ;;
 esac
 
 tmp_blink() {

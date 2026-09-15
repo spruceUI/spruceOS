@@ -77,7 +77,12 @@ case $INFO in
         ;;
     *) 
         if [ -e /usr/magicx ]; then
-            export PLATFORM="Zero28"
+            # MagicX A133P family on our Tina base: the image names the model in
+            # /usr/magicx/device (zero28 | zero40); images without it are Zero 28.
+            case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+                zero40) export PLATFORM="Zero40" ;;
+                *)      export PLATFORM="Zero28" ;;
+            esac
         else
             export PLATFORM="MiyooMini" 
         fi
@@ -108,7 +113,8 @@ device_names() {
         Pixel2)           echo "GKD_PIXEL2" ;;
         RGB30)            echo "RGB30" ;;
         Miniloong)        echo "MINILOONG_POCKET1" ;;
-        Zero28)           echo "MAGICX_ZERO28" ;;
+        Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
+        Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

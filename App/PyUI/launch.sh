@@ -342,11 +342,15 @@ case "$PLATFORM" in
 # MagicX Zero28
 ############################################################
 
-    "Zero28" )
+    "Zero28" | "Zero40" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="/usr/magicx/lib"
-        DEVICE="MAGICX_ZERO28"
+        if [ "$PLATFORM" = "Zero40" ]; then
+            DEVICE="MAGICX_ZERO40"
+        else
+            DEVICE="MAGICX_ZERO28"
+        fi
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \

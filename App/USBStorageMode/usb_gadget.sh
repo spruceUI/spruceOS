@@ -22,7 +22,7 @@ usb_gadget_platform_setup() {
             LUN_PATH="$USB_GADGET_PATH/lun0"
             LUN_FILE="$LUN_PATH/file"
             ;;
-        "Brick" | "SmartPro" | "BrickPro")
+        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40")
             STORAGE_DEVICE="/dev/mmcblk1p1"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"

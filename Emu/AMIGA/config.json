@@ -38,7 +38,9 @@
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
         "GKD_PIXEL2",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "MAGICX_ZERO28",
+        "MAGICX_ZERO40"
       ]
     },
     "Emulator_MiyooMini": {

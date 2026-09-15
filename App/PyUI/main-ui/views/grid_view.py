@@ -319,8 +319,38 @@ class GridView(View):
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.B:
                 return Selection(self.get_selected_option(), Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.TOUCH_TAP:
+                hit = self.cell_at_touch_point(Controller.take_touch_point())
+                if hit is not None:
+                    if hit == self.selected:
+                        return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
+                    self.selected = hit
+                    self.correct_selected_for_off_list()
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def cell_at_touch_point(self, point):
+        """Option index under a logical-space tap, or None (mirrors _render_cell)."""
+        if point is None or not self.options:
+            return None
+        x, y = point
+        x_index = int((x - self.x_pad) // self.icon_width) if self.icon_width else 0
+        if x_index < 0 or x_index >= self.cols:
+            return None
+        top = Display.get_top_bar_height(False)
+        row_spacing = Display.get_usable_screen_height() / self.rows
+        if y < top or row_spacing <= 0:
+            return None
+        y_index = int((y - top) // row_spacing)
+        if y_index < 0 or y_index >= self.rows:
+            return None
+        visible_index = y_index * self.cols + x_index
+        window = self.current_right - self.current_left
+        if window <= 0:
+            window = min(self.rows * self.cols, len(self.options))
+        if visible_index >= window:
+            return None
+        return (self.current_left + visible_index) % len(self.options)
 
     def adjust_selected(self, amount, skip_by_letter):
         amount = self.calculate_amount_to_move_by(amount, skip_by_letter)

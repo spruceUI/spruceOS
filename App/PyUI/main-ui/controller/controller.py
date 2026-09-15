@@ -35,6 +35,8 @@ class Controller:
     _screensaver_active = False
     _screensaver_ignore_input_until = 0
     _game_running = False
+    # Logical-space point of the last TOUCH_TAP, set by the touch watcher
+    touch_point = None
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -64,6 +66,16 @@ class Controller:
         ControllerInput.A,
     ]
 
+
+    @staticmethod
+    def set_touch_point(x, y):
+        Controller.touch_point = (x, y)
+
+    @staticmethod
+    def take_touch_point():
+        point = Controller.touch_point
+        Controller.touch_point = None
+        return point
 
     @staticmethod
     def init():

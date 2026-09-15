@@ -30,4 +30,7 @@ class ControllerInput(Enum):
     VOLUME_DOWN = auto()
     VOLUME_UP = auto()
     POWER_BUTTON = auto()
+    # A finger tap; the point is on Controller.take_touch_point(). Views that
+    # know their item rectangles turn it into a selection (see ListView/GridView).
+    TOUCH_TAP = auto()
     UNKNOWN = auto()

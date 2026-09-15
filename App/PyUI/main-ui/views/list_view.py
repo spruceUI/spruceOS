@@ -86,8 +86,45 @@ class ListView(View):
             elif Controller.last_input() == ControllerInput.B:
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.TOUCH_TAP:
+                hit = self.row_at_touch_point(Controller.take_touch_point())
+                if hit is not None:
+                    if hit == self.selected:
+                        self.selection_made()
+                        return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
+                    self.selected = hit
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def row_at_touch_point(self, point):
+        """Index of the visible row under a logical-space tap, or None.
+
+        Rows are laid out from base_y_offset in line_height steps (the
+        NonDescriptiveListView family); other lists share the window evenly.
+        """
+        if point is None or not self.options:
+            return None
+        x, y = point
+        visible = self.current_bottom - self.current_top
+        if visible <= 0:
+            return None
+        top = getattr(self, 'base_y_offset', None)
+        line_height = getattr(self, 'line_height', None)
+        if top is None:
+            top = Display.get_top_bar_height() + 5
+        if line_height is None:
+            usable = Display.get_usable_screen_height()
+            max_rows = getattr(self, 'max_rows', visible) or visible
+            line_height = usable / max_rows
+        if y < top or line_height <= 0:
+            return None
+        row = int((y - top) // line_height)
+        if row < 0 or row >= visible:
+            return None
+        index = self.current_top + row
+        if index >= len(self.options):
+            return None
+        return index
     
     def options_are_alphabetized(self):
         return False

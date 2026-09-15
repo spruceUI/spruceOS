@@ -55,7 +55,7 @@ run_ppsspp() {
 
 	case "$PLATFORM" in
 		# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
-		"Brick"|"SmartPro"|"BrickPro")
+		"Brick"|"SmartPro"|"BrickPro"|"Zero28"|"Zero40")
 			export SDL_VIDEODRIVER=mali
 			"$EMU_DIR/setalpha" 0
 			rm -f "$PSP_DIR/FailedGraphicsBackends.txt"
