@@ -50,15 +50,12 @@ class TrimUISmartProS(TrimUIDevice):
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             threading.Thread(target=self.startup_init, daemon=True).start()
-            if(PyUiConfig.enable_button_watchers()):
-                from controller.controller import Controller
-                #/dev/miyooio if we want to get rid of miyoo_inputd
-                # debug in terminal: hexdump  /dev/miyooio
-                self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-                volume_key_polling_thread.start()
-                self.power_key_watcher = self.volume_key_watcher
+            from controller.controller import Controller
+            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+            self.power_key_watcher = self.volume_key_watcher
                 
         super().__init__()
 

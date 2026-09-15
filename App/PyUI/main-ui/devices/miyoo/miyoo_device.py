@@ -15,6 +15,7 @@ import sdl2
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
+from utils.py_ui_config import PyUiConfig
 
 
 class MiyooDevice(DeviceCommon):
@@ -119,11 +120,12 @@ class MiyooDevice(DeviceCommon):
         DeviceCommon.prompt_power_down(self)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
 
     def map_key(self, key_code):
         if(116 == key_code):

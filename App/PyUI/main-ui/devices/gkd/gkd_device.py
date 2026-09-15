@@ -16,6 +16,7 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 class GKDDevice(DeviceCommon):
     
@@ -107,11 +108,12 @@ class GKDDevice(DeviceCommon):
 
     
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
 
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
