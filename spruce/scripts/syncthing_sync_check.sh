@@ -100,11 +100,6 @@ start_network() {
     ifconfig lo up
 }
 
-stop_network() {
-    log_message "SyncthingCheck: Stopping network interface..."
-    ifconfig lo down
-}
-
 get_folders() {
     local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
     if [ -z "$folders" ]; then
@@ -374,7 +369,6 @@ main() {
         if ! wait_for_syncthing_api; then
             display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
             sleep 1
-            stop_network
             exit 1
         fi
     fi
@@ -394,14 +388,12 @@ main() {
             ;;
         *)
             log_message "SyncthingCheck: Usage: $0 {--monitor|--startup|--shutdown}"
-            stop_network
             exit 1
             ;;
     esac
 
     exit_code=$?
     log_message "SyncthingCheck: Sync check completed with exit code: $exit_code"
-    stop_network
     exit $exit_code
 }
 
