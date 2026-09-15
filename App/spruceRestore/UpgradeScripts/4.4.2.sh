@@ -1,18 +1,7 @@
 #!/bin/sh
 
-# -------------------- UPGRADE SCRIPT TEMPLATE --------------------
-# Instructions:
-# 1. Set the TARGET_VERSION to the version you're upgrading to.
-# 2. Add your file updates in the designated section using the update_file function.
-# 3. Ensure all paths are correct for your specific upgrade scenario.
-# 4. Add any additional upgrade steps as needed.
+TARGET_VERSION="4.4.2"
 
-# Define the target version for this upgrade script
-TARGET_VERSION="X.Y.Z"  # Replace X.Y.Z with your target version number
-
-/mnt/SDCARD/spruce/scripts/helperFunctions.sh
-
-# Source the helper functions
 HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 if [ -f "$HELPER_FUNCTIONS" ]; then
     . "$HELPER_FUNCTIONS"
