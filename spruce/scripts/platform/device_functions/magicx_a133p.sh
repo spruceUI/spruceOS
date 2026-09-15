@@ -114,7 +114,7 @@ device_init() {
     ) &
     # Bluetooth: the base ships bluez and the XR829 BT firmware, but the HCI attach
     # sequence is not wired on this family yet; PyUI's Bluetooth toggle owns it.
-    amixer set 'Soft Volume Master' 255 2>/dev/null
+    magicx_init_audio
 
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
@@ -196,6 +196,39 @@ device_exit_sleep() {
 take_screenshot() {
     screenshot_path="$1"
     /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
+}
+
+# Volume. trimui_a133p.sh's set_volume writes /tmp/system/set_volume, the
+# level file TrimUI's firmware daemon applies; nothing on this base reads it,
+# so the volume keys did nothing (Zero 40, 2026-09-16). MinUI's zero28 port
+# drives the codec directly: 'DAC volume' takes 0 (mute) or 96..160 for
+# 5..100 %, after 'Headphone', 'digital volume' and 'Soft Volume Master' are
+# opened up once (libmsettings/msettings.c). Same 0-20 scale and json as the
+# TrimUI routine, minus the firmware file and TrimUI's OSD script.
+magicx_apply_volume() {
+    vol="${1:-0}"
+    raw=$((vol * 5))
+    [ "$raw" -gt 0 ] && raw=$((96 + 64 * raw / 100))
+    amixer sset 'DAC volume' "$raw" >/dev/null 2>&1
+}
+
+set_volume() {
+    new_vol="${1:-0}"
+    SAVE_TO_CONFIG="${2:-true}"
+    [ "$new_vol" -lt 0 ] 2>/dev/null && new_vol=0
+    [ "$new_vol" -gt 20 ] 2>/dev/null && new_vol=20
+    magicx_apply_volume "$new_vol"
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        current_volume=$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)
+        [ "$current_volume" = "$new_vol" ] || save_volume_to_config_file "$new_vol"
+    fi
+}
+
+magicx_init_audio() {
+    amixer sset 'Headphone' 0 >/dev/null 2>&1
+    amixer sset 'digital volume' 0 >/dev/null 2>&1
+    amixer sset 'Soft Volume Master' 255 >/dev/null 2>&1
+    magicx_apply_volume "$(get_volume_level 2>/dev/null)"
 }
 
 # TrimUI-only hooks inherited from trimui_a133p.sh. The MagicX boards have no
