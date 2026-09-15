@@ -1,8 +1,15 @@
+import os
+
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 
 DEADZONE = 16000
+
+
+def _env_flag(name, default):
+    v = os.environ.get(name, "").strip()
+    return default if v == "" else v not in ("0", "false", "False", "no")
 
 
 class MagicXKeyMappingProvider:
@@ -29,8 +36,19 @@ class MagicXKeyMappingProvider:
             314: ControllerInput.SELECT, 315: ControllerInput.START,
             103: ControllerInput.DPAD_UP, 108: ControllerInput.DPAD_DOWN,
             105: ControllerInput.DPAD_LEFT, 106: ControllerInput.DPAD_RIGHT,
-            158: ControllerInput.MENU,
+            # MENU: KEY_BACK 158 per MinUI's keymon and DedicatedOS's hangmon on
+            # both boards; the Zero 40 did not react to it on first use, so the
+            # other codes a MENU key is commonly given are mapped as well until
+            # the diag log's key bitmap names the real one.
+            158: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
+            172: ControllerInput.HOME,
         }
+        # Stick direction. DedicatedOS (Zero 40) negates the X axis
+        # ("inverted!", libhookdrastic.c) and leaves Y alone; the DTB gives
+        # the driver joystick1_invert=1. Overridable from the platform cfg
+        # (MAGICX_STICK_INVERT_X / MAGICX_STICK_INVERT_Y) without a rebuild.
+        self.invert_x = _env_flag("MAGICX_STICK_INVERT_X", True)
+        self.invert_y = _env_flag("MAGICX_STICK_INVERT_Y", False)
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
             self.key_mappings[KeyEvent(1, code, 0)] = [InputResult(ci, KeyState.RELEASE)]
@@ -41,9 +59,12 @@ class MagicXKeyMappingProvider:
         if mappings is None and key_event.event_type == 3 and key_event.code in (0, 1):
             neg, pos = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT) if key_event.code == 0
                         else (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN))
-            if key_event.value < -DEADZONE:
+            value = key_event.value
+            if (key_event.code == 0 and self.invert_x) or (key_event.code == 1 and self.invert_y):
+                value = -value
+            if value < -DEADZONE:
                 return [InputResult(neg, KeyState.PRESS)]
-            if key_event.value > DEADZONE:
+            if value > DEADZONE:
                 return [InputResult(pos, KeyState.PRESS)]
             return [InputResult(neg, KeyState.RELEASE), InputResult(pos, KeyState.RELEASE)]
         return mappings
