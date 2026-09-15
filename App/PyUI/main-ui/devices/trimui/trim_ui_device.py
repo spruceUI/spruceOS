@@ -74,7 +74,6 @@ class TrimUIDevice(DeviceCommon):
 
     def reboot(self):
         Display.display_message(Language.label("rebooting", "Rebooting..."))
-        self._prepare_for_power_action()
         time.sleep(1)
         super().reboot()
         # So we dont update the display while rebooting

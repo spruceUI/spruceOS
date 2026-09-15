@@ -233,3 +233,9 @@ class PyUiConfig:
     @classmethod
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
+
+
+    @classmethod
+    def ignore_menu_button_combination_presses(cls):
+        return cls.get("ignoreMenuCombinationPresses",False)
+
