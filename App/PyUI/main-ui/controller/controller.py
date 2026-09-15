@@ -371,6 +371,12 @@ class Controller:
     #return TRUE if it was a hotkey press, FALSE otherwise
     @staticmethod
     def check_for_hotkey():
+        # See DeviceCommon.menu_hold_was_cancelled(): on devices where PyUI
+        # never reads volume itself, the shell watchdog is the only thing
+        # that can tell us a vol press interrupted this MENU hold.
+        if(Device.get_device().menu_hold_was_cancelled()):
+            return True
+
         Controller.is_check_for_hotkey = True
         cached_event = Controller.last_controller_input
         Controller.controller_interface.cache_last_event()

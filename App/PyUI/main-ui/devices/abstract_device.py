@@ -450,6 +450,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def menu_hold_was_cancelled(self):
+        pass
+
+    @abstractmethod
     def get_image_for_activity(self, activity):
         pass
 

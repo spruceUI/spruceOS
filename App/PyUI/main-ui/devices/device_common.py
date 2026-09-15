@@ -805,6 +805,21 @@ class DeviceCommon(AbstractDevice):
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
+    # The shell watchdogs (homebutton_watchdog.sh / buttons_watchdog.sh) run
+    # independently of PyUI and read the raw input devices themselves. On
+    # devices where "enableButtonWatchers" is off (e.g. Smart Pro S), they're
+    # the only thing that ever sees a volume key at all, since PyUI's own
+    # volume KeyWatcher thread never starts there - so a Menu + Vol press
+    # is never observable from inside PyUI at all. Bash already correctly
+    # detects a vol press interrupting a MENU hold and marks it by touching
+    # this flag (see cancel_menu_hold() in homebutton_watchdog.sh); read
+    # that here instead of Controller re-deriving the same thing from an
+    # input source that may not exist on this hardware.
+    MENU_HOLD_CANCELLED_FLAG = "/tmp/menubtn_cancelled"
+
+    def menu_hold_was_cancelled(self):
+        return os.path.exists(self.MENU_HOLD_CANCELLED_FLAG)
+
     def capture_framebuffer(self):
         pass
 
