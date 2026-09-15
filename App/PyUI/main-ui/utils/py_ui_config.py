@@ -234,8 +234,11 @@ class PyUiConfig:
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
 
-
     @classmethod
     def ignore_menu_button_combination_presses(cls):
         return cls.get("ignoreMenuCombinationPresses",False)
+
+    @classmethod
+    def get_timezone_dir(cls):
+        return cls.get("timezoneDir","")
 

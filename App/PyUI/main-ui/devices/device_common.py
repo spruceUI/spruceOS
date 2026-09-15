@@ -418,14 +418,8 @@ class DeviceCommon(AbstractDevice):
     def supports_popup_menu(self):
         return True
     
-    # spruce ships its own copy of the tz database. The Miyoo Mini has none at
-    # all and a read-only squashfs root, so there is nowhere to install one, and
-    # the devices that do have a firmware copy disagree about which zones they
-    # carry. Shipping it means every device offers the same list.
-    SPRUCE_ZONEINFO_DIR = "/mnt/SDCARD/spruce/zoneinfo"
-
     def get_zoneinfo_dir(self):
-        return DeviceCommon.SPRUCE_ZONEINFO_DIR
+        return PyUiConfig.get_timezone_dir()
 
     def supports_timezone_setting(self):
         return os.path.isdir(self.get_zoneinfo_dir())
