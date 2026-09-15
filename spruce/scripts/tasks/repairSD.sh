@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# TODO: miyoo mini support
 # TODO: opt out with a tmp_confirm() ?
 
 EXPERT_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/expertappswitch.png"
 TMP_LOG_PATH=/tmp/SDCARD_REPAIR.log
 FINAL_LOG_PATH="/mnt/SDCARD/SDCARD_REPAIR.log"
 FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+SDFIX_DIR=/tmp/sdfix
 
 
   ##################
@@ -44,93 +44,92 @@ fi
 ##### ABRIDGED HELPER FUNCTIONS #####
   #################################
 
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-case $INFO in
-    *"sun8i"*)
-        PLATFORM="A30"
-        LD_LIBRARY_PATH="/usr/miyoo/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk0p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin"
-        MAX_FREQ=1344000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=270
-        ;;
-    *"0xd05"*)
-        PLATFORM="Flip"
-        LD_LIBRARY_PATH="/usr/miyoo/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=0
-        ;;
-    *"0xd04"*)
-        PLATFORM="Pixel2"
-        LD_LIBRARY_PATH="/usr/lib:/lib:/usr/lib/compat"
-        SD_DEV="/dev/mmcblk0p3"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1416000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG3040"*)
-        PLATFORM="Brick"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=960
-        DISPLAY_WIDTH=1024
-        DISPLAY_HEIGHT=768
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG4040"*)
-        PLATFORM="BrickPro"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png" 
-        TEXT_WIDTH=960
-        DISPLAY_WIDTH=1024
-        DISPLAY_HEIGHT=768
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG5040"*)
-        PLATFORM="SmartPro"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" 
-        TEXT_WIDTH=1200
-        DISPLAY_WIDTH=1280
-        DISPLAY_HEIGHT=720
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG5050"*)
-        PLATFORM="SmartProS"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
+# Platform facts. runtimeHelper.sh sources helperFunctions.sh and the platform
+# cfg before running us, and exports all of this, so inherit it. Run by hand
+# there is no such environment, so source it off the card - which is still
+# mounted at this point. Either way the cfg stays the single source of truth;
+# this script used to keep a second copy as a cpuinfo table, and every device
+# added since was missing from it.
+resolve_platform_facts() {
+    if [ -z "$PLATFORM" ] || [ -z "$SD_MOUNTPOINT" ]; then
+        . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+    fi
+
+    SD_MOUNTPOINT="${SD_MOUNTPOINT:-/mnt/SDCARD}"
+
+    # Ask the kernel which device is mounted there and prefer its answer to the
+    # cfg's, because the node is not fixed: dArkMoss finds the card by label so
+    # its number follows probe order, and BaseOS mounts TF2 if it is there and
+    # TF1's own FAT partition (mmcblk0p7) if it is not - while the XX cfg names
+    # mmcblk1p1 either way. Unmounting a device other than the one mounted here
+    # just fails, and a failed unmount is the whole bug this script keeps hitting.
+    # /mnt/SDCARD is a symlink to /mnt/sdcard on BaseOS, so match on the real path.
+    _mount_path=$(readlink -f "$SD_MOUNTPOINT" 2>/dev/null)
+    [ -n "$_mount_path" ] || _mount_path="$SD_MOUNTPOINT"
+    _mounted_dev=$(awk -v mp="$_mount_path" '$2==mp {print $1; exit}' /proc/mounts 2>/dev/null)
+    if [ -n "$_mounted_dev" ]; then
+        SD_DEV="$_mounted_dev"
+    fi
+
+    DISPLAY_WIDTH="${DISPLAY_WIDTH:-640}"
+    DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-480}"
+    DISPLAY_ROTATION="${DISPLAY_ROTATION:-0}"
+
+    # Platforms that cannot run display_text.elf set this to "not applicable".
+    case "$DISPLAY_TEXT_ELF_WIDTH" in
+        ''|*[!0-9]*) TEXT_WIDTH=$((DISPLAY_WIDTH - 80)) ;;
+        *)           TEXT_WIDTH="$DISPLAY_TEXT_ELF_WIDTH" ;;
+    esac
+
+    BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+    [ "$DISPLAY_WIDTH" -ge 1280 ] 2>/dev/null &&
         BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
-        TEXT_WIDTH=1200
-        DISPLAY_WIDTH=1280
-        DISPLAY_HEIGHT=720
-        DISPLAY_ROTATION=0
-        ;;
-esac
+
+    BIN_DIR="/mnt/SDCARD/spruce/bin64"
+    if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+        BIN_DIR="/mnt/SDCARD/spruce/bin"
+    fi
+}
+
+# Drop card entries from a colon-separated path list. Once the card is
+# unmounted anything resolved through them is gone - and that includes mount,
+# sync and poweroff on the platforms whose PATH leads with the card.
+strip_card_paths() {
+    _out=""
+    _old_ifs="$IFS"
+    IFS=:
+    for _d in $1; do
+        case "$_d" in ""|/mnt/SDCARD*|/mnt/sdcard*) continue ;; esac
+        _out="${_out:+$_out:}$_d"
+    done
+    IFS="$_old_ifs"
+    echo "$_out"
+}
+
+# Copy everything the repair needs off the card before it goes away: the
+# display tool and its assets, and fsck.fat unless the base system has its own
+# (dArkMoss is Debian and ships one, which outlives the unmount for free).
+stage_repair_tools() {
+    mkdir -p "$SDFIX_DIR"
+
+    cp "$FONT" "$SDFIX_DIR/font.ttf" && echo "staged font"
+    cp "$BG_IMAGE" "$SDFIX_DIR/bg.png" && echo "staged background"
+    cp "$EXPERT_ICON" "$SDFIX_DIR/" && echo "staged icon"
+
+    if cp "$BIN_DIR/display_text.elf" "$SDFIX_DIR/"; then
+        chmod 777 "$SDFIX_DIR/display_text.elf"
+        echo "staged display_text.elf from $BIN_DIR"
+    fi
+
+    FSCK_BIN="$(command -v fsck.fat 2>/dev/null)"
+    if [ -n "$FSCK_BIN" ]; then
+        echo "using the base system's fsck.fat at $FSCK_BIN"
+    elif cp "$BIN_DIR/fsck.fat" "$SDFIX_DIR/"; then
+        chmod 777 "$SDFIX_DIR/fsck.fat"
+        FSCK_BIN="$SDFIX_DIR/fsck.fat"
+        echo "staged fsck.fat from $BIN_DIR"
+    fi
+}
 
 tmp_blink() {
     if [ "$PLATFORM" = "A30" ]; then
@@ -174,18 +173,27 @@ tmp_debug_info() {
 
 }
 
+# Best effort. The Miyoo Mini stubs display() out entirely and the RGB30's
+# display_text.elf dies at SDL_CreateWindow on its Mali blob, so a device that
+# cannot draw still gets its card repaired - silently, with the log to say so.
 tmp_display() {
-    text="$1"
-
     tmp_display_kill
 
-    command="LD_LIBRARY_PATH=$LD_LIBRARY_PATH /tmp/sdfix/display_text.elf"
-    command="$command $DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION"
-    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0"
+    [ -x "$SDFIX_DIR/display_text.elf" ] || { echo "no display tool staged: $1"; return 0; }
 
-    echo "displaying: $command"
-    eval "$command" &
+    "$SDFIX_DIR/display_text.elf" \
+        "$DISPLAY_WIDTH" "$DISPLAY_HEIGHT" "$DISPLAY_ROTATION" \
+        "$SDFIX_DIR/bg.png" "$1" 0 30 50 middle "$TEXT_WIDTH" \
+        eb db b2 "$SDFIX_DIR/font.ttf" 7f 7f 7f 0 1.0 \
+        >>"$SDFIX_DIR/display.out" 2>&1 &
     DISPLAY_PID=$!
+
+    sleep 0.5
+    if kill -0 "$DISPLAY_PID" 2>/dev/null; then
+        echo "displaying: $1"
+    else
+        echo "display exited at once (unsupported on this device?): $(tail -1 "$SDFIX_DIR/display.out" 2>/dev/null)"
+    fi
 }
 
 tmp_display_kill() {
@@ -193,9 +201,27 @@ tmp_display_kill() {
     sleep 0.1
 }
 
+# dArkMoss runs spruce from spruce-launch.service, which has Restart=on-failure
+# and an ExecStartPre that mounts the card. Killing runtime.sh below ends that
+# unit's main process, so without stopping it first systemd remounts the card
+# three seconds into the fsck. KillMode=process means stopping the unit does not
+# take this script with it.
+tmp_stop_frontend_service() {
+    command -v systemctl >/dev/null 2>&1 || return 0
+    if systemctl stop spruce-launch.service 2>/dev/null; then
+        echo "Stopped spruce-launch.service so it cannot remount the card."
+    fi
+}
+
+# The list save_poweroff.sh kills before it unmounts, for the same reason: any
+# of these still running holds files open on the card and umount refuses.
+# runtime.sh and principal.sh go first so nothing launches a new app behind us.
 tmp_kill_boot_scripts() {
     echo "Attempting to kill any boot scripts."
-    for script in main tee runmiyoo.sh runtrimui.sh runmagicx.sh updater runtime.sh ; do
+    for script in runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
+        runmagicx.sh updater homebutton_watchdog.sh buttons_watchdog.sh idlemon \
+        idlemon_mm.sh low_power_warning.sh theme_watchdog.sh volume_sync_watchdog.sh \
+        inotifywait inotifywatch getevent sendevent ; do
         if killall -9 "$script" ; then
             echo "Killed ${script}."
         fi
@@ -239,11 +265,12 @@ tmp_set_performance() {
             chmod a-w "$online"
         fi
     done
-    echo "Locking CPU governor to performance with maximum frequency $MAX_FREQ"
+    echo "Locking CPU governor to performance with maximum frequency ${CPU_PERF_MAX_FREQ:-unchanged}"
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo "$MAX_FREQ" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    [ -n "$CPU_PERF_MAX_FREQ" ] &&
+        echo "$CPU_PERF_MAX_FREQ" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 }
@@ -255,29 +282,72 @@ tmp_set_performance() {
 
 if [ "$1" = "run" ]; then
 
-    mkdir -p /tmp/sdfix     # do this first so the tmp log path is valid
-    cd /tmp/sdfix
+    mkdir -p "$SDFIX_DIR"     # do this first so the tmp log path is valid
+    cd "$SDFIX_DIR"
 
     {
+        resolve_platform_facts
+        echo "platform=$PLATFORM device=$SD_DEV mountpoint=$SD_MOUNTPOINT"
+
+        # Drop the card from the search paths BEFORE staging: spruce ships its
+        # own fsck.fat in spruce/bin, which is on PATH on the Mini and the A30,
+        # so command -v would otherwise settle on the copy that is about to be
+        # unmounted.
+        #
+        # This also means the message below cannot link against SDL on the card,
+        # so devices whose SDL lives there (RGB30, Miniloong, the XX line) repair
+        # without on-screen text. That is the trade on purpose: a display process
+        # holding libraries open on the card is itself a reason umount refuses,
+        # and a silent repair beats a pretty message and a failed unmount.
+        PATH="$(strip_card_paths "$PATH")"
+        LD_LIBRARY_PATH="$(strip_card_paths "$LD_LIBRARY_PATH")"
+        export PATH LD_LIBRARY_PATH
+        echo "PATH=$PATH"
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+
+        stage_repair_tools
+
         tmp_blink
+        tmp_stop_frontend_service
         tmp_kill_boot_scripts
         tmp_read_only_check
         tmp_set_performance
+        # The literal path the setting-up phase writes and runtimeHelper checks,
+        # not $SD_MOUNTPOINT: clearing a different path would boot straight back
+        # into the repair.
         rm -f /mnt/SDCARD/FIX_MY_SDCARD
-
-        cp "$BIN_DIR/fsck.fat" /tmp/sdfix/ && echo "copied fsck.fat to /tmp/sdfix/"
-        cp "$BIN_DIR/display_text.elf" /tmp/sdfix/ && echo "copied display_text.elf to /tmp/sdfix/"
-        cp "$EXPERT_ICON" /tmp/sdfix/ && echo "copied expertappswitch.png to /tmp/sdfix/"
-        cp "$FONT" /tmp/sdfix/ && echo "copied nunwen.ttf to /tmp/sdfix/"
-        cp "$BG_IMAGE" "/tmp/sdfix/bg.png" && echo "copied background image to /tmp/sdfix/"
-        chmod 777 /tmp/sdfix/display_text.elf
-        chmod 777 /tmp/sdfix/fsck.fat
 
         tmp_display "Attempting to repair SD card. This may take some time."
 
         tmp_debug_info    # uncomment to see `ps` and `mount` outputs in your log
 
-        if umount "$SD_DEV"; then
+        if [ -z "$SD_DEV" ] || [ -z "$FSCK_BIN" ]; then
+            echo "Nothing to repair with: SD_DEV='$SD_DEV' FSCK_BIN='$FSCK_BIN'"
+            tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
+            sleep 10
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
+            sync
+            poweroff
+            exit 1
+        fi
+
+        # Retry rather than give up on the first refusal. systemctl stop returns
+        # before the unit's children are actually gone (it is KillMode=process),
+        # and a watchdog on its way out can hold the card for a moment longer.
+        # Something that never lets go still ends in the failure branch below.
+        _umounted=0
+        _tries=0
+        while [ "$_tries" -lt 10 ]; do
+            if umount "$SD_DEV"; then
+                _umounted=1
+                break
+            fi
+            _tries=$((_tries + 1))
+            echo "umount refused, waiting for holders to exit ($_tries)"
+            sleep 1
+        done
+
+        if [ "$_umounted" -eq 1 ]; then
             echo "$SD_DEV unmounted successfully."
         else
             echo "Unable to unmount $SD_DEV."
@@ -289,7 +359,7 @@ if [ "$1" = "run" ]; then
             exit 1
         fi
         
-        /tmp/sdfix/fsck.fat -av "$SD_DEV"
+        "$FSCK_BIN" -av "$SD_DEV"
         FSCK_EXIT_CODE=$?
         echo "fsck.fat exited with code $FSCK_EXIT_CODE"
         if [ "$FSCK_EXIT_CODE" -eq 0 ]; then
@@ -303,7 +373,7 @@ if [ "$1" = "run" ]; then
             fi
             tmp_display "$msg"
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             [ "$PLATFORM" = "A30" ] && poweroff || reboot
@@ -319,7 +389,7 @@ if [ "$1" = "run" ]; then
             fi
             tmp_display "$msg"
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             [ "$PLATFORM" = "A30" ] && poweroff || reboot
@@ -328,7 +398,7 @@ if [ "$1" = "run" ]; then
             echo "fsck.fat reported errors. Unable to repair $SD_DEV."
             tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             poweroff
