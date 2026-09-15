@@ -16,19 +16,27 @@ if [ -f "$HOME/config.ini" ]; then
     sed -i -e 's/^ScreenWidth=.*/ScreenWidth=0/' \
            -e 's/^ScreenHeight=.*/ScreenHeight=0/' \
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
+
+    # handle swapped X/Y on RGB30. Can this be handled more gracefully by editing a gamecontrollerdb.txt?
+    if [ "$PLATFORM" = "RGB30" ]; then
+        sed -i -e 's/^OskKeyBksp=x/OskKeyBksp=y/' \
+               -e 's/^OskKeyShift=y/OskKeyShift=x' \
+               -e 's/^KeyMenu=y/KeyMenu=x/' "$HOME/config.ini"
+    else
+        sed -i -e 's/^OskKeyBksp=y/OskKeyBksp=x/' \
+               -e 's/^OskKeyShift=x/OskKeyShift=y' \
+               -e 's/^KeyMenu=x/KeyMenu=y/' "$HOME/config.ini"
+    fi
 fi
 
 # GLES window on the Mali blob. The Miniloong Pocket 1 has the same GLES-only
 # Mali-G52 as the RGB30, so it needs the same context or vtree fails to open one.
 { [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "Miniloong" ]; } && export VTREE_GLES=1
 
-case "$PLATFORM" in
-    "SmartPro"* | "BrickPro") export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$HOME/lib-Brick:$LD_LIBRARY_PATH" ;;
-    * )           export LD_LIBRARY_PATH="$HOME/lib-${PLATFORM}:$LD_LIBRARY_PATH" ;;
-esac
 
 case "$PLATFORM" in
     "A30")
+        export LD_LIBRARY_PATH="$HOME/lib-A30:$LD_LIBRARY_PATH"
         killall -q -USR2 joystickinput
         ./vtree.a30 --rotate=3 >"$HOME/log.txt" 2>&1
         sync
@@ -51,19 +59,12 @@ case "$PLATFORM" in
         sync
         ;;
     "Anbernic"*)
-        # Nothing on this device ships an SDL GameController mapping for
-        # "ANBERNIC-keys", so without one the pad enumerates and nothing
-        # responds. Positional rather than the default label-named form: vtree
-        # carries spruce's nintendo-button-labels patch and already swaps A<->B
-        # and X<->Y itself, so the label-named map corrected twice and landed
-        # back where it started. See export_sdl_gamecontroller_map in
-        # helperFunctions.sh for what the two forms mean.
         export_sdl_gamecontroller_map positional
         ./vtree.aarch64 >"$HOME/log.txt" 2>&1
         sync
         ;;
     *)
-        echo "File Management: unsupported PLATFORM=$PLATFORM" >&2
+        log_message "File Management: unsupported PLATFORM: $PLATFORM"
         exit 1
         ;;
 esac
