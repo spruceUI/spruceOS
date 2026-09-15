@@ -191,6 +191,7 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
         /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
+        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
         /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
     do
         stop_running_watchdog "$_wd"
@@ -204,6 +205,7 @@ launch_startup_watchdogs(){
     # that launcher is low_power_warning.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
     /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
 
     if has_lid >/dev/null; then
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
