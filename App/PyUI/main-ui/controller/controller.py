@@ -381,13 +381,15 @@ class Controller:
 
         while(not was_hotkey and time.monotonic() - start_time < 0.3):
             if(Controller.get_input(timeout=0.05, called_from_check_for_hotkey=True)):
-                Controller.perform_hotkey(Controller.last_input())
-                time.sleep(0.1)
                 was_hotkey = True 
+                if(not PyUiConfig.ignore_menu_button_combination_presses()):
+                    Controller.perform_hotkey(Controller.last_input())
+                    time.sleep(0.1)
             elif(Controller.non_sdl_input is not None):
                 was_hotkey = True 
-                Controller.perform_hotkey(Controller.non_sdl_input)
-                time.sleep(0.1)
+                if(not PyUiConfig.ignore_menu_button_combination_presses()):
+                    Controller.perform_hotkey(Controller.non_sdl_input)
+                    time.sleep(0.1)
 
         Controller.non_sdl_input = None
         Controller.set_last_input(cached_event)
