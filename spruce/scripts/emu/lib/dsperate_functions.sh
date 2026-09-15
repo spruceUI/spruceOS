@@ -35,36 +35,19 @@ display_dsperate_bios_message() {
 }
 
 seed_dsperate_config() {
-	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
-	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
-	_cfg_a30="$_cfg_dir/a30.ini"
-	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
-	_cfg_one_stick="$_cfg_dir/one-stick.ini"
-	_cfg_two_sticks="$_cfg_dir/two-sticks.ini"
-	_cfg_boot_menu="$_cfg_dir/games/BootMenu.ini"
+	_src_dir="/mnt/SDCARD/Emu/NDS/dsperate-configs"
+	_cfg_dir="/mnt/SDCARD/Saves/dsperate"
 
-	mkdir -p "$_cfg_dir"
-	if [ ! -f "$_cfg_two_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/two-sticks.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/two-sticks.ini" "$_cfg_two_sticks"
-		log_message "DSperate: seeded config from two-sticks.ini"
-	fi
-	if [ ! -f "$_cfg_a30" ] && [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
-		log_message "DSperate: seeded config from a30.ini"
-	fi
-	if [ ! -f "$_cfg_no_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/no-sticks.ini" "$_cfg_no_sticks"
-		log_message "DSperate: seeded config from no-sticks.ini"
-	fi
-	if [ ! -f "$_cfg_one_stick" ] && [ -f "$EMU_DIR/dsperate-configs/one-stick.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/one-stick.ini" "$_cfg_one_stick"
-		log_message "DSperate: seeded config from one-stick.ini"
-	fi
-	if [ ! -f "$_cfg_boot_menu" ] && [ -f "$EMU_DIR/dsperate-configs/BootMenu.ini" ]; then
-		mkdir -p /mnt/SDCARD/Saves/dsperate/games/
-		cp -f "$EMU_DIR/dsperate-configs/BootMenu.ini" "$_cfg_boot_menu"
-		log_message "DSperate: seeded config from BootMenu.ini"
-	fi
+	mkdir -p /mnt/SDCARD/Saves/saves/dsperate \
+			 /mnt/SDCARD/Saves/states/dsperate \
+			 /mnt/SDCARD/Saves/dsperate/games
+
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini games/BootMenu.ini; do
+		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
+			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
+			log_message "DSperate: seeded $_cfg"
+		fi
+	done
 }
 
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
@@ -227,8 +210,17 @@ run_dsperate() {
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
 				;;
-			"1") _config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"  ;;
-			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
+			"1")
+				_config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini" 
+				;;
+			*)
+				if [ "$PLATFORM" = "RGB30" ]; then
+					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
+					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini" 
+				else
+					_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
+				fi 
+				;;
 		esac
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 		# DSperate_flip_lib holds PyUI's SDL2 under the SONAME the loader wants:
