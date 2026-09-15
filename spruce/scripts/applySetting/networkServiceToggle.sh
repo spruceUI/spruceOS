@@ -16,6 +16,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 
 SERVICE="$1"
 ENABLED="$2"
@@ -125,5 +126,6 @@ done
 echo "$$" >"$LOCK/pid"
 trap 'rm -rf "$LOCK"' EXIT INT TERM
 
+write_landing_page_services
 apply_toggle
 exit 0

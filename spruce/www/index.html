@@ -85,41 +85,38 @@
         }
     </style>
     <script>
-    // Function to parse the config file
-    async function loadConfig() {
+    async function hideDisabledServices() {
         try {
-            const response = await fetch('/sprucecfg.bak');
-            const text = await response.text();
-            
-            // Parse config file (format: key=value)
-            const config = {};
-            text.split('\n').forEach(line => {
+            const response = await fetch('/services.txt', { cache: 'no-store' });
+            if (!response.ok) return;
+            const enabled = {};
+            (await response.text()).split('\n').forEach(line => {
                 const [key, value] = line.split('=');
-                if (key && value) {
-                    config[key.trim()] = value.trim();
-                }
+                if (key && value) enabled[key.trim()] = value.trim();
             });
-            
-            // Hide sections based on config
             const sections = {
-                'samba': document.getElementById('smb-section'),
-                'syncthing': document.getElementById('syncthing-section'),
-                'dropbear': document.getElementById('ssh-section'),
-                'sftpgo': document.getElementById('ftp-section')
+                samba: 'smb-section',
+                ssh: 'ssh-section',
+                sftpgo: 'sftp-section',
+                syncthing: 'syncthing-section'
             };
-            
-            for (const [service, element] of Object.entries(sections)) {
-                if (element && config[service] !== '0') {
-                    element.style.display = 'none';
-                }
+            for (const [service, id] of Object.entries(sections)) {
+                const element = document.getElementById(id);
+                if (element && enabled[service] !== 'True') element.style.display = 'none';
+            }
+            if (enabled.file_transfer) {
+                const [protocol, port] = enabled.file_transfer.split(':');
+                document.getElementById('file-transfer-protocol').textContent = protocol;
+                document.getElementById('file-transfer-address').textContent = window.location.hostname + ':' + port;
+                document.getElementById('file-transfer-line').style.display = '';
             }
         } catch (error) {
-            console.error('Error loading config:', error);
+            console.error('Error loading services:', error);
         }
     }
     </script>
 </head>
-<body onload="loadConfig()">
+<body onload="hideDisabledServices()">
 
 <div class="header-container">
     <img src="/spruce_sd.ico" alt="Spruce Logo">
@@ -179,7 +176,7 @@ For all things spruce be sure to check out the wiki. It's full of useful informa
     <br />
     Password: <code>happygaming</code>
     <br />
-    You can also connect through FTP with an FTP client at: <code><script>document.write(window.location.host + ":21")</script></code>
+    <span id="file-transfer-line" style="display: none">You can also connect with an <span id="file-transfer-protocol"></span> client at: <code id="file-transfer-address"></code></span>
     <br /><br />
     <a href="https://github.com/spruceUI/spruceOS/wiki/13.-Using-Apps#ftp-client" class="docs-link" target="_blank">Click here</a> for more detailed instructions.
     <br />
