@@ -145,13 +145,10 @@ display_unpack_status() {
 # Function to unpack archives from a specified directory
 unpack_archives() {
     dir="$1"
-    flag_name="$2"
-    section_label="$3"
+    section_label="$2"
     section_delay_applied=0
 
     [ -z "$section_label" ] && section_label="archives"
-
-    [ -n "$flag_name" ] && flag_add "$flag_name" --tmp
 
     for archive in "$dir"/*.7z; do
         if [ -f "$archive" ]; then
@@ -196,8 +193,6 @@ unpack_archives() {
             fi
         fi
     done
-
-    [ -n "$flag_name" ] && flag_remove "$flag_name"
 }
 
 # Quick check for .7z files in relevant directories
@@ -224,9 +219,9 @@ fi
 log_message "Unpacker: Starting theme and archive unpacking process"
 
 run_mode_all() {
-    unpack_archives "$THEME_DIR" "" "Themes"
-    unpack_archives "$ARCHIVE_DIR/preMenu" "pre_menu_unpacking" "Pre-menu content"
-    unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
+    unpack_archives "$THEME_DIR" "Themes"
+    unpack_archives "$ARCHIVE_DIR/preMenu" "Pre-menu content"
+    unpack_archives "$ARCHIVE_DIR/preCmd" "System content"
 }
 
 run_mode_firstboot_theme_phase() {
@@ -234,7 +229,7 @@ run_mode_firstboot_theme_phase() {
     write_unpack_state "running" "firstboot-theme-phase-active" "$$"
     archive_prepare_firstboot_progress || true
     log_message "Unpacker: firstboot theme archive plan completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL"
-    unpack_archives "$THEME_DIR" "" "Themes"
+    unpack_archives "$THEME_DIR" "Themes"
 }
 
 dispatch_run_mode() {
