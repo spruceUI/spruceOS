@@ -375,7 +375,7 @@ set_default_ra_hotkeys() {
     # state slot. Only the triggers move with the pad layout: stickless models
     # have no stick-click keys ahead of them. Nothing rewrites these at
     # launch; the 32-bit build's overlay carries its own linuxraw copy.
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
     case "$XX_PAD_LAYOUT" in
         nostick) l2_btn="12"; r2_btn="13" ;;
         *)       l2_btn="13"; r2_btn="14" ;;
