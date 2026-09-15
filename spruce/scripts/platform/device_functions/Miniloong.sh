@@ -468,7 +468,7 @@ take_screenshot() {
 }
 
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
     update_ra_config_file_with_new_setting "$RA_FILE" \
         "input_enable_hotkey_btn = \"4\"" \
