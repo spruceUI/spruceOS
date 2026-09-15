@@ -1,5 +1,6 @@
 from devices.anbernic.anbernic_xx_common import AnbernicXXCommon
 import os
+from utils import throttle
 
 
 class AnbernicRG28xx(AnbernicXXCommon):
@@ -47,5 +48,6 @@ class AnbernicRG28xx(AnbernicXXCommon):
             pass
         return False
 
+    @throttle.limit_refresh(5)
     def supports_wifi(self):
         return self._usb_radio_present()
