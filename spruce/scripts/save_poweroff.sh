@@ -283,6 +283,9 @@ clean_up_flags() {
     if flag_check "in_menu" || usb_storage_exit; then
         flag_remove "save_active"
         log_message "save_active cleared by save_poweroff: shutdown initiated from menu"
+    elif [ ! -f "${FLAGS_DIR}/lastgame.lock" ]; then
+        flag_remove "save_active"
+        log_message "save_active cleared by save_poweroff: nothing to resume, no lastgame.lock"
     else
         flag_add "save_active"
         log_message "save_active set by save_poweroff: shutdown initiated outside menu"
