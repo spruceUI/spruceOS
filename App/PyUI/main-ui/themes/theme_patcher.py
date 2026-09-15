@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import shutil
 import time
@@ -145,7 +146,8 @@ class ThemePatcher():
                      scale,
                      width_multiplier,
                      height_multiplier,
-                     aspect_ratio_reset)
+                     aspect_ratio_reset,
+                     cls.transposed_layout(os.path.join(config_path,"config.json"), theme_width, theme_height, target_width, target_height))
 
     @classmethod
     def patch_folder(cls, input_folder, output_folder, scale, theme_width, theme_height, target_width, target_height):
@@ -222,12 +224,15 @@ class ThemePatcher():
                     PyUiLogger().get_logger().exception(f"Failed to copy {input_file} to {output_file}: {copy_err}")    
                         
     @classmethod
-    def scale_config_json(cls, config_path, output_config_path, scale, width_multiplier, height_multiplier, aspect_ratio_reset):
+    def scale_config_json(cls, config_path, output_config_path, scale, width_multiplier, height_multiplier, aspect_ratio_reset, forced_keys=None):
         try:
             with open(config_path, 'r') as f:
                 config = json.load(f)
 
             scaled_config = cls._scale_json_values(config, scale, width_multiplier, height_multiplier, aspect_ratio_reset)
+            if forced_keys:
+                scaled_config.update(forced_keys)
+                PyUiLogger.get_logger().info(f"Portrait layout keys written: {forced_keys}")
 
             os.makedirs(os.path.dirname(output_config_path), exist_ok=True)
             with open(output_config_path, 'w') as f:
@@ -236,6 +241,54 @@ class ThemePatcher():
             PyUiLogger.get_logger().info(f"Scaled config written to: {output_config_path}")
         except Exception as e:
             PyUiLogger().get_logger().exception(f"Failed to process JSON config {config_path}: {e}")    
+
+    # Grid shapes to transpose when a theme is patched across orientations:
+    # (columns key, rows key, default cols, default rows, view-type key).
+    GRID_SHAPES = (
+        ("mainMenuColCount", "mainMenuRowCount", 4, 1, "mainMenuViewType"),
+        ("gameSystemSelectColCount", "gameSystemSelectRowCount", 4, 2, "systemSelectViewType"),
+        ("gameSelectColCount", "gameSelectRowCount", 4, 2, "gameSelectionViewType"),
+    )
+    GRID_VIEW_TYPES = {None, "GRID", "GRID_VIEW", "FULLSCREEN_GRID"}
+
+    @classmethod
+    def transposed_layout(cls, config_json_path, theme_width, theme_height, target_width, target_height):
+        """Explicit column/row counts for a theme whose orientation differs
+        from the screen's, or {} when they share one.
+
+        The scaler keeps sizes proportional but leaves grid shapes alone, and
+        the theme's defaults fill in landscape shapes (4 columns by 1 row for
+        the main menu), which on the MagicX Zero 40's 480x800 panel became one
+        squeezed row with the rest of the screen empty (2026-09-16). Columns
+        are scaled by the aspect change and rows by its inverse: 640x480 to
+        480x800 turns 4x1 into 2x3 and 4x2 into 2x4.
+        """
+        try:
+            if theme_width <= 0 or theme_height <= 0 or target_width <= 0 or target_height <= 0:
+                return {}
+            # Only a landscape theme on a portrait screen (or the reverse) is transposed.
+            # A square target (RGB30, 720x720) keeps the theme's shapes, as it always has.
+            if (theme_height > theme_width) == (target_height > target_width):
+                return {}
+            with open(config_json_path, 'r') as f:
+                config = json.load(f)
+            aspect_factor = (target_width / target_height) / (theme_width / theme_height)
+            forced = {}
+            for cols_key, rows_key, default_cols, default_rows, view_key in cls.GRID_SHAPES:
+                if config.get(view_key) not in cls.GRID_VIEW_TYPES:
+                    continue
+                cols = config.get(cols_key, default_cols)
+                rows = config.get(rows_key, default_rows)
+                if not isinstance(cols, (int, float)) or not isinstance(rows, (int, float)):
+                    continue
+                forced[cols_key] = max(1, int(round(cols * aspect_factor)))
+                rows_scaled = rows / aspect_factor
+                # the main menu carries up to six entries; give it whole rows
+                forced[rows_key] = max(1, int(math.ceil(rows_scaled)) if rows_key == "mainMenuRowCount" else int(round(rows_scaled)))
+            return forced
+        except Exception as e:
+            PyUiLogger.get_logger().exception(f"transposed_layout failed for {config_json_path}: {e}")
+            return {}
 
     @classmethod
     def _scale_json_values(cls, obj, scale, width_multiplier, height_multiplier, aspect_ratio_reset):
