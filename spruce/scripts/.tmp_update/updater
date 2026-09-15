@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# The MagicX A133P boards are decided by their base image's marker, not by
+# cpuinfo (same Cortex-A53 part id as the H700; see helperFunctions.sh).
+if [ -e /usr/magicx ]; then
+    case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+        zero40) export PLATFORM="Zero40" ;;
+        *)      export PLATFORM="Zero28" ;;
+    esac
+else
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
     *"sun8i"*) export PLATFORM="A30" ;;
@@ -17,19 +25,9 @@ case $INFO in
         fi
         ;;
     *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) 
-        if [ -e /usr/magicx ]; then
-            # MagicX A133P family on our Tina base: the image names the model in
-            # /usr/magicx/device (zero28 | zero40); images without it are Zero 28.
-            case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
-                zero40) export PLATFORM="Zero40" ;;
-                *)      export PLATFORM="Zero28" ;;
-            esac
-        else
-            export PLATFORM="MiyooMini" 
-        fi
-        ;;
+    *) export PLATFORM="MiyooMini" ;;
 esac
+fi
 
 
 # The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh

@@ -28,6 +28,17 @@ POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
+#
+# MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
+# the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
+if [ -e /usr/magicx ]; then
+    # /usr/magicx/device names the model (zero28 | zero40); a base without
+    # the file (Moss-zero28, main-zero40) is treated as a Zero 28.
+    case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+        zero40) export PLATFORM="Zero40" ;;
+        *)      export PLATFORM="Zero28" ;;
+    esac
+else
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 
 case $INFO in
@@ -75,19 +86,9 @@ case $INFO in
             *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
-    *) 
-        if [ -e /usr/magicx ]; then
-            # MagicX A133P family on our Tina base: the image names the model in
-            # /usr/magicx/device (zero28 | zero40); images without it are Zero 28.
-            case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
-                zero40) export PLATFORM="Zero40" ;;
-                *)      export PLATFORM="Zero28" ;;
-            esac
-        else
-            export PLATFORM="MiyooMini" 
-        fi
-        ;;
+    *) export PLATFORM="MiyooMini" ;;
 esac
+fi
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
