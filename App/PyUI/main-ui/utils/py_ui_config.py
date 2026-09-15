@@ -242,3 +242,7 @@ class PyUiConfig:
     def get_timezone_dir(cls):
         return cls.get("timezoneDir","")
 
+    @classmethod
+    def get_cpu_mode_cmd(cls):
+        return cls.get("cpuModeCmd",None)
+
