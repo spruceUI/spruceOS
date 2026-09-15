@@ -20,11 +20,11 @@ if [ -f "$HOME/config.ini" ]; then
     # handle swapped X/Y on RGB30. Can this be handled more gracefully by editing a gamecontrollerdb.txt?
     if [ "$PLATFORM" = "RGB30" ]; then
         sed -i -e 's/^OskKeyBksp=x/OskKeyBksp=y/' \
-               -e 's/^OskKeyShift=y/OskKeyShift=x' \
+               -e 's/^OskKeyShift=y/OskKeyShift=x/' \
                -e 's/^KeyMenu=y/KeyMenu=x/' "$HOME/config.ini"
     else
         sed -i -e 's/^OskKeyBksp=y/OskKeyBksp=x/' \
-               -e 's/^OskKeyShift=x/OskKeyShift=y' \
+               -e 's/^OskKeyShift=x/OskKeyShift=y/' \
                -e 's/^KeyMenu=x/KeyMenu=y/' "$HOME/config.ini"
     fi
 fi
