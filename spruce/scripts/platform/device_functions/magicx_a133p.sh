@@ -101,6 +101,7 @@ magicx_resolve_event_paths() {
 
 device_init() {
     runtime_mounts_magicx
+    magicx_seed_system_json
 
     export LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
 
@@ -188,4 +189,23 @@ device_exit_sleep() {
         done
     fi
     wifi_request apply --wait
+}
+
+# TrimUI-only hooks inherited from trimui_a133p.sh. The MagicX boards have no
+# /sys/class/led_anim, so the RGB hooks are no-ops here.
+enable_or_disable_rgb() {
+    log_message "enable_or_disable_rgb: no RGB LED on $PLATFORM" -v
+}
+
+rgb_led() {
+    log_message "rgb_led: no RGB LED on $PLATFORM" -v
+}
+
+# PyUI copies its bundled default into the system json on its first start, but
+# runtime.sh reads that file before PyUI runs, so seed it here as Flip.sh does.
+magicx_seed_system_json() {
+    json="$(get_config_path 2>/dev/null)"
+    [ -n "$json" ] && [ ! -f "$json" ] || return 0
+    cp /mnt/SDCARD/App/PyUI/main-ui/devices/magicx/magicx-system.json "$json" 2>/dev/null \
+        && log_message "MagicX: seeded $json from the bundled default"
 }
