@@ -176,14 +176,15 @@ class MiyooMiniCommon(MiyooDevice):
             Display.volume_changed(self.mainui_volume * 5)
 
     def special_input(self, controller_input, length_in_seconds):
-        # The volume keys are keymon's; PyUI only mirrors the level it writes.
-        # A press reaches us through the event0 watcher before the file watcher's
-        # next tick, so re-read at once - if keymon has not written yet, the
-        # watcher's granularity repeat picks the change up within 200 ms.
-        if controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN):
-            self.on_mainui_config_change()
-            return
-        super().special_input(controller_input, length_in_seconds)
+        if(PyUiConfig.enable_button_watchers()):
+            # The volume keys are keymon's; PyUI only mirrors the level it writes.
+            # A press reaches us through the event0 watcher before the file watcher's
+            # next tick, so re-read at once - if keymon has not written yet, the
+            # watcher's granularity repeat picks the change up within 200 ms.
+            if controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN):
+                self.on_mainui_config_change()
+                return
+            super().special_input(controller_input, length_in_seconds)
 
     def startup_init(self, include_wifi=True):
         self.on_mainui_config_change()
@@ -192,14 +193,11 @@ class MiyooMiniCommon(MiyooDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self.init_gpio()
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
+        from controller.controller import Controller
+        self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+        Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+        volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+        volume_key_polling_thread.start()
 
     def build_controller_interface(self):
         key_mappings = {}  

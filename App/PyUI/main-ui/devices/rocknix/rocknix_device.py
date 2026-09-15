@@ -15,6 +15,7 @@ from utils import throttle
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
+from utils.py_ui_config import PyUiConfig
 
 
 class RocknixDevice(DeviceCommon):
@@ -134,15 +135,16 @@ class RocknixDevice(DeviceCommon):
         self.change_volume(-5)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
+            elif(ControllerInput.VOLUME_UP == controller_input):
+                self.change_volume(5)
+            elif(ControllerInput.VOLUME_DOWN == controller_input):
+                self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)

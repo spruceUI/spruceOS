@@ -86,18 +86,15 @@ class MiyooFlip(MiyooDevice):
             ConfigCopier.ensure_config(MiyooFlip.MIYOO_STOCK_CONFIG_LOCATION, miyoo_stock_json_file)
             self.hardware_poller = MiyooFlipPoller(self)
             threading.Thread(target=self.startup_init, daemon=True).start()
-            if(PyUiConfig.enable_button_watchers()):
-                threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
-                from controller.controller import Controller
-                #/dev/miyooio if we want to get rid of miyoo_inputd
-                # debug in terminal: hexdump  /dev/miyooio
-                self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-                volume_key_polling_thread.start()
-                self.power_key_watcher = KeyWatcher("/dev/input/event2")
-                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-                power_key_polling_thread.start()
+            threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+            from controller.controller import Controller
+            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+            self.power_key_watcher = KeyWatcher("/dev/input/event2")
+            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+            power_key_polling_thread.start()
           
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
