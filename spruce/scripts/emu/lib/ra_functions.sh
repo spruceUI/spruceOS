@@ -48,7 +48,7 @@ setup_rumble_env() {
 prepare_ra_config() {
 
 	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
-	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg"
+	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
 	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
 
 	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then

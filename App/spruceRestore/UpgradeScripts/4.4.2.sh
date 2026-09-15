@@ -36,15 +36,19 @@ mkdir -p "$NEW_CFG_DIR"
 # Don't move the old config if it's the same as the .bak; the user never touched this file,
 # so there's no need to keep it. Otherwise, move it into the new location. We use mv -f
 # because we want the restore to always work even if there's already a file at its destination.
+# Skip over the non-base configs, for which we do not ship a .bak file.
 for _cfg in "$OLD_CFG_DIR"/*.cfg ; do
 
-    if [ "$(cat "$_cfg")" = "$(cat "$_cfg.bak")" ]; then
-        rm "$_cfg"
-        log_message "Deleted stale $_cfg with no differences from its .bak ."
+    if [ -f "$_cfg.bak" ]; then
 
-    else
-        mv -f "$_cfg" "$NEW_CFG_DIR"/"$(basename "$_cfg")"
-        log_message "Moved $_cfg into $NEW_CFG_DIR ."
+        if [ "$(cat "$_cfg")" = "$(cat "$_cfg.bak")" ]; then
+            rm "$_cfg"
+            log_message "Deleted stale $_cfg with no differences from its .bak ."
+
+        else
+            mv -f "$_cfg" "$NEW_CFG_DIR"/"$(basename "$_cfg")"
+            log_message "Moved $_cfg into $NEW_CFG_DIR ."
+        fi
     fi
 
 done
