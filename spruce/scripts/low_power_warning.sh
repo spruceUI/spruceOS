@@ -129,7 +129,7 @@ while true; do
             else
                 if [ "$flag_added" = false ]; then
                     if flag_check "in_menu"; then
-                        display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay
+                        display -t "Battery has $CAPACITY% left. Charge or shutdown your device." --okay &
                     else
                         flag_add "low_battery" --tmp
                     fi
