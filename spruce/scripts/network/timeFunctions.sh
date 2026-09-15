@@ -35,7 +35,13 @@ run_with_time_limit() {
 	_limit="$1"
 	shift
 	if command -v timeout >/dev/null 2>&1; then
-		timeout "$_limit" "$@"
+		# Older BusyBox (Miyoo Mini) requires -t SECS; modern timeout takes
+		# SECS positionally. Probe with true so the real command runs only once.
+		if timeout 1 true >/dev/null 2>&1; then
+			timeout "$_limit" "$@"
+		else
+			timeout -t "$_limit" "$@"
+		fi
 	else
 		"$@"
 	fi
