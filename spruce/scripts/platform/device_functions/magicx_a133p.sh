@@ -191,6 +191,13 @@ device_exit_sleep() {
     wifi_request apply --wait
 }
 
+# The in-game menu composes over a framebuffer snapshot; the panel is portrait and
+# the UI rotated, so the capture is un-rotated the way the XX line does it.
+take_screenshot() {
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
+}
+
 # TrimUI-only hooks inherited from trimui_a133p.sh. The MagicX boards have no
 # /sys/class/led_anim, so the RGB hooks are no-ops here.
 enable_or_disable_rgb() {
