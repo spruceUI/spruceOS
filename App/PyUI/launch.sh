@@ -365,10 +365,11 @@ case "$PLATFORM" in
         log_message "Starting PyUI on $PLATFORM"
         if [ $button_listener_mode -eq 1 ]; then
             "$@"
-        elif [ "$redirect_output" -eq 1 ]; then
-            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
-            "$@" >/dev/null 2>&1
+            # Bring-up platform: keep PyUI's stdout/stderr and record how it ended.
+            # A crash in the SDL2 blob or the GPU stack prints nothing to pyui.log.
+            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
+            log_message "PyUI on $PLATFORM exited with status $?"
         fi
     ;;
 
