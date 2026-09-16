@@ -127,14 +127,27 @@ magicx_load_onboard_radio() {
     mkdir -p "$(dirname "$MAGICX_RADIO_KMSG")" 2>/dev/null
     cat /dev/kmsg > "$MAGICX_RADIO_KMSG" 2>/dev/null &
     _kmsg_pid=$!
-    modprobe "$WIFI_ONBOARD_MODULE" 2>/tmp/magicx_radio_err; rc=$?
+    if [ -n "$MAGICX_RADIO_MODULES_DIR" ] && [ -f "$MAGICX_RADIO_MODULES_DIR/$WIFI_ONBOARD_MODULE.ko" ]; then
+        # Card-carried modules, built for the kernel this board boots (the hybrid Zero 40
+        # runs MagicX's kernel). Dependency order for the XR829 stack.
+        rc=0
+        for _m in xradio_mac xradio_core "$WIFI_ONBOARD_MODULE"; do
+            [ -f "$MAGICX_RADIO_MODULES_DIR/$_m.ko" ] || continue
+            usb_wifi_module_loaded "$_m" && continue
+            insmod "$MAGICX_RADIO_MODULES_DIR/$_m.ko" 2>/tmp/magicx_radio_err || { rc=$?; break; }
+        done
+        _src="card:$MAGICX_RADIO_MODULES_DIR"
+    else
+        modprobe "$WIFI_ONBOARD_MODULE" 2>/tmp/magicx_radio_err; rc=$?
+        _src="modprobe"
+    fi
     for _ in 1 2 3 4 5; do
         [ -d /sys/class/net/wlan0 ] && break
         sleep 1
     done
     kill "$_kmsg_pid" 2>/dev/null
     sync
-    log_message "MagicX radio: modprobe $WIFI_ONBOARD_MODULE rc=$rc $(head -1 /tmp/magicx_radio_err 2>/dev/null); wlan0=$([ -d /sys/class/net/wlan0 ] && echo yes || echo no); sdio=$(ls /sys/bus/sdio/devices 2>/dev/null | tr '\n' ' '); $(grep -a -i 'xradio\|sbus\|RTW: \|8189\|firmware\|sdd\|Unable to handle\|BUG' "$MAGICX_RADIO_KMSG" 2>/dev/null | head -8 | cut -c1-160 | tr '\n' '|')"
+    log_message "MagicX radio: $_src $WIFI_ONBOARD_MODULE rc=$rc $(head -1 /tmp/magicx_radio_err 2>/dev/null); wlan0=$([ -d /sys/class/net/wlan0 ] && echo yes || echo no); sdio=$(ls /sys/bus/sdio/devices 2>/dev/null | tr '\n' ' '); $(grep -a -i 'xradio\|sbus\|RTW: \|8189\|firmware\|sdd\|Unable to handle\|BUG' "$MAGICX_RADIO_KMSG" 2>/dev/null | head -8 | cut -c1-160 | tr '\n' '|')"
     return 0
 }
 
