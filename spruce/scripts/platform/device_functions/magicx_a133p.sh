@@ -111,6 +111,28 @@ magicx_disown_base_supplicant() {
     return 0
 }
 
+# The onboard radio differs per board and neither driver may autoload: the
+# Zero 28 carries a Realtek RTL8189ES-class SDIO part (0x024c:0x8179, the
+# base's modules.d loads 8189es), the Zero 40 an XR829 (SDIO 0x0a9e:0x2282,
+# the id the kernel's xr829 driver lists; measured 2026-09-16 after a night
+# of blaming the power pins). xradio's platform init rescans the SDIO bus
+# and threw the Realtek off it, so the base autoloads no xradio_* at all and
+# each cfg names its module in WIFI_ONBOARD_MODULE; this loads it when the
+# base did not. The dmesg excerpt is for the boards without a network.
+magicx_load_onboard_radio() {
+    [ -n "$WIFI_ONBOARD_MODULE" ] || return 0
+    if usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
+        return 0
+    fi
+    modprobe "$WIFI_ONBOARD_MODULE" 2>/tmp/magicx_radio_err; rc=$?
+    for _ in 1 2 3 4 5; do
+        [ -d /sys/class/net/wlan0 ] && break
+        sleep 1
+    done
+    log_message "MagicX radio: modprobe $WIFI_ONBOARD_MODULE rc=$rc $(head -1 /tmp/magicx_radio_err 2>/dev/null); wlan0=$([ -d /sys/class/net/wlan0 ] && echo yes || echo no); sdio=$(ls /sys/bus/sdio/devices 2>/dev/null | tr '\n' ' '); $(dmesg 2>/dev/null | grep -i 'xradio\|RTW: \|8189\|sbus\|firmware' | tail -4 | tr '\n' '|' | cut -c1-400)"
+    return 0
+}
+
 device_init() {
     runtime_mounts_magicx
     magicx_disown_base_supplicant
@@ -120,6 +142,7 @@ device_init() {
 
     init_gpio_a133p
     magicx_resolve_event_paths
+    magicx_load_onboard_radio
 
     (
         syslogd -S
