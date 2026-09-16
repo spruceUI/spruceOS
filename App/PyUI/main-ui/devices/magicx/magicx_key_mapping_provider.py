@@ -40,9 +40,9 @@ class MagicXKeyMappingProvider:
             # both boards; the Zero 40 did not react to it on first use, so the
             # other codes a MENU key is commonly given are mapped as well until
             # the diag log's key bitmap names the real one.
-            # MENU: KEY_BACK 158 on the Zero 28 (MinUI keymon); 353 on the Zero 40
-            # (pyui.log "unmapped key code 353" on every press, 2026-09-16).
-            158: ControllerInput.MENU, 353: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
+            # MENU is KEY_BACK 158 (measured on the Zero 28, 2026-09-16: a
+            # timed capture of every button in a known order).
+            158: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
             172: ControllerInput.HOME,
         }
         # Stick direction and axis layout differ per board: DedicatedOS (Zero 40) has
@@ -54,10 +54,15 @@ class MagicXKeyMappingProvider:
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
             self.key_mappings[KeyEvent(1, code, 0)] = [InputResult(ci, KeyState.RELEASE)]
-        # L3/R3 (317/318) are the driver's virtual-mouse keys; left unmapped.
+        # The A button also emits KEY_SELECT 353 in the same instant as its
+        # BTN_SOUTH (same capture); 353 is deliberately ignored so A is not
+        # counted twice. 272/273 are the driver's virtual-mouse buttons.
+        self.ignored_codes = {353, 272, 273}
 
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
+        if mappings is None and key_event.event_type == 1 and key_event.code in self.ignored_codes:
+            return None
         if mappings is None and key_event.event_type == 1 and key_event.value == 1 and key_event.code not in self._reported:
             # Bring-up aid: name every key code this pad sends that the map
             # does not know, once per code (the Zero 40's MENU, 2026-09-16).
