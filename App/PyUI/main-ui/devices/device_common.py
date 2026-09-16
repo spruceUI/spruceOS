@@ -792,14 +792,8 @@ class DeviceCommon(AbstractDevice):
         """
         return [self.get_device_name()]
 
-    def arch_emulator_key_to_skip(self, menu_options: dict, rom_file_path=None):
-        """The Emulator_64/Emulator_32 key that does not match the RA build.
-
-        Only ever skips when the other key exists and names this device, so a
-        system carrying a lone Emulator_64 keeps resolving to it on a 32-bit
-        build instead of resolving to nothing. ARCADE, ATOMISWAVE, DC, NAOMI and
-        PS are that shape. Mirrors emu_option_key_for_device in the launcher.
-        """
+    def get_emulator_arch(self, menu_options: dict, rom_file_path=None):
+        """The Emulator_64/Emulator_32 key matching the RA build, or None if this device lacks that key."""
         ra_build = menu_options.get("raBuild")
         if not ra_build:
             return None
@@ -817,15 +811,15 @@ class DeviceCommon(AbstractDevice):
             return any(name in (option.get("devices") or []) for name in self.get_device_names())
 
         if selected == "32-bit" and claims("Emulator_32"):
-            return "Emulator_64"
-        if selected == "64-bit" and claims("Emulator_64"):
             return "Emulator_32"
+        if selected == "64-bit" and claims("Emulator_64"):
+            return "Emulator_64"
         return None
 
     def get_selected_emulator(self, menu_options: dict):
-        skip_key = self.arch_emulator_key_to_skip(menu_options)
+        arch_key = self.get_emulator_arch(menu_options)
         for key, option in menu_options.items():
-            if key.startswith("Emulator") and key != skip_key:
+            if key.startswith("Emulator") and (arch_key is None or key == arch_key):
                 devices = option.get("devices", [])
                 if any(name in devices for name in self.get_device_names()):
                     return option.get("selected")

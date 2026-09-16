@@ -43,11 +43,9 @@ get_effective_ra_build() {
 # file order and take the first whose list contains any of our names. Empty when
 # nothing matches, so callers fall through to their existing behaviour.
 #
-# When a system offers both Emulator_64 and Emulator_32 to this device, RA_BUILD
-# picks which one the walk may use, so a 32-bit build reads its core name from
-# the 32-bit list. Skipping only ever happens when the other key is there to be
-# found instead: ARCADE, ATOMISWAVE, DC, NAOMI and PS carry raBuild with a lone
-# Emulator_64, and dropping it would leave them with no key at all.
+# If this device has the Emulator_32/Emulator_64 key matching RA_BUILD, only that
+# key is used. Otherwise the walk is unrestricted, so systems with a lone
+# Emulator_64 (ARCADE, DC, PS, ...) still resolve on a 32-bit build.
 emu_option_key_for_device() {
     _names="$(device_names 2>/dev/null)"
     [ -n "$_names" ] || return 0
@@ -57,12 +55,12 @@ emu_option_key_for_device() {
                             | $names | index($d) ]
                           | map(select(. != null)) | length > 0;
 
-        (if   $ra_build == "32-bit" and claims("Emulator_32") then "Emulator_64"
-         elif $ra_build == "64-bit" and claims("Emulator_64") then "Emulator_32"
-         else "" end) as $skip
+        (if   $ra_build == "32-bit" and claims("Emulator_32") then "Emulator_32"
+         elif $ra_build == "64-bit" and claims("Emulator_64") then "Emulator_64"
+         else "" end) as $arch
         | [ .menuOptions | to_entries[]
             | select(.key | startswith("Emulator"))
-            | select(.key != $skip)
+            | select($arch == "" or .key == $arch)
             | select( [ (.value.devices // [])[] as $d | $names | index($d) ]
                       | map(select(. != null)) | length > 0 )
           ][0].key // empty
