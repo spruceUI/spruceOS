@@ -174,6 +174,20 @@ magicx_relight_panel() {
     set_backlight "$level"
 }
 
+# Sleep: the onboard radio here is the Realtek 8189es (WIFI_ONBOARD_MODULE), not
+# trimui_a133p.sh's XR829, so that is the module that goes out before suspend.
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    wifi_request suspend --wait
+    usb_wifi_note_sleep
+    usb_wifi_tear_down
+    usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE" && rmmod "$WIFI_ONBOARD_MODULE"
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
 device_exit_sleep() {
     magicx_relight_panel
     clear_wake_alarm "$WAKE_ALARM_PATH"
@@ -181,7 +195,7 @@ device_exit_sleep() {
         wifi_request apply --wait
         return 0
     fi
-    modprobe xradio_wlan
+    modprobe "$WIFI_ONBOARD_MODULE"
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
         for _ in 1 2 3 4 5; do
             ip link show wlan0 >/dev/null 2>&1 && break
