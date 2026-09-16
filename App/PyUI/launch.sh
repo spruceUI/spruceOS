@@ -339,15 +339,17 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# MagicX Zero28
+# MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32)
 ############################################################
 
-    "Zero28" | "Zero40" )
+    "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="/usr/magicx/lib"
         if [ "$PLATFORM" = "Zero40" ]; then
             DEVICE="MAGICX_ZERO40"
+        elif [ "$PLATFORM" = "XU20" ]; then
+            DEVICE="MAGICX_XU20"
         else
             DEVICE="MAGICX_ZERO28"
         fi

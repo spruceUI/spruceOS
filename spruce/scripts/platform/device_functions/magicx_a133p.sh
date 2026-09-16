@@ -1,22 +1,12 @@
 #!/bin/sh
 
-# MagicX A133P family: Mini Zero 28 and Zero 40.
-#
-# Same Allwinner A133P as the TrimUI Smart Pro / Brick, so everything that is
-# SoC-generic (sleep and wake, WiFi through the XR829 driver, rumble, volume,
-# the /dev/disp backlight) is inherited from trimui_a133p.sh. What differs is
-# the base OS: these boards run our own pared-down Tina Linux on SD1
-# (CFW/Spruce/devices in the wrapper, Moss-zero28's lineage) instead of TrimUI's
-# firmware, so there are no /usr/trimui blobs (no trimui_inputd: the kernel's
-# simplepad driver is the gamepad), the SDL2 blobs live in /usr/magicx/lib, and
-# the image names the model in /usr/magicx/device.
-#
-# Intended to be sourced by Zero28.sh / Zero40.sh only.
+# MagicX A133P family: Mini Zero 28, Zero 40 and XU20 V32. Same SoC as the Smart Pro,
+# so trimui_a133p.sh is sourced; the base OS is our own Tina on SD1, not TrimUI's.
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_a133p.sh"
 
-# zero28 | zero40, from the base image's marker. Images without one predate
-# the marker and are Zero 28 (Moss-zero28 itself).
+# zero28 | zero40 | xu20, from the base image's marker. Images without one
+# predate the marker and are Zero 28 (Moss-zero28 itself).
 magicx_model() {
     m=$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)
     echo "${m:-zero28}"
@@ -48,10 +38,16 @@ magicx_touch_event_path() {
             return 0
         fi
     done
-    magicx_find_event_by_name "*[Tt]ouch*" "*ts*" "*gt9*" "*ft5*" "*goodix*" "*[Ff]ocal*"
+    magicx_find_event_by_name "*[Tt]ouch*" "*ts*" "*gt9*" "*ft5*" "*goodix*" "*[Ff]ocal*" "*hyn*" "*cst*"
 }
 
+# Board pin pokes for OUR Tina device tree. The XU20 runs the vendor's kernel and
+# device tree, which owns these pins, so its cfg sets MAGICX_INIT_GPIO=false.
 init_gpio_a133p() {
+    if [ "$MAGICX_INIT_GPIO" = "false" ]; then
+        log_message "MagicX: skipping the Tina GPIO init on $PLATFORM (vendor device tree owns these pins)" -v
+        return 0
+    fi
     #PD11 pull high for VCC-5v
     echo 107 > /sys/class/gpio/export
     printf '%s' out > /sys/class/gpio/gpio107/direction
@@ -78,9 +74,8 @@ runtime_mounts_magicx() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
-# Resolve the input nodes at boot instead of trusting the cfg's numbering: the
-# simplepad gamepad, the PMIC power key and (Zero 40) the touchscreen enumerate
-# in whatever order the drivers probe. The cfg values stay as fallbacks.
+# Resolve the input nodes at boot instead of trusting the cfg's numbering: they
+# enumerate in whatever order the drivers probe. The cfg values stay as fallbacks.
 magicx_resolve_event_paths() {
     # The simplepad driver (UART MCU pad) registers its input device as
     # "magicx-input" (strings in simplepad.ko), not under the generic names.
@@ -120,7 +115,10 @@ magicx_load_onboard_radio() {
     if usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE"; then
         return 0
     fi
-    for _other in 8189es xradio_wlan; do
+    # Every driver any board in this family ships, dependents before their base: one of
+    # these probing the SDIO bus first is what knocked the real radio off it.
+    for _other in 8189es xradio_wlan xradio_core xradio_mac xr829 xradio_btlpm \
+                  aic8800_fdrv aic8800_btlpm aic8800_bsp sprdwl_ng sprdbt_tty uwe5622_bsp_sdio; do
         [ "$_other" = "$WIFI_ONBOARD_MODULE" ] && continue
         usb_wifi_module_loaded "$_other" && rmmod "$_other" 2>/dev/null
     done

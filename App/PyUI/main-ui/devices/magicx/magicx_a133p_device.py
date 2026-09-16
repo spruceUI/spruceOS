@@ -18,7 +18,7 @@ from utils.py_ui_config import PyUiConfig
 
 
 class MagicXA133PDevice(TrimUIDevice):
-    """MagicX A133P family (Mini Zero 28, Zero 40).
+    """MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32).
 
     The same Allwinner A133P as the TrimUI Smart Pro, running on our own Tina
     base image (CFW/Spruce/devices in the wrapper): the same /dev/disp
@@ -27,6 +27,11 @@ class MagicXA133PDevice(TrimUIDevice):
     TrimUI evdev codes, so the TrimUI key mapping provider is reused. The shell
     resolves the input nodes at boot and exports them (EVENT_PATH_*); the
     literals here are only fallbacks.
+
+    The XU20 V32 differs in one way that matters here: it runs this userland
+    under the device's own Android kernel rather than our Tina one, so the sysfs
+    paths below (battery, backlight) are inherited assumptions on that board
+    until a unit confirms them.
     """
 
     def __init__(self, device_name, main_ui_mode, system_json_path):
@@ -78,18 +83,18 @@ class MagicXA133PDevice(TrimUIDevice):
         return self.device_name
 
     def get_device_names(self):
-        # The family token lets one Emu/App config entry cover both boards; it
-        # mirrors device_names() in spruce/scripts/helperFunctions.sh.
+        # The family token lets one Emu/App config entry cover every board in the
+        # family; it mirrors device_names() in spruce/scripts/helperFunctions.sh.
         return [self.device_name, "MAGICX_A133P"]
 
     def get_fw_version(self):
-        # The base image records the Tina config it was built from next to the
-        # marker; there is no /etc/version worth showing.
+        # The base image records the Tina config it was built from next to the marker.
+        # A failed read must not name a different board, so report the launch platform.
         try:
             with open("/usr/magicx/device") as f:
-                model = f.read().strip()
+                model = f.read().strip() or "unknown"
         except OSError:
-            model = "zero28"
+            model = os.environ.get("PLATFORM", "").strip() or "unknown"
         return f"magicx-tina ({model})"
 
     # ----- display -----

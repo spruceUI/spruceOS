@@ -5,6 +5,7 @@
 if [ -e /usr/magicx ]; then
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
+        xu20)   export PLATFORM="XU20" ;;
         *)      export PLATFORM="Zero28" ;;
     esac
 else

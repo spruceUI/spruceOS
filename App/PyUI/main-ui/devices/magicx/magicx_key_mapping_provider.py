@@ -12,6 +12,28 @@ def _env_flag(name, default):
     return default if v == "" else v not in ("0", "false", "False", "no")
 
 
+def _env_codes(name, default):
+    """Comma-separated key codes from the platform cfg, else the default set.
+
+    The pad is the same driver on every board in this family, but the codes are
+    not: each board's device tree names them, and some buttons carry a second
+    code (linux,code2) that the driver emits alongside the first. On the XU20
+    V32 that makes B send KEY_BACK 158, the code the Zero boards use for MENU,
+    so the cfg has to be able to move MENU (to BTN_0 256 there) and to add 158
+    to the ignored set without a rebuild.
+    """
+    out = set()
+    for part in os.environ.get(name, "").replace(";", ",").split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            out.add(int(part))
+        except ValueError:
+            continue
+    return out or set(default)
+
+
 class MagicXKeyMappingProvider:
     """Key map for the MagicX simplepad ("magicx-input", a UART MCU pad).
 
@@ -36,15 +58,12 @@ class MagicXKeyMappingProvider:
             314: ControllerInput.SELECT, 315: ControllerInput.START,
             103: ControllerInput.DPAD_UP, 108: ControllerInput.DPAD_DOWN,
             105: ControllerInput.DPAD_LEFT, 106: ControllerInput.DPAD_RIGHT,
-            # MENU: KEY_BACK 158 per MinUI's keymon and DedicatedOS's hangmon on
-            # both boards; the Zero 40 did not react to it on first use, so the
-            # other codes a MENU key is commonly given are mapped as well until
-            # the diag log's key bitmap names the real one.
-            # MENU is KEY_BACK 158 (measured on the Zero 28, 2026-09-16: a
-            # timed capture of every button in a known order).
-            158: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
             172: ControllerInput.HOME,
         }
+        # MENU is KEY_BACK 158 on the Zero boards (measured on the Zero 28), with the
+        # usual MENU codes as fallbacks. The XU20 overrides this to 256 from its cfg.
+        for _code in _env_codes("MAGICX_MENU_CODES", (158, 139, 316)):
+            buttons[_code] = ControllerInput.MENU
         # Stick direction and axis layout differ per board: DedicatedOS (Zero 40) has
         # horizontal = -ABS_Y, MinUI (Zero 28) plain ABS_X/ABS_Y. Set from the cfg.
         self.swap_xy = _env_flag("MAGICX_STICK_SWAP_XY", False)
@@ -54,10 +73,14 @@ class MagicXKeyMappingProvider:
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
             self.key_mappings[KeyEvent(1, code, 0)] = [InputResult(ci, KeyState.RELEASE)]
-        # The A button also emits KEY_SELECT 353 in the same instant as its
-        # BTN_SOUTH (same capture); 353 is deliberately ignored so A is not
-        # counted twice. 272/273 are the driver's virtual-mouse buttons.
-        self.ignored_codes = {353, 272, 273}
+        # A also emits KEY_SELECT 353 alongside BTN_SOUTH, so 353 is ignored; 272/273
+        # are the driver's virtual-mouse buttons. The XU20 adds 158, B's second code.
+        self.ignored_codes = _env_codes("MAGICX_IGNORED_CODES", (353, 272, 273))
+        # An ignored code must never also be mapped: the cfg moves MENU off a
+        # code precisely because another button emits it too.
+        for _code in self.ignored_codes:
+            self.key_mappings.pop(KeyEvent(1, _code, 1), None)
+            self.key_mappings.pop(KeyEvent(1, _code, 0), None)
 
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)

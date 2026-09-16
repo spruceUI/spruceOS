@@ -334,7 +334,8 @@ device_needs_strict_unmount() {
 # dongle whose module will not load, means the onboard radio exactly as before.
 #
 # Defined only for a cfg that opted in (the platform cfg is sourced before
-# this file). This file is also sourced by RGB30.sh and Zero28.sh for its
+# this file). This file is also sourced by RGB30.sh and by the MagicX A133P
+# boards (Zero28.sh / Zero40.sh / XU20.sh, through magicx_a133p.sh) for its
 # TrimUI helpers - the RGB30 after defining its own nmcli radio hooks - and an
 # unconditional definition here would shadow those and turn its WiFi toggle
 # into a no-op.
