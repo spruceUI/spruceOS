@@ -225,18 +225,21 @@ take_screenshot() {
     /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
 }
 
-# Volume. trimui_a133p.sh's set_volume writes /tmp/system/set_volume, the
-# level file TrimUI's firmware daemon applies; nothing on this base reads it,
-# so the volume keys did nothing (Zero 40, 2026-09-16). MinUI's zero28 port
-# drives the codec directly: 'DAC volume' takes 0 (mute) or 96..160 for
-# 5..100 %, after 'Headphone', 'digital volume' and 'Soft Volume Master' are
-# opened up once (libmsettings/msettings.c). Same 0-20 scale and json as the
-# TrimUI routine, minus the firmware file and TrimUI's OSD script.
+# Volume. trimui_a133p.sh's set_volume writes a file only TrimUI's daemon reads, so
+# the codec is driven directly and the level lives in 'digital volume' (0..63).
+MAGICX_DIGITAL_VOLUME_FLOOR=63
+MAGICX_DIGITAL_VOLUME_QUIETEST=41
+
 magicx_apply_volume() {
     vol="${1:-0}"
-    raw=$((vol * 5))
-    [ "$raw" -gt 0 ] && raw=$((96 + 64 * raw / 100))
-    amixer sset 'DAC volume' "$raw" >/dev/null 2>&1
+    case "$vol" in ''|*[!0-9]*) vol=0 ;; esac
+    if [ "$vol" -le 0 ]; then
+        att=$MAGICX_DIGITAL_VOLUME_FLOOR
+    else
+        [ "$vol" -gt 20 ] && vol=20
+        att=$(( (MAGICX_DIGITAL_VOLUME_QUIETEST * (20 - vol) + 9) / 19 ))
+    fi
+    amixer sset 'digital volume' "$att" >/dev/null 2>&1
 }
 
 set_volume() {
@@ -251,9 +254,10 @@ set_volume() {
     fi
 }
 
+# One-time mixer state (MinUI's msettings init): headphone gain open, softvol at
+# unity. 'DAC volume' is left to the driver; the level itself comes from the json.
 magicx_init_audio() {
     amixer sset 'Headphone' 0 >/dev/null 2>&1
-    amixer sset 'digital volume' 0 >/dev/null 2>&1
     amixer sset 'Soft Volume Master' 255 >/dev/null 2>&1
     magicx_apply_volume "$(get_volume_level 2>/dev/null)"
 }
