@@ -152,6 +152,27 @@ send_virtual_key_L3() {
 }
 
 
+# An unreadable or unparseable version means "do not nag".
+check_if_fw_needs_update() {
+    _baseos_have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null)"
+    if [ -z "$_baseos_have" ] || [ -z "$TARGET_BASEOS_VERSION" ]; then
+        echo "false"
+        return
+    fi
+    case "$_baseos_have" in
+        ''|*[!0-9.]*) echo "false"; return ;;
+    esac
+
+    _have_n="$(printf '%s' "$_baseos_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+    _want_n="$(printf '%s' "$TARGET_BASEOS_VERSION" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+
+    if [ "$_have_n" -lt "$_want_n" ] 2>/dev/null; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
 has_lid() {
     # BaseOS's build target names the model exactly, and every clamshell target
     # in the line ends in "sp" (rg34xxsp, rg35xxsp, rgsp).
