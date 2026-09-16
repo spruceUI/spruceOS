@@ -348,8 +348,8 @@ class MiniloongPocket1(DeviceCommon):
         return ChargeStatus.DISCONNECTED
 
     def sleep(self):
-        # spruce's sleep helper owns suspend on every platform; PyUI only asks.
-        ProcessRunner.run(["/mnt/SDCARD/spruce/scripts/sleep_helper.sh"], timeout=None)
+        # TODO not implemented yet
+        return
 
     def power_off_cmd(self):
         return "poweroff"

@@ -251,16 +251,9 @@ class MiyooFlip(MiyooDevice):
                                      "179:hue:"+str(self.system_config.hue * 5)])
         
             
-    def _take_snapshot(self, path):
-        ProcessRunner.run(["/mnt/sdcard/spruce/flip/screenshot.sh", path])
-        return path
-
     def take_snapshot(self, path):
-        #Currently this takes 0.7s on the flip, way too long to leave enabled
-        #return self._take_snapshot(path)
         return None
-    
-    
+        
     @throttle.limit_refresh(5)
     def get_charge_status(self):
         with open("/sys/class/power_supply/ac/online", "r") as f:
