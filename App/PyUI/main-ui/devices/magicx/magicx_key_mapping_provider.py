@@ -40,7 +40,9 @@ class MagicXKeyMappingProvider:
             # both boards; the Zero 40 did not react to it on first use, so the
             # other codes a MENU key is commonly given are mapped as well until
             # the diag log's key bitmap names the real one.
-            158: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
+            # MENU: KEY_BACK 158 on the Zero 28 (MinUI keymon); 353 on the Zero 40
+            # (pyui.log "unmapped key code 353" on every press, 2026-09-16).
+            158: ControllerInput.MENU, 353: ControllerInput.MENU, 139: ControllerInput.MENU, 316: ControllerInput.MENU,
             172: ControllerInput.HOME,
         }
         # Stick direction and axis layout differ per board: DedicatedOS (Zero 40) has
