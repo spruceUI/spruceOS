@@ -103,20 +103,8 @@ trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
 
-# A poweroff on USB power comes straight back as a charger boot into spruce, so a
-# sleep on USB runs with the "Off" timeout instead (re-checked at the deadline below).
-USB_POWER_ONLINE="${USB_POWER_ONLINE:-/sys/class/power_supply/axp2202-usb/online}"
-
-usb_power_online() {
-    [ "$(cat "$USB_POWER_ONLINE" 2>/dev/null)" = "1" ]
-}
-
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
-    if usb_power_online; then
-        log_message "On USB power: sleeping without the ${IDLE_TIMEOUT}s shutdown timer"
-        IDLE_TIMEOUT=2592000
-    fi
     WAKE_ALARM_PATH="$(find_wake_alarm_path)"
     rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -137,14 +125,6 @@ device_exit_sleep() {
 device_woke_via_timer() {
     if [ -f "$WAKE_ALARM_ARMED_FLAG" ] && [ -e "$WAKE_ALARM_PATH" ]; then
         if [ -z "$(cat "$WAKE_ALARM_PATH" 2>/dev/null)" ]; then
-            if usb_power_online; then
-                # Plugged in since the sleep began: re-arm "Off" and keep sleeping
-                # rather than power off into a charger boot. Stdout is captured here.
-                log_message "On USB power at the sleep deadline: not shutting down" >/dev/null
-                save_sleep_info 2592000 >/dev/null && set_wake_alarm 2592000 "$WAKE_ALARM_PATH" >/dev/null
-                echo "false"
-                return
-            fi
             echo "true"
             return
         fi
