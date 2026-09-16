@@ -21,8 +21,7 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ]
     }
   ],
@@ -54,8 +53,7 @@
         "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
         "RGB30",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ],
       "options": [
         "gvu",

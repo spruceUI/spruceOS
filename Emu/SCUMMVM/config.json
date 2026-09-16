@@ -22,8 +22,7 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ]
     },
     {
@@ -42,8 +41,7 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ]
     },
     {
@@ -62,8 +60,7 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ]
     }
   ],
@@ -116,8 +113,7 @@
         "MIYOO_FLIP",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ],
       "selected": "scummvm-standalone",
       "overrides": {}
@@ -136,8 +132,7 @@
     "MIYOO_MINI_PLUS",
     "MIYOO_MINI_FLIP",
     "RGB30",
-    "MAGICX_ZERO28",
-    "MAGICX_ZERO40"
+    "MAGICX_A133P"
   ],
   "sortOrder": 5600,
   "brand": "modernengine",

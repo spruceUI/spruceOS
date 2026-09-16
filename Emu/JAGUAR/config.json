@@ -55,8 +55,7 @@
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
         "RGB30",
-        "MAGICX_ZERO28",
-        "MAGICX_ZERO40"
+        "MAGICX_A133P"
       ],
       "options": [
         "bigpemu-standalone",
