@@ -42,16 +42,28 @@ get_effective_ra_build() {
 # exactly the way PyUI's Device.get_selected_emulator does: walk the keys in
 # file order and take the first whose list contains any of our names. Empty when
 # nothing matches, so callers fall through to their existing behaviour.
+#
+# If this device has the Emulator_32/Emulator_64 key matching RA_BUILD, only that
+# key is used. Otherwise the walk is unrestricted, so systems with a lone
+# Emulator_64 (ARCADE, DC, PS, ...) still resolve on a 32-bit build.
 emu_option_key_for_device() {
     _names="$(device_names 2>/dev/null)"
     [ -n "$_names" ] || return 0
     _names_json="$(printf '%s\n' $_names | jq -R . | jq -sc .)"
-    jq -r --argjson names "$_names_json" '
-        [ .menuOptions | to_entries[]
-          | select(.key | startswith("Emulator"))
-          | select( [ (.value.devices // [])[] as $d | $names | index($d) ]
-                    | map(select(. != null)) | length > 0 )
-        ][0].key // empty
+    jq -r --argjson names "$_names_json" --arg ra_build "${RA_BUILD:-}" '
+        def claims($key): [ (.menuOptions[$key].devices // [])[] as $d
+                            | $names | index($d) ]
+                          | map(select(. != null)) | length > 0;
+
+        (if   $ra_build == "32-bit" and claims("Emulator_32") then "Emulator_32"
+         elif $ra_build == "64-bit" and claims("Emulator_64") then "Emulator_64"
+         else "" end) as $arch
+        | [ .menuOptions | to_entries[]
+            | select(.key | startswith("Emulator"))
+            | select($arch == "" or .key == $arch)
+            | select( [ (.value.devices // [])[] as $d | $names | index($d) ]
+                      | map(select(. != null)) | length > 0 )
+          ][0].key // empty
     ' "$EMU_JSON_PATH" 2>/dev/null
 }
 
