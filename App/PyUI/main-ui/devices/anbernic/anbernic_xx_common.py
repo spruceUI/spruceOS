@@ -326,8 +326,10 @@ class AnbernicXXCommon(DeviceCommon):
 
     # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
     def get_core_for_game(self, game_system_config, rom_file_path):
-        for key, option in game_system_config.get_menu_options().items():
-            if key.startswith("Emulator") and any(name in (option.get("devices") or []) for name in self.get_device_names()):
+        menu_options = game_system_config.get_menu_options()
+        skip_key = self.arch_emulator_key_to_skip(menu_options, rom_file_path)
+        for key, option in menu_options.items():
+            if key.startswith("Emulator") and key != skip_key and any(name in (option.get("devices") or []) for name in self.get_device_names()):
                 return game_system_config.get_effective_menu_selection(key, rom_file_path)
         return game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
 
