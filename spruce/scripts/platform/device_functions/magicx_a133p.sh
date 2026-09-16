@@ -99,8 +99,21 @@ magicx_resolve_event_paths() {
     log_message "MagicX input nodes: pad=${EVENT_PATH_READ_INPUTS_SPRUCE} power=${EVENT_PATH_POWER} touch=${EVENT_PATH_TOUCH:-none}"
 }
 
+# The Tina base ships OpenWrt's wpa_supplicant service (S96), which procd starts on
+# wlan0 a second after ours and disconnects it. spruce owns the radio, so it goes.
+magicx_disown_base_supplicant() {
+    if [ -n "$(ls /etc/rc.d/[SK]??wpa_supplicant 2>/dev/null)" ]; then
+        /etc/init.d/wpa_supplicant disable >/dev/null 2>&1
+        log_message "MagicX: disabled the base image's wpa_supplicant service; spruce owns the radio"
+    fi
+    ubus call service delete '{"name":"wpa_supplicant"}' >/dev/null 2>&1
+    pkill -f 'wpa_supplicant.*-O/etc/wifi/sockets' 2>/dev/null
+    return 0
+}
+
 device_init() {
     runtime_mounts_magicx
+    magicx_disown_base_supplicant
     magicx_seed_system_json
 
     export LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
