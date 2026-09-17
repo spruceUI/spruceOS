@@ -600,3 +600,9 @@ EOF
 device_stock_ui_command() {
     printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
 }
+
+# Strict unmount: btmanager, hardwareservice, miyoo_inputd and gpiowait hold
+# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+device_needs_strict_unmount() {
+    return 0
+}

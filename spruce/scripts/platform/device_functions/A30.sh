@@ -387,3 +387,8 @@ device_system_handles_sdcard_unmount() {
 }
 
 
+# Strict unmount: udhcpc, joypad, joystickinput, getevent and inotifywait hold
+# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+device_needs_strict_unmount() {
+    return 0
+}
