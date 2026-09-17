@@ -37,10 +37,8 @@ class MagicXA133PDevice(TrimUIDevice):
         self.device_name = device_name
         self.audio_player = AudioPlayerDelegateSdl2()
         self.pad_event_path = os.environ.get("EVENT_PATH_READ_INPUTS_SPRUCE") or "/dev/input/event3"
-        # event0 on every board in this family: the AXP power key enumerates first and
-        # the audio jack takes event1 (measured on all three, 2026-09-17). The sibling
-        # TrimUI family puts a matrix keyboard at event0 and is shifted down one, which
-        # is where the old event1 default came from.
+        # event0 on all three boards, measured 2026-09-17: the AXP power key enumerates
+        # first. The sibling TrimUI family has a matrix keyboard there and shifts down one.
         self.power_event_path = os.environ.get("EVENT_PATH_POWER") or "/dev/input/event0"
         self.volume_event_path = os.environ.get("EVENT_PATH_VOLUME") or self.pad_event_path
         self.touch_event_path = os.environ.get("EVENT_PATH_TOUCH") or ""

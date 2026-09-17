@@ -126,9 +126,8 @@ magicx_load_onboard_radio() {
     cat /dev/kmsg > "$MAGICX_RADIO_KMSG" 2>/dev/null &
     _kmsg_pid=$!
     if [ -n "$MAGICX_RADIO_MODULES_DIR" ] && [ -f "$MAGICX_RADIO_MODULES_DIR/$WIFI_ONBOARD_MODULE.ko" ]; then
-        # Card-carried modules, for a board whose kernel is not the one our modules were
-        # built against. Every board in this family runs our own kernel as of 2026-09-17,
-        # so this path is a fallback; dependency order for the XR829 stack.
+        # Card-carried modules, for a board not running the kernel ours were built against.
+        # No board in the family needs this now; the order below is the XR829 stack's.
         rc=0
         for _m in xradio_mac xradio_core "$WIFI_ONBOARD_MODULE"; do
             [ -f "$MAGICX_RADIO_MODULES_DIR/$_m.ko" ] || continue
@@ -227,9 +226,8 @@ magicx_relight_panel() {
     set_backlight "$level"
 }
 
-# Sleep: the module that goes out before suspend is whichever the board's cfg names in
-# WIFI_ONBOARD_MODULE. That is the Realtek 8189es on the Zero 28 and the XU20, and the
-# XR829 on the Zero 40, so this cannot be hardcoded per family.
+# Sleep: the module that goes out before suspend is the board cfg's WIFI_ONBOARD_MODULE,
+# not a per-family constant: 8189es on the Zero 28 and XU20, XR829 on the Zero 40.
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"

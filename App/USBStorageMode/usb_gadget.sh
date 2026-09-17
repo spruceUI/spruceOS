@@ -152,15 +152,8 @@ usb_export_gadget() {
             echo "musb-hdrc" > $USB_GADGET_PATH/UDC
             ;;
         "Zero28" | "Zero40" | "XU20")
-            # Same A133P silicon and the same configfs gadget as the TrimUI arm above;
-            # only the advertised strings differ. usb_gadget_platform_setup() has always
-            # claimed these three boards as supported, but until 2026-09-17 neither this
-            # case nor usb_gadget_release() had an arm for them, so the app walked the
-            # user through the whole flow and exported nothing at all.
-            # The TrimUI boards get configfs mounted by their vendor init; our base image
-            # makes no such promise, so mount it here if it is not already up. The kernel
-            # has CONFIG_USB_CONFIGFS and CONFIG_USB_CONFIGFS_MASS_STORAGE (checked against
-            # the running config on the Zero 28 and Zero 40, 2026-09-17).
+            # Same A133P silicon and configfs gadget as the TrimUI arm above, but our base
+            # image does not mount configfs the way their vendor init does, so mount it here.
             [ -d /sys/kernel/config/usb_gadget ] || mount -t configfs none /sys/kernel/config 2>/dev/null
             mkdir -p $USB_GADGET_PATH/functions/mass_storage.usb0
             echo "0x1d6b" > $USB_GADGET_PATH/idVendor
