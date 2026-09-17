@@ -259,8 +259,37 @@ anbernic_xx_common_init() {
 
     runtime_mounts_anbernic_34xxsp
 
+    stage_ra_autoconfig
+
     add_spruce_system_user
     shield_baseos_session
+}
+
+# RetroArch has no profile for this pad, so it announces "ANBERNIC-keys (1/1)
+# not configured, using fallback" at every launch (#1676).
+#
+# One file cannot serve the line: every model reports the same name, bus and
+# vendor/product, but the stickless ones have no L3/R3, so every button after
+# them shifts down by one. Stage whichever variant matches this device instead,
+# for both RetroArch builds - sdl2 is the 64-bit one, linuxraw the 32-bit.
+# The binds are the ones the platform cfg already sets, so nothing changes but
+# the notification. A card moves between models, hence every boot.
+stage_ra_autoconfig() {
+    case "$PLATFORM" in
+        *NoStick|AnbernicRG28XX) _ra_ac_variant="nosticks" ;;
+        *)                       _ra_ac_variant="sticks" ;;
+    esac
+
+    for _ra_ac_driver in sdl2 linuxraw; do
+        _ra_ac_src="/mnt/SDCARD/RetroArch/platform/autoconfig/${_ra_ac_driver}/ANBERNIC-keys-${_ra_ac_variant}.cfg"
+        _ra_ac_dst="/mnt/SDCARD/RetroArch/.retroarch/autoconfig/${_ra_ac_driver}/ANBERNIC-keys.cfg"
+        [ -f "$_ra_ac_src" ] || continue
+        cmp -s "$_ra_ac_src" "$_ra_ac_dst" && continue
+        mkdir -p "${_ra_ac_dst%/*}"
+        cp "$_ra_ac_src" "$_ra_ac_dst" && \
+            log_message "Staged $_ra_ac_driver pad profile ($_ra_ac_variant) for RetroArch"
+    done
+    unset _ra_ac_variant _ra_ac_driver _ra_ac_src _ra_ac_dst
 }
 
 device_init() {
