@@ -103,20 +103,8 @@ trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
 
-# A poweroff on USB power comes straight back as a charger boot into spruce, so a
-# sleep on USB runs with the "Off" timeout instead (re-checked at the deadline below).
-USB_POWER_ONLINE="${USB_POWER_ONLINE:-/sys/class/power_supply/axp2202-usb/online}"
-
-usb_power_online() {
-    [ "$(cat "$USB_POWER_ONLINE" 2>/dev/null)" = "1" ]
-}
-
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
-    if usb_power_online; then
-        log_message "On USB power: sleeping without the ${IDLE_TIMEOUT}s shutdown timer"
-        IDLE_TIMEOUT=2592000
-    fi
     WAKE_ALARM_PATH="$(find_wake_alarm_path)"
     rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -137,14 +125,6 @@ device_exit_sleep() {
 device_woke_via_timer() {
     if [ -f "$WAKE_ALARM_ARMED_FLAG" ] && [ -e "$WAKE_ALARM_PATH" ]; then
         if [ -z "$(cat "$WAKE_ALARM_PATH" 2>/dev/null)" ]; then
-            if usb_power_online; then
-                # Plugged in since the sleep began: re-arm "Off" and keep sleeping
-                # rather than power off into a charger boot. Stdout is captured here.
-                log_message "On USB power at the sleep deadline: not shutting down" >/dev/null
-                save_sleep_info 2592000 >/dev/null && set_wake_alarm 2592000 "$WAKE_ALARM_PATH" >/dev/null
-                echo "false"
-                return
-            fi
             echo "true"
             return
         fi
@@ -172,6 +152,27 @@ send_virtual_key_L3() {
 }
 
 
+# An unreadable or unparseable version means "do not nag".
+check_if_fw_needs_update() {
+    _baseos_have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null)"
+    if [ -z "$_baseos_have" ] || [ -z "$TARGET_BASEOS_VERSION" ]; then
+        echo "false"
+        return
+    fi
+    case "$_baseos_have" in
+        ''|*[!0-9.]*) echo "false"; return ;;
+    esac
+
+    _have_n="$(printf '%s' "$_baseos_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+    _want_n="$(printf '%s' "$TARGET_BASEOS_VERSION" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+
+    if [ "$_have_n" -lt "$_want_n" ] 2>/dev/null; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
 has_lid() {
     # BaseOS's build target names the model exactly, and every clamshell target
     # in the line ends in "sp" (rg34xxsp, rg35xxsp, rgsp).
@@ -191,6 +192,7 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
         /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
+        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
         /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
     do
         stop_running_watchdog "$_wd"
@@ -204,6 +206,7 @@ launch_startup_watchdogs(){
     # that launcher is low_power_warning.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
     /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
 
     if has_lid >/dev/null; then
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
@@ -375,7 +378,7 @@ set_default_ra_hotkeys() {
     # state slot. Only the triggers move with the pad layout: stickless models
     # have no stick-click keys ahead of them. Nothing rewrites these at
     # launch; the 32-bit build's overlay carries its own linuxraw copy.
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
     case "$XX_PAD_LAYOUT" in
         nostick) l2_btn="12"; r2_btn="13" ;;
         *)       l2_btn="13"; r2_btn="14" ;;

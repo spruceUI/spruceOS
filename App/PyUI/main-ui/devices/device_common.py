@@ -418,14 +418,8 @@ class DeviceCommon(AbstractDevice):
     def supports_popup_menu(self):
         return True
     
-    # spruce ships its own copy of the tz database. The Miyoo Mini has none at
-    # all and a read-only squashfs root, so there is nowhere to install one, and
-    # the devices that do have a firmware copy disagree about which zones they
-    # carry. Shipping it means every device offers the same list.
-    SPRUCE_ZONEINFO_DIR = "/mnt/SDCARD/spruce/zoneinfo"
-
     def get_zoneinfo_dir(self):
-        return DeviceCommon.SPRUCE_ZONEINFO_DIR
+        return PyUiConfig.get_timezone_dir()
 
     def supports_timezone_setting(self):
         return os.path.isdir(self.get_zoneinfo_dir())
@@ -687,33 +681,27 @@ class DeviceCommon(AbstractDevice):
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to run hwclock: {e}")
 
-    SPRUCE_HELPER_FUNCTIONS = "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
-
-    def _apply_spruce_cpu_mode(self, shell_function):
-        """
-        Hand off to the shell's CPU mode functions, which already know each
-        platform's cores and frequencies. Devices without them fall back to
-        set_smart via platform/device.sh, so this is safe everywhere.
-        """
-        if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
+    def _apply_cpu_mode(self, mode):
+        cpu_script = PyUiConfig.get_cpu_mode_cmd()
+        if not os.path.exists(cpu_script):
             return
 
         try:
             subprocess.run(
-                ["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && {shell_function}"],
+                [cpu_script, mode],
                 check=False,
                 timeout=10
             )
         except Exception as e:
-            PyUiLogger.get_logger().warning(f"Could not apply CPU mode {shell_function}: {e}")
+            PyUiLogger.get_logger().warning(
+                f"Could not apply CPU mode {mode}: {e}"
+            )
 
     def set_cpu_low_power(self):
-        """Drop to the platform's powersave profile while the device sits idle."""
-        self._apply_spruce_cpu_mode("set_powersave")
+        self._apply_cpu_mode("powersave")
 
     def set_cpu_normal(self):
-        """Back to the mode the menu normally runs in."""
-        self._apply_spruce_cpu_mode("set_smart")
+        self._apply_cpu_mode("smart")
 
     def animation_divisor(self):
         return self.get_system_config().animation_speed(1)
@@ -792,9 +780,34 @@ class DeviceCommon(AbstractDevice):
         """
         return [self.get_device_name()]
 
+    def get_emulator_arch(self, menu_options: dict, rom_file_path=None):
+        """The Emulator_64/Emulator_32 key matching the RA build, or None if this device lacks that key."""
+        ra_build = menu_options.get("raBuild")
+        if not ra_build:
+            return None
+        if not any(name in (ra_build.get("devices") or []) for name in self.get_device_names()):
+            return None
+
+        selected = ra_build.get("selected")
+        if rom_file_path is not None:
+            selected = (ra_build.get("overrides") or {}).get(rom_file_path, selected)
+
+        def claims(key):
+            option = menu_options.get(key)
+            if not option:
+                return False
+            return any(name in (option.get("devices") or []) for name in self.get_device_names())
+
+        if selected == "32-bit" and claims("Emulator_32"):
+            return "Emulator_32"
+        if selected == "64-bit" and claims("Emulator_64"):
+            return "Emulator_64"
+        return None
+
     def get_selected_emulator(self, menu_options: dict):
+        arch_key = self.get_emulator_arch(menu_options)
         for key, option in menu_options.items():
-            if key.startswith("Emulator"):
+            if key.startswith("Emulator") and (arch_key is None or key == arch_key):
                 devices = option.get("devices", [])
                 if any(name in devices for name in self.get_device_names()):
                     return option.get("selected")

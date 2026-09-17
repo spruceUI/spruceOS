@@ -1,12 +1,12 @@
 #!/bin/sh
 
-# TODO: miyoo mini support
 # TODO: opt out with a tmp_confirm() ?
 
 EXPERT_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/expertappswitch.png"
 TMP_LOG_PATH=/tmp/SDCARD_REPAIR.log
 FINAL_LOG_PATH="/mnt/SDCARD/SDCARD_REPAIR.log"
 FONT="/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf"
+SDFIX_DIR=/tmp/sdfix
 
 
   ##################
@@ -40,111 +40,78 @@ fi
 
 
 
-  #################################
-##### ABRIDGED HELPER FUNCTIONS #####
-  #################################
+  ########################
+##### HELPER FUNCTIONS #####
+  ########################
 
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-case $INFO in
-    *"sun8i"*)
-        PLATFORM="A30"
-        LD_LIBRARY_PATH="/usr/miyoo/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk0p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin"
-        MAX_FREQ=1344000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=270
-        ;;
-    *"0xd05"*)
-        PLATFORM="Flip"
-        LD_LIBRARY_PATH="/usr/miyoo/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=0
-        ;;
-    *"0xd04"*)
-        PLATFORM="Pixel2"
-        LD_LIBRARY_PATH="/usr/lib:/lib:/usr/lib/compat"
-        SD_DEV="/dev/mmcblk0p3"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1416000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=600
-        DISPLAY_WIDTH=640
-        DISPLAY_HEIGHT=480
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG3040"*)
-        PLATFORM="Brick"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        TEXT_WIDTH=960
-        DISPLAY_WIDTH=1024
-        DISPLAY_HEIGHT=768
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG4040"*)
-        PLATFORM="BrickPro"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png" 
-        TEXT_WIDTH=960
-        DISPLAY_WIDTH=1024
-        DISPLAY_HEIGHT=768
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG5040"*)
-        PLATFORM="SmartPro"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" 
-        TEXT_WIDTH=1200
-        DISPLAY_WIDTH=1280
-        DISPLAY_HEIGHT=720
-        DISPLAY_ROTATION=0
-        ;;
-    *"TG5050"*)
-        PLATFORM="SmartProS"
-        LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
+resolve_platform_facts() {
+    if [ -z "$PLATFORM" ] || [ -z "$SD_MOUNTPOINT" ]; then
+        . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+    fi
+
+    SD_MOUNTPOINT="${SD_MOUNTPOINT:-/mnt/SDCARD}"
+
+    # The node is not fixed: dArkMoss follows probe order, and BaseOS mounts TF1's
+    # mmcblk0p7 when no TF2 is fitted, while the XX cfg names mmcblk1p1 either way.
+    _mount_path=$(readlink -f "$SD_MOUNTPOINT" 2>/dev/null)
+    [ -n "$_mount_path" ] || _mount_path="$SD_MOUNTPOINT"
+    _mounted_dev=$(awk -v mp="$_mount_path" '$2==mp {print $1; exit}' /proc/mounts 2>/dev/null)
+    if [ -n "$_mounted_dev" ]; then
+        SD_DEV="$_mounted_dev"
+    fi
+
+    DISPLAY_WIDTH="${DISPLAY_WIDTH:-640}"
+    DISPLAY_HEIGHT="${DISPLAY_HEIGHT:-480}"
+    DISPLAY_ROTATION="${DISPLAY_ROTATION:-0}"
+
+    case "$DISPLAY_TEXT_ELF_WIDTH" in
+        ''|*[!0-9]*) TEXT_WIDTH=$((DISPLAY_WIDTH - 80)) ;;
+        *)           TEXT_WIDTH="$DISPLAY_TEXT_ELF_WIDTH" ;;
+    esac
+
+    BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
+    [ "$DISPLAY_WIDTH" -ge 1280 ] 2>/dev/null &&
         BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png"
-        TEXT_WIDTH=1200
-        DISPLAY_WIDTH=1280
-        DISPLAY_HEIGHT=720
-        DISPLAY_ROTATION=0
-        ;;
-    *"sun50iw10p1"*)
-        # MagicX A133P family on our Tina base (TrimUI's kernels report TG*
-        # instead, matched above). The image names the model.
-        case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
-            zero40) PLATFORM="Zero40"; TEXT_WIDTH=440;  DISPLAY_WIDTH=480;  DISPLAY_HEIGHT=800; DISPLAY_ROTATION=0 ;;
-            xu20)   PLATFORM="XU20";   TEXT_WIDTH=984;  DISPLAY_WIDTH=1024; DISPLAY_HEIGHT=768; DISPLAY_ROTATION=0 ;;
-            *)      PLATFORM="Zero28"; TEXT_WIDTH=600;  DISPLAY_WIDTH=640;  DISPLAY_HEIGHT=480; DISPLAY_ROTATION=90 ;;
-        esac
-        LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib"
-        SD_DEV="/dev/mmcblk1p1"
-        BIN_DIR="/mnt/SDCARD/spruce/bin64"
-        MAX_FREQ=1800000
-        BG_IMAGE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
-        ;;
-esac
+
+    BIN_DIR="/mnt/SDCARD/spruce/bin64"
+    if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+        BIN_DIR="/mnt/SDCARD/spruce/bin"
+    fi
+}
+
+strip_card_paths() {
+    _out=""
+    _old_ifs="$IFS"
+    IFS=:
+    for _d in $1; do
+        case "$_d" in ""|/mnt/SDCARD*|/mnt/sdcard*) continue ;; esac
+        _out="${_out:+$_out:}$_d"
+    done
+    IFS="$_old_ifs"
+    echo "$_out"
+}
+
+stage_repair_tools() {
+    mkdir -p "$SDFIX_DIR"
+
+    cp "$FONT" "$SDFIX_DIR/font.ttf" && echo "staged font"
+    cp "$BG_IMAGE" "$SDFIX_DIR/bg.png" && echo "staged background"
+    cp "$EXPERT_ICON" "$SDFIX_DIR/" && echo "staged icon"
+
+    if cp "$BIN_DIR/display_text.elf" "$SDFIX_DIR/"; then
+        chmod 777 "$SDFIX_DIR/display_text.elf"
+        echo "staged display_text.elf from $BIN_DIR"
+    fi
+
+    FSCK_BIN="$(command -v fsck.fat 2>/dev/null)"
+    if [ -n "$FSCK_BIN" ]; then
+        echo "using the base system's fsck.fat at $FSCK_BIN"
+    elif cp "$BIN_DIR/fsck.fat" "$SDFIX_DIR/"; then
+        chmod 777 "$SDFIX_DIR/fsck.fat"
+        FSCK_BIN="$SDFIX_DIR/fsck.fat"
+        echo "staged fsck.fat from $BIN_DIR"
+    fi
+}
 
 tmp_blink() {
     if [ "$PLATFORM" = "A30" ]; then
@@ -188,18 +155,26 @@ tmp_debug_info() {
 
 }
 
+# Best effort: the Mini stubs display() out, and the RGB30's display_text.elf
+# dies at SDL_CreateWindow on its Mali blob.
 tmp_display() {
-    text="$1"
-
     tmp_display_kill
 
-    command="LD_LIBRARY_PATH=$LD_LIBRARY_PATH /tmp/sdfix/display_text.elf"
-    command="$command $DISPLAY_WIDTH $DISPLAY_HEIGHT $DISPLAY_ROTATION"
-    command="$command /tmp/sdfix/bg.png \"$text\" 0 30 50 middle $TEXT_WIDTH eb db b2 /tmp/sdfix/nunwen.ttf 7f 7f 7f 0 1.0"
+    [ -x "$SDFIX_DIR/display_text.elf" ] || { echo "no display tool staged: $1"; return 0; }
 
-    echo "displaying: $command"
-    eval "$command" &
+    "$SDFIX_DIR/display_text.elf" \
+        "$DISPLAY_WIDTH" "$DISPLAY_HEIGHT" "$DISPLAY_ROTATION" \
+        "$SDFIX_DIR/bg.png" "$1" 0 30 50 middle "$TEXT_WIDTH" \
+        eb db b2 "$SDFIX_DIR/font.ttf" 7f 7f 7f 0 1.0 \
+        >>"$SDFIX_DIR/display.out" 2>&1 &
     DISPLAY_PID=$!
+
+    sleep 0.5
+    if kill -0 "$DISPLAY_PID" 2>/dev/null; then
+        echo "displaying: $1"
+    else
+        echo "display exited at once (unsupported on this device?): $(tail -1 "$SDFIX_DIR/display.out" 2>/dev/null)"
+    fi
 }
 
 tmp_display_kill() {
@@ -207,9 +182,21 @@ tmp_display_kill() {
     sleep 0.1
 }
 
+# dArkMoss's spruce-launch.service is Restart=on-failure with a mount in
+# ExecStartPre, so it remounts the card 3s after runtime.sh is killed below.
+tmp_stop_frontend_service() {
+    command -v systemctl >/dev/null 2>&1 || return 0
+    if systemctl stop spruce-launch.service 2>/dev/null; then
+        echo "Stopped spruce-launch.service so it cannot remount the card."
+    fi
+}
+
 tmp_kill_boot_scripts() {
     echo "Attempting to kill any boot scripts."
-    for script in main tee runmiyoo.sh runtrimui.sh runmagicx.sh updater runtime.sh ; do
+    for script in runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
+        runmagicx.sh updater homebutton_watchdog.sh buttons_watchdog.sh idlemon \
+        idlemon_mm.sh low_power_warning.sh theme_watchdog.sh volume_sync_watchdog.sh \
+        inotifywait inotifywatch getevent sendevent ; do
         if killall -9 "$script" ; then
             echo "Killed ${script}."
         fi
@@ -253,11 +240,12 @@ tmp_set_performance() {
             chmod a-w "$online"
         fi
     done
-    echo "Locking CPU governor to performance with maximum frequency $MAX_FREQ"
+    echo "Locking CPU governor to performance with maximum frequency ${CPU_PERF_MAX_FREQ:-unchanged}"
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a+w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
     echo performance >/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-    echo "$MAX_FREQ" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    [ -n "$CPU_PERF_MAX_FREQ" ] &&
+        echo "$CPU_PERF_MAX_FREQ" >/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
     chmod a-w /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 }
@@ -269,29 +257,56 @@ tmp_set_performance() {
 
 if [ "$1" = "run" ]; then
 
-    mkdir -p /tmp/sdfix     # do this first so the tmp log path is valid
-    cd /tmp/sdfix
+    mkdir -p "$SDFIX_DIR"     # do this first so the tmp log path is valid
+    cd "$SDFIX_DIR"
 
     {
+        resolve_platform_facts
+        echo "platform=$PLATFORM device=$SD_DEV mountpoint=$SD_MOUNTPOINT"
+
+        # Strip before staging: spruce's own fsck.fat is on PATH on the Mini and A30.
+        PATH="$(strip_card_paths "$PATH")"
+        LD_LIBRARY_PATH="$(strip_card_paths "$LD_LIBRARY_PATH")"
+        export PATH LD_LIBRARY_PATH
+        echo "PATH=$PATH"
+        echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
+
+        stage_repair_tools
+
         tmp_blink
+        tmp_stop_frontend_service
         tmp_kill_boot_scripts
         tmp_read_only_check
         tmp_set_performance
         rm -f /mnt/SDCARD/FIX_MY_SDCARD
 
-        cp "$BIN_DIR/fsck.fat" /tmp/sdfix/ && echo "copied fsck.fat to /tmp/sdfix/"
-        cp "$BIN_DIR/display_text.elf" /tmp/sdfix/ && echo "copied display_text.elf to /tmp/sdfix/"
-        cp "$EXPERT_ICON" /tmp/sdfix/ && echo "copied expertappswitch.png to /tmp/sdfix/"
-        cp "$FONT" /tmp/sdfix/ && echo "copied nunwen.ttf to /tmp/sdfix/"
-        cp "$BG_IMAGE" "/tmp/sdfix/bg.png" && echo "copied background image to /tmp/sdfix/"
-        chmod 777 /tmp/sdfix/display_text.elf
-        chmod 777 /tmp/sdfix/fsck.fat
-
         tmp_display "Attempting to repair SD card. This may take some time."
 
         tmp_debug_info    # uncomment to see `ps` and `mount` outputs in your log
 
-        if umount "$SD_DEV"; then
+        if [ -z "$SD_DEV" ] || [ -z "$FSCK_BIN" ]; then
+            echo "Nothing to repair with: SD_DEV='$SD_DEV' FSCK_BIN='$FSCK_BIN'"
+            tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
+            sleep 10
+            cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
+            sync
+            poweroff
+            exit 1
+        fi
+
+        _umounted=0
+        _tries=0
+        while [ "$_tries" -lt 10 ]; do
+            if umount "$SD_DEV"; then
+                _umounted=1
+                break
+            fi
+            _tries=$((_tries + 1))
+            echo "umount refused, waiting for holders to exit ($_tries)"
+            sleep 1
+        done
+
+        if [ "$_umounted" -eq 1 ]; then
             echo "$SD_DEV unmounted successfully."
         else
             echo "Unable to unmount $SD_DEV."
@@ -303,7 +318,7 @@ if [ "$1" = "run" ]; then
             exit 1
         fi
         
-        /tmp/sdfix/fsck.fat -av "$SD_DEV"
+        "$FSCK_BIN" -av "$SD_DEV"
         FSCK_EXIT_CODE=$?
         echo "fsck.fat exited with code $FSCK_EXIT_CODE"
         if [ "$FSCK_EXIT_CODE" -eq 0 ]; then
@@ -317,7 +332,7 @@ if [ "$1" = "run" ]; then
             fi
             tmp_display "$msg"
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             [ "$PLATFORM" = "A30" ] && poweroff || reboot
@@ -333,7 +348,7 @@ if [ "$1" = "run" ]; then
             fi
             tmp_display "$msg"
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             [ "$PLATFORM" = "A30" ] && poweroff || reboot
@@ -342,7 +357,7 @@ if [ "$1" = "run" ]; then
             echo "fsck.fat reported errors. Unable to repair $SD_DEV."
             tmp_display "SD card repair attempt failed. Sorry! Your device will shut down in 10 seconds. Please eject your SD card and attempt a repair using your PC instead."
             sleep 10
-            mount "$SD_DEV" /mnt/SDCARD 2>/dev/null
+            mount "$SD_DEV" "$SD_MOUNTPOINT" 2>/dev/null
             cp "$TMP_LOG_PATH" "$FINAL_LOG_PATH"
             sync
             poweroff

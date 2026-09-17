@@ -65,11 +65,7 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
 
     if [ "$firstboot_rc" -eq 0 ] || [ "$firstboot_rc" -eq 2 ]; then
         foreground_unpack_ok=0
-        if run_unpacker_foreground \
-            "firstboot foreground run" \
-            "0" \
-            "1" \
-            "1"; then
+        if run_unpacker_foreground "firstboot foreground run" "1"; then
             foreground_unpack_ok=1
         fi
 
@@ -92,11 +88,7 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
 else
-    run_unpacker_foreground \
-        "foreground run" \
-        "1" \
-        "0" \
-        "0"
+    run_unpacker_foreground "foreground run" "0"
 fi
 
 # Run upgrade scripts on first boot after PC installer (or if flag was left by a failed restore)

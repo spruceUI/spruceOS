@@ -83,23 +83,22 @@ class AnbernicXXCommon(DeviceCommon):
         #self._set_brightness_to_config()
         #self._set_hue_to_config()
 
-        if(PyUiConfig.enable_button_watchers()):
-            self.hardware_poller = MiyooFlipPoller(self)
-            threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
-            self.power_key_watcher = KeyWatcher("/dev/input/event2")
-            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-            power_key_polling_thread.start()
-            self.controller_watcher = KeyWatcher("/dev/input/event1")
-            Controller.add_button_watcher(self.controller_watcher.poll_keyboard)
-            controller_watching_thread = threading.Thread(target=self.controller_watcher.poll_keyboard, daemon=True)
-            controller_watching_thread.start()
+        self.hardware_poller = MiyooFlipPoller(self)
+        threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
+        from controller.controller import Controller
+        #/dev/miyooio if we want to get rid of miyoo_inputd
+        # debug in terminal: hexdump  /dev/miyooio
+        self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+        Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+        volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+        volume_key_polling_thread.start()
+        self.power_key_watcher = KeyWatcher("/dev/input/event2")
+        power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+        power_key_polling_thread.start()
+        self.controller_watcher = KeyWatcher("/dev/input/event1")
+        Controller.add_button_watcher(self.controller_watcher.poll_keyboard)
+        controller_watching_thread = threading.Thread(target=self.controller_watcher.poll_keyboard, daemon=True)
+        controller_watching_thread.start()
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
@@ -198,15 +197,16 @@ class AnbernicXXCommon(DeviceCommon):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event1",114)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.volume_up(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.volume_up(-5)
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
+            elif(ControllerInput.VOLUME_UP == controller_input):
+                self.volume_up(5)
+            elif(ControllerInput.VOLUME_DOWN == controller_input):
+                self.volume_up(-5)
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
@@ -326,8 +326,10 @@ class AnbernicXXCommon(DeviceCommon):
 
     # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
     def get_core_for_game(self, game_system_config, rom_file_path):
-        for key, option in game_system_config.get_menu_options().items():
-            if key.startswith("Emulator") and any(name in (option.get("devices") or []) for name in self.get_device_names()):
+        menu_options = game_system_config.get_menu_options()
+        arch_key = self.get_emulator_arch(menu_options, rom_file_path)
+        for key, option in menu_options.items():
+            if key.startswith("Emulator") and (arch_key is None or key == arch_key) and any(name in (option.get("devices") or []) for name in self.get_device_names()):
                 return game_system_config.get_effective_menu_selection(key, rom_file_path)
         return game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
 

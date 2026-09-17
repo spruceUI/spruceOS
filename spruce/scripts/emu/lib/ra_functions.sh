@@ -48,13 +48,16 @@ setup_rumble_env() {
 }
 
 prepare_ra_config() {
-	# One cfg per platform, the fleet layout since the 2025-04 restructure:
-	# the card carries every platform's file and the device picks its own, so
-	# a card moved between models never launches on another model's saved
-	# state. The XX line used to share retroarch-AnbernicRG_XX-universal.cfg;
-	# 4.3.7.sh carries a restored copy of that file into the current
-	# platform's cfg once, then removes it.
-	export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+
+	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
+	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
+
+	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then
+		log_message "No retroarch-${PLATFORM}.cfg found."
+		mkdir -p "$_live_cfg_dir"
+		cp "$_bak_cfg" "$PLATFORM_CFG" && log_message "$PLATFORM_CFG seeded from .bak file."
+	fi
 
 	# Set up RetroAchievements based on spruceUI config
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
@@ -155,11 +158,6 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
-	# Rotation and fullscreen size used to be forced into the XX line's shared
-	# cfg on every launch, because one file served a portrait RG28XX and three
-	# landscape models. Each platform cfg now ships with its own values, and
-	# 4.3.7.sh sets them once on a cfg it carries over, so a rotation the user
-	# picks inside RetroArch stays picked - as on every other platform.
 	sync
 }
 

@@ -42,9 +42,6 @@ while [ 1 ]; do
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
 
-        # This is to mostly to allow themes to unpack before hitting the menu so they are immediately visible to PyUI
-        finish_unpacking "pre_menu_unpacking"
-
         prepare_for_pyui_launch
 
         log_activity_event "PyUI" "START"
@@ -52,9 +49,6 @@ while [ 1 ]; do
         log_activity_event "PyUI" "STOP"
 
         post_pyui_exit
-
-        # This is to block any games from launching before all necessary assets such as cores have been unpacked
-        finish_unpacking "pre_cmd_unpacking"
 
         flag_remove "in_menu"
     fi

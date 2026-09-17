@@ -635,7 +635,7 @@ get_config_path() {
 # the entries deliberately left as "nul" there are reset to "nul" too - a reset
 # that only rewrote the bound keys would leave stale bindings behind.
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

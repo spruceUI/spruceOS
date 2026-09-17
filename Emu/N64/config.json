@@ -87,8 +87,7 @@
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
         "km_parallel_n64_xtreme_amped_turbo",
-        "mupen64plus",
-        "mupen64plus-standalone"
+        "mupen64plus"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}

@@ -45,7 +45,7 @@ setup_for_retroarch(){
 }
 
 get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
+    echo "/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
 }
 
 set_loading_screen() {
@@ -438,7 +438,7 @@ disable_dpad_mod() {
 }
 
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
