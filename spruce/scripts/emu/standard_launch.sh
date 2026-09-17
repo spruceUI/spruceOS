@@ -115,7 +115,7 @@ case $EMU_NAME in
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate --tate
 
-		elif [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
+		elif [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ] || [ "$GAME" = "BootMenuDSi.nds" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
 

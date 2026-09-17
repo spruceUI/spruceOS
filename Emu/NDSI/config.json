@@ -18,7 +18,7 @@
       "/mnt/SDCARD/BIOS/nds/biosdsi7.bin"
     ]
   ],
-  "extlist": "nds|zip|7z|cia",
+  "extlist": "nds|zip|7z|cia|dsi|srl",
   "launchlist": [],
   "menuOptions": {
     "Governor": {

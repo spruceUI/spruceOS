@@ -12,13 +12,7 @@
 # Provides:
 #   run_dsperate
 
-
 . /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
-
-# set dsi mode for BootMenu.nds if launched from NDSI rom folder
-if [ "$EMU_DIR" = "/mnt/SDCARD/Emu/NDSI" ] && [ "$GAME" = "BootMenu.nds" ]; then
-	DSI_MODE="true"
-fi
 
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 export DS_CHEEVOS_CFW_CONFIG="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
@@ -47,7 +41,7 @@ seed_dsperate_config() {
 			 /mnt/SDCARD/Saves/states/dsperate \
 			 /mnt/SDCARD/Saves/dsperate/games
 
-	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini two-sticks-tate.ini games/BootMenu.ini; do
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini two-sticks-tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
 		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
 			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
 			log_message "DSperate: seeded $_cfg"
@@ -196,8 +190,6 @@ run_dsperate() {
 		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
 	esac
-
-	[ "$DSI_MODE" = "true" ] && set -- "$@" --dsi-mode
 
 	# The game switcher's thumbnail, written by DSperate itself with the auto
 	# state (emu.autosave_png). The device's take_screenshot runs first in
