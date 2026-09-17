@@ -28,17 +28,20 @@ class MagicXA133PDevice(TrimUIDevice):
     resolves the input nodes at boot and exports them (EVENT_PATH_*); the
     literals here are only fallbacks.
 
-    The XU20 V32 differs in one way that matters here: it runs this userland
-    under the device's own Android kernel rather than our Tina one, so the sysfs
-    paths below (battery, backlight) are inherited assumptions on that board
-    until a unit confirms them.
+    All three boards run our own Tina kernel: the Zero 28 on the plain SDK chain,
+    the Zero 40 and the XU20 behind their stock boot0 and U-Boot. The sysfs paths
+    below (battery, backlight) were confirmed on all three on 2026-09-17.
     """
 
     def __init__(self, device_name, main_ui_mode, system_json_path):
         self.device_name = device_name
         self.audio_player = AudioPlayerDelegateSdl2()
         self.pad_event_path = os.environ.get("EVENT_PATH_READ_INPUTS_SPRUCE") or "/dev/input/event3"
-        self.power_event_path = os.environ.get("EVENT_PATH_POWER") or "/dev/input/event1"
+        # event0 on every board in this family: the AXP power key enumerates first and
+        # the audio jack takes event1 (measured on all three, 2026-09-17). The sibling
+        # TrimUI family puts a matrix keyboard at event0 and is shifted down one, which
+        # is where the old event1 default came from.
+        self.power_event_path = os.environ.get("EVENT_PATH_POWER") or "/dev/input/event0"
         self.volume_event_path = os.environ.get("EVENT_PATH_VOLUME") or self.pad_event_path
         self.touch_event_path = os.environ.get("EVENT_PATH_TOUCH") or ""
 

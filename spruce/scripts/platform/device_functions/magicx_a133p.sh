@@ -41,11 +41,11 @@ magicx_touch_event_path() {
     magicx_find_event_by_name "*[Tt]ouch*" "*ts*" "*gt9*" "*ft5*" "*goodix*" "*[Ff]ocal*" "*hyn*" "*cst*"
 }
 
-# Board pin pokes for OUR Tina device tree. The XU20 runs the vendor's kernel and
-# device tree, which owns these pins, so its cfg sets MAGICX_INIT_GPIO=false.
+# Board pin pokes for boards whose device tree leaves these pins to userland. The
+# XU20's tree already drives them, so its cfg sets MAGICX_INIT_GPIO=false.
 init_gpio_a133p() {
     if [ "$MAGICX_INIT_GPIO" = "false" ]; then
-        log_message "MagicX: skipping the Tina GPIO init on $PLATFORM (vendor device tree owns these pins)" -v
+        log_message "MagicX: skipping the Tina GPIO init on $PLATFORM (its device tree owns these pins)" -v
         return 0
     fi
     #PD11 pull high for VCC-5v
@@ -126,8 +126,9 @@ magicx_load_onboard_radio() {
     cat /dev/kmsg > "$MAGICX_RADIO_KMSG" 2>/dev/null &
     _kmsg_pid=$!
     if [ -n "$MAGICX_RADIO_MODULES_DIR" ] && [ -f "$MAGICX_RADIO_MODULES_DIR/$WIFI_ONBOARD_MODULE.ko" ]; then
-        # Card-carried modules, built for the kernel this board boots (the hybrid Zero 40
-        # runs MagicX's kernel). Dependency order for the XR829 stack.
+        # Card-carried modules, for a board whose kernel is not the one our modules were
+        # built against. Every board in this family runs our own kernel as of 2026-09-17,
+        # so this path is a fallback; dependency order for the XR829 stack.
         rc=0
         for _m in xradio_mac xradio_core "$WIFI_ONBOARD_MODULE"; do
             [ -f "$MAGICX_RADIO_MODULES_DIR/$_m.ko" ] || continue
@@ -226,8 +227,9 @@ magicx_relight_panel() {
     set_backlight "$level"
 }
 
-# Sleep: the onboard radio here is the Realtek 8189es (WIFI_ONBOARD_MODULE), not
-# trimui_a133p.sh's XR829, so that is the module that goes out before suspend.
+# Sleep: the module that goes out before suspend is whichever the board's cfg names in
+# WIFI_ONBOARD_MODULE. That is the Realtek 8189es on the Zero 28 and the XU20, and the
+# XR829 on the Zero 40, so this cannot be hardcoded per family.
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
