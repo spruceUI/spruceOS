@@ -5,7 +5,7 @@
   "themecolor": "FF8800",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "noaudiofix": 1,
-  "extlist": "nds|zip|7z|rar",
+  "extlist": "nds|zip|7z|rar|cia",
   "launchlist": [],
   "menuOptions": {
     "Governor": {

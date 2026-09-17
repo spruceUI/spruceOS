@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Requires globals:
-#   EMU_DIR
 #   ROM_FILE
 #   GAME
 #   EMU_JSON_PATH
@@ -18,6 +17,7 @@
 
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 export DS_CHEEVOS_CFW_CONFIG="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
+export EMU_DIR="/mnt/SDCARD/Emu/NDS" # override this so NDSi can refer back to NDS emu folder easily
 
 dsperate_bios_missing() {
 	_missing=""

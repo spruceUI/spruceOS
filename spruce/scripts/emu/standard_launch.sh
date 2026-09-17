@@ -110,9 +110,7 @@ case $EMU_NAME in
 		fi
 		;;
 
-	"NDS")
-
-
+	"NDS"|"NDSI")
 		if [ "$CORE" = "DSperate-Tate" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate --tate
