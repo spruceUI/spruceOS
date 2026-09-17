@@ -15,6 +15,11 @@
 
 . /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
 
+# set dsi mode for BootMenu.nds if launched from NDSI rom folder
+if [ "$EMU_DIR" = "/mnt/SDCARD/Emu/NDSI" ] && [ "$GAME" = "BootMenu.nds" ]; then
+	DSI_MODE="true"
+fi
+
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 export DS_CHEEVOS_CFW_CONFIG="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
 export EMU_DIR="/mnt/SDCARD/Emu/NDS" # override this so NDSi can refer back to NDS emu folder easily
@@ -191,6 +196,8 @@ run_dsperate() {
 		"Chunky Grid") set -- "$@" --chunky --lcd-grid 1 ;;
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
 	esac
+
+	[ "$DSI_MODE" = "true" ] && set -- "$@" --dsi-mode
 
 	# The game switcher's thumbnail, written by DSperate itself with the auto
 	# state (emu.autosave_png). The device's take_screenshot runs first in

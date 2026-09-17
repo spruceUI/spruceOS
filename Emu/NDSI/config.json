@@ -4,7 +4,20 @@
   "iconsel": "dsi_sel.png",
   "themecolor": "0044AA",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "noaudiofix": 1,
+  "requiredfiles": [
+    [
+      "/mnt/SDCARD/BIOS/nds/bios9.bin"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/nds/bios7.bin"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/nds/biosdsi9.bin"
+    ],
+    [
+      "/mnt/SDCARD/BIOS/nds/biosdsi7.bin"
+    ]
+  ],
   "extlist": "nds|zip|7z|cia",
   "launchlist": [],
   "menuOptions": {
