@@ -42,7 +42,7 @@ seed_dsperate_config() {
 			 /mnt/SDCARD/Saves/states/dsperate \
 			 /mnt/SDCARD/Saves/dsperate/games
 
-	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini games/BootMenu.ini; do
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini two-sticks-tate.ini games/BootMenu.ini; do
 		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
 			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
 			log_message "DSperate: seeded $_cfg"
@@ -136,6 +136,9 @@ prepare_dsperate_rom() {
 }
 
 run_dsperate() {
+
+	[ "$1" = "--tate" ] && TATE_MODE="true"
+
 	export HOME="$EMU_DIR"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 
@@ -206,6 +209,7 @@ run_dsperate() {
 		export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
 	else
+
 		case "$DEVICE_NUM_ANALOG_STICKS" in
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
@@ -222,6 +226,12 @@ run_dsperate() {
 				fi 
 				;;
 		esac
+
+		if [ "$TATE_MODE" = "true" ]; then
+			export DS_ROTATE=270
+			_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks-tate.ini"
+		fi
+
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 		# DSperate_flip_lib holds PyUI's SDL2 under the SONAME the loader wants:
 		# spruce/flip/lib ships it as libSDL2-2.0.so, which PyUI loads by name

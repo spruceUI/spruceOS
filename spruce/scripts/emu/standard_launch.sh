@@ -111,9 +111,16 @@ case $EMU_NAME in
 		;;
 
 	"NDS")
-		if [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
+
+
+		if [ "$CORE" = "DSperate-Tate" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate --tate
+
+		elif [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
+
 		else
 			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
 			run_drastic

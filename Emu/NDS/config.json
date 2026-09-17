@@ -55,7 +55,8 @@
       "options": [
         "DraStic-original",
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DSperate",
       "overrides": {}
@@ -80,6 +81,7 @@
       ],
       "options": [
         "DSperate",
+        "DSperate-Tate",
         "DraStic-original"
       ],
       "selected": "DSperate",
