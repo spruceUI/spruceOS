@@ -31,6 +31,8 @@ jobs:
 
       - name: Get version and date
         id: get_version
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           if [ ! -f "spruce/spruce" ]; then
             echo "Error: spruce/spruce file not found"
@@ -38,7 +40,25 @@ jobs:
           fi
 
           VERSION="$(< spruce/spruce)"
-          echo "version=${VERSION}-$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
+          FULL_VERSION="${VERSION}-$(date '+%Y%m%d')"
+          echo "version=${FULL_VERSION}" >> "$GITHUB_OUTPUT"
+
+          # One release per RUN, never a reused tag. The release action deletes
+          # an existing tag's assets before uploading the new ones, so a failed
+          # upload used to leave a published release with nothing in it while
+          # the OTA feed still advertised the file (2026-09-17: two runs in a
+          # row hit a GitHub 500 there and every device 404'd on download).
+          #
+          # The version string is unchanged - devices read NIGHTLY_VERSION and
+          # follow NIGHTLY_LINK, neither of which cares what the tag is called.
+          TAG="v${FULL_VERSION}"
+          n=1
+          while gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${TAG}" >/dev/null 2>&1; do
+            n=$((n + 1))
+            TAG="v${FULL_VERSION}.${n}"
+          done
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Release tag for this run: ${TAG}"
 
           # Get last commit hash and commits, save to file
           {
@@ -452,14 +472,16 @@ jobs:
           # Add the commits file separately to place it at the root
           7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
 
+      # The release is created empty and the archives are uploaded one at a
+      # time below. The action uploads its files in parallel with no timeout,
+      # no retry and no per-file error: on 2026-09-17 the 1.6 GB archive took
+      # a 500 twice and then hung for 11 minutes with no output, while the
+      # small diff beside it uploaded fine every time.
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: success() && steps.check_commits.outcome == 'success'
         with:
-          files: |
-            spruceV${{ steps.get_version.outputs.version }}.7z
-            spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z
-          tag_name: v${{ steps.get_version.outputs.version }}
+          tag_name: ${{ steps.get_version.outputs.tag }}
           body: |
             ${{ steps.check_commits.outputs.commits }}
 
@@ -480,6 +502,55 @@ jobs:
           token: ${{ secrets.PAT_TOKEN }}
           draft: false
           prerelease: false
+
+      - name: Upload release assets
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TAG: ${{ steps.get_version.outputs.tag }}
+        run: |
+          upload() {
+              _file="$1"
+              _size="$(ls -l --block-size=1M "$_file" | awk '{print $5}')"
+              for _attempt in 1 2 3; do
+                  echo "Uploading $_file (${_size} MB), attempt ${_attempt}..."
+                  _start="$(date +%s)"
+                  if timeout 900 gh release upload "$TAG" "$_file" \
+                      --repo spruceUI/spruceOSNightlies --clobber; then
+                      echo "  done in $(( $(date +%s) - _start ))s"
+                      return 0
+                  fi
+                  echo "  failed after $(( $(date +%s) - _start ))s"
+                  sleep 30
+              done
+              echo "::error::giving up on $_file after 3 attempts"
+              return 1
+          }
+
+          # Smallest first: the OTA diff is what most devices take.
+          upload "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+          upload "spruceV${{ steps.get_version.outputs.version }}.7z"
+
+      # The upload can fail after the release exists. Publishing a feed that
+      # points at a release with no assets is what breaks every device's OTA,
+      # so check before writing it.
+      - name: Verify release assets
+        if: success() && steps.check_commits.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          for asset in \
+            "spruceV${{ steps.get_version.outputs.version }}.7z" \
+            "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+          do
+            state="$(gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${{ steps.get_version.outputs.tag }}" \
+              --jq ".assets[] | select(.name == \"${asset}\") | .state")"
+            if [ "$state" != "uploaded" ]; then
+              echo "::error::${asset} is not uploaded on ${{ steps.get_version.outputs.tag }} (state='${state:-missing}')"
+              exit 1
+            fi
+            echo "${asset}: uploaded"
+          done
 
       - name: Update OTA files
         if: success() && steps.check_commits.outcome == 'success'
@@ -519,8 +590,8 @@ jobs:
               echo "NIGHTLY_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
               echo "NIGHTLY_CHECKSUM=$CHECKSUM" >> "$file"
               echo "NIGHTLY_SIZE_IN_MB=$SIZE_MB" >> "$file"
-              echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
-              echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/v${{ steps.get_version.outputs.version }}" >> "$file"
+              echo "NIGHTLY_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/${{ steps.get_version.outputs.tag }}/spruceV${{ steps.get_version.outputs.version }}.7z" >> "$file"
+              echo "NIGHTLY_INFO=https://github.com/spruceUI/spruceOSNightlies/releases/tag/${{ steps.get_version.outputs.tag }}" >> "$file"
               # Build identity: the commit this nightly was built from. Several
               # nightlies built on one day share a version string; a device
               # compares this with "Last commit:" in its commits_nightly.txt to
@@ -535,7 +606,7 @@ jobs:
               echo "NIGHTLY_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
               echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
               echo "NIGHTLY_DIFF_SIZE_IN_MB=$DIFF_SIZE_MB" >> "$file"
-              echo "NIGHTLY_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/v${{ steps.get_version.outputs.version }}/${DIFF_ARCHIVE}" >> "$file"
+              echo "NIGHTLY_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/${{ steps.get_version.outputs.tag }}/${DIFF_ARCHIVE}" >> "$file"
           }
 
           # Update both OTA files
@@ -573,7 +644,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          # Keep only the three most recent nightly releases.
+          # Keep only the five most recent nightly releases. Each RUN makes its
+          # own release now, so a day with reruns uses more than one.
           RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
             jq -r '.[] | .id')
 
@@ -581,7 +653,7 @@ jobs:
           for RELEASE_ID in $RELEASES; do
             COUNT=$((COUNT + 1))
 
-            if [ $COUNT -gt 3 ]; then
+            if [ $COUNT -gt 5 ]; then
               gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
             fi
           done

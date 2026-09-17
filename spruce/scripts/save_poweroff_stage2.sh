@@ -188,6 +188,15 @@ echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
 # the loop reaching it (measured on the Smart Pro S, 2026-09-05: the one
 # holder left after the sweep was an orphaned getevent with no card fd).
 stage2_kill_holders() {
+    if [ "$STRICT_UNMOUNT" = "1" ]; then
+        for pid in $(stage2_holder_pids); do
+            kill -9 "$pid" 2>/dev/null
+        done
+        return
+    fi
+
+    # The original loop, for devices that have not opted into the strict path:
+    # open file descriptors only, one readlink at a time.
     for pidpath in /proc/[0-9]*; do
         pid="${pidpath#/proc/}"
 
@@ -195,42 +204,33 @@ stage2_kill_holders() {
         [ "$pid" -le 1 ] && continue
         [ "$pid" = "$$" ] && continue
 
-        holds_sd=0
-
-        # cwd and the running executable, neither of which appears under fd/.
-        # Strict mode only: this kills strictly more processes than the original
-        # loop did, and on a device whose umount already succeeded that is risk
-        # with nothing to buy.
-        if [ "$STRICT_UNMOUNT" = "1" ]; then
-            for link in "$pidpath/cwd" "$pidpath/exe"; do
-                target=$(readlink "$link" 2>/dev/null) || continue
-                case "$target" in
-                    "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
-                esac
-            done
-            # A mapped file pins the filesystem exactly like an open descriptor,
-            # and a rootfs binary that loaded a library through the card (the
-            # sdl2 bind directory, a Python extension) shows up nowhere else:
-            # no card exe, no card cwd, no fd. Measured on the Smart Pro S
-            # (2026-09-05): with fd/cwd/exe holders gone the card still would
-            # not unmount.
-            if [ "$holds_sd" -eq 0 ] && grep -q " $SD_MOUNTPOINT/" "$pidpath/maps" 2>/dev/null; then
-                holds_sd=1
-            fi
-        fi
-
-        # Then open file descriptors
-        if [ "$holds_sd" -eq 0 ]; then
-            for fd in "$pidpath/fd/"*; do
-                target=$(readlink "$fd" 2>/dev/null) || continue
-                case "$target" in
-                    "$SD_MOUNTPOINT"/*) holds_sd=1; break ;;
-                esac
-            done
-        fi
-
-        [ "$holds_sd" -eq 1 ] && kill -9 "$pid" 2>/dev/null
+        for fd in "$pidpath/fd/"*; do
+            target=$(readlink "$fd" 2>/dev/null) || continue
+            case "$target" in
+                "$SD_MOUNTPOINT"/*) kill -9 "$pid" 2>/dev/null; break ;;
+            esac
+        done
     done
+}
+
+# Pids holding the card by open fd, cwd, exe or a mapped file. Strict path only.
+# One ls and one grep for every process; the loop above forked per process and
+# took ~5 s a pass on the Smart Pro S, and it runs at least twice.
+stage2_holder_pids() {
+    {
+        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" '
+            /^\/proc\/[0-9]+\/fd\/?:$/ { split($0, a, "/"); cur = a[3]; next }
+            / -> / {
+                t = $0; sub(/.* -> /, "", t)
+                if (index(t, mp) != 1) next
+                if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe) -> /) {
+                    p = $0; sub(/.* \/proc\//, "", p); sub(/\/.*/, "", p); print p
+                } else {
+                    print cur
+                }
+            }'
+        grep -l " $SD_MOUNTPOINT/" /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
+    } | sort -un | awk -v self="$$" '$1 > 1 && $1 != self'
 }
 
 stage2_kill_holders
