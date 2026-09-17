@@ -628,6 +628,10 @@ set_up_boot_action() {
                     log_message "Sun's literal entire romset not found; booting to spruceUI instead."
                 fi
                 ;;
+            "Mega Mode")
+                log_message "In the year 20XX AD... the first annual Ry mode was launched!"
+                log_message "$("$(get_python_path)" /mnt/SDCARD/spruce/scripts/megamode.py "$PLATFORM" $(device_names) 2>&1)"
+                ;;
         esac
     fi
 }
