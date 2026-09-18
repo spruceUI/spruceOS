@@ -42,6 +42,11 @@ class ListView(View):
     def _render(self):
         pass
 
+    @abstractmethod
+    def get_row_geometry(self):
+        """(y of the first visible row, row height) in logical pixels, as _render lays the rows out."""
+        pass
+
     def get_selected_option(self):
         if 0 <= self.selected < len(self.options):
             return self.options[self.selected]
@@ -97,29 +102,18 @@ class ListView(View):
         return Selection(self.get_selected_option(), None, self.selected)
 
     def row_at_touch_point(self, point):
-        """Index of the visible row under a logical-space tap, or None.
-
-        Rows are laid out from base_y_offset in line_height steps (the
-        NonDescriptiveListView family); other lists share the window evenly.
-        """
+        """Index of the visible row under a logical-space tap, or None."""
         if point is None or not self.options:
             return None
         x, y = point
         visible = self.current_bottom - self.current_top
         if visible <= 0:
             return None
-        top = getattr(self, 'base_y_offset', None)
-        line_height = getattr(self, 'line_height', None)
-        if top is None:
-            top = Display.get_top_bar_height() + 5
-        if line_height is None:
-            usable = Display.get_usable_screen_height()
-            max_rows = getattr(self, 'max_rows', visible) or visible
-            line_height = usable / max_rows
+        top, line_height = self.get_row_geometry()
         if y < top or line_height <= 0:
             return None
         row = int((y - top) // line_height)
-        if row < 0 or row >= visible:
+        if row >= visible:
             return None
         index = self.current_top + row
         if index >= len(self.options):
