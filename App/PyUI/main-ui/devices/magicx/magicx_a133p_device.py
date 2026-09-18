@@ -14,7 +14,6 @@ from devices.utils.file_watcher import FileWatcher
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 
 class MagicXA133PDevice(TrimUIDevice):
@@ -51,15 +50,16 @@ class MagicXA133PDevice(TrimUIDevice):
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 system_json_path, self.on_system_config_changed, interval=0.2,
                 repeat_trigger_for_mtime_granularity_issues=True)
-            if PyUiConfig.enable_button_watchers():
-                from controller.controller import Controller
-                # Volume keys ride the gamepad node on this family (KEY_VOLUMEUP/DOWN);
-                # a second evdev reader on the same node gets its own copy of the stream.
-                self.volume_key_watcher = KeyWatcher(self.volume_event_path)
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True).start()
-                self.power_key_watcher = KeyWatcher(self.power_event_path)
-                threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True).start()
+            # The watchers always run, as on the TrimUI siblings; enableButtonWatchers
+            # is honoured where the keys are processed (TrimUIDevice.special_input).
+            from controller.controller import Controller
+            # Volume keys ride the gamepad node on this family (KEY_VOLUMEUP/DOWN);
+            # a second evdev reader on the same node gets its own copy of the stream.
+            self.volume_key_watcher = KeyWatcher(self.volume_event_path)
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True).start()
+            self.power_key_watcher = KeyWatcher(self.power_event_path)
+            threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True).start()
             if self.supports_touch():
                 self._start_touch_watcher()
         super().__init__()
