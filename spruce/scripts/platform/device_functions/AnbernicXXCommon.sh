@@ -536,6 +536,32 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
+# Same ioctl and scale as PyUI's _set_lumination_to_config
+set_backlight() {
+    level="$1"
+    [ "$level" -lt 1 ] && level=1
+    [ "$level" -gt 10 ] && level=10
+    if [ "$level" -eq 10 ]; then raw=127; else raw=$((level * 25 / 2)); fi
+    "$DEVICE_PYTHON3_PATH" -c "
+import os, fcntl, struct
+fd = os.open('/dev/disp', os.O_RDWR)
+try:
+    fcntl.ioctl(fd, 0x102, struct.pack('QQQQ', 0, $raw, 0, 0))
+finally:
+    os.close(fd)
+"
+    tmp="$SYSTEM_JSON.tmp.$$"
+    jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
+brightness_down() {
+    set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") - 1 ))
+}
+
+brightness_up() {
+    set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
+}
+
 
 send_menu_button_to_retroarch() {
     # Every RetroArch binary this device can launch has to be listed here or the
