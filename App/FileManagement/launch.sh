@@ -42,7 +42,7 @@ case "$PLATFORM" in
         sync
         killall -q -USR2 joystickinput
         ;;
-    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30")
+    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"Zero"*)
         ./vtree.aarch64 >"$HOME/log.txt" 2>&1
         sync
         ;;
