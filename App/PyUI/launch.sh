@@ -339,14 +339,20 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# MagicX Zero28
+# MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32)
 ############################################################
 
-    "Zero28" )
+    "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="/usr/magicx/lib"
-        DEVICE="MAGICX_ZERO28"
+        if [ "$PLATFORM" = "Zero40" ]; then
+            DEVICE="MAGICX_ZERO40"
+        elif [ "$PLATFORM" = "XU20" ]; then
+            DEVICE="MAGICX_XU20"
+        else
+            DEVICE="MAGICX_ZERO28"
+        fi
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -361,10 +367,11 @@ case "$PLATFORM" in
         log_message "Starting PyUI on $PLATFORM"
         if [ $button_listener_mode -eq 1 ]; then
             "$@"
-        elif [ "$redirect_output" -eq 1 ]; then
-            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
         else
-            "$@" >/dev/null 2>&1
+            # Bring-up platform: keep PyUI's stdout/stderr and record how it ended.
+            # A crash in the SDL2 blob or the GPU stack prints nothing to pyui.log.
+            "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
+            log_message "PyUI on $PLATFORM exited with status $?"
         fi
     ;;
 

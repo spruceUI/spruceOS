@@ -32,7 +32,8 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MAGICX_A133P"
     ],
     "scaling_min_freq": 1008000,
     "alternativeFolderNames": [

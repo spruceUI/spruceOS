@@ -44,3 +44,8 @@ class ControllerInterface(ABC):
     @abstractmethod
     def restore_cached_event(self):
         pass
+
+    # Queue an input that did not come from this interface's own device (touch
+    # gestures, for one). Interfaces that cannot take injected inputs ignore it.
+    def inject_input(self, controller_input):
+        pass

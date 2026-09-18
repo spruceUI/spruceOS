@@ -185,6 +185,12 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
+# May low_power_warning.sh force a shutdown when the gauge reads 1 % or less?
+# Default yes; a platform whose gauge is not trusted overrides this.
+device_low_battery_shutdown_ok() {
+    return 0
+}
+
 # Which "first_boot_<key>" flag gates the firstboot lane for this device.
 # Unlike its neighbours here this is a real default, not a missing-function stub:
 # every platform needs a working value, and per-platform is the right answer for

@@ -22,7 +22,7 @@ usb_gadget_platform_setup() {
             LUN_PATH="$USB_GADGET_PATH/lun0"
             LUN_FILE="$LUN_PATH/file"
             ;;
-        "Brick" | "SmartPro" | "BrickPro")
+        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20")
             STORAGE_DEVICE="/dev/mmcblk1p1"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
@@ -83,7 +83,7 @@ usb_gadget_release() {
             echo "" > "$LUN_FILE" 2>/dev/null
             [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 0 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
             ;;
-        "Brick" | "SmartPro" | "BrickPro")
+        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20")
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             rm -f $USB_GADGET_PATH/configs/c.1/mass_storage.usb0
             [ -d "$USB_GADGET_PATH/configs/c.1" ] && rmdir "$USB_GADGET_PATH/configs/c.1" 2>/dev/null
@@ -150,6 +150,26 @@ usb_export_gadget() {
             echo "1234567890" > $USB_GADGET_PATH/strings/0x409/serialnumber
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             echo "musb-hdrc" > $USB_GADGET_PATH/UDC
+            ;;
+        "Zero28" | "Zero40" | "XU20")
+            # Same A133P silicon and configfs gadget as the TrimUI arm above, but our base
+            # image does not mount configfs the way their vendor init does, so mount it here.
+            [ -d /sys/kernel/config/usb_gadget ] || mount -t configfs none /sys/kernel/config 2>/dev/null
+            mkdir -p $USB_GADGET_PATH/functions/mass_storage.usb0
+            echo "0x1d6b" > $USB_GADGET_PATH/idVendor
+            echo "0x0104" > $USB_GADGET_PATH/idProduct
+            echo "$STORAGE_DEVICE" > $USB_GADGET_PATH/functions/mass_storage.usb0/lun.0/file
+            echo 1 > $USB_GADGET_PATH/functions/mass_storage.usb0/lun.0/removable
+            mkdir -p $USB_GADGET_PATH/configs/c.1
+            ln -s $USB_GADGET_PATH/functions/mass_storage.usb0 $USB_GADGET_PATH/configs/c.1/
+            mkdir -p $USB_GADGET_PATH/strings/0x409
+            echo "MagicX" > $USB_GADGET_PATH/strings/0x409/manufacturer
+            echo "MagicX Device" > $USB_GADGET_PATH/strings/0x409/product
+            echo "1234567890" > $USB_GADGET_PATH/strings/0x409/serialnumber
+            echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
+            # Bind whichever UDC the kernel registered rather than assuming its name.
+            _magicx_udc="$(ls /sys/class/udc 2>/dev/null | head -1)"
+            echo "${_magicx_udc:-musb-hdrc}" > $USB_GADGET_PATH/UDC
             ;;
         "Flip")
             mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0/lun.0" 2>/dev/null

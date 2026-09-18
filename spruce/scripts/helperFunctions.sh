@@ -28,6 +28,18 @@ POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
+#
+# MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
+# the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
+if [ -e /usr/magicx ]; then
+    # /usr/magicx/device names the model (zero28 | zero40 | xu20); a base
+    # without the file (Moss-zero28, main-zero40) is treated as a Zero 28.
+    case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
+        zero40) export PLATFORM="Zero40" ;;
+        xu20)   export PLATFORM="XU20" ;;
+        *)      export PLATFORM="Zero28" ;;
+    esac
+else
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 
 case $INFO in
@@ -75,14 +87,9 @@ case $INFO in
             *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
-    *) 
-        if [ -e /usr/magicx ]; then
-            export PLATFORM="Zero28"
-        else
-            export PLATFORM="MiyooMini" 
-        fi
-        ;;
+    *) export PLATFORM="MiyooMini" ;;
 esac
+fi
 
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
@@ -108,7 +115,9 @@ device_names() {
         Pixel2)           echo "GKD_PIXEL2" ;;
         RGB30)            echo "RGB30" ;;
         Miniloong)        echo "MINILOONG_POCKET1" ;;
-        Zero28)           echo "MAGICX_ZERO28" ;;
+        Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
+        Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
+        XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

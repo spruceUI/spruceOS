@@ -50,7 +50,8 @@
       "devices": [
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_SMART_PRO",
-        "TRIMUI_BRICK_PRO"
+        "TRIMUI_BRICK_PRO",
+        "MAGICX_A133P"
       ],
       "options": [
         "DraStic-original",
@@ -98,7 +99,8 @@
         "ANBERNIC_RGXX",
         "GKD_PIXEL2",
         "RGB30",
-        "MIYOO_A30"
+        "MIYOO_A30",
+        "MAGICX_A133P"
       ],
       "options": [
         "None",
