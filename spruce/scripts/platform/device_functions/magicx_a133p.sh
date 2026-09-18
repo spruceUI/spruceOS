@@ -1,9 +1,10 @@
 #!/bin/sh
 
-# MagicX A133P family: Mini Zero 28, Zero 40 and XU20 V32. Same SoC as the Smart Pro,
-# so trimui_a133p.sh is sourced; the base OS is our own Tina on SD1, not TrimUI's.
+# MagicX A133P family: Mini Zero 28, Zero 40 and XU20 V32. The SoC-level functions
+# come from a133p.sh, shared with the TrimUI A133P boards; the base OS is our own
+# Tina on SD1, so nothing of TrimUI's userland is sourced here.
 
-. "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_a133p.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 
 # zero28 | zero40 | xu20, from the base image's marker. Images without one
 # predate the marker and are Zero 28 (Moss-zero28 itself).
@@ -264,8 +265,9 @@ take_screenshot() {
     /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
 }
 
-# Volume. trimui_a133p.sh's set_volume writes a file only TrimUI's daemon reads, so
-# the codec is driven directly and the level lives in 'digital volume' (0..63).
+# Volume. There is no vendor volume daemon on this base (a133p.sh leaves set_volume
+# to the vendor layer), so the codec is driven directly and the level lives in
+# 'digital volume' (0..63).
 MAGICX_DIGITAL_VOLUME_FLOOR=63
 MAGICX_DIGITAL_VOLUME_QUIETEST=41
 
@@ -301,8 +303,8 @@ magicx_init_audio() {
     magicx_apply_volume "$(get_volume_level 2>/dev/null)"
 }
 
-# TrimUI-only hooks inherited from trimui_a133p.sh. The MagicX boards have no
-# /sys/class/led_anim, so the RGB hooks are no-ops here.
+# No RGB LED on these boards (no /sys/class/led_anim): quiet no-ops in place of
+# device.sh's "Missing ..." log lines.
 enable_or_disable_rgb() {
     log_message "enable_or_disable_rgb: no RGB LED on $PLATFORM" -v
 }
