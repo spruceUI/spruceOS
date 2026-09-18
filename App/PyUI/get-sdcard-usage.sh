@@ -2,4 +2,4 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-df -h "$SD_DEV" | awk 'NR==2 {print $4 " / " $3}'
+df -h "$SD_DEV" | awk 'NR==2 {print $4 " / " $2}'
