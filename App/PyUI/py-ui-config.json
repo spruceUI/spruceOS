@@ -34,6 +34,11 @@
         {
             "display":"SD Card usage",
             "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
+        },
+        {
+            "display":"BaseOS Version",
+            "cmd":"/mnt/SDCARD/App/PyUI/get-base-os-version.sh",
+            "devices": ["ANBERNIC_RGXX"]
         }
     ]
 }
