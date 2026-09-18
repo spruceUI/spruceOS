@@ -212,6 +212,16 @@ set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
 }
 
+# Platforms whose EVENT_PATH_READ_INPUTS_SPRUCE node is a combined controller
+# node that reports raw analog stick/trigger ADC noise as ordinary getevent
+# traffic need idlemon_activity_gate.sh running: idlemon treats any byte read
+# from its event device as "activity" with no deadzone, so ADC jitter alone
+# would keep the idle-shutdown timer from ever elapsing. Off by default;
+# override to `return 0` for an affected platform.
+needs_idlemon_activity_filter() {
+    return 1
+}
+
 set_default_ra_hotkeys() {
     log_message "Missing set_default_ra_hotkeys function"
 }

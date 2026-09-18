@@ -330,8 +330,19 @@ device_init() {
     ) &
 }
 
+# Deliberately NOT "-e $EVENT_PATH_READ_INPUTS_SPRUCE": that node also carries
+# both analog sticks' and both analog triggers' raw ADC output, and idlemon
+# has no deadzone of its own - any read off that node resets its idle clock,
+# stick jitter included. idlemon_activity_gate.sh watches that node WITH a
+# deadzone instead and restarts idlemon on genuine activity, so idlemon here
+# gets no -e at all and relies purely on those restarts (plus its own
+# process-detection) to know it's not idle.
 set_event_arg_for_idlemon() {
-    log_message "set_event_arg_for_idlemon not needed for Trim UI Smart Pro S?" -v
+    log_message "no -e for idlemon on Trim UI Smart Pro S; idlemon_activity_gate.sh resets it instead" -v
+}
+
+needs_idlemon_activity_filter() {
+    return 0
 }
 
 set_default_ra_hotkeys() {

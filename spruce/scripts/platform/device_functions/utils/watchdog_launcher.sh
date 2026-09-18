@@ -76,7 +76,8 @@ launch_common_startup_watchdogs_v2() {
         /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh \
-        /mnt/SDCARD/spruce/scripts/wifi_watchdog.sh
+        /mnt/SDCARD/spruce/scripts/wifi_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/idlemon_activity_gate.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -105,5 +106,9 @@ launch_common_startup_watchdogs_v2() {
         pin_cpu "$SYSTEM_CPU" -n wifi_watchdog.sh &
     fi
 
+    if needs_idlemon_activity_filter; then
+        /mnt/SDCARD/spruce/scripts/idlemon_activity_gate.sh &
+        pin_cpu "$SYSTEM_CPU" -n idlemon_activity_gate.sh &
+    fi
 
 }
