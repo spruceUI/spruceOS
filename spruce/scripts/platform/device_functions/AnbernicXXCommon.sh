@@ -539,9 +539,10 @@ get_volume_level() {
 # Same ioctl and scale as PyUI's _set_lumination_to_config
 set_backlight() {
     level="$1"
-    [ "$level" -lt 1 ] && level=1
+    [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
     if [ "$level" -eq 10 ]; then raw=127; else raw=$((level * 25 / 2)); fi
+    [ "$raw" -lt 5 ] && raw=5
     "$DEVICE_PYTHON3_PATH" -c "
 import os, fcntl, struct
 fd = os.open('/dev/disp', os.O_RDWR)
