@@ -330,14 +330,14 @@ class GridView(View):
         return Selection(self.get_selected_option(), None, self.selected)
 
     def cell_at_touch_point(self, point):
-        """Option index under a logical-space tap, or None (mirrors _render_cell)."""
+        """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""
         if point is None or not self.options:
             return None
         x, y = point
         x_index = int((x - self.x_pad) // self.icon_width) if self.icon_width else 0
         if x_index < 0 or x_index >= self.cols:
             return None
-        top = Display.get_top_bar_height(False)
+        top = Display.get_top_bar_height()
         row_spacing = Display.get_usable_screen_height() / self.rows
         if y < top or row_spacing <= 0:
             return None
