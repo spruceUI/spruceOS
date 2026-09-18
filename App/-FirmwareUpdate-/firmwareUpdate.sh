@@ -21,9 +21,8 @@ case "$PLATFORM" in
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
 	Anbernic*)
-		log_and_display_message "Your BaseOS is $(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null), and spruce needs ${TARGET_BASEOS_VERSION} or newer.\n\nGet BaseOS from:\ngithub.com/pvaibhav/BaseOS\n\nYou can download and install it using the Spruce Installer:\ngithub.com/spruceUI/spruceOS-Installer/releases/latest\n\nPress A to close."
-		acknowledge
-		exit 1
+		# BaseOS updates itself from a .bosupd file at the root of the card.
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
