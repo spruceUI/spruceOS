@@ -41,7 +41,7 @@ seed_dsperate_config() {
 			 /mnt/SDCARD/Saves/states/dsperate \
 			 /mnt/SDCARD/Saves/dsperate/games
 
-	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini two-sticks-tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
 		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
 			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
 			log_message "DSperate: seeded $_cfg"
@@ -228,7 +228,7 @@ run_dsperate() {
 
 		if [ "$TATE_MODE" = "true" ]; then
 			export DS_ROTATE=270
-			_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks-tate.ini"
+			_config_path="/mnt/SDCARD/Saves/dsperate/tate.ini"
 		fi
 
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"

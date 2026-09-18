@@ -25,7 +25,8 @@
       ],
       "options": [
         "DraStic-Steward",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DraStic-Steward",
       "overrides": {}
@@ -40,7 +41,8 @@
         "DraStic-original",
         "DraStic-Steward",
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DSperate",
       "overrides": {}
@@ -69,7 +71,8 @@
       ],
       "options": [
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DraStic-trngaje",
       "overrides": {}
