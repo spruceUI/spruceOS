@@ -11,7 +11,7 @@
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 SD_ROOT="/mnt/SDCARD"
 API="https://api.github.com/repos/pvaibhav/BaseOS/releases/latest"
-MANUAL_HELP="You can also update by hand: github.com/pvaibhav/BaseOS"
+MANUAL_HELP="Please visit github.com/pvaibhav/BaseOS to manually download the proper version for your device."
 
 baseos_field() {
     sed -n "s/^$1=//p" /etc/baseos-release 2>/dev/null | tr -d '"'
@@ -34,8 +34,8 @@ bail() {
 
 # No network is the normal case on a model with no built-in radio, so say what
 # to do about it rather than just refusing.
-offline_bail() {
-    bail "$1\n\nThe XX line needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/pvaibhav/BaseOS\n\nPress A to close."
+dongle_bail() {
+    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/pvaibhav/BaseOS\n\nPress A to close."
 }
 
 INSTALLED="$(baseos_field BASEOS_VERSION)"
@@ -47,11 +47,13 @@ log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET, spruce wants
 log_and_display_message "BaseOS $INSTALLED is installed. Checking for a newer one. Press A to continue."
 acknowledge
 
-if [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
-    offline_bail "WiFi is off, so the update cannot be downloaded."
+if ! device_wifi_is_available; then
+    dongle_bail 
+elif [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
+    bail "WiFi is off, so the update cannot be downloaded. Please enable WiFi from spruce settings and try again."
 fi
 if ! curl -sf -m 20 -o /tmp/baseos_release.json "$API"; then
-    offline_bail "Could not reach GitHub to look for a BaseOS update."
+    bail "Could not reach GitHub to look for a BaseOS update. Please try again later."
 fi
 
 LATEST="$(jq -r '.tag_name // empty' /tmp/baseos_release.json | sed 's/^v//')"
@@ -69,7 +71,7 @@ if [ -n "$INSTALLED" ]; then
     _have="$(version_num "$INSTALLED")"
     _latest="$(version_num "$LATEST")"
     if [ -n "$_have" ] && [ -n "$_latest" ] && [ "$_have" -ge "$_latest" ] 2>/dev/null; then
-        log_and_display_message "BaseOS $INSTALLED is already the latest. Press A to close."
+        log_and_display_message "Your installed BaseOS $INSTALLED is already the version that spruceUI expects. Press A to close."
         acknowledge
         exit 0
     fi
@@ -90,7 +92,7 @@ confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
 
 if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then
     rm -f "$SD_ROOT/$ASSET_NAME"
-    offline_bail "The BaseOS update did not download."
+    bail "The BaseOS update could not be downloaded. Please try again later."
 fi
 
 # A truncated or corrupt update file is worse than none: BaseOS would try to
@@ -109,10 +111,7 @@ else
 fi
 
 sync
-log_and_display_message "BaseOS $LATEST is ready and installs during the next start, which takes a little longer than usual.\n\nPress A to restart now, or B to do it later."
-if confirm; then
-    /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
-else
-    log_and_display_message "The update is on the card and installs the next time you restart. Press A to close."
-    acknowledge
-fi
+
+log_and_display_message "BaseOS $LATEST is ready to install. Your device will now reboot into the update procedure, and then power itself off once finished."
+sleep 8
+/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
