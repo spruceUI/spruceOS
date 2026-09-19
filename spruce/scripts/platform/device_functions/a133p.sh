@@ -150,7 +150,7 @@ init_gpio_a133p() {
 
 
 set_event_arg_for_idlemon() {
-    log_message "nothing to do" -v
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 

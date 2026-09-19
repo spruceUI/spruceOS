@@ -331,7 +331,7 @@ device_init() {
 }
 
 set_event_arg_for_idlemon() {
-    log_message "set_event_arg_for_idlemon not needed for Trim UI Smart Pro S?" -v
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 set_default_ra_hotkeys() {
