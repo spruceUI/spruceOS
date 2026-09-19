@@ -285,9 +285,29 @@ prepare_game_switcher() {
 
 }
 
+show_trimui_osd() {
+    log_message "button_actions.sh: Toggling TrimUI OSD"
+    mkdir -p /tmp/trimui_osd
+    if [ -f /tmp/trimui_osd/osdd_show_up ] || [ -f /tmp/show_osdd ]; then
+        touch /tmp/hide_osdd
+        rm -f /tmp/show_osdd
+    else
+        sync_osd_state 2>/dev/null
+        if ! pgrep trimui_osdd >/dev/null 2>&1 && ! ps | grep "[t]rimui_osdd" >/dev/null 2>&1; then
+            run_trimui_osdd
+            sleep 0.5
+        fi
+        touch /tmp/show_osdd
+        rm -f /tmp/hide_osdd
+    fi
+}
+
 perform_action() {
     # handle short press
     case $1 in
+    "TrimUI OSD")
+        show_trimui_osd
+        ;;
     "Game Switcher")
         prepare_game_switcher
         ;;
