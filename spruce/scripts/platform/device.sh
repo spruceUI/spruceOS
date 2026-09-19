@@ -212,6 +212,18 @@ set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
 }
 
+# The pad's js node carries buttons and axes but not the rumble (EV_FF)
+# that emulators write to its event node, which idlemon would count as input.
+set_idlemon_to_pad() {
+    _pad="${EVENT_PATH_READ_INPUTS_SPRUCE##*/}"
+    _js="$_pad"
+    for _node in /sys/class/input/"$_pad"/device/js*; do
+        [ -e "$_node" ] && _js="${_node##*/}"
+        break
+    done
+    EVENT_ARG="-e /dev/input/$_js"
+}
+
 set_default_ra_hotkeys() {
     log_message "Missing set_default_ra_hotkeys function"
 }

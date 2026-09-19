@@ -393,7 +393,7 @@ add_spruce_system_user() {
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event1" # is this right?
+    set_idlemon_to_pad
 }
 
 set_default_ra_hotkeys() {
