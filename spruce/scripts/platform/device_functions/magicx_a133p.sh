@@ -150,6 +150,41 @@ magicx_load_onboard_radio() {
     return 0
 }
 
+# Touch. The touch drivers ship in the base as modules nothing autoloads (oakMOSS
+# sdk-patches/tree/090: XU20 hynitron, Zero 40 axs15205): built in, the XU20's probe
+# ran on the kernel's init thread and stalled 6 of 8 boots before init (initcall
+# marker, 2026-09-18). The cfg names the module (MAGICX_TOUCH_MODULE). Like the
+# onboard radio it is loaded here, once the board has settled - in the background,
+# with a bounded wait for its input node, so a probe that hangs costs touch for this
+# session instead of the boot. The kernel log around the load goes to the card.
+MAGICX_TOUCH_KMSG=/mnt/SDCARD/Saves/spruce/touch-kmsg.log
+
+magicx_load_touch() {
+    [ -n "$MAGICX_TOUCH_MODULE" ] || return 0
+    usb_wifi_module_loaded "$MAGICX_TOUCH_MODULE" && return 0
+    mkdir -p "$(dirname "$MAGICX_TOUCH_KMSG")" 2>/dev/null
+    cat /dev/kmsg > "$MAGICX_TOUCH_KMSG" 2>/dev/null &
+    _kmsg_pid=$!
+    _kmsg_from=$(dmesg 2>/dev/null | wc -l)
+    modprobe "$MAGICX_TOUCH_MODULE" 2>/tmp/magicx_touch_err &
+    _mp_pid=$!
+    _node=""
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        _node=$(magicx_find_event_by_name "*hyn*" "*cst*" "*axs*") && break
+        sleep 0.5
+    done
+    if kill -0 "$_mp_pid" 2>/dev/null; then
+        _st="modprobe still running after 5 s"
+    else
+        wait "$_mp_pid"
+        _st="rc=$?"
+    fi
+    kill "$_kmsg_pid" 2>/dev/null
+    sync
+    log_message "MagicX touch: $MAGICX_TOUCH_MODULE $_st; node=${_node:-none}; $(head -1 /tmp/magicx_touch_err 2>/dev/null) $(dmesg 2>/dev/null | tail -n +$((_kmsg_from + 1)) | grep -a -e hyn -e axs -e 'xfer timeout' -e 'Unable to handle' -e 'BUG:' | head -6 | cut -c1-160 | tr '\n' '|')"
+    return 0
+}
+
 device_init() {
     runtime_mounts_magicx
     magicx_disown_base_supplicant
@@ -158,6 +193,7 @@ device_init() {
     export LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
 
     init_gpio_a133p
+    magicx_load_touch
     magicx_resolve_event_paths
     magicx_load_onboard_radio
 
