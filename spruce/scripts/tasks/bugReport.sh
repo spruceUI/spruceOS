@@ -519,6 +519,8 @@ SCANEOF
             -i'!/mnt/SDCARD/Saves/spruce/*.log' \
             -i'!/mnt/SDCARD/Saves/spruce/*.json' \
             -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*' \
+            -i'!/mnt/SDCARD/RetroArch/.retroarch/config/*' \
+            -i'!/mnt/SDCARD/RetroArch/platform/*' \
             -i'!/mnt/SDCARD/App/*/log.txt' \
             -i'!/mnt/SDCARD/App/*/*/log.txt' \
             -i'!/mnt/SDCARD/spruce/spruce'
