@@ -211,9 +211,6 @@ device_init() {
     fi
 }
 
-# MinUI's zero28 port found some board revisions keep the panel dark after a
-# resume unless the backlight is driven low and back to its level.
-
 # Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
 # reading with a good voltage becomes an estimate and holds the shutdown off.
 MAGICX_VBAT_EMPTY_MV=3400
@@ -255,43 +252,66 @@ device_low_battery_shutdown_ok() {
     return 0
 }
 
-magicx_relight_panel() {
-    level=$(jq -r '.backlight // 5' "$SYSTEM_JSON" 2>/dev/null)
-    case "$level" in ''|*[!0-9]*) level=5 ;; esac
-    [ "$level" -ge 1 ] || level=5
-    set_backlight 1
-    set_backlight "$level"
+# Sleep is faux sleep, MinUI/Moss's model (none of their boards uses kernel suspend):
+# suspend-to-RAM never came back on the MagicX stock boot chain (XU20 2026-09-18: after
+# `echo mem` neither the power key nor the +300 s RTC alarm woke it, and no driver's
+# resume ran). The panel goes dark and the session stops until sleep_helper's pseudo loop
+# sees the power button, or its idle timer powers the board off. The radio stays up.
+device_uses_pseudo_sleep() {
+    echo "true"
 }
 
-# Sleep: the module that goes out before suspend is the board cfg's WIFI_ONBOARD_MODULE,
-# not a per-family constant: 8189es on the Zero 28 and XU20, XR829 on the Zero 40.
+# No MagicX board has a lid; sleep_helper's pseudo loop takes the power button only
+# while this reads "1".
+device_lid_open() {
+    echo "1"
+}
+
+MAGICX_SLEEP_STOP="MainUI retroarch ra64.trimui drastic drastic64 PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM scummvm ffplay OpenBOR_mod OpenBOR_new mupen64plus"
+MAGICX_SLEEP_BRIGHTNESS=/tmp/magicx_sleep_brightness
+
+# The panel's raw brightness through /dev/disp (DISP_LCD_GET/SET_BRIGHTNESS). Raw on
+# purpose: PyUI mirrors the level on the boards whose backlight PWM is inverted, so sleep
+# saves and restores the driver's value instead of re-deriving it from the user's level.
+magicx_disp_brightness() {
+    "$DEVICE_PYTHON3_PATH" - "$@" <<'EOF'
+import ctypes, fcntl, os, sys
+fd = os.open("/dev/disp", os.O_RDWR)
+try:
+    if sys.argv[1] == "get":
+        print(fcntl.ioctl(fd, 0x103, (ctypes.c_ulong * 4)(0, 0, 0, 0)))
+    else:
+        fcntl.ioctl(fd, 0x102, (ctypes.c_ulong * 4)(0, int(sys.argv[2]), 0, 0))
+finally:
+    os.close(fd)
+EOF
+}
+
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
-    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    wifi_request suspend --wait
-    usb_wifi_note_sleep
-    usb_wifi_tear_down
-    usb_wifi_module_loaded "$WIFI_ONBOARD_MODULE" && rmmod "$WIFI_ONBOARD_MODULE"
-    save_sleep_info "$IDLE_TIMEOUT" || return 1
-    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
-    trigger_device_sleep
+    log_message "Entering pseudo sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    # The power watchdog holds the power key with an exclusive grab and runs
+    # sleep_helper in the foreground, so sleep_helper's own reader would never see the
+    # wake press. Drop the grab; the watchdog restarts its reader when sleep_helper returns.
+    kill $(pgrep -f "getevent.*-exclusive") 2>/dev/null
+    killall -q -STOP $MAGICX_SLEEP_STOP 2>/dev/null
+    magicx_disp_brightness get > "$MAGICX_SLEEP_BRIGHTNESS" 2>/dev/null
+    # The darkest raw value: 1, or 255 where the PWM is inverted (MAGICX_BACKLIGHT_REVERSED).
+    if [ "$MAGICX_BACKLIGHT_REVERSED" = "1" ]; then _dark=255; else _dark=1; fi
+    magicx_disp_brightness set "$_dark" 2>/dev/null
+    echo 4 > /sys/class/graphics/fb0/blank 2>/dev/null
 }
 
 device_exit_sleep() {
-    magicx_relight_panel
-    clear_wake_alarm "$WAKE_ALARM_PATH"
-    if usb_wifi_wait_after_resume; then
-        wifi_request apply --wait
-        return 0
-    fi
-    modprobe "$WIFI_ONBOARD_MODULE"
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
-        for _ in 1 2 3 4 5; do
-            ip link show wlan0 >/dev/null 2>&1 && break
-            sleep 1
-        done
-    fi
-    wifi_request apply --wait
+    echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null
+    _raw=$(cat "$MAGICX_SLEEP_BRIGHTNESS" 2>/dev/null)
+    rm -f "$MAGICX_SLEEP_BRIGHTNESS"
+    case "$_raw" in
+        ''|*[!0-9]*) _raw=128 ;;
+    esac
+    magicx_disp_brightness set "$_raw" 2>/dev/null
+    killall -q -CONT $MAGICX_SLEEP_STOP 2>/dev/null
+    log_message "Left pseudo sleep (brightness raw $_raw)"
 }
 
 # The in-game menu composes over a framebuffer snapshot; the panel is portrait and
