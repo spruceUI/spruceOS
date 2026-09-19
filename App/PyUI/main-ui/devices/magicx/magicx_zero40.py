@@ -12,6 +12,8 @@ class MagicXZero40(MagicXA133PDevice):
     and the touch layer inverts the rotation for you.
     """
 
+    BACKLIGHT_REVERSED = True  # see MagicXA133PDevice._set_lumination_to_config
+
     def __init__(self, device_name, main_ui_mode):
         super().__init__(device_name, main_ui_mode, "/mnt/SDCARD/Saves/magicx-zero40-system.json")
 
