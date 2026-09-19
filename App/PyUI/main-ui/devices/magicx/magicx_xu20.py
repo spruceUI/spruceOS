@@ -18,6 +18,8 @@ class MagicXXU20(MagicXA133PDevice):
     These three values must match DISPLAY_* in spruce/scripts/platform/XU20.cfg.
     """
 
+    BACKLIGHT_REVERSED = True  # see MagicXA133PDevice._set_lumination_to_config
+
     def __init__(self, device_name, main_ui_mode):
         super().__init__(device_name, main_ui_mode, "/mnt/SDCARD/Saves/magicx-xu20-system.json")
 
