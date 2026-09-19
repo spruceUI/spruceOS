@@ -29,7 +29,13 @@
         },
         {
             "display":"PPSSPP version",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
+            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh",
+            "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP", "GKD_PIXEL2", "ANBERNIC_RGXX", "RGB30", "MAGICX_A133P"]
+        },
+        {
+            "display":"DSperate version",
+            "cmd":"/mnt/SDCARD/App/PyUI/get-dsperate-version.sh",
+            "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "TRIMUI_BRICK_PRO", "RGB30", "ANBERNIC_RGXX", "MAGICX_A133P", "GKD_PIXEL2"]
         },
         {
             "display":"SD Card usage",
