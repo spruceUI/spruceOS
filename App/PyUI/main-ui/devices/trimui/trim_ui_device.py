@@ -22,6 +22,7 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 class TrimUIDevice(DeviceCommon):
     
@@ -40,18 +41,14 @@ class TrimUIDevice(DeviceCommon):
 
         # Something outside this process - the physical switch's
         # scene-wifi.sh, today - can flip .wifi in this same file while PyUI
-        # is already running. reload_config() above already picks up the
-        # fresh value, so monitor_wifi()'s self-heal loop won't fight the
-        # switch by turning WiFi back on - but the WiFi status caches still
+        # is already running. reload_config() above picks up the fresh
+        # value, but the WiFi status caches still
         # need an explicit nudge so the WiFi menu/top bar icon catch up
         # immediately instead of waiting on their own throttle window.
         if(old_wifi_enabled != self.system_config.is_wifi_enabled()):
             self.get_wifi_status.force_refresh()
             self.get_ip_addr_text.force_refresh()
 
-    def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
-        
     def clear_framebuffer(self):
         pass
 
@@ -69,24 +66,8 @@ class TrimUIDevice(DeviceCommon):
     def reboot_cmd(self):
         return "reboot"
         
-    # Shared by the Brick, Brick Pro, Smart Pro and Smart Pro S. The
-    # "Powering off" / "Rebooting" message ends the UI, and the trailing sleep
-    # keeps PyUI from drawing over it while the shutdown runs.
-    def _signal_osd_quit(self):
-        os.makedirs("/tmp/trimui_osd", exist_ok=True)
-        open("/tmp/trimui_osd/osdd_quit", "a").close()
-
-    def _wpa_supplicant_quit(self):
-        ProcessRunner.run(["killall", "wpa_supplicant"])
-
-    def _prepare_for_power_action(self):
-        self._signal_osd_quit()
-        self._wpa_supplicant_quit()
-        time.sleep(1)
-
     def power_off(self):
         Display.display_message(Language.label("poweringOff", "Powering off..."))
-        self._prepare_for_power_action()
         time.sleep(1)
         super().power_off()
         # So we dont update the display while shutting down
@@ -94,7 +75,6 @@ class TrimUIDevice(DeviceCommon):
 
     def reboot(self):
         Display.display_message(Language.label("rebooting", "Rebooting..."))
-        self._prepare_for_power_action()
         time.sleep(1)
         super().reboot()
         # So we dont update the display while rebooting
@@ -169,11 +149,12 @@ class TrimUIDevice(DeviceCommon):
 
     
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
 
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
@@ -189,15 +170,15 @@ class TrimUIDevice(DeviceCommon):
             output = result.stdout.strip()
 
             if "Not connected." in output or result.returncode != 0:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
-            signal_level = 0
             link_quality = 0  # This won't be available directly via iw, unless you derive it
 
-            # Extract signal level (in dBm)
+            # Extract signal level (in dBm); no reading is no signal, not full bars
             signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
-            if signal_match:
-                signal_level = int(signal_match.group(1))
+            if not signal_match:
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+            signal_level = int(signal_match.group(1))
 
             # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
             # Example rough mapping:
@@ -216,77 +197,10 @@ class TrimUIDevice(DeviceCommon):
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
              
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        MiyooTrimCommon.stop_wifi_services(self)
-
-    def start_wpa_supplicant(self):
-        MiyooTrimCommon.start_wpa_supplicant(self)
-
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
-
-    def disable_wifi(self):
-        MiyooTrimCommon.disable_wifi(self)
-
-    # A USB WiFi dongle on the USB-C port replaces the onboard XR829 while it
-    # is plugged in (spruce/scripts/platform/device_functions/utils/
-    # usb_wifi_dongle.sh, launched for the A133P line by its cfgs). The shell's
-    # enable_wifi is the only path that does the swap - unload xradio_wlan,
-    # load the dongle's module, name its interface wlan0 - so the WiFi toggle
-    # hands the bring-up to it whenever a supported dongle is on the bus and
-    # keeps the historic Python path otherwise. WIFI_USB_IDS is exported by
-    # that contract; a device launched without it (the Smart Pro S, a PyUI run
-    # outside spruce) never sees a dongle here.
-    USB_SYS = "/sys/bus/usb/devices"
-
-    def _usb_wifi_dongle_present(self):
-        ids = {i.lower() for i in os.environ.get("WIFI_USB_IDS", "").split()}
-        if not ids:
-            return False
-        try:
-            for dev in os.listdir(self.USB_SYS):
-                base = os.path.join(self.USB_SYS, dev)
-                try:
-                    with open(os.path.join(base, "idVendor")) as f:
-                        vendor = f.read().strip().lower()
-                    with open(os.path.join(base, "idProduct")) as f:
-                        product = f.read().strip().lower()
-                except OSError:
-                    continue
-                if f"{vendor}:{product}" in ids:
-                    return True
-        except OSError:
-            pass
-        return False
-
-    def enable_wifi(self):
-        if not self._usb_wifi_dongle_present():
-            MiyooTrimCommon.enable_wifi(self)
-            return
-        # Same bookkeeping as the Python path, then the shell does the rest:
-        # bus check, driver swap, wlan0, supplicant, DHCP, network services.
-        # Popen, not run: the swap waits on driver probes and must not block
-        # the UI.
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        if not os.path.exists(self.SPRUCE_HELPER_FUNCTIONS):
-            PyUiLogger.get_logger().error(f"{self.SPRUCE_HELPER_FUNCTIONS} missing; cannot bring WiFi up")
-            return
-        try:
-            subprocess.Popen(
-                ["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && enable_wifi"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            PyUiLogger.get_logger().info("USB WiFi dongle present; bring-up handed to the shell enable_wifi")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error starting wifi: {e}")
-        self.get_wifi_status.force_refresh()
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
@@ -350,7 +264,13 @@ class TrimUIDevice(DeviceCommon):
         pass
 
     def calibrate_sticks(self):
-        pass
+        from controller.controller import Controller
+        from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
+        TrimUIStickCalibrator(Controller.controller_interface.event_path, self.apply_stick_calibration).run()
+
+    def apply_stick_calibration(self):
+        from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
+        TrimUIStickCalibrator.reload_via_cal_update()
 
     def supports_analog_calibration(self):
         return False

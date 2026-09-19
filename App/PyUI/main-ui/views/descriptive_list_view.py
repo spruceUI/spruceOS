@@ -44,6 +44,9 @@ class DescriptiveListView(ListView):
                 if entry.contains_potential_icon():
                     self.contains_any_icons = True
 
+    def get_row_geometry(self):
+        # _render starts at the same offset and steps by the selected-bg height
+        return Display.get_top_bar_height(force_include_top_bar = True) + 5, self.each_entry_height
 
     def set_options(self, options):
         self.options = options

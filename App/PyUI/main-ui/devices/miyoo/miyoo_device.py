@@ -15,6 +15,7 @@ import sdl2
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
+from utils.py_ui_config import PyUiConfig
 
 
 class MiyooDevice(DeviceCommon):
@@ -40,9 +41,6 @@ class MiyooDevice(DeviceCommon):
             f.write("deep")
         with open("/sys/power/state", "w") as f:
             f.write("mem")  
-
-    def ensure_wpa_supplicant_conf(self):
-        MiyooTrimCommon.ensure_wpa_supplicant_conf(self.get_wpa_supplicant_conf_path())
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
@@ -122,11 +120,12 @@ class MiyooDevice(DeviceCommon):
         DeviceCommon.prompt_power_down(self)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
 
     def map_key(self, key_code):
         if(116 == key_code):
@@ -164,28 +163,15 @@ class MiyooDevice(DeviceCommon):
                     link_quality=link_quality
                 )
             else:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
         
-    def stop_wifi_services(self):
-        PyUiLogger.get_logger().info(f"Stopping WiFi Services")
-        MiyooTrimCommon.stop_wifi_services(self)
-
-    def start_wpa_supplicant(self):
-        MiyooTrimCommon.start_wpa_supplicant(self)
-
-
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    def disable_wifi(self):
-        MiyooTrimCommon.disable_wifi(self)
-
-    def enable_wifi(self):
-        MiyooTrimCommon.enable_wifi(self)
         
     def get_app_finder(self):
         return MiyooAppFinder()

@@ -229,7 +229,7 @@ device_exit_sleep() {
     # A dongle that was the radio gets a bounded wait to re-enumerate, then the
     # system json decides whether WiFi comes back (the boot path's rule).
     if usb_wifi_wait_after_resume; then
-        enable_or_disable_wifi_per_system_json
+        wifi_request apply --wait
     fi
 }
 
@@ -443,7 +443,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -599,4 +599,10 @@ EOF
 # (my355/init.sh renames it rather than replacing it).
 device_stock_ui_command() {
     printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
+}
+
+# Strict unmount: btmanager, hardwareservice, miyoo_inputd and gpiowait hold
+# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+device_needs_strict_unmount() {
+    return 0
 }

@@ -15,6 +15,7 @@ from utils import throttle
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
+from utils.py_ui_config import PyUiConfig
 
 
 class RocknixDevice(DeviceCommon):
@@ -25,9 +26,6 @@ class RocknixDevice(DeviceCommon):
         super().__init__()
 
     def sleep(self):
-        pass
-
-    def ensure_wpa_supplicant_conf(self):
         pass
 
     def should_scale_screen(self):
@@ -137,28 +135,20 @@ class RocknixDevice(DeviceCommon):
         self.change_volume(-5)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
+            elif(ControllerInput.VOLUME_UP == controller_input):
+                self.change_volume(5)
+            elif(ControllerInput.VOLUME_DOWN == controller_input):
+                self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         return WiFiConnectionQualityInfo(noise_level=0, signal_level=0, link_quality=0)
 
-
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()

@@ -4,26 +4,16 @@ THEME_DIR="/mnt/SDCARD/Themes"
 ARCHIVE_DIR="/mnt/SDCARD/spruce/archives"
 ICON="/mnt/SDCARD/spruce/imgs/iconfresh.png"
 STATE_FILE="/mnt/SDCARD/Saves/spruce/unpacker_state"
-PRECMD_PID_FILE="/mnt/SDCARD/spruce/flags/unpacker_precmd.pid"
-HANDOFF_FLAG="unpacker_handoff_pre_cmd"
 FIRSTBOOT_PACKAGE_PHASE_FLAG="firstboot_packages_extracting"
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 # This is a service to unpack archives that are preformatted to land in the right place.
-# Since some files need to be available before the menu is displayed, we need to unpack them before
-# the menu is displayed so that's one mode.
-# The other mode is to unpack archives needed before the command_to_run, this is used for preCmd.
+# Themes and preMenu have to be unpacked before the menu is displayed; preCmd holds
+# what games need before cmd_to_run. Every lane unpacks in the foreground.
 
-# This can be called with a "pre_cmd" argument to run over preCmd only.
-# On firstboot this now runs fully in the foreground; on non-firstboot paths,
-# pre_cmd may still hand off to a background worker when safe.
-
-SKIP_SILENT_CLEANUP=0
 UNPACK_HAD_FAILURE=0
-HANDOFF_BACKGROUND=0
 RUN_MODE="all"
-FORCE_FOREGROUND_PRECMD="${UNPACKER_FORCE_FOREGROUND_PRECMD:-0}"
 FIRSTBOOT_ARCHIVE_TOTAL="${SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL:-0}"
 FIRSTBOOT_ARCHIVE_COMPLETED="${SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED:-0}"
 
@@ -67,10 +57,6 @@ run_mode_is_firstboot_theme_phase() {
     [ "$RUN_MODE" = "firstboot_theme_phase" ]
 }
 
-run_mode_is_pre_cmd_only() {
-    [ "$RUN_MODE" = "pre_cmd" ]
-}
-
 archive_firstboot_ui_requested() {
     [ "${SPRUCE_FIRSTBOOT_UI:-0}" = "1" ] || return 1
 }
@@ -111,37 +97,14 @@ queue_empty_for_mode() {
         return
     fi
 
-    if run_mode_is_pre_cmd_only; then
-        ! queue_has_archive "$ARCHIVE_DIR/preCmd"
-        return
-    fi
-
     ! queue_has_archive "$THEME_DIR" &&
     ! queue_has_archive "$ARCHIVE_DIR/preMenu" &&
     ! queue_has_archive "$ARCHIVE_DIR/preCmd"
 }
 
-cleanup() {
-    if run_mode_is_pre_cmd_only; then
-        rm -f "$PRECMD_PID_FILE"
-    fi
-
-    if [ "$SKIP_SILENT_CLEANUP" = "1" ]; then
-        return
-    fi
-
-    flag_remove "silentUnpacker"
-}
-
 parse_startup_args() {
-    arg1="$1"
-    arg2="$2"
-
-    if [ "$arg1" = "--silent" ]; then
-        flag_add "silentUnpacker" --tmp
-        [ -n "$arg2" ] && RUN_MODE="$arg2"
-    elif [ -n "$arg1" ]; then
-        RUN_MODE="$arg1"
+    if [ -n "$1" ]; then
+        RUN_MODE="$1"
     fi
 }
 
@@ -153,36 +116,18 @@ wait_for_firstboot_package_phase() {
     fi
 }
 
-# Guard against overlapping unpack workers.
-# A --silent pre_cmd worker is allowed to enter only when an explicit parent handoff flag exists.
-if flag_check "silentUnpacker"; then
-    if [ "$1" = "--silent" ] && [ "$2" = "pre_cmd" ] && flag_check "$HANDOFF_FLAG"; then
-        flag_remove "$HANDOFF_FLAG"
-    else
-        log_message "Unpacker: Another silent unpacker is running, exiting" -v
-        exit 0
-    fi
-fi
-
 log_message "Unpacker: Script started"
 
-# Set trap for script exit
-trap cleanup EXIT
-
 # Process command line arguments
-parse_startup_args "${1:-}" "${2:-}"
+parse_startup_args "${1:-}"
 wait_for_firstboot_package_phase
 write_unpack_state "running" "startup" ""
 
-# Function to display text if not in silent mode
-display_if_not_silent() {
+# Function to display which archive is being unpacked
+display_unpack_status() {
     section_label="$1"
     detail_line="$2"
     hold_seconds="${3:-0}"
-
-    if flag_check "silentUnpacker"; then
-        return 0
-    fi
 
     start_pyui_message_writer
     if archive_prepare_firstboot_progress; then
@@ -200,13 +145,10 @@ display_if_not_silent() {
 # Function to unpack archives from a specified directory
 unpack_archives() {
     dir="$1"
-    flag_name="$2"
-    section_label="$3"
+    section_label="$2"
     section_delay_applied=0
 
     [ -z "$section_label" ] && section_label="archives"
-
-    [ -n "$flag_name" ] && flag_add "$flag_name" --tmp
 
     for archive in "$dir"/*.7z; do
         if [ -f "$archive" ]; then
@@ -216,7 +158,7 @@ unpack_archives() {
                 section_hold=2
                 section_delay_applied=1
             fi
-            display_if_not_silent "$section_label" "$archive_name.7z" "$section_hold"
+            display_unpack_status "$section_label" "$archive_name.7z" "$section_hold"
             if run_mode_is_firstboot_theme_phase; then
                 log_firstboot_theme_archive_status "$section_label" "start" "$archive_name.7z"
             fi
@@ -251,8 +193,6 @@ unpack_archives() {
             fi
         fi
     done
-
-    [ -n "$flag_name" ] && flag_remove "$flag_name"
 }
 
 # Quick check for .7z files in relevant directories
@@ -279,25 +219,9 @@ fi
 log_message "Unpacker: Starting theme and archive unpacking process"
 
 run_mode_all() {
-    unpack_archives "$THEME_DIR" "" "Themes"
-    unpack_archives "$ARCHIVE_DIR/preMenu" "pre_menu_unpacking" "Pre-menu content"
-    if [ "$FORCE_FOREGROUND_PRECMD" = "1" ] || flag_check "save_active"; then
-        unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
-    else
-        flag_add "$HANDOFF_FLAG" --tmp
-        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh --silent pre_cmd &
-        handoff_pid="$!"
-        HANDOFF_BACKGROUND=1
-        echo "$handoff_pid" > "$PRECMD_PID_FILE"
-        write_unpack_state "running" "handoff-pre_cmd" "$handoff_pid"
-        SKIP_SILENT_CLEANUP=1
-    fi
-}
-
-run_mode_pre_cmd() {
-    echo "$$" > "$PRECMD_PID_FILE"
-    write_unpack_state "running" "pre_cmd-active" "$$"
-    unpack_archives "$ARCHIVE_DIR/preCmd" "pre_cmd_unpacking" "System content"
+    unpack_archives "$THEME_DIR" "Themes"
+    unpack_archives "$ARCHIVE_DIR/preMenu" "Pre-menu content"
+    unpack_archives "$ARCHIVE_DIR/preCmd" "System content"
 }
 
 run_mode_firstboot_theme_phase() {
@@ -305,13 +229,12 @@ run_mode_firstboot_theme_phase() {
     write_unpack_state "running" "firstboot-theme-phase-active" "$$"
     archive_prepare_firstboot_progress || true
     log_message "Unpacker: firstboot theme archive plan completed=$FIRSTBOOT_ARCHIVE_COMPLETED total=$FIRSTBOOT_ARCHIVE_TOTAL"
-    unpack_archives "$THEME_DIR" "" "Themes"
+    unpack_archives "$THEME_DIR" "Themes"
 }
 
 dispatch_run_mode() {
     case "$RUN_MODE" in
     "all") handler="run_mode_all" ;;
-    "pre_cmd") handler="run_mode_pre_cmd" ;;
     "firstboot_theme_phase") handler="run_mode_firstboot_theme_phase" ;;
     *)
         exit_with_state \
@@ -325,11 +248,6 @@ dispatch_run_mode() {
 }
 
 dispatch_run_mode
-
-if [ "$HANDOFF_BACKGROUND" = "1" ]; then
-    log_message "Unpacker: Foreground phases finished; pre_cmd handed off to background worker."
-    exit 0
-fi
 
 if [ "$UNPACK_HAD_FAILURE" -ne 0 ]; then
     exit_with_state \

@@ -3,12 +3,12 @@
     "themeDir": "/mnt/SDCARD/Themes/",
     "turboDelayMs": 250,
     "enableButtonWatchers": false,
-    "enableWifiMonitor": true,
     "mainMenuTitle": "spruceOS",
     "gameSystemSortMode": "SortOrderKey",
     "includeStockOsLaunchOption": false,
     "allowPyUiGameSwitcher": true,
     "mimicMiyooMainUiMode": true,
+    "ignoreMenuCombinationPresses": true,
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
@@ -16,6 +16,8 @@
     "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
+    "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
+    "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "aboutEntries" : [
         {
            "display":"spruce version",
@@ -27,7 +29,13 @@
         },
         {
             "display":"PPSSPP version",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh"
+            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh",
+            "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP", "GKD_PIXEL2", "ANBERNIC_RGXX", "RGB30", "MAGICX_A133P"]
+        },
+        {
+            "display":"DSperate version",
+            "cmd":"/mnt/SDCARD/App/PyUI/get-dsperate-version.sh",
+            "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "TRIMUI_BRICK_PRO", "RGB30", "ANBERNIC_RGXX", "MAGICX_A133P", "GKD_PIXEL2"]
         },
         {
             "display":"SD Card usage",

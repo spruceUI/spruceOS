@@ -189,6 +189,15 @@ close_forcefully_all_emus() {
     done
 }
 
+# Is the thing we are shutting down out of a game, rather than an app? Apps and
+# games both run from cmd_to_run.sh and both leave the menu, so "not in_menu" is
+# not the question - an app shutdown was announcing "Saving and shutting down"
+# and waiting on emulators that were never running.
+current_cmd_is_game() {
+    [ -f /tmp/cmd_to_run.sh ] || return 1
+    grep -q -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus' /tmp/cmd_to_run.sh
+}
+
 close_non_emu_cmd_to_run() {
     [ -f /tmp/cmd_to_run.sh ] || return 1
     if cat /tmp/cmd_to_run.sh | grep -q -v -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus'; then
@@ -232,9 +241,18 @@ display_appropriate_icon_and_message() {
         display_image_and_text "$SAVE_IMG" 33 10 "Battery level is below 1%. Shutting down to prevent progress loss." 60 50
         flag_remove "forced_shutdown"
         sleep 1.5 # Let user read message
-    elif ! flag_check "in_menu"; then
+    elif current_cmd_is_game; then
         start_pyui_message_writer
         display_image_and_text "$SAVE_IMG" 33 10 "Saving and shutting down... Please wait a moment." 60 50
+        sleep 1.5 # Let user read message
+    elif ! flag_check "in_menu"; then
+        # An app, so nothing is being saved. Say what is happening instead.
+        start_pyui_message_writer
+        if [ "$s2_arg" = "--reboot" ]; then
+            display_image_and_text "$BG_TREE" 33 10 "Restarting... Please wait a moment." 60 50
+        else
+            display_image_and_text "$BG_TREE" 33 10 "Shutting down... Please wait a moment." 60 50
+        fi
         sleep 1.5 # Let user read message
     fi
 }
@@ -283,6 +301,9 @@ clean_up_flags() {
     if flag_check "in_menu" || usb_storage_exit; then
         flag_remove "save_active"
         log_message "save_active cleared by save_poweroff: shutdown initiated from menu"
+    elif [ ! -f "${FLAGS_DIR}/lastgame.lock" ]; then
+        flag_remove "save_active"
+        log_message "save_active cleared by save_poweroff: nothing to resume, no lastgame.lock"
     else
         flag_add "save_active"
         log_message "save_active set by save_poweroff: shutdown initiated outside menu"
@@ -445,11 +466,15 @@ log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
 
 if ! usb_storage_exit && ! flag_check "in_menu"; then
-    attempt_to_close_emu_gracefully
-    wait_for_graceful_emu_exit
-    sync
+    if current_cmd_is_game; then
+        attempt_to_close_emu_gracefully
+        wait_for_graceful_emu_exit
+        sync
+    else
+        close_non_emu_cmd_to_run
+    fi
+    # Both paths: an emulator left over from a crashed game holds the card open.
     close_forcefully_all_emus
-    close_non_emu_cmd_to_run
 fi
 
 if usb_storage_exit; then

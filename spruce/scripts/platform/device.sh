@@ -185,6 +185,12 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
+# May low_power_warning.sh force a shutdown when the gauge reads 1 % or less?
+# Default yes; a platform whose gauge is not trusted overrides this.
+device_low_battery_shutdown_ok() {
+    return 0
+}
+
 # Which "first_boot_<key>" flag gates the firstboot lane for this device.
 # Unlike its neighbours here this is a real default, not a missing-function stub:
 # every platform needs a working value, and per-platform is the right answer for
@@ -204,6 +210,18 @@ device_init() {
 
 set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
+}
+
+# The pad's js node carries buttons and axes but not the rumble (EV_FF)
+# that emulators write to its event node, which idlemon would count as input.
+set_idlemon_to_pad() {
+    _pad="${EVENT_PATH_READ_INPUTS_SPRUCE##*/}"
+    _js="$_pad"
+    for _node in /sys/class/input/"$_pad"/device/js*; do
+        [ -e "$_node" ] && _js="${_node##*/}"
+        break
+    done
+    EVENT_ARG="-e /dev/input/$_js"
 }
 
 set_default_ra_hotkeys() {
@@ -358,6 +376,22 @@ device_wifi_power_off() {
 # need recovering.
 device_ensure_wifi_interface() {
     return 0
+}
+
+# Save a network ($1 SSID, $2 password, empty for an open network) and point the
+# running supplicant at it. Called by wifi.sh connect; never log the password.
+device_wifi_connect() {
+    wpa_add_network "$1" "$2"
+}
+
+# Called by wifi.sh forget-all, which applies the saved setting afterwards.
+device_wifi_forget_all() {
+    wpa_forget_all_networks
+}
+
+# Whether wifi_watchdog.sh restarts a link that has no address. Off where the OS owns the radio.
+device_wifi_watchdog_enabled() {
+    ! device_manages_own_wifi
 }
 
 device_system_handles_sdcard_unmount() {

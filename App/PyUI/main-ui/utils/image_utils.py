@@ -27,4 +27,8 @@ class ImageUtils(ABC):
     def convert_from_png_to_qoi(self, png_path,qoi_path=None):
         pass
 
+    @abstractmethod
+    def create_solid_color_image(self, output_path, r, g, b, width, height):
+        pass
+
     

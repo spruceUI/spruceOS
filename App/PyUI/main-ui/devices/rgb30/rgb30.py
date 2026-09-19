@@ -25,6 +25,7 @@ from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class Rgb30KeyMappingProvider:
@@ -308,54 +309,10 @@ class Rgb30(DeviceCommon):
         return True
 
     def is_wifi_enabled(self):
-        # Read the rfkill soft-block state directly. Instant, no subprocess -
-        # and crucially no nmcli, which shells out on the UI status path AND
-        # drives NetworkManager/dbus CPU on every call.
-        try:
-            import glob, os
-            for d in glob.glob("/sys/class/rfkill/*"):
-                try:
-                    if open(os.path.join(d, "type")).read().strip() == "wlan":
-                        return open(os.path.join(d, "soft")).read().strip() == "0"
-                except OSError:
-                    continue
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"rfkill is_wifi_enabled failed: {e}")
-        return False
-
-    def enable_wifi(self):
-        ProcessRunner.run(["nmcli", "radio", "wifi", "on"], timeout=10)
-
-    def disable_wifi(self):
-        ProcessRunner.run(["nmcli", "radio", "wifi", "off"], timeout=10)
+        return self.system_config.is_wifi_enabled()
 
     def get_new_wifi_scanner(self):
         return NmcliWifiScanner()
-
-    def wifi_connect(self, ssid, password):
-        # NetworkManager stores the profile and reconnects on its own from
-        # then on, so this only has to run once per network.
-        try:
-            if password:
-                cmd = ["nmcli", "device", "wifi", "connect", ssid,
-                       "password", password]
-            else:
-                cmd = ["nmcli", "device", "wifi", "connect", ssid]
-
-            result = ProcessRunner.run(cmd, timeout=45)
-
-            if result and result.returncode == 0:
-                PyUiLogger.get_logger().info(f"nmcli connected to {ssid}")
-                return
-
-            # Deliberately not logging nmcli's own stderr: it echoes back the
-            # arguments it was given, password included.
-            PyUiLogger.get_logger().error(
-                f"nmcli could not connect to {ssid} "
-                f"(exit {result.returncode if result else 'none'})"
-            )
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"nmcli wifi_connect failed: {e}")
 
     def get_wpa_supplicant_conf_path(self):
         # Not used - wifi_connect is overridden - but return a harmless path
@@ -403,9 +360,6 @@ class Rgb30(DeviceCommon):
     # ---- host behaviour ----
 
     def sleep(self):
-        pass
-
-    def ensure_wpa_supplicant_conf(self):
         pass
 
     def should_scale_screen(self):
@@ -485,15 +439,16 @@ class Rgb30(DeviceCommon):
         self.change_volume(-5)
 
     def special_input(self, controller_input, length_in_seconds):
-        if(ControllerInput.POWER_BUTTON == controller_input):
-            if(length_in_seconds < 1):
-                self.sleep()
-            else:
-                self.prompt_power_down()
-        elif(ControllerInput.VOLUME_UP == controller_input):
-            self.change_volume(5)
-        elif(ControllerInput.VOLUME_DOWN == controller_input):
-            self.change_volume(-5)
+        if(PyUiConfig.enable_button_watchers()):
+            if(ControllerInput.POWER_BUTTON == controller_input):
+                if(length_in_seconds < 1):
+                    self.sleep()
+                else:
+                    self.prompt_power_down()
+            elif(ControllerInput.VOLUME_UP == controller_input):
+                self.change_volume(5)
+            elif(ControllerInput.VOLUME_DOWN == controller_input):
+                self.change_volume(-5)
 
     def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
         # Read RSSI straight from the kernel. Instant and, crucially, no scan:
@@ -521,15 +476,6 @@ class Rgb30(DeviceCommon):
         return WiFiConnectionQualityInfo(
             noise_level=0, signal_level=-200, link_quality=0
         )
-
-    def set_wifi_power(self, value):
-        pass
-
-    def stop_wifi_services(self):
-        pass
-
-    def start_wpa_supplicant(self):
-        pass
 
     def get_app_finder(self):
         return MiyooAppFinder()

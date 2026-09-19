@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Requires globals:
-#   EMU_DIR
 #   ROM_FILE
 #   GAME
 #   EMU_JSON_PATH
@@ -13,10 +12,11 @@
 # Provides:
 #   run_dsperate
 
-
 . /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
 
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
+export DS_CHEEVOS_CFW_CONFIG="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
+export EMU_DIR="/mnt/SDCARD/Emu/NDS" # override this so NDSi can refer back to NDS emu folder easily
 
 dsperate_bios_missing() {
 	_missing=""
@@ -34,60 +34,42 @@ display_dsperate_bios_message() {
 }
 
 seed_dsperate_config() {
-	mkdir -p /mnt/SDCARD/Saves/saves/dsperate /mnt/SDCARD/Saves/states/dsperate
-	_cfg_dir="$XDG_CONFIG_HOME/dsperate"
-	_cfg_a30="$_cfg_dir/a30.ini"
-	_cfg_no_sticks="$_cfg_dir/no-sticks.ini"
-	_cfg_one_stick="$_cfg_dir/one-stick.ini"
-	_cfg_two_sticks="$_cfg_dir/two-sticks.ini"
-	_cfg_boot_menu="$_cfg_dir/games/BootMenu.ini"
+	_src_dir="/mnt/SDCARD/Emu/NDS/dsperate-configs"
+	_cfg_dir="/mnt/SDCARD/Saves/dsperate"
 
-	mkdir -p "$_cfg_dir"
-	if [ ! -f "$_cfg_two_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/two-sticks.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/two-sticks.ini" "$_cfg_two_sticks"
-		log_message "DSperate: seeded config from two-sticks.ini"
-	fi
-	if [ ! -f "$_cfg_a30" ] && [ -f "$EMU_DIR/dsperate-configs/a30.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/a30.ini" "$_cfg_a30"
-		log_message "DSperate: seeded config from a30.ini"
-	fi
-	if [ ! -f "$_cfg_no_sticks" ] && [ -f "$EMU_DIR/dsperate-configs/no-sticks.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/no-sticks.ini" "$_cfg_no_sticks"
-		log_message "DSperate: seeded config from no-sticks.ini"
-	fi
-	if [ ! -f "$_cfg_one_stick" ] && [ -f "$EMU_DIR/dsperate-configs/one-stick.ini" ]; then
-		cp -f "$EMU_DIR/dsperate-configs/one-stick.ini" "$_cfg_one_stick"
-		log_message "DSperate: seeded config from one-stick.ini"
-	fi
-	if [ ! -f "$_cfg_boot_menu" ] && [ -f "$EMU_DIR/dsperate-configs/BootMenu.ini" ]; then
-		mkdir -p /mnt/SDCARD/Saves/dsperate/games/
-		cp -f "$EMU_DIR/dsperate-configs/BootMenu.ini" "$_cfg_boot_menu"
-		log_message "DSperate: seeded config from BootMenu.ini"
-	fi
+	mkdir -p /mnt/SDCARD/Saves/saves/dsperate \
+			 /mnt/SDCARD/Saves/states/dsperate \
+			 /mnt/SDCARD/Saves/dsperate/games
+
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
+		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
+			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
+			log_message "DSperate: seeded $_cfg"
+		fi
+	done
 }
 
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
 # file it only reads (DS_CHEEVOS_CFW_CONFIG); its own in-menu sign-in wins.
 prepare_dsperate_cheevos() {
-	_cfw="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	case "$rac_mode" in
-		Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$_cfw"; return 0; } ;;
-		*) rm -f "$_cfw"; return 0 ;;
+		Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0; } ;;
+		Disabled) rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0 ;;
+		*) return 0 ;;
 	esac
-	if ! grep -qx "cheevos_username = \"$rac_user\"" "$_cfw" 2>/dev/null; then
+	if ! grep -qx "cheevos_username = \"$rac_user\"" "$DS_CHEEVOS_CFW_CONFIG" 2>/dev/null; then
 		rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 		_token="$(rac_login_token "$rac_user" "$rac_pass")"
 		if [ -n "$_token" ]; then
-			printf 'cheevos_username = "%s"\ncheevos_token = "%s"\n' "$rac_user" "$_token" > "$_cfw"
+			printf 'cheevos_username = "%s"\ncheevos_token = "%s"\n' "$rac_user" "$_token" > "$DS_CHEEVOS_CFW_CONFIG"
 			log_message "DSperate: fetched a RetroAchievements token for $rac_user"
 		else
-			rm -f "$_cfw"
+			rm -f "$DS_CHEEVOS_CFW_CONFIG"
 			log_message "DSperate: RetroAchievements login failed for $rac_user"
 		fi
 	fi
-	[ -f "$_cfw" ] && export DS_CHEEVOS_CFW_CONFIG="$_cfw"
 }
 
 get_video_effect() {
@@ -153,6 +135,9 @@ prepare_dsperate_rom() {
 }
 
 run_dsperate() {
+
+	[ "$1" = "--tate" ] && TATE_MODE="true"
+
 	export HOME="$EMU_DIR"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 
@@ -223,15 +208,35 @@ run_dsperate() {
 		export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
 	else
+
 		case "$DEVICE_NUM_ANALOG_STICKS" in
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
 				;;
-			"1") _config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"  ;;
-			*)   _config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini" ;;
+			"1")
+				_config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini" 
+				;;
+			*)
+				if [ "$PLATFORM" = "RGB30" ]; then
+					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
+					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini" 
+				else
+					_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
+				fi 
+				;;
 		esac
+
+		if [ "$TATE_MODE" = "true" ]; then
+			export DS_ROTATE=270
+			_config_path="/mnt/SDCARD/Saves/dsperate/tate.ini"
+		fi
+
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
-		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
+		# DSperate_flip_lib holds PyUI's SDL2 under the SONAME the loader wants:
+		# spruce/flip/lib ships it as libSDL2-2.0.so, which PyUI loads by name
+		# through ctypes but the loader never finds. DraStic's lib64_Flip build is
+		# patched for DraStic and segfaults dsperate even rendering offscreen.
+		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="$EMU_DIR/DSperate_flip_lib:$LD_LIBRARY_PATH"
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 

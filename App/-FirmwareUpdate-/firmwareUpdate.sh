@@ -20,6 +20,10 @@ case "$PLATFORM" in
 	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
+	Anbernic*)
+		# BaseOS updates itself from a .bosupd file at the root of the card.
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
+		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
 		sleep 5

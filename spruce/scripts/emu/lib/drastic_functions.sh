@@ -264,6 +264,34 @@ run_drastic_SmartPro(){
 	fi
 }
 
+##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32) #####
+
+# Same SoC as the Smart Pro, so the same two DraStic builds apply. Without these
+# `run_drastic_$PLATFORM` expanded to an undefined function and nothing launched.
+run_drastic_magicx_a133p() {
+	if [ "$CORE" = "DraStic-original" ]; then
+		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_SmartPro_original"
+		export SDL_AUDIODRIVER=dsp
+		run_drastic64
+	elif [ "$CORE" = "DraStic-trngaje" ]; then
+		run_drastic_trngaje_a133p
+	else
+		display_core_unrecognized_for_platform_message
+	fi
+}
+
+run_drastic_Zero28() {
+	run_drastic_magicx_a133p
+}
+
+run_drastic_Zero40() {
+	run_drastic_magicx_a133p
+}
+
+run_drastic_XU20() {
+	run_drastic_magicx_a133p
+}
+
 ##### SMART PRO S #####
 
 # Only original version is currently available on TSPS. Hardcode this "core" selection.

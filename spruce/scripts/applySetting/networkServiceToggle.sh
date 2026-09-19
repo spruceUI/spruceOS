@@ -16,6 +16,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 
 SERVICE="$1"
 ENABLED="$2"
@@ -126,4 +127,5 @@ echo "$$" >"$LOCK/pid"
 trap 'rm -rf "$LOCK"' EXIT INT TERM
 
 apply_toggle
+start_darkhttpd_process
 exit 0

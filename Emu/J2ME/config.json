@@ -14,14 +14,22 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30"
+    "RGB30",
+    "MIYOO_A30",
+    "MIYOO_MINI",
+    "MIYOO_MINI_V4",
+    "MIYOO_MINI_PLUS",
+    "MIYOO_MINI_FLIP",
+    "MAGICX_A133P"
   ],
   "requiredfiles": [
     [
-      "/mnt/SDCARD/Emu/J2ME/freej2me_plus_libretro.so"
+      "/mnt/SDCARD/RetroArch/.retroarch/cores64/freej2me_plus_libretro.so",
+      "/mnt/SDCARD/RetroArch/.retroarch/cores/freej2me_plus_libretro.so"
     ],
     [
-      "/mnt/SDCARD/Emu/J2ME/jre/bin/java"
+      "/mnt/SDCARD/Emu/J2ME/jre/bin/java",
+      "/mnt/SDCARD/Emu/J2ME/jre32/bin/java"
     ],
     [
       "/mnt/SDCARD/BIOS/freej2me_plus-lr.jar"

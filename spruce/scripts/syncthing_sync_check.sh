@@ -100,11 +100,6 @@ start_network() {
     ifconfig lo up
 }
 
-stop_network() {
-    log_message "SyncthingCheck: Stopping network interface..."
-    ifconfig lo down
-}
-
 get_folders() {
     local folders=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/config/folders" | jq -r '.[] | "\(.id)|\(.label)"')
     if [ -z "$folders" ]; then
@@ -294,7 +289,6 @@ No progress for ${stall_timeout}s" -i "$BG_TREE"
 
         rm -f /tmp/sync_status
         rm -f /tmp/sync_display.txt
-        current_status=""
 
         for device in $devices; do
             local device_name=$(get_device_name "$device")
@@ -318,12 +312,12 @@ No progress for ${stall_timeout}s" -i "$BG_TREE"
                     status="${download_completion}/${upload_completion}%"
                 fi
 
-                current_status="${current_status}${status}"
                 echo "$folder_label:" >> /tmp/sync_display.txt
                 echo "$status" >> /tmp/sync_display.txt
                 echo "" >> /tmp/sync_display.txt
             done
         done
+        current_status="$(cat /tmp/sync_display.txt 2>/dev/null)"
 
         # Check if status has changed
         if [ "$current_status" != "$previous_status" ] && [ -n "$previous_status" ]; then
@@ -375,7 +369,6 @@ main() {
         if ! wait_for_syncthing_api; then
             display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
             sleep 1
-            stop_network
             exit 1
         fi
     fi
@@ -395,14 +388,12 @@ main() {
             ;;
         *)
             log_message "SyncthingCheck: Usage: $0 {--monitor|--startup|--shutdown}"
-            stop_network
             exit 1
             ;;
     esac
 
     exit_code=$?
     log_message "SyncthingCheck: Sync check completed with exit code: $exit_code"
-    stop_network
     exit $exit_code
 }
 

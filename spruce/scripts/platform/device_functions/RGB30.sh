@@ -271,6 +271,24 @@ device_stop_dhcp_client() {
     return 0
 }
 
+# NetworkManager keeps the profile and reconnects on its own from then on. Its
+# error output echoes the password back, so none of it is kept.
+device_wifi_connect() {
+    command -v nmcli >/dev/null 2>&1 || return 1
+    # NM 1.52 refuses "device wifi connect" when a profile for the SSID already exists
+    # ("key-mgmt: property is missing"), so replace any saved profile for it
+    nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r _uuid _type; do
+        [ "$_type" = "802-11-wireless" ] || continue
+        [ "$(nmcli -g 802-11-wireless.ssid connection show uuid "$_uuid" 2>/dev/null)" = "$1" ] || continue
+        nmcli connection delete uuid "$_uuid" >/dev/null 2>&1
+    done
+    if [ -n "$2" ]; then
+        nmcli -w 45 device wifi connect "$1" password "$2" >/dev/null 2>&1
+    else
+        nmcli -w 45 device wifi connect "$1" >/dev/null 2>&1
+    fi
+}
+
   #################
 #####   AUDIO   #####
   #################
@@ -617,7 +635,7 @@ get_config_path() {
 # the entries deliberately left as "nul" there are reset to "nul" too - a reset
 # that only rewrote the bound keys would leave stale bindings behind.
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -854,6 +872,7 @@ rgb30_wifi_up() {
     _conf="/mnt/SDCARD/Saves/spruce/rgb30_wifi.conf"
 
     [ -f "$_conf" ] || return 0
+    wifi_setting_wanted || return 0
     command -v nmcli >/dev/null 2>&1 || return 0
 
     _ssid="$(sed -n 's/^SSID=//p' "$_conf" | head -1)"

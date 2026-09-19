@@ -39,20 +39,25 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Flip")
+		# The XU20 is deliberately absent: its motor is driven by the vendor's
+		# sunxi-vibrator off a regulator, not a GPIO, so there is no sysfs value here.
+		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
 }
 
 prepare_ra_config() {
-	# One cfg per platform, the fleet layout since the 2025-04 restructure:
-	# the card carries every platform's file and the device picks its own, so
-	# a card moved between models never launches on another model's saved
-	# state. The XX line used to share retroarch-AnbernicRG_XX-universal.cfg;
-	# 4.3.7.sh carries a restored copy of that file into the current
-	# platform's cfg once, then removes it.
-	export PLATFORM_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+
+	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
+	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
+
+	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then
+		log_message "No retroarch-${PLATFORM}.cfg found."
+		mkdir -p "$_live_cfg_dir"
+		cp "$_bak_cfg" "$PLATFORM_CFG" && log_message "$PLATFORM_CFG seeded from .bak file."
+	fi
 
 	# Set up RetroAchievements based on spruceUI config
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
@@ -153,11 +158,6 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
-	# Rotation and fullscreen size used to be forced into the XX line's shared
-	# cfg on every launch, because one file served a portrait RG28XX and three
-	# landscape models. Each platform cfg now ships with its own values, and
-	# 4.3.7.sh sets them once on a cfg it carries over, so a rotation the user
-	# picks inside RetroArch stays picked - as on every other platform.
 	sync
 }
 
@@ -247,7 +247,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"A30"|"MiyooMini"|"RGB30"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac

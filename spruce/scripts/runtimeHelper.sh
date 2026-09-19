@@ -405,10 +405,9 @@ unstage_archive() {
     fi
 }
 
-# These archives have always unpacked in the pre-menu lane: the target
-# argument used to be ignored, so "preCmd" here never took effect. Keep them
-# in preMenu; moving any of them to the background pre_cmd lane is a
-# deliberate boot-timing change, not a cleanup.
+# These archives have always unpacked in the pre-menu lane, before the menu is
+# drawn. preCmd unpacks after it in the same foreground run, so moving any of
+# them there is a deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
     if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
         unstage_archive "overlays_640x480.7z" "preMenu"
@@ -471,41 +470,22 @@ read_unpack_state() {
 }
 
 run_archive_unpacker_foreground() {
-    force_foreground_precmd="$1"
-
-    if [ "$force_foreground_precmd" = "1" ]; then
-        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
-        UNPACKER_FORCE_FOREGROUND_PRECMD=1 /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    else
-        SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
-        SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
-        /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
-    fi
+    SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
+    SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
+    SPRUCE_FIRSTBOOT_ARCHIVE_COMPLETED="${FIRSTBOOT_PROGRESS_CONTEXT_COMPLETED:-0}" \
+    /mnt/SDCARD/spruce/scripts/archiveUnpacker.sh
 }
 
 run_unpacker_foreground() {
     log_prefix="$1"
-    allow_background_state="$2"
-    force_foreground_precmd="$3"
-    firstboot_ui="$4"
+    firstboot_ui="$2"
 
     firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
-    run_archive_unpacker_foreground "$force_foreground_precmd"
+    run_archive_unpacker_foreground
     firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"
 
     unpack_state="$(read_unpack_state)"
-    if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
-        log_message "Unpacker: $log_prefix returned with background worker still active."
-    else
-        log_message "Unpacker: $log_prefix returned with state=$unpack_state."
-    fi
-
-    if [ "$allow_background_state" = "1" ] && [ "$unpack_state" = "running" ]; then
-        return 0
-    fi
+    log_message "Unpacker: $log_prefix returned with state=$unpack_state."
 
     [ "$unpack_state" = "complete" ]
 }
@@ -647,6 +627,10 @@ set_up_boot_action() {
                 else
                     log_message "Sun's literal entire romset not found; booting to spruceUI instead."
                 fi
+                ;;
+            "Mega Mode")
+                log_message "In the year 20XX AD... the first annual Ry mode was launched!"
+                log_message "$("$(get_python_path)" /mnt/SDCARD/spruce/scripts/megamode.py "$PLATFORM" $(device_names) 2>&1)"
                 ;;
         esac
     fi

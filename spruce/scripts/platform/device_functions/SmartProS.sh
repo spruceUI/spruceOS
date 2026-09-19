@@ -331,12 +331,12 @@ device_init() {
 }
 
 set_event_arg_for_idlemon() {
-    log_message "set_event_arg_for_idlemon not needed for Trim UI Smart Pro S?" -v
+    set_idlemon_to_pad
 }
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -391,17 +391,14 @@ WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_exit_sleep(){
     restore_cores_online
-    if [ -f /tmp/wifi_on ]; then
-        # wait for wlan0 to appear (up to ~5s)
+    # Sleep turned the radio off without changing the setting, so the setting says whether WiFi was on
+    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
         for _ in 1 2 3 4 5; do
             ip link show wlan0 >/dev/null 2>&1 && break
             sleep 1
         done
-
-        if ! pidof wpa_supplicant >/dev/null 2>&1; then
-            enable_or_disable_wifi_per_system_json
-        fi
     fi
+    wifi_request apply --wait
     device_run_tsps_blobs
     device_run_thermal_process
     (
@@ -419,7 +416,7 @@ trigger_device_sleep() {
 device_enter_sleep() {    
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
-    disable_wifi
+    wifi_request suspend --wait
 
     save_cores_online
     cores_online 0
@@ -444,7 +441,7 @@ device_run_tsps_blobs() {
 
 device_prepare_for_poweroff() {
     touch /tmp/trimui_osd/osdd_quit
-    disable_wifi
+    wifi_request suspend --wait
 }
 
 device_home_button_pressed() {

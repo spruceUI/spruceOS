@@ -13,23 +13,40 @@ log_activity_event "$current_app" "STOP"
 log_message "Sleep helper starting up..."
 rm -f /tmp/power_pressed_flag
 
-START_TIME=$(date +%s)
-getevent $EVENT_PATH_POWER | while read -r line; do
-    CURRENT_TIME=$(date +%s)
-    ELAPSED=$((CURRENT_TIME - START_TIME))
-    # Ignore events for the first 2 seconds of script starting
-    # as sometimes the power button can trigger a couple times immediately
-    if [ "$ELAPSED" -lt 2 ]; then
-        continue
-    fi
-    case "$line" in
-        *"key $B_POWER 1"*) 
-            touch /tmp/power_pressed_flag
-        ;;
-    esac
-done &
-GET_EVENT_PID=$!
+PSEUDO_SLEEP="$(device_uses_pseudo_sleep)"
+POWER_EVENT_PIPE="/tmp/sleep_helper_power.$$"
+GET_EVENT_PID=""
+READER_PID=""
 
+# Only pseudo sleep reads this; the FIFO makes $! the getevent pid
+if [ "$PSEUDO_SLEEP" = "true" ] && mkfifo "$POWER_EVENT_PIPE"; then
+    START_TIME=$(date +%s)
+    getevent $EVENT_PATH_POWER > "$POWER_EVENT_PIPE" &
+    GET_EVENT_PID=$!
+    while read -r line; do
+        CURRENT_TIME=$(date +%s)
+        ELAPSED=$((CURRENT_TIME - START_TIME))
+        # Ignore events for the first 2 seconds of script starting
+        # as sometimes the power button can trigger a couple times immediately
+        if [ "$ELAPSED" -lt 2 ]; then
+            continue
+        fi
+        case "$line" in
+            *"key $B_POWER 1"*)
+                touch /tmp/power_pressed_flag
+            ;;
+        esac
+    done < "$POWER_EVENT_PIPE" &
+    READER_PID=$!
+fi
+
+stop_power_reader() {
+    [ -n "$GET_EVENT_PID" ] && kill "$GET_EVENT_PID" 2>/dev/null
+    [ -n "$READER_PID" ] && kill "$READER_PID" 2>/dev/null
+    GET_EVENT_PID=""
+    READER_PID=""
+    rm -f "$POWER_EVENT_PIPE"
+}
 
 power_button_pressed() {
     if [ -e /tmp/power_pressed_flag ]; then
@@ -41,7 +58,7 @@ power_button_pressed() {
 }
 
 cleanup() {
-    kill "${GET_EVENT_PID:-}" 2>/dev/null
+    stop_power_reader
     rmdir /tmp/sleep_helper_started 2>/dev/null
     rm -f /tmp/power_pressed_flag
 }
@@ -123,7 +140,7 @@ trigger_sleep() {
     start_ts=$(date +%s)
     set_volume 0 false # Mute on sleep so when we wake to shutdown it's silent
     device_enter_sleep "$IDLE_TIMEOUT"
-    if [ "$(device_uses_pseudo_sleep)" = "true" ]; then
+    if [ "$PSEUDO_SLEEP" = "true" ]; then
         log_message "Device uses pseudosleep -- starting idle loop"
         log_message "Starting idle timeout countdown: ${IDLE_TIMEOUT}s until poweroff if lid remains closed"
         local elapsed=0
@@ -214,7 +231,7 @@ case "$VOLUME_LV" in
 esac
 
 
-kill "$GET_EVENT_PID" 2>/dev/null
+stop_power_reader
 
 sleep 2 #don't allow resleeping for a few seconds
 rmdir /tmp/sleep_helper_started 2>/dev/null

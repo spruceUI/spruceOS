@@ -103,20 +103,8 @@ trigger_device_sleep() {
     echo -n mem >/sys/power/state
 }
 
-# A poweroff on USB power comes straight back as a charger boot into spruce, so a
-# sleep on USB runs with the "Off" timeout instead (re-checked at the deadline below).
-USB_POWER_ONLINE="${USB_POWER_ONLINE:-/sys/class/power_supply/axp2202-usb/online}"
-
-usb_power_online() {
-    [ "$(cat "$USB_POWER_ONLINE" 2>/dev/null)" = "1" ]
-}
-
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
-    if usb_power_online; then
-        log_message "On USB power: sleeping without the ${IDLE_TIMEOUT}s shutdown timer"
-        IDLE_TIMEOUT=2592000
-    fi
     WAKE_ALARM_PATH="$(find_wake_alarm_path)"
     rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -137,14 +125,6 @@ device_exit_sleep() {
 device_woke_via_timer() {
     if [ -f "$WAKE_ALARM_ARMED_FLAG" ] && [ -e "$WAKE_ALARM_PATH" ]; then
         if [ -z "$(cat "$WAKE_ALARM_PATH" 2>/dev/null)" ]; then
-            if usb_power_online; then
-                # Plugged in since the sleep began: re-arm "Off" and keep sleeping
-                # rather than power off into a charger boot. Stdout is captured here.
-                log_message "On USB power at the sleep deadline: not shutting down" >/dev/null
-                save_sleep_info 2592000 >/dev/null && set_wake_alarm 2592000 "$WAKE_ALARM_PATH" >/dev/null
-                echo "false"
-                return
-            fi
             echo "true"
             return
         fi
@@ -172,6 +152,27 @@ send_virtual_key_L3() {
 }
 
 
+# An unreadable or unparseable version means "do not nag".
+check_if_fw_needs_update() {
+    _baseos_have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null)"
+    if [ -z "$_baseos_have" ] || [ -z "$TARGET_BASEOS_VERSION" ]; then
+        echo "false"
+        return
+    fi
+    case "$_baseos_have" in
+        ''|*[!0-9.]*) echo "false"; return ;;
+    esac
+
+    _have_n="$(printf '%s' "$_baseos_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+    _want_n="$(printf '%s' "$TARGET_BASEOS_VERSION" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+
+    if [ "$_have_n" -lt "$_want_n" ] 2>/dev/null; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
 has_lid() {
     # BaseOS's build target names the model exactly, and every clamshell target
     # in the line ends in "sp" (rg34xxsp, rg35xxsp, rgsp).
@@ -191,6 +192,7 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
         /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
+        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
         /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
     do
         stop_running_watchdog "$_wd"
@@ -204,6 +206,7 @@ launch_startup_watchdogs(){
     # that launcher is low_power_warning.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
     /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
 
     if has_lid >/dev/null; then
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
@@ -211,7 +214,8 @@ launch_startup_watchdogs(){
 }
 
 take_screenshot() {
-    log_message "Unable to doso on 34xxsp currently"
+    screenshot_path="$1"
+    /mnt/SDCARD/spruce/bin64/fbscreenshot "$screenshot_path" -r "${DISPLAY_ROTATION:-0}"
 }
 
 runtime_mounts_anbernic_34xxsp() {
@@ -255,8 +259,37 @@ anbernic_xx_common_init() {
 
     runtime_mounts_anbernic_34xxsp
 
+    stage_ra_autoconfig
+
     add_spruce_system_user
     shield_baseos_session
+}
+
+# RetroArch has no profile for this pad, so it announces "ANBERNIC-keys (1/1)
+# not configured, using fallback" at every launch (#1676).
+#
+# One file cannot serve the line: every model reports the same name, bus and
+# vendor/product, but the stickless ones have no L3/R3, so every button after
+# them shifts down by one. Stage whichever variant matches this device instead,
+# for both RetroArch builds - sdl2 is the 64-bit one, linuxraw the 32-bit.
+# The binds are the ones the platform cfg already sets, so nothing changes but
+# the notification. A card moves between models, hence every boot.
+stage_ra_autoconfig() {
+    case "$PLATFORM" in
+        *NoStick|AnbernicRG28XX) _ra_ac_variant="nosticks" ;;
+        *)                       _ra_ac_variant="sticks" ;;
+    esac
+
+    for _ra_ac_driver in sdl2 linuxraw; do
+        _ra_ac_src="/mnt/SDCARD/RetroArch/platform/autoconfig/${_ra_ac_driver}/ANBERNIC-keys-${_ra_ac_variant}.cfg"
+        _ra_ac_dst="/mnt/SDCARD/RetroArch/.retroarch/autoconfig/${_ra_ac_driver}/ANBERNIC-keys.cfg"
+        [ -f "$_ra_ac_src" ] || continue
+        cmp -s "$_ra_ac_src" "$_ra_ac_dst" && continue
+        mkdir -p "${_ra_ac_dst%/*}"
+        cp "$_ra_ac_src" "$_ra_ac_dst" && \
+            log_message "Staged $_ra_ac_driver pad profile ($_ra_ac_variant) for RetroArch"
+    done
+    unset _ra_ac_variant _ra_ac_driver _ra_ac_src _ra_ac_dst
 }
 
 device_init() {
@@ -360,7 +393,7 @@ add_spruce_system_user() {
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event1" # is this right?
+    set_idlemon_to_pad
 }
 
 set_default_ra_hotkeys() {
@@ -374,7 +407,7 @@ set_default_ra_hotkeys() {
     # state slot. Only the triggers move with the pad layout: stickless models
     # have no stick-click keys ahead of them. Nothing rewrites these at
     # launch; the 32-bit build's overlay carries its own linuxraw copy.
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
     case "$XX_PAD_LAYOUT" in
         nostick) l2_btn="12"; r2_btn="13" ;;
         *)       l2_btn="13"; r2_btn="14" ;;
@@ -501,6 +534,33 @@ volume_down() {
 
 get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
+}
+
+# Same ioctl and scale as PyUI's _set_lumination_to_config
+set_backlight() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 10 ] && level=10
+    if [ "$level" -eq 10 ]; then raw=127; else raw=$((level * 25 / 2)); fi
+    [ "$raw" -lt 5 ] && raw=5
+    "$DEVICE_PYTHON3_PATH" -c "
+import os, fcntl, struct
+fd = os.open('/dev/disp', os.O_RDWR)
+try:
+    fcntl.ioctl(fd, 0x102, struct.pack('QQQQ', 0, $raw, 0, 0))
+finally:
+    os.close(fd)
+"
+    tmp="$SYSTEM_JSON.tmp.$$"
+    jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
+brightness_down() {
+    set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") - 1 ))
+}
+
+brightness_up() {
+    set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
 }
 
 
@@ -705,13 +765,39 @@ wifi_usb_wait_for_radio() {
     return 1
 }
 
+# The port can switch to host mode long after boot (EHCI came up at 40 s on an
+# RG28XX, 2026-09-13), and a dongle can be plugged in late. Watch the bus for a
+# while and apply the WiFi setting once the radio appears, instead of waiting
+# for someone to toggle WiFi.
+WIFI_USB_LATE_WATCH="${WIFI_USB_LATE_WATCH:-120}"
+WIFI_USB_LATE_WATCH_MARK="/tmp/wifi_usb_late_watch"
+
+wifi_usb_watch_for_late_radio() {
+    mkdir "$WIFI_USB_LATE_WATCH_MARK" 2>/dev/null || return 0
+    (
+        trap '' HUP
+        _lw_left="$WIFI_USB_LATE_WATCH"
+        while [ "$_lw_left" -gt 0 ]; do
+            sleep 2
+            _lw_left=$((_lw_left - 2))
+            if wifi_usb_radio_present; then
+                log_message "WiFi: $WIFI_MODULE radio appeared on USB - applying the WiFi setting"
+                wifi_request apply
+                break
+            fi
+        done
+        rmdir "$WIFI_USB_LATE_WATCH_MARK" 2>/dev/null
+    ) </dev/null >/dev/null 2>&1 &
+}
+
 device_wifi_power_on() {
     # Bus-first on USB models: no adapter after the enumeration wait means no
-    # radio this session - no module load, and the availability guards turn
-    # the rest of the WiFi path off instead of starting a supplicant on a
-    # wlan0 that cannot exist.
+    # radio for now - no module load, and the availability guards turn the
+    # rest of the WiFi path off instead of starting a supplicant on a wlan0
+    # that cannot exist.
     if [ "$WIFI_BUS" = "usb" ] && ! wifi_usb_wait_for_radio; then
-        log_message "WiFi: $WIFI_MODULE radio not enumerated on USB after ${WIFI_USB_ENUM_WAIT}s - no radio this session"
+        log_message "WiFi: $WIFI_MODULE radio not enumerated on USB after ${WIFI_USB_ENUM_WAIT}s - watching the bus for ${WIFI_USB_LATE_WATCH}s"
+        wifi_usb_watch_for_late_radio
         return 1
     fi
     if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then

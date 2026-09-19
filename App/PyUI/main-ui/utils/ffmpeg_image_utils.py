@@ -21,6 +21,22 @@ class FfmpegImageUtils(ImageUtils):
         except subprocess.CalledProcessError as e:
             PyUiLogger().get_logger().error(f"Error converting {input_path} to {output_path}: {e}")
 
+    def create_solid_color_image(self, output_path, r, g, b, width, height):
+        try:
+            subprocess.run([
+                "ffmpeg",
+                "-y",
+                "-f", "lavfi",
+                # format=rgba on the source itself; converting afterwards rounds white to 253
+                "-i", f"color=c=0x{r:02x}{g:02x}{b:02x}:s={width}x{height},format=rgba",
+                "-frames:v", "1",
+                "-update", "1",
+                "-pix_fmt", "rgba",
+                output_path
+            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except subprocess.CalledProcessError as e:
+            PyUiLogger().get_logger().error(f"Error creating {output_path}: {e}")
+
     def convert_from_jpg_to_qoi(self,jpg_path, qoi_path):
        self.convert_type(jpg_path,qoi_path)
 

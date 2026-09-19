@@ -13,7 +13,7 @@ brightness_down() {
     BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
 
-    extended_brightness="$(get_config_value 'menuOptions."System Settings".extendedBrightness.selected' "False")"
+    extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
 
     # setsharedmem binary on A30 does not accept a contrast argument (yet?)
     if [ "$PLATFORM" = "Flip" ]; then
@@ -58,7 +58,7 @@ brightness_up() {
     BRIGHTNESS_LV=$(get_brightness_level)
     VOLUME_LV=$(get_volume_level)
 
-    extended_brightness="$(get_config_value 'menuOptions."System Settings".extendedBrightness.selected' "False")"
+    extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
 
     # setsharedmem binary on A30 does not accept a contrast argument (yet?)
     if [ "$PLATFORM" = "Flip" ]; then

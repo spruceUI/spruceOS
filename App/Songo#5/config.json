@@ -3,6 +3,15 @@
   "icon": "songo.png",
   "launch": "launch.sh",
   "description": "A music player",
-  "devices": ["MIYOO_FLIP", "TRIMUI_SMART_PRO", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO_S", "GKD_PIXEL2", "ANBERNIC_RGXX"],
+  "devices": [
+    "MIYOO_FLIP",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_BRICK",
+    "TRIMUI_BRICK_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "MAGICX_A133P"
+  ],
   "hideInSimpleMode": false
 }

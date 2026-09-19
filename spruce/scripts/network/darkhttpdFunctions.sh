@@ -4,9 +4,26 @@
 
 WWW_DIR=/mnt/SDCARD/spruce/www
 
+# The landing page reads this to show only the services that are on.
+write_landing_page_services() {
+  {
+    echo "samba=$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
+    echo "ssh=$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
+    echo "sftpgo=$(get_config_value '.menuOptions."Network Settings".enableSFTPGo.selected' "False")"
+    echo "syncthing=$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
+    if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+      echo "file_transfer=FTP:21"
+    else
+      echo "file_transfer=SFTP:2022"
+    fi
+  } > "$WWW_DIR/services.txt.tmp" && mv "$WWW_DIR/services.txt.tmp" "$WWW_DIR/services.txt"
+}
+
 # Generic Startup
 # Should only be used in contexts where firststart has already been called
 start_darkhttpd_process() {
+  write_landing_page_services
+
   if pgrep "darkhttpd" >/dev/null; then
     log_message "darkhttpd: Already running, skipping start" -v
     return 1

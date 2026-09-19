@@ -110,10 +110,15 @@ case $EMU_NAME in
 		fi
 		;;
 
-	"NDS")
-		if [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ]; then
+	"NDS"|"NDSI")
+		if [ "$CORE" = "DSperate-Tate" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate --tate
+
+		elif [ "$CORE" = "DSperate" ] || [ "$GAME" = "BootMenu.nds" ] || [ "$GAME" = "BootMenuDSi.nds" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
+
 		else
 			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
 			run_drastic
@@ -143,7 +148,14 @@ case $EMU_NAME in
 	"J2ME")
 		# The core execvp's "java"; fonts come from the JRE's own
 		# fontconfig.properties, so nothing else needs setting up here.
-		export PATH="$EMU_DIR/jre/bin:$PATH"
+		# The devices have no writable home, so java.util.prefs fails and then
+		# retries every 30s. Point it at tmpfs instead.
+		export JAVA_TOOL_OPTIONS="-Duser.home=/tmp"
+		if [ "$PLATFORM_ARCHITECTURE" = "armhf" ]; then
+			export PATH="$EMU_DIR/jre32/bin:$PATH"
+		else
+			export PATH="$EMU_DIR/jre/bin:$PATH"
+		fi
 		run_retroarch
 		;;
 
@@ -213,7 +225,7 @@ calculate_current_session_duration
 update_gtt
 sync
 
-enable_or_disable_wifi_per_system_json &
+wifi_request apply
 
 
 log_message "-----Closing Emulator-----"

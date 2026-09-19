@@ -205,6 +205,12 @@ class KeyWatcherController(ControllerInterface):
             self.input_queue.clear()
             self.held_controller_inputs.clear()
 
+    def inject_input(self, controller_input):
+        # A press with no matching hold: it is delivered once by get_input and
+        # never shows up in still_held_down.
+        with self.lock:
+            self.input_queue.append(controller_input)
+
     def init_controller(self):
         pass
     

@@ -33,6 +33,9 @@ class NonDescriptiveListView(ListView):
         self.current_bottom = min(self.max_rows,len(options))
         self.center_selection()
 
+    def get_row_geometry(self):
+        return self.base_y_offset, self.line_height
+
     def set_options(self, options):
         self.options = options
         self.options_are_sorted = self.is_alphabetized(options)

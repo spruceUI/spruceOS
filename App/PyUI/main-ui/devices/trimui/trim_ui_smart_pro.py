@@ -1,3 +1,4 @@
+import os
 import subprocess
 import math
 from pathlib import Path
@@ -39,22 +40,17 @@ class TrimUISmartPro(TrimUIDevice):
 
 
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
-            self.ensure_wpa_supplicant_conf()
-            threading.Thread(target=self.monitor_wifi, daemon=True).start()
             threading.Thread(target=self.startup_init, daemon=True).start()
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
-            if(PyUiConfig.enable_button_watchers()):
-                from controller.controller import Controller
-                #/dev/miyooio if we want to get rid of miyoo_inputd
-                # debug in terminal: hexdump  /dev/miyooio
-                self.volume_key_watcher = KeyWatcher("/dev/input/event3")
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-                volume_key_polling_thread.start()
-                self.power_key_watcher = KeyWatcher("/dev/input/event1")
-                power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-                power_key_polling_thread.start()
+            from controller.controller import Controller
+            self.volume_key_watcher = KeyWatcher("/dev/input/event3")
+            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+            volume_key_polling_thread.start()
+            self.power_key_watcher = KeyWatcher("/dev/input/event1")
+            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+            power_key_polling_thread.start()
                 
         super().__init__()
 
@@ -64,10 +60,6 @@ class TrimUISmartPro(TrimUIDevice):
         self._set_saturation_to_config()
         self._set_brightness_to_config()
         self._set_hue_to_config()
-        if include_wifi and self.is_wifi_enabled():
-            if not self.connection_seems_up():
-                self.stop_wifi_services()
-            self.start_wifi_services(foreground_call=False)
 
     #Untested
     @throttle.limit_refresh(5)
@@ -120,7 +112,24 @@ class TrimUISmartPro(TrimUIDevice):
 
     def get_controller_interface(self):
         return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
-    
+
+    def supports_analog_calibration(self):
+        return True
+
+    # This inputd has no cal_update; it only reads joypad*.config at startup.
+    def apply_stick_calibration(self):
+        subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && restart_trimui_inputd"],
+                       stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=30, check=True)
+        watcher = getattr(self, "volume_key_watcher", None)
+        if watcher is not None:
+            old_fd = watcher.fd
+            watcher.fd = os.open(watcher.event_path, os.O_RDONLY | os.O_NONBLOCK)
+            try:
+                os.close(old_fd)
+            except OSError:
+                pass
+
     def get_device_name(self):
         return self.device_name
         

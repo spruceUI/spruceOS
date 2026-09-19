@@ -32,19 +32,16 @@ class AboutMenu(settings_menu.SettingsMenu):
             for entry in PyUiConfig.get_about_entries():
                 display = entry.get("display", "")
                 cmd = entry.get("cmd", "")
-
-                option_list.append(
-                    GridOrListEntry(
-                        primary_text=display,
-                        value_text=self.get_value_from_cmd(cmd) if cmd else "",
-                        description=None,
-                        value=self.do_nothing
+                devices = entry.get("devices", [])
+                if(Device.supports_device(devices)) :
+                    option_list.append(
+                        GridOrListEntry(
+                            primary_text=display,
+                            value_text=self.get_value_from_cmd(cmd) if cmd else "",
+                            description=None,
+                            value=self.do_nothing
+                        )
                     )
-                )
-
-
-
-            
 
         return option_list
 

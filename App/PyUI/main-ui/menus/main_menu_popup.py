@@ -102,9 +102,9 @@ class MainMenuPopup:
             top_bar_text=Language.label("mainMenuSubOptions", "Main Menu Sub Options"),
             selected_index=0,
             cols=Theme.popup_menu_cols(),
-            rows=Theme.popup_menu_rows)
+            rows=Theme.popup_menu_rows())
 
-        while (popup_selection := popup_view.get_selection()):
+        while (popup_selection := popup_view.get_selection(select_controller_inputs=[ControllerInput.A, ControllerInput.MENU])):
             if (popup_selection.get_input() is not None):
                 break
 

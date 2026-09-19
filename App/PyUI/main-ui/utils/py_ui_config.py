@@ -93,10 +93,6 @@ class PyUiConfig:
         return cls._data.get("enableButtonWatchers", True)
 
     @classmethod
-    def enable_wifi_monitor(cls):
-        return cls._data.get("enableWifiMonitor", True)
-
-    @classmethod
     def get_main_menu_title(cls):
         return cls._data.get("mainMenuTitle", "PyUI")
 
@@ -237,3 +233,16 @@ class PyUiConfig:
     @classmethod
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
+
+    @classmethod
+    def ignore_menu_button_combination_presses(cls):
+        return cls.get("ignoreMenuCombinationPresses",False)
+
+    @classmethod
+    def get_timezone_dir(cls):
+        return cls.get("timezoneDir","")
+
+    @classmethod
+    def get_cpu_mode_cmd(cls):
+        return cls.get("cpuModeCmd",None)
+

@@ -45,7 +45,7 @@ setup_for_retroarch(){
 }
 
 get_spruce_ra_cfg_location() {
-    echo "/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
+    echo "/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
 }
 
 set_loading_screen() {
@@ -169,6 +169,12 @@ device_get_charging_status() {
 
 device_get_battery_percent() {
 	cat "$BATTERY/capacity"
+}
+
+# The OS network stack started in setup_network_services owns the radio; spruce
+# must not start a wpa_supplicant or DHCP client beside it
+device_manages_own_wifi() {
+    return 0
 }
 
 device_wifi_power_on() {
@@ -432,7 +438,7 @@ disable_dpad_mod() {
 }
 
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-Pixel2.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

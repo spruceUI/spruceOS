@@ -1,6 +1,6 @@
 J2ME (Java ME) phone games run on the FreeJ2ME-Plus core, which is a wrapper
 around a real Java runtime. Neither one ships with spruce - together they are
-about 37MB to download - so both come from the Game Nursery.
+about 35MB to download - so both come from the Game Nursery.
 
 To install:
 
@@ -22,5 +22,6 @@ game expects - 176x208 and 240x320 cover most of them - and restart the game.
 Core Options > Phone Key Layout does the same job for games that ignore the
 controls: Nokia and Siemens layouts are the common ones.
 
-64-bit devices only. The Miyoo Mini and the A30 do not have the memory to run a
-JVM, so J2ME is not offered on them.
+Java is heavier than a normal emulator core, so expect a few seconds of black
+screen while the runtime starts, and expect the Miyoo Mini to be slower at it
+than everything else.

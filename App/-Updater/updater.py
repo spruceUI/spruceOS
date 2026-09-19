@@ -1997,18 +1997,6 @@ def main():
         "tester_mode"
     )
 
-
-    # TODO: remove once incremental OTA is approved as stable.
-    # The downloader only builds incremental queues for developer/tester
-    # devices; refuse to apply one anywhere else (a stale "install later"
-    # queue after the flag was removed, or a hand-made queue).
-    if not is_full and not (developer_mode or tester_mode):
-
-        fail(
-            "Incremental OTA updates are currently limited to "
-            "developer or tester mode. Run 'Check for Updates' again."
-        )
-
     # ------------------------------------------------------------------
     # Stop services before touching the installation
     # ------------------------------------------------------------------

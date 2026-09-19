@@ -22,7 +22,6 @@ class MuosAnbernicRGXX(MuosDevice):
 
 
         self.miyoo_games_file_parser = MiyooGamesFileParser()        
-        threading.Thread(target=self.monitor_wifi, daemon=True).start()
         self.hardware_poller = MiyooFlipPoller(self)
         threading.Thread(target=self.hardware_poller.continuously_monitor, daemon=True).start()
 
@@ -32,21 +31,20 @@ class MuosAnbernicRGXX(MuosDevice):
         #self._set_brightness_to_config()
         #self._set_hue_to_config()
 
-        if(PyUiConfig.enable_button_watchers()):
-            from controller.controller import Controller
-            #/dev/miyooio if we want to get rid of miyoo_inputd
-            # debug in terminal: hexdump  /dev/miyooio
-            self.volume_key_watcher = KeyWatcher("/dev/input/event0")
-            Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-            volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-            volume_key_polling_thread.start()
-            self.power_key_watcher = KeyWatcher("/dev/input/event2")
-            power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-            power_key_polling_thread.start()
-            self.controller_watcher = KeyWatcher("/dev/input/event1")
-            Controller.add_button_watcher(self.controller_watcher.poll_keyboard)
-            controller_watching_thread = threading.Thread(target=self.controller_watcher.poll_keyboard, daemon=True)
-            controller_watching_thread.start()
+        from controller.controller import Controller
+        #/dev/miyooio if we want to get rid of miyoo_inputd
+        # debug in terminal: hexdump  /dev/miyooio
+        self.volume_key_watcher = KeyWatcher("/dev/input/event0")
+        Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
+        volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
+        volume_key_polling_thread.start()
+        self.power_key_watcher = KeyWatcher("/dev/input/event2")
+        power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
+        power_key_polling_thread.start()
+        self.controller_watcher = KeyWatcher("/dev/input/event1")
+        Controller.add_button_watcher(self.controller_watcher.poll_keyboard)
+        controller_watching_thread = threading.Thread(target=self.controller_watcher.poll_keyboard, daemon=True)
+        controller_watching_thread.start()
 
         super().__init__()
 

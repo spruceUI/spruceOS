@@ -275,10 +275,36 @@ run_trimui_blobs() {
             continue
         fi
 
-        LD_LIBRARY_PATH=/usr/trimui/lib "./$blob" &
-        log_message "Started $blob"
+        bin="./$blob"
+        if [ "$blob" = "trimui_inputd" ] && [ -x "$TRIMUI_INPUTD_PATCHED" ]; then
+            bin="$TRIMUI_INPUTD_PATCHED"
+        fi
+
+        LD_LIBRARY_PATH=/usr/trimui/lib "$bin" &
+        log_message "Started $bin"
         sleep 0.05
     done
+}
+
+# For stick calibration on inputd builds without cal_update. The restart recreates
+# the pad device, so the getevent watchdogs have to reopen it too.
+restart_trimui_inputd() {
+    log_message "Restarting trimui_inputd and the button watchdogs"
+    killall -9 trimui_inputd
+    sleep 0.3
+    run_trimui_blobs "trimui_inputd"
+    sleep 1
+
+    for wd in /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh; do
+        stop_running_watchdog "$wd"
+    done
+    sleep 1
+    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh </dev/null >/dev/null 2>&1 &
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
 }
 
 

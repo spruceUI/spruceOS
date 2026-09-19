@@ -5,7 +5,7 @@
   "themecolor": "FF8800",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "noaudiofix": 1,
-  "extlist": "nds|zip|7z|rar",
+  "extlist": "nds|zip|7z|rar|cia|dsi|srl",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
@@ -25,7 +25,8 @@
       ],
       "options": [
         "DraStic-Steward",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DraStic-Steward",
       "overrides": {}
@@ -40,7 +41,8 @@
         "DraStic-original",
         "DraStic-Steward",
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DSperate",
       "overrides": {}
@@ -50,12 +52,14 @@
       "devices": [
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_SMART_PRO",
-        "TRIMUI_BRICK_PRO"
+        "TRIMUI_BRICK_PRO",
+        "MAGICX_A133P"
       ],
       "options": [
         "DraStic-original",
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DSperate",
       "overrides": {}
@@ -67,7 +71,8 @@
       ],
       "options": [
         "DraStic-trngaje",
-        "DSperate"
+        "DSperate",
+        "DSperate-Tate"
       ],
       "selected": "DraStic-trngaje",
       "overrides": {}
@@ -80,6 +85,7 @@
       ],
       "options": [
         "DSperate",
+        "DSperate-Tate",
         "DraStic-original"
       ],
       "selected": "DSperate",
@@ -96,7 +102,8 @@
         "ANBERNIC_RGXX",
         "GKD_PIXEL2",
         "RGB30",
-        "MIYOO_A30"
+        "MIYOO_A30",
+        "MAGICX_A133P"
       ],
       "options": [
         "None",

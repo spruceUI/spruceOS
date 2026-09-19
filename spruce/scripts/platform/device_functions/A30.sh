@@ -308,7 +308,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg"
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 
@@ -387,3 +387,8 @@ device_system_handles_sdcard_unmount() {
 }
 
 
+# Strict unmount: udhcpc, joypad, joystickinput, getevent and inotifywait hold
+# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+device_needs_strict_unmount() {
+    return 0
+}
