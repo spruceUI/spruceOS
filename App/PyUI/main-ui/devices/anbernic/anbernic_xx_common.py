@@ -138,6 +138,16 @@ class AnbernicXXCommon(DeviceCommon):
     def reboot_cmd(self):
         return "reboot"
 
+    def get_fw_version(self):
+        try:
+            with open("/etc/baseos-release") as f:
+                for line in f:
+                    if line.startswith("BASEOS_VERSION="):
+                        return "BaseOS " + line.split("=", 1)[1].strip().strip('"')
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read FW version : {e}")
+        return "Unknown"
+
     def _set_brightness_to_config(self):
         pass
                               
