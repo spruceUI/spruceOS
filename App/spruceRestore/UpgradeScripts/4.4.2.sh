@@ -42,6 +42,27 @@ for _cfg in "$OLD_CFG_DIR"/*.cfg ; do
 
 done
 
+# RetroArch rewrites its config on exit, so an RGB30 config nobody edited was
+# kept above and would miss the 4.4.2 hotkey defaults. Move each hotkey that is
+# still at its 4.4.1 default; anything the user changed stays as it is.
+RGB30_CFG="$NEW_CFG_DIR/retroarch-RGB30.cfg"
+if [ -f "$RGB30_CFG" ]; then
+    for _hotkey in \
+        "input_fps_toggle_btn 2 3" \
+        "input_menu_toggle_btn 3 2" \
+        "input_screenshot_btn nul 1" \
+        "input_shader_toggle_btn nul 13" \
+        "input_state_slot_decrease_btn nul 15" \
+        "input_state_slot_increase_btn nul 16" \
+        "input_toggle_fast_forward_btn 10 7" \
+        "input_toggle_slowmotion_btn nul 6"
+    do
+        set -- $_hotkey
+        sed "s|^$1 = \"$2\"\$|$1 = \"$3\"|" "$RGB30_CFG" > "$RGB30_CFG.tmp" && mv "$RGB30_CFG.tmp" "$RGB30_CFG"
+    done
+    log_message "Moved RGB30 RetroArch hotkeys still at their 4.4.1 defaults to the 4.4.2 ones."
+fi
+
 
 
 # -------------------- UPGRADE COMPLETION --------------------
