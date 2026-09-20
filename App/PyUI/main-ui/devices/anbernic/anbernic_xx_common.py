@@ -48,6 +48,11 @@ from devices.device_common import DeviceCommon
 # platform cfgs on the shell side.
 ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
 
+# Only the three models with RGB rings around the sticks. Kept in step with
+# device_names() in helperFunctions.sh.
+ANBERNIC_XX_RGB = "ANBERNIC_RGXX_RGB"
+ANBERNIC_XX_RGB_TARGETS = ("rg40xx", "rgcubexx")
+
 
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
@@ -453,7 +458,21 @@ class AnbernicXXCommon(DeviceCommon):
     def get_device_names(self):
         # Model name first so anything reading the first entry still gets the
         # specific device; the family token is what configs are written against.
-        return [self.device_name, ANBERNIC_XX_FAMILY]
+        names = [self.device_name, ANBERNIC_XX_FAMILY]
+        if self._has_rgb_rings():
+            names.append(ANBERNIC_XX_RGB)
+        return names
+
+    def _has_rgb_rings(self):
+        try:
+            with open("/etc/baseos-release") as f:
+                for line in f:
+                    if line.startswith("BASEOS_TARGET="):
+                        target = line.split("=", 1)[1].strip().strip('"')
+                        return target.startswith(ANBERNIC_XX_RGB_TARGETS)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read BaseOS target : {e}")
+        return False
 
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)

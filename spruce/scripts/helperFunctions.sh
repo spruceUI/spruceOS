@@ -127,6 +127,16 @@ device_names() {
         AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
         AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
     esac
+
+    # Ring LEDs: two of the three models share a platform with models that have
+    # none, so no platform token can stand in for this.
+    case "$PLATFORM" in
+        AnbernicXX*|AnbernicRGCubeXX)
+            case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+                rg40xx*|rgcubexx) echo "ANBERNIC_RGXX_RGB" ;;
+            esac
+            ;;
+    esac
 }
 
 # Call this just by having "acknowledge" in your script
