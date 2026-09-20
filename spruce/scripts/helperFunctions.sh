@@ -129,14 +129,10 @@ device_names() {
     esac
 
     # Ring LEDs: two of the three models share a platform with models that have
-    # none, so no platform token can stand in for this.
-    case "$PLATFORM" in
-        AnbernicXX*|AnbernicRGCubeXX)
-            case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-                rg40xx*|rgcubexx) echo "ANBERNIC_RGXX_RGB" ;;
-            esac
-            ;;
-    esac
+    # none, so no platform token can stand in for this. Set in AnbernicXXCommon.sh.
+    if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
+        echo "ANBERNIC_RGXX_RGB"
+    fi
 }
 
 # Call this just by having "acknowledge" in your script

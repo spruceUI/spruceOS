@@ -56,6 +56,7 @@ ANBERNIC_XX_RGB_TARGETS = ("rg40xx", "rgcubexx")
 
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
+        self.has_rgb_rings = self._read_rgb_rings()
         # device_name is set by the subclass before it calls up here. This used
         # to assign a model name unconditionally, which ran *after* the subclass
         # and so made every XX model report itself as that one model - no config
@@ -459,11 +460,12 @@ class AnbernicXXCommon(DeviceCommon):
         # Model name first so anything reading the first entry still gets the
         # specific device; the family token is what configs are written against.
         names = [self.device_name, ANBERNIC_XX_FAMILY]
-        if self._has_rgb_rings():
+        if self.has_rgb_rings:
             names.append(ANBERNIC_XX_RGB)
         return names
 
-    def _has_rgb_rings(self):
+    @staticmethod
+    def _read_rgb_rings():
         try:
             with open("/etc/baseos-release") as f:
                 for line in f:

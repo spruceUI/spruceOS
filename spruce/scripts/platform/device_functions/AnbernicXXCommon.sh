@@ -192,11 +192,20 @@ XX_RGB_SERIAL="/dev/ttyS5"
 XX_RGB_MCU_PWR="/sys/class/power_supply/axp2202-battery/mcu_pwr"
 XX_RGB_STATE="/tmp/xx_rgb_state"
 
+case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+    rg40xx*|rgcubexx) XX_RGB_MODEL=1 ;;
+    *)                XX_RGB_MODEL=0 ;;
+esac
+
 has_rgb_leds() {
-    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
-        rg40xx*|rgcubexx) [ -c "$XX_RGB_SERIAL" ] ;;
-        *)                return 1 ;;
-    esac
+    [ "$XX_RGB_MODEL" = "1" ] && [ -c "$XX_RGB_SERIAL" ]
+}
+
+# Nothing to clear if we never lit them this boot - the MCU comes up unpowered.
+xx_rgb_already_dark() {
+    [ -r "$XX_RGB_STATE" ] || return 0
+    xx_rgb_load_state
+    [ "$_left" = "000000" ] && [ "$_right" = "000000" ]
 }
 
 xx_rgb_open() {
@@ -302,6 +311,7 @@ enable_or_disable_rgb() {
     has_rgb_leds || return 0
 
     if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
+        xx_rgb_already_dark && return 0
         echo "000000 000000" > "$XX_RGB_STATE"
         xx_rgb_write 0 000000 000000
     fi
@@ -321,6 +331,7 @@ toggle_led() {
 
 xx_rgb_off() {
     has_rgb_leds || return 0
+    xx_rgb_already_dark && return 0
     xx_rgb_write 0 000000 000000
 }
 
