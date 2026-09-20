@@ -95,11 +95,16 @@ enable_or_disable_rgb() {
 # "Off" is a static 000000 since effect=0 only freezes the animation on its last
 # colour. Reads the left LED's current colour to decide which way to flip.
 toggle_led() {
-    cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
+    cur="$(cat /sys/class/led_anim/effect_rgb_hex_lr /sys/class/led_anim/effect_rgb_hex_l /sys/class/led_anim/effect_rgb_hex_m 2>/dev/null | head -n 1 | tr -d ' ')"
     hex="$(led_color_hex)"
-    if [ "$cur" = "000000" ]; then
+    if [ "$cur" = "000000" ] || flag_check "leds_forced_off"; then
+        flag_remove "leds_forced_off"
+        echo 25 > /sys/class/led_anim/max_scale 2>/dev/null
+        echo 1 > /sys/class/led_anim/enable 2>/dev/null
         rgb_led lrm12 static "$hex" &
     else
+        flag_add "leds_forced_off" --tmp
+        echo 0 > /sys/class/led_anim/max_scale 2>/dev/null
         rgb_led lrm12 static "000000" &
     fi
 }
@@ -220,8 +225,11 @@ init_gpio_SmartProS() {
     # echo -n out > /sys/class/gpio/gpio335/direction
     # echo -n 1 > /sys/class/gpio/gpio335/value
 
-    #fan off
-    echo 0 > /sys/class/thermal/cooling_device0/cur_state 
+    fan_lvl="$(jq -r '.fanlevel // -1' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$fan_lvl" in
+        ''|*[!-0-9]*) fan_lvl=-1 ;;
+    esac
+    apply_fan_level "$fan_lvl"
 
     #rumble motor PH12
     echo 236 > /sys/class/gpio/export
@@ -275,7 +283,7 @@ device_init() {
         modprobe aic8800_fdrv.ko
         modprobe aic8800_btlpm.ko
 
-        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ]; then
+        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 1 ]; then
             /etc/bluetooth/bt_init.sh start
 
             hpid="$(pgrep hciattach)"
@@ -289,7 +297,17 @@ device_init() {
 
 
     device_run_tsps_blobs
-    device_run_thermal_process
+
+    fan_lvl="$(jq -r '.fanlevel // -1' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$fan_lvl" in
+        ''|*[!-0-9]*) fan_lvl=-1 ;;
+    esac
+
+    if [ "$fan_lvl" -eq -1 ]; then
+        device_run_thermal_process
+    else
+        apply_fan_level "$fan_lvl"
+    fi
 
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
@@ -400,7 +418,11 @@ device_exit_sleep(){
     fi
     wifi_request apply --wait
     device_run_tsps_blobs
-    device_run_thermal_process
+    fan_lvl="$(jq -r '.fanlevel // -1' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$fan_lvl" in
+        ''|*[!-0-9]*) fan_lvl=-1 ;;
+    esac
+    apply_fan_level "$fan_lvl"
     (
         # Core 0 won't offline immediately, wait a bit to get rid of it
         sleep 10

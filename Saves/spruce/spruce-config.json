@@ -654,11 +654,12 @@
             "disableLEDs": {
                 "display": "Disable RGB LEDs in all contexts",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "reload UI to apply",
+                "description": "instantly applied",
                 "options": [
                     "True",
                     "False"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh",
                 "selected": "True"
             },
             "LEDmaxScale": {
@@ -681,6 +682,7 @@
                     "70",
                     "80"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh",
                 "selected": "15"
             },
             "defaultLEDcolor": {
@@ -701,6 +703,7 @@
                     "Orange",
                     "White"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh",
                 "selected": "Green"
             },
             "defaultLEDeffect": {
@@ -717,6 +720,7 @@
                     "blink 2",
                     "blink 3"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh",
                 "selected": "static"
             },
             "defaultLEDduration": {
@@ -738,6 +742,7 @@
                     "4500",
                     "5000"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh",
                 "selected": "2000"
             },
             "enableEmuSpecificLEDbehavior": {
@@ -769,6 +774,7 @@
                     "Orange",
                     "White"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh preview_emu",
                 "selected": "System-specific"
             },
             "emuLEDeffect": {
@@ -785,6 +791,7 @@
                     "blink 2",
                     "blink 3"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh preview_emu",
                 "selected": "breathe"
             },
             "emuLEDduration": {
@@ -806,6 +813,7 @@
                     "4500",
                     "5000"
                 ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/applyRgbLed.sh preview_emu",
                 "selected": "4000"
             }
         },
