@@ -62,6 +62,10 @@ runtime_mounts_a133p() {
 }
 
 device_init_a133p() {
+    # Stock is "8 7 1 7": a long burst on ttyS0 at 115200 holds CPU0 long enough for
+    # an i2c transfer to time out, and the stock handler panics on the late IRQ.
+    # dmesg and pstore still record every level.
+    echo "3 4 1 7" > /proc/sys/kernel/printk
     runtime_mounts_a133p
 
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
