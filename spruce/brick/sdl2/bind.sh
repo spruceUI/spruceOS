@@ -5,6 +5,23 @@
 
 DST_DIR="/mnt/SDCARD/spruce/brick/sdl2"
 
+# Every name below is created with `touch` before it is bound over, so a card
+# that has booted on another device in this family keeps that device's names
+# here as 0-byte files. PYSDL2_DLL_PATH points at this directory, and pysdl2
+# globs it: an empty libSDL2-2.0.so.0.3200.6 left over from a Smart Pro S is
+# tried before the real library and fails with "file too short". Drop any empty
+# file that is not currently a bind target before laying down this platform's
+# set.
+clear_stale_placeholders() {
+	[ -d "$DST_DIR" ] || return 0
+	for _stale in "$DST_DIR"/*; do
+		[ -f "$_stale" ] || continue
+		[ -s "$_stale" ] && continue
+		grep -q " $_stale " /proc/mounts 2>/dev/null && continue
+		rm -f "$_stale"
+	done
+}
+
 
 case "$PLATFORM" in
 	Brick|SmartPro|BrickPro)
@@ -12,6 +29,7 @@ case "$PLATFORM" in
 
 		# Create destination directory if missing
 		mkdir -p "$DST_DIR"
+		clear_stale_placeholders
 
 		# List of files to bind
 		for f in \
@@ -39,6 +57,7 @@ case "$PLATFORM" in
 		;;
 	SmartProS)
 		mkdir -p "$DST_DIR"
+		clear_stale_placeholders
 
 		for f in \
 		/usr/lib/libSDL-1.2.so.0 \
