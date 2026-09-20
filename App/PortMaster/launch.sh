@@ -50,6 +50,20 @@ sed -i \
     -e '/^class PlatformSpruce/,/^class /{s|^    WANT_XBOX_FIX = False|    WANT_XBOX_FIX = True|}' \
     "$PM_DIR/pylibs/harbourmaster/platform.py"
 
+# pugwash's quit() calls sdl2.ext.quit() while pysdl2's Renderer object is still
+# alive. Interpreter shutdown then garbage-collects it, Renderer.__del__ calls
+# SDL_DestroyRenderer after SDL_Quit, and on TrimUI's vendor SDL 2.30.8 that
+# runs the GLES2 teardown through pointers into a GL stack SDL_Quit has already
+# unloaded: every PortMaster exit on the Brick, Smart Pro and Brick Pro ends in
+# a segfault. SDL 2.32 destroys the renderer first, so the Smart Pro S and the
+# Flip are unaffected. Destroying it in order costs nothing anywhere.
+#
+# Interim measure. The guard makes it a no-op the moment upstream ships the same
+# change (PortMaster-GUI pugwash:1105), and this can then be deleted.
+grep -q 'self\.renderer\.destroy()' "$PM_DIR/pugwash" 2>/dev/null || sed -i \
+    -e 's|^        sdl2\.ext\.quit()$|        self.renderer.destroy(); self.window.close(); sdl2.ext.quit()|' \
+    "$PM_DIR/pugwash"
+
 # A self-update extracts over the bundle without deleting spruce/, so test the
 # files it does replace.
 if grep -q 'CFW_NAME="spruce"' "$PM_DIR/device_info.txt" 2>/dev/null \
