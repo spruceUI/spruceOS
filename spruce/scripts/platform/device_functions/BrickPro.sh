@@ -41,10 +41,7 @@ device_init() {
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_on_msg.sh" &
     mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "/usr/trimui/apps/fn_editor/show_fn_dip_off_msg.sh" &
 
-    if [ ! -x /bin/bash ]; then
-        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
-        chmod +x /bin/bash
-    fi
+    ensure_gnu_bash
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
     # adopts, once, whatever action was already installed - on the Brick line that

@@ -49,10 +49,7 @@ device_init() {
     run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
     [ "$run_osd" = "True" ] && run_trimui_osdd
 
-    if [ ! -x /bin/bash ]; then
-        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
-        chmod +x /bin/bash
-    fi
+    ensure_gnu_bash
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
     # adopts, once, whatever action was already installed - on the Brick line that

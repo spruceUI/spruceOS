@@ -324,8 +324,14 @@ ensure_dev_fd() {
     done
 }
 
+# Do not trust the /proc/mounts line here. The Smart Pro S mounts a tmpfs on
+# /dev/shm and then devtmpfs over /dev, so the mount entry survives while the
+# directory itself does not exist. The old grep saw the entry, returned early,
+# and left PortMaster with no /dev/shm at all: `mkdir /dev/shm/portmaster`
+# failed with ENOENT in 9 of 9 port runs there and the message dialog never
+# appeared. Test for a writable directory instead - that is what callers need.
 ensure_dev_shm() {
-    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+    if [ -d /dev/shm ] && [ -w /dev/shm ]; then
         return 0
     fi
     mkdir -p /dev/shm 2>/dev/null || return 1
@@ -335,6 +341,33 @@ ensure_dev_shm() {
         log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
         return 1
     fi
+}
+
+# /bin/bash has to be GNU bash, not merely present. On the Brick and the Smart
+# Pro it is an old copy of spruce's own BusyBox that an earlier version of this
+# hook installed, and `[ ! -x /bin/bash ]` happily accepts it. 48 PortMaster
+# ports reach a construct BusyBox's shell rejects outright (arrays, ${v,,},
+# (( ))), and an unquoted glob on the right of [[ ]] is pathname-expanded there,
+# so up to 44 more can take the wrong branch with no error at all.
+ensure_gnu_bash() {
+    case "$(/bin/bash --version 2>/dev/null | head -n 1)" in
+        *"GNU bash"*) return 0 ;;
+    esac
+    # Write beside it and rename. Unlike the old hook this can run while the
+    # file it replaces exists, and on some units something may already be
+    # running it - writing over a busy executable fails with ETXTBSY, while a
+    # rename leaves the running copy on its own inode.
+    cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/.bash.spruce 2>/dev/null || {
+        log_message "Could not install GNU bash at /bin/bash"
+        return 1
+    }
+    chmod +x /bin/.bash.spruce 2>/dev/null
+    mv -f /bin/.bash.spruce /bin/bash 2>/dev/null || {
+        rm -f /bin/.bash.spruce 2>/dev/null
+        log_message "Could not replace /bin/bash"
+        return 1
+    }
+    log_message "Replaced /bin/bash (it was not GNU bash)"
 }
 
 # Move the contents of $1 into $2, merging shared subdirs. Rename-based.
