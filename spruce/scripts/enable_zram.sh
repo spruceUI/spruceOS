@@ -41,9 +41,13 @@ case "$PLATFORM" in
     ;;
 
   "SmartPro"|"Brick"|"BrickPro")
+    # Built against the device's own kernel config: stock has no zsmalloc, and a
+    # module built the ordinary way writes its page count into NR_FREE_CMA_PAGES.
     MODULE_DIR="/mnt/SDCARD/spruce/smartpro/modules"
     load_module zsmalloc
     load_module lzo
+    load_module lz4_compress
+    load_module lz4
     load_module zram
     ;;
   *)

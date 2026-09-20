@@ -61,7 +61,42 @@ runtime_mounts_a133p() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+# Stock runs its own wpa_supplicant (procd S96), which procd spawns just after
+# enable_wifi has looked for one - so both end up on wlan0, deauthenticating each
+# other for ~80 s. Import its networks, stop the service, then watch for 30 s
+# because at device_init time procd has not registered it yet. Runtime only: the
+# service stays enabled. Double-forked - runtime.sh waits for device_init's children.
+stop_stock_wpa_supplicant_a133p() {
+    [ -x /etc/init.d/wpa_supplicant ] || return 0
+    import_wpa_networks_from /etc/wifi/wpa_supplicant.conf
+    /etc/init.d/wpa_supplicant stop >/dev/null 2>&1
+    (
+        (
+            _i=0
+            while [ "$_i" -lt 60 ]; do
+                for _pid in $(pgrep -f "wpa_supplicant.*-c/etc/wifi/"); do
+                    kill -9 "$_pid" 2>/dev/null
+                    /etc/init.d/wpa_supplicant stop >/dev/null 2>&1
+                    log_message "Stopped the stock wpa_supplicant ($_pid) so spruce's is the only one"
+                    # Ours does not recover from having shared wlan0, so restart it.
+                    if pgrep -f "wpa_supplicant.*-c $WPA_SUPPLICANT_FILE" >/dev/null; then
+                        log_message "spruce's wpa_supplicant was already running; restarting WiFi so it starts clean"
+                        wifi_request restart
+                    fi
+                done
+                usleep 500000
+                _i=$((_i + 1))
+            done
+        ) &
+    ) </dev/null >/dev/null 2>&1
+}
+
 device_init_a133p() {
+    # Stock is "8 7 1 7": a long burst on ttyS0 at 115200 holds CPU0 long enough for
+    # an i2c transfer to time out, and the stock handler panics on the late IRQ.
+    # dmesg and pstore still record every level.
+    echo "3 4 1 7" > /proc/sys/kernel/printk
+    stop_stock_wpa_supplicant_a133p
     runtime_mounts_a133p
 
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
