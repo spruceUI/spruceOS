@@ -185,9 +185,11 @@ has_lid() {
 }
 
 # Ring LEDs on the RG40XX H/V and CubeXX: an MCU on /dev/ttyS5, 115200 8N1, not
-# sysfs. Packet is <mode> <brightness> <8 RGB triplets right ring> <8 left>
-# <checksum>. Protocol from muOS. Static only - its other modes take a
-# different payload and muOS dropped them.
+# sysfs. Every packet ends in a checksum of the bytes before it. Mode 1 is
+# static and carries 8 RGB triplets for the right ring then 8 for the left;
+# modes 2-4 breathe and carry 16 triplets of one colour; modes 5-6 are the
+# MCU's rainbows and carry <mode> <brightness> 1 1 <speed>. Protocol from muOS,
+# which uses mode 1 only - the rest are confirmed working on a CubeXX.
 XX_RGB_SERIAL="/dev/ttyS5"
 XX_RGB_MCU_PWR="/sys/class/power_supply/axp2202-battery/mcu_pwr"
 XX_RGB_STATE="/tmp/xx_rgb_state"
@@ -205,7 +207,7 @@ has_rgb_leds() {
 xx_rgb_already_dark() {
     [ -r "$XX_RGB_STATE" ] || return 0
     xx_rgb_load_state
-    [ "$_left" = "000000" ] && [ "$_right" = "000000" ]
+    [ "$_mode" = "1" ] && [ "$_left" = "000000" ] && [ "$_right" = "000000" ]
 }
 
 xx_rgb_open() {
@@ -235,9 +237,13 @@ xx_rgb_split() {
 xx_rgb_load_state() {
     _left=000000
     _right=000000
-    [ -r "$XX_RGB_STATE" ] && read -r _left _right < "$XX_RGB_STATE"
+    _mode=1
+    _dur=1000
+    [ -r "$XX_RGB_STATE" ] && read -r _left _right _mode _dur < "$XX_RGB_STATE"
     xx_rgb_valid_hex "$_left" || _left=000000
     xx_rgb_valid_hex "$_right" || _right=000000
+    case "$_mode" in [1-6]) : ;; *) _mode=1 ;; esac
+    case "$_dur" in ''|*[!0-9]*) _dur=1000 ;; esac
 }
 
 # Shares the TrimUI's 5-80 setting, spread over the MCU's 0-255.
@@ -250,18 +256,19 @@ xx_rgb_brightness() {
     echo $(( _scale * 255 / 80 ))
 }
 
-# xx_rgb_write <brightness 0-255> <left RRGGBB> <right RRGGBB>
-xx_rgb_write() {
-    _bri="$1"
-    _left_hex="$2"
-    _right_hex="$3"
-
-    set -- $(xx_rgb_split "$_left_hex")
-    _lr="$1" _lg="$2" _lb="$3"
-    set -- $(xx_rgb_split "$_right_hex")
-    _rr="$1" _rg="$2" _rb="$3"
-
+xx_rgb_send() {
+    _sum=0
+    for _byte in "$@"; do
+        _sum=$(( (_sum + _byte) & 255 ))
+    done
     xx_rgb_open
+    printf '%b' "$(printf '\\x%02X' "$@" "$_sum")" > "$XX_RGB_SERIAL"
+}
+
+xx_rgb_static() {
+    _bri="$1"
+    set -- $(xx_rgb_split "$2") $(xx_rgb_split "$3")
+    _lr="$1" _lg="$2" _lb="$3" _rr="$4" _rg="$5" _rb="$6"
 
     set -- 1 "$_bri"
     _i=0
@@ -274,17 +281,60 @@ xx_rgb_write() {
         set -- "$@" "$_lr" "$_lg" "$_lb"
         _i=$((_i + 1))
     done
-
-    _sum=0
-    for _byte in "$@"; do
-        _sum=$(( (_sum + _byte) & 255 ))
-    done
-
-    printf '%b' "$(printf '\\x%02X' "$@" "$_sum")" > "$XX_RGB_SERIAL"
+    xx_rgb_send "$@"
 }
 
-# Zones l and r are the two rings; m, 1 and 2 have no hardware here, and so do
-# effect, duration and cycles - anything but off is a steady colour.
+xx_rgb_breath() {
+    _bmode="$1"
+    _bri="$2"
+    set -- $(xx_rgb_split "$3")
+    _r="$1" _g="$2" _b="$3"
+
+    set -- "$_bmode" "$_bri"
+    _i=0
+    while [ "$_i" -lt 16 ]; do
+        set -- "$@" "$_r" "$_g" "$_b"
+        _i=$((_i + 1))
+    done
+    xx_rgb_send "$@"
+}
+
+xx_rgb_rainbow() {
+    xx_rgb_send "$1" "$2" 1 1 "$3"
+}
+
+# rise, sniff and blink have no MCU equivalent and land on static.
+xx_rgb_mode() {
+    case "$1" in
+        2|breath*)
+            if   [ "$2" -le 2000 ]; then echo 2
+            elif [ "$2" -le 3500 ]; then echo 3
+            else                        echo 4
+            fi ;;
+        rainbow) echo 5 ;;
+        *multi*) echo 6 ;;
+        *)       echo 1 ;;
+    esac
+}
+
+# Duration to the rainbow speed byte; a higher byte cycles faster.
+xx_rgb_speed() {
+    _d="$1"
+    [ "$_d" -lt 1000 ] && _d=1000
+    [ "$_d" -gt 5000 ] && _d=5000
+    echo $(( 255 - (_d - 1000) * 245 / 4000 ))
+}
+
+xx_rgb_apply() {
+    _bri="$(xx_rgb_brightness)"
+    case "$3" in
+        2|3|4) xx_rgb_breath "$3" "$_bri" "$1" ;;
+        5|6)   xx_rgb_rainbow "$3" "$_bri" "$(xx_rgb_speed "$4")" ;;
+        *)     xx_rgb_static "$_bri" "$1" "$2" ;;
+    esac
+}
+
+# Zones l and r are the two rings; m, 1 and 2 have no hardware here.
 rgb_led() {
     has_rgb_leds || return 0
 
@@ -295,16 +345,21 @@ rgb_led() {
     # One packet carries both rings, so a call naming one resends the other.
     xx_rgb_load_state
 
+    _dur="${4:-1000}"
+    case "$_dur" in
+        ''|*[!0-9]*) _dur=1000 ;;
+    esac
+
     case "$2" in
-        0|off|disable) _colour="000000" ;;
-        *)             _colour="${3:-FFFFFF}" ;;
+        0|off|disable) _colour=000000; _mode=1 ;;
+        *)             _colour="${3:-FFFFFF}"; _mode="$(xx_rgb_mode "$2" "$_dur")" ;;
     esac
 
     case "$_zones" in *l*) _left="$_colour" ;; esac
     case "$_zones" in *r*) _right="$_colour" ;; esac
 
-    echo "$_left $_right" > "$XX_RGB_STATE"
-    xx_rgb_write "$(xx_rgb_brightness)" "$_left" "$_right"
+    echo "$_left $_right $_mode $_dur" > "$XX_RGB_STATE"
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
 }
 
 enable_or_disable_rgb() {
@@ -312,8 +367,8 @@ enable_or_disable_rgb() {
 
     if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
         xx_rgb_already_dark && return 0
-        echo "000000 000000" > "$XX_RGB_STATE"
-        xx_rgb_write 0 000000 000000
+        echo "000000 000000 1 1000" > "$XX_RGB_STATE"
+        xx_rgb_static 0 000000 000000
     fi
 }
 
@@ -332,7 +387,7 @@ toggle_led() {
 xx_rgb_off() {
     has_rgb_leds || return 0
     xx_rgb_already_dark && return 0
-    xx_rgb_write 0 000000 000000
+    xx_rgb_static 0 000000 000000
 }
 
 xx_rgb_restore() {
@@ -341,7 +396,7 @@ xx_rgb_restore() {
     [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
 
     xx_rgb_load_state
-    xx_rgb_write "$(xx_rgb_brightness)" "$_left" "$_right"
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
 }
 
 launch_startup_watchdogs(){

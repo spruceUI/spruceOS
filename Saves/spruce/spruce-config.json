@@ -655,7 +655,7 @@
                 "display": "Disable RGB LEDs in all contexts",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
-                "description": "reload UI to apply",
+                "description": "applies immediately",
                 "options": [
                     "True",
                     "False"
@@ -708,23 +708,27 @@
             },
             "defaultLEDeffect": {
                 "display": "Default LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "in menu, etc.",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "static"
             },
             "defaultLEDduration": {
                 "display": "Default LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "in menu, etc.",
                 "options": [
                     "1000",
@@ -736,9 +740,13 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "2000"
@@ -776,23 +784,25 @@
             },
             "emuLEDeffect": {
                 "display": "In-game LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "during emulation",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "breathe"
             },
             "emuLEDduration": {
                 "display": "In-game LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "during emulation",
                 "options": [
                     "1000",
@@ -804,9 +814,13 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "4000"
