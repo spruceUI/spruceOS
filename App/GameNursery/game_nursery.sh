@@ -13,6 +13,7 @@ RELEASE_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/
 CONFIG_URL="$RELEASE_URL/nursery_config"
 BOXART_URL="$RELEASE_URL/boxart.7z"
 SYSTEMS_URL="$RELEASE_URL/systems.json"
+REQUIREMENTS_URL="$RELEASE_URL/nursery_requirements.json"
 CACHE_VALID_MINUTES=20
 
 log_message "--DEBUG-- PATH: $PATH" -v
@@ -78,6 +79,13 @@ download_nursery_assets() {
         rm -f "$CONFIG_DIR/systems.json" 2>/dev/null
     fi
 
+    # Optional: what an entry needs from the device. Only clients that know about this file
+    # fetch it, so adding it to the catalog cannot disturb older spruce releases.
+    if ! download_url_to_file "$REQUIREMENTS_URL" "$CONFIG_DIR/nursery_requirements.json"; then
+        log_message "Game Nursery: Failed to download nursery_requirements.json (non-fatal)"
+        rm -f "$CONFIG_DIR/nursery_requirements.json" 2>/dev/null
+    fi
+
     log_and_display_message "Downloading game artwork..."
     if download_url_to_file "$BOXART_URL" "/tmp/boxart.7z"; then
         mkdir -p "$CONFIG_DIR/Imgs"
@@ -100,6 +108,70 @@ filter_config_for_platform() {
         jq 'with_entries(select(.key | startswith("Ports/") | not))' \
             "$CONFIG_DIR/nursery_config" > "$CONFIG_DIR/nursery_config.tmp" \
             && mv "$CONFIG_DIR/nursery_config.tmp" "$CONFIG_DIR/nursery_config"
+    fi
+}
+
+# Hide entries this device cannot run. nursery_requirements.json maps a catalog key to what it
+# needs, and every field is optional:
+#
+#   { "App/Aesthetic Spruce": { "arch": ["aarch64"],
+#                               "devices": ["MIYOO_FLIP", "MAGICX_A133P"],
+#                               "min_spruce": "4.3.0" } }
+#
+# arch is PLATFORM_ARCHITECTURE ("aarch64", "armhf"), devices are the tokens device_names()
+# reports for this device, and min_spruce is the oldest release the entry supports. A check the
+# device cannot answer is skipped rather than guessed, and any failure here keeps the catalog
+# whole: a filter that cannot run must not empty the nursery.
+filter_config_for_requirements() {
+    requirements="$CONFIG_DIR/nursery_requirements.json"
+    config="$CONFIG_DIR/nursery_config"
+
+    [ -f "$requirements" ] || return 0
+    if ! jq empty "$requirements" >/dev/null 2>&1; then
+        log_message "Game Nursery: nursery_requirements.json is not valid JSON; keeping every entry"
+        rm -f "$requirements"
+        return 0
+    fi
+
+    names="$(device_names 2>/dev/null | jq -R . | jq -s -c .)"
+    [ -n "$names" ] || names="[]"
+    before="$(jq 'length' "$config" 2>/dev/null)"
+
+    # No regex: some jq builds ship without oniguruma, so versions are split by hand.
+    if jq --slurpfile requirements "$requirements" \
+          --arg arch "${PLATFORM_ARCHITECTURE:-}" \
+          --argjson names "$names" \
+          --arg version "$(get_version 2>/dev/null)" '
+        def num($v):
+            ($v | split("-")[0] | split(".")) as $p
+            | if ($p | length) == 0 then null
+              else (($p[0] | tonumber? // 0) * 10000)
+                   + ((($p[1] // "0") | tonumber? // 0) * 100)
+                   + (($p[2] // "0") | tonumber? // 0)
+              end;
+        def wanted($need):
+            (if ($need.arch // null) == null or ($arch | length) == 0 then true
+             else ([$need.arch] | flatten | index($arch)) != null end)
+            and (if ($need.devices // null) == null or ($names | length) == 0 then true
+                 else ([$need.devices] | flatten) as $d
+                      | ( ($d - $names) | length ) < ( $d | length ) end)
+            and (if ($need.min_spruce // null) == null
+                    or num($version) == null or num($need.min_spruce) == null then true
+                 else num($version) >= num($need.min_spruce) end);
+        ($requirements[0]) as $needs
+        | with_entries(select(
+              .key == "descriptions"
+              or ($needs[.key] // null) == null
+              or wanted($needs[.key])))
+    ' "$config" > "$config.tmp"; then
+        mv "$config.tmp" "$config"
+        after="$(jq 'length' "$config" 2>/dev/null)"
+        if [ -n "$before" ] && [ -n "$after" ] && [ "$before" != "$after" ]; then
+            log_message "Game Nursery: hid $((before - after)) entr(y/ies) this device cannot run"
+        fi
+    else
+        log_message "Game Nursery: could not apply entry requirements; keeping every entry"
+        rm -f "$config.tmp" 2>/dev/null
     fi
 }
 
@@ -130,6 +202,12 @@ get_system_icon_from_theme() {
     emu_name="$(jq -r --arg cat "$category" '.[$cat].emu // empty' "$systems_file")"
 
     if [ -z "$icon_name" ]; then
+        # Categories the catalog draws itself (App, for one) ship their tile in boxart.7z
+        if [ -e "/mnt/SDCARD/Saves/GameNursery/Imgs/${category}.png" ] ||
+            [ -e "/mnt/SDCARD/Saves/GameNursery/Imgs/${category}.qoi" ]; then
+            log_message "Game Nursery: '$category' has no system mapping; keeping the catalog artwork" -v
+            return 0
+        fi
         log_message "Game Nursery: No system mapping found for '$category'"
         return 1
     fi
@@ -170,6 +248,7 @@ if ! is_wifi_connected; then sleep 3; exit 1; fi
 if ! is_cache_valid; then
     download_nursery_assets
     filter_config_for_platform
+    filter_config_for_requirements
     apply_system_icons
 fi
 
