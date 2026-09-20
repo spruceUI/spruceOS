@@ -252,10 +252,7 @@ anbernic_xx_common_init() {
     # is BusyBox with no bash at all, so without this the watchdogs fail
     # silently and take the power, home and lid buttons with them. Same static
     # aarch64 bash the TrimUI devices drop in for the same reason.
-    if [ ! -x /bin/bash ]; then
-        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
-        chmod +x /bin/bash 2>/dev/null
-    fi
+    ensure_gnu_bash
 
     runtime_mounts_anbernic_34xxsp
 

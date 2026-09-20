@@ -205,10 +205,7 @@ device_init() {
     # sequence is not wired on this family yet; PyUI's Bluetooth toggle owns it.
     magicx_init_audio
 
-    if [ ! -x /bin/bash ]; then
-        cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
-        chmod +x /bin/bash 2>/dev/null
-    fi
+    ensure_gnu_bash
 }
 
 # Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
