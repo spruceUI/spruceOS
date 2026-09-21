@@ -58,8 +58,8 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 
 * Quicksave + Shutdown: Hold POWER for 3 seconds*
 * Game Switcher: Hold HOME for 3 seconds
-* Brightness down: START + L1
-* Brightness up: START + R1
+* Brightness down: START + L1 or MENU + VOLDOWN
+* Brightness up: START + R1 or MENU + VOLUP
 
 \*Holding POWER after the vibration occurs will cause your device to force shutdown (in case of freezes etc.)
 
@@ -124,6 +124,11 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
 
 
 THANK YOU TO THE AMAZING RETRO HANDHELD COMMUNITY!!
+
+
+## AI Disclosure
+
+Some of our contributors use AI to help code, as is the industry standard. The spruceUI organizations’s policy on AI use is that we will always judge potential contributions based on the code’s quality rather than who wrote it, or how.
 
 
 ## SUPPORTED GAME SYSTEMS
