@@ -27,7 +27,9 @@ backup_theme_configs() {
     local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
     mkdir -p "$backup_root"
 
-    for config in /mnt/SDCARD/Themes/*/config*json; do
+    for config in /mnt/SDCARD/Themes/*/config*json /mnt/SDCARD/Themes/*/igm.json; do
+        # an unmatched glob expands to the pattern itself
+        [ -f "$config" ] || continue
         theme_dir="$(dirname "$config")"
         theme_name="$(basename "$theme_dir")"
 
@@ -112,6 +114,7 @@ folders="
 /mnt/SDCARD/Emu/NDS/resources/settings_MiyooMini.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Pixel2.json
 /mnt/SDCARD/Emu/SATURN/.yabasanshiro
+/mnt/SDCARD/RetroArch/igm.json
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/RetroArch/.retroarch/shaders
