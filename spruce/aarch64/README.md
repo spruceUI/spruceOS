@@ -1,12 +1,17 @@
-# spruce/ports - the PortMaster port environment's own userland
+# spruce/aarch64 - the shared aarch64 userland for the PortMaster port environment
 
 Binaries and shared libraries that ports get in front of whatever the device's
-stock firmware provides. A platform opts in from its `.cfg`:
+stock firmware provides. One set for every aarch64 device; a platform wires it
+in from its `.cfg`, and every aarch64 platform that runs PortMaster does:
 
 ```sh
-export PORTS_BIN="/mnt/SDCARD/spruce/ports/bin"
-export PORTS_LD_LIBRARY_PATH="/mnt/SDCARD/spruce/ports/lib64:<the rest>"
+export PORTS_BIN="/mnt/SDCARD/spruce/aarch64/bin"
+export PORTS_LD_LIBRARY_PATH="/mnt/SDCARD/spruce/aarch64/lib:<the rest>"
 ```
+
+(Until 2026-09-21 this was `spruce/ports/{bin,lib64}`, wired on the TrimUI units
+only. The rename made it the shared set and put it first on the Anbernic XX line
+and the MagicX boards too; binaries look for the libraries at `$ORIGIN/../lib`.)
 
 `run_port` puts `$PORTS_BIN` first on the port `PATH`
 (`spruce/scripts/emu/lib/ports_functions.sh`), and nothing outside a port run
@@ -40,7 +45,7 @@ The stock BusyBox on the TrimUI A133P units is 1.27.2, from 2017.
 | `mv`, `cp`, `sort` | `mv -T` (3 ports), `cp -RT`, `sort -V` rejected. |
 | `stat`, `timeout`, `shuf`, `tac`, `sha1sum` | not built into that BusyBox at all. |
 
-## lib64 - what the rootfs has no usable copy of
+## lib - what the rootfs has no usable copy of
 
 Seven of these replace libraries that spruce already ships in
 `spruce/flip/lib` but which need `GLIBC_2.34` or newer, so on a glibc-2.33
@@ -58,6 +63,16 @@ frozen-bubble in the sample port runs), `libjpeg.so.62`, `libwebp.so.6` and
 `spruce/flip/lib/libdecor-0.so.0` also needs `GLIBC_2.34` and is deliberately
 not replaced: it only matters to SDL's Wayland backend, which none of these
 devices use.
+
+Added 2026-09-21, from resolving all 46 PortMaster runtime images over the
+round-9 dumps of every lab device (`git/spruce-lib-audit`):
+
+| Library | Who needs it | Where it was missing |
+|---|---|---|
+| `libevdev.so.2` | weston runtime (`libexec_weston` -> `libinput`), 64 ports on the headless path | every H700 unit |
+| `libuuid.so.1` | weston's Xwayland (fontconfig); every copy spruce shipped needed `GLIBC_2.38` | every H700 unit |
+| `libvorbisfile.so.3`, `libvorbis.so.0`, `libvorbisenc.so.2`, `libogg.so.0` | gmtoolkit's `oggdec` (49 GameMaker ports), rlvm (4) | every MagicX board |
+| `libsndfile.so.1` | rlvm | every H700 unit |
 
 ## Provenance
 

@@ -98,7 +98,7 @@ run_port() {
         MOUNT_BIND=true
         # PORTS_BIN, when the platform sets one, goes first. It holds GNU
         # coreutils, findutils, grep, tar and unzip built against glibc 2.23
-        # (spruce/ports/README.md), and it has to win over both the stock
+        # (spruce/aarch64/README.md), and it has to win over both the stock
         # BusyBox applets and spruce/flip/bin - whose unzip needs GLIBC_2.34 and
         # so cannot load at all on the TrimUI devices, where 44 ports call it.
         export PATH="${PORTS_BIN:+$PORTS_BIN:}/mnt/SDCARD/spruce/flip/bin/:$PATH"
