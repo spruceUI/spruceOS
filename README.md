@@ -154,7 +154,7 @@ THANK YOU TO THE AMAZING RETRO HANDHELD COMMUNITY!!
 
 ## SUPPORTED GAME SYSTEMS
 
-(Click here for a table of supported systems and file extensions.)[https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#rom-folder-chart]
+[Click here for a table of supported systems and file extensions.](https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#rom-folder-chart)
 
 ## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
 
