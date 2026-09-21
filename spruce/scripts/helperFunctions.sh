@@ -350,14 +350,42 @@ ensure_dev_shm() {
 # (( ))), and an unquoted glob on the right of [[ ]] is pathname-expanded there,
 # so up to 44 more can take the wrong branch with no error at all.
 ensure_gnu_bash() {
-    case "$(/bin/bash --version 2>/dev/null | head -n 1)" in
-        *"GNU bash"*) return 0 ;;
-    esac
-    # Write beside it and rename. Unlike the old hook this can run while the
-    # file it replaces exists, and on some units something may already be
-    # running it - writing over a busy executable fails with ETXTBSY, while a
-    # rename leaves the running copy on its own inode.
-    cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/.bash.spruce 2>/dev/null || {
+    # Identify /bin/bash by READING it, never by running it.
+    #
+    # On the Brick and the Smart Pro that file is a copy of setsid (md5
+    # 44e264eb..., byte-identical to spruce/smartpro/bin/setsid - an older hook
+    # copied the wrong file). Running `setsid --version` detaches a child that
+    # keeps the command substitution's pipe open, so `$( )` never sees EOF and
+    # device_init hangs the boot. The previous `[ ! -x /bin/bash ]` test never
+    # executed the file, so that mis-copy sat there harmlessly for months and
+    # the first hook to run it hung both units on first boot.
+    _ours=/mnt/SDCARD/spruce/smartpro/bin/bash
+
+    # Already exactly the file we would install (the Brick Pro's case).
+    if [ "$(md5sum /bin/bash 2>/dev/null | cut -d' ' -f1)" = \
+         "$(md5sum "$_ours" 2>/dev/null | cut -d' ' -f1)" ]; then
+        return 0
+    fi
+
+    # Some other real GNU bash - the Anbernic XX ships its own musl build. Leave
+    # it alone. -a is required: without it grep gives up at the NUL bytes and
+    # reports no match on a genuine bash, which would condemn a working shell.
+    if grep -qa "GNU bash" /bin/bash 2>/dev/null; then
+        return 0
+    fi
+
+    # Self-test the identification before acting on it. If grep cannot find that
+    # string in the bash we are about to install, then it cannot read binaries
+    # here and a negative result above means nothing. Replacing a file we have
+    # not identified is precisely how this broke the first time.
+    if ! grep -qa "GNU bash" "$_ours" 2>/dev/null; then
+        log_message "Cannot identify /bin/bash on this device; leaving it alone"
+        return 1
+    fi
+
+    # Write beside it and rename: writing over a busy executable fails with
+    # ETXTBSY, while a rename leaves any running copy on its own inode.
+    cp "$_ours" /bin/.bash.spruce 2>/dev/null || {
         log_message "Could not install GNU bash at /bin/bash"
         return 1
     }
