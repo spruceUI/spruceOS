@@ -5,6 +5,8 @@
 export HOME="$(dirname "$0")"
 cd "$HOME"
 
+# Miyoo Mini is not enabled for this app in the config.json; should it be?
+# A30 is also notably missing from both this script and the json.
 if [ "$PLATFORM" = "MiyooMini" ]; then
     cp config_mini.conf config.conf
 
