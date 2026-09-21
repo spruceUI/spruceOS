@@ -17,6 +17,32 @@
 > also makes coreutils call `statx`, which the 4.9 kernels (TrimUI A133P, the XX line, MagicX) do not
 > have; the device's glibc is expected to fall back. Both are what this card is for finding out.
 > Not a merge candidate. Evidence: `git/spruce-lib-audit/TOOLCHAINS.md`.
+>
+> **Seven commands the fleet does not have (2026-09-21, this branch only; the 41 files above are
+> byte-identical to the first 2.33 build).** Chosen from what PortMaster calls bare, measured against the
+> 20 lab device profiles:
+>
+> | command | absent on | who calls it |
+> |---|---|---|
+> | `getconf` | every unit | PortMaster's probe-based `device_info.txt` asks it for the glibc version first; its fallback paths miss Debian multiarch, so the seven H700 units would read 0.0.0 and lose every port with a `min_glibc` |
+> | `od` | not recorded (BusyBox has the applet on every aarch64 unit; whether a link to it is on the path was not measured) | the same script's first choice for reading a devicetree cell; two ports call it bare |
+> | `lscpu` | 19 of 20 | `device_info.txt` 0.1.x - what ships today - sets `DEVICE_CPU` from it |
+> | `zramctl` | every unit | eleven ports call it bare |
+> | `dos2unix` | the three MagicX boards (the BusyBox applet exists, no link to it) | fifteen ports call it bare |
+> | `losetup` | Brick, Brick Pro, Smart Pro | no bare caller in the catalogue; comes free with the util-linux build |
+> | `taskset` | 17 of 20 | no bare caller in the catalogue; comes free with the util-linux build |
+>
+> `getconf` is not built here: it is glibc's own, taken from the Arm GNU 10.3 sysroot. It needs
+> `GLIBC_2.17` and libc alone, carries no rpath (the one binary allowed to: it asks for nothing this tree
+> ships), and answers from the RUNNING libc, so it reports the device's glibc. The util-linux programs
+> link libsmartcols statically, so `lib/` gains nothing; the other six need exactly `GLIBC_2.33`.
+> `zip` was checked and needs nothing: `spruce/bin64/zip` is on every aarch64 path, needs `GLIBC_2.17`, and
+> its `libbz2.so.1.0` is on every unit or in `spruce/flip/lib` (235 GameMaker ports call `zip -r -0`).
+> Left out on purpose: `hexdump`/`xxd`/`strings`/`bc` (BusyBox applets on every aarch64 unit and only
+> fallbacks), `jq` (RetroDECK only), `file`, `dialog`, `innoextract`, `readelf`/`ar` (no bare caller).
+> The PortMaster APP sees these too: `spruce/portmaster/portmaster.txt` appends `$PORTS_BIN` LAST on its
+> path, so it only fills gaps there and never stands in front of a device's own tools.
+> **Not run on a device yet.**
 
 Binaries and shared libraries that ports get in front of whatever the device's
 stock firmware provides. One set for every aarch64 device; a platform wires it
