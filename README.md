@@ -65,50 +65,45 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 ### RetroArch (and PPSSPP)
 ![hotkeyDefaults](https://github.com/user-attachments/assets/7558ecd9-8149-4009-936a-2cd32c9c7ec9)
 
-* Screenshot: SELECT + A
-* Exit to spruceUI: SELECT + B
+* MOD: SELECT or MENU, depending on the device (can be changed either in RA or in spruce settings)
+* Screenshot: MOD + A
+* Exit to spruceUI: MOD + B
 * Open menu: HOME/MENU (label differs by device)
-* Open menu: SELECT + X
-* Toggle FPS display: SELECT + Y
-* Load state: SELECT + L1
-* Save state: SELECT + R1
-* Toggle slow-motion: SELECT + L2
-* Toggle fast-forward: SELECT + R2
-* Toggle current shader: SELECT + D-Pad UP
-* Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
+* Open menu: MOD + X
+* Toggle FPS display: MOD + Y
+* Load state: MOD + L1
+* Save state: MOD + R1
+* Toggle slow-motion: MOD + L2
+* Toggle fast-forward: MOD + R2
+* Toggle current shader: MOD + D-Pad UP
+* Cycle state slots: MOD + D-Pad LEFT/D-Pad RIGHT
 
 ### DSperate
 
-- modifier = MENU (SELECT on devices with no MENU key)
-
-- screenshot = mod + A
-- Quit = mod + B
-- Open menu = mod + X
-- Toggle FPS = mod + Y
-
-- Cycle state slots = mod + left/right
-- Save state = mod + R1
-- Load state = mod + L2
-
-- Cycle screen layouts = mod + up/down
-- change primary screen = mod + L2
-
-- FF hold = R2
-- FF toggle = mod + R2
-
-- Tap stylus = L2
-
+* MOD = MENU (SELECT on devices with no MENU key)
+* screenshot = MOD + A
+* Quit = MOD + B
+* Open menu = MOD + X
+* Toggle FPS = MOD + Y
+* Cycle state slots = MOD + left/right
+* Save state = MOD + R1
+* Load state = MOD + L1
+* Cycle screen layouts = MOD + up/down
+* change primary screen = MOD + L2
+* FF hold = R2
+* FF toggle = MOD + R2
+* Tap stylus = L2 or L3
 
 Zero-stick devices:
-- Use D-pad as stylus = hold R2
-- no FF hold button
+* Use D-pad as stylus = hold R2
+* no FF hold button
 
 One-stick devices:
-- stylus control is on left stick
+* stylus control is on left stick
 
 Two-stick devices:
-- stylus control is on right stick
-- left stick mirrors d-pad
+* stylus control is on right stick
+* left stick mirrors d-pad
 
 
 ## Themes
