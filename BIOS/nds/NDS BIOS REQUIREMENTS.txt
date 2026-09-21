@@ -1,0 +1,21 @@
+For original NDS games, no BIOS are required for either DraStic or DSperate. However, adding the following files to the /mnt/SDCARD/BIOS/nds/ directory can help improve compatibility or performance for certain games under DSperate:
+
+- bios9.bin
+- bios7.bin
+
+If you wish to boot directly into the NDS firmware using the BootMenu cart, you will also need to add the following file to the same directory:
+
+- firmware.bin
+
+DSi games require ALL of the following files to be present in the /mnt/SDCARD/BIOS/nds/ directory in order to run at all, and will only run under DSperate. Spruce will not even display Roms placed in the NDSI folder if any of these files are missing:
+
+- bios9.bin
+- bios7.bin
+- biosdsi9.bin
+- biosdsi7.bin
+
+Add to those 4, two additional files if you would like to be able to boot into the DSi firmware using the BootMenuDSi cart:
+
+- dsifirmware.bin
+- nand.bin
+
