@@ -33,6 +33,7 @@
     "separator_inset_pct": 10.0,
     "separator_h_px":      1,
     "arrow_inset_pct":     10.0,
+    "accent_w_pct":        1.25,
     "accent_bar":          true,
     "text_baseline":       0.68,
     "title_baseline":      0.68,
