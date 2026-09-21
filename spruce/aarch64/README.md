@@ -1,5 +1,23 @@
 # spruce/aarch64 - the shared aarch64 userland for the PortMaster port environment
 
+> **VARIANT BRANCH `feat/ports-userland-glibc233`: the same 41 files, built at the fleet's ceiling.**
+> Everything below describes the set as `feat/trimui-ports-userland` ships it, built with the Tina
+> SDK's GCC 6.4 against glibc 2.23 so that no file needs more than `GLIBC_2.17`. On THIS branch the
+> same sources and the same recipes were built with Arm GNU Toolchain 10.3-2021.07 (GCC 10.3.1,
+> **glibc 2.33**; oakMOSS `PORTS_TOOLCHAIN=armgnu103 scripts/build-ports-userland.sh`), to test on hardware
+> what standing on the ceiling costs. 2.33 is the highest floor the aarch64 fleet allows: the four
+> TrimUI units run the vendor's glibc 2.33, and anything built against 2.34 or newer cannot start
+> there.
+>
+> What differs: 14 of the 41 files need **exactly `GLIBC_2.33`** - every caller of the `stat` family:
+> `cp`, `mv`, `find`, `grep`, `tar`, `unzip`, `sort`, `stat`, `shuf`, `libavformat`, `libavutil`,
+> `libbsd`, `libevdev`, `libsndfile` - one needs 2.32 (`liblzma`), and the rest 2.17 to 2.29. That is
+> zero margin on a TrimUI unit, and none at all on a Smart Pro still below firmware 1.0.4, which
+> shipped glibc 2.29: there these tools sit first on the port `PATH` and cannot start. A 2.33 sysroot
+> also makes coreutils call `statx`, which the 4.9 kernels (TrimUI A133P, the XX line, MagicX) do not
+> have; the device's glibc is expected to fall back. Both are what this card is for finding out.
+> Not a merge candidate. Evidence: `git/spruce-lib-audit/TOOLCHAINS.md`.
+
 Binaries and shared libraries that ports get in front of whatever the device's
 stock firmware provides. One set for every aarch64 device; a platform wires it
 in from its `.cfg`, and every aarch64 platform that runs PortMaster does:
