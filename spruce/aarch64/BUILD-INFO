@@ -1,5 +1,6 @@
 oakmoss=v0.2.0-beta.1-dirty
-built=2026-09-21T05:01:08Z
-toolchain=aarch64-openwrt-linux-gnu-gcc.bin (OpenWrt/Linaro GCC 6.4-2017.11 2017-11) 6.4.1
-toolchain_glibc=GNU C Library (GNU libc) stable release version 2.23, by Roland McGrath et al.
+built=2026-09-21T14:26:03Z
+toolchain=aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621
+toolchain_glibc=GNU C Library (GNU) release release version 2.33.
+toolchain_lane=armgnu103
 packages=zlib xz zstd libbsd pcre2 grep tar unzip coreutils findutils lame libvpx ffmpeg libjpegturbo libjpegturbo8 libpng libwebp libogg libvorbis libsndfile libevdev libuuid
