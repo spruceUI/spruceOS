@@ -14,6 +14,12 @@ case "$PLATFORM" in
     *) export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
 esac
 
+# PortMaster's device_info.txt runs here too, before the app starts, and asks for commands no device of
+# ours has (getconf for the glibc version, lscpu for the CPU name). spruce/aarch64/bin carries them. LAST
+# on the path, unlike in a port run: here it only fills gaps and never stands in front of a device's own
+# tools, which is what the app has always run with.
+[ -n "$PORTS_BIN" ] && [ -d "$PORTS_BIN" ] && export PATH="$PATH:$PORTS_BIN"
+
 case "$PLATFORM" in
     Flip|SmartProS|Brick|SmartPro|BrickPro)
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/flip/lib:$LD_LIBRARY_PATH"
