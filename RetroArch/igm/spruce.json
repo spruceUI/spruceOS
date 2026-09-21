@@ -43,10 +43,14 @@
     "preview":             true
   },
 
+  // A relative font path resolves against the folder holding THIS file, so a
+  // theme shipping its own igm.json can just say "nunwen.ttf" and mean its own.
+  // The colourways here live in RetroArch/igm/, where there is no font, so they
+  // name the stock one outright.
   "font": {
-    "path":           "nunwen.ttf",
+    "path":           "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
     "size_pct":       5.0,
-    "size_small_pct": 3.571
+    "size_small_pct": 3.5714286
   },
 
   "text": {
