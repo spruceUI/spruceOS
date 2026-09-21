@@ -53,13 +53,12 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 ## Controls and Hotkeys
 
 
-
 ### Global
 
 * Quicksave + Shutdown: Hold POWER for 3 seconds*
-* Game Switcher: Hold HOME for 3 seconds
-* Brightness down: START + L1
-* Brightness up: START + R1
+* Game Switcher: Hold MENU for 3 seconds
+* Brightness down: START + L1 or MENU + VOLDOWN
+* Brightness up: START + R1 or MENU + VOLUP
 
 \*Holding POWER after the vibration occurs will cause your device to force shutdown (in case of freezes etc.)
 
@@ -78,7 +77,39 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 * Toggle current shader: SELECT + D-Pad UP
 * Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
 
-Please do not adjust the RetroArch configurations unless you are already familiar with RetroArch's workings: removing or changing settings may cause games and/or controls to not work correctly.
+### DSperate
+
+- modifier = MENU (SELECT on devices with no MENU key)
+
+- screenshot = mod + A
+- Quit = mod + B
+- Open menu = mod + X
+- Toggle FPS = mod + Y
+
+- Cycle state slots = mod + left/right
+- Save state = mod + R1
+- Load state = mod + L2
+
+- Cycle screen layouts = mod + up/down
+- change primary screen = mod + L2
+
+- FF hold = R2
+- FF toggle = mod + R2
+
+- Tap stylus = L2
+
+
+Zero-stick devices:
+- Use D-pad as stylus = hold R2
+- no FF hold button
+
+One-stick devices:
+- stylus control is on left stick
+
+Two-stick devices:
+- stylus control is on right stick
+- left stick mirrors d-pad
+
 
 ## Themes
 
