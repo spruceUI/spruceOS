@@ -7,6 +7,10 @@ case "$PLATFORM" in
     Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
     Anbernic*)               export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
     RGB30|Miniloong)         export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
+    # The vendor SDL 2.26.1 set the MagicX firmware ships, the same one PyUI loads on these boards.
+    # Without a path pysdl2 finds no SDL2 at all and the app dies on `import sdl2` (XU20, 2026-09-22).
+    # SDL2_gfx is not in it; PortMaster treats that module as optional.
+    XU20|Zero28|Zero40)      export PYSDL2_DLL_PATH="/usr/magicx/lib" ;;
 esac
 
 case "$PLATFORM" in
