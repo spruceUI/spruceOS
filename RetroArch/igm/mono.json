@@ -1,4 +1,3 @@
-// Black and white. Selected row inverts to black on white; no accent bar.
 {
   "name": "mono",
   "colors": {
