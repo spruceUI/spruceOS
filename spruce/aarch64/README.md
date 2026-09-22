@@ -121,6 +121,31 @@ round-9 dumps of every lab device (`git/spruce-lib-audit`):
 | `libvorbisfile.so.3`, `libvorbis.so.0`, `libvorbisenc.so.2`, `libogg.so.0` | gmtoolkit's `oggdec` (49 GameMaker ports), rlvm (4) | every MagicX board |
 | `libsndfile.so.1` | rlvm | every H700 unit |
 
+Added 2026-09-22, after the dedupe audit and the Pixel 2 firmware study
+(`CFW/RootUI/pixel2/PIXEL2-LIBRARIES.md`). From this day `spruce/aarch64/lib` is also the LAST entry of
+every 64-bit board's `LD_LIBRARY_PATH` (and of the Flip's port path; first on the Pixel 2's): the firmware
+and a board's own directories keep winning, this directory only answers for what none of them have. It is
+the one place a library the firmware lacks is added; the prebuilt copies that used to sit in
+`spruce/flip/lib`, in Moonlight's `libs` or beside an emulator are gone.
+
+| Library | Who needs it | Where it was missing |
+|---|---|---|
+| `libboost_filesystem.so.1.71.0` | Emu/SATURN/yabasanshiro | the Pixel 2 (both twigUI firmwares); Development's c977e70dd had moved the only copy into `spruce/flip/lib` |
+| `libinterpose.aarch64.so` | the gptokeyb2 in Emu/N64 and Emu/JAGUAR (PortMaster's LD_PRELOAD shim, built from the gptokeyb2 sources) | the Pixel 2 on the classic twigUI firmware; 6e35f2219 had left the only copy in `spruce/flip/lib` |
+| `libpulse.so.0`, `libpulse-simple.so.0`, `libpulsecommon-13.99.so` | App/Moonlight's `moonlight` (links the Ubuntu 20.04 pulse client) | the Pixel 2: the Ubuntu copies sat in `spruce/flip/lib` (and `libpulse.so.0` again in Moonlight's own `libs`), which it never lists. One set here now, client libraries only, needing nothing beyond this lane's libsndfile (speexdsp and ltdl satisfy its configure and are not shipped); the Ubuntu copies are retired |
+| `libssl.so.1.1`, `libcrypto.so.1.1` | `spruce/bin64/wget`, `spruce/flip/lib`'s `libcurl.so.4` and `libzip.so.5` | the H700 BaseOS and both twigUI firmwares carry OpenSSL 3 on the path |
+| `libpcre.so.1` | `spruce/bin64/wget`, Emu/SCUMMVM's glib | twigUI-next, the H700 BaseOS (pcre3 only) |
+| `libncursesw.so.6`, `libtinfo.so.6` | `spruce/bin64/rnano` (Emu/N64's own `libncurses.so.6` needs the tinfo half) | the TrimUI, Flip and Miniloong rootfs and the classic twigUI firmware |
+
+Second pass the same day, from a fleet census of every launchable card binary over the 19 lab dumps
+(`fleet-missing.py`, kept with the audit kit): the sonames no firmware in the fleet could satisfy.
+
+| Library | Who needs it | Where it was missing |
+|---|---|---|
+| `libfluidsynth.so.3`, `libharfbuzz.so.0`, `libspeexdsp.so.1` | the EasyRPG core (`cores64/easyrpg_libretro.so`) | every TrimUI, Flip, Miniloong and MagicX unit; only `Emu/EASYRPG/lib-Flip` carried Ubuntu copies, and only the Flip lists that directory. fluidsynth is synth-only (no drivers) and needs just glib |
+| `libglib-2.0.so.0`, `libgthread-2.0.so.0`, `libfreetype.so.6` | fluidsynth, harfbuzz and SDL_ttf above | (dependencies of the lane's own libraries; every rootfs has freetype and glib, which keep winning) |
+| `libSDL-1.2.so.0`, `libSDL_image-1.2.so.0`, `libSDL_ttf-2.0.so.0` | `App/Gallery/gallery64`, `App/PixelReader/reader` | the three MagicX boards have no SDL 1.2 at all; the others have theirs, which win |
+
 ## Provenance
 
 `SHA256SUMS` and `BUILD-INFO` record what produced each file. Regenerate with:
