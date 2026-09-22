@@ -642,17 +642,3 @@ set_up_boot_action() {
         esac
     fi
 }
-
-# Apps that have to run for the whole session rather than only while their own
-# screen is open opt in by shipping an autostart-launch.sh. Runs on every path
-# that reaches runtime.sh, including the devices that never touch .tmp_update.
-# Unsupervised and backgrounded: an app that wants to survive a crash restarts
-# itself. Sourced via sh because exec bits off the card are not dependable.
-launch_app_autostarts() {
-    for _aa_script in /mnt/SDCARD/App/*/autostart-launch.sh; do
-        [ -f "$_aa_script" ] || continue
-        log_message "App autostart: $_aa_script"
-        sh "$_aa_script" &
-    done
-    unset _aa_script
-}

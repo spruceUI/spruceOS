@@ -102,8 +102,6 @@ fi
 
 launch_startup_watchdogs
 
-launch_app_autostarts
-
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
     if auto_resume_game; then
