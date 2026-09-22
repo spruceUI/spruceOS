@@ -12,9 +12,11 @@ RA_PROXY_DIR=/mnt/SDCARD/App/RAOfflineProxy
 RA_PROXY_BOOT="$RA_PROXY_DIR/autostart-launch.sh"
 
 # The daemon runs as "python -m raofflineproxy.boot". Matched on the module
-# rather than the app directory so the menu, which is raofflineproxy.main out
-# of the same tree, is never caught by a stop.
-RA_PROXY_PROC="raofflineproxy.boot"
+# rather than the app directory, so the menu - raofflineproxy.main out of the
+# same tree - survives a stop. No leading dash: pgrep reads one as an option
+# and fails the match outright, which would start a second daemon on every
+# pass and never stop either of them.
+RA_PROXY_PROC="raofflineproxy\.boot"
 
 ra_proxy_is_installed() {
 	[ -f "$RA_PROXY_BOOT" ]
