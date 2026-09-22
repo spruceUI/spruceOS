@@ -38,7 +38,7 @@ class MagicXXU20(MagicXA133PDevice):
         return self._env_int("DISPLAY_HEIGHT", 768)
 
     def screen_rotation(self):
-        return self._env_int("DISPLAY_ROTATION", 180)
+        return self._env_int("DISPLAY_ROTATION", 0)
 
     def supports_touch(self):
         return True
