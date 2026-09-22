@@ -104,12 +104,12 @@ device had: `libbsd.so.0` (missing on all four TrimUI units - it is what stopped
 frozen-bubble in the sample port runs), `libjpeg.so.62`, `libwebp.so.6` and
 `libpcre2-8.so.0` (for `grep -P`).
 
-`spruce/flip/lib/libdecor-0.so.0` also needs `GLIBC_2.34` and is deliberately
-not replaced: it only matters to SDL's Wayland backend, which none of these
-devices use. `libvpx.so.7`, which Development's library dedupe moved into `spruce/flip/lib` (merged
-2026-09-22), needs `GLIBC_2.34` too and is likewise left alone: no binary in the tree and none on
-any lab unit asks for it (the FFmpeg here links `libvpx.so.8`, which is shadowed), so the
-unloadable copy is never resolved.
+Since 2026-09-22 `spruce/flip/lib` holds only libraries every 64-bit board can load: the
+nine Flip builds that need `GLIBC_2.34` to `2.38` (the FFmpeg set, `liblzma`, `libzstd`,
+`libvpx.so.7/.8`, `libdecor`) moved to `spruce/flip/lib-Flip`, which only `Flip.cfg` lists.
+The copies here still matter: they are what ports on the TrimUI, H700 and MagicX boards
+resolve instead. `unittest/tests/test_library_path_hygiene_contracts.py` keeps the shared
+directory at the fleet floor and every board's path free of dead entries.
 
 Added 2026-09-21, from resolving all 46 PortMaster runtime images over the
 round-9 dumps of every lab device (`git/spruce-lib-audit`):
