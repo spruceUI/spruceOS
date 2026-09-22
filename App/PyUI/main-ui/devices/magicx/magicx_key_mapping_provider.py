@@ -41,7 +41,8 @@ class MagicXKeyMappingProvider:
     L1=4 R1=5 L2=6 R2=7 SELECT=8 START=9 L3=10 R3=11, UP=13 LEFT=14 RIGHT=15
     DOWN=16, MINUS=17 PLUS=18 MENU=19) under SDL's evdev enumeration order
     (BTN_JOYSTICK.. first, then 0..BTN_JOYSTICK): the face buttons are
-    304/305/307/308 = A/B/X/Y, the triggers are buttons 312/313, the d-pad is
+    305/304/308/307 = A/B/X/Y (the codes are POSITIONS - south/east/north/west -
+    and our board trees emit them positionally, like TrimUI's A133P boards), the triggers are buttons 312/313, the d-pad is
     KEY_UP/LEFT/RIGHT/DOWN 103/105/106/108, MENU is KEY_BACK 158 and the
     volume keys 115/114 ride the same device. Unlike the TrimUI map, A and B
     (and X and Y) are not swapped and there is no ABS hat. Sticks: ABS 0/1
@@ -51,8 +52,8 @@ class MagicXKeyMappingProvider:
     def __init__(self):
         self.key_mappings = {}
         buttons = {
-            304: ControllerInput.A, 305: ControllerInput.B,
-            307: ControllerInput.X, 308: ControllerInput.Y,
+            305: ControllerInput.A, 304: ControllerInput.B,
+            308: ControllerInput.X, 307: ControllerInput.Y,
             310: ControllerInput.L1, 311: ControllerInput.R1,
             312: ControllerInput.L2, 313: ControllerInput.R2,
             314: ControllerInput.SELECT, 315: ControllerInput.START,
@@ -73,7 +74,7 @@ class MagicXKeyMappingProvider:
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
             self.key_mappings[KeyEvent(1, code, 0)] = [InputResult(ci, KeyState.RELEASE)]
-        # A also emits KEY_SELECT 353 alongside BTN_SOUTH, so 353 is ignored; 272/273
+        # A also emits KEY_SELECT 353 alongside its own code, so 353 is ignored; 272/273
         # are the driver's virtual-mouse buttons. The XU20 adds 158, B's second code.
         self.ignored_codes = _env_codes("MAGICX_IGNORED_CODES", (353, 272, 273))
         # An ignored code must never also be mapped: the cfg moves MENU off a
