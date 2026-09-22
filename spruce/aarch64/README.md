@@ -106,7 +106,10 @@ frozen-bubble in the sample port runs), `libjpeg.so.62`, `libwebp.so.6` and
 
 `spruce/flip/lib/libdecor-0.so.0` also needs `GLIBC_2.34` and is deliberately
 not replaced: it only matters to SDL's Wayland backend, which none of these
-devices use.
+devices use. `libvpx.so.7`, which Development's library dedupe moved into `spruce/flip/lib` (merged
+2026-09-22), needs `GLIBC_2.34` too and is likewise left alone: no binary in the tree and none on
+any lab unit asks for it (the FFmpeg here links `libvpx.so.8`, which is shadowed), so the
+unloadable copy is never resolved.
 
 Added 2026-09-21, from resolving all 46 PortMaster runtime images over the
 round-9 dumps of every lab device (`git/spruce-lib-audit`):
