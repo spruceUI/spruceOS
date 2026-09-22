@@ -616,8 +616,15 @@ set_up_boot_action() {
                 log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
                 echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
                 ;;
+            "DSi firmware")
+                log_message "Attempting to boot into Nintendo DSi firmware via DSperate BootMenuDSi.nds"
+                echo "\"/mnt/SDCARD/Emu/NDSI/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds\"" > /tmp/cmd_to_run.sh
+                ;;
             "PPSSPP")
                 echo "\"/mnt/SDCARD/App/PPSSPP/launch.sh\"" > /tmp/cmd_to_run.sh
+                ;;
+            "Songo#5")
+                echo "\"/mnt/SDCARD/App/Songo#5/launch.sh\"" > /tmp/cmd_to_run.sh
                 ;;
             "Apotris"*)
                 log_message "Sun mode engaged."

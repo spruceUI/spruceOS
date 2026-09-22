@@ -11,6 +11,7 @@
 
 - Mini splore update from tenlevels
 - Expose H700 led settings
+- Make RA spruce IGM themeable
     
 --- Ry ------------------------------------------------------------------------
 
@@ -18,6 +19,7 @@
 - fake08 patches from TL
 - XX - polish shutdown paths - LEDs on, screen dim/off
 - XX - bootlogo app needs polish - add "bootlogo applied successfully" message
+-- need to update App/BootLogo/install_logo.sh to use PyUI display instead of legacy display(), as that one is not enabled on XX.
 - attach check_and_connect_wifi() to dsperate exec paths when appropriate;
 
 

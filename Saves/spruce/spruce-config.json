@@ -180,7 +180,9 @@
                     "Game Switcher",
                     "Splore",
                     "NDS firmware",
+                    "DSi firmware",
                     "PPSSPP",
+                    "Songo#5",
                     "Apotris (GBA)",
                     "Mega Mode"
                 ],
@@ -431,6 +433,19 @@
                 ],
                 "selected": "True"
             },
+            "raIgmColorway": {
+                "display": "RA: in-game menu colors",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
+                "options": [
+                    "spruce",
+                    "mono",
+                    "red",
+                    "blue",
+                    "green",
+                    "purple"
+                ],
+                "selected": "spruce"
+            },
             "keepSavesBetweenCores": {
                 "display": "Transfer saves between cores",
                 "options": [
@@ -575,14 +590,6 @@
             },
             "otaUpdateType": {
                 "display": "OTA: update type",
-                "devices":["MIYOO_FLIP", "MIYOO_MINI",
-                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
-                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
-                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
-                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
-                           "ANBERNIC_RGXX640480", "RGB30"],
                 "description": "incremental is faster; full can fix broken installs",
                 "options": [
                     "Incremental",
@@ -592,14 +599,6 @@
             },
             "otaChannel": {
                 "display": "OTA: release channel",
-                "devices":["MIYOO_FLIP", "MIYOO_MINI",
-                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
-                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
-                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
-                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
-                           "ANBERNIC_RGXX640480", "RGB30"],
                 "description": "developer mode only",
                 "options": [
                     "Nightly",
@@ -653,8 +652,9 @@
         "RGB LED Settings": {
             "disableLEDs": {
                 "display": "Disable RGB LEDs in all contexts",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "reload UI to apply",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
+                "description": "applies immediately",
                 "options": [
                     "True",
                     "False"
@@ -663,7 +663,8 @@
             },
             "LEDmaxScale": {
                 "display": "RGB LED brightness",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "if enabled; non-linear",
                 "options": [
                     "5",
@@ -685,7 +686,8 @@
             },
             "defaultLEDcolor": {
                 "display": "Default LED color",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "in menu, etc.",
                 "options": [
                     "Red",
@@ -705,23 +707,27 @@
             },
             "defaultLEDeffect": {
                 "display": "Default LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "in menu, etc.",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "static"
             },
             "defaultLEDduration": {
                 "display": "Default LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "in menu, etc.",
                 "options": [
                     "1000",
@@ -733,16 +739,20 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "2000"
             },
             "enableEmuSpecificLEDbehavior": {
                 "display": "Use separate LED control during emulation",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "follows defaults if set to False",
                 "options": [
                     "True",
@@ -752,7 +762,7 @@
             },
             "emuLEDcolor": {
                 "display": "In-game LED color",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "during emulation",
                 "options": [
                     "System-specific",
@@ -773,23 +783,25 @@
             },
             "emuLEDeffect": {
                 "display": "In-game LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "during emulation",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "breathe"
             },
             "emuLEDduration": {
                 "display": "In-game LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB"],
                 "description": "during emulation",
                 "options": [
                     "1000",
@@ -801,9 +813,13 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "4000"

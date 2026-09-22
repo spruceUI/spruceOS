@@ -112,12 +112,14 @@ device_enter_sleep() {
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     [ -e "$WAKE_ALARM_PATH" ] && touch "$WAKE_ALARM_ARMED_FLAG"
+    xx_rgb_off
     trigger_device_sleep
 }
 
 device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
     rm -f "$WAKE_ALARM_ARMED_FLAG"
+    xx_rgb_restore
 }
 
 # Decide by the alarm, not the clock (the two RTCs drift): an armed alarm that has
@@ -180,6 +182,221 @@ has_lid() {
         *sp) return 0 ;;
         *)   return 1 ;;
     esac
+}
+
+# Ring LEDs on the RG40XX H/V and CubeXX: an MCU on /dev/ttyS5, 115200 8N1, not
+# sysfs. Every packet ends in a checksum of the bytes before it. Mode 1 is
+# static and carries 8 RGB triplets for the right ring then 8 for the left;
+# modes 2-4 breathe and carry 16 triplets of one colour; modes 5-6 are the
+# MCU's rainbows and carry <mode> <brightness> 1 1 <speed>. Protocol from muOS,
+# which uses mode 1 only - the rest are confirmed working on a CubeXX.
+XX_RGB_SERIAL="/dev/ttyS5"
+XX_RGB_MCU_PWR="/sys/class/power_supply/axp2202-battery/mcu_pwr"
+XX_RGB_STATE="/tmp/xx_rgb_state"
+
+case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+    rg40xx*|rgcubexx) XX_RGB_MODEL=1 ;;
+    *)                XX_RGB_MODEL=0 ;;
+esac
+
+has_rgb_leds() {
+    [ "$XX_RGB_MODEL" = "1" ] && [ -c "$XX_RGB_SERIAL" ]
+}
+
+# Nothing to clear if we never lit them this boot - the MCU comes up unpowered.
+xx_rgb_already_dark() {
+    [ -r "$XX_RGB_STATE" ] || return 0
+    xx_rgb_load_state
+    [ "$_mode" = "1" ] && [ "$_left" = "000000" ] && [ "$_right" = "000000" ]
+}
+
+xx_rgb_open() {
+    if [ -w "$XX_RGB_MCU_PWR" ] && [ "$(cat "$XX_RGB_MCU_PWR" 2>/dev/null)" != "1" ]; then
+        # printf, not echo: the driver parses each write on its own, and echo's
+        # newline arrives as a second one that reads as 0 and powers it back off.
+        printf 1 > "$XX_RGB_MCU_PWR"
+        sleep 1
+    fi
+    stty -F "$XX_RGB_SERIAL" 115200 cs8 -parenb -cstopb -opost -isig -icanon -echo 2>/dev/null
+}
+
+xx_rgb_valid_hex() {
+    case "$1" in
+        [0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+xx_rgb_split() {
+    _hex="$1"
+    xx_rgb_valid_hex "$_hex" || _hex="FFFFFF"
+    _rest="${_hex#??}"
+    echo "$((0x${_hex%????})) $((0x${_rest%??})) $((0x${_rest#??}))"
+}
+
+xx_rgb_load_state() {
+    _left=000000
+    _right=000000
+    _mode=1
+    _dur=1000
+    [ -r "$XX_RGB_STATE" ] && read -r _left _right _mode _dur < "$XX_RGB_STATE"
+    xx_rgb_valid_hex "$_left" || _left=000000
+    xx_rgb_valid_hex "$_right" || _right=000000
+    case "$_mode" in [1-6]) : ;; *) _mode=1 ;; esac
+    case "$_dur" in ''|*[!0-9]*) _dur=1000 ;; esac
+}
+
+# Shares the TrimUI's 5-80 setting, spread over the MCU's 0-255.
+xx_rgb_brightness() {
+    _scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    case "$_scale" in
+        ''|*[!0-9]*) _scale=15 ;;
+    esac
+    [ "$_scale" -gt 80 ] && _scale=80
+    echo $(( _scale * 255 / 80 ))
+}
+
+xx_rgb_send() {
+    _sum=0
+    for _byte in "$@"; do
+        _sum=$(( (_sum + _byte) & 255 ))
+    done
+    xx_rgb_open
+    printf '%b' "$(printf '\\x%02X' "$@" "$_sum")" > "$XX_RGB_SERIAL"
+}
+
+xx_rgb_static() {
+    _bri="$1"
+    set -- $(xx_rgb_split "$2") $(xx_rgb_split "$3")
+    _lr="$1" _lg="$2" _lb="$3" _rr="$4" _rg="$5" _rb="$6"
+
+    set -- 1 "$_bri"
+    _i=0
+    while [ "$_i" -lt 8 ]; do
+        set -- "$@" "$_rr" "$_rg" "$_rb"
+        _i=$((_i + 1))
+    done
+    _i=0
+    while [ "$_i" -lt 8 ]; do
+        set -- "$@" "$_lr" "$_lg" "$_lb"
+        _i=$((_i + 1))
+    done
+    xx_rgb_send "$@"
+}
+
+xx_rgb_breath() {
+    _bmode="$1"
+    _bri="$2"
+    set -- $(xx_rgb_split "$3")
+    _r="$1" _g="$2" _b="$3"
+
+    set -- "$_bmode" "$_bri"
+    _i=0
+    while [ "$_i" -lt 16 ]; do
+        set -- "$@" "$_r" "$_g" "$_b"
+        _i=$((_i + 1))
+    done
+    xx_rgb_send "$@"
+}
+
+xx_rgb_rainbow() {
+    xx_rgb_send "$1" "$2" 1 1 "$3"
+}
+
+# rise, sniff and blink have no MCU equivalent and land on static.
+xx_rgb_mode() {
+    case "$1" in
+        2|breath*)
+            if   [ "$2" -le 2000 ]; then echo 2
+            elif [ "$2" -le 3500 ]; then echo 3
+            else                        echo 4
+            fi ;;
+        rainbow) echo 5 ;;
+        *multi*) echo 6 ;;
+        *)       echo 1 ;;
+    esac
+}
+
+# Duration to the rainbow speed byte; a higher byte cycles faster.
+xx_rgb_speed() {
+    _d="$1"
+    [ "$_d" -lt 1000 ] && _d=1000
+    [ "$_d" -gt 5000 ] && _d=5000
+    echo $(( 255 - (_d - 1000) * 245 / 4000 ))
+}
+
+xx_rgb_apply() {
+    _bri="$(xx_rgb_brightness)"
+    case "$3" in
+        2|3|4) xx_rgb_breath "$3" "$_bri" "$1" ;;
+        5|6)   xx_rgb_rainbow "$3" "$_bri" "$(xx_rgb_speed "$4")" ;;
+        *)     xx_rgb_static "$_bri" "$1" "$2" ;;
+    esac
+}
+
+# Zones l and r are the two rings; m, 1 and 2 have no hardware here.
+rgb_led() {
+    has_rgb_leds || return 0
+
+    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    flag_check "leds_forced_off" && return 0
+
+    _zones="${1:-lr}"
+    # One packet carries both rings, so a call naming one resends the other.
+    xx_rgb_load_state
+
+    _dur="${4:-1000}"
+    case "$_dur" in
+        ''|*[!0-9]*) _dur=1000 ;;
+    esac
+
+    case "$2" in
+        0|off|disable) _colour=000000; _mode=1 ;;
+        *)             _colour="${3:-FFFFFF}"; _mode="$(xx_rgb_mode "$2" "$_dur")" ;;
+    esac
+
+    case "$_zones" in *l*) _left="$_colour" ;; esac
+    case "$_zones" in *r*) _right="$_colour" ;; esac
+
+    echo "$_left $_right $_mode $_dur" > "$XX_RGB_STATE"
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
+}
+
+enable_or_disable_rgb() {
+    has_rgb_leds || return 0
+
+    if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
+        xx_rgb_already_dark && return 0
+        echo "000000 000000 1 1000" > "$XX_RGB_STATE"
+        xx_rgb_static 0 000000 000000
+    fi
+}
+
+toggle_led() {
+    has_rgb_leds || return 0
+
+    if flag_check "leds_forced_off"; then
+        flag_remove "leds_forced_off"
+        set_rgb_in_menu
+    else
+        rgb_led lr off
+        flag_add "leds_forced_off" --tmp
+    fi
+}
+
+xx_rgb_off() {
+    has_rgb_leds || return 0
+    xx_rgb_already_dark && return 0
+    xx_rgb_static 0 000000 000000
+}
+
+xx_rgb_restore() {
+    has_rgb_leds || return 0
+    flag_check "leds_forced_off" && return 0
+    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+
+    xx_rgb_load_state
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
 }
 
 launch_startup_watchdogs(){
@@ -944,4 +1161,5 @@ device_ensure_wifi_interface() {
 # that stops the wedge being created, rather than recovering from it after.
 device_prepare_for_poweroff() {
     device_wifi_power_off
+    xx_rgb_off
 }

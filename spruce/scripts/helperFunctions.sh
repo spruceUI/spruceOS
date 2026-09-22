@@ -127,6 +127,12 @@ device_names() {
         AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
         AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
     esac
+
+    # Ring LEDs: two of the three models share a platform with models that have
+    # none, so no platform token can stand in for this. Set in AnbernicXXCommon.sh.
+    if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
+        echo "ANBERNIC_RGXX_RGB"
+    fi
 }
 
 # Call this just by having "acknowledge" in your script

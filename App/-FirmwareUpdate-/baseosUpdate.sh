@@ -87,7 +87,7 @@ if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status
     bail "Please charge your device to at least 15%, or plug it in, then try again."
 fi
 
-log_and_display_message "BaseOS $LATEST is available (you have $INSTALLED).\n\nIt downloads now and installs on the next start. Press A to continue, B to cancel."
+log_and_display_message "BaseOS $LATEST is available (you have $INSTALLED).\n\nPress A to download and install it now, or B to cancel."
 confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
 
 if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then

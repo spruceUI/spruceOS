@@ -1,0 +1,16 @@
+{
+  "name": "mono",
+  "colors": {
+    "dim_bg":        "#000000D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#FFFFFFFF",
+    "accent":        "#FFFFFFD9",
+    "title_line":    "#FFFFFF66",
+    "text":          "#FFFFFFFF",
+    "text_selected": "#000000FF",
+    "text_title":    "#FFFFFFFF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#FFFFFFFF"
+  },
+  "layout": { "accent_bar": false }
+}

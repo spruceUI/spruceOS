@@ -1,4 +1,3 @@
-import fcntl
 import json
 import os
 import subprocess
@@ -9,7 +8,6 @@ import sys
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
-from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
@@ -135,10 +133,6 @@ class Rgb30(DeviceCommon):
     # confirmed on hardware.
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
 
-    KEY_VOLUMEDOWN = 114
-    KEY_VOLUMEUP = 115
-    EVIOCGRAB = 0x40044590
-
     def __init__(self, device_name):
         self.device_name = device_name
         self.load_rgb30_system_json()
@@ -157,56 +151,21 @@ class Rgb30(DeviceCommon):
 
     # ---- RGB30-specific ----
 
-    def _resolve_volume_node(self):
-        # The volume rocker is on gpio-keys, a separate evdev node from the
-        # joypad. It is NOT adc-keys, which declares a phantom volume capability
-        # that never fires. Match by device name so a node-number shuffle does
-        # not matter.
-        try:
-            with open("/proc/bus/input/devices") as f:
-                blocks = f.read().split("\n\n")
-            for blk in blocks:
-                if 'Name="gpio-keys"' in blk:
-                    for tok in blk.split():
-                        if tok.startswith("event"):
-                            return "/dev/input/" + tok
-        except OSError:
-            pass
-        return "/dev/input/event2"
-
     def _start_volume_watcher(self):
-        # PyUI reads the volume node itself so the menu shows the volume widget
-        # and the 0-20 number updates - the main controller only watches the
-        # joypad. Same mechanism the Miyoo Flip uses (a KeyWatcher plus a poll
-        # thread), and map_key turns 114/115 into VOLUME_DOWN/UP -> special_input
-        # -> change_volume -> Display.volume_changed.
-        #
-        # Grab the node exclusively (EVIOCGRAB) so while PyUI runs it owns the
-        # volume keys and the shell buttons_watchdog does not double-count them.
-        # When a game launches PyUI exits, the grab is released, and the shell
-        # handles volume in-game.
-        node = self._resolve_volume_node()
-        try:
-            self.volume_key_watcher = KeyWatcher(node)
-            if getattr(self.volume_key_watcher, "fd", None) is not None:
-                try:
-                    fcntl.ioctl(self.volume_key_watcher.fd, self.EVIOCGRAB, 1)
-                except OSError as e:
-                    PyUiLogger.get_logger().warning(f"RGB30: could not grab {node}: {e}")
-                from controller.controller import Controller
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                t = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-                t.start()
-                PyUiLogger.get_logger().info(f"RGB30: volume watcher on {node}")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"RGB30: volume watcher failed: {e}")
+        # The shell owns the volume keys (it runs in-game, PyUI does not). PyUI
+        # only reflects the change by watching the config the shell writes, like
+        # the Anbernic XX.
+        from devices.utils.file_watcher import FileWatcher
+        self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+            "/mnt/SDCARD/App/PyUI/config/rgb30-system.json", self.on_system_config_changed,
+            interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
-    def map_key(self, key_code):
-        if key_code == self.KEY_VOLUMEUP:
-            return ControllerInput.VOLUME_UP
-        elif key_code == self.KEY_VOLUMEDOWN:
-            return ControllerInput.VOLUME_DOWN
-        return None
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if old_volume != new_volume:
+            Display.volume_changed(new_volume)
 
     def _set_volume(self, volume):
         # The generic volume path only changes the config number; nothing sets

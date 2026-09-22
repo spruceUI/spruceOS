@@ -1,0 +1,15 @@
+{
+  "name": "purple",
+  "colors": {
+    "dim_bg":        "#0A0014D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#B47FE52E",
+    "accent":        "#B47FE5D9",
+    "title_line":    "#5C4A6B66",
+    "text":          "#E5DCEDFF",
+    "text_selected": "#F7F0FFFF",
+    "text_title":    "#B47FE5FF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#E5DCEDFF"
+  }
+}

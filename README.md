@@ -53,32 +53,58 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 ## Controls and Hotkeys
 
 
-
 ### Global
 
 * Quicksave + Shutdown: Hold POWER for 3 seconds*
-* Game Switcher: Hold HOME for 3 seconds
-* Brightness down: START + L1
-* Brightness up: START + R1
+* Game Switcher: Hold MENU for 3 seconds
+* Brightness down: START + L1 or MENU + VOLDOWN
+* Brightness up: START + R1 or MENU + VOLUP
 
 \*Holding POWER after the vibration occurs will cause your device to force shutdown (in case of freezes etc.)
 
 ### RetroArch (and PPSSPP)
 ![hotkeyDefaults](https://github.com/user-attachments/assets/7558ecd9-8149-4009-936a-2cd32c9c7ec9)
 
-* Screenshot: SELECT + A
-* Exit to spruceUI: SELECT + B
+* MOD: SELECT or MENU, depending on the device (can be changed either in RA or in spruce settings)
+* Screenshot: MOD + A
+* Exit to spruceUI: MOD + B
 * Open menu: HOME/MENU (label differs by device)
-* Open menu: SELECT + X
-* Toggle FPS display: SELECT + Y
-* Load state: SELECT + L1
-* Save state: SELECT + R1
-* Toggle slow-motion: SELECT + L2
-* Toggle fast-forward: SELECT + R2
-* Toggle current shader: SELECT + D-Pad UP
-* Cycle state slots: SELECT + D-Pad LEFT/D-Pad RIGHT
+* Open menu: MOD + X
+* Toggle FPS display: MOD + Y
+* Load state: MOD + L1
+* Save state: MOD + R1
+* Toggle slow-motion: MOD + L2
+* Toggle fast-forward: MOD + R2
+* Toggle current shader: MOD + D-Pad UP
+* Cycle state slots: MOD + D-Pad LEFT/D-Pad RIGHT
 
-Please do not adjust the RetroArch configurations unless you are already familiar with RetroArch's workings: removing or changing settings may cause games and/or controls to not work correctly.
+### DSperate
+
+* MOD = MENU (SELECT on devices with no MENU key)
+* screenshot = MOD + A
+* Quit = MOD + B
+* Open menu = MOD + X
+* Toggle FPS = MOD + Y
+* Cycle state slots = MOD + left/right
+* Save state = MOD + R1
+* Load state = MOD + L1
+* Cycle screen layouts = MOD + up/down
+* change primary screen = MOD + L2
+* FF hold = R2
+* FF toggle = MOD + R2
+* Tap stylus = L2 or L3
+
+Zero-stick devices:
+* Use D-pad as stylus = hold R2
+* no FF hold button
+
+One-stick devices:
+* stylus control is on left stick
+
+Two-stick devices:
+* stylus control is on right stick
+* left stick mirrors d-pad
+
 
 ## Themes
 
@@ -126,9 +152,14 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
 THANK YOU TO THE AMAZING RETRO HANDHELD COMMUNITY!!
 
 
+## AI Disclosure
+
+Some of our contributors use AI to help code, as is the industry standard. The spruceUI organizations’s policy on AI use is that we will always judge potential contributions based on the code’s quality rather than who wrote it, or how.
+
+
 ## SUPPORTED GAME SYSTEMS
 
-(Click here for a table of supported systems and file extensions.)[https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#rom-folder-chart]
+[Click here for a table of supported systems and file extensions.](https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#rom-folder-chart)
 
 ## Interested in being a tester, or just hanging out? To provide feedback and speak with the development team please join our Discord server by clicking on the image below or using [this link](https://discord.gg/KjR5uMQQt9)
 

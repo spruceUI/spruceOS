@@ -145,9 +145,14 @@ brightness_up_bg() {
 }
 
 take_screenshot_bg() {
-    timestamp=$(date '+_%Y.%m.%d_%H.%M.%S.%N.png')
+    # No %N: BusyBox date on BaseOS ignores it and drops everything after,
+    # so the name lost its .png and fbscreenshot rejected the extension - the
+    # XX line rumbled but saved nothing. $$ (this backgrounded subshell's PID)
+    # keeps names unique across rapid presses and works on every date build.
+    timestamp=$(date '+_%Y.%m.%d_%H.%M.%S')_$$.png
     ss_name="/mnt/SDCARD/Saves/screenshots/$PLATFORM$timestamp"
 
+    mkdir -p /mnt/SDCARD/Saves/screenshots
     vibrate &
     take_screenshot "$ss_name"
 }
