@@ -375,10 +375,10 @@ e2a6d5ea771bd4ab1b751528ba48264b41b63bce344041da599e37da251880a7  ./spruce/flip/
 5a7ab6f45681844b15dbcb5b23097a7585562519b328bd4c6e27946d86e102f4  ./spruce/flip/arm64-ffmpeg/bin/libavdevice.so.58
 95001a07b3e03f44960de57327880eb32713c86c206f65f234a89ae387169aca  ./spruce/flip/arm64-ffmpeg/bin/libXv.so.1
 6d6da001d8112cdef30a72ed62b97f7e274cd81469effa759a133f9ba2c30c61  ./spruce/flip/arm64-ffmpeg/bin/libGLdispatch.so.0
-2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./spruce/flip/lib/libOpenGL.so
+2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./Emu/JAGUAR/bigpemu/libOpenGL.so
 86366dd1bdf7afaf1b52b18ee2dfeb969244b3062e23e1cf6d5a9d8ae0989096  ./spruce/flip/lib/libnghttp2.so.14
 b18c099535c8415a33a16c034e71dd184ef73c37aaee468c751699b2af90db35  ./spruce/flip/lib/libmpeg2.so.0
-7f5c67e9c3a497ed8f0fa2895d0b6047ffad2046e677aac3d7876b302e761e13  ./spruce/flip/lib/libGL.so.1
+7f5c67e9c3a497ed8f0fa2895d0b6047ffad2046e677aac3d7876b302e761e13  ./Emu/COCO/lib/libGL.so.1
 43634317b8289442034e916b472bc9cac54539e99601d9f62d95321070643351  ./spruce/flip/lib/libwebp.so.1.0.3
 a44017a30eb67aac07887c3a9c990f87dd06133b1ed46c4f2e0e987d0e3b0348  ./spruce/flip/lib/libspeechd.so.2
 df0606adc7693eef38ceff52029c4144e337b650f4d0b2dc843e6e64bee6e8a8  ./spruce/flip/lib/libsystemd.so.0
@@ -436,7 +436,7 @@ be793443aec05058cddc3f4ec09de4ab81e96f368926e77c1ad54354306d51c5  ./spruce/flip/
 ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./spruce/flip/lib/libSDL2_ttf-2.0.so
 0dd86eba0290dbaa7b8e9f90c05948429db0ff3dbd75ba81bb103b4ba5ad756b  ./spruce/flip/lib/libicui18n.so.63
 b532a6056455e9901e29fcb90a5da27f3c09c361d3a76bc929732dbc8e9a469a  ./spruce/flip/lib/libkrb5support.so.0
-9e9f8d746287f973764bf024cc8e84428fa326364148c60165bc7a21e5bf9ec2  ./spruce/flip/lib/libGLX.so.0
+9e9f8d746287f973764bf024cc8e84428fa326364148c60165bc7a21e5bf9ec2  ./Emu/COCO/lib/libGLX.so.0
 ad9c4d80e3c64ba31ed24f3960f4aaff1b8b9baeeb7a56781112c92e15f63d8f  ./spruce/flip/lib/libwayland-cursor.so.0
 ea8f1bd150500f6eb5eb22f47045de69359448333873735874cd9a7351f3d8e7  ./spruce/flip/lib/libvpx.so.4
 b4ab304d51450ebef1ff1cd90c10d97619c11a9e76fd963f1962fb415904fd6d  ./spruce/flip/lib/libfaad.so.2
@@ -455,7 +455,7 @@ e9b221b172ba165b75950826afae53f1f7d987477f961bb429f4bfdac553273e  ./spruce/flip/
 04b0452a7ca1d36cfcbfed59d4ea38e358d66389fb23e8892a74606b511f236e  ./spruce/flip/lib/libSDL2_mixer-2.0.so
 b4069eee3350923f988247d377b2c7fbe9b7582a39f19c5ec00dc12f442b6ee2  ./spruce/flip/lib/libnettle.so.7
 ff323cadd9b1e144dae58c9d04220050d6a7013a975eac396150a58702c049f1  ./spruce/flip/lib/liblzma.so.5
-2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./spruce/flip/lib/libOpenGL.so.0
+2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./Emu/JAGUAR/bigpemu/libOpenGL.so.0
 2535d001659e128b01edd187397d98cf55d3aa67d1de02d8a299e51b88a53379  ./spruce/flip/lib/libgssapi.so.3
 8d4b8f40133a7b518849463dbd291f6386fa350f247fe5a8a3e465fd40de7dc0  ./spruce/flip/lib/libXext.so.6
 b7dd4653fbc6d3349fe0b0175f23503df5adde69a7396637f3b3427deb0e3a4e  ./spruce/flip/lib/libXcursor.so.1
@@ -467,7 +467,7 @@ c36f9ed870b40c341069fe8ec047ec25b92c786c9975e68a12dc2535134dbba2  ./Emu/OPENBOR/
 883f6b8ca69454c329f7e65ddf68a4022cd3e05306dfb71cdd703a44a33e964c  ./spruce/flip/lib/libhx509.so.5
 0ead676e950000241e7c2fcf3dd8d4603e44713c28955010b6b8b582860f59e2  ./spruce/flip/lib/libSDL2_net-2.0.so.0
 b494b0c3009564d2b3f820b786c383e654a96995f37da17fd8a062edeb24b748  ./spruce/flip/lib/libasyncns.so.0
-e05a487fbf7de78df3c2b68b90cfc2e42a373c07d630c4a436291fb53f9aecec  ./spruce/flip/lib/libGLU.so.1
+e05a487fbf7de78df3c2b68b90cfc2e42a373c07d630c4a436291fb53f9aecec  ./Emu/COCO/lib/libGLU.so.1
 89f75bfb25091fe703a8e62befe612262f1a26288f2542e9d3ed3a93ee691b46  ./spruce/flip/lib/libhogweed.so.6
 e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./spruce/flip/lib/libSDL2-2.0.so
 26028e2f7b95e8dd8df7d355ab01fe54ac26da7334eb28bb0e5b05bf930f4fdf  ./spruce/flip/lib/libkeyutils.so.1
@@ -475,7 +475,7 @@ e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./spruce/flip/
 9fa00315c7f3652aae0c14a4eeb12bca3129459f89006fe1bc9bdc08acbac033  ./spruce/flip/lib/libXss.so.1
 0669230435538a29b0c0d7f0f8498b6c2ea2bf171112ccaf6e7b2afb2a2a00ab  ./spruce/flip/lib/libwavpack.so.1
 f7b659d2801e8045d42bb8de7f19ddca596e8f06598674552f42d1af53c54ce0  ./spruce/flip/lib/libffi.so.7
-8037b0ba93ccea008bba4d069973ce19332abc27b31470adee37a031c9c04118  ./spruce/flip/lib/libGLdispatch.so.0
+8037b0ba93ccea008bba4d069973ce19332abc27b31470adee37a031c9c04118  ./Emu/COCO/lib/libGLdispatch.so.0
 bf86cf0d720c3d9eda685a7f5dd97fb3c6a44e9d700f41af3256275f7e1cc01e  ./spruce/flip/lib/liba52-0.7.4.so
 610e6b05df7fa00d6f4a7f6c466feb2f76d1cd21ee0871ff5335bba2a374eca0  ./spruce/flip/lib/libtiff.so.5
 48719bde1d4eb1410fb4fc778a049ddcb3afaa0b2b1151e09ea0d37ddb6493ae  ./spruce/flip/lib/libgssapi_krb5.so.2
