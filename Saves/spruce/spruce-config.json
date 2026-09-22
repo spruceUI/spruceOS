@@ -435,7 +435,6 @@
             },
             "raIgmColorway": {
                 "display": "RA: in-game menu colors",
-                "description": "Color scheme for the in-game menu. A theme can override this.",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
                 "options": [
                     "spruce",
