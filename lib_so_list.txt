@@ -474,7 +474,7 @@ b7dd4653fbc6d3349fe0b0175f23503df5adde69a7396637f3b3427deb0e3a4e  ./spruce/flip/
 d00669d11d3afcaa56c3654dd158e5929f28265cfb1e5773cd7940304f24f262  ./spruce/flip/lib/libgcrypt.so.20
 da42a28cf92bc74933985bf68d49753f65ce66282b9b7052d58a90b15d54b127  ./spruce/flip/lib/libspeex.so.1
 6e0d458f32c8f412c63da222ab8a0a54a913d5b19b58dcf44168b655c6b071a1  ./spruce/flip/lib/libp11-kit.so.0
-c36f9ed870b40c341069fe8ec047ec25b92c786c9975e68a12dc2535134dbba2  ./spruce/flip/lib/libvorbisidec.so.1
+c36f9ed870b40c341069fe8ec047ec25b92c786c9975e68a12dc2535134dbba2  ./Emu/OPENBOR/lib/libvorbisidec.so.1
 3edad31ebf9be96454abb8b02ee095229fa25cb9649d7b25f15aac1794e5404f  ./spruce/flip/lib/libtk8.6.so
 883f6b8ca69454c329f7e65ddf68a4022cd3e05306dfb71cdd703a44a33e964c  ./spruce/flip/lib/libhx509.so.5
 0ead676e950000241e7c2fcf3dd8d4603e44713c28955010b6b8b582860f59e2  ./spruce/flip/lib/libSDL2_net-2.0.so.0
