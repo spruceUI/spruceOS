@@ -38,11 +38,7 @@
     "Emulator_A30": {
       "display": "Emulator",
       "devices": [
-        "MIYOO_A30",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_A30"
       ],
       "options": [
         "pcsx_rearmed",
