@@ -1,12 +1,3 @@
-// spruceOS in-game menu theme - the default look, and the reference for the
-// other files here. Every key below is optional: anything you leave out keeps
-// the value the binary was built with, so a colourway only needs the colours.
-//
-// Colours are #RRGGBB or #RRGGBBAA. Sizes are percentages of the screen, so one
-// file works on every device. JS-style comments are allowed; trailing commas
-// are NOT - a stray comma makes the whole file fall back to the default look.
-//
-// A theme can override this by shipping its own igm.json in the theme folder.
 {
   "name": "spruce",
 
@@ -44,10 +35,6 @@
     "preview":             true
   },
 
-  // A relative font path resolves against the folder holding THIS file, so a
-  // theme shipping its own igm.json can just say "nunwen.ttf" and mean its own.
-  // The colourways here live in RetroArch/igm/, where there is no font, so they
-  // name the stock one outright.
   "font": {
     "path":           "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
     "size_pct":         5.0,
