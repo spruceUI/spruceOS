@@ -49,14 +49,12 @@ setup_rumble_env() {
 
 prepare_ra_config() {
 
-	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
-	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
-	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
+	export PLATFORM_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
 
-	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then
+	if [ ! -f "$PLATFORM_CFG" ]; then
 		log_message "No retroarch-${PLATFORM}.cfg found."
-		mkdir -p "$_live_cfg_dir"
-		cp "$_bak_cfg" "$PLATFORM_CFG" && log_message "$PLATFORM_CFG seeded from .bak file."
+		ensure_ra_config_path >/dev/null
+		[ -f "$PLATFORM_CFG" ] && log_message "$PLATFORM_CFG seeded from .bak file."
 	fi
 
 	# Set up RetroAchievements based on spruceUI config
