@@ -3,13 +3,14 @@
 # 64-bit devices only - there is no ARM32 BigPEmu build.
 #
 # BigPEmu wants desktop OpenGL and every spruce GPU is GLES-only, so gl4es
-# (spruce/flip/lib/libOpenGL.so, SONAME libGL.so.1; the SDL2 plugin links it
+# (libOpenGL.so beside the binary, SONAME libGL.so.1; the SDL2 plugin links it
 # as libOpenGL.so.0) translates GL -> GLES and is LD_PRELOADed, matching
-# dArkMoss's proven launcher: preloaded first, every later request for
-# libGL.so.1 lands on it and not on the GLVND libGL.so.1 xroar keeps in the
-# same directory. It sat beside the binary until Development's 6e35f2219
-# moved it, which left a preload of ./libOpenGL.so that no longer existed
-# (ld.so reported it and went on without gl4es). BigPEmu's config already
+# dArkMoss's proven launcher. It lives HERE and not in spruce/flip/lib on
+# purpose: that directory precedes the firmware on the Flip and the Miniloong,
+# and PyUI's KMSDRM SDL2 asks for libGL.so.1 / libOpenGL.so.0 before falling
+# back to GLES - with a GL entry point findable there it took the desktop-GL
+# path Mali cannot serve and no window was ever created (2026-09-22).
+# BigPEmu's config already
 # carries keyboard bindings, so gptokeyb2 maps the pad to those keys rather
 # than binding each device's controller GUID.
 
@@ -65,7 +66,7 @@ with zipfile.ZipFile(sys.argv[1]) as z: z.extractall(sys.argv[2])
     fi
 
     log_message "bigpemu_functions.sh: launching $ROM_PATH"
-    LD_PRELOAD=/mnt/SDCARD/spruce/flip/lib/libOpenGL.so ./bigpemu "$ROM_PATH" > "$(emu_log_file)" 2>&1
+    LD_PRELOAD="$BIGPEMU_DIR/libOpenGL.so" ./bigpemu "$ROM_PATH" > "$(emu_log_file)" 2>&1
 
     kill -9 "$(pidof gptokeyb2)" 2>/dev/null
     [ -n "$TEMP_ROM" ] && rm -rf "$TEMP_ROM"
