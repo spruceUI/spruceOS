@@ -1,639 +1,607 @@
-./Emu/N64/mupen64plus/libmupen64plus.so.2
-./Emu/N64/mupen64plus/libz.so.1
-./Emu/N64/mupen64plus/libpng16.so.16
-./Emu/N64/mupen64plus-a30/libmupen64plus.so.2
-./Emu/PSP/libstdc++.so.6
-./Emu/EASYRPG/lib-Flip/libglib-2.0.so.0
-./Emu/EASYRPG/lib-Flip/libsystemd.so.0
-./Emu/EASYRPG/lib-Flip/libwrap.so.0
-./Emu/EASYRPG/lib-Flip/libnsl.so.1
-./Emu/EASYRPG/lib-Flip/libicuuc.so.63
-./Emu/EASYRPG/lib-Flip/libgthread-2.0.so.0
-./Emu/EASYRPG/lib-Flip/libXau.so.6
-./Emu/EASYRPG/lib-Flip/liblcf.so.0
-./Emu/EASYRPG/lib-Flip/libxcb.so.1
-./Emu/EASYRPG/lib-Flip/libopusfile.so.0
-./Emu/EASYRPG/lib-Flip/libXdmcp.so.6
-./Emu/EASYRPG/lib-Flip/liblz4.so.1
-./Emu/EASYRPG/lib-Flip/libpulse-simple.so.0
-./Emu/EASYRPG/lib-Flip/libXtst.so.6
-./Emu/EASYRPG/lib-Flip/libspeexdsp.so.1
-./Emu/EASYRPG/lib-Flip/libopus.so.0
-./Emu/EASYRPG/lib-Flip/libpcre.so.3
-./Emu/EASYRPG/lib-Flip/libgpg-error.so.0
-./Emu/EASYRPG/lib-Flip/libpulsecommon-12.2.so
-./Emu/EASYRPG/lib-Flip/libicui18n.so.63
-./Emu/EASYRPG/lib-Flip/libsndfile.so.1
-./Emu/EASYRPG/lib-Flip/libicudata.so.63
-./Emu/EASYRPG/lib-Flip/libgraphite2.so.3
-./Emu/EASYRPG/lib-Flip/liblzma.so.5
-./Emu/EASYRPG/lib-Flip/libfluidsynth.so.3
-./Emu/EASYRPG/lib-Flip/libX11-xcb.so.1
-./Emu/EASYRPG/lib-Flip/libXext.so.6
-./Emu/EASYRPG/lib-Flip/libgcrypt.so.20
-./Emu/EASYRPG/lib-Flip/libasyncns.so.0
-./Emu/EASYRPG/lib-Flip/libcap.so.2
-./Emu/EASYRPG/lib-Flip/libdbus-1.so.3
-./Emu/EASYRPG/lib-Flip/libpulse.so.0
-./Emu/EASYRPG/lib-Flip/libharfbuzz.so.0
-./Emu/EASYRPG/lib-Flip/libFLAC.so.8
-./Emu/EASYRPG/lib-Flip/libICE.so.6
-./Emu/EASYRPG/lib-Flip/libX11.so.6
-./Emu/EASYRPG/lib-Flip/libXi.so.6
-./Emu/EASYRPG/lib-Flip/libpixman-1.so.0
-./Emu/EASYRPG/lib-Flip/libbsd.so.0
-./Emu/EASYRPG/lib-Flip/libSM.so.6
-./Emu/EASYRPG/lib-trimui/liblzma.so.5
-./Emu/EASYRPG/lib-trimui/libpng16.so.16
-./Emu/OPENBOR/lib64/libvpx.so.4
-./Emu/OPENBOR/lib64/libpng12.so.0
-./Emu/OPENBOR/lib64mod/libz.so.1
-./Emu/OPENBOR/lib64mod/libvpx.so.6
-./Emu/OPENBOR/lib64mod/libpng16.so.16
-./Emu/OPENBOR/lib/libSDL2_gfx-1.0.so.0
-./Emu/OPENBOR/lib/libz.so.1
-./Emu/OPENBOR/lib/libSDL2-2.0.so.0
-./Emu/OPENBOR/lib/libvorbisidec.so.1
-./Emu/OPENBOR/lib/libvpx.so.7
-./Emu/OPENBOR/lib/libpng16.so.16
-./Emu/PS/libs/libz.so.1
-./Emu/PS/libs/libSDL-1.2.so.0
-./Emu/PS/libs/libpng16.so.16
-./Emu/PS/liba30/libSDL-1.2.so.0
-./Emu/SCUMMVM/liba30/libfluidlite.so.1
-./Emu/SCUMMVM/liba30/libSDL2_net-2.0.so.0
-./Emu/SCUMMVM/liba30/libasound.so.2
-./Emu/SCUMMVM/liba30/libtheoradec.so.1
-./Emu/SCUMMVM/liba30/libfluidlite.so
-./Emu/SCUMMVM/liba30/libmad.so.0
-./Emu/SCUMMVM/libmini/libjpeg.so.62
-./Emu/SCUMMVM/libmini/libjpeg.so.9
-./Emu/SCUMMVM/libmini/libfreetype.so.6
-./Emu/SCUMMVM/libmini/libvorbisfile.so.3
-./Emu/SCUMMVM/libmini/libvorbis.so.0
-./Emu/SCUMMVM/libmini/libgif.so.7
-./Emu/SCUMMVM/libmini/libfluidlite.so.1
-./Emu/SCUMMVM/libmini/libSDL2_net-2.0.so.0
-./Emu/SCUMMVM/libmini/libSDL-1.2.so.0
-./Emu/SCUMMVM/libmini/libasound.so.2
-./Emu/SCUMMVM/libmini/libogg.so.0
-./Emu/SCUMMVM/libmini/libfribidi.so.0
-./Emu/SCUMMVM/libmini/libtheoradec.so.1
-./Emu/SCUMMVM/libmini/libfluidlite.so
-./Emu/SCUMMVM/libmini/libmad.so.0
-./Emu/SCUMMVM/lib/libnghttp2.so.14
-./Emu/SCUMMVM/lib/libmpeg2.so.0
-./Emu/SCUMMVM/lib/libglib-2.0.so.0
-./Emu/SCUMMVM/lib/libspeechd.so.2
-./Emu/SCUMMVM/lib/libgnutls.so.30
-./Emu/SCUMMVM/lib/libcrypto.so.1.1
-./Emu/SCUMMVM/lib/libasn1.so.8
-./Emu/SCUMMVM/lib/libheimntlm.so.0
-./Emu/SCUMMVM/lib/libhcrypto.so.4
-./Emu/SCUMMVM/lib/libgmp.so.10
-./Emu/SCUMMVM/lib/libwind.so.0
-./Emu/SCUMMVM/lib/libfreetype.so.6
-./Emu/SCUMMVM/lib/libroken.so.18
-./Emu/SCUMMVM/lib/liblber-2.4.so.2
-./Emu/SCUMMVM/lib/libunistring.so.2
-./Emu/SCUMMVM/lib/libsqlite3.so.0
-./Emu/SCUMMVM/lib/libz.so.1
-./Emu/SCUMMVM/lib/libopenal.so.1
-./Emu/SCUMMVM/lib/libatomic.so.1
-./Emu/SCUMMVM/lib/libvorbisfile.so.3
-./Emu/SCUMMVM/lib/libkrb5.so.26
-./Emu/SCUMMVM/lib/libcrypt.so.1
-./Emu/SCUMMVM/lib/libkrb5support.so.0
-./Emu/SCUMMVM/lib/libpulsecommon-14.2.so
-./Emu/SCUMMVM/lib/libvorbis.so.0
-./Emu/SCUMMVM/lib/libfaad.so.2
-./Emu/SCUMMVM/lib/libmpg123.so.0
-./Emu/SCUMMVM/lib/libvpx.so.6
-./Emu/SCUMMVM/lib/libgif.so.7
-./Emu/SCUMMVM/lib/libmikmod.so.3
-./Emu/SCUMMVM/lib/libldap_r-2.4.so.2
-./Emu/SCUMMVM/lib/libsndio.so.7.0
-./Emu/SCUMMVM/lib/libkrb5.so.3
-./Emu/SCUMMVM/lib/libnettle.so.7
-./Emu/SCUMMVM/lib/liblzma.so.5
-./Emu/SCUMMVM/lib/libfluidsynth.so.3
-./Emu/SCUMMVM/lib/libgssapi.so.3
-./Emu/SCUMMVM/lib/libp11-kit.so.0
-./Emu/SCUMMVM/lib/libhx509.so.5
-./Emu/SCUMMVM/lib/libhogweed.so.6
-./Emu/SCUMMVM/lib/libkeyutils.so.1
-./Emu/SCUMMVM/lib/libssl.so.1.1
-./Emu/SCUMMVM/lib/libffi.so.7
-./Emu/SCUMMVM/lib/liba52-0.7.4.so
-./Emu/SCUMMVM/lib/libgssapi_krb5.so.2
-./Emu/SCUMMVM/lib/libdbus-1.so.3
-./Emu/SCUMMVM/lib/librtmp.so.1
-./Emu/SCUMMVM/lib/libpsl.so.5
-./Emu/SCUMMVM/lib/libfribidi.so.0
-./Emu/SCUMMVM/lib/libopenmpt.so.0
-./Emu/SCUMMVM/lib/libFLAC.so.8
-./Emu/SCUMMVM/lib/libcurl.so.4
-./Emu/SCUMMVM/lib/libheimbase.so.1
-./Emu/SCUMMVM/lib/libsasl2.so.2
-./Emu/SCUMMVM/lib/libk5crypto.so.3
-./Emu/SCUMMVM/lib/libhogweed.so.5
-./Emu/SCUMMVM/lib/libpng16.so.16
-./Emu/SCUMMVM/lib/libnettle.so.8
-./Emu/SCUMMVM/lib/libcom_err.so.2
-./Emu/SCUMMVM/lib/libgomp.so.1
-./Emu/SCUMMVM/lib/libidn2.so.0
-./Emu/SCUMMVM/lib/libbrotlidec.so.1
-./Emu/SCUMMVM/lib/libbrotlicommon.so.1
-./Emu/SCUMMVM/lib/libbsd.so.0
-./Emu/SCUMMVM/lib/libtasn1.so.6
-./Emu/SCUMMVM/lib/libssh.so.4
-./Emu/SCUMMVM/lib/libmad.so.0
-./Emu/AMIGA/libmpg123.so.0
-./Emu/AMIGA/libmpg123.so
-./Emu/AMIGA/libFLAC.so.8
-./Emu/PICO8/lib-h700/libsdl_sensor_shim.so
-./Emu/PICO8/lib-stew/libcrypto.so.1.1
-./Emu/PICO8/lib-stew/libSDL2-2.0.so.0
-./Emu/PICO8/lib-stew/libpcre.so.1
-./Emu/PICO8/lib-Flip/libSDL2-2.0.so.0
-./Emu/PICO8/lib-Flip/libpcre.so.1
-./Emu/PICO8/lib-a133p/libSDL2-2.0.so.0
-./Emu/PICO8/lib-a133p/libpcre.so.1
-./Emu/PICO8/lib-cine/libcrypto.so.1.1
-./Emu/PICO8/lib-cine/libSDL2-2.0.so.0
-./Emu/PICO8/lib-cine/libpcre.so.1
-./Emu/MEDIA/lib64/libavdevice.so.57
-./Emu/MEDIA/lib64/libbz2.so.1.0
-./Emu/MEDIA/lib64/libpostproc.so.54
-./Emu/MEDIA/lib64/libavformat.so.57
-./Emu/MEDIA/lib64/libavresample.so.3
-./Emu/MEDIA/lib64/libswresample.so.2
-./Emu/MEDIA/lib64/libavcodec.so.57
-./Emu/MEDIA/lib64/libavutil.so.55
-./Emu/MEDIA/lib64/libx264.so.157
-./Emu/MEDIA/lib64/libswscale.so.4
-./Emu/MEDIA/lib64/libavfilter.so.6
-./Emu/MEDIA/gvu_lib32_a30/libSDL2-2.0.so.0
-./Emu/MEDIA/gvu_lib32/libz.so.1
-./Emu/MEDIA/gvu_lib32/libSDL2-2.0.so.0
-./Emu/MEDIA/gvu_lib64/libz.so.1
-./Emu/MEDIA/lib32/libswscale.so.5
-./Emu/MEDIA/lib32/libXau.so.6
-./Emu/MEDIA/lib32/libxcb-shape.so.0
-./Emu/MEDIA/lib32/libavfilter.so.7
-./Emu/MEDIA/lib32/libxcb.so.1
-./Emu/MEDIA/lib32/libXdmcp.so.6
-./Emu/MEDIA/lib32/libavformat.so.58
-./Emu/MEDIA/lib32/libtheoraenc.so.1
-./Emu/MEDIA/lib32/libavcodec.so.58
-./Emu/MEDIA/lib32/libvorbis.so.0
-./Emu/MEDIA/lib32/libvorbisenc.so.2
-./Emu/MEDIA/lib32/libavresample.so.4
-./Emu/MEDIA/lib32/libavdevice.so.58
-./Emu/MEDIA/lib32/libxcb-xfixes.so.0
-./Emu/MEDIA/lib32/libpostproc.so.55
-./Emu/MEDIA/lib32/libdrm.so.2
-./Emu/MEDIA/lib32/libswresample.so.3
-./Emu/MEDIA/lib32/libogg.so.0
-./Emu/MEDIA/lib32/libtheoradec.so.1
-./Emu/MEDIA/lib32/libx264.so.164
-./Emu/MEDIA/lib32/libxcb-shm.so.0
-./Emu/MEDIA/lib32/libavutil.so.56
-./Emu/MEDIA/lib32/libmodplug.so.1
-./Emu/NDS/lib64/libcrypto.so.1.1
-./Emu/NDS/lib64/libfreeimage.so.3
-./Emu/NDS/lib64/libssl.so.1.1
-./Emu/NDS/lib64/libcurl.so.4
-./Emu/NDS/lib64_A133P_trngaje/libadvdrastic.so
-./Emu/NDS/lib64_A133P_trngaje/libjson-c.so.4
-./Emu/NDS/lib64_SmartPro_original/libSDL2-2.0.so.0
-./Emu/NDS/DSperate_flip_lib/libSDL2-2.0.so.0
-./Emu/NDS/libs/libglib-2.0.so.0
-./Emu/NDS/libs/libSDL2_ttf-2.0.so.0
-./Emu/NDS/libs/libfreetype.so.6
-./Emu/NDS/libs/libjson-c.so.5
-./Emu/NDS/libs/libz.so.1
-./Emu/NDS/libs/libSDL2-2.0.so.0
-./Emu/NDS/libs/libdtr.so
-./Emu/NDS/libs/libasound.so.2
-./Emu/NDS/libs/libharfbuzz.so.0
-./Emu/NDS/libs/libSDL2_image-2.0.so.0
-./Emu/NDS/libs/libpcre2-8.so.0
-./Emu/NDS/libs/libpng16.so.16
-./Emu/NDS/lib64_Flip/libjson-c.so.5
-./Emu/NDS/lib64_Flip/libadvdrastic.so
-./Emu/NDS/lib64_Flip/libSDL2-2.0.so.0
-./Emu/NDS/lib32_Flip/libbz2.so.1.0
-./Emu/NDS/lib32_Flip/libSDL2_ttf-2.0.so.0
-./Emu/NDS/lib32_Flip/libjson-c.so.5
-./Emu/NDS/lib32_Flip/libz.so.1
-./Emu/NDS/lib32_Flip/libSDL2-2.0.so.0
-./Emu/NDS/lib32_Flip/libdtr.so
-./Emu/NDS/lib32_Flip/libSDL2_image-2.0.so.0
-./Emu/NDS/lib32_Flip/libcommon.so
-./Emu/NDS/lib32_Flip/libpng16.so.16
-./Emu/NDS/lib32_Brick/libbz2.so.1.0
-./Emu/NDS/lib32_Brick/libSDL2_ttf-2.0.so.0
-./Emu/NDS/lib32_Brick/libfreetype.so.6
-./Emu/NDS/lib32_Brick/libjson-c.so.5
-./Emu/NDS/lib32_Brick/libEGL.so.1
-./Emu/NDS/lib32_Brick/libz.so.1
-./Emu/NDS/lib32_Brick/libdl.so.2
-./Emu/NDS/lib32_Brick/libexpat.so.1
-./Emu/NDS/lib32_Brick/librt.so.1
-./Emu/NDS/lib32_Brick/libm.so.6
-./Emu/NDS/lib32_Brick/libSDL2-2.0.so.0
-./Emu/NDS/lib32_Brick/libgcc_s.so.1
-./Emu/NDS/lib32_Brick/libdtr.so
-./Emu/NDS/lib32_Brick/libpthread.so.0
-./Emu/NDS/lib32_Brick/libc.so.6
-./Emu/NDS/lib32_Brick/libstdc++.so.6
-./Emu/NDS/lib32_Brick/libdrm.so.2
-./Emu/NDS/lib32_Brick/libgbm.so.1
-./Emu/NDS/lib32_Brick/libasound.so.2
-./Emu/NDS/lib32_Brick/libdbus-1.so.3
-./Emu/NDS/lib32_Brick/libglapi.so.0
-./Emu/NDS/lib32_Brick/libSDL2_image-2.0.so.0
-./Emu/NDS/lib32_Brick/libcommon.so
-./Emu/NDS/lib32_Brick/libGLESv2.so.2
-./Emu/NDS/lib32_Brick/libpng16.so.16
-./Emu/NDS/libs_MiyooMini/libEGL.so
-./Emu/NDS/libs_MiyooMini/libSDL2_ttf-2.0.so.0
-./Emu/NDS/libs_MiyooMini/libjson-c.so.5
-./Emu/NDS/libs_MiyooMini/libz.so.1
-./Emu/NDS/libs_MiyooMini/libSDL2-2.0.so.0
-./Emu/NDS/libs_MiyooMini/libsnappy.so.1
-./Emu/NDS/libs_MiyooMini/libdtr.so
-./Emu/NDS/libs_MiyooMini/libgomp.so.1.0.0
-./Emu/NDS/libs_MiyooMini/libgbm.so.1
-./Emu/NDS/libs_MiyooMini/libasound.so.2
-./Emu/NDS/libs_MiyooMini/libglapi.so.0
-./Emu/NDS/libs_MiyooMini/libSDL2_image-2.0.so.0
-./Emu/NDS/libs_MiyooMini/libpng16.so.16
-./Emu/NDS/libs_MiyooMini/libGLESv2.so
-./Emu/NDS/libs_MiyooMini/libgomp.so.1
-./Emu/NDS/libs_MiyooMini/libGLESv1_CM.so
-./Emu/NDS/lib/libcrypto.so.1.1
-./Emu/NDS/lib/libz.so.1
-./Emu/NDS/lib/libssl.so.1.1
-./Emu/NDS/lib/libcurl.so.4
-./Emu/SATURN/lib64/libz.so.1
-./Emu/SATURN/lib64/libboost_filesystem.so.1.71.0
-./Emu/SATURN/lib64/libpng16.so.16
-./Emu/SATURN/lib64/libbsd.so.0
-./Emu/DC/lib64/libcrypto.so.1.1
-./Emu/DC/lib64/libssl.so.1.1
-./Emu/DC/lib64/libcurl.so.4
-./lib_so_list.txt
-./RetroArch/.retroarch/cores/libgametank_libretro.so
-./RetroArch/.retroarch/cores64/libgametank_libretro.so
-./miyoo/lib/libgme.so.1
-./miyoo/lib/libSDL2_ttf-2.0.so.0
-./miyoo/lib/libSDL_image-1.2.so.0
-./miyoo/lib/libncursesw.so.6
-./miyoo/lib/libSDL2_gfx-1.0.so.0
-./miyoo/lib/libz.so.1
-./miyoo/lib/libshmvar.so
-./miyoo/lib/sdl2/libSDL2-2.0.so.0
-./miyoo/lib/sdl2/libSDL-1.2.so.0
-./miyoo/lib/libSDL2-2.0.so.0
-./miyoo/lib/libturbojpeg.so.0
-./miyoo/lib/libjpeg.so.8
-./miyoo/lib/libstdc++.so.6
-./miyoo/lib/libopk.so.1
-./miyoo/lib/librsautil.so
-./miyoo/lib/libunrar.so
-./miyoo/lib/libSDL-1.2.so.0
-./miyoo/lib/libini.so.0
-./miyoo/lib/libSDL_ttf-2.0.so.0
-./miyoo/lib/libSDL2_image-2.0.so.0
-./miyoo/lib/libSDL2_mixer-2.0.so.0
-./miyoo/lib/libgamename.so
-./miyoo/lib/libSDL_mixer-1.2.so.0
-./miyoo/lib/libpng12.so.0
-./miyoo/lib/libpng16.so.16
-./miyoo/lib/libpng.so.3
-./miyoo/lib/libtmenu.so
-./miyoo355/app/my355/payload/lib/liblz4.so.1
-./miyoo355/app/my355/payload/lib/liblzma.so.5
-./miyoo355/app/my355/payload/lib/liblzo2.so.2
-./miyoo355/app/my355/payload/lib/libzstd.so.1
-./spruce/brick/sdl2/libSDL2_image-2.0.so
-./spruce/miyoomini/lib/libEGL.so
-./spruce/miyoomini/lib/libcrypto.so.1.1
-./spruce/miyoomini/lib/libnsl.so.1
-./spruce/miyoomini/lib/libSDL2_ttf-2.0.so.0
-./spruce/miyoomini/lib/libSDL2_gfx-1.0.so.0
-./spruce/miyoomini/lib/libz.so.1
-./spruce/miyoomini/lib/libm.so.6
-./spruce/miyoomini/lib/libSDL2-2.0.so.0
-./spruce/miyoomini/lib/libSDL2_ttf-2.0.so
-./spruce/miyoomini/lib/libtevent.so.0
-./spruce/miyoomini/lib/libneonarmmiyoo.so
-./spruce/miyoomini/lib/libtdb.so.1
-./spruce/miyoomini/lib/libuuid.so.1
-./spruce/miyoomini/lib/libssl.so.1.1
-./spruce/miyoomini/lib/libutil.so.1
-./spruce/miyoomini/lib/libtalloc.so.2
-./spruce/miyoomini/lib/libSDL2_image-2.0.so.0
-./spruce/miyoomini/lib/libSDL2_mixer-2.0.so.0
-./spruce/miyoomini/lib/libpcre.so.1
-./spruce/miyoomini/lib/libpng16.so.16
-./spruce/miyoomini/lib/libGLESv2.so
-./spruce/bin/Samba/lib/libnetapi.so.0
-./spruce/bin/Samba/lib/libsmbclient.so
-./spruce/bin/Samba/lib/libtevent.so
-./spruce/bin/Samba/lib/libtevent.so.0
-./spruce/bin/Samba/lib/libsmbsharemodes.so.0
-./spruce/bin/Samba/lib/libtdb.so.1
-./spruce/bin/Samba/lib/libtalloc.so
-./spruce/bin/Samba/lib/libtevent.so.0.9.11
-./spruce/bin/Samba/lib/libsmbsharemodes.so
-./spruce/bin/Samba/lib/libtalloc.so.2
-./spruce/bin/Samba/lib/libnetapi.so
-./spruce/bin/Samba/lib/libtalloc.so.2.0.5
-./spruce/bin/Samba/lib/libtdb.so.1.2.9
-./spruce/bin/Samba/lib/libtdb.so
-./spruce/bin/Samba/lib/libsmbclient.so.0
-./spruce/bin/python/lib/libpython3.10.so
-./spruce/bin/python/lib/libtcl8.6.so
-./spruce/bin/python/lib/libtk8.6.so
-./spruce/bin/python/lib/libpython3.so
-./spruce/bin/python/lib/libpython3.10.so.1.0
-./spruce/flip/lib32/libbz2.so.1.0
-./spruce/flip/lib32/libxcb-dri2.so.0
-./spruce/flip/libmali-bifrost-g52-g2p0-gbm.so
-./spruce/flip/arm64-ffmpeg/bin/libGL.so.1
-./spruce/flip/arm64-ffmpeg/bin/libsndio.so.7
-./spruce/flip/arm64-ffmpeg/bin/libavdevice.so.60
-./spruce/flip/arm64-ffmpeg/bin/libGLX.so.0
-./spruce/flip/arm64-ffmpeg/bin/libavdevice.so.58
-./spruce/flip/arm64-ffmpeg/bin/libXv.so.1
-./spruce/flip/arm64-ffmpeg/bin/libGLdispatch.so.0
-./spruce/flip/lib/libOpenGL.so
-./spruce/flip/lib/libGL.so.1
-./spruce/flip/lib/libwebp.so.1.0.3
-./spruce/flip/lib/libsystemd.so.0
-./spruce/flip/lib/libpython3.10.so
-./spruce/flip/lib/libXrandr.so.2
-./spruce/flip/lib/libswscale.so.5
-./spruce/flip/lib/libwrap.so.0
-./spruce/flip/lib/libwebpdemux.so.2.6.0
-./spruce/flip/lib/libnsl.so.1
-./spruce/flip/lib/libncurses.so.6
-./spruce/flip/lib/libicuuc.so.63
-./spruce/flip/lib/libbz2.so.1.0
-./spruce/flip/lib/libSDL2_ttf-2.0.so.0
-./spruce/flip/lib/libXau.so.6
-./spruce/flip/lib/libxmp.so.4
-./spruce/flip/lib/libxkbcommon.so.0
-./spruce/flip/lib/libgme.so.0
-./spruce/flip/lib/libvpx.so.8
-./spruce/flip/lib/sdl2dll/dll/libwebp.so.1.0.3
-./spruce/flip/lib/sdl2dll/dll/libwebpdemux.so.2.6.0
-./spruce/flip/lib/sdl2dll/dll/libxmp.so.4
-./spruce/flip/lib/sdl2dll/dll/libgme.so.0
-./spruce/flip/lib/sdl2dll/dll/libopusfile.so.0
-./spruce/flip/lib/sdl2dll/dll/libopus.so.0
-./spruce/flip/lib/sdl2dll/dll/libSDL2_ttf-2.0.so
-./spruce/flip/lib/sdl2dll/dll/libavif.so.16
-./spruce/flip/lib/sdl2dll/dll/libSDL2_mixer-2.0.so
-./spruce/flip/lib/sdl2dll/dll/libSDL2-2.0.so
-./spruce/flip/lib/sdl2dll/dll/libwavpack.so.1
-./spruce/flip/lib/sdl2dll/dll/libtiff.so.5
-./spruce/flip/lib/sdl2dll/dll/libogg.so.0
-./spruce/flip/lib/sdl2dll/dll/libdav1d.so.6
-./spruce/flip/lib/sdl2dll/dll/libSDL2_gfx-1.0.so
-./spruce/flip/lib/sdl2dll/dll/libSDL2_image-2.0.so
-./spruce/flip/lib/libxcb.so.1
-./spruce/flip/lib/libopusfile.so.0
-./spruce/flip/lib/libXdmcp.so.6
-./spruce/flip/lib/liblz4.so.1
-./spruce/flip/lib/libpulse-simple.so.0
-./spruce/flip/lib/libSDL2_gfx-1.0.so.0
-./spruce/flip/lib/libavformat.so.58
-./spruce/flip/lib/libwayland-egl++.so.1
-./spruce/flip/lib/libopus.so.0
-./spruce/flip/lib/libavcodec.so.58
-./spruce/flip/lib/libgpg-error.so.0
-./spruce/flip/lib/libSDL2_ttf-2.0.so
-./spruce/flip/lib/libicui18n.so.63
-./spruce/flip/lib/libGLX.so.0
-./spruce/flip/lib/libwayland-cursor.so.0
-./spruce/flip/lib/libinterpose.aarch64.so
-./spruce/flip/lib/libmp3lame.so.0
-./spruce/flip/lib/libpulsecommon-13.99.so
-./spruce/flip/lib/libicudata.so.63
-./spruce/flip/lib/libxcb.so copy.1
-./spruce/flip/lib/libXrender.so.1
-./spruce/flip/lib/libavif.so.16
-./spruce/flip/lib/libcairo.so.2
-./spruce/flip/lib/libtcl8.6.so
-./spruce/flip/lib/libxcb-render.so.0
-./spruce/flip/lib/libSDL2_mixer-2.0.so
-./spruce/flip/lib/libX11.so copy.6
-./spruce/flip/lib/libjpeg.so.8
-./spruce/flip/lib/liblzma.so.5
-./spruce/flip/lib/libOpenGL.so.0
-./spruce/flip/lib/libXext.so.6
-./spruce/flip/lib/libXcursor.so.1
-./spruce/flip/lib/libgcrypt.so.20
-./spruce/flip/lib/libspeex.so.1
-./spruce/flip/lib/libtk8.6.so
-./spruce/flip/lib/libSDL2_net-2.0.so.0
-./spruce/flip/lib/libasyncns.so.0
-./spruce/flip/lib/libGLU.so.1
-./spruce/flip/lib/libSDL2-2.0.so
-./spruce/flip/lib/libXss.so.1
-./spruce/flip/lib/libwavpack.so.1
-./spruce/flip/lib/libGLdispatch.so.0
-./spruce/flip/lib/libswresample.so.3
-./spruce/flip/lib/libtiff.so.5
-./spruce/flip/lib/libwayland-client.so.0
-./spruce/flip/lib/libXau.so copy.6
-./spruce/flip/lib/libXdmcp.so copy.6
-./spruce/flip/lib/libpulse.so.0
-./spruce/flip/lib/libapparmor.so.1
-./spruce/flip/lib/libpython3.so
-./spruce/flip/lib/libogg.so.0
-./spruce/flip/lib/libSDL2_image-2.0.so.0
-./spruce/flip/lib/libSDL2_mixer-2.0.so.0
-./spruce/flip/lib/libpcre.so.1
-./spruce/flip/lib/libtheoradec.so.1
-./spruce/flip/lib/libX11.so.6
-./spruce/flip/lib/libdav1d.so.6
-./spruce/flip/lib/libXfixes.so.3
-./spruce/flip/lib/libdecor-0.so.0
-./spruce/flip/lib/libXi.so.6
-./spruce/flip/lib/libpng16.so.16
-./spruce/flip/lib/libSDL2_gfx-1.0.so
-./spruce/flip/lib/libxcb-shm.so.0
-./spruce/flip/lib/libpixman-1.so.0
-./spruce/flip/lib/libavutil.so.56
-./spruce/flip/lib/libwayland-egl.so.1
-./spruce/flip/lib/libmodplug.so.1
-./spruce/flip/lib/libpython3.10.so.1.0
-./spruce/flip/lib/libbsd.so.0
-./spruce/flip/lib/libSDL2_image-2.0.so
-./spruce/flip/lib/libzstd.so.1
-./spruce/h700/lib64/libcrypto.so.1.1
-./spruce/h700/lib64/libSDL_image-1.2.so.0
-./spruce/h700/lib64/libjbig.so.0
-./spruce/h700/lib64/sdl2/libSDL2-2.0.so.0
-./spruce/h700/lib64/libjpeg.so.8
-./spruce/h700/lib64/libssl.so.1.1
-./spruce/h700/lib64/libtiff.so.5
-./spruce/h700/lib64/libSDL_ttf-2.0.so.0
-./spruce/h700/lib64/libwebp.so.6
-./spruce/h700/lib64/libpng16.so.16
-./spruce/h700/lib64/libzstd.so.1
-./spruce/h700/lib32/libEGL.so
-./spruce/h700/lib32/libfreetype.so.6
-./spruce/h700/lib32/libEGL.so.1
-./spruce/h700/lib32/libGLESv1_CM.so.1
-./spruce/h700/lib32/libz.so.1
-./spruce/h700/lib32/libdl.so.2
-./spruce/h700/lib32/librt.so.1
-./spruce/h700/lib32/libm.so.6
-./spruce/h700/lib32/libSDL2-2.0.so.0
-./spruce/h700/lib32/libudev.so.1
-./spruce/h700/lib32/libgcc_s.so.1
-./spruce/h700/lib32/libpthread.so.0
-./spruce/h700/lib32/libstdc++.so.6
-./spruce/h700/lib32/libasound.so.2
-./spruce/h700/lib32/libGLESv2.so.2
-./spruce/h700/lib32/libpng16.so.16
-./spruce/h700/lib32/libGLESv2.so
-./spruce/h700/lib32/libGLESv1_CM.so
-./spruce/h700/lib32/libbrotlidec.so.1
-./spruce/h700/lib32/libbrotlicommon.so.1
-./spruce/h700/lib32/libmali.so.0
-./spruce/h700/ports-lib64/libopenal.so.1
-./spruce/h700/ports-lib64/libatomic.so.1
-./spruce/h700/ports-lib64/libvorbisfile.so.3
-./spruce/h700/ports-lib64/libvorbis.so.0
-./spruce/h700/ports-lib64/libmpg123.so.0
-./spruce/bin64/Samba/lib/libnetapi.so.0
-./spruce/bin64/Samba/lib/libsmbclient.so
-./spruce/bin64/Samba/lib/libtevent.so
-./spruce/bin64/Samba/lib/libtevent.so.0
-./spruce/bin64/Samba/lib/libsmbsharemodes.so.0
-./spruce/bin64/Samba/lib/libtdb.so.1
-./spruce/bin64/Samba/lib/libtalloc.so
-./spruce/bin64/Samba/lib/libtevent.so.0.9.11
-./spruce/bin64/Samba/lib/libsmbsharemodes.so
-./spruce/bin64/Samba/lib/libtalloc.so.2
-./spruce/bin64/Samba/lib/libnetapi.so
-./spruce/bin64/Samba/lib/libtalloc.so.2.0.5
-./spruce/bin64/Samba/lib/libtdb.so.1.2.9
-./spruce/bin64/Samba/lib/libtdb.so
-./spruce/bin64/Samba/lib/libsmbclient.so.0
-./spruce/a30/sdl2/libSDL2_image-2.0.so.0
-./spruce/a30/lib/libcrypto.so.1.1
-./spruce/a30/lib/libstdc++.so.6
-./spruce/a30/lib/libSDL2_net-2.0.so.0
-./spruce/a30/lib/libpcre.so.1
-./spruce/a30/lib/libtheoradec.so.1
-./spruce/a30/setcpu/lib/libSDL2_ttf-2.0.so.0
-./spruce/a30/setcpu/lib/libSDL2_gfx-1.0.so.0
-./spruce/a30/setcpu/lib/libz.so.1
-./spruce/a30/setcpu/lib/libSDL2-2.0.so.0
-./spruce/a30/setcpu/lib/libstdc++.so.6
-./spruce/a30/setcpu/lib/libSDL2_image-2.0.so.0
-./spruce/a30/setcpu/lib/libpng16.so.16
-./App/PixelReader/libs32/libSDL_image-1.2.so.0
-./App/PixelReader/libs32/libz.so.1
-./App/PixelReader/libs32/libxml2.so.2
-./App/PixelReader/libs32/libjpeg.so.8
-./App/PixelReader/libs32/liblzma.so.5
-./App/PixelReader/libs32/libSDL-1.2.so.0
-./App/PixelReader/libs32/libSDL_ttf-2.0.so.0
-./App/PixelReader/libs32/libzip.so.5
-./App/PixelReader/libs/libbz2.so.1.0
-./App/PixelReader/libs/libicuuc.so.66
-./App/PixelReader/libs/libxml2.so.2
-./App/PixelReader/libs/libicudata.so.66
-./App/PixelReader/libs/liblzma.so.5
-./App/PixelReader/libs/libSDL-1.2.so.0
-./App/PixelReader/libs/libzip.so.5
-./App/FileManagement/lib-A30/libSDL2_ttf-2.0.so.0
-./App/FileManagement/lib-A30/libSDL2_image-2.0.so.0
-./App/PyUI/dll-mali/libwebp.so.1.0.3
-./App/PyUI/dll-mali/libwebpdemux.so.2.6.0
-./App/PyUI/dll-mali/libxmp.so.4
-./App/PyUI/dll-mali/libgme.so.0
-./App/PyUI/dll-mali/libopusfile.so.0
-./App/PyUI/dll-mali/libopus.so.0
-./App/PyUI/dll-mali/libSDL2-2.0.so.0
-./App/PyUI/dll-mali/libSDL2_ttf-2.0.so
-./App/PyUI/dll-mali/libavif.so.16
-./App/PyUI/dll-mali/libSDL2_mixer-2.0.so
-./App/PyUI/dll-mali/libSDL2-2.0.so
-./App/PyUI/dll-mali/libwavpack.so.1
-./App/PyUI/dll-mali/libtiff.so.5
-./App/PyUI/dll-mali/libogg.so.0
-./App/PyUI/dll-mali/libsamplerate.so.0
-./App/PyUI/dll-mali/libdav1d.so.6
-./App/PyUI/dll-mali/libpng12.so.0
-./App/PyUI/dll-mali/libSDL2_gfx-1.0.so
-./App/PyUI/dll-mali/libSDL2_image-2.0.so
-./App/PyUI/dll/libwebp.so.1.0.3
-./App/PyUI/dll/libwebpdemux.so.2.6.0
-./App/PyUI/dll/libxmp.so.4
-./App/PyUI/dll/libgme.so.0
-./App/PyUI/dll/libopusfile.so.0
-./App/PyUI/dll/libopus.so.0
-./App/PyUI/dll/libSDL2_ttf-2.0.so
-./App/PyUI/dll/libavif.so.16
-./App/PyUI/dll/libSDL2_mixer-2.0.so
-./App/PyUI/dll/libSDL2-2.0.so
-./App/PyUI/dll/libwavpack.so.1
-./App/PyUI/dll/libtiff.so.5
-./App/PyUI/dll/libogg.so.0
-./App/PyUI/dll/libdav1d.so.6
-./App/PyUI/dll/libSDL2_gfx-1.0.so
-./App/PyUI/dll/libSDL2_image-2.0.so
-./App/adbd/libcrypto.so.1.1
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so.3.9.100
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libluajit-5.1.so.2
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libsystemd.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so.2.7.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so.4
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavahi-client.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/liblz4.so.1
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libpulse-simple.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libexpat.so.1
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libopus.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so.58
-./App/Moonlight/ports/moonlightnew/moonlight/libs/liblove-11.5.so
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libgpg-error.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so.4
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libssl.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libevdev.so.2
-./App/Moonlight/ports/moonlightnew/moonlight/libs/liblzma.so.5
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so.2.7.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libgcrypt.so.20
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libcrypto.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libuuid.so.1
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libdbus-1.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libpulse.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libcurl.so.4
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavahi-common.so.3
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so.56
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so.58.134.100
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libbsd.so.0
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so.56.70.100
-./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so
-./App/Songo#5/songo5/runtime/ffmpeg/libavutil.so.60
-./App/Songo#5/songo5/runtime/ffmpeg/libavformat.so.62
-./App/Songo#5/songo5/runtime/ffmpeg/libswresample.so.6
-./App/Songo#5/songo5/runtime/ffmpeg/libavcodec.so.62
-./App/Gallery/lib64/libSDL-1.2.so.0
-./App/Gallery/lib32/libSDL_image-1.2.so.0
-./App/Gallery/lib32/libSDL-1.2.so.0
-./App/Gallery/lib32/libSDL_ttf-2.0.so.0
+75fac069e418f55ac03b0188e4f3a8333a9a5bbb0a10dc688dcbb8d95aa87c06  ./App/PixelReader/libs32/libSDL_image-1.2.so.0
+3a5a76c882131252383ed248f2be89df8c43017b1efda6dcd4841430c9464866  ./App/PixelReader/libs32/libz.so.1
+440d952c653f2ed0b7efa18750d507231e8813ae681232b37b47784a15416128  ./App/PixelReader/libs32/libxml2.so.2
+ba35784fa7f6c84099ef7a7dd5fc0c63a3b2c982cc44acf19345f07d6a50a70a  ./App/PixelReader/libs32/libjpeg.so.8
+94d7347bf270fe6ad00a6fec26275f8e27ed906febee6a51aaee113d54abc20a  ./App/PixelReader/libs32/liblzma.so.5
+f770d2cd90eddd56e3f4831526a79bfd59b7057f2f5bb3defec28915c9a95b80  ./App/PixelReader/libs32/libSDL-1.2.so.0
+585147b05fb7dfbe3f5e5f6506f36a766b9586dfa191bd89f4ace327d7d11cf9  ./App/PixelReader/libs32/libSDL_ttf-2.0.so.0
+278df0c685c35d3564434fd2d589d83ed91036d7fdd2d7356e78db63b0b0c5b9  ./App/PixelReader/libs32/libzip.so.5
+d2ec91f432a456b54adaddb7e7095cc53b81a1277ae51199a902540b6b7a3e12  ./App/PixelReader/libs/libbz2.so.1.0
+712d28f7e05d429b1163f951a73ee8b4dc316ce2e1a77c1d9701dae015d166eb  ./App/PixelReader/libs/libicuuc.so.66
+9946813793ea0ca47199d780cb26243d9757dfb0fb70a0478fc8b91a1070d3ac  ./App/PixelReader/libs/libxml2.so.2
+2678dca08d30cabfb532ca45be6dcda1be6ceacceea2e3ad2e26dcb02108ff88  ./App/PixelReader/libs/libicudata.so.66
+8cd9f1ee1383c5a04614f61cd81db012c0245b87cc6f7b12c19a072ccc792775  ./App/PixelReader/libs/liblzma.so.5
+4dfdaebc6b5bed95d70291e2713beccef55dcc041cfae76f8e969c54e6129ed3  ./App/PixelReader/libs/libSDL-1.2.so.0
+b9fdde94f8a77c731670f9200e5961986b1c1c84d158f8788648a0269a5784ae  ./App/PixelReader/libs/libzip.so.5
+9b34fce9cd2d1ef65fe05eeb714204a5d94c973d1c32bd87a507d80f496eb170  ./App/FileManagement/lib-A30/libSDL2_ttf-2.0.so.0
+5b9eab85b126497cbb5acaf61c4b2ce737cffdba5dc758042b160898d4d0167a  ./App/FileManagement/lib-A30/libSDL2_image-2.0.so.0
+43634317b8289442034e916b472bc9cac54539e99601d9f62d95321070643351  ./App/PyUI/dll-mali/libwebp.so.1.0.3
+740eda82dfe9077fde1b0190aa5ddfd5b292334185cb91ae573135f01bb41d8c  ./App/PyUI/dll-mali/libwebpdemux.so.2.6.0
+d91ce95aa684df5ecd1fce8efdabd2082635fd6e5faa34580e54abac61902012  ./App/PyUI/dll-mali/libxmp.so.4
+cc471ee979d98dc185be87801b7eaff24dc19a02cb6312b575ac5df59df6a47c  ./App/PyUI/dll-mali/libgme.so.0
+ff7e778b7581ecf8756d0fdd71091eb17322c1ec14c54377fb22c7342cfff0b4  ./App/PyUI/dll-mali/libopusfile.so.0
+cf93ef3ebdc9a34c99e86d3b7192bf05631753e057e8a0d90021d38718abd722  ./App/PyUI/dll-mali/libopus.so.0
+ce4b4e2ea4aaf4500a0388655a80e61df8a8e8f8344acaf7773f9aeeda77238d  ./App/PyUI/dll-mali/libSDL2-2.0.so.0
+ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./App/PyUI/dll-mali/libSDL2_ttf-2.0.so
+af7dd704f1d562b382c64c0cdeed4621a525452c7fd0716f1b0771a02426e9b0  ./App/PyUI/dll-mali/libavif.so.16
+def4985c80882d2694853530a951561380fb2403f4649964ad8431320d8bf802  ./App/PyUI/dll-mali/libSDL2_mixer-2.0.so
+ce4b4e2ea4aaf4500a0388655a80e61df8a8e8f8344acaf7773f9aeeda77238d  ./App/PyUI/dll-mali/libSDL2-2.0.so
+0669230435538a29b0c0d7f0f8498b6c2ea2bf171112ccaf6e7b2afb2a2a00ab  ./App/PyUI/dll-mali/libwavpack.so.1
+610e6b05df7fa00d6f4a7f6c466feb2f76d1cd21ee0871ff5335bba2a374eca0  ./App/PyUI/dll-mali/libtiff.so.5
+6c333116f097d9c612276b897e1f99516c3234c6a3e00b88b5860fd94d2e56a0  ./App/PyUI/dll-mali/libogg.so.0
+0816706e6cf0f6b17e14b8a6305cf5214ce3c8af8d2116c22341c7961a1498be  ./App/PyUI/dll-mali/libsamplerate.so.0
+95bd972df4ece2f141b84963283a40171d71d72be5224de1018c62d463d4e5fe  ./App/PyUI/dll-mali/libdav1d.so.6
+f43019f22f9d98734bfda6e0645ac0c7725c71fb4f6b785a64c30156d03dced9  ./App/PyUI/dll-mali/libpng12.so.0
+b7f6000e8f985b9f71a8432a6189ec618e4860406dc33934ce47ee6c23352d72  ./App/PyUI/dll-mali/libSDL2_gfx-1.0.so
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./App/PyUI/dll-mali/libSDL2_image-2.0.so
+43634317b8289442034e916b472bc9cac54539e99601d9f62d95321070643351  ./App/PyUI/dll/libwebp.so.1.0.3
+740eda82dfe9077fde1b0190aa5ddfd5b292334185cb91ae573135f01bb41d8c  ./App/PyUI/dll/libwebpdemux.so.2.6.0
+d91ce95aa684df5ecd1fce8efdabd2082635fd6e5faa34580e54abac61902012  ./App/PyUI/dll/libxmp.so.4
+cc471ee979d98dc185be87801b7eaff24dc19a02cb6312b575ac5df59df6a47c  ./App/PyUI/dll/libgme.so.0
+ff7e778b7581ecf8756d0fdd71091eb17322c1ec14c54377fb22c7342cfff0b4  ./App/PyUI/dll/libopusfile.so.0
+cf93ef3ebdc9a34c99e86d3b7192bf05631753e057e8a0d90021d38718abd722  ./App/PyUI/dll/libopus.so.0
+ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./App/PyUI/dll/libSDL2_ttf-2.0.so
+af7dd704f1d562b382c64c0cdeed4621a525452c7fd0716f1b0771a02426e9b0  ./App/PyUI/dll/libavif.so.16
+def4985c80882d2694853530a951561380fb2403f4649964ad8431320d8bf802  ./App/PyUI/dll/libSDL2_mixer-2.0.so
+e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./App/PyUI/dll/libSDL2-2.0.so
+0669230435538a29b0c0d7f0f8498b6c2ea2bf171112ccaf6e7b2afb2a2a00ab  ./App/PyUI/dll/libwavpack.so.1
+610e6b05df7fa00d6f4a7f6c466feb2f76d1cd21ee0871ff5335bba2a374eca0  ./App/PyUI/dll/libtiff.so.5
+6c333116f097d9c612276b897e1f99516c3234c6a3e00b88b5860fd94d2e56a0  ./App/PyUI/dll/libogg.so.0
+95bd972df4ece2f141b84963283a40171d71d72be5224de1018c62d463d4e5fe  ./App/PyUI/dll/libdav1d.so.6
+b7f6000e8f985b9f71a8432a6189ec618e4860406dc33934ce47ee6c23352d72  ./App/PyUI/dll/libSDL2_gfx-1.0.so
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./App/PyUI/dll/libSDL2_image-2.0.so
+1f7cfa9d88e3792eda3a6db2048d3b780fab3b92d6c47190d60c1bf17979b71b  ./App/adbd/libcrypto.so.1.1
+fdc0a580ba0f8e94ccfcf2a033ca2ee087727a2c5774ce13333272587cd18269  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so.3.9.100
+b4b29431056a11fb2309d1327ac941193ad8113ca7bf48584af9965846fabc65  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libluajit-5.1.so.2
+5899be19768050a40d016ca32cce11423f7eaba6086b36c78608244928accd48  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libsystemd.so.0
+d4d86f952146ad63e5f71c5da0c65417a4af0a2215a3b15d573493540a25da9e  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so.2.7.0
+d4d86f952146ad63e5f71c5da0c65417a4af0a2215a3b15d573493540a25da9e  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so.4
+619ba379bbb93b76d5d164f3d670afb896d8b9b92385fbf47e7a6c794a721734  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavahi-client.so.3
+7c8ab8eae344c605b41e94c8079b0776be73e8bde0d7133ae571110779c246e2  ./App/Moonlight/ports/moonlightnew/moonlight/libs/liblz4.so.1
+90c6b092530e9050e7dfd8413b7f5a6c46f84da572f22e4cab6172ee5da26f7a  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libpulse-simple.so.0
+6c8e3156a86e6220fac7f8f48f804cfd41df96545e18853d86cf5f590bad16a7  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so
+aa40c8e031a751b71ab72f4e5b307282f37d850df946fd0bc58f709caa49141b  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libexpat.so.1
+29b7d02c15b66536a58a10aaf11f64663d96b0d1aaa3c768b56dfe75d30f5cdd  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libopus.so.0
+db0a4ff20a24765b9fc2146e29e2884b364758aecd551502d5f4cf4a66d9a481  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so.58
+a50c83729cb0e1c4d8389eaaa827f0a6e7f3362814d0504ca84074dd0e47c379  ./App/Moonlight/ports/moonlightnew/moonlight/libs/liblove-11.5.so
+1fe5234793a681e855169fe6703800f6d273bc718f2901a703b89a620dc0b34a  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libgpg-error.so.0
+fdc0a580ba0f8e94ccfcf2a033ca2ee087727a2c5774ce13333272587cd18269  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so
+daffca86d7e7a1c8ee45a2f73cd782b37e49c511b9c9230cb33aa888efed831c  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so.4
+a793ff31aa8955fbc5ba7d4579c43f197fe91b9add663306818eff401458afc2  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libssl.so.3
+58ff33a3f9d078d1aa026bb9e05b827c9af77eb25c0c53bfd323a145d68cc4ce  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libevdev.so.2
+39295b2a71893ae067c387bdb4d47374e6eefd5e11e92a8f37919a7774c8679f  ./App/Moonlight/ports/moonlightnew/moonlight/libs/liblzma.so.5
+daffca86d7e7a1c8ee45a2f73cd782b37e49c511b9c9230cb33aa888efed831c  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so.2.7.0
+d00669d11d3afcaa56c3654dd158e5929f28265cfb1e5773cd7940304f24f262  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libgcrypt.so.20
+bc7729db8fc3a9166f017be1c07ccc00cef48f25ee72571d61bb5649bc84c9eb  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libcrypto.so.3
+491b2465f412a139512f4583900ee818f5de0708c20e389a859f048af28e7487  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libuuid.so.1
+daffca86d7e7a1c8ee45a2f73cd782b37e49c511b9c9230cb33aa888efed831c  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libmoonlight-common.so
+db0a4ff20a24765b9fc2146e29e2884b364758aecd551502d5f4cf4a66d9a481  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so
+fdc0a580ba0f8e94ccfcf2a033ca2ee087727a2c5774ce13333272587cd18269  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libswresample.so.3
+f6dbd10e42c254c0c5469af2862584d99a5d125cd46450559ef54cacbbc67ffc  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libdbus-1.so.3
+856bb327790b9a311b860c39fc27174a6441c0b1da4827719e062685d64c0db3  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libpulse.so.0
+ac36181ace4c77182df21de8adac4c35761ff256fb2996833a5d57cce0465ba0  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libcurl.so.4
+cbc2be813172f9b57c5a1efb57af4e548cf922965ca692d086981285161e131a  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavahi-common.so.3
+6c8e3156a86e6220fac7f8f48f804cfd41df96545e18853d86cf5f590bad16a7  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so.56
+db0a4ff20a24765b9fc2146e29e2884b364758aecd551502d5f4cf4a66d9a481  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavcodec.so.58.134.100
+db1a155fe53084c14f194d9ef59ffe94b985da258c43b962aeb0acf8f3299dc2  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libbsd.so.0
+6c8e3156a86e6220fac7f8f48f804cfd41df96545e18853d86cf5f590bad16a7  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libavutil.so.56.70.100
+d4d86f952146ad63e5f71c5da0c65417a4af0a2215a3b15d573493540a25da9e  ./App/Moonlight/ports/moonlightnew/moonlight/libs/libgamestream.so
+a2496a5bc6771a691cee2156b4efeec0fa66f5bc6fae850b8fc0c6f7700585d3  ./App/Songo#5/songo5/runtime/ffmpeg/libavutil.so.60
+275e5a0f13481ef5761fb93bd52156249d808e72e6438e197da9c5ce22dd2b4b  ./App/Songo#5/songo5/runtime/ffmpeg/libavformat.so.62
+fa8d307b5c685afe92552ca906a97559a4f5b02e5f4da12f2d4e10ffea1f9f8c  ./App/Songo#5/songo5/runtime/ffmpeg/libswresample.so.6
+e62a309c572968ad47281be61a56c29ba8953ef6162225dff1d2f6b272dd1647  ./App/Songo#5/songo5/runtime/ffmpeg/libavcodec.so.62
+4dfdaebc6b5bed95d70291e2713beccef55dcc041cfae76f8e969c54e6129ed3  ./App/Gallery/lib64/libSDL-1.2.so.0
+75fac069e418f55ac03b0188e4f3a8333a9a5bbb0a10dc688dcbb8d95aa87c06  ./App/Gallery/lib32/libSDL_image-1.2.so.0
+f770d2cd90eddd56e3f4831526a79bfd59b7057f2f5bb3defec28915c9a95b80  ./App/Gallery/lib32/libSDL-1.2.so.0
+585147b05fb7dfbe3f5e5f6506f36a766b9586dfa191bd89f4ace327d7d11cf9  ./App/Gallery/lib32/libSDL_ttf-2.0.so.0
+c59133f090aa2113bf9154a8df1e7edc6ec7a33aad0bdf4001473984128f761e  ./Emu/N64/mupen64plus/libncurses.so.6
+e827ff2fe7a997cca388e0e506394a366990740a7f5712c79ad2182c217797e6  ./Emu/N64/mupen64plus/libmupen64plus.so.2
+7fb37d1568085015270b83b794d78bece261bdd617b664d2263780fd1093d5f4  ./Emu/N64/mupen64plus/libz.so.1
+cd7fe67ad9102203413271a632284b703d8e945f271d0187442da9961038bf25  ./Emu/N64/mupen64plus/libpng16.so.16
+85242a2e25bfcea17b84db3abb3b67b8676b05901b697b1842472fd5df19c06b  ./Emu/N64/mupen64plus-a30/libmupen64plus.so.2
+9d54d67da9a624808234015c818bc25da80d52490f15588bb03853726e43aa3d  ./Emu/PSP/libstdc++.so.6
+fa8717afef1f312fa2524adcb10dc5eb183190c42e8e4b1d35a95814f9f1237d  ./Emu/EASYRPG/lib-Flip/libglib-2.0.so.0
+edd991555c166c911341cf8eccbd44316808a276e0deac6b6cc17a998553b46b  ./Emu/EASYRPG/lib-Flip/libsystemd.so.0
+57c15a782353acbebd1a0c028fe5d7916753f75e853a1cff0918672899fdff3f  ./Emu/EASYRPG/lib-Flip/libwrap.so.0
+d931488257a2593a26faace47ffc88da46e1f2ffb0e8d946e443bcf73b620152  ./Emu/EASYRPG/lib-Flip/libnsl.so.1
+5c4973dc03b6f72890a045d5e78da3148e45ed3e8118f2b39bf44a9f52f3b347  ./Emu/EASYRPG/lib-Flip/libicuuc.so.63
+d36906ab62455c42f141ba0edbf158d43caa7c7ca000610f60419d6cc0c6ba6b  ./Emu/EASYRPG/lib-Flip/libgthread-2.0.so.0
+433de0cc7381b16e1b400ffedb3fb05d8df5b814d92dd99f72c801c2bf38118e  ./Emu/EASYRPG/lib-Flip/libXau.so.6
+949ee2db22cb4a6ebe8955b23091ba405bca9f4fd66054ddd8fa5dbf799d0234  ./Emu/EASYRPG/lib-Flip/liblcf.so.0
+2211a1981a5ba0fb63783c7292bd5d0d5cec92efe38d4d52a8346c5f87031804  ./Emu/EASYRPG/lib-Flip/libxcb.so.1
+5355cc8d3a21d62de494b58858bc341128ee998da5a7e4321486275b46f78117  ./Emu/EASYRPG/lib-Flip/libopusfile.so.0
+cff589ca553d339123ba32528cdf45f071761624aef1ebb4b3970fe9180b7e3b  ./Emu/EASYRPG/lib-Flip/libXdmcp.so.6
+a65c53e2e7015b636e4f212449eff2016b99736cdf5798fe2cf3672818b88b8b  ./Emu/EASYRPG/lib-Flip/liblz4.so.1
+57f16dd733197f678be2322dc2d48b490128188f8c832ee8d72bf211af008d42  ./Emu/EASYRPG/lib-Flip/libpulse-simple.so.0
+966b7ba915987a811753895baddd64fde3456ffd424c2437b95b677d39a9c03f  ./Emu/EASYRPG/lib-Flip/libXtst.so.6
+66d09a760f709c67bf56065d446d857db1a26c80ac064dd55449132f41503d76  ./Emu/EASYRPG/lib-Flip/libspeexdsp.so.1
+4c4e877b2b39f975ee051cd31bace72fde3cd676bc2de81f440deb0e087f894c  ./Emu/EASYRPG/lib-Flip/libopus.so.0
+c97cc6dd9ac99243a87484517511a95f419973dc10bde271de587196db05456b  ./Emu/EASYRPG/lib-Flip/libpcre.so.3
+8d1b2e62ff55bf2c9c1ef405f1cb04eb2fc8b0e79696d3fda34cafe59d0ab924  ./Emu/EASYRPG/lib-Flip/libgpg-error.so.0
+defd5d5a5a80c5d5b9251d2f8dd73cf9cced22885b848014aa7b3356a091e205  ./Emu/EASYRPG/lib-Flip/libpulsecommon-12.2.so
+0dd86eba0290dbaa7b8e9f90c05948429db0ff3dbd75ba81bb103b4ba5ad756b  ./Emu/EASYRPG/lib-Flip/libicui18n.so.63
+d05ed068b4060ea0df92628100bf37d1c97e2252e4c5e97b3af3ecbc609bb115  ./Emu/EASYRPG/lib-Flip/libsndfile.so.1
+6329080e402b0c8619f54b2102c187eabfd10c9599156e778907b7537064eb2f  ./Emu/EASYRPG/lib-Flip/libicudata.so.63
+2603e04b3d96fedfee55813d022762c196cfdc971b02fbf62b0f0c9845fe3393  ./Emu/EASYRPG/lib-Flip/libgraphite2.so.3
+c6a7b9d7bd43f4ec853da608ecf4e65e9e55494454f0b2813eb1872109ec2d22  ./Emu/EASYRPG/lib-Flip/liblzma.so.5
+95d1977c9ec9328f750a5b067866b62ae5edc78cf83bb3408ac7a3441584a3b3  ./Emu/EASYRPG/lib-Flip/libfluidsynth.so.3
+9fd97baa200ee503c47d2d6f71ec91bc195a56d2e0091a86a3def66932027771  ./Emu/EASYRPG/lib-Flip/libX11-xcb.so.1
+f205981e2e44ea47d9e97ce50beaf88f823ce25c0994f37e104a4785418d825e  ./Emu/EASYRPG/lib-Flip/libXext.so.6
+bb02f37bdd1499d797707286b033001dbee52d789be9463781d1209b00f7bb51  ./Emu/EASYRPG/lib-Flip/libgcrypt.so.20
+39ac0532131e1acdeb4668bbd516d9537bb7d2c3191dd2846a7302c25b70234d  ./Emu/EASYRPG/lib-Flip/libasyncns.so.0
+a3b1bc2bc343d213baa260b34389ea5ab7737a8c99eb2cdaeae6139915de76f8  ./Emu/EASYRPG/lib-Flip/libcap.so.2
+06c965250656961e735e4e3f6f5bf1f4c96dbe64f5c3cb602b63e6b49d9a8901  ./Emu/EASYRPG/lib-Flip/libdbus-1.so.3
+6b24bb9bd70e820fceada21322d45c0d2f3381b7613588a20c79693189e84f06  ./Emu/EASYRPG/lib-Flip/libpulse.so.0
+2260ada45bf784a6530c1b85a1fd8b439bf44c109535801c82edb283f090e9b4  ./Emu/EASYRPG/lib-Flip/libharfbuzz.so.0
+37f0fabec02bf23c9444f6dfada0e3fe6213b35cce04dd6691ad7893b2d98588  ./Emu/EASYRPG/lib-Flip/libFLAC.so.8
+867ec288958effab33c8e4cb8d498d1b2b195d4268f8f1bb62aa232200b9f04a  ./Emu/EASYRPG/lib-Flip/libICE.so.6
+52d778a02cce727aa75d199b13549ebe2051e24ce6e34828cabc94c9c2ccf101  ./Emu/EASYRPG/lib-Flip/libX11.so.6
+e8653aef9b7aae23b80d82954a3fc9fa728d2e1b3d6e078bbaa10d6acaac4af7  ./Emu/EASYRPG/lib-Flip/libXi.so.6
+9b380fc455d00f7cc92424ca90ef8ba12f95b79da553099fb270d956a79cd5aa  ./Emu/EASYRPG/lib-Flip/libpixman-1.so.0
+5958b4bb068c251e7daf0f37cc148bc26ffa37b7839d18a2431f51a7ff2d2961  ./Emu/EASYRPG/lib-Flip/libbsd.so.0
+94937ec22b40d901691cd0665e4027cc7310c3c8217797345c8794a145be437d  ./Emu/EASYRPG/lib-Flip/libSM.so.6
+8cd9f1ee1383c5a04614f61cd81db012c0245b87cc6f7b12c19a072ccc792775  ./Emu/EASYRPG/lib-trimui/liblzma.so.5
+382bd91e6f0dbea241eb85b92d349e5f99d6cbcbac0a575c7a8636ba6c192fa8  ./Emu/EASYRPG/lib-trimui/libpng16.so.16
+79bf81b394c488aa1a9db3d0974abe4baf06b896d936ae6a1b81260a090418a0  ./Emu/OPENBOR/lib64/libpng12.so.0
+f7421fde8036391750dc2b1dd7299a0a3305a93cb95846fcc381590f565215c1  ./Emu/OPENBOR/lib64mod/libz.so.1
+14ba485f3a55c36893f372831d0445f78fc64f26073a8d7374dc89ac50b95edc  ./Emu/OPENBOR/lib64mod/libpng16.so.16
+5fe384a84823a26ab10f446db2d9e7d43e8ecaaad2860f766209ff2ac3a273c5  ./Emu/OPENBOR/lib/libSDL2_gfx-1.0.so.0
+f08192376fe7f8cbe2bd39290483710682ace87fd226a95a0324fca84f7f9626  ./Emu/OPENBOR/lib/libz.so.1
+f2a9605bfb415f2bcd4829ad38bb33bb73af935ef41cb0d30e2568eeef02842a  ./Emu/OPENBOR/lib/libSDL2-2.0.so.0
+c36f9ed870b40c341069fe8ec047ec25b92c786c9975e68a12dc2535134dbba2  ./Emu/OPENBOR/lib/libvorbisidec.so.1
+abeab7bf55f80db2b0d54e1ab9d8c43c53c45c155dbeeab7c6b90e0b2fe6e4ed  ./Emu/OPENBOR/lib/libpng16.so.16
+f7421fde8036391750dc2b1dd7299a0a3305a93cb95846fcc381590f565215c1  ./Emu/PS/libs/libz.so.1
+4d112238b6e74af84ed70248bf6d8299942adb8a2120c973b7fa586ff38cf37d  ./Emu/PS/libs/libSDL-1.2.so.0
+14ba485f3a55c36893f372831d0445f78fc64f26073a8d7374dc89ac50b95edc  ./Emu/PS/libs/libpng16.so.16
+46294a147fb7dec6c990400f969f0ab6bb8dad5a82028ddffe54d85ccb4fad0d  ./Emu/PS/liba30/libSDL-1.2.so.0
+6cc6da24f6537025db832cf89a60075cc6066f7b60af729daba3b7146693661f  ./Emu/SCUMMVM/liba30/libfluidlite.so.1
+2eff8ace68a08b737e30de29957dcecd3ee4e7e57403454670085f8068707e00  ./Emu/SCUMMVM/liba30/libSDL2_net-2.0.so.0
+0fa2dd965d8d8eff1f6f2d2c5dc877423dee000fc1c274563a8729fdf0c7bda8  ./Emu/SCUMMVM/liba30/libasound.so.2
+d6d8587bb00259d4f7a8dfd4038935729f9d181ae0c04216add83f4295cdcd8a  ./Emu/SCUMMVM/liba30/libtheoradec.so.1
+6cc6da24f6537025db832cf89a60075cc6066f7b60af729daba3b7146693661f  ./Emu/SCUMMVM/liba30/libfluidlite.so
+48ff37fd1fd56a7a105e8c091372604693552f7b4f8e5cbcad210e6a11126d41  ./Emu/SCUMMVM/liba30/libmad.so.0
+eef66a800e2525a3fc3a8b58fe40e556e893916aa7c30d2c244a1c10f2641bf9  ./Emu/SCUMMVM/libmini/libjpeg.so.62
+1d4f7b63479a7a82afed35268e954072141b636634fe515636a4369685eb97bf  ./Emu/SCUMMVM/libmini/libjpeg.so.9
+6518d3fd8b7574e07efc4ca1e8a9d7634cd8ba153865b862f3c4bb95421257d4  ./Emu/SCUMMVM/libmini/libfreetype.so.6
+7e72a5e016cb4348e99c2530bc2d606989e2ac01f9b149ab101e853f40a83b81  ./Emu/SCUMMVM/libmini/libvorbisfile.so.3
+b66f383bc2dfb58442367113447f55647c94eb22ce4a5945bf9180e7e5eadb8e  ./Emu/SCUMMVM/libmini/libvorbis.so.0
+848b12fc133a4265aa697b993034db477f7f604e79e0be18042d464ea3ed1780  ./Emu/SCUMMVM/libmini/libgif.so.7
+971f5ff6bf61fb016827c221facf35173bb9f7d4eaf7c42e853656a9bd87a462  ./Emu/SCUMMVM/libmini/libfluidlite.so.1
+0694f9a0284af193245673cf14b2b19107b235858dbb0802eb33132fd465d96b  ./Emu/SCUMMVM/libmini/libSDL2_net-2.0.so.0
+01be412b18a3cfed24b223fc99b6a269778a1576e5d90a280f28a5a07402a8e1  ./Emu/SCUMMVM/libmini/libSDL-1.2.so.0
+54924f83d41a024f5a20f3ece91624ec4f2f08219337f755019abea68650dc4f  ./Emu/SCUMMVM/libmini/libasound.so.2
+21271b9fbd47495de147b25fde98c5ca0dec7209b28a542502fb0f50f15ad71e  ./Emu/SCUMMVM/libmini/libogg.so.0
+7aa769364c85ddcddd0cbd2f00f81888c114a3688f5349379bac283e7f208170  ./Emu/SCUMMVM/libmini/libfribidi.so.0
+88b6d1252242ea50a92d9b7e00ff65b6305ba9887b4fe1e94e71b838f8b1f5b6  ./Emu/SCUMMVM/libmini/libtheoradec.so.1
+971f5ff6bf61fb016827c221facf35173bb9f7d4eaf7c42e853656a9bd87a462  ./Emu/SCUMMVM/libmini/libfluidlite.so
+34b20c97c6368f5c715f1255ba1da7501ae07eed5dd3b6f377ef8bd8bcf7d83b  ./Emu/SCUMMVM/libmini/libmad.so.0
+5f421c7f8d969e24ae9597430a509aec3c256e4b3137609ae19eaf21cd5e5bf6  ./Emu/SCUMMVM/lib/libglib-2.0.so.0
+a44017a30eb67aac07887c3a9c990f87dd06133b1ed46c4f2e0e987d0e3b0348  ./Emu/SCUMMVM/lib/libspeechd.so.2
+7f78e54add153922f5fcbbff4742673b37ae93e0b4fe224131e91afa9864f6f6  ./Emu/SCUMMVM/lib/libcrypto.so.1.1
+87a8a74922c37135b379ae5b68eebc199371e6105af6d130547f6722c3434bd2  ./Emu/SCUMMVM/lib/libfreetype.so.6
+7fc3a87247bd2977f444dc2b007a1550ade1a09a29f0a99803add558f0a60fc6  ./Emu/SCUMMVM/lib/libsqlite3.so.0
+f7421fde8036391750dc2b1dd7299a0a3305a93cb95846fcc381590f565215c1  ./Emu/SCUMMVM/lib/libz.so.1
+9e3a56e70bf9596b1d47d466f89e09e89df25f8b33ed502d310eb1c838d89eac  ./Emu/SCUMMVM/lib/libpulsecommon-14.2.so
+5bedfb2a3c05f80aa2c0cd2583f37bfe69eb91ac8979e7a4a306fad24482d0f5  ./Emu/SCUMMVM/lib/libmpg123.so.0
+9eb903b3bbf366abc0a88ac37d0e16cb53e6df49c093070c0045634e10306e94  ./Emu/SCUMMVM/lib/libsndio.so.7.0
+39295b2a71893ae067c387bdb4d47374e6eefd5e11e92a8f37919a7774c8679f  ./Emu/SCUMMVM/lib/liblzma.so.5
+4747f75b47c19fa50a4e7086055bc2257de342381dc41ba3a5c7f4e3927861eb  ./Emu/SCUMMVM/lib/libfluidsynth.so.3
+1035908aabab0202d741173e908382d9f1a2ac989625ccb92d01e54702103ba9  ./Emu/SCUMMVM/lib/libdbus-1.so.3
+153ae61aa87046588e289713108582e7cf4f4f1a27b08f24ebdc8d21af0876f6  ./Emu/SCUMMVM/lib/librtmp.so.1
+a578d2ce1077aa027f3174537e74795e0d895dbf24fa2694083e884065ef74e4  ./Emu/SCUMMVM/lib/libFLAC.so.8
+586ad1a0d5acd3a2a99fc79ea75fad41b48a8aca16b9bd6ddff59cb1f6df6a5c  ./Emu/SCUMMVM/lib/libcurl.so.4
+14ba485f3a55c36893f372831d0445f78fc64f26073a8d7374dc89ac50b95edc  ./Emu/SCUMMVM/lib/libpng16.so.16
+3d0c23e8b7ba4931e3715dc8434cc0ffd67319b8444483dda69bce194c5e46a3  ./Emu/SCUMMVM/lib/libgomp.so.1
+6dc155ae57c5dd899caf716c3856076aae1269e14304d249bb03a146512b3e48  ./Emu/SCUMMVM/lib/libssh.so.4
+74aeb054dc89fcb8929c6137a8df9bc42a41a66a27128fb2f91a3b5299a45874  ./Emu/AMIGA/libFLAC.so.8
+27197a6f9dc892702b26b2f98de4fca53d60cad9e14a4db28559a36ac2d04f98  ./Emu/PICO8/lib-h700/libsdl_sensor_shim.so
+e65ebf388088680e971f5b36e06903a4346b6a71d79f963203e983bbd0911fcf  ./Emu/PICO8/lib-stew/libSDL2-2.0.so.0
+47471d545e7b92b9a384e71c249435947d8a023e2f6ba65f8aae5615efe85422  ./Emu/PICO8/lib-Flip/libSDL2-2.0.so.0
+aaf07508f0361b97e1d9d7464fe31eb8ee79e63ad8051750bf27f60564ca651a  ./Emu/PICO8/lib-a133p/libSDL2-2.0.so.0
+302a6491dc710fd68ae4f6cc2694eaaf247fede7d6a300cc54d52f4ad3e93f19  ./Emu/PICO8/lib-cine/libSDL2-2.0.so.0
+b157d8032d8ccf1b598d3c749ac9add2836dba22694857cf157956962c7182be  ./Emu/MEDIA/lib64/libavdevice.so.57
+c0a2f4e0d24b70adfcdb5135e4c81b25618c7959926e2e218e1082e40a5328a4  ./Emu/MEDIA/lib64/libbz2.so.1.0
+1a0c8ece503c4d564a84e2d5d4cadbbb723b3395542c65d7746375d48cd15425  ./Emu/MEDIA/lib64/libpostproc.so.54
+b5389916cbe2343cfae30c2df867f9cadf8d5ce518ca55e59e8fd6c43df7589c  ./Emu/MEDIA/lib64/libavformat.so.57
+32cf3c61febd23c6ad4917d81dbf63218ccdf594d4f7ed5a326426a94cb4b133  ./Emu/MEDIA/lib64/libavresample.so.3
+83cd6cba588599a5f61e7e7689a2066d66c2e8141a91610c713ef6548993676c  ./Emu/MEDIA/lib64/libswresample.so.2
+7d0f01e79f1b1eefd798b1eb252eefe10d73cc865cda2ef690b3a479dfa0a0d6  ./Emu/MEDIA/lib64/libavcodec.so.57
+944b37eee7774b5f36328053ec48ece3d3de70eb67813dd58c669f55b97043ca  ./Emu/MEDIA/lib64/libavutil.so.55
+f34caf8300c9ca786e694cc7ca0ad5cd0140182f68eb2c131295705e4287fd61  ./Emu/MEDIA/lib64/libx264.so.157
+f0f56904dbb5d38eab41a8df89cd2053c3f771dd0e541ce5e316b1bd585f9abf  ./Emu/MEDIA/lib64/libswscale.so.4
+3a6a9c924be0322180a9f4343768a50ef2635ebc945e61391c5a11e1ff238a62  ./Emu/MEDIA/lib64/libavfilter.so.6
+ef6fdb01dd2f2fb9098f4e9fbb6cc1ff2dd084068507ce299318802078931eca  ./Emu/MEDIA/gvu_lib32_a30/libSDL2-2.0.so.0
+e8f5ff20a6dd792bef144d2f3280c62189279f17c0c41db6a32cf7c8534c681a  ./Emu/MEDIA/gvu_lib32/libz.so.1
+7231e93d5c4b06d4cf51aaac0048c40ce367513bb1b2e691382ab4fdb06dc8cd  ./Emu/MEDIA/gvu_lib32/libSDL2-2.0.so.0
+7fb37d1568085015270b83b794d78bece261bdd617b664d2263780fd1093d5f4  ./Emu/MEDIA/gvu_lib64/libz.so.1
+f17e2cdb124d223f05173cda11cf488c565abdaf11ef458882c95086333d8092  ./Emu/MEDIA/lib32/libswscale.so.5
+95d279249f2a958a81f6ca45a12b7e453a16783d08bafd3048010935cd22ff71  ./Emu/MEDIA/lib32/libXau.so.6
+feca316e2b9354ec076a7a6de7b692470a5071113f05a2b781158f21f87d759d  ./Emu/MEDIA/lib32/libxcb-shape.so.0
+ec6c4cd2f072a3342a556b417c3c903a6ae59ed947f92351027f000393e941c6  ./Emu/MEDIA/lib32/libavfilter.so.7
+d0528fd9ec6d9ad800fb1c5af2600677ae44c006a9f4bf505e388cdae4c47f9b  ./Emu/MEDIA/lib32/libxcb.so.1
+beb6422e7cdd8a9505a8d2dd528f317f7c518cb543702a0f530dc907d6d008cc  ./Emu/MEDIA/lib32/libXdmcp.so.6
+4a65c07b0d14536c32662fc3e07c94510f9ea294cb90954778c9a540e9ef4019  ./Emu/MEDIA/lib32/libavformat.so.58
+ec862dbb7d748c3a340be746d4ad1ad5a0d9f46b862e29ed4ed14fb74ad025e2  ./Emu/MEDIA/lib32/libtheoraenc.so.1
+de1ddf0adebafabefdacb8d909208424151b8f4c455b98cb69b825fe9e363151  ./Emu/MEDIA/lib32/libavcodec.so.58
+f91b0f1cb1921adffb27c517e27edd1babc2de513ee23ee774a1f6c1050e8174  ./Emu/MEDIA/lib32/libvorbis.so.0
+3d18bf64228c6d2d1b8fd73fcff47fb68ed0435d6ba0dc4726ee30762e616946  ./Emu/MEDIA/lib32/libvorbisenc.so.2
+706fd361a56bacc6128b7fed6ec2dd1dd935e35fdbd8668a1491eba2d3b9e55b  ./Emu/MEDIA/lib32/libavresample.so.4
+a625048792b3694de0df469569565f0b5149e561509bd0df7705dd23e575edb1  ./Emu/MEDIA/lib32/libavdevice.so.58
+b69a0d8c045648a34222859f983b2ac1050d6663ed9178ccae64ceb80ad21cc3  ./Emu/MEDIA/lib32/libxcb-xfixes.so.0
+eedd47a58e79a41f18ad301164abacde9455ce6b96bbdb3867947855a58db012  ./Emu/MEDIA/lib32/libpostproc.so.55
+379270a1058a2d87b9a4b1d1cb51749aba617aa96691d4f3a14bd8884ec31b4b  ./Emu/MEDIA/lib32/libdrm.so.2
+768f6011d4c0bd80d99df1caab3a4a01febc784bd1003ac237f6e82a520cbe5c  ./Emu/MEDIA/lib32/libswresample.so.3
+41a61d10c684c2450f29139edf4b3cff1404d6e8380af11d0beea4fbf2355bcc  ./Emu/MEDIA/lib32/libogg.so.0
+d7fd8eb2884f4d4e99bec029a6966ff1e3c5b4848ebbcbec86f2e1ed719e58d9  ./Emu/MEDIA/lib32/libtheoradec.so.1
+01c947c99f610cf7ff1996d1e15daede73c2fec4d0ed085ce6c3d19489ff7341  ./Emu/MEDIA/lib32/libx264.so.164
+977df46e9a45e0158db35453aef49157acfaa18d0d21c32d79442d33b94894bd  ./Emu/MEDIA/lib32/libxcb-shm.so.0
+18740d9b6a2d64ef11e804dd3eefbc402ad85d04a278960374ac89497fafc520  ./Emu/MEDIA/lib32/libavutil.so.56
+50006b09fdbaa10d459c5c9e881c0bd629667739ca060e903c891ca62910b6d7  ./Emu/MEDIA/lib32/libmodplug.so.1
+729642980ae72bee91d7a9ce76577b366b5eab422d4d8acc82069db1c03f8afe  ./Emu/NDS/lib64/libcrypto.so.1.1
+77ad1da8ffcb16de54fefd5d99b16a8de9c5d36b5b05b427359f48a1841feaac  ./Emu/NDS/lib64/libfreeimage.so.3
+29df77584de812438fd363ede4f07f767effeb8cc29e74b68f52286bd5bf66ad  ./Emu/NDS/lib64/libssl.so.1.1
+dfde3d17fed0ad99eddf069d3bad4556ffa1e25d4be4c00e650653ee9027b855  ./Emu/NDS/lib64_A133P_trngaje/libadvdrastic.so
+19d47ef9c6384312f4acb46c8cb4e9212e867bcf2d6775831390464126fcbdc4  ./Emu/NDS/lib64_A133P_trngaje/libjson-c.so.4
+664332956bc0da4635a6b2d91e3bcf920476bf8999ae20685fca00e42e58f946  ./Emu/NDS/lib64_SmartPro_original/libSDL2-2.0.so.0
+e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./Emu/NDS/DSperate_flip_lib/libSDL2-2.0.so.0
+f10c50f89a1f2dc029cd90adf0c934530de9771758f9e9d15dc99e3d0f27de44  ./Emu/NDS/libs/libglib-2.0.so.0
+04bb3eea141ec6a723930b0064fb593695df8e7f776b177cb3300a072bd8654e  ./Emu/NDS/libs/libSDL2_ttf-2.0.so.0
+1f703f23eff67a3688f928be9fad831ab5214575e2dae4b509b4867621b953e7  ./Emu/NDS/libs/libfreetype.so.6
+a77dfe2042af6511fdd2bdc0e5e26b447a751a1d36b6c7435f7eb85e9a5d6971  ./Emu/NDS/libs/libSDL2-2.0.so.0
+ee32fd8defad5e5f819a65bba036c8bab449545b8a2562bd98329c37572387df  ./Emu/NDS/libs/libdtr.so
+2e32e0028c231e323e90daa3fb89fc4a270412e161e5b9744ed3c7a88f8935f8  ./Emu/NDS/libs/libasound.so.2
+61231917d20406aba9fd6b0a5fa1cb1633cde044e7ae0817d35df832c4ae82b6  ./Emu/NDS/libs/libharfbuzz.so.0
+a1c61f7d0828860170cc512c63b5f2077e45da4ecfd267d39832f95a3473ba77  ./Emu/NDS/libs/libSDL2_image-2.0.so.0
+a3f67e85781ef919777be1c957806efc9e43a0120e7fb551db8a0f1f3cb68265  ./Emu/NDS/libs/libpcre2-8.so.0
+35c940c7b15f3533d100764977e2998121193153b88cb76945ee9a5eef3907e3  ./Emu/NDS/lib64_Flip/libjson-c.so.5
+89a692577e8b78829d8f06872900ce48c134fe268991bae266c259c497129407  ./Emu/NDS/lib64_Flip/libadvdrastic.so
+d1db5974b5afc48e85de665162603791629649a8fa0b9c6abdb973303bde1d54  ./Emu/NDS/lib64_Flip/libSDL2-2.0.so.0
+9552e1b4701b080f775094f5bbf9601cee513ca4ee0cb803b1127241a65b49e7  ./Emu/NDS/lib32_Flip/libbz2.so.1.0
+b56f3b6ded400854408ff09bd8db0dd9d4e9fcc7300a628a4354277973101da3  ./Emu/NDS/lib32_Flip/libSDL2_ttf-2.0.so.0
+08061a57e654f69797ec726087c819409087c5d5768310097767353aab34c27c  ./Emu/NDS/lib32_Flip/libSDL2-2.0.so.0
+061c8015b4b65a49d4fcbdb6bba848880d763b0fd48d07039d1342ea019d3535  ./Emu/NDS/lib32_Flip/libdtr.so
+a1c61f7d0828860170cc512c63b5f2077e45da4ecfd267d39832f95a3473ba77  ./Emu/NDS/lib32_Flip/libSDL2_image-2.0.so.0
+db7ad1f59cbac5a23aad9dd7eba87322b5921c486097c1140b24f2d82af28892  ./Emu/NDS/lib32-common/libjson-c.so.5
+eb1f1c3ee87d480f11fe6231d0205f10856501cd2a24cc1346a827499c36c060  ./Emu/NDS/lib32-common/libz.so.1
+440616f402d324877f768d3415d9844978831d5a9a66dee77eb2eb793cf4db56  ./Emu/NDS/lib32-common/libcommon.so
+d2286d8fad3c0ebc18337ec5c79bb15c1d74b7274f8059aee609ffe4f3d5302c  ./Emu/NDS/lib32-common/libpng16.so.16
+d4e57704e545fcf5102abbb52c6fa54ce63d467afbb323cdaf74e861244d2fc6  ./Emu/NDS/lib32_Brick/libbz2.so.1.0
+04bb3eea141ec6a723930b0064fb593695df8e7f776b177cb3300a072bd8654e  ./Emu/NDS/lib32_Brick/libSDL2_ttf-2.0.so.0
+d02176214e8b06287d1ccb6f4fbd43f69c1ff7ef403e9d1889b304293d0fbba6  ./Emu/NDS/lib32_Brick/libfreetype.so.6
+43de0278f1e8b31316184ed02f1ba340b810ada2f835f29e654cc053f91e4f41  ./Emu/NDS/lib32_Brick/libEGL.so.1
+94582b0dc9511456c3d38b262ae24045a3df4ff92742ece2ab872e87ffa1e950  ./Emu/NDS/lib32_Brick/libdl.so.2
+49ef508bc78d958fb87efbec8c7b6e93014e82bff705d8971ff9d67c42b8f79a  ./Emu/NDS/lib32_Brick/libexpat.so.1
+acf35aad56c926c27da92f93088639a1b4f4fe71a07623b5de3ccfdd8b5630d2  ./Emu/NDS/lib32_Brick/librt.so.1
+8be06ecbe9e61b9beaac7ca0c2ee4e1eb27b94b56ed49df6e611680e13cfed31  ./Emu/NDS/lib32_Brick/libm.so.6
+32bdf73cae64c6d2998842807b2e0250819f16624e94969805f9e882f45285c1  ./Emu/NDS/lib32_Brick/libSDL2-2.0.so.0
+c9b53158286d9d29c1b5f8469b7c722f0a74f47209e0eb915042c64f58370b70  ./Emu/NDS/lib32_Brick/libgcc_s.so.1
+5bfe1b429c987305b34e85af0b56d0b7769259c59e44c1a6fb2a341b2cb6926c  ./Emu/NDS/lib32_Brick/libdtr.so
+19aeb0bbfbd5932d6af9e7be3a044623164def71a942d38548ae885080e8fa69  ./Emu/NDS/lib32_Brick/libpthread.so.0
+97eaa7f77a6f481cd1ab09634b4bd0850bcaf140174a8c89a80f3f2551953293  ./Emu/NDS/lib32_Brick/libc.so.6
+a37408d0398949aaa85f70c958253e88dc81f62e97fd1cb41a06a05fdc08c06c  ./Emu/NDS/lib32_Brick/libstdc++.so.6
+e4f9167d03c40392c951d90d496ca1f31e57a5e1cbf82828abfe342b9f932dbb  ./Emu/NDS/lib32_Brick/libdrm.so.2
+5e2892b09c08aa8cc3560cf27068211b7ad37e2d505607c2e56cc6b6da9156e8  ./Emu/NDS/lib32_Brick/libgbm.so.1
+ab539d2c71fee7e0fb0f2bb06b65b358b9d72f1ad8780422ac9adc63c51af78c  ./Emu/NDS/lib32_Brick/libasound.so.2
+d5daea612a16a051ba1884b8497bea48e3612c50aba30815fd54417aa1a7e550  ./Emu/NDS/lib32_Brick/libdbus-1.so.3
+833391e7874370559c14751c5f10c9b4866effbf1a53e7287740f1dfa7301c55  ./Emu/NDS/lib32_Brick/libglapi.so.0
+a1c61f7d0828860170cc512c63b5f2077e45da4ecfd267d39832f95a3473ba77  ./Emu/NDS/lib32_Brick/libSDL2_image-2.0.so.0
+430137de1d9de465205b8c1bbb358a8b63121e16e4c19002e7b0df327f28fc84  ./Emu/NDS/lib32_Brick/libGLESv2.so.2
+2726ad492e69e670e3f1f76ad15703463c85bb3fc9c209787f4d9ba72c652841  ./Emu/NDS/libs_MiyooMini/libEGL.so
+b56f3b6ded400854408ff09bd8db0dd9d4e9fcc7300a628a4354277973101da3  ./Emu/NDS/libs_MiyooMini/libSDL2_ttf-2.0.so.0
+3928941858396f325f8f05fb87e26ae96e0e015bde55ba81f6da813aa8112659  ./Emu/NDS/libs_MiyooMini/libSDL2-2.0.so.0
+a75d7fe02a58bf771629bddf900f932233daf1bd102da1b8fd07f0cc3a88d90d  ./Emu/NDS/libs_MiyooMini/libsnappy.so.1
+5bf075576371462972f98068c9e968fce4b6a471ea5a1d11c5ecac8ea1aa2dfa  ./Emu/NDS/libs_MiyooMini/libdtr.so
+a35ab4a9e83a55ab973a19f120a77435cd011b34e2650613836d8281915fb007  ./Emu/NDS/libs_MiyooMini/libgomp.so.1.0.0
+0893beb9ad1f50fa55d8fccb785b423707229b52d6a92079eae02327c3baa49f  ./Emu/NDS/libs_MiyooMini/libgbm.so.1
+d0ff105c471cf50c7140fd8a8abb5347c5d9b9d26e912be90dd33a55d013b441  ./Emu/NDS/libs_MiyooMini/libasound.so.2
+46ee1a0df885c199f9420cc868a2c02760f2118a469b844a4dc6f1a60f2799c3  ./Emu/NDS/libs_MiyooMini/libglapi.so.0
+a1c61f7d0828860170cc512c63b5f2077e45da4ecfd267d39832f95a3473ba77  ./Emu/NDS/libs_MiyooMini/libSDL2_image-2.0.so.0
+2726ad492e69e670e3f1f76ad15703463c85bb3fc9c209787f4d9ba72c652841  ./Emu/NDS/libs_MiyooMini/libGLESv2.so
+a35ab4a9e83a55ab973a19f120a77435cd011b34e2650613836d8281915fb007  ./Emu/NDS/libs_MiyooMini/libgomp.so.1
+2726ad492e69e670e3f1f76ad15703463c85bb3fc9c209787f4d9ba72c652841  ./Emu/NDS/libs_MiyooMini/libGLESv1_CM.so
+ec04aa9f5fdc8156e80938e897054fcaa7c28cfd0ebbc4879ec839f7f48e438c  ./Emu/NDS/lib/libcrypto.so.1.1
+0e8b08bd61ded90f51e04801fa30e3e7a0c9bef684f4713dcdf8a98f5368d2e1  ./Emu/NDS/lib/libz.so.1
+9eb2afee64370e19b44beb7b5bb8524eb2672bdbb028a43b3c11346484663efe  ./Emu/NDS/lib/libssl.so.1.1
+a91e072a75af13334a23b1263984e261192b92aa36175767b59f1d8b6f8d93ca  ./Emu/NDS/lib/libcurl.so.4
+f7421fde8036391750dc2b1dd7299a0a3305a93cb95846fcc381590f565215c1  ./Emu/SATURN/lib64/libz.so.1
+14ba485f3a55c36893f372831d0445f78fc64f26073a8d7374dc89ac50b95edc  ./Emu/SATURN/lib64/libpng16.so.16
+729642980ae72bee91d7a9ce76577b366b5eab422d4d8acc82069db1c03f8afe  ./Emu/DC/lib64/libcrypto.so.1.1
+29df77584de812438fd363ede4f07f767effeb8cc29e74b68f52286bd5bf66ad  ./Emu/DC/lib64/libssl.so.1.1
+12fc003c3a7a35ca8121760a15db81599ec8b4f4acea8965334b328e29da5587  ./lib_so_list.txt
+2cca98e268c892dbe3178baa81c6f90f595a265fcd7c1ab798056690a8ee63df  ./miyoo/lib/libgme.so.1
+eab5e11dda514ec41d282996c5d9851e2d37b70516aec7cef894d69ed452ad29  ./miyoo/lib/libSDL2_ttf-2.0.so.0
+c0133a62daa8c2f153873f61d31ab7bec0a74fb40ef3d50ddfe89390444f0bc8  ./miyoo/lib/libSDL_image-1.2.so.0
+c39da98910256a90920296b36a7875593db92885a9953e44c25a105a230c2c62  ./miyoo/lib/libncursesw.so.6
+89512a302f08433e2db8e687594501efd869856556a1fccd741ef4a6307b5110  ./miyoo/lib/libSDL2_gfx-1.0.so.0
+7bbd1c930c49022df40dd651c79e2456404bd003ea4cb35f08acc7a59d9d7cf7  ./miyoo/lib/libz.so.1
+f9ae0891705133f56453d4aaa447f3f5f414d06949d63848456fec12163fac46  ./miyoo/lib/libshmvar.so
+c6070b5840e954643e7758c6a9043f48764b44bd0059c23c78557716bfbc0347  ./miyoo/lib/sdl2/libSDL2-2.0.so.0
+bc1c4ddad8fc2fa5a1c899f1bfe67d24a23702071442cd93c064ed62d9e86fd5  ./miyoo/lib/sdl2/libSDL-1.2.so.0
+12b8f97a816bb5531dfb7811ca0966cfe6d284fe753ca02422ade67f370f32ed  ./miyoo/lib/libSDL2-2.0.so.0
+276cafa2bc15fcda86b8867bdb973545f0f2b4557cd61c6661f372cd44cc02d9  ./miyoo/lib/libturbojpeg.so.0
+d0950f1fa1912ff466c0e93a4dbd7baeb89dc5a8c7fa710db03756e7cfba7513  ./miyoo/lib/libjpeg.so.8
+8014989515dc003f669e87abe4cbd89dcc4d68a458248ceee2528d73ed457a72  ./miyoo/lib/libstdc++.so.6
+80fd3f1210956aab69ac702d07974b2c39b7e64d7eda8af39894ffc814c7fea0  ./miyoo/lib/libopk.so.1
+a8448fb248942814800bd2c8510ee9380291b9be20e3f2d060cccac84b714185  ./miyoo/lib/librsautil.so
+bd4a9140c719613656a56659256acb355b6f4ec1ba15b1819519944be30b6451  ./miyoo/lib/libunrar.so
+f770d2cd90eddd56e3f4831526a79bfd59b7057f2f5bb3defec28915c9a95b80  ./miyoo/lib/libSDL-1.2.so.0
+144383097a0df810122989fd9c140bdd8d3df535c4e61098f3d490e531e9c208  ./miyoo/lib/libini.so.0
+585147b05fb7dfbe3f5e5f6506f36a766b9586dfa191bd89f4ace327d7d11cf9  ./miyoo/lib/libSDL_ttf-2.0.so.0
+efe4226305e8da12fe76271fd2ed73c130320a55fcfca3dddca1d3125aa46960  ./miyoo/lib/libSDL2_image-2.0.so.0
+6908c85ae98cadef69370dd28670b66e7cccd66f6ceccae198896431151b413d  ./miyoo/lib/libSDL2_mixer-2.0.so.0
+b615ad8636c9aeac9e194c4c3c9f52de4e1c21a0fad796fca08e0d68ded9403b  ./miyoo/lib/libgamename.so
+841e04d6e3912d2bb66aa82be62a4ac61c664f7616cae95d8f98b4bb881f6812  ./miyoo/lib/libSDL_mixer-1.2.so.0
+d725a382e26dc02e0919595861509329591e0fda78484ea1d1daf2ddd857a2b1  ./miyoo/lib/libpng12.so.0
+ce22ad5f03a3651faaf0dfce53baa5b0fd3eee4ba01c3f127a2037a3622f03ca  ./miyoo/lib/libpng16.so.16
+ab74d99bc86d20261e108a38cbaef3ae77ba945ee23b9b0d1874566929de3a0c  ./miyoo/lib/libpng.so.3
+4ec46e16e6e49d1840818c7bf1e237217a587f5d8a33410c1156c2f8c5fc67f4  ./miyoo/lib/libtmenu.so
+43109ed13afa34ff991ed73c4d520c5056378949b17d77c50d5773c5aa851439  ./miyoo355/app/my355/payload/lib/liblz4.so.1
+89c4407fd4022312b12b2144aed975f6015aa3e51844cdf34ff1e1f8dd05576a  ./miyoo355/app/my355/payload/lib/liblzma.so.5
+ce9536660c245fb4580882555e00104d9e8336ad9ecf7445af8217bce34d21cb  ./miyoo355/app/my355/payload/lib/liblzo2.so.2
+63ff891e4316be1d30a8e551ded6cbb0283772105b352103608e60c06c95ac15  ./miyoo355/app/my355/payload/lib/libzstd.so.1
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./spruce/brick/sdl2/libSDL2_image-2.0.so
+58e07aec9d59058b02c3ab8478038eec7e7c7964bedb8707f369998425692570  ./spruce/miyoomini/lib/libEGL.so
+ea020e4f22b554617ac8351baace7e75e20e2d0131ab67e278cbdfb954e1adbc  ./spruce/miyoomini/lib/libcrypto.so.1.1
+bcf7295bb66856844ef9c332748a44bba75ca79f2ede356f521111a25fe84f2c  ./spruce/miyoomini/lib/libnsl.so.1
+b56f3b6ded400854408ff09bd8db0dd9d4e9fcc7300a628a4354277973101da3  ./spruce/miyoomini/lib/libSDL2_ttf-2.0.so.0
+cab620b531b29e4dbfb37ceecfce8c20717322974289ca582a0df0435a7c2c67  ./spruce/miyoomini/lib/libSDL2_gfx-1.0.so.0
+86e791344c21af7bc90d9c4c2387a0b9ffa2d1443e3d4b153943956004de7372  ./spruce/miyoomini/lib/libz.so.1
+5c2d0a05ea494db2cc8c35bc7fe56da682fc2dfdd06a7035d7d79b4b7545eb49  ./spruce/miyoomini/lib/libm.so.6
+f55f2f1a092e3f1d99966b82dc3f07372d16b3f8ac2a14a021fb7d291ef71f54  ./spruce/miyoomini/lib/libSDL2-2.0.so.0
+51ab93a0d7d4ebee8ba653c9249694b6a92242d0e81888ffcb8e9a8cc680ff17  ./spruce/miyoomini/lib/libSDL2_ttf-2.0.so
+b1c39c0c809ff164bff91b9459a3327f4cdcedc6927142a6e9c017a82e0fcdcb  ./spruce/miyoomini/lib/libtevent.so.0
+1179ba8ceb9952d8b151c9db7f9bf94c817b65ac5772157c0b5c044309199dd1  ./spruce/miyoomini/lib/libneonarmmiyoo.so
+355312819cabd5da41211a5e8c4ef49f373bcbb300407c4687bcd36fdf6ccfec  ./spruce/miyoomini/lib/libtdb.so.1
+e6cb12a7b8d545556f9ded1eb55596a8ed8f1ac7331074be035948b0cdb17dbe  ./spruce/miyoomini/lib/libuuid.so.1
+bebf4d51570ff389f2f599db653a048cd86a5835f36d2e28dc44a35dccbd8e56  ./spruce/miyoomini/lib/libssl.so.1.1
+1426c81344c402e739d015bf8d18f707d1dabc60e1c44f9d9dcd819b5c899228  ./spruce/miyoomini/lib/libutil.so.1
+447cc73983045905d79eeb7c3b49ed3e5b50cc31947fa1c6b912cf037ff0325b  ./spruce/miyoomini/lib/libtalloc.so.2
+6f46901b2655fbeba738a7e20ed2eca646111035e58472b04ddaad27deef4cb8  ./spruce/miyoomini/lib/libSDL2_image-2.0.so.0
+f80f96ae04402eade3035949730b6185aadae66fd8f568624e47ea774f61ed6a  ./spruce/miyoomini/lib/libSDL2_mixer-2.0.so.0
+e784aeb83eaf24a5b0f82856b1f3420c07f3b1cceb36afa52f516ee31b843af7  ./spruce/miyoomini/lib/libpcre.so.1
+e1e82b2bfe99f90491bb4614771962f963fdcfb1d85920929d2390c4cef00d7c  ./spruce/miyoomini/lib/libpng16.so.16
+6e1b1f44d0ca83b09df4056acaed662675a5bb9dceb1b73f08ed11a9e67c8972  ./spruce/miyoomini/lib/libGLESv2.so
+35dd15b50e390191fb160f1f1bb5cf4ac7868b87cb85afef98104f1078a66913  ./spruce/bin/Samba/lib/libnetapi.so.0
+d694d859fc2fbe6abd2033b7d40ea5fc5475c5caa31353fdc6ce9f70b3f6f700  ./spruce/bin/Samba/lib/libsmbclient.so
+b1c39c0c809ff164bff91b9459a3327f4cdcedc6927142a6e9c017a82e0fcdcb  ./spruce/bin/Samba/lib/libtevent.so
+b1c39c0c809ff164bff91b9459a3327f4cdcedc6927142a6e9c017a82e0fcdcb  ./spruce/bin/Samba/lib/libtevent.so.0
+a5a937b2b51484a75a3c54f8d1b63ea36f84da88ac8a97c1a52bd5ee25dcb4e4  ./spruce/bin/Samba/lib/libsmbsharemodes.so.0
+355312819cabd5da41211a5e8c4ef49f373bcbb300407c4687bcd36fdf6ccfec  ./spruce/bin/Samba/lib/libtdb.so.1
+447cc73983045905d79eeb7c3b49ed3e5b50cc31947fa1c6b912cf037ff0325b  ./spruce/bin/Samba/lib/libtalloc.so
+b1c39c0c809ff164bff91b9459a3327f4cdcedc6927142a6e9c017a82e0fcdcb  ./spruce/bin/Samba/lib/libtevent.so.0.9.11
+a5a937b2b51484a75a3c54f8d1b63ea36f84da88ac8a97c1a52bd5ee25dcb4e4  ./spruce/bin/Samba/lib/libsmbsharemodes.so
+447cc73983045905d79eeb7c3b49ed3e5b50cc31947fa1c6b912cf037ff0325b  ./spruce/bin/Samba/lib/libtalloc.so.2
+35dd15b50e390191fb160f1f1bb5cf4ac7868b87cb85afef98104f1078a66913  ./spruce/bin/Samba/lib/libnetapi.so
+447cc73983045905d79eeb7c3b49ed3e5b50cc31947fa1c6b912cf037ff0325b  ./spruce/bin/Samba/lib/libtalloc.so.2.0.5
+355312819cabd5da41211a5e8c4ef49f373bcbb300407c4687bcd36fdf6ccfec  ./spruce/bin/Samba/lib/libtdb.so.1.2.9
+355312819cabd5da41211a5e8c4ef49f373bcbb300407c4687bcd36fdf6ccfec  ./spruce/bin/Samba/lib/libtdb.so
+d694d859fc2fbe6abd2033b7d40ea5fc5475c5caa31353fdc6ce9f70b3f6f700  ./spruce/bin/Samba/lib/libsmbclient.so.0
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./spruce/bin/python/lib/libpython3.10.so
+f01bc6992f649e6176d9c604d39ad32c899f63bb12b457942cd221a7480c189d  ./spruce/bin/python/lib/libtcl8.6.so
+24ea6bee79c805b9ca2134f2ae15f5d2ec25f807abfa5343008899794c923670  ./spruce/bin/python/lib/libtk8.6.so
+b3346c0f41657d78225f1467920546b1fa53432c4743f217b4fb7a35fd42ec25  ./spruce/bin/python/lib/libpython3.so
+b898f1fa553d6e270b42479e7ac9cdf996efd5afe8725c42f623f5a00d0534a1  ./spruce/bin/python/lib/libpython3.10.so.1.0
+20e9a3b1ab95a4af65f2e4cf51dca40c793921b3cc6d0fb20be418fbc8e58d2c  ./spruce/flip/lib32/libbz2.so.1.0
+837d82c37cff18269cf54e3d4dfb7a50c9ecb15ec4f0979a0dea3e08323a48ab  ./spruce/flip/lib32/libxcb-dri2.so.0
+74e2b86170d7c2cfb8b9206ac06faa9e7b4094b1febf57f329c3b03ca24ba21d  ./spruce/flip/libmali-bifrost-g52-g2p0-gbm.so
+99c2cde6f0586ad932d13c9cc344e752c694cd3d45a33d3b2633e0c971d7cef8  ./spruce/flip/arm64-ffmpeg/bin/libGL.so.1
+102df0dabd2b4246c37e31db4d2d6883654031a43a0834331857122119dbfe5c  ./spruce/flip/arm64-ffmpeg/bin/libsndio.so.7
+5a7ab6f45681844b15dbcb5b23097a7585562519b328bd4c6e27946d86e102f4  ./spruce/flip/arm64-ffmpeg/bin/libavdevice.so.60
+e2a6d5ea771bd4ab1b751528ba48264b41b63bce344041da599e37da251880a7  ./spruce/flip/arm64-ffmpeg/bin/libGLX.so.0
+5a7ab6f45681844b15dbcb5b23097a7585562519b328bd4c6e27946d86e102f4  ./spruce/flip/arm64-ffmpeg/bin/libavdevice.so.58
+95001a07b3e03f44960de57327880eb32713c86c206f65f234a89ae387169aca  ./spruce/flip/arm64-ffmpeg/bin/libXv.so.1
+6d6da001d8112cdef30a72ed62b97f7e274cd81469effa759a133f9ba2c30c61  ./spruce/flip/arm64-ffmpeg/bin/libGLdispatch.so.0
+2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./spruce/flip/lib/libOpenGL.so
+86366dd1bdf7afaf1b52b18ee2dfeb969244b3062e23e1cf6d5a9d8ae0989096  ./spruce/flip/lib/libnghttp2.so.14
+b18c099535c8415a33a16c034e71dd184ef73c37aaee468c751699b2af90db35  ./spruce/flip/lib/libmpeg2.so.0
+7f5c67e9c3a497ed8f0fa2895d0b6047ffad2046e677aac3d7876b302e761e13  ./spruce/flip/lib/libGL.so.1
+43634317b8289442034e916b472bc9cac54539e99601d9f62d95321070643351  ./spruce/flip/lib/libwebp.so.1.0.3
+df0606adc7693eef38ceff52029c4144e337b650f4d0b2dc843e6e64bee6e8a8  ./spruce/flip/lib/libsystemd.so.0
+3b57224315a46083cb23390aae081d83947b1c0515ddba33f0b9b15783d472d5  ./spruce/flip/lib/libpython3.10.so
+35fcdeb241810de83bda62ccc3f4d46103ab9f45d32369aef01fa2f5b4a3fee9  ./spruce/flip/lib/libXrandr.so.2
+1b94200a794d1077b376ee3882c92678168ec50ee6c2af6799fdde4a1c65cb04  ./spruce/flip/lib/libswscale.so.5
+adaf79819d3bcac63c75fc81b5a8abadf8f000e5155847913400a95775ba65c8  ./spruce/flip/lib/libwrap.so.0
+0fb6ebaf8ce9d63d385000cdcd9c487614595cbf692ff4fdab1193277424f89d  ./spruce/flip/lib/libgnutls.so.30
+740eda82dfe9077fde1b0190aa5ddfd5b292334185cb91ae573135f01bb41d8c  ./spruce/flip/lib/libwebpdemux.so.2.6.0
+abb8a846b142ce64b6e9c917959bc40b6c140dace77b71885a5698d51e26de9b  ./spruce/flip/lib/libasn1.so.8
+e8b3b1dd4369834e5a6e4b69ae2240a6637e4364bfb9403f70134c77adf581e3  ./spruce/flip/lib/libheimntlm.so.0
+25663a6cf11e0246b601577855f9b6553a51bb7c695c2629b4a5f2c0c87aa9f5  ./spruce/flip/lib/libnsl.so.1
+5c4973dc03b6f72890a045d5e78da3148e45ed3e8118f2b39bf44a9f52f3b347  ./spruce/flip/lib/libicuuc.so.63
+c0a2f4e0d24b70adfcdb5135e4c81b25618c7959926e2e218e1082e40a5328a4  ./spruce/flip/lib/libbz2.so.1.0
+2024eb349a81cdc332c3a2b8ea6990cef6330734b76192c87a978ed048e93021  ./spruce/flip/lib/libhcrypto.so.4
+47793dba2d4bf32411db45742c115d312c1788ff305767cd8479da04130f70ca  ./spruce/flip/lib/libgmp.so.10
+ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./spruce/flip/lib/libSDL2_ttf-2.0.so.0
+abf8d43afa56e29a80e0e8eb3dc8e206323a7ce4bdff5f4943fe236fed358752  ./spruce/flip/lib/libwind.so.0
+eda1406d1eff7c704eff6d3811b582eebb85786cf29fdd47964c386bde96eace  ./spruce/flip/lib/libXau.so.6
+d91ce95aa684df5ecd1fce8efdabd2082635fd6e5faa34580e54abac61902012  ./spruce/flip/lib/libxmp.so.4
+bdaa3b24c59ef1766494d62f8ac13bbe6434d461b5691b8126ca03ec60021888  ./spruce/flip/lib/libxkbcommon.so.0
+cc471ee979d98dc185be87801b7eaff24dc19a02cb6312b575ac5df59df6a47c  ./spruce/flip/lib/libgme.so.0
+e8d0c1d1df50eb56ee76d23a3cd26449577bb1a77c093272448ed4f7b1dffa9c  ./spruce/flip/lib/libvpx.so.8
+c5c8068ab438b590c684eced0e346069e46ef901d4ce4bc8aac7a6df9dd89b49  ./spruce/flip/lib/libroken.so.18
+43634317b8289442034e916b472bc9cac54539e99601d9f62d95321070643351  ./spruce/flip/lib/sdl2dll/dll/libwebp.so.1.0.3
+740eda82dfe9077fde1b0190aa5ddfd5b292334185cb91ae573135f01bb41d8c  ./spruce/flip/lib/sdl2dll/dll/libwebpdemux.so.2.6.0
+d91ce95aa684df5ecd1fce8efdabd2082635fd6e5faa34580e54abac61902012  ./spruce/flip/lib/sdl2dll/dll/libxmp.so.4
+cc471ee979d98dc185be87801b7eaff24dc19a02cb6312b575ac5df59df6a47c  ./spruce/flip/lib/sdl2dll/dll/libgme.so.0
+ff7e778b7581ecf8756d0fdd71091eb17322c1ec14c54377fb22c7342cfff0b4  ./spruce/flip/lib/sdl2dll/dll/libopusfile.so.0
+cf93ef3ebdc9a34c99e86d3b7192bf05631753e057e8a0d90021d38718abd722  ./spruce/flip/lib/sdl2dll/dll/libopus.so.0
+ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./spruce/flip/lib/sdl2dll/dll/libSDL2_ttf-2.0.so
+af7dd704f1d562b382c64c0cdeed4621a525452c7fd0716f1b0771a02426e9b0  ./spruce/flip/lib/sdl2dll/dll/libavif.so.16
+def4985c80882d2694853530a951561380fb2403f4649964ad8431320d8bf802  ./spruce/flip/lib/sdl2dll/dll/libSDL2_mixer-2.0.so
+e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./spruce/flip/lib/sdl2dll/dll/libSDL2-2.0.so
+0669230435538a29b0c0d7f0f8498b6c2ea2bf171112ccaf6e7b2afb2a2a00ab  ./spruce/flip/lib/sdl2dll/dll/libwavpack.so.1
+610e6b05df7fa00d6f4a7f6c466feb2f76d1cd21ee0871ff5335bba2a374eca0  ./spruce/flip/lib/sdl2dll/dll/libtiff.so.5
+6c333116f097d9c612276b897e1f99516c3234c6a3e00b88b5860fd94d2e56a0  ./spruce/flip/lib/sdl2dll/dll/libogg.so.0
+95bd972df4ece2f141b84963283a40171d71d72be5224de1018c62d463d4e5fe  ./spruce/flip/lib/sdl2dll/dll/libdav1d.so.6
+b7f6000e8f985b9f71a8432a6189ec618e4860406dc33934ce47ee6c23352d72  ./spruce/flip/lib/sdl2dll/dll/libSDL2_gfx-1.0.so
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./spruce/flip/lib/sdl2dll/dll/libSDL2_image-2.0.so
+0be8eae2a25b4c6c7cbdd92f10deecdab42aed11607c90cc46e914acad562a36  ./spruce/flip/lib/libxcb.so.1
+56000e78ae9e08569293965c6b75bf2178ca116a2e7720dc14dee26a62b7799a  ./spruce/flip/lib/liblber-2.4.so.2
+ff7e778b7581ecf8756d0fdd71091eb17322c1ec14c54377fb22c7342cfff0b4  ./spruce/flip/lib/libopusfile.so.0
+0f32b817e0bcecd79a64b15c56a5e62674322683f5ee0d8620c086c1e2beca02  ./spruce/flip/lib/libXdmcp.so.6
+68e88c114d5371cff571ad6e4218c7cf8ccdcf8f0dc1fbccea6c046301b7fb02  ./spruce/flip/lib/liblz4.so.1
+90c6b092530e9050e7dfd8413b7f5a6c46f84da572f22e4cab6172ee5da26f7a  ./spruce/flip/lib/libpulse-simple.so.0
+7dd616369439e726fa2267bd31fec8918e01f448a2f505ad472e1a878db14cdf  ./spruce/flip/lib/libunistring.so.2
+c322f5200f76752be70f28f688f54e474c1397d4d917630c09b6a6d0fd64a40a  ./spruce/flip/lib/libSDL2_gfx-1.0.so.0
+65ddf98b5a57ff9e0142c83b133331ce0bcf0d0f958a36672cea390ad7fcf6a1  ./spruce/flip/lib/libopenal.so.1
+d5b430195c469fd95e9bbf69fc191d377c2c9d722b7e287922c0a08a323825b4  ./spruce/flip/lib/libatomic.so.1
+6b23e00b221a1baffed8313a7690a9c632ae697183a7fc335dd15381d2990d8e  ./spruce/flip/lib/libavformat.so.58
+51c924c017bbcf8d1bb1e8c0ba6aab8b373a29f32ec64f229231b9e6eb0b293e  ./spruce/flip/lib/libwayland-egl++.so.1
+a8b7a4a3c3c926d09ebf5934dc2c970090307a75933764a83e4446d2bd6556bf  ./spruce/flip/lib/libvorbisfile.so.3
+013e0c7c92a47acd66fb44ee9b95ef44bc268b12f6cc4174668841f9c81b48b9  ./spruce/flip/lib/libopus.so.0
+939788a5aea0e4b885145754696189f1ffa5b15c24c7ead5358e584ed7f9d6b5  ./spruce/flip/lib/libkrb5.so.26
+db07bc3a681006dc904ec5d17d1ad0a5817d9a345803d65cbb6e35977af573d5  ./spruce/flip/lib/libavcodec.so.58
+1fe5234793a681e855169fe6703800f6d273bc718f2901a703b89a620dc0b34a  ./spruce/flip/lib/libgpg-error.so.0
+be793443aec05058cddc3f4ec09de4ab81e96f368926e77c1ad54354306d51c5  ./spruce/flip/lib/libcrypt.so.1
+ae4b3335010ed8642382c8d850102dfeff2ff6321e2d02d2c62615c52c3d2ec0  ./spruce/flip/lib/libSDL2_ttf-2.0.so
+0dd86eba0290dbaa7b8e9f90c05948429db0ff3dbd75ba81bb103b4ba5ad756b  ./spruce/flip/lib/libicui18n.so.63
+b532a6056455e9901e29fcb90a5da27f3c09c361d3a76bc929732dbc8e9a469a  ./spruce/flip/lib/libkrb5support.so.0
+9e9f8d746287f973764bf024cc8e84428fa326364148c60165bc7a21e5bf9ec2  ./spruce/flip/lib/libGLX.so.0
+ad9c4d80e3c64ba31ed24f3960f4aaff1b8b9baeeb7a56781112c92e15f63d8f  ./spruce/flip/lib/libwayland-cursor.so.0
+2a252286f387ed186f0cb18b9c4591852a2b1a29179dcd2444489ebdb8d53dd9  ./spruce/flip/lib/libvorbis.so.0
+ea8f1bd150500f6eb5eb22f47045de69359448333873735874cd9a7351f3d8e7  ./spruce/flip/lib/libvpx.so.4
+b4ab304d51450ebef1ff1cd90c10d97619c11a9e76fd963f1962fb415904fd6d  ./spruce/flip/lib/libfaad.so.2
+0ccdceedf2f7fa5b60606fe539d9b4aea8fed101b99102d7b0acd8dad9ae1d21  ./spruce/flip/lib/libmpg123.so.0
+4f79ef7753e497ef649e88baf0a15f813fc9fab2478703ef76284bed9542a2d0  ./spruce/flip/lib/libvpx.so.6
+f1f6bd2781b9f6c62d61d1b33833491bc01b384f0f74d14bbf4483b7b8797a36  ./spruce/flip/lib/libinterpose.aarch64.so
+69ff8f93f714cb0920a2d439782514319b521e98e568871c34ebe0768250c8d5  ./spruce/flip/lib/libgif.so.7
+f6d652f2e4bd89075c5bade2f168bd6305c557b19e682053479bfdc35a96e536  ./spruce/flip/lib/libmikmod.so.3
+35fa7db1c95cc9387cc98f7b028751a864e492610d256fd3e53adccefd4c5baa  ./spruce/flip/lib/libmp3lame.so.0
+82990c47b08de8fad908c068f016363e478dad5a99978804ffb136fc7cc738f2  ./spruce/flip/lib/libldap_r-2.4.so.2
+0470f4da4a57d1640940f7c98d285efb70858d8d5805282e4fa95fe772077212  ./spruce/flip/lib/libpulsecommon-13.99.so
+6329080e402b0c8619f54b2102c187eabfd10c9599156e778907b7537064eb2f  ./spruce/flip/lib/libicudata.so.63
+412f8d3f5d491407ff5710bad4c27cb46bf49a0fc560a5b97ffb287fb193c653  ./spruce/flip/lib/libXrender.so.1
+af7dd704f1d562b382c64c0cdeed4621a525452c7fd0716f1b0771a02426e9b0  ./spruce/flip/lib/libavif.so.16
+f0b87b6173cfb2286c02d165668d108393fab0b0f6ef6a54d52de9b0511e4df5  ./spruce/flip/lib/libkrb5.so.3
+6a8712a670ed9887ca97e321e05312bab8d77e2fcf9d775e2c593263bd9ce3d6  ./spruce/flip/lib/libcairo.so.2
+e9b221b172ba165b75950826afae53f1f7d987477f961bb429f4bfdac553273e  ./spruce/flip/lib/libtcl8.6.so
+810d9f861f3aba2a8d234cf9fc3adaeb1d0f67efa8c66f1632991db8758fad77  ./spruce/flip/lib/libxcb-render.so.0
+04b0452a7ca1d36cfcbfed59d4ea38e358d66389fb23e8892a74606b511f236e  ./spruce/flip/lib/libSDL2_mixer-2.0.so
+b4069eee3350923f988247d377b2c7fbe9b7582a39f19c5ec00dc12f442b6ee2  ./spruce/flip/lib/libnettle.so.7
+b908c6d0d375e403e1c03fa395ad1ad170be21c4159b0f5af6bf14e7e7f16cd1  ./spruce/flip/lib/libjpeg.so.8
+ff323cadd9b1e144dae58c9d04220050d6a7013a975eac396150a58702c049f1  ./spruce/flip/lib/liblzma.so.5
+2a3aadd4c5c154e136be2b4ce58586e1f1874a9893246fcf50ab68f8595b9ad4  ./spruce/flip/lib/libOpenGL.so.0
+2535d001659e128b01edd187397d98cf55d3aa67d1de02d8a299e51b88a53379  ./spruce/flip/lib/libgssapi.so.3
+8d4b8f40133a7b518849463dbd291f6386fa350f247fe5a8a3e465fd40de7dc0  ./spruce/flip/lib/libXext.so.6
+b7dd4653fbc6d3349fe0b0175f23503df5adde69a7396637f3b3427deb0e3a4e  ./spruce/flip/lib/libXcursor.so.1
+d00669d11d3afcaa56c3654dd158e5929f28265cfb1e5773cd7940304f24f262  ./spruce/flip/lib/libgcrypt.so.20
+da42a28cf92bc74933985bf68d49753f65ce66282b9b7052d58a90b15d54b127  ./spruce/flip/lib/libspeex.so.1
+6e0d458f32c8f412c63da222ab8a0a54a913d5b19b58dcf44168b655c6b071a1  ./spruce/flip/lib/libp11-kit.so.0
+3edad31ebf9be96454abb8b02ee095229fa25cb9649d7b25f15aac1794e5404f  ./spruce/flip/lib/libtk8.6.so
+883f6b8ca69454c329f7e65ddf68a4022cd3e05306dfb71cdd703a44a33e964c  ./spruce/flip/lib/libhx509.so.5
+0ead676e950000241e7c2fcf3dd8d4603e44713c28955010b6b8b582860f59e2  ./spruce/flip/lib/libSDL2_net-2.0.so.0
+7009501be2148ef0edb8955c31848082cb3605a232d9bd9678db62d4c5148f79  ./spruce/flip/lib/libboost_filesystem.so.1.71.0
+b494b0c3009564d2b3f820b786c383e654a96995f37da17fd8a062edeb24b748  ./spruce/flip/lib/libasyncns.so.0
+e05a487fbf7de78df3c2b68b90cfc2e42a373c07d630c4a436291fb53f9aecec  ./spruce/flip/lib/libGLU.so.1
+89f75bfb25091fe703a8e62befe612262f1a26288f2542e9d3ed3a93ee691b46  ./spruce/flip/lib/libhogweed.so.6
+e54f830c6259ee5146a5b719ee4ea00d234c3f91b2791c1643e1e2f3de1d63dd  ./spruce/flip/lib/libSDL2-2.0.so
+26028e2f7b95e8dd8df7d355ab01fe54ac26da7334eb28bb0e5b05bf930f4fdf  ./spruce/flip/lib/libkeyutils.so.1
+0ccdceedf2f7fa5b60606fe539d9b4aea8fed101b99102d7b0acd8dad9ae1d21  ./spruce/flip/lib/libmpg123.so
+278540b39ba74524366bfd3bc6f40f23d3e798951413924075c67938212a337f  ./spruce/flip/lib/libssl.so.1.1
+9fa00315c7f3652aae0c14a4eeb12bca3129459f89006fe1bc9bdc08acbac033  ./spruce/flip/lib/libXss.so.1
+0669230435538a29b0c0d7f0f8498b6c2ea2bf171112ccaf6e7b2afb2a2a00ab  ./spruce/flip/lib/libwavpack.so.1
+f7b659d2801e8045d42bb8de7f19ddca596e8f06598674552f42d1af53c54ce0  ./spruce/flip/lib/libffi.so.7
+8037b0ba93ccea008bba4d069973ce19332abc27b31470adee37a031c9c04118  ./spruce/flip/lib/libGLdispatch.so.0
+bf86cf0d720c3d9eda685a7f5dd97fb3c6a44e9d700f41af3256275f7e1cc01e  ./spruce/flip/lib/liba52-0.7.4.so
+426ca7fe1387879495708fbed57ed809f684b875b7cf56c877b13604c1dc4281  ./spruce/flip/lib/libswresample.so.3
+610e6b05df7fa00d6f4a7f6c466feb2f76d1cd21ee0871ff5335bba2a374eca0  ./spruce/flip/lib/libtiff.so.5
+48719bde1d4eb1410fb4fc778a049ddcb3afaa0b2b1151e09ea0d37ddb6493ae  ./spruce/flip/lib/libgssapi_krb5.so.2
+7c9ee217c9e88c9701adb27efc0cf1f90a8b1cdf0f385cca937ea35c270cdadd  ./spruce/flip/lib/libwayland-client.so.0
+856bb327790b9a311b860c39fc27174a6441c0b1da4827719e062685d64c0db3  ./spruce/flip/lib/libpulse.so.0
+cdfc184c26a0a4d001bf2203b8da77868bc472a002af7e7f30b7c14183705c76  ./spruce/flip/lib/libapparmor.so.1
+ebe03d65472de990fe2888e2219154f92c196054d9a5650ab2c0705f976dc59c  ./spruce/flip/lib/libpsl.so.5
+e336a84d59c65efb208f68e9e634f9777311f190db08ccb44eeca03cc07a258d  ./spruce/flip/lib/libpython3.so
+6c333116f097d9c612276b897e1f99516c3234c6a3e00b88b5860fd94d2e56a0  ./spruce/flip/lib/libogg.so.0
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./spruce/flip/lib/libSDL2_image-2.0.so.0
+8c829d7202214c309dfb5f6ff7ca50ebac8dfbd16a88bfa9da34d4d4fc86da55  ./spruce/flip/lib/libfribidi.so.0
+fa37d0eabf50ac0d69b9f703191050ceb5c9056b24b056e6d6a398813708588b  ./spruce/flip/lib/libopenmpt.so.0
+04b0452a7ca1d36cfcbfed59d4ea38e358d66389fb23e8892a74606b511f236e  ./spruce/flip/lib/libSDL2_mixer-2.0.so.0
+261ffeb58110ae6f67eb73f07f8f072790504d468dd6f5e76a0c447a38b17179  ./spruce/flip/lib/libpcre.so.1
+fa670304d5602d3815d4ddef32c30617ecd306dfce373437fe7721cee0268b4c  ./spruce/flip/lib/libtheoradec.so.1
+05af49fcba54275560a08cf6aae816c2202bc63021ea4f1026f5133b491077c0  ./spruce/flip/lib/libvpx.so.7
+f02a890a182c979e2bd6b867918a9afba4763e74865fe6f35203020bc9c88a93  ./spruce/flip/lib/libX11.so.6
+95bd972df4ece2f141b84963283a40171d71d72be5224de1018c62d463d4e5fe  ./spruce/flip/lib/libdav1d.so.6
+07a17f0f376dc5767ec9a08088f74eea7020101c2863cf695584e3174b6a284f  ./spruce/flip/lib/libcurl.so.4
+366080bac4e91b8af31cbfda6259b77eb5de13eac014535e36937f5f01523579  ./spruce/flip/lib/libXfixes.so.3
+a8d7ba3c1ae8a105d29b4aaeb1e97e3db89d564d257b56b35cf320303a90e19a  ./spruce/flip/lib/libheimbase.so.1
+da44196982403f70bfdfd707916c6d0b316c7a0126bcf8fd98053c9985302aa5  ./spruce/flip/lib/libsasl2.so.2
+e06075dfbe40aa12c27b3a3517d1d4a725687f559f23c855c4fc90e97c5e45ea  ./spruce/flip/lib/libdecor-0.so.0
+fd54a3ff960b4f6929e1e3790781bfc14ffaa59158165174b4ef0fa1c0a77569  ./spruce/flip/lib/libk5crypto.so.3
+65c63b864a1ddde39278c7ceda56debbaaeb2e394b8398c7cd42ecf5e49e183f  ./spruce/flip/lib/libhogweed.so.5
+6f3240dcf0ba88f56d42c9229aa9cc2aef9055d47238c73afa193370318c0e17  ./spruce/flip/lib/libXi.so.6
+382bd91e6f0dbea241eb85b92d349e5f99d6cbcbac0a575c7a8636ba6c192fa8  ./spruce/flip/lib/libpng16.so.16
+5ff2009d543a6e648e9cb45c45b2497248d64cefa2b2714904bdcea7f8b5279c  ./spruce/flip/lib/libnettle.so.8
+b7f6000e8f985b9f71a8432a6189ec618e4860406dc33934ce47ee6c23352d72  ./spruce/flip/lib/libSDL2_gfx-1.0.so
+9f158d646c56fb4eea9658754ccbb8fb3d4d325b1c1e791d0335cdb638e8bed0  ./spruce/flip/lib/libxcb-shm.so.0
+6d4bf80528619ad7bccf5083644c4d94105c50a7b53a8c002d56090c7d44c68f  ./spruce/flip/lib/libpixman-1.so.0
+75e8d36b6791abff81cbfd0224db3dc8d7bd47e788c889e66884ebc314836edb  ./spruce/flip/lib/libavutil.so.56
+68ec273103986ecbb53f576759101634974d073d1fcff74db19cb93c4e8b5d46  ./spruce/flip/lib/libcom_err.so.2
+947171c2237aba34ba44ab9edca941eb9f72c8f3425dc1ba45b89c2be6a0d52e  ./spruce/flip/lib/libwayland-egl.so.1
+026b2287c9d68f920cf541b68b94f1a691168e4bbf301a8793f4114808aa8f95  ./spruce/flip/lib/libmodplug.so.1
+d8e281aef2021664e6607dd44fe0f5877c215fac40a9cbb5fca6ddf315552913  ./spruce/flip/lib/libidn2.so.0
+9c34295aa778cc22539d4a0ea7995de97b6e8d4403565c243719bb50c79cf56a  ./spruce/flip/lib/libbrotlidec.so.1
+5f23fdbe6de8f67ef15ae66b16183ac343c041a25cb9a18638264c6608b5e9e5  ./spruce/flip/lib/libbrotlicommon.so.1
+3b57224315a46083cb23390aae081d83947b1c0515ddba33f0b9b15783d472d5  ./spruce/flip/lib/libpython3.10.so.1.0
+db1a155fe53084c14f194d9ef59ffe94b985da258c43b962aeb0acf8f3299dc2  ./spruce/flip/lib/libbsd.so.0
+62e7c33aec13d58bc701444a154b73afe30ce91cbbc797e79ab501dc8e620858  ./spruce/flip/lib/libtasn1.so.6
+ac2464343c958d08f86377f06f83e04839ceb7b202e728e6c7b452f8c781bd43  ./spruce/flip/lib/libSDL2_image-2.0.so
+9fcb8178c6f622158a257d4d1e5c0685d605ff8b9712c5587baf72fc50717f39  ./spruce/flip/lib/libmad.so.0
+4b6cb3e7d6d08b0e446ac39f138ff8a6b3a4cbce0c4861a7a1286c3c2dfc1a90  ./spruce/flip/lib/libzstd.so.1
+7f78e54add153922f5fcbbff4742673b37ae93e0b4fe224131e91afa9864f6f6  ./spruce/h700/lib64/libcrypto.so.1.1
+6544d8dec161308a566021cb37da3f0a66637cad7eb47b3ee16bf92f15f164ab  ./spruce/h700/lib64/libSDL_image-1.2.so.0
+9afaf6ad0b46a0b50f7c9783ad08e2933993b698a5e9af1dc0e3a92573ccda2b  ./spruce/h700/lib64/libjbig.so.0
+e0a84eed3d1dfa35398adee13055b02238453070317b16dbe446ac1acf29633e  ./spruce/h700/lib64/sdl2/libSDL2-2.0.so.0
+5e14f0912289555d274dc4d38a86ad6aead67a39ee2a89df3c7c8685309af899  ./spruce/h700/lib64/libjpeg.so.8
+a0b90811150f1b3591cc998d86735b602f09a28eec03346b166f49add7020d2e  ./spruce/h700/lib64/libtiff.so.5
+3ffc118417f42cb75fba59d6fb73867df4bb4f95e4c0a50c65c693ff013f669c  ./spruce/h700/lib64/libSDL_ttf-2.0.so.0
+700338d5189a1962d796444bc4ef86dd0207f3be25fb0094a601fefc172dbfd1  ./spruce/h700/lib64/libwebp.so.6
+14ba485f3a55c36893f372831d0445f78fc64f26073a8d7374dc89ac50b95edc  ./spruce/h700/lib64/libpng16.so.16
+2b6c1b1fedc02c64d03feb8d0df13c5b60e648d511641ae0471750d74f2e8843  ./spruce/h700/lib64/libzstd.so.1
+288c8a26055d8523b61f87101c262d443b6f04247cde92fe0db7584b0c27c0e4  ./spruce/h700/lib32/libEGL.so
+95824d0ebca93272defea45b34a9294189fd541e14ee6ad2c8ddffac0f74a8ac  ./spruce/h700/lib32/libfreetype.so.6
+288c8a26055d8523b61f87101c262d443b6f04247cde92fe0db7584b0c27c0e4  ./spruce/h700/lib32/libEGL.so.1
+e4e91c2edf919f0a436ab3c8a032fb8f5ea7b7fbc4958612b3d0125f7bbaae89  ./spruce/h700/lib32/libGLESv1_CM.so.1
+640fdbf785bfd47f9c1755a70eeee398a43decd668c3546b5fbefa456f9fe5ae  ./spruce/h700/lib32/libz.so.1
+7eea2952ea6d1951579edce859b8b06b906a4cb04701105a6b646f68bc82ae92  ./spruce/h700/lib32/libdl.so.2
+a208cf83fd25562d4a92bab23352a0f0bade9c2e772119b606bdc0b7efec4d30  ./spruce/h700/lib32/librt.so.1
+73c3de7eb270b8408a56c445360ebee8d77384ab69b1b5c759626c313cf5e85d  ./spruce/h700/lib32/libm.so.6
+36e366ee7693cae6193d9150e60eed4d687d8c12a85d5427ef5be00695d03e6f  ./spruce/h700/lib32/libSDL2-2.0.so.0
+5f929fbb25063ee9517889f2755dc997f4bf3b240389be887cb06388f98a8a90  ./spruce/h700/lib32/libudev.so.1
+82d46526110aae8b8d041f9ff698c6f42d7bf3f3686e2134c5b7306a62c8e8ce  ./spruce/h700/lib32/libgcc_s.so.1
+7eaf8c1b28bf17f8f0062035edc5b745050c55f82dfa8f6fb358f72c88238f47  ./spruce/h700/lib32/libpthread.so.0
+fdf052330face504551a62645da4625f41db33bba0a3f8bf9603660c030612f1  ./spruce/h700/lib32/libstdc++.so.6
+82216a96991e4792cbce92728cfca310c093eb5785d912c46f76d655330b5b4f  ./spruce/h700/lib32/libasound.so.2
+ac519e785a685df51332924c6769ffd1d486d21f6c5b6d3876f8b6b8640e804c  ./spruce/h700/lib32/libGLESv2.so.2
+4a74c2b0f35593d5913d03c4203c2c1906975d222dabb44ad5c720a3221d3652  ./spruce/h700/lib32/libpng16.so.16
+ac519e785a685df51332924c6769ffd1d486d21f6c5b6d3876f8b6b8640e804c  ./spruce/h700/lib32/libGLESv2.so
+e4e91c2edf919f0a436ab3c8a032fb8f5ea7b7fbc4958612b3d0125f7bbaae89  ./spruce/h700/lib32/libGLESv1_CM.so
+c02e03571a68a7506da1286e8b3887f7ec63bac968c9775a32e008b435eb719c  ./spruce/h700/lib32/libbrotlidec.so.1
+da9db4f9319147ae82616127b305ae2a05aba6cab5828f8e5b2b79b2f49d2ba7  ./spruce/h700/lib32/libbrotlicommon.so.1
+35e6dad3762fe8beb41fa2c0e7d895b3e5a39cdc8cf8cd094a0c7295e6eeb7cb  ./spruce/h700/lib32/libmali.so.0
+a3835e3a1117eb08e5a4322c2e04d5e4d1a550cf00248c8dcf9a1d1d61aa6188  ./spruce/bin64/Samba/lib/libnetapi.so.0
+10074761a26c2b75c5763b89eed0609f5c7e1cd337fc4632713b4591d9f0ba6c  ./spruce/bin64/Samba/lib/libsmbclient.so
+1ba795574ff31d9adc0e2c969dd4942af15669d0ccf5be5cb0047e1b8840d020  ./spruce/bin64/Samba/lib/libtevent.so
+1ba795574ff31d9adc0e2c969dd4942af15669d0ccf5be5cb0047e1b8840d020  ./spruce/bin64/Samba/lib/libtevent.so.0
+d93bcb1944082a836b94a1420090397feced7cb64cdf99b004bc738ece3e3583  ./spruce/bin64/Samba/lib/libsmbsharemodes.so.0
+82243d590a0462f62ad9ee9c2b03d1b849cd2d454d490bc1c44110a43f74664a  ./spruce/bin64/Samba/lib/libtdb.so.1
+5d94bf139c4bfe47145c0c234903dfe76e1700dd80a85d6a603618af62eb709c  ./spruce/bin64/Samba/lib/libtalloc.so
+1ba795574ff31d9adc0e2c969dd4942af15669d0ccf5be5cb0047e1b8840d020  ./spruce/bin64/Samba/lib/libtevent.so.0.9.11
+d93bcb1944082a836b94a1420090397feced7cb64cdf99b004bc738ece3e3583  ./spruce/bin64/Samba/lib/libsmbsharemodes.so
+5d94bf139c4bfe47145c0c234903dfe76e1700dd80a85d6a603618af62eb709c  ./spruce/bin64/Samba/lib/libtalloc.so.2
+a3835e3a1117eb08e5a4322c2e04d5e4d1a550cf00248c8dcf9a1d1d61aa6188  ./spruce/bin64/Samba/lib/libnetapi.so
+5d94bf139c4bfe47145c0c234903dfe76e1700dd80a85d6a603618af62eb709c  ./spruce/bin64/Samba/lib/libtalloc.so.2.0.5
+82243d590a0462f62ad9ee9c2b03d1b849cd2d454d490bc1c44110a43f74664a  ./spruce/bin64/Samba/lib/libtdb.so.1.2.9
+82243d590a0462f62ad9ee9c2b03d1b849cd2d454d490bc1c44110a43f74664a  ./spruce/bin64/Samba/lib/libtdb.so
+10074761a26c2b75c5763b89eed0609f5c7e1cd337fc4632713b4591d9f0ba6c  ./spruce/bin64/Samba/lib/libsmbclient.so.0
+6f46901b2655fbeba738a7e20ed2eca646111035e58472b04ddaad27deef4cb8  ./spruce/a30/sdl2/libSDL2_image-2.0.so.0
+0f829d7cc7252dc20790d3d73d79723b6d9d458ab570fb739753f2b0b3b1788d  ./spruce/a30/lib/libcrypto.so.1.1
+8014989515dc003f669e87abe4cbd89dcc4d68a458248ceee2528d73ed457a72  ./spruce/a30/lib/libstdc++.so.6
+9bc20c173549556ecd8bd0acf2a0aaa579dd3dc3774bf64543818220842cb875  ./spruce/a30/lib/libSDL2_net-2.0.so.0
+e784aeb83eaf24a5b0f82856b1f3420c07f3b1cceb36afa52f516ee31b843af7  ./spruce/a30/lib/libpcre.so.1
+da1d7be44c2aa75dc4364560780ffbffb438cd6027832bbba5d9771fd1a7509f  ./spruce/a30/lib/libtheoradec.so.1
+b5378f166f6a77dafa311c6470b6a64a5a67debf106b9d93a3f183597a451075  ./spruce/a30/setcpu/lib/libSDL2_ttf-2.0.so.0
+5fe384a84823a26ab10f446db2d9e7d43e8ecaaad2860f766209ff2ac3a273c5  ./spruce/a30/setcpu/lib/libSDL2_gfx-1.0.so.0
+f08192376fe7f8cbe2bd39290483710682ace87fd226a95a0324fca84f7f9626  ./spruce/a30/setcpu/lib/libz.so.1
+40e0f6e68861586442a195f71d7e5793fd8370e6ca477f68798a92b377afb237  ./spruce/a30/setcpu/lib/libSDL2-2.0.so.0
+70a9dad7daf278f024d88b5fc45ab7574432cf5b962888c203bd0f505d532e60  ./spruce/a30/setcpu/lib/libstdc++.so.6
+b3537df14c83c858e801f5d6454f225b1bf297bf89f5c1767c5d5b0ba0a204db  ./spruce/a30/setcpu/lib/libSDL2_image-2.0.so.0
+abeab7bf55f80db2b0d54e1ab9d8c43c53c45c155dbeeab7c6b90e0b2fe6e4ed  ./spruce/a30/setcpu/lib/libpng16.so.16
