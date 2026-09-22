@@ -17,7 +17,10 @@ run_xroar() {
 
 XROAR_BIN="xroar"
 
-LD_LIBRARY_PATH="$EMU_DIR/libs.aarch64:$LD_LIBRARY_PATH"
+# xroar links libevdev.so.2, which no device firmware and no other card directory provides; the
+# shared aarch64 userland does. (Its GL and libbsd libraries moved from $EMU_DIR/libs.aarch64 to
+# spruce/flip/lib, already on LD_LIBRARY_PATH, so that directory is gone.)
+LD_LIBRARY_PATH="/mnt/SDCARD/spruce/aarch64/lib:$LD_LIBRARY_PATH"
 export LD_LIBRARY_PATH
 
 XR_GPTK="$EMU_DIR/gptk"
