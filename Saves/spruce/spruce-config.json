@@ -433,6 +433,19 @@
                 ],
                 "selected": "True"
             },
+            "raIgmColorway": {
+                "display": "RA: in-game menu colors",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
+                "options": [
+                    "spruce",
+                    "mono",
+                    "red",
+                    "blue",
+                    "green",
+                    "purple"
+                ],
+                "selected": "spruce"
+            },
             "keepSavesBetweenCores": {
                 "display": "Transfer saves between cores",
                 "options": [

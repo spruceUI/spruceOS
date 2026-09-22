@@ -221,6 +221,20 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
+	# Hand the IGM the active theme dir so a theme can ship its own igm.json.
+	# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
+	# configs store a full path, so accept either. Leaving the variable unset
+	# is fine - the binary falls through to the colourway it was given.
+	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
+	case "$_theme" in
+		/*)      _theme_dir="${_theme%/}" ;;
+		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
+		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
+	esac
+	if [ -d "$_theme_dir" ]; then
+		export SPRUCE_THEME_DIR="$_theme_dir"
+	fi
+
 	setup_for_retroarch
 	cd "$RA_DIR"
 

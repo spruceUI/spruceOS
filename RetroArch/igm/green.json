@@ -1,0 +1,15 @@
+{
+  "name": "green",
+  "colors": {
+    "dim_bg":        "#001408D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#5FBF6B2E",
+    "accent":        "#5FBF6BD9",
+    "title_line":    "#4A6B5066",
+    "text":          "#D8EDD9FF",
+    "text_selected": "#F0FFF2FF",
+    "text_title":    "#5FBF6BFF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#D8EDD9FF"
+  }
+}

@@ -76,7 +76,10 @@ restore_theme_configs() {
         dest_dir="/mnt/SDCARD/Themes/$base_theme"
 
         if [ -d "$dest_dir" ]; then
-            cp -f "$theme_name"/config*json "$dest_dir"/
+            for f in "$theme_name"/config*json "$theme_name"/igm.json; do
+                [ -f "$f" ] || continue
+                cp -f "$f" "$dest_dir"/
+            done
             log_message "Restored configs for theme $base_theme"
         else
             log_message "Skipping restore for missing theme: $base_theme"
