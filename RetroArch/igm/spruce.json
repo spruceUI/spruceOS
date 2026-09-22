@@ -50,8 +50,9 @@
   // name the stock one outright.
   "font": {
     "path":           "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
-    "size_pct":       5.0,
-    "size_small_pct": 3.5714286
+    "size_pct":         5.0,
+    "size_small_pct":   3.5714286,
+    "battery_size_pct": 3.5714286
   },
 
   "text": {
