@@ -72,3 +72,26 @@ stop_raproxy_process() {
 	log_message "RAOfflineProxy: stop-proxy left it running, killing"
 	pkill -f "$RA_PROXY_PROC" 2>/dev/null
 }
+
+# Cache one ROM's achievement set for offline play, and print whatever the app
+# says - the 100-game cap and "not logged in" both come back this way, and the
+# caller shows it to the user verbatim.
+#
+# Needs the network: this is the call that fetches from retroachievements.org
+# so the game can be played without it later.
+raproxy_cache_rom() {
+	_rom="$1"
+
+	if ! ra_proxy_is_installed; then
+		echo "RAOfflineProxy is not installed"
+		return 1
+	fi
+
+	(
+		cd "$RA_PROXY_DIR" || exit 1
+		. "$RA_PROXY_COMMON"
+		prepare_env
+		resolve_python_bin || { echo "No usable python"; exit 1; }
+		run_backend_raw "$RESOLVED_PYTHON_BIN" cache-rom --path "$_rom" 2>&1
+	)
+}
