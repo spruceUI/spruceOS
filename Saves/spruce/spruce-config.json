@@ -845,6 +845,16 @@
                 "display": "Password",
                 "type": "freeText",
                 "selected": ""
+            },
+            "enableOfflineProxy": {
+                "display": "Offline Achievements",
+                "description": "Earn achievements with no connection. Softcore only, 100 games max.",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
             }
         },
         "Audio Settings": {

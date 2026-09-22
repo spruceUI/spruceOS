@@ -135,6 +135,19 @@ device_names() {
     fi
 }
 
+# The live RetroArch config, seeded from the .bak when absent. The configs moved
+# out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
+ensure_ra_config_path() {
+    _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
+    _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+    if [ ! -f "$_rac_live" ] && [ -f "$_rac_bak" ]; then
+        mkdir -p /mnt/SDCARD/Saves/ra-configs
+        cp "$_rac_bak" "$_rac_live"
+    fi
+    echo "$_rac_live"
+    unset _rac_live _rac_bak
+}
+
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {

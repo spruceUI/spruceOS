@@ -5,6 +5,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
 
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
@@ -14,6 +15,9 @@ samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.s
 ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
 sftpgo_enabled="$(get_config_value '.menuOptions."Network Settings".enableSFTPGo.selected' "False")"
 syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
+# Grouped with the RetroAchievements settings rather than the network ones:
+# that is where a user goes looking for it.
+raproxy_enabled="$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")"
 
 # Directory, not a file: mkdir is atomic, so two near-simultaneous launches
 # cannot both decide they hold the lock.
@@ -120,6 +124,16 @@ connect_services() {
 		stop_syncthing_process
 	fi
 
+	# RAOfflineProxy check
+	if [ "$raproxy_enabled" = "True" ]; then
+		if ! ra_proxy_is_running; then
+			log_message "Network services: RAOfflineProxy detected not running, starting..."
+			start_raproxy_process
+		fi
+	else
+		stop_raproxy_process
+	fi
+
 	# Start Network Services Landing page
 	start_darkhttpd_process
 
@@ -139,6 +153,8 @@ disconnect_services() {
 	fi
 
 	log_message "Network services: Stopping all network services..."
+	stop_raproxy_process
+
 	for service in "$SFTP_SERVICE_NAME" "$SSH_SERVICE_NAME" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
 			case "$service" in

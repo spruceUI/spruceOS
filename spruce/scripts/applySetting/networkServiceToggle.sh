@@ -1,10 +1,10 @@
 #!/bin/sh
-# Apply a Network Settings service toggle (Enable Samba / Enable SSH /
-# Enable WiFi File Transfer / Enable Syncthing) immediately, instead of
+# Apply a service toggle (Enable Samba / Enable SSH / Enable WiFi File
+# Transfer / Enable Syncthing / Offline Achievements) immediately, instead of
 # waiting for networkservices.sh's own connect loop to notice on its next
 # wake, or for a reboot.
 #
-# Usage: networkServiceToggle.sh <samba|ssh|sftpgo|syncthing> <True|False>
+# Usage: networkServiceToggle.sh <samba|ssh|sftpgo|syncthing|raproxy> <True|False>
 #
 # Wired up as each setting's changeCmd. PyUI's set_menu_option() saves the
 # newly-selected value to spruce-config.json before running changeCmd (see
@@ -17,6 +17,7 @@
 . /mnt/SDCARD/spruce/scripts/network/sftpgoFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
 SERVICE="$1"
 ENABLED="$2"
@@ -27,6 +28,7 @@ case "$SERVICE" in
     ssh)       PROC_NAME="$(get_ssh_service_name)" ;;
     sftpgo)    PROC_NAME="$(get_sftp_service_name)" ;;
     syncthing) PROC_NAME="syncthing" ;;
+    raproxy)   PROC_NAME="$RA_PROXY_PROC" ;;
     *)
         log_message "networkServiceToggle: unknown service '$SERVICE'"
         exit 1
@@ -39,6 +41,14 @@ start_service() {
         ssh)       start_ssh_process ;;
         sftpgo)    start_sftpgo_process ;;
         syncthing) start_syncthing_process ;;
+        raproxy)   start_raproxy_process ;;
+    esac
+}
+
+service_is_running() {
+    case "$SERVICE" in
+        raproxy) ra_proxy_is_running ;;
+        *)       pgrep "$PROC_NAME" >/dev/null ;;
     esac
 }
 
@@ -48,12 +58,13 @@ stop_service() {
         ssh)       stop_ssh_process ;;
         sftpgo)    stop_sftpgo_process ;;
         syncthing) stop_syncthing_process ;;
+        raproxy)   stop_raproxy_process ;;
     esac
 }
 
 apply_toggle() {
     if [ "$ENABLED" != "True" ]; then
-        if pgrep "$PROC_NAME" >/dev/null; then
+        if service_is_running; then
             log_message "networkServiceToggle: stopping $SERVICE (disabled via Settings)"
             stop_service
         fi
@@ -64,7 +75,7 @@ apply_toggle() {
     # networkservices.sh's own connect loop for whenever it does connect, same as
     # at boot (it reads this same setting fresh once the network comes up).
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ] && network_is_connected true; then
-        if ! pgrep "$PROC_NAME" >/dev/null; then
+        if ! service_is_running; then
             log_message "networkServiceToggle: starting $SERVICE (enabled via Settings, WiFi already connected)"
             start_service
         fi
@@ -74,7 +85,7 @@ apply_toggle() {
 # Do the work detached, and one at a time per service.
 #
 # PyUI runs this through set_menu_option's subprocess.run(..., check=True),
-# which blocks the UI thread until we exit. Two of the four services background
+# which blocks the UI thread until we exit. Three of the five services background
 # themselves, but SSH does not: start_ssh_process polls for up to five seconds
 # waiting for dropbear to take port 22, after a one-off RSA and ed25519 keygen
 # the first time, which is seconds more on these CPUs. That froze the settings
