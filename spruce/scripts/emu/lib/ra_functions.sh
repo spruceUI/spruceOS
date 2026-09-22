@@ -100,36 +100,6 @@ prepare_ra_config() {
 			;;
 	esac
 
-	# Point RetroAchievements at the offline proxy, or back at the real site.
-	# networkservices.sh owns running it; this only decides where RetroArch
-	# sends its traffic. Rewritten on every launch in both directions, so
-	# turning the proxy off cannot leave a host behind that answers nothing.
-	ra_proxy="$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")"
-	if [ "$ra_proxy" = "True" ]; then
-		_rac_host="http://127.0.0.1:$RA_PROXY_PORT"
-	else
-		_rac_host=""
-	fi
-	log_message "Cheevos host is ${_rac_host:-retroachievements.org}" -v
-	TMP_CFG="$(mktemp)"
-	if sed -e "s|^cheevos_custom_host.*|cheevos_custom_host = \"$_rac_host\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
-		mv "$TMP_CFG" "$PLATFORM_CFG"
-	else
-		rm -f "$TMP_CFG"
-	fi
-
-	# The proxy cannot validate a hardcore run, and RetroArch would drop every
-	# award earned against it. Softcore is the only mode that survives.
-	if [ "$ra_proxy" = "True" ] && [ "$rac_mode" = "Hardcore" ]; then
-		log_message "Offline proxy is on; forcing softcore for this launch"
-		TMP_CFG="$(mktemp)"
-		if sed -e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
-			mv "$TMP_CFG" "$PLATFORM_CFG"
-		else
-			rm -f "$TMP_CFG"
-		fi
-	fi
-
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
 	log_message "auto save setting is $auto_save" -v

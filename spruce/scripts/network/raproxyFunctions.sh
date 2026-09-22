@@ -9,17 +9,19 @@
 # RetroArch points (see prepare_ra_config in emu/lib/ra_functions.sh); the app
 # owns its own runtime, its menu and its cache.
 RA_PROXY_DIR=/mnt/SDCARD/App/RAOfflineProxy
-RA_PROXY_BOOT="$RA_PROXY_DIR/autostart-launch.sh"
+RA_PROXY_COMMON="$RA_PROXY_DIR/common.sh"
 
-# The daemon runs as "python -m raofflineproxy.boot". Matched on the module
-# rather than the app directory, so the menu - raofflineproxy.main out of the
-# same tree - survives a stop. No leading dash: pgrep reads one as an option
-# and fails the match outright, which would start a second daemon on every
-# pass and never stop either of them.
-RA_PROXY_PROC="raofflineproxy\.boot"
+# raofflineproxy.boot is only a bootstrap; it forks the real daemon and exits,
+# so matching .boot finds nothing a moment later - the toggle then reported the
+# proxy as stopped while it was serving, and could neither stop nor avoid
+# restarting it. The service and the menu are both raofflineproxy.main, so the
+# verb is what separates them and menu-sdl has to survive a stop.
+#
+# No leading dash either: pgrep reads one as an option and fails outright.
+RA_PROXY_PROC="raofflineproxy\.main run-service"
 
 ra_proxy_is_installed() {
-	[ -f "$RA_PROXY_BOOT" ]
+	[ -f "$RA_PROXY_COMMON" ]
 }
 
 ra_proxy_is_running() {
@@ -32,12 +34,41 @@ start_raproxy_process() {
 		return 1
 	fi
 
-	# Its own launcher resolves the bundled interpreter and environment, which
-	# differ per device. Reimplementing that here would drift the moment the
-	# app changes.
-	sh "$RA_PROXY_BOOT" &
+	# start-proxy, not the app's autostart-launch.sh: that runs boot-reconcile,
+	# which honours the app's *own* autostart flag and quietly does nothing when
+	# it is off. Enabling lives in our toggle now, and two switches for one
+	# feature is how a user ends up with a setting that says On and nothing
+	# running - which is exactly what it did.
+	#
+	# Sourcing the app's common.sh rather than reimplementing it: resolving the
+	# interpreter and its environment differs per device and is the app's to
+	# own. In a subshell so none of it leaks into the caller.
+	(
+		cd "$RA_PROXY_DIR" || exit 1
+		. "$RA_PROXY_COMMON"
+		prepare_env
+		resolve_python_bin || exit 1
+		run_backend_raw "$RESOLVED_PYTHON_BIN" start-proxy
+	) >/dev/null 2>&1 &
 }
 
+# stop-proxy, not a kill: the app restores the RetroArch host it saved when it
+# patched, and a user's own custom host is part of that. Killing the process
+# leaves cheevos_custom_host pointing at a port with nothing behind it, and
+# RetroArch then fails to reach achievements with nothing on screen to say why.
+# pkill stays only for a process that ignored the request.
 stop_raproxy_process() {
+	if [ -f "$RA_PROXY_COMMON" ]; then
+		(
+			cd "$RA_PROXY_DIR" || exit 1
+			. "$RA_PROXY_COMMON"
+			prepare_env
+			resolve_python_bin || exit 1
+			run_backend_raw "$RESOLVED_PYTHON_BIN" stop-proxy
+		) >/dev/null 2>&1
+	fi
+
+	ra_proxy_is_running || return 0
+	log_message "RAOfflineProxy: stop-proxy left it running, killing"
 	pkill -f "$RA_PROXY_PROC" 2>/dev/null
 }

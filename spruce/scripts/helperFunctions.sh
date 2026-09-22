@@ -27,11 +27,6 @@ POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
-# RAOfflineProxy's port. 8080 is SFTPGo's, so it sits next door. Read by the
-# service and by prepare_ra_config, which have to agree or RetroArch ends up
-# talking to a port with nothing on it.
-export RA_PROXY_PORT=8099
-
 # Detect device and export to any script sourcing helperFunctions
 #
 # MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
