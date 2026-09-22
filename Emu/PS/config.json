@@ -36,9 +36,13 @@
       "overrides": {}
     },
     "Emulator_A30": {
-      "display": "Retroarch Core",
+      "display": "Emulator",
       "devices": [
-        "MIYOO_A30"
+        "MIYOO_A30",
+        "MIYOO_MINI",
+        "MIYOO_MINI_V4",
+        "MIYOO_MINI_PLUS",
+        "MIYOO_MINI_FLIP"
       ],
       "options": [
         "pcsx_rearmed",

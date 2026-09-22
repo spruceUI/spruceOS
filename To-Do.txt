@@ -11,7 +11,7 @@
 
 - Mini splore update from tenlevels
 - Expose H700 led settings
-- Make RA spruce IGM themeable
+- PCSX Standalone on Miyoo Mini - we ship this and have scripting for it, but it doesn't work. Mini Flip - segfaults. Mini Plus - borks the screen.
     
 --- Ry ------------------------------------------------------------------------
 
