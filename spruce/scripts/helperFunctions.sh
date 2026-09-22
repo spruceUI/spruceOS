@@ -135,9 +135,8 @@ device_names() {
     fi
 }
 
-# The live RetroArch config, seeded from the shipped .bak when absent. Anything
-# editing RA settings outside a game launch must go through this: the configs
-# moved out of RetroArch/platform/ in 4.4.2 and that folder now holds only seeds.
+# The live RetroArch config, seeded from the .bak when absent. The configs moved
+# out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
 ensure_ra_config_path() {
     _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
     _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
@@ -147,48 +146,6 @@ ensure_ra_config_path() {
     fi
     echo "$_rac_live"
     unset _rac_live _rac_bak
-}
-
-# SDL2 that can actually reach this device's panel. Mirrors App/PyUI/launch.sh -
-# keep the two in step.
-get_sdl2_dll_path() {
-    case "$PLATFORM" in
-        A30) echo "/mnt/SDCARD/spruce/a30/sdl2" ;;
-        Brick|BrickPro|SmartPro|SmartProS) echo "/mnt/SDCARD/spruce/brick/sdl2" ;;
-        MiyooMini) echo "/mnt/SDCARD/spruce/miyoomini/lib" ;;
-        Pixel2) echo "/usr/lib" ;;
-        Zero28|Zero40|XU20) echo "/usr/magicx/lib" ;;
-        Flip|RGB30|Miniloong) echo "/mnt/SDCARD/App/PyUI/dll" ;;
-        Anbernic*)
-            if [ -f /mnt/SDCARD/App/PyUI/dll-mali/libSDL2-2.0.so.0 ]; then
-                echo "/mnt/SDCARD/App/PyUI/dll-mali"
-            else
-                echo "/mnt/SDCARD/App/PyUI/dll"
-            fi
-            ;;
-    esac
-}
-
-# Empty means "let SDL probe"; naming a driver it cannot use is worse than that.
-get_sdl2_videodriver() {
-    case "$PLATFORM" in
-        MiyooMini) echo "mmiyoo" ;;
-        RGB30) echo "kmsdrm" ;;
-        Miniloong) [ "${MINILOONG_STOP_WESTON:-1}" = "1" ] && echo "kmsdrm" || echo "wayland" ;;
-        Anbernic*)
-            [ -f /mnt/SDCARD/App/PyUI/dll-mali/libSDL2-2.0.so.0 ] && echo "mali"
-            ;;
-    esac
-}
-
-# The user's zone as glibc wants it in TZ. Empty when none is set.
-get_spruce_tz() {
-    _tz_cfg="/mnt/SDCARD/Saves/spruce/shared-system.json"
-    [ -f "$_tz_cfg" ] || return 0
-    _tz_name="$(sed -n 's/.*"timezone"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$_tz_cfg" 2>/dev/null | head -n 1)"
-    [ -n "$_tz_name" ] && [ -r "/mnt/SDCARD/spruce/zoneinfo/$_tz_name" ] &&
-        echo ":/mnt/SDCARD/spruce/zoneinfo/$_tz_name"
-    unset _tz_cfg _tz_name
 }
 
 # Call this just by having "acknowledge" in your script

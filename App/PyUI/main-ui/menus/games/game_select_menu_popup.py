@@ -74,22 +74,14 @@ class GameSelectMenuPopup:
         next_view = CYCLE_VIEWS[(idx + 1) % len(CYCLE_VIEWS)]
         Theme.set_game_selection_view_type(next_view)
 
-    def offline_cheevos_enabled(self):
-        return "True" == CfwSystemConfig.get_selected_value(
-            "RetroAchievements Settings", "enableOfflineProxy")
-
     def cache_for_offline_cheevos(self, input_value, rom_info : RomInfo):
-        """Fetch this game's achievements so they can be earned with no
-        connection. Needs the network now; the proxy serves them later."""
         Display.display_message(Language.label("cachingCheevos", "Caching achievements..."))
         try:
             result = subprocess.run(
                 ["/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh", rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
-            message = (result.stdout or result.stderr).strip().splitlines()
-            message = message[-1] if message else "No response"
-        except subprocess.TimeoutExpired:
-            message = "Timed out"
+            lines = (result.stdout or result.stderr).strip().splitlines()
+            message = lines[-1] if lines else "No response"
         except Exception as e:
             PyUiLogger.get_logger().error(f"cache-rom failed: {e}")
             message = "Failed"
@@ -251,7 +243,7 @@ class GameSelectMenuPopup:
                 value=lambda input_value, rom_info=rom_info: self.select_specific_boxart(input_value, rom_info)
             ))
 
-        if(self.offline_cheevos_enabled() and not rom_info.is_collection):
+        if("True" == CfwSystemConfig.get_selected_value("RetroAchievements Settings", "enableOfflineProxy")):
             popup_options.append(GridOrListEntry(
                 primary_text=Language.label("cacheCheevos", "Cache Achievements") if use_full_text else "Cache Cheevos",
                 image_path=Theme.settings(),

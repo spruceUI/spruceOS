@@ -15,9 +15,8 @@ samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.s
 ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
 sftpgo_enabled="$(get_config_value '.menuOptions."Network Settings".enableSFTPGo.selected' "False")"
 syncthing_enabled="$(get_config_value '.menuOptions."Network Settings".enableSyncthing.selected' "False")"
-# Grouped with the other RetroAchievements settings rather than the network
-# ones: it is where a user looks for it, and where ra_functions.sh reads the
-# same toggle to decide the cheevos host.
+# Grouped with the RetroAchievements settings rather than the network ones:
+# that is where a user goes looking for it.
 raproxy_enabled="$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")"
 
 # Directory, not a file: mkdir is atomic, so two near-simultaneous launches
