@@ -153,3 +153,14 @@ Second pass the same day, from a fleet census of every launchable card binary ov
 ```sh
 scripts/build-ports-userland.sh          # in the oakMOSS checkout
 ```
+
+## Floor rule (2026-09-23)
+
+The firmware serves its own zlib and freetype ahead of this directory on every board that has them, and the
+oldest copies in the fleet are zlib 1.2.8 and freetype 2.6.1 (Brick, Brick Pro, Smart Pro, XU20, Zero 28,
+Zero 40). So the lane compiles and links against exactly those: zlib 1.2.8 is its build dependency and a
+freetype 2.6.1 is staged before harfbuzz and SDL_ttf are built (the shipped freetype 2.10.4 is built last).
+Two lane gates enforce it on every shipped file: no ZLIB_ version beyond 1.2.8's, no FT_ import that 2.6.1
+lacks. Found by the device verifier's symbol pass: the previous harfbuzz imported FT_Get_Var_Blend_Coordinates
+and FT_Done_MM_Var, which loaded fine on those six boards and would have killed the EasyRPG core at the first
+variable font. Build 20260923-1443-ports-userland-glibc233-floor; 11 of the 77 files changed.
