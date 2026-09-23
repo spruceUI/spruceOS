@@ -323,6 +323,9 @@ class Theme():
     
     @classmethod
     def favorite_icon(cls): return cls._asset("ic-favorite-mark.qoi")
+
+    @classmethod
+    def cheevos_icon(cls): return cls._asset("ic-cheevos-mark.qoi")
     
     @classmethod
     def get_list_large_selected_bg(cls): return cls._asset("bg-list-l.qoi")

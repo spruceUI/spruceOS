@@ -10,6 +10,7 @@ from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
+from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
@@ -145,6 +146,7 @@ def initialize_device(device, main_ui_mode):
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
+    CheevosCacheManager.initialize(PyUiConfig.get_cheevos_cache_path())
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
