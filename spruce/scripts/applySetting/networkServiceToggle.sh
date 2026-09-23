@@ -63,6 +63,13 @@ stop_service() {
 }
 
 apply_toggle() {
+    # The offline proxy is wanted with or without a network, so it skips the
+    # connectivity test the others wait on.
+    if [ "$SERVICE" = "raproxy" ]; then
+        raproxy_apply
+        return 0
+    fi
+
     if [ "$ENABLED" != "True" ]; then
         if service_is_running; then
             log_message "networkServiceToggle: stopping $SERVICE (disabled via Settings)"

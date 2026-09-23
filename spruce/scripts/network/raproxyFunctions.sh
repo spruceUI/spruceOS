@@ -56,3 +56,14 @@ raproxy_cache_rom() {
 	ra_proxy_is_installed || { echo "RAOfflineProxy is not installed"; return 1; }
 	_ra_proxy_run cache-rom --path "$1" --json 2>&1
 }
+
+# Deliberately not gated on the network, unlike the services beside it: this is
+# the one whose whole job is to work without it. Turning WiFi off used to stop
+# it, which is exactly when it is needed.
+raproxy_apply() {
+	if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
+		ra_proxy_is_running || start_raproxy_process
+	else
+		stop_raproxy_process
+	fi
+}

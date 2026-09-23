@@ -124,14 +124,11 @@ connect_services() {
 		stop_syncthing_process
 	fi
 
-	# RAOfflineProxy check
-	if [ "$raproxy_enabled" = "True" ]; then
-		if ! ra_proxy_is_running; then
-			log_message "Network services: RAOfflineProxy detected not running, starting..."
-			start_raproxy_process
-		fi
-	else
-		stop_raproxy_process
+	# Only ever started here, never stopped: losing the network is not a reason
+	# to stop an offline proxy. runtime.sh starts it at boot; this is a re-check.
+	if [ "$raproxy_enabled" = "True" ] && ! ra_proxy_is_running; then
+		log_message "Network services: RAOfflineProxy detected not running, starting..."
+		start_raproxy_process
 	fi
 
 	# Start Network Services Landing page
@@ -153,7 +150,6 @@ disconnect_services() {
 	fi
 
 	log_message "Network services: Stopping all network services..."
-	stop_raproxy_process
 
 	for service in "$SFTP_SERVICE_NAME" "$SSH_SERVICE_NAME" "smbd" "syncthing" "darkhttpd"; do
 		if pgrep "$service" >/dev/null; then
