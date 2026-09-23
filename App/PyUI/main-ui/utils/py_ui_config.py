@@ -246,3 +246,7 @@ class PyUiConfig:
     def get_cpu_mode_cmd(cls):
         return cls.get("cpuModeCmd",None)
 
+    @classmethod
+    def get_cache_cheevos_cmd(cls):
+        return cls.get("cacheCheevosCmd",None)
+

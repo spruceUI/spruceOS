@@ -78,7 +78,7 @@ class GameSelectMenuPopup:
         Display.display_message(Language.label("cachingCheevos", "Caching achievements..."))
         try:
             result = subprocess.run(
-                ["/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh", rom_info.rom_file_path],
+                [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
             lines = (result.stdout or result.stderr).strip().splitlines()
             message = lines[-1] if lines else "No response"
@@ -243,7 +243,8 @@ class GameSelectMenuPopup:
                 value=lambda input_value, rom_info=rom_info: self.select_specific_boxart(input_value, rom_info)
             ))
 
-        if("True" == CfwSystemConfig.get_selected_value("RetroAchievements Settings", "enableOfflineProxy")):
+        if(PyUiConfig.get_cache_cheevos_cmd()
+           and "True" == CfwSystemConfig.get_selected_value("RetroAchievements Settings", "enableOfflineProxy")):
             popup_options.append(GridOrListEntry(
                 primary_text=Language.label("cacheCheevos", "Cache Achievements") if use_full_text else "Cache Cheevos",
                 image_path=Theme.settings(),
