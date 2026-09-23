@@ -12,7 +12,7 @@
 #   run_yabasanshiro
 
 run_yabasanshiro() {
-	export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 	export HOME="$EMU_DIR"
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
