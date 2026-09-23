@@ -1,6 +1,6 @@
 oakmoss=v0.2.0-beta.1-dirty
-built=2026-09-23T19:49:28Z
+built=2026-09-23T23:10:38Z
 toolchain=aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621
 toolchain_glibc=GNU C Library (GNU) release release version 2.33.
 toolchain_lane=armgnu103
-packages=zlib xz zstd libbsd pcre2 grep tar unzip coreutils findutils lame libvpx ffmpeg libjpegturbo libjpegturbo8 libpng libwebp libogg libvorbis libsndfile libevdev libuuid alsa flac theora modplug physfs openal mpg123 libatomic pcre openssl ncurses boost ltdl speexdsp pulseaudio interpose freetypefloor harfbuzz libffi glib fluidsynth sdl12 sdlimage12 sdlttf freetype getconf utilprogs dos2unix
+packages=zlib xz zstd libbsd pcre2 grep tar unzip coreutils findutils lame libvpx ffmpeg libjpegturbo libjpegturbo8 libpng libwebp libogg libvorbis libsndfile libevdev libuuid alsa flac theora modplug physfs openal mpg123 libatomic pcre openssl ncurses boost ltdl speexdsp pulseaudio interpose curl libdrm freetypefloor harfbuzz libffi glib fluidsynth sdl12 sdlimage12 sdlttf freetype getconf utilprogs dos2unix

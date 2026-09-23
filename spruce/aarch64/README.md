@@ -143,6 +143,8 @@ Second pass the same day, from a fleet census of every launchable card binary ov
 | Library | Who needs it | Where it was missing |
 |---|---|---|
 | `libfluidsynth.so.3`, `libharfbuzz.so.0`, `libspeexdsp.so.1` | the EasyRPG core (`cores64/easyrpg_libretro.so`) | every TrimUI, Flip, Miniloong and MagicX unit; only `Emu/EASYRPG/lib-Flip` carried Ubuntu copies, and only the Flip lists that directory. fluidsynth is synth-only (no drivers) and needs just glib |
+| `libcurl.so.4` | flycast on the Brick, Brick Pro and Smart Pro (their firmware curl 7.54.1 predates the mime API flycast links; the launcher lists this directory first for that one process there) | minimal: the lane OpenSSL 1.1.1 and the floor zlib |
+| `libdrm.so.2` | kmsgrab (`spruce/bin64`) on every board whose firmware ships no libdrm | generic ioctl wrapper, not a GPU vendor library |
 | `libglib-2.0.so.0`, `libgthread-2.0.so.0`, `libfreetype.so.6` | fluidsynth, harfbuzz and SDL_ttf above | (dependencies of the lane's own libraries; every rootfs has freetype and glib, which keep winning) |
 | `libSDL-1.2.so.0`, `libSDL_image-1.2.so.0`, `libSDL_ttf-2.0.so.0` | `App/Gallery/gallery64`, `App/PixelReader/reader` | the three MagicX boards have no SDL 1.2 at all; the others have theirs, which win |
 
@@ -164,3 +166,10 @@ Two lane gates enforce it on every shipped file: no ZLIB_ version beyond 1.2.8's
 lacks. Found by the device verifier's symbol pass: the previous harfbuzz imported FT_Get_Var_Blend_Coordinates
 and FT_Done_MM_Var, which loaded fine on those six boards and would have killed the EasyRPG core at the first
 variable font. Build 20260923-1443-ports-userland-glibc233-floor; 11 of the 77 files changed.
+
+## Supported firmware floor
+
+The set is built at glibc 2.33 with zero margin: the seven GNU tools that call the stat family need exactly
+GLIBC_2.33. A TrimUI Smart Pro on firmware 1.0.3 or older carries glibc 2.29 and cannot run them; that firmware
+is below the floor spruce supports for this directory, and the answer there is a firmware update, not a lower
+build.
