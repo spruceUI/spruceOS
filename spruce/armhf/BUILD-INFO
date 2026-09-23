@@ -1,0 +1,5 @@
+oakmoss=untracked
+built=2026-09-23T23:21:56Z
+toolchain=arm-a30-linux-gnueabihf-gcc-13.2.0.br_real (Buildroot 2024.02.1) 13.2.0
+toolchain_glibc=GNU C Library (Buildroot) stable release version 2.23, by Roland McGrath et al.
+packages=zlib xz zstd libbsd pcre2 libpng libjpegturbo libwebp libogg libvorbis libsndfile libevdev libuuid ncurses5 smartcols grep tar unzip coreutils findutils lame libvpx ffmpeg

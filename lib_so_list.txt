@@ -395,6 +395,8 @@ e19f284d3e0d1200d8013e549bc96b4b3ee2120d6fefef10569e58e13d5e6754  ./spruce/aarch
 6bca239f6e96a9136f8c007f8d6ca930efc5e3a6f788c5a4713ecef4f4e3d5e7  ./spruce/aarch64/lib/libvpx.so.8
 1323ef5cbb3b3f5ada691803662373f1d4ac9ab0099a99f032faceb6374b6ce1  ./spruce/aarch64/lib/libwebp.so.6
 48f86c84646b1d24456c4faad81d4a05e66686679638973197ce25d5a2cbbaf2  ./spruce/aarch64/lib/libzstd.so.1
+c0704e22ac41cbb48b7f86400ac5ce3471442b3624f9d263cacaf355899ef664  ./spruce/armhf/lib/libncurses.so.5
+26a8d99e1d6aa007508d8ebfb7b083ebf6ad48718bbdf829e30aa66c39509aa5  ./spruce/armhf/lib/libsmartcols.so.1
 35dd15b50e390191fb160f1f1bb5cf4ac7868b87cb85afef98104f1078a66913  ./spruce/bin/Samba/lib/libnetapi.so
 35dd15b50e390191fb160f1f1bb5cf4ac7868b87cb85afef98104f1078a66913  ./spruce/bin/Samba/lib/libnetapi.so.0
 d694d859fc2fbe6abd2033b7d40ea5fc5475c5caa31353fdc6ce9f70b3f6f700  ./spruce/bin/Samba/lib/libsmbclient.so
