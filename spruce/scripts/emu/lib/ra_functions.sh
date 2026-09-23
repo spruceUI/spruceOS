@@ -49,14 +49,12 @@ setup_rumble_env() {
 
 prepare_ra_config() {
 
-	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
-	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
-	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
+	export PLATFORM_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
 
-	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then
+	if [ ! -f "$PLATFORM_CFG" ]; then
 		log_message "No retroarch-${PLATFORM}.cfg found."
-		mkdir -p "$_live_cfg_dir"
-		cp "$_bak_cfg" "$PLATFORM_CFG" && log_message "$PLATFORM_CFG seeded from .bak file."
+		ensure_ra_config_path >/dev/null
+		[ -f "$PLATFORM_CFG" ] && log_message "$PLATFORM_CFG seeded from .bak file."
 	fi
 
 	# Set up RetroAchievements based on spruceUI config
@@ -101,6 +99,21 @@ prepare_ra_config() {
 			fi
 			;;
 	esac
+
+	# The proxy cannot validate a hardcore run. Forced per launch rather than by
+	# rewriting modeToggle, so the user's chosen mode survives turning the proxy
+	# off again - and because PyUI writes spruce-config.json wholesale from a
+	# copy it holds in memory, so an outside edit is lost on its next save.
+	if [ "$rac_mode" = "Hardcore" ] &&
+		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
+		log_message "Offline proxy on; softcore for this launch"
+		TMP_CFG="$(mktemp)"
+		if sed -e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+		else
+			rm -f "$TMP_CFG"
+		fi
+	fi
 
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"

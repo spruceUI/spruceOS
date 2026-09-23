@@ -2,6 +2,7 @@
 
 import os
 import random
+import subprocess
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
@@ -17,6 +18,7 @@ from menus.games.utils.rom_select_options_builder import get_rom_select_options_
 from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
+from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -71,6 +73,19 @@ class GameSelectMenuPopup:
         idx = CYCLE_VIEWS.index(current) if current in CYCLE_VIEWS else -1
         next_view = CYCLE_VIEWS[(idx + 1) % len(CYCLE_VIEWS)]
         Theme.set_game_selection_view_type(next_view)
+
+    def cache_for_offline_cheevos(self, input_value, rom_info : RomInfo):
+        Display.display_message(Language.label("cachingCheevos", "Caching achievements..."))
+        try:
+            result = subprocess.run(
+                [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
+                capture_output=True, text=True, timeout=180)
+            lines = (result.stdout or result.stderr).strip().splitlines()
+            message = lines[-1] if lines else "No response"
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"cache-rom failed: {e}")
+            message = "Failed"
+        Display.display_message(message, duration_ms=2500)
 
     def download_boxart(self, input, rom_info : RomInfo):
         if (ControllerInput.A == input):
@@ -226,6 +241,17 @@ class GameSelectMenuPopup:
                 description=None,
                 icon=None,
                 value=lambda input_value, rom_info=rom_info: self.select_specific_boxart(input_value, rom_info)
+            ))
+
+        if(PyUiConfig.get_cache_cheevos_cmd()
+           and "True" == CfwSystemConfig.get_selected_value("RetroAchievements Settings", "enableOfflineProxy")):
+            popup_options.append(GridOrListEntry(
+                primary_text=Language.label("cacheCheevos", "Cache Achievements") if use_full_text else "Cache Cheevos",
+                image_path=Theme.settings(),
+                image_path_selected=Theme.settings_selected(),
+                description=None,
+                icon=None,
+                value=lambda input_value, rom_info=rom_info: self.cache_for_offline_cheevos(input_value, rom_info)
             ))
 
         popup_options.append(GridOrListEntry(

@@ -4,6 +4,7 @@
 . /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
 run_sd_card_fix_if_triggered() {
     needs_fix=false
