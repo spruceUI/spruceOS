@@ -38,7 +38,6 @@
     "Emulator_Flip": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
@@ -46,20 +45,19 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "selected": "yabasanshiro_libretro",
+      "selected": "yabasanshiro-standalone-hle",
       "overrides": {}
     },
     "Emulator_Pixel2": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
         "GKD_PIXEL2"
       ],
-      "selected": "yabasanshiro_libretro",
+      "selected": "yabasanshiro-standalone-hle",
       "overrides": {}
     },
     "Emulator_SmartProS": {
@@ -85,10 +83,21 @@
       "devices": [
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
-        "MAGICX_A133P"
+        "TRIMUI_SMART_PRO"
       ],
       "selected": "yabasanshiro_a133p_libretro",
+      "overrides": {}
+    },
+    "Emulator_MagicX": {
+      "display": "Emulator",
+      "devices": [
+        "MAGICX_A133P"
+      ],
+      "options": [
+        "yabasanshiro-standalone-hle",
+        "yabasanshiro-standalone-bios"
+      ],
+      "selected": "yabasanshiro-standalone-hle",
       "overrides": {}
     }
   },
@@ -96,7 +105,7 @@
   "brand": "Sega",
   "type": "homeconsole",
   "releaseYear": 1994,
-  "default_emulator": "yabasanshiro-libretro",
+  "default_emulator": "yabasanshiro-standalone-hle",
   "scaling_min_freq": 1008000,
   "devices": [
     "TRIMUI_BRICK",

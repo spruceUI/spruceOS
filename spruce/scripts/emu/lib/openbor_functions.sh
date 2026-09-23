@@ -35,8 +35,7 @@ run_openbor() {
 	if [ "$PLATFORM" = "Flip" ]; then
 
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64mod
-			$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
+						$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
 		else
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME
 			$EMU_DIR/OpenBOR_Flip "$ROM_FILE" > $(emu_log_file) 2>&1
@@ -75,11 +74,9 @@ run_openbor() {
 			if [ "$PLATFORM" = "SmartPro" ] || [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "BrickPro" ]; then
 				export SDL_VIDEODRIVER=mali
 				"/mnt/SDCARD/Emu/PSP/setalpha" 0
-				export LD_LIBRARY_PATH=$EMU_DIR/lib64mod:$LD_LIBRARY_PATH
-				$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
+								$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
 			else
-				export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64mod
-				$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
+								$EMU_DIR/OpenBOR_64_mod "$ROM_FILE" > $(emu_log_file) 2>&1
 			fi
 		else
 			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64

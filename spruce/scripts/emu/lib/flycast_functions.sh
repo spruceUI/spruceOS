@@ -42,6 +42,11 @@ run_flycast_standalone() {
 	export XDG_DATA_HOME="/mnt/SDCARD/Emu/DC/data"
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Emu/DC/config"
 	export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
+	# The Brick, Brick Pro and Smart Pro rootfs carry curl 7.54.1; flycast is built against 7.56+ (curl_mime_*), and
+	# the firmware copy loads first by the fleet rule. For this one process the shared userland's curl goes ahead.
+	case "$PLATFORM" in
+		Brick|BrickPro|SmartPro) export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/aarch64/lib:$LD_LIBRARY_PATH" ;;
+	esac
 
 	mkdir -p "$HOME/bios"
 	mkdir -p "$HOME/data"
