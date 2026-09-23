@@ -288,27 +288,17 @@ OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateTy
 # nightly version is always offered again (see nightly_is_newer_than_advertised).
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
-# Determine desired release channel. Developer/tester devices follow the
-# nightly channel unless "OTA: release channel" is set to Stable; that choice
-# exists so the stable->stable incremental path can be exercised while
-# incremental updates are gated behind developer mode. Everybody else always
-# follows the stable channel.
-#
 # A nightly device knows its version from the root marker
 # (/mnt/SDCARD/<base>-<date>), its build from commits_nightly.txt and its
 # stable base from NIGHTLY_BASE_FILE. Nightly-to-nightly updates only need
 # the base: every nightly diff is generated from the current stable release
 # and covers every path touched since it, so it applies on top of any
 # nightly with the same recorded base.
-OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")"
-TARGET_CHANNEL="stable"
-
-if flag_check "developer_mode" || flag_check "tester_mode"; then
-    if [ "$OTA_CHANNEL" = "Stable" ]; then
-        TARGET_CHANNEL="stable"
-    else
-        TARGET_CHANNEL="nightly"
-    fi
+OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")"
+if [ "$OTA_CHANNEL" = "Nightly" ]; then
+    TARGET_CHANNEL="nightly"
+else
+    TARGET_CHANNEL="stable"
 fi
 
 log_message "OTA: Current version: $CURRENT_VERSION"

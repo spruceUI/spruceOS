@@ -133,6 +133,22 @@ jobs:
             "${{ steps.get_version.outputs.version }}" \
             > .ota_extra_files
 
+      - name: Set the release channel default
+        run: |
+          CFG=Saves/spruce/spruce-config.json
+          python3 - "$CFG" "Nightly" <<'PY'
+          import json, sys
+          path, channel = sys.argv[1], sys.argv[2]
+          with open(path) as f:
+              data = json.load(f)
+          opt = data["menuOptions"]["Network Settings"]["releaseChannel"]
+          assert channel in opt["options"], channel
+          opt["selected"] = channel
+          with open(path, "w") as f:
+              json.dump(data, f, indent=4)
+          print(f"releaseChannel = {channel}")
+          PY
+
       - name: Check for commits
         id: check_commits
         run: |

@@ -153,6 +153,22 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      - name: Set the release channel default
+        run: |
+          CFG=Saves/spruce/spruce-config.json
+          python3 - "$CFG" "Stable" <<'PY'
+          import json, sys
+          path, channel = sys.argv[1], sys.argv[2]
+          with open(path) as f:
+              data = json.load(f)
+          opt = data["menuOptions"]["Network Settings"]["releaseChannel"]
+          assert channel in opt["options"], channel
+          opt["selected"] = channel
+          with open(path, "w") as f:
+              json.dump(data, f, indent=4)
+          print(f"releaseChannel = {channel}")
+          PY
+
       - name: Generate OTA diff manifest
         id: ota_diff
         run: |

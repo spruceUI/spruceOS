@@ -158,15 +158,10 @@ check_for_update() {
     NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
 
-    # Set target version based on developer/tester mode
     TARGET_VERSION="$RELEASE_VERSION"
 
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
-        # Same rule as downloader.sh: "OTA: release channel" = Stable keeps a
-        # developer/tester device on stable releases.
-        if [ "$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")" != "Stable" ]; then
-            TARGET_VERSION="$NIGHTLY_VERSION"
-        fi
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
+        TARGET_VERSION="$NIGHTLY_VERSION"
     fi
 
     # Compare versions

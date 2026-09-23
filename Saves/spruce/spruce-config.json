@@ -597,14 +597,14 @@
                 ],
                 "selected": "Incremental"
             },
-            "otaChannel": {
+            "releaseChannel": {
                 "display": "OTA: release channel",
-                "description": "developer mode only",
+                "description": "Nightly builds are untested and may break things",
                 "options": [
                     "Nightly",
                     "Stable"
                 ],
-                "selected": "Nightly"
+                "selected": "Stable"
             }
         },
         "Proxy Settings": {
