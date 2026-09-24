@@ -67,3 +67,14 @@ raproxy_apply() {
 		stop_raproxy_process
 	fi
 }
+
+# "<title> (N unlocks) ##GAMEID:<id>" per cached game.
+raproxy_cached_games() {
+	ra_proxy_is_installed || return 1
+	_ra_proxy_run cached-games 2>/dev/null
+}
+
+raproxy_remove_cached_game() {
+	ra_proxy_is_installed || { echo "RAOfflineProxy is not installed"; return 1; }
+	_ra_proxy_run remove-cached-game --game-id "$1" 2>&1
+}

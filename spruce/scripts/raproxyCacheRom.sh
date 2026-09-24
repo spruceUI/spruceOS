@@ -34,5 +34,15 @@ PARSED="$(printf '%s' "$MSG" | jq -r '.message // empty' 2>/dev/null)"
 [ -n "$PARSED" ] && MSG="$PARSED"
 
 log_message "RAOfflineProxy cache-rom: $(basename "$ROM") -> $MSG"
-echo "$MSG"
+
+# The id the ROM resolved to, so the caller can drop it again later. cache-rom
+# does not report it, but cached-games tags every entry with ##GAMEID:.
+GAME_ID=""
+if [ "$RC" = "0" ]; then
+	TITLE="${MSG#Cached }"
+	GAME_ID="$(raproxy_cached_games | grep -F "$TITLE ##GAMEID:" | sed -n 's/.*##GAMEID:\([0-9]*\).*/\1/p' | head -n 1)"
+	[ -n "$GAME_ID" ] || GAME_ID="$(raproxy_cached_games | grep -F "$TITLE " | sed -n 's/.*##GAMEID:\([0-9]*\).*/\1/p' | head -n 1)"
+fi
+
+printf '{"message":"%s","game_id":%s}\n' "$MSG" "${GAME_ID:-null}"
 exit $RC
