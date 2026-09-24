@@ -41,6 +41,9 @@ jobs:
             TAG="v${VERSION}.${n}"
           done
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          # tformat, not format: format omits the newline after the last entry, so the closing EOF of the
+          # multi-line output below landed on the same line as the last commit and the runner rejected it
+          # ("Matching delimiter not found 'EOF'", run 35951581687) for every branch with commits.
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
           {
@@ -48,12 +51,12 @@ jobs:
             echo "Branch: $GITHUB_REF_NAME"
             echo ""
             echo "Commits not in Development:"
-            git log origin/Development..HEAD --pretty=format:'- %s (%an)'
+            git log origin/Development..HEAD --pretty=tformat:'- %s (%an)'
           } > commits_nightly.txt
 
           {
             echo "commits<<EOF"
-            git log origin/Development..HEAD --pretty=format:'- %s (%an)' | head -n 50
+            git log origin/Development..HEAD --pretty=tformat:'- %s (%an)' | head -n 50
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
