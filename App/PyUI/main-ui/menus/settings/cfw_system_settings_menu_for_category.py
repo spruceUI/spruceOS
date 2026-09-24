@@ -1,9 +1,14 @@
 
+import subprocess
+
 from controller.controller_inputs import ControllerInput
+from display.display import Display
+from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.cheevos_cache_menu import CheevosCacheMenu
 from utils.cfw_system_config import CfwSystemConfig
+from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -25,6 +30,44 @@ class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):
                 and "True" == CfwSystemConfig.get_selected_value(
                     self.RETROACHIEVEMENTS, "enableOfflineProxy"))
 
+    def update_cheevos_cache(self, input_value):
+        """Re-fetch every cached game from RetroAchievements. The cached unlock
+        state is a snapshot taken when the game was cached, so anything earned
+        since - on another device, or here while online - is missing from it
+        until this runs. Re-caching a game already in the cache does not cost a
+        slot."""
+        if ControllerInput.A != input_value:
+            return
+
+        entries = CheevosCacheManager.get_cached()
+        if not entries:
+            Display.display_message(
+                Language.label("noCachedCheevos", "No cached games"), duration_ms=2000)
+            return
+
+        cache_cmd = PyUiConfig.get_cache_cheevos_cmd()
+        updated = 0
+        failed = 0
+        for index, entry in enumerate(entries, start=1):
+            Display.display_message(
+                Language.label("updatingCheevos", "Updating {current} of {total}...")
+                    .replace("{current}", str(index)).replace("{total}", str(len(entries))))
+            try:
+                result = subprocess.run([cache_cmd, entry.rom_file_path],
+                                        capture_output=True, text=True, timeout=180)
+                if result.returncode == 0:
+                    updated += 1
+                else:
+                    failed += 1
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"cheevos update failed: {e}")
+                failed += 1
+
+        summary = Language.label("updatedCheevos", "Updated {updated}").replace("{updated}", str(updated))
+        if failed:
+            summary = f"{summary}, {failed} failed"
+        Display.display_message(summary, duration_ms=2500)
+
     def build_options_list(self):
         option_list = self.build_options_list_from_config_menu_options(self.category)
 
@@ -38,6 +81,18 @@ class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):
                     description=None,
                     icon=None,
                     value=self.launch_cheevos_cache
+                )
+            )
+
+            option_list.append(
+                GridOrListEntry(
+                    primary_text=Language.label("updateCheevosCache", "Update Cached Games"),
+                    value_text=None,
+                    image_path=None,
+                    image_path_selected=None,
+                    description=None,
+                    icon=None,
+                    value=self.update_cheevos_cache
                 )
             )
 

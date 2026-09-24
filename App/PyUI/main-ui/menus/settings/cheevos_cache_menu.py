@@ -5,6 +5,7 @@ from display.display import Display
 from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.language.language import Language
 from menus.settings import settings_menu
+from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -15,10 +16,18 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
     """The games whose achievements are cached for offline play. Removing one
     frees a slot against the proxy's 100 game cap."""
 
-    def remove(self, input_value, entry):
+    def show_entry_menu(self, input_value, entry):
         if ControllerInput.A != input_value:
             return
 
+        choice = ListOfOptionsSelectionMenu().get_selected_option_index(
+            [Language.label("removeFromCheevosCache", "Remove from cache")],
+            entry.display_name or entry.rom_file_path)
+
+        if choice == 0:
+            self.remove(entry)
+
+    def remove(self, entry):
         Display.display_message(Language.label("removingCheevos", "Removing..."))
 
         # No id means it was cached before the id was recorded, or by something
@@ -58,7 +67,7 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
                     image_path_selected=None,
                     description=entry.game_system_name,
                     icon=Theme.cheevos_icon(),
-                    value=lambda input_value, entry=entry: self.remove(input_value, entry)
+                    value=lambda input_value, entry=entry: self.show_entry_menu(input_value, entry)
                 )
             )
 
