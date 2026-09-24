@@ -848,7 +848,7 @@
             },
             "enableOfflineProxy": {
                 "display": "Offline Achievements",
-                "description": "Earn achievements with no connection. Softcore only, 100 games max.",
+                "description": "Earn Softcore Cheevos Offline",
                 "options": [
                     "True",
                     "False"
@@ -858,7 +858,6 @@
             },
             "autoCacheCheevos": {
                 "display": "Cache achievements at launch",
-                "description": "Caches a game the first time it is launched, so achievements work with wifi off in game.",
                 "options": [
                     "True",
                     "False"
