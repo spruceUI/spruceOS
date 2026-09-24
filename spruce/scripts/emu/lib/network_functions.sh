@@ -17,6 +17,32 @@
 # Provides:
 #   handle_network_services
 
+CHEEVOS_CACHE_JSON=/mnt/SDCARD/Saves/pyui-cheevos-cache.json
+
+cache_cheevos_at_launch() {
+	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
+	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".autoCacheCheevos.selected' "False")" = "True" ] || return 0
+	[ -s "$CHEEVOS_CACHE_JSON" ] && jq -e --arg p "$ROM_FILE" 'any(.[]; .rom_file_path == $p)' "$CHEEVOS_CACHE_JSON" >/dev/null 2>&1 && return 0
+
+	network_is_connected true || check_and_connect_wifi || return 0
+
+	start_pyui_message_writer 1
+	display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "Caching achievements..." 75
+	out="$(/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh "$ROM_FILE")"
+	rc=$?
+	stop_pyui_message_writer
+	[ "$rc" = "0" ] || return 0
+
+	game_id="$(printf '%s' "$out" | tail -n 1 | jq -r '.game_id // null' 2>/dev/null)"
+	[ -s "$CHEEVOS_CACHE_JSON" ] || echo "[]" > "$CHEEVOS_CACHE_JSON"
+	tmpfile="$(mktemp)"
+	jq --arg p "$ROM_FILE" --arg s "$EMU_NAME" --arg n "${GAME%.*}" --argjson id "${game_id:-null}" '
+		map(select(.rom_file_path != $p)) +
+		[{rom_file_path: $p, game_system_name: $s, display_name: $n, game_id: $id}]
+		' "$CHEEVOS_CACHE_JSON" > "$tmpfile" && mv "$tmpfile" "$CHEEVOS_CACHE_JSON"
+	log_message "Cached achievements for $GAME at launch"
+}
+
 handle_network_services() {
 	if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
 		log_message "network_functions.sh: WiFi is off, don't try to connect."
@@ -68,6 +94,8 @@ handle_network_services() {
 		flag_add "syncthing_startup_synced" --tmp
 
 	fi
+
+	[ "$cheevos_wanted" = true ] && cache_cheevos_at_launch
 
 	# Handle network service disabling
 	if [ "$disable_wifi_in_game" = "True" ] || [ "$disable_net_serv_in_game" = "True" ]; then

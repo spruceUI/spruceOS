@@ -855,6 +855,15 @@
                 ],
                 "selected": "False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
+            },
+            "autoCacheCheevos": {
+                "display": "Cache achievements at launch",
+                "description": "Caches a game the first time it is launched, so achievements work with wifi off in game.",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "Audio Settings": {
