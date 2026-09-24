@@ -231,6 +231,22 @@ class Theme():
         return cls._resolve_file(cls._skin_folder, parts, cache_missing)
 
     @classmethod
+    def _stock_asset(cls, name):
+        key = ("__stock__", name, cls._skin_folder)
+        if key in cls._asset_cache:
+            return cls._asset_cache[key]
+
+        stock = os.path.join(PyUiConfig.get("themeDir"), PyUiConfig.get("theme"))
+        for folder in (cls._skin_folder, "skin"):
+            path = os.path.join(stock, folder, name)
+            if os.path.exists(path):
+                cls._asset_cache[key] = path
+                return path
+
+        cls._asset_cache[key] = None
+        return None
+
+    @classmethod
     def _bg(cls, *parts, cache_missing=True):
         return cls._resolve_file(cls._bg_folder, parts, cache_missing)
 
@@ -323,6 +339,10 @@ class Theme():
     
     @classmethod
     def favorite_icon(cls): return cls._asset("ic-favorite-mark.qoi")
+
+    @classmethod
+    def cheevos_icon(cls):
+        return cls._asset("ic-cheevos-mark.qoi") or cls._stock_asset("ic-cheevos-mark.png")
     
     @classmethod
     def get_list_large_selected_bg(cls): return cls._asset("bg-list-l.qoi")

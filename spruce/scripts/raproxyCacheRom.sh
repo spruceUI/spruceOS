@@ -1,5 +1,4 @@
 #!/bin/sh
-# Cache one ROM for offline achievements, for PyUI's game options menu.
 # Usage: raproxyCacheRom.sh <rom path>
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -13,7 +12,6 @@ if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflin
 	exit 1
 fi
 
-# Caching talks to the proxy, not straight to the network.
 if ! ra_proxy_is_running; then
 	start_raproxy_process
 	_waited=0
@@ -27,12 +25,22 @@ fi
 OUT="$(raproxy_cache_rom "$ROM")"
 RC=$?
 
-# Last line only: the JSON is printed last and anything on stderr comes first.
-# .message carries the app's own wording - the 100-game cap, a missing login.
 MSG="$(printf '%s\n' "$OUT" | tail -n 1)"
 PARSED="$(printf '%s' "$MSG" | jq -r '.message // empty' 2>/dev/null)"
 [ -n "$PARSED" ] && MSG="$PARSED"
 
 log_message "RAOfflineProxy cache-rom: $(basename "$ROM") -> $MSG"
-echo "$MSG"
+
+GAME_ID=""
+if [ "$RC" = "0" ]; then
+	GAME_ID="$(raproxy_cached_games | awk -v title="${MSG#Cached }" '
+		{
+			line = $0
+			sub(/ ##GAMEID:[0-9]+$/, "", line)
+			sub(/ \([0-9]+ unlocks\)$/, "", line)
+			if (line == title) { sub(/.*##GAMEID:/, ""); print; exit }
+		}')"
+fi
+
+jq -nc --arg m "$MSG" --argjson id "${GAME_ID:-null}" '{message:$m,game_id:$id}'
 exit $RC

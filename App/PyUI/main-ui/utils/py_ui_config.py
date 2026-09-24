@@ -217,6 +217,14 @@ class PyUiConfig:
     @classmethod
     def get_activity_log_path(cls):
         return cls.get("activityLogPath",None)
+
+    @classmethod
+    def get_cheevos_remove_cmd(cls):
+        return cls.get("cheevosRemoveCmd",None)
+
+    @classmethod
+    def get_cheevos_cache_path(cls):
+        return cls.get("cheevosCachePath",None)
     
     @classmethod
     def get_about_entries(cls):

@@ -12,6 +12,8 @@
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
     "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
+    "cheevosRemoveCmd":"/mnt/SDCARD/spruce/scripts/raproxyRemoveCached.sh",
+    "cheevosCachePath":"/mnt/SDCARD/Saves/pyui-cheevos-cache.json",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
     "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",

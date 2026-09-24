@@ -9,6 +9,7 @@ from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu
+from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -81,7 +82,9 @@ class GameSelectMenuPopup:
                 [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
             lines = (result.stdout or result.stderr).strip().splitlines()
-            message = lines[-1] if lines else "No response"
+            message, game_id = CheevosCacheManager.parse_result(lines)
+            if result.returncode == 0:
+                CheevosCacheManager.add_cached(rom_info, game_id)
         except Exception as e:
             PyUiLogger.get_logger().error(f"cache-rom failed: {e}")
             message = "Failed"
