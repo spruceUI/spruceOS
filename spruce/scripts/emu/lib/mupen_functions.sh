@@ -175,6 +175,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 	export M64P_AUTOLOAD=1
 	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
+	mkdir -p /mnt/SDCARD/Saves/screenshots/mupen64plus
 
 	rm -f /tmp/mupen_restart
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
