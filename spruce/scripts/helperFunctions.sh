@@ -1640,6 +1640,11 @@ check_and_connect_wifi() {
         return 1
     fi
 
+    if network_is_connected true; then
+        log_message "Active network connection verified"
+        return 0
+    fi
+
     waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
     if [ "$waiting_enabled" = "False" ]; then
         log_message "User opted out of waiting to connect, via spruce network settings."
@@ -1648,12 +1653,6 @@ check_and_connect_wifi() {
 
     timeout=60
     start_time=$(date +%s)
-
-    # Initial connection check
-    if network_is_connected true; then
-        log_message "Active network connection verified"
-        return 0
-    fi
 
     # Check if device has wifi available
     if ! device_wifi_is_available; then
