@@ -571,8 +571,8 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
             "enableWaitingToConnect": {
-                "display": "Wait for connection before launching game",
-                "descritpion": "when Syncthing or RAC are enabled",
+                "display": "Wait for WiFi at game launch",
+                "description": "When cheevos or Syncthing need it",
                 "options": [
                     "True",
                     "False"
