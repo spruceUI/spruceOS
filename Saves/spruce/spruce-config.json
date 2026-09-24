@@ -855,14 +855,6 @@
                 ],
                 "selected": "False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
-            },
-            "autoCacheCheevos": {
-                "display": "Cache achievements at launch",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False"
             }
         },
         "Audio Settings": {

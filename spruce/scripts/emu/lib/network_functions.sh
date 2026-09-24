@@ -21,7 +21,7 @@ CHEEVOS_CACHE_JSON=/mnt/SDCARD/Saves/pyui-cheevos-cache.json
 
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
-	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".autoCacheCheevos.selected' "False")" = "True" ] || return 0
+	[ "$disable_wifi_in_game" = "True" ] || return 0
 	[ -s "$CHEEVOS_CACHE_JSON" ] && jq -e --arg p "$PYUI_ROM_PATH" 'any(.[]; .rom_file_path == $p)' "$CHEEVOS_CACHE_JSON" >/dev/null 2>&1 && return 0
 
 	network_is_connected true || check_and_connect_wifi || return 0
