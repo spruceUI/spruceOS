@@ -4,7 +4,7 @@
   "iconsel": "arduboy_sel.png",
   "themecolor": "8b2db4",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "hex",
+  "extlist": "hex|zip",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
