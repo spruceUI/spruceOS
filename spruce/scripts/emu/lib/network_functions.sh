@@ -22,7 +22,7 @@ CHEEVOS_CACHE_JSON=/mnt/SDCARD/Saves/pyui-cheevos-cache.json
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".autoCacheCheevos.selected' "False")" = "True" ] || return 0
-	[ -s "$CHEEVOS_CACHE_JSON" ] && jq -e --arg p "$ROM_FILE" 'any(.[]; .rom_file_path == $p)' "$CHEEVOS_CACHE_JSON" >/dev/null 2>&1 && return 0
+	[ -s "$CHEEVOS_CACHE_JSON" ] && jq -e --arg p "$PYUI_ROM_PATH" 'any(.[]; .rom_file_path == $p)' "$CHEEVOS_CACHE_JSON" >/dev/null 2>&1 && return 0
 
 	network_is_connected true || check_and_connect_wifi || return 0
 
@@ -36,7 +36,7 @@ cache_cheevos_at_launch() {
 	game_id="$(printf '%s' "$out" | tail -n 1 | jq -r '.game_id // null' 2>/dev/null)"
 	[ -s "$CHEEVOS_CACHE_JSON" ] || echo "[]" > "$CHEEVOS_CACHE_JSON"
 	tmpfile="$(mktemp)"
-	jq --arg p "$ROM_FILE" --arg s "$EMU_NAME" --arg n "${GAME%.*}" --argjson id "${game_id:-null}" '
+	jq --arg p "$PYUI_ROM_PATH" --arg s "$EMU_NAME" --arg n "${GAME%.*}" --argjson id "${game_id:-null}" '
 		map(select(.rom_file_path != $p)) +
 		[{rom_file_path: $p, game_system_name: $s, display_name: $n, game_id: $id}]
 		' "$CHEEVOS_CACHE_JSON" > "$tmpfile" && mv "$tmpfile" "$CHEEVOS_CACHE_JSON"

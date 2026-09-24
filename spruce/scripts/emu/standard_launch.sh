@@ -28,6 +28,7 @@ export GAME="$(basename "$1")"
 export MODE="$(get_cpu_mode_from_emu_json)"
 log_message "EMU_NAME is $EMU_NAME, EMU_DIR is $EMU_DIR, GAME is $GAME, MODE is $MODE"
 ROM_FILE="$(echo "$1" | sed 's|/media/SDCARD0/|/mnt/SDCARD/|g')"
+export PYUI_ROM_PATH="$ROM_FILE"
 export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 . /mnt/SDCARD/spruce/scripts/emu/lib/led_functions.sh
