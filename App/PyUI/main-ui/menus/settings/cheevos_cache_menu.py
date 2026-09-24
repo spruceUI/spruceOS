@@ -13,8 +13,6 @@ from views.grid_or_list_entry import GridOrListEntry
 
 
 class CheevosCacheMenu(settings_menu.SettingsMenu):
-    """The games whose achievements are cached for offline play. Removing one
-    frees a slot against the proxy's 100 game cap."""
 
     def show_entry_menu(self, input_value, entry):
         if ControllerInput.A != input_value:
@@ -30,8 +28,6 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
     def remove(self, entry):
         Display.display_message(Language.label("removingCheevos", "Removing..."))
 
-        # No id means it was cached before the id was recorded, or by something
-        # else. Drop our own record so the marker goes, and say so.
         if entry.game_id is None:
             CheevosCacheManager.remove_cached(entry.rom_file_path)
             Display.display_message(
@@ -39,19 +35,21 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
                 duration_ms=2500)
             return
 
-        message = "Removed"
+        message = "Remove failed"
         remove_cmd = PyUiConfig.get_cheevos_remove_cmd()
         try:
             result = subprocess.run([remove_cmd, str(entry.game_id)],
                                     capture_output=True, text=True, timeout=60)
-            if result.returncode != 0:
+            if result.returncode == 0:
+                CheevosCacheManager.remove_cached(entry.rom_file_path)
+                message = "Removed"
+            else:
                 lines = (result.stdout or result.stderr).strip().splitlines()
-                message = lines[-1] if lines else "Remove failed"
+                if lines:
+                    message = lines[-1]
         except Exception as e:
             PyUiLogger.get_logger().error(f"remove-cached-game failed: {e}")
-            message = "Remove failed"
 
-        CheevosCacheManager.remove_cached(entry.rom_file_path)
         Display.display_message(message, duration_ms=2500)
 
     def build_options_list(self):

@@ -232,9 +232,6 @@ class Theme():
 
     @classmethod
     def _stock_asset(cls, name):
-        """The stock theme's copy of an asset, for ones a third party theme is
-        not expected to ship. Tries its matching resolution folder first so the
-        size still suits the screen."""
         key = ("__stock__", name, cls._skin_folder)
         if key in cls._asset_cache:
             return cls._asset_cache[key]

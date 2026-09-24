@@ -1,5 +1,4 @@
 #!/bin/sh
-# Drop one game from the proxy's cache, freeing a slot against its 100 game cap.
 # Usage: raproxyRemoveCached.sh <game id>
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh

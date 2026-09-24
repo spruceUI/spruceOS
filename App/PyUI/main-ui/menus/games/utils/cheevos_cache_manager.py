@@ -17,12 +17,9 @@ class CheevosCacheEntry:
 
 
 class CheevosCacheManager:
-    """Which ROMs have had their achievements cached, and the RetroAchievements
-    id each one resolved to. The id is what lets the settings menu drop a game
-    from the proxy's own cache, not just from this list."""
-
     _entries_file: Optional[str] = None
     _entries: List[CheevosCacheEntry] = []
+    _paths = set()
     _lock = threading.Lock()
     _init_event = threading.Event()
 
@@ -30,6 +27,7 @@ class CheevosCacheManager:
     def initialize(cls, entries_file: str):
         cls._entries_file = entries_file
         cls._entries = cls._load()
+        cls._paths = {e.rom_file_path for e in cls._entries}
         cls._init_event.set()
 
     @classmethod
@@ -58,8 +56,7 @@ class CheevosCacheManager:
 
     @classmethod
     def _save(cls):
-        # Same swap-a-temp-file pattern as RomsListManager: a kill between
-        # truncate and dump would otherwise leave an empty file.
+        cls._paths = {e.rom_file_path for e in cls._entries}
         tempname = None
         try:
             dirpath = os.path.dirname(cls._entries_file) or "."
@@ -83,6 +80,16 @@ class CheevosCacheManager:
                 except OSError:
                     pass
 
+    @staticmethod
+    def parse_result(lines):
+        for line in reversed(lines):
+            try:
+                parsed = json.loads(line)
+            except ValueError:
+                continue
+            return parsed.get("message"), parsed.get("game_id")
+        return (lines[-1] if lines else "No response"), None
+
     @classmethod
     def add_cached(cls, rom_info: RomInfo, game_id=None):
         cls._wait_for_init()
@@ -98,6 +105,15 @@ class CheevosCacheManager:
             cls._save()
 
     @classmethod
+    def set_game_id(cls, rom_file_path: str, game_id):
+        cls._wait_for_init()
+        with cls._lock:
+            for e in cls._entries:
+                if e.rom_file_path == rom_file_path:
+                    e.game_id = game_id
+            cls._save()
+
+    @classmethod
     def remove_cached(cls, rom_file_path: str):
         cls._wait_for_init()
         with cls._lock:
@@ -107,7 +123,7 @@ class CheevosCacheManager:
     @classmethod
     def is_cached(cls, rom_info: RomInfo) -> bool:
         cls._wait_for_init()
-        return any(e.rom_file_path == rom_info.rom_file_path for e in cls._entries)
+        return rom_info.rom_file_path in cls._paths
 
     @classmethod
     def get_cached(cls) -> List[CheevosCacheEntry]:

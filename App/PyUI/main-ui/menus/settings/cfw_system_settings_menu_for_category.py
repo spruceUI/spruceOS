@@ -31,11 +31,6 @@ class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):
                     self.RETROACHIEVEMENTS, "enableOfflineProxy"))
 
     def update_cheevos_cache(self, input_value):
-        """Re-fetch every cached game from RetroAchievements. The cached unlock
-        state is a snapshot taken when the game was cached, so anything earned
-        since - on another device, or here while online - is missing from it
-        until this runs. Re-caching a game already in the cache does not cost a
-        slot."""
         if ControllerInput.A != input_value:
             return
 
@@ -54,9 +49,13 @@ class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):
                     .replace("{current}", str(index)).replace("{total}", str(len(entries))))
             try:
                 result = subprocess.run([cache_cmd, entry.rom_file_path],
-                                        capture_output=True, text=True, timeout=180)
+                                        capture_output=True, text=True, timeout=300)
                 if result.returncode == 0:
                     updated += 1
+                    lines = (result.stdout or result.stderr).strip().splitlines()
+                    _, game_id = CheevosCacheManager.parse_result(lines)
+                    if game_id is not None and game_id != entry.game_id:
+                        CheevosCacheManager.set_game_id(entry.rom_file_path, game_id)
                 else:
                     failed += 1
             except Exception as e:

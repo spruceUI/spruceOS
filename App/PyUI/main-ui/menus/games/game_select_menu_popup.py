@@ -1,6 +1,5 @@
 
 
-import json
 import os
 import random
 import subprocess
@@ -76,15 +75,6 @@ class GameSelectMenuPopup:
         next_view = CYCLE_VIEWS[(idx + 1) % len(CYCLE_VIEWS)]
         Theme.set_game_selection_view_type(next_view)
 
-    def cache_result(self, lines):
-        for line in reversed(lines):
-            try:
-                parsed = json.loads(line)
-            except ValueError:
-                continue
-            return parsed.get("message"), parsed.get("game_id")
-        return (lines[-1] if lines else "No response"), None
-
     def cache_for_offline_cheevos(self, input_value, rom_info : RomInfo):
         Display.display_message(Language.label("cachingCheevos", "Caching achievements..."))
         try:
@@ -92,7 +82,7 @@ class GameSelectMenuPopup:
                 [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
             lines = (result.stdout or result.stderr).strip().splitlines()
-            message, game_id = self.cache_result(lines)
+            message, game_id = CheevosCacheManager.parse_result(lines)
             if result.returncode == 0:
                 CheevosCacheManager.add_cached(rom_info, game_id)
         except Exception as e:
