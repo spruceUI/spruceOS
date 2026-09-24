@@ -78,3 +78,14 @@ raproxy_remove_cached_game() {
 	ra_proxy_is_installed || { echo "RAOfflineProxy is not installed"; return 1; }
 	_ra_proxy_run remove-cached-game --game-id "$1" 2>&1
 }
+
+raproxy_reconcile() {
+	ra_proxy_is_installed || return 1
+	(
+		cd "$RA_PROXY_DIR" || exit 1
+		. "$RA_PROXY_COMMON"
+		prepare_env
+		resolve_python_bin || exit 1
+		"$RESOLVED_PYTHON_BIN" /mnt/SDCARD/spruce/scripts/raproxyReconcile.py "$@"
+	)
+}

@@ -27,7 +27,7 @@ class CheevosCacheManager:
     def initialize(cls, entries_file: str):
         cls._entries_file = entries_file
         cls._entries = cls._load()
-        cls._paths = {e.rom_file_path for e in cls._entries}
+        cls._paths = {e.rom_file_path for e in cls._entries if e.rom_file_path}
         cls._init_event.set()
 
     @classmethod
@@ -48,7 +48,7 @@ class CheevosCacheManager:
                     e.get("display_name"),
                     e.get("game_id"),
                 )
-                for e in data if e.get("rom_file_path")
+                for e in data if e.get("rom_file_path") or e.get("game_id") is not None
             ]
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to read {cls._entries_file}: {e}")
@@ -56,7 +56,7 @@ class CheevosCacheManager:
 
     @classmethod
     def _save(cls):
-        cls._paths = {e.rom_file_path for e in cls._entries}
+        cls._paths = {e.rom_file_path for e in cls._entries if e.rom_file_path}
         tempname = None
         try:
             dirpath = os.path.dirname(cls._entries_file) or "."
@@ -95,7 +95,8 @@ class CheevosCacheManager:
         cls._wait_for_init()
         with cls._lock:
             cls._entries = [e for e in cls._entries
-                            if e.rom_file_path != rom_info.rom_file_path]
+                            if e.rom_file_path != rom_info.rom_file_path
+                            and (game_id is None or e.game_id != game_id)]
             cls._entries.append(CheevosCacheEntry(
                 rom_info.rom_file_path,
                 rom_info.game_system.system_name,
@@ -114,10 +115,11 @@ class CheevosCacheManager:
             cls._save()
 
     @classmethod
-    def remove_cached(cls, rom_file_path: str):
+    def remove_entry(cls, entry: CheevosCacheEntry):
         cls._wait_for_init()
         with cls._lock:
-            cls._entries = [e for e in cls._entries if e.rom_file_path != rom_file_path]
+            cls._entries = [e for e in cls._entries
+                            if (e.rom_file_path, e.game_id) != (entry.rom_file_path, entry.game_id)]
             cls._save()
 
     @classmethod

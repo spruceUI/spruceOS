@@ -29,7 +29,7 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
         Display.display_message(Language.label("removingCheevos", "Removing..."))
 
         if entry.game_id is None:
-            CheevosCacheManager.remove_cached(entry.rom_file_path)
+            CheevosCacheManager.remove_entry(entry)
             Display.display_message(
                 Language.label("cheevosForgotten", "Removed from the list only"),
                 duration_ms=2500)
@@ -41,7 +41,7 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
             result = subprocess.run([remove_cmd, str(entry.game_id)],
                                     capture_output=True, text=True, timeout=60)
             if result.returncode == 0:
-                CheevosCacheManager.remove_cached(entry.rom_file_path)
+                CheevosCacheManager.remove_entry(entry)
                 message = "Removed"
             else:
                 lines = (result.stdout or result.stderr).strip().splitlines()
@@ -56,14 +56,15 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
         option_list = []
 
         for entry in sorted(CheevosCacheManager.get_cached(),
-                            key=lambda e: (e.display_name or e.rom_file_path).lower()):
+                            key=lambda e: (e.display_name or e.rom_file_path or "").lower()):
             option_list.append(
                 GridOrListEntry(
                     primary_text=entry.display_name or entry.rom_file_path,
                     value_text=None,
                     image_path=None,
                     image_path_selected=None,
-                    description=entry.game_system_name,
+                    description=entry.game_system_name or Language.label(
+                        "cheevosOnlinePlay", "Cached from online play"),
                     icon=Theme.cheevos_icon(),
                     value=lambda input_value, entry=entry: self.show_entry_menu(input_value, entry)
                 )

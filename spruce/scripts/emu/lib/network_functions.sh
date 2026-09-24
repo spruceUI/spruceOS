@@ -37,10 +37,17 @@ cache_cheevos_at_launch() {
 	[ -s "$CHEEVOS_CACHE_JSON" ] || echo "[]" > "$CHEEVOS_CACHE_JSON"
 	tmpfile="$(mktemp)"
 	jq --arg p "$PYUI_ROM_PATH" --arg s "$EMU_NAME" --arg n "${GAME%.*}" --argjson id "${game_id:-null}" '
-		map(select(.rom_file_path != $p)) +
+		map(select(.rom_file_path != $p and ($id == null or .game_id != $id))) +
 		[{rom_file_path: $p, game_system_name: $s, display_name: $n, game_id: $id}]
 		' "$CHEEVOS_CACHE_JSON" > "$tmpfile" && mv "$tmpfile" "$CHEEVOS_CACHE_JSON"
 	log_message "Cached achievements for $GAME at launch"
+}
+
+reconcile_cheevos_after_game() {
+	[ "$cheevos_wanted" = true ] || return 0
+	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
+	. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+	raproxy_reconcile "$PYUI_ROM_PATH" "$EMU_NAME" "${GAME%.*}" >/dev/null 2>&1
 }
 
 handle_network_services() {

@@ -225,6 +225,7 @@ record_session_end_time
 calculate_current_session_duration
 update_gtt
 sync
+reconcile_cheevos_after_game
 
 wifi_request apply
 

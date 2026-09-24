@@ -34,7 +34,7 @@ class CfwSystemSettingsMenuForCategory(settings_menu.SettingsMenu):
         if ControllerInput.A != input_value:
             return
 
-        entries = CheevosCacheManager.get_cached()
+        entries = [e for e in CheevosCacheManager.get_cached() if e.rom_file_path]
         if not entries:
             Display.display_message(
                 Language.label("noCachedCheevos", "No cached games"), duration_ms=2000)
