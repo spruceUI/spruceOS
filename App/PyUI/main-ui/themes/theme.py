@@ -236,7 +236,7 @@ class Theme():
         if key in cls._asset_cache:
             return cls._asset_cache[key]
 
-        stock = os.path.join(os.path.dirname(cls._path), "SPRUCE")
+        stock = os.path.join(PyUiConfig.get("themeDir"), PyUiConfig.get("theme"))
         for folder in (cls._skin_folder, "skin"):
             path = os.path.join(stock, folder, name)
             if os.path.exists(path):
