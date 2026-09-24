@@ -10,6 +10,7 @@
 export CFW=SPRUCE
 export SPRUCE_PLATFORM="$PLATFORM"
 export SPRUCE_PYTHON="$(get_python_path)"
+export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Editing RetroArch/platform instead has no effect: RetroArch is launched with
 # --config pointing here.

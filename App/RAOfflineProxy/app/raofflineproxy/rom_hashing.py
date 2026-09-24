@@ -73,9 +73,18 @@ def _candidate_library_paths() -> list[str | None]:
 
     # Bundled relative to this module. Distro bundles nest the package under
     # <base>/app/raofflineproxy/ with the native lib at <base>/lib/, so search
-    # alongside the module and up at the bundle's lib/ directory.
+    # alongside the module and up at the bundle's lib/ directory. spruce ships
+    # both arches under <base>/lib/<arch>/.
     here = Path(__file__).resolve().parent
-    module_dirs = (here, here / "lib", here.parent / "lib", here.parent.parent / "lib")
+    machine = os.uname().machine if hasattr(os, "uname") else ""
+    arch = "aarch64" if machine in ("aarch64", "arm64") else "armv7"
+    module_dirs = (
+        here,
+        here / "lib",
+        here.parent / "lib",
+        here.parent.parent / "lib",
+        here.parent.parent / "lib" / arch,
+    )
     for directory in module_dirs:
         for name in names:
             paths.append(str(directory / name))

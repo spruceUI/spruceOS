@@ -85,6 +85,10 @@ prepare_env() {
     export MALLOC_ARENA_MAX=2
     export LD_LIBRARY_PATH="$APP_LIB_DIR:/config/lib:/customer/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
+    # spruce's python has no certificates of its own.
+    if [ -z "${SSL_CERT_FILE:-}" ] && [ -r /mnt/SDCARD/spruce/etc/ca-certificates.crt ]; then
+        export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
+    fi
     [ -n "${SSL_CERT_FILE:-}" ] && export RAOFFLINEPROXY_CA_FILE="$SSL_CERT_FILE"
 
     return 0
