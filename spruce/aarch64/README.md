@@ -167,9 +167,10 @@ lacks. Found by the device verifier's symbol pass: the previous harfbuzz importe
 and FT_Done_MM_Var, which loaded fine on those six boards and would have killed the EasyRPG core at the first
 variable font. Build 20260923-1443-ports-userland-glibc233-floor; 11 of the 77 files changed.
 
-## Supported firmware floor
+## Supported firmware
 
-The set is built at glibc 2.33 with zero margin: the seven GNU tools that call the stat family need exactly
-GLIBC_2.33. A TrimUI Smart Pro on firmware 1.0.3 or older carries glibc 2.29 and cannot run them; that firmware
-is below the floor spruce supports for this directory, and the answer there is a firmware update, not a lower
-build.
+The accepted firmware for every board is the vendor's current release; that is what the lab dumps describe and
+what this directory is verified against. The set is built at glibc 2.33 with zero margin (the seven GNU tools
+that call the stat family need exactly GLIBC_2.33), so a board on an older vendor release below that - a
+TrimUI Smart Pro on firmware 1.0.3 or earlier carries glibc 2.29 - is outside what spruce supports here, and
+the answer is the firmware update, not a lower build (decided 2026-09-23).
