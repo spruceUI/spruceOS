@@ -522,7 +522,7 @@ device_prepare_for_ports_run() {
 }
 
 device_cleanup_after_ports_run() {
-    log_message "device_cleanup_after_ports_run unneeded" -v
+    _xx_dpad_swap 0
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
