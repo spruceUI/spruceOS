@@ -12,7 +12,7 @@
 SHUTDOWN_UI_DIR="${SHUTDOWN_UI_DIR:-/tmp/shutdown_ui}"
 
 shutdown_ui_log() {
-    echo "shutdown ui [$(cut -d' ' -f1 /proc/uptime 2>/dev/null)s]: $1"
+    echo "shutdown ui [$(cut -d' ' -f1 /proc/uptime 2>/dev/null)s]: $1" >&2
 }
 
 # Rootfs-only library path: the platform cfg's LD_LIBRARY_PATH without the
@@ -50,6 +50,11 @@ shutdown_ui_stage() {
     cp "$_bg" "$SHUTDOWN_UI_DIR/bg.png" &&
     cp /mnt/SDCARD/spruce/scripts/shutdown_ui.sh "$SHUTDOWN_UI_DIR/shutdown_ui.sh" || return 1
     chmod +x "$SHUTDOWN_UI_DIR/display_text.elf" "$SHUTDOWN_UI_DIR/getevent"
+    # The TrimUI pad is a virtual node made by trimui_inputd. Where spruce runs a
+    # patched copy from the card, the strict unmount kills it and the node goes
+    # with it, so the session restarts the stock rootfs copy (SmartPro/S, BrickPro).
+    _pad_daemon=""
+    [ -n "$TRIMUI_INPUTD_PATCHED" ] && [ -x /usr/trimui/bin/trimui_inputd ] && _pad_daemon=/usr/trimui/bin/trimui_inputd
     {
         echo "PLATFORM='$PLATFORM'"
         echo "SD_DEV='$SD_DEV'"
@@ -62,6 +67,7 @@ shutdown_ui_stage() {
         echo "DISPLAY_HEIGHT='${DISPLAY_HEIGHT:-480}'"
         echo "DISPLAY_ROTATION='${DISPLAY_ROTATION:-0}'"
         echo "SHUTDOWN_UI_LD_LIBRARY_PATH='$(shutdown_ui_rootfs_ld_path)'"
+        echo "SHUTDOWN_UI_PAD_DAEMON='$_pad_daemon'"
     } > "$SHUTDOWN_UI_DIR/env" || return 1
     sync
     log_message "shutdown ui: staged in $SHUTDOWN_UI_DIR"
@@ -101,6 +107,15 @@ shutdown_ui_display_errors() {
 
 # Input: a getevent on the pad, consulted with shutdown_ui_key_seen A|B.
 shutdown_ui_getevent_start() {
+    if [ -n "$SHUTDOWN_UI_PAD_DAEMON" ] && [ ! -e "$EVENT_PATH_READ_INPUTS_SPRUCE" ]; then
+        shutdown_ui_log "pad node gone, starting $SHUTDOWN_UI_PAD_DAEMON"
+        # Fully detached: the caller may be inside a command substitution.
+        (cd "${SHUTDOWN_UI_PAD_DAEMON%/*}" && exec "$SHUTDOWN_UI_PAD_DAEMON") >/dev/null 2>&1 &
+        for _i in 1 2 3 4 5 6 7 8 9 10; do
+            [ -e "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && break
+            sleep 0.3
+        done
+    fi
     rm -f "$SHUTDOWN_UI_DIR/ge_out"
     "$SHUTDOWN_UI_DIR/getevent" "$EVENT_PATH_READ_INPUTS_SPRUCE" > "$SHUTDOWN_UI_DIR/ge_out" 2>/dev/null &
     SHUTDOWN_UI_GE_PID=$!
