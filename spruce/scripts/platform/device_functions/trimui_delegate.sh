@@ -55,15 +55,20 @@
 led_color_hex() {
     name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
     case "$name" in
-        Red)     echo "FF0000" ;;
-        Green)   echo "00FF00" ;;
-        Blue)    echo "0000FF" ;;
-        Yellow)  echo "FFFF00" ;;
-        Cyan)    echo "00FFFF" ;;
-        Magenta) echo "FF00FF" ;;
-        Orange)  echo "FF8800" ;;
-        *)       echo "FFFFFF" ;;
+        "Red")          hex=FF0000 ;;
+        "Pink")         hex=FF3333 ;;
+        "Fuchsia")      hex=FF0022 ;;
+        "Purple")       hex=FF00FF ;;
+        "Dark Purple")  hex=2200CC ;;
+        "Blue")         hex=0000FF ;;
+        "Cyan")         hex=00FFFF ;;
+        "Teal")         hex=00FF22 ;;
+        "Green")        hex=00FF00 ;;
+        "Yellow")       hex=FFFF00 ;;
+        "Orange")       hex=FF1100 ;;
+        *)              hex=FFFFFF ;;
     esac
+    echo "$hex"
 }
 
 rgb_led_trimui() {
