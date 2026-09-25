@@ -23,11 +23,13 @@
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "aboutEntries" : [
         {
-           "display":"spruce version",
+           "display":"Spruce version",
+           "displayKey":"aboutSpruceVersion",
            "cmd":"cat /mnt/SDCARD/spruce/spruce"
         },
         {
             "display":"RetroArch version",
+            "displayKey":"aboutRetroArchVersion",
             "cmd":"/mnt/SDCARD/App/PyUI/get-ra-version.sh"
         },
         {
@@ -37,11 +39,13 @@
         },
         {
             "display":"DSperate version",
+            "displayKey":"aboutDsperateVersion",
             "cmd":"/mnt/SDCARD/App/PyUI/get-dsperate-version.sh",
             "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "TRIMUI_BRICK_PRO", "RGB30", "ANBERNIC_RGXX", "MAGICX_A133P", "GKD_PIXEL2"]
         },
         {
             "display":"SD Card usage",
+            "displayKey":"aboutSdCardUsage",
             "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
         }
     ]

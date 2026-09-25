@@ -1,4 +1,5 @@
 from devices.device import Device
+from menus.language.language import Language
 from menus.settings import settings_menu
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -31,6 +32,9 @@ class AboutMenu(settings_menu.SettingsMenu):
         if PyUiConfig.get_about_entries():
             for entry in PyUiConfig.get_about_entries():
                 display = entry.get("display", "")
+                display_key = entry.get("displayKey")
+                if display_key:
+                    display = Language.label(display_key, display)
                 cmd = entry.get("cmd", "")
                 devices = entry.get("devices", [])
                 if(Device.supports_device(devices)) :
