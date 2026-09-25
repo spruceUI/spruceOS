@@ -204,11 +204,36 @@ device_init() {
     # Bluetooth: the base ships bluez and the XR829 BT firmware, but the HCI attach
     # sequence is not wired on this family yet; PyUI's Bluetooth toggle owns it.
     magicx_init_audio
+    stage_ra_autoconfig
 
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash 2>/dev/null
         chmod +x /bin/bash 2>/dev/null
     fi
+}
+
+# RetroArch has no profile for this pad, so it announces "magicx-input
+# (46098/26214) not configured, using fallback" at every launch.
+#
+# All three boards report the same name and ids (simplepad), but the XU20 has no
+# sticks, the Zero 40 one and the Zero 28 two, so stage the variant that matches.
+# Only sdl2: these boards run the 64-bit build. The binds are the ones the platform
+# cfg already sets, so nothing changes but the notification. A card moves between
+# boards, hence every boot. Same scheme as the Anbernic XX line.
+stage_ra_autoconfig() {
+    case "$PLATFORM" in
+        XU20)   _ra_ac_variant="nosticks" ;;
+        Zero40) _ra_ac_variant="onestick" ;;
+        *)      _ra_ac_variant="twosticks" ;;
+    esac
+    _ra_ac_src="/mnt/SDCARD/RetroArch/platform/autoconfig/sdl2/magicx-input-${_ra_ac_variant}.cfg"
+    _ra_ac_dst="/mnt/SDCARD/RetroArch/.retroarch/autoconfig/sdl2/magicx-input.cfg"
+    if [ -f "$_ra_ac_src" ] && ! cmp -s "$_ra_ac_src" "$_ra_ac_dst"; then
+        mkdir -p "${_ra_ac_dst%/*}"
+        cp "$_ra_ac_src" "$_ra_ac_dst" && \
+            log_message "Staged sdl2 pad profile ($_ra_ac_variant) for RetroArch"
+    fi
+    unset _ra_ac_variant _ra_ac_src _ra_ac_dst
 }
 
 # Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
