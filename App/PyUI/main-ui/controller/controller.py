@@ -131,6 +131,14 @@ class Controller:
             last_input = ControllerInput.DPAD_LEFT
         elif(last_input == ControllerInput.LEFT_STICK_RIGHT):
             last_input = ControllerInput.DPAD_RIGHT
+        elif(last_input == ControllerInput.RIGHT_STICK_UP):
+            last_input = ControllerInput.DPAD_UP
+        elif(last_input == ControllerInput.RIGHT_STICK_DOWN):
+            last_input = ControllerInput.DPAD_DOWN
+        elif(last_input == ControllerInput.RIGHT_STICK_LEFT):
+            last_input = ControllerInput.DPAD_LEFT
+        elif(last_input == ControllerInput.RIGHT_STICK_RIGHT):
+            last_input = ControllerInput.DPAD_RIGHT
 
         Controller.last_controller_input = last_input
 

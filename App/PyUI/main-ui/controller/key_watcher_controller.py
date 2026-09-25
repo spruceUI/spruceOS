@@ -10,7 +10,7 @@ from typing import OrderedDict
 
 from controller.controller_interface import ControllerInterface
 from controller.key_state import KeyState
-from controller.key_watcher_controller_dataclasses import KeyEvent
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from utils.logger import PyUiLogger
 
 # Constants for Linux input
@@ -32,7 +32,34 @@ class DictKeyMappingProvider:
 
     def get_mapped_events(self, key_event):
         return self.key_mappings.get(key_event)
-        
+
+
+class AxisKeyMappingProvider(DictKeyMappingProvider):
+    """The dict for buttons, plus analog axes as stick directions.
+    axis_inputs maps an ABS code to its (negative, positive) inputs."""
+    EV_ABS = 3
+
+    def __init__(self, key_mappings, axis_inputs, deadzone):
+        super().__init__(key_mappings)
+        self.axis_inputs = axis_inputs
+        self.deadzone = deadzone
+
+    def get_mapped_events(self, key_event):
+        mappings = self.key_mappings.get(key_event)
+        if mappings is not None or key_event.event_type != self.EV_ABS:
+            return mappings
+        directions = self.axis_inputs.get(key_event.code)
+        if directions is None:
+            return None
+        negative, positive = directions
+        # Release the opposite direction on every press: a fast flick can cross
+        # the axis between two samples without a reading inside the deadzone.
+        if key_event.value < -self.deadzone:
+            return [InputResult(positive, KeyState.RELEASE), InputResult(negative, KeyState.PRESS)]
+        if key_event.value > self.deadzone:
+            return [InputResult(negative, KeyState.RELEASE), InputResult(positive, KeyState.PRESS)]
+        return [InputResult(negative, KeyState.RELEASE), InputResult(positive, KeyState.RELEASE)]
+
 class KeyWatcherController(ControllerInterface):
 
     def __init__(self, event_path, mapping_provider, event_format='llHHI'):

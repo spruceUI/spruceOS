@@ -45,7 +45,7 @@ class MagicXKeyMappingProvider:
     KEY_UP/LEFT/RIGHT/DOWN 103/105/106/108, MENU is KEY_BACK 158 and the
     volume keys 115/114 ride the same device. Unlike the TrimUI map, A and B
     (and X and Y) are not swapped and there is no ABS hat. Sticks: ABS 0/1
-    left, 2/3 right. To be confirmed against the key bitmap in the diag log.
+    left, 2/5 right (measured on the Zero 28).
     """
 
     def __init__(self):
@@ -82,6 +82,13 @@ class MagicXKeyMappingProvider:
             self.key_mappings.pop(KeyEvent(1, _code, 1), None)
             self.key_mappings.pop(KeyEvent(1, _code, 0), None)
 
+    LEFT_STICK = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+                  (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN))
+    RIGHT_STICK = ((ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+                   (ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN))
+    # Left stick on ABS_X/ABS_Y, right on ABS_Z/ABS_RZ (measured on the Zero 28).
+    STICK_AXES = {0: (LEFT_STICK, 0), 1: (LEFT_STICK, 1), 2: (RIGHT_STICK, 0), 5: (RIGHT_STICK, 1)}
+
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
         if mappings is None and key_event.event_type == 1 and key_event.code in self.ignored_codes:
@@ -95,12 +102,11 @@ class MagicXKeyMappingProvider:
                 PyUiLogger.get_logger().info(f"MagicX pad: unmapped key code {key_event.code} pressed")
             except Exception:
                 pass
-        if mappings is None and key_event.event_type == 3 and key_event.code in (0, 1):
-            axis = key_event.code
+        if mappings is None and key_event.event_type == 3 and key_event.code in self.STICK_AXES:
+            stick, axis = self.STICK_AXES[key_event.code]
             if self.swap_xy:
                 axis = 1 - axis
-            neg, pos = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT) if axis == 0
-                        else (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN))
+            neg, pos = stick[axis]
             value = key_event.value
             if (axis == 0 and self.invert_x) or (axis == 1 and self.invert_y):
                 value = -value

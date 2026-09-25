@@ -27,7 +27,7 @@ from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
+from controller.key_watcher_controller import AxisKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -400,15 +400,24 @@ class AnbernicXXCommon(DeviceCommon):
         key_mappings[KeyEvent(1, 316, 0)] = [InputResult(ControllerInput.R3, KeyState.RELEASE)]  
         key_mappings[KeyEvent(1, 316, 1)] = [InputResult(ControllerInput.R3, KeyState.PRESS)]
 
-        key_mappings[KeyEvent(3, 17, 4294967295)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
+        key_mappings[KeyEvent(3, 17, -1)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 17, 1)] = [InputResult(ControllerInput.DPAD_DOWN, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 17, 0)] = [InputResult(ControllerInput.DPAD_UP, KeyState.RELEASE), InputResult(ControllerInput.DPAD_DOWN, KeyState.RELEASE)]
-        key_mappings[KeyEvent(3, 16, 4294967295)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
+        key_mappings[KeyEvent(3, 16, -1)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 16, 1)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 16, 0)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.RELEASE), InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
-        
-        return KeyWatcherController(event_path="/dev/input/event1", mapping_provider=DictKeyMappingProvider(key_mappings))
+
+        # Sticks on ABS 2-5, +-4096. Stickless models never send them.
+        axis_inputs = {
+            2: (ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            3: (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+            4: (ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            5: (ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
+        }
+        return KeyWatcherController(event_path="/dev/input/event1",
+                                    mapping_provider=AxisKeyMappingProvider(key_mappings, axis_inputs, 2048),
+                                    event_format='llHHi')
 
 
     def are_headphones_plugged_in(self):

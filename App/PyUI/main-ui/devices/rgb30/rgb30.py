@@ -27,20 +27,18 @@ from utils.py_ui_config import PyUiConfig
 
 
 class Rgb30KeyMappingProvider:
-    """Buttons from a plain dict, plus the left analog stick as d-pad input.
+    """Buttons from a plain dict, plus both analog sticks as d-pad input.
 
     The pad reports its axes on a -1800..1800 range, not the +-32767 SDL scale
     the TrimUI provider assumes, so the deadzone is sized for this device -
     measured with evtest on hardware, which also gives fuzz 16 / flat 16 and a
     rest value of exactly 0 on all four axes.
-
-    Only the left stick is mapped. The right stick is live (ABS_RX/ABS_RY) but
-    nothing in the UI consumes RIGHT_STICK_*, so mapping it would just queue
-    inputs no view acts on.
     """
 
     ABS_X = 0
     ABS_Y = 1
+    ABS_RX = 3
+    ABS_RY = 4
     EV_KEY = 1
     EV_ABS = 3
     DEADZONE = 900
@@ -65,6 +63,10 @@ class Rgb30KeyMappingProvider:
                          ControllerInput.LEFT_STICK_RIGHT),
             self.ABS_Y: (ControllerInput.LEFT_STICK_UP,
                          ControllerInput.LEFT_STICK_DOWN),
+            self.ABS_RX: (ControllerInput.RIGHT_STICK_LEFT,
+                          ControllerInput.RIGHT_STICK_RIGHT),
+            self.ABS_RY: (ControllerInput.RIGHT_STICK_UP,
+                          ControllerInput.RIGHT_STICK_DOWN),
         }
         # Which input each click reported when it went down, so its release
         # always matches - the setting can change between the two.
