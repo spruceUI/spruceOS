@@ -457,6 +457,7 @@ fi
 # stops, which is exactly how the RGB30 lockup first presented. These are three
 # writes on a path that ends in a poweroff; they cost nothing.
 log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
+battery_snapshot poweroff
 stage_shutdown_stage_2
 
 blink_led_if_applicable

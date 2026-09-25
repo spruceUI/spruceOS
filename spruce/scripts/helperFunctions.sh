@@ -599,6 +599,22 @@ log_precise() {
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
 }
 
+# battery_snapshot EVENT: one line per power-off and per boot in Saves/spruce/battery-history.log
+# (epoch, event, percent, gauge raw percent, mV), so drain while the device was off can be read as
+# the difference between a "poweroff" line and the next "boot" line. Kept to the last 200 lines.
+battery_snapshot() {
+    _bs_log=/mnt/SDCARD/Saves/spruce/battery-history.log
+    _bs_raw=$(cat "$BATTERY/capacity" 2>/dev/null)
+    _bs_uv=$(cat "$BATTERY/voltage_now" 2>/dev/null)
+    case "$_bs_uv" in ''|*[!0-9]*) _bs_mv=- ;; *) [ "$_bs_uv" -gt 100000 ] && _bs_mv=$((_bs_uv / 1000)) || _bs_mv=$_bs_uv ;; esac
+    printf '%s %s %s%% raw=%s%% %smV\n' "$(date +%s)" "$1" "$(device_get_battery_percent 2>/dev/null)" \
+        "${_bs_raw:--}" "$_bs_mv" >> "$_bs_log" 2>/dev/null
+    if [ "$(wc -l < "$_bs_log" 2>/dev/null || echo 0)" -gt 200 ]; then
+        tail -n 200 "$_bs_log" > "$_bs_log.tmp" 2>/dev/null && mv "$_bs_log.tmp" "$_bs_log"
+    fi
+    unset _bs_log _bs_raw _bs_uv _bs_mv
+}
+
 low_battery_check() {
     if flag_check "low_battery"; then
         CAPACITY=$(device_get_battery_percent)
