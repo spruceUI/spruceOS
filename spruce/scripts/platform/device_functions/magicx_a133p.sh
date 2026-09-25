@@ -281,8 +281,52 @@ device_low_battery_shutdown_ok() {
 # `echo mem` neither the power key nor the +300 s RTC alarm woke it, and no driver's
 # resume ran). The panel goes dark and the session stops until sleep_helper's pseudo loop
 # sees the power button, or its idle timer powers the board off. The radio stays up.
+#
+# Real suspend-to-RAM where the board has been proven to resume (MAGICX_REAL_SLEEP=1 in its
+# cfg): the Zero 28 on the SDK's firmware and the Zero 40 on MagicX's both came back from
+# `mem` on the RTC alarm (2026-09-24); the XU20 resets at the wake and stays on faux sleep.
 device_uses_pseudo_sleep() {
-    echo "true"
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then echo "false"; else echo "true"; fi
+}
+
+# The TrimUI boards' real-sleep path (a133p.sh, overridden by the faux-sleep functions
+# below), with one difference: only a module this path unloaded is loaded again, since the
+# Zero 28's radio is an RTL8188ES, not the XR829 a133p.sh reloads unconditionally. The
+# XR829 (Zero 40) has to go: loaded and associated, it refuses the suspend (-EBUSY).
+MAGICX_SLEEP_UNLOADED=/tmp/magicx_sleep_unloaded
+magicx_real_enter_sleep() {
+    log_message "Entering sleep (suspend to RAM) w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    wifi_request suspend --wait
+    usb_wifi_note_sleep
+    usb_wifi_tear_down
+    rm -f "$MAGICX_SLEEP_UNLOADED"
+    if usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan; then
+        echo xradio_wlan > "$MAGICX_SLEEP_UNLOADED"
+    fi
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
+magicx_real_exit_sleep() {
+    clear_wake_alarm "$WAKE_ALARM_PATH"
+    if usb_wifi_wait_after_resume; then
+        wifi_request apply --wait
+        return 0
+    fi
+    _mod=$(cat "$MAGICX_SLEEP_UNLOADED" 2>/dev/null)
+    rm -f "$MAGICX_SLEEP_UNLOADED"
+    if [ -n "$_mod" ]; then
+        modprobe "$_mod"
+        if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
+            for _ in 1 2 3 4 5; do
+                ip link show wlan0 >/dev/null 2>&1 && break
+                sleep 1
+            done
+        fi
+    fi
+    wifi_request apply --wait
+    log_message "Left sleep (suspend to RAM)"
 }
 
 # No MagicX board has a lid; sleep_helper's pseudo loop takes the power button only
@@ -329,6 +373,10 @@ set_backlight() {
 
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then
+        magicx_real_enter_sleep
+        return
+    fi
     log_message "Entering pseudo sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
     # The power watchdog holds the power key with an exclusive grab and runs
     # sleep_helper in the foreground, so sleep_helper's own reader would never see the
@@ -343,6 +391,10 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then
+        magicx_real_exit_sleep
+        return
+    fi
     echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null
     _raw=$(cat "$MAGICX_SLEEP_BRIGHTNESS" 2>/dev/null)
     rm -f "$MAGICX_SLEEP_BRIGHTNESS"
