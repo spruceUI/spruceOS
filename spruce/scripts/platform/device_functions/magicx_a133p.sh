@@ -42,26 +42,20 @@ magicx_touch_event_path() {
     magicx_find_event_by_name "*[Tt]ouch*" "*ts*" "*gt9*" "*ft5*" "*goodix*" "*[Ff]ocal*" "*hyn*" "*cst*"
 }
 
-# Board pin pokes for boards whose device tree leaves these pins to userland. The
-# XU20's tree already drives them, so its cfg sets MAGICX_INIT_GPIO=false.
+# The rumble motor. MagicX's stock trees switch it through an "io-vibrator" fixed
+# regulator whose enable pin is PH3, active high (Zero 40 and XU20 stock DTBs); our trees
+# leave PH3 to userland, so spruce drives it as a GPIO the way the TrimUI boards do. That
+# needs sysfs GPIO in the kernel (oakMOSS 020, 2026-09-24): without it there is nothing to
+# export and rumble stays off. This used to be the TrimUI Brick's init, which also drove
+# PD11 high and exported PH19 - neither is a MagicX pin, and PH19 is a pad button here.
 init_gpio_a133p() {
-    if [ "$MAGICX_INIT_GPIO" = "false" ]; then
-        log_message "MagicX: skipping the Tina GPIO init on $PLATFORM (its device tree owns these pins)" -v
+    if [ ! -w /sys/class/gpio/export ]; then
+        log_message "MagicX: no sysfs GPIO in this kernel, rumble unavailable" -v
         return 0
     fi
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    printf '%s' out > /sys/class/gpio/gpio107/direction
-    printf '%s' 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
+    [ -d /sys/class/gpio/gpio227 ] || echo 227 > /sys/class/gpio/export
     printf '%s' out > /sys/class/gpio/gpio227/direction
     printf '%s' 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    printf '%s' in > /sys/class/gpio/gpio243/direction
 }
 
 # trimui's runtime_mounts_a133p also runs spruce/brick/sdl2/bind.sh, which binds
