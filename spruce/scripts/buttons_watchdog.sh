@@ -237,7 +237,9 @@ SS_B3_DOWN=false
 
 # scan all button input
 EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
-[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
+# Only when it is another node: where the volume keys live on the pad (MagicX), naming
+# it twice made getevent read every event twice and each key step twice.
+[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && [ "$EVENT_PATH_VOLUME" != "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && EVENTS="$EVENTS $EVENT_PATH_VOLUME"
 getevent $EVENTS | while read line; do
     # first print event code to log file
     # handle hotkeys and volume buttons
