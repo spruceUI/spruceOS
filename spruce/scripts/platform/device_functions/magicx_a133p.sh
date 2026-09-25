@@ -311,6 +311,22 @@ finally:
 EOF
 }
 
+# Level 1..10 -> the panel. Overrides a133p.sh's set_backlight (sourced above), which
+# the brightness keys reach through brightness_up/down: on the boards whose backlight
+# PWM is inverted (MAGICX_BACKLIGHT_REVERSED, the XU20 and the Zero 40) the level has
+# to become a falling raw duty, as PyUI's own path already does, or the keys step the
+# panel the wrong way.
+set_backlight() {
+    val="$1"
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+    val_255=$(( (val - 1) * 254 / 9 + 1 ))
+    [ "$MAGICX_BACKLIGHT_REVERSED" = "1" ] && val_255=$(( 256 - val_255 ))
+    magicx_disp_brightness set "$val_255" 2>/dev/null
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering pseudo sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
