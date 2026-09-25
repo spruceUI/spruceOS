@@ -20,7 +20,8 @@
     "Emulator": {
       "display": "Retroarch Core",
       "options": [
-        "ardens"
+        "ardens",
+        "arduous"
       ],
       "selected": "ardens",
       "overrides": {},
@@ -33,13 +34,16 @@
         "TRIMUI_BRICK_PRO",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "RGB30",
+        "MINILOONG_POCKET1"
       ]
     },
     "Emulator_MiyooMini": {
       "display": "Retroarch Core",
       "options": [
-        "arduous"
+        "arduous",
+        "ardens"
       ],
       "selected": "arduous",
       "overrides": {},
