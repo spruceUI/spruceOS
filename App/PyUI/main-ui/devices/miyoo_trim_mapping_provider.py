@@ -1,5 +1,6 @@
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
+from controller.key_watcher_controller import HorizontalStickAxis, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 
 DEADZONE=16000
@@ -44,38 +45,18 @@ class MiyooTrimKeyMappingProvider:
         self.key_mappings[KeyEvent(1, 314, 0)] = [InputResult(ControllerInput.SELECT, KeyState.RELEASE)]   
         self.key_mappings[KeyEvent(1, 314, 1)] = [InputResult(ControllerInput.SELECT, KeyState.PRESS)]   
         
+    STICK_AXES = {
+        0: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+        1: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+        3: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+        4: VerticalStickAxis(ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
+    }
+
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
         if mappings is None and key_event.event_type == 3:
-            # LEFT STICK Y
-            if key_event.code == 1:
-                if key_event.value < -DEADZONE:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_UP, KeyState.PRESS)
-                    ]
-                elif key_event.value > DEADZONE:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_DOWN, KeyState.PRESS)
-                    ]
-                else:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_UP, KeyState.RELEASE),
-                        InputResult(ControllerInput.LEFT_STICK_DOWN, KeyState.RELEASE),
-                    ]
-            # LEFT STICK X 
-            if key_event.code == 0:
-                if key_event.value < -DEADZONE:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_LEFT, KeyState.PRESS)
-                    ]
-                elif key_event.value > DEADZONE:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_RIGHT, KeyState.PRESS)
-                    ]
-                else:
-                    return [
-                        InputResult(ControllerInput.LEFT_STICK_LEFT, KeyState.RELEASE),
-                        InputResult(ControllerInput.LEFT_STICK_RIGHT, KeyState.RELEASE),
-                    ]
+            axis = self.STICK_AXES.get(key_event.code)
+            if axis is not None:
+                return axis.get_mapped_events(key_event.value, DEADZONE)
 
         return mappings

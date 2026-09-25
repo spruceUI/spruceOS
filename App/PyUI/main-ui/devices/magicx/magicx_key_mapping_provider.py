@@ -2,6 +2,7 @@ import os
 
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
+from controller.key_watcher_controller import HorizontalStickAxis, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 
 DEADZONE = 16000
@@ -46,7 +47,7 @@ class MagicXKeyMappingProvider:
     KEY_UP/LEFT/RIGHT/DOWN 103/105/106/108, MENU is KEY_BACK 158 and the
     volume keys 115/114 ride the same device. Unlike the TrimUI map, A and B
     (and X and Y) are not swapped and there is no ABS hat. Sticks: ABS 0/1
-    left, 2/3 right. To be confirmed against the key bitmap in the diag log.
+    left, 2/5 right (measured on the Zero 28).
     """
 
     def __init__(self):
@@ -70,6 +71,12 @@ class MagicXKeyMappingProvider:
         self.swap_xy = _env_flag("MAGICX_STICK_SWAP_XY", False)
         self.invert_x = _env_flag("MAGICX_STICK_INVERT_X", False)
         self.invert_y = _env_flag("MAGICX_STICK_INVERT_Y", False)
+        left_x, left_y = self._stick_axes(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT,
+                                          ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN)
+        right_x, right_y = self._stick_axes(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT,
+                                            ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN)
+        # Left stick on ABS_X/ABS_Y, right on ABS_Z/ABS_RZ (measured on the Zero 28).
+        self.stick_axes = {0: left_x, 1: left_y, 2: right_x, 5: right_y}
         self._reported = set()
         for code, ci in buttons.items():
             self.key_mappings[KeyEvent(1, code, 1)] = [InputResult(ci, KeyState.PRESS)]
@@ -82,6 +89,16 @@ class MagicXKeyMappingProvider:
         for _code in self.ignored_codes:
             self.key_mappings.pop(KeyEvent(1, _code, 1), None)
             self.key_mappings.pop(KeyEvent(1, _code, 0), None)
+
+    def _stick_axes(self, left, right, up, down):
+        """One stick's (X axis, Y axis) with the board's swap and invert flags applied."""
+        if self.invert_x:
+            left, right = right, left
+        if self.invert_y:
+            up, down = down, up
+        horizontal = HorizontalStickAxis(left, right)
+        vertical = VerticalStickAxis(up, down)
+        return (vertical, horizontal) if self.swap_xy else (horizontal, vertical)
 
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
@@ -96,18 +113,8 @@ class MagicXKeyMappingProvider:
                 PyUiLogger.get_logger().info(f"MagicX pad: unmapped key code {key_event.code} pressed")
             except Exception:
                 pass
-        if mappings is None and key_event.event_type == 3 and key_event.code in (0, 1):
-            axis = key_event.code
-            if self.swap_xy:
-                axis = 1 - axis
-            neg, pos = ((ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT) if axis == 0
-                        else (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN))
-            value = key_event.value
-            if (axis == 0 and self.invert_x) or (axis == 1 and self.invert_y):
-                value = -value
-            if value < -DEADZONE:
-                return [InputResult(neg, KeyState.PRESS)]
-            if value > DEADZONE:
-                return [InputResult(pos, KeyState.PRESS)]
-            return [InputResult(neg, KeyState.RELEASE), InputResult(pos, KeyState.RELEASE)]
+        if mappings is None and key_event.event_type == 3:
+            axis = self.stick_axes.get(key_event.code)
+            if axis is not None:
+                return axis.get_mapped_events(key_event.value, DEADZONE)
         return mappings

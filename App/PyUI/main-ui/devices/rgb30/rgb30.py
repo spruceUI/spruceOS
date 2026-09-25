@@ -8,7 +8,7 @@ import sys
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
-from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller import HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
@@ -27,20 +27,18 @@ from utils.py_ui_config import PyUiConfig
 
 
 class Rgb30KeyMappingProvider:
-    """Buttons from a plain dict, plus the left analog stick as d-pad input.
+    """Buttons from a plain dict, plus both analog sticks as d-pad input.
 
     The pad reports its axes on a -1800..1800 range, not the +-32767 SDL scale
     the TrimUI provider assumes, so the deadzone is sized for this device -
     measured with evtest on hardware, which also gives fuzz 16 / flat 16 and a
     rest value of exactly 0 on all four axes.
-
-    Only the left stick is mapped. The right stick is live (ABS_RX/ABS_RY) but
-    nothing in the UI consumes RIGHT_STICK_*, so mapping it would just queue
-    inputs no view acts on.
     """
 
     ABS_X = 0
     ABS_Y = 1
+    ABS_RX = 3
+    ABS_RY = 4
     EV_KEY = 1
     EV_ABS = 3
     DEADZONE = 900
@@ -60,11 +58,11 @@ class Rgb30KeyMappingProvider:
 
     def __init__(self, key_mappings):
         self.key_mappings = key_mappings
-        self.axis_inputs = {
-            self.ABS_X: (ControllerInput.LEFT_STICK_LEFT,
-                         ControllerInput.LEFT_STICK_RIGHT),
-            self.ABS_Y: (ControllerInput.LEFT_STICK_UP,
-                         ControllerInput.LEFT_STICK_DOWN),
+        self.stick_axes = {
+            self.ABS_X: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            self.ABS_Y: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+            self.ABS_RX: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            self.ABS_RY: VerticalStickAxis(ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
         }
         # Which input each click reported when it went down, so its release
         # always matches - the setting can change between the two.
@@ -102,22 +100,10 @@ class Rgb30KeyMappingProvider:
         if key_event.event_type != self.EV_ABS:
             return self.key_mappings.get(key_event)
 
-        directions = self.axis_inputs.get(key_event.code)
-        if directions is None:
+        axis = self.stick_axes.get(key_event.code)
+        if axis is None:
             return None
-        negative, positive = directions
-
-        # Release the opposite direction on every press: a fast flick can cross
-        # the whole axis between two reported samples and never land inside the
-        # deadzone, which would otherwise leave the old direction held forever.
-        if key_event.value < -self.DEADZONE:
-            return [InputResult(positive, KeyState.RELEASE),
-                    InputResult(negative, KeyState.PRESS)]
-        elif key_event.value > self.DEADZONE:
-            return [InputResult(negative, KeyState.RELEASE),
-                    InputResult(positive, KeyState.PRESS)]
-        return [InputResult(negative, KeyState.RELEASE),
-                InputResult(positive, KeyState.RELEASE)]
+        return axis.get_mapped_events(key_event.value, self.DEADZONE)
 
 
 class Rgb30(DeviceCommon):
