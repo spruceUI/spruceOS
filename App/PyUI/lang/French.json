@@ -300,6 +300,7 @@
     "aboutIpAddress": "IP Address",
     "aboutMacAddress": "Mac Address",
     "aboutFwVersion": "FW Version",
+    "aboutThisDevice": "À propos de cet appareil",
     "aboutUnknown": "Unknown",
     "noValidRomsToLaunch": "No valid ROMs available to launch.",
     "loadingBoxartList": "Loading boxart list...",
