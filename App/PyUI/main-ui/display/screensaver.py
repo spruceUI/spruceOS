@@ -8,6 +8,7 @@ import sdl2.sdlttf
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 
@@ -517,7 +518,19 @@ class ScreenSaver:
 
         elif wtype == "date":
             now = datetime.datetime.now()
-            text = now.strftime("%A, %B %d")
+            # Localized date data is optional;
+            weekdays = Language.get("dateWeekdays")
+            months = Language.get("dateMonths")
+            date_format = Language.get("screensaverDateFormat")
+            # If translation is missing, use datetime.now()
+            if weekdays and months and date_format and len(weekdays) == 7 and len(months) == 12:
+                text = date_format.format(
+                    weekday=weekdays[now.weekday()],
+                    month=months[now.month - 1],
+                    day=now.day,
+                )
+            else:
+                text = now.strftime("%A, %B %d")
             cls._draw_text(text, x, y, color, scaled_size, Display, center=True, widget=widget)
 
         elif wtype == "battery":
