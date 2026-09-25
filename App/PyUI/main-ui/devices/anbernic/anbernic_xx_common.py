@@ -27,7 +27,7 @@ from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import AxisKeyMappingProvider, KeyWatcherController
+from controller.key_watcher_controller import AxisKeyMappingProvider, HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -409,14 +409,14 @@ class AnbernicXXCommon(DeviceCommon):
 
 
         # Sticks on ABS 2-5, +-4096. Stickless models never send them.
-        axis_inputs = {
-            2: (ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
-            3: (ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
-            4: (ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
-            5: (ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
+        stick_axes = {
+            2: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            3: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+            4: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            5: VerticalStickAxis(ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
         }
         return KeyWatcherController(event_path="/dev/input/event1",
-                                    mapping_provider=AxisKeyMappingProvider(key_mappings, axis_inputs, 2048),
+                                    mapping_provider=AxisKeyMappingProvider(key_mappings, stick_axes, 2048),
                                     event_format='llHHi')
 
 

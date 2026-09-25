@@ -34,31 +34,57 @@ class DictKeyMappingProvider:
         return self.key_mappings.get(key_event)
 
 
+class HorizontalStickAxis:
+    """One stick's X axis: pushed left the value goes negative, pushed right positive."""
+
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def get_mapped_events(self, value, deadzone):
+        """PRESS the direction the stick is pushed past the deadzone and RELEASE the
+        other; RELEASE both when centred. The opposite direction is released on
+        every press because a fast flick can cross the axis between two samples
+        without a reading inside the deadzone."""
+        if value < -deadzone:
+            return [InputResult(self.right, KeyState.RELEASE), InputResult(self.left, KeyState.PRESS)]
+        if value > deadzone:
+            return [InputResult(self.left, KeyState.RELEASE), InputResult(self.right, KeyState.PRESS)]
+        return [InputResult(self.left, KeyState.RELEASE), InputResult(self.right, KeyState.RELEASE)]
+
+
+class VerticalStickAxis:
+    """One stick's Y axis: pushed up the value goes negative, pushed down positive."""
+
+    def __init__(self, up, down):
+        self.up = up
+        self.down = down
+
+    def get_mapped_events(self, value, deadzone):
+        if value < -deadzone:
+            return [InputResult(self.down, KeyState.RELEASE), InputResult(self.up, KeyState.PRESS)]
+        if value > deadzone:
+            return [InputResult(self.up, KeyState.RELEASE), InputResult(self.down, KeyState.PRESS)]
+        return [InputResult(self.up, KeyState.RELEASE), InputResult(self.down, KeyState.RELEASE)]
+
+
 class AxisKeyMappingProvider(DictKeyMappingProvider):
-    """The dict for buttons, plus analog axes as stick directions.
-    axis_inputs maps an ABS code to its (negative, positive) inputs."""
+    """The dict for buttons, plus stick_axes: ABS code -> Horizontal/VerticalStickAxis."""
     EV_ABS = 3
 
-    def __init__(self, key_mappings, axis_inputs, deadzone):
+    def __init__(self, key_mappings, stick_axes, deadzone):
         super().__init__(key_mappings)
-        self.axis_inputs = axis_inputs
+        self.stick_axes = stick_axes
         self.deadzone = deadzone
 
     def get_mapped_events(self, key_event):
         mappings = self.key_mappings.get(key_event)
         if mappings is not None or key_event.event_type != self.EV_ABS:
             return mappings
-        directions = self.axis_inputs.get(key_event.code)
-        if directions is None:
+        axis = self.stick_axes.get(key_event.code)
+        if axis is None:
             return None
-        negative, positive = directions
-        # Release the opposite direction on every press: a fast flick can cross
-        # the axis between two samples without a reading inside the deadzone.
-        if key_event.value < -self.deadzone:
-            return [InputResult(positive, KeyState.RELEASE), InputResult(negative, KeyState.PRESS)]
-        if key_event.value > self.deadzone:
-            return [InputResult(negative, KeyState.RELEASE), InputResult(positive, KeyState.PRESS)]
-        return [InputResult(negative, KeyState.RELEASE), InputResult(positive, KeyState.RELEASE)]
+        return axis.get_mapped_events(key_event.value, self.deadzone)
 
 class KeyWatcherController(ControllerInterface):
 
