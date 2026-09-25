@@ -41,7 +41,7 @@ seed_dsperate_config() {
 			 /mnt/SDCARD/Saves/states/dsperate \
 			 /mnt/SDCARD/Saves/dsperate/games
 
-	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini zero40.ini games/BootMenu.ini games/BootMenuDSi.ini; do
 		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
 			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
 			log_message "DSperate: seeded $_cfg"
@@ -207,8 +207,8 @@ run_dsperate() {
 		export DS_ROTATE=270
 		export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
-	else
 
+	else
 		case "$DEVICE_NUM_ANALOG_STICKS" in
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
@@ -219,7 +219,12 @@ run_dsperate() {
 			*)
 				if [ "$PLATFORM" = "RGB30" ]; then
 					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
-					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini" 
+					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini"
+
+				elif [ "$PLATFORM" = "Zero40" ]; then
+					# Z40 gets its own config to accommodate its unique touchscreen
+					_config_path="/mnt/SDCARD/Saves/dsperate/zero40.ini"
+
 				else
 					_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
 				fi 
