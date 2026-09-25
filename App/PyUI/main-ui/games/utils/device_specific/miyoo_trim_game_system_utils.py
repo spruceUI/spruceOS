@@ -18,6 +18,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "81": ["81"],
         "a5200": ["a5200"],
         "ardens": ["Ardens"],
+        "arduous": ["Arduous"],
         "atari800": ["Atari800"],
         "bk": ["bk"],
         "bluemsx": ["blueMSX"],
