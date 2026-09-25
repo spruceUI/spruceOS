@@ -144,6 +144,21 @@ ensure_ra_config_path() {
     unset _rac_live _rac_bak
 }
 
+# last_key_line FILE KEY...: the latest line of a getevent capture that is one of KEY
+# (each a "<type> <code>" pair as in B_A, or a Miyoo Mini key name). Not the capture's
+# last line: a pad may send a second code for one press (MagicX simplepad "code2": A is
+# 305 then 353, XU20 B is 304 then 158), and that rider would hide the key pressed.
+last_key_line() {
+    _klf=$1
+    shift
+    for _k in "$@"; do
+        shift
+        [ -n "$_k" ] && set -- "$@" -e "key $_k "
+    done
+    [ $# -gt 0 ] || return 0
+    grep -F "$@" "$_klf" 2>/dev/null | tail -n 1
+}
+
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
@@ -154,7 +169,7 @@ acknowledge() {
     GE_PID=$!
 
     while true; do
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START_2" "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
                     log_message "last_line: $line" -v
@@ -194,7 +209,7 @@ confirm() {
     RET_VAL=2
     while [ "$RET_VAL" -eq 2 ]; do
         # 1. Check for User Input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
@@ -1691,7 +1706,7 @@ check_and_connect_wifi() {
 
     while true; do
         # 1. Check for user input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
