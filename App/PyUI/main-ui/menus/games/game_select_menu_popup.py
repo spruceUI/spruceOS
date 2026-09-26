@@ -65,6 +65,7 @@ class GameSelectMenuPopup:
 
     def toggle_view(self):
         CYCLE_VIEWS = [
+            ViewType.TEXT_ONLY,
             ViewType.TEXT_AND_IMAGE,
             ViewType.GRID,
             ViewType.ICON_AND_DESC,
