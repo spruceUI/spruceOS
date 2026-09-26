@@ -540,10 +540,10 @@ device_stock_ui_command() {
     printf ''
 }
 
-treat_analog_as_dpad() {
-     log_message "Missing treat_analog_as_dpad function, assuming it does not the capability" -v
+treat_dpad_as_analog() {
+     log_message "Missing treat_dpad_as_analog function, assuming it does not the capability" -v
 }
 
-treat_analog_as_analog() { 
-     log_message "Missing treat_analog_as_analog function, assuming it does not the capability" -v
+treat_dpad_as_dpad() { 
+     log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
 }

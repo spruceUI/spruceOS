@@ -1178,10 +1178,10 @@ _xx_dpad_swap () {
 	vibrate &
 }
 
-treat_analog_as_dpad() {
+treat_dpad_as_analog() {
 	_xx_dpad_swap 2
 }
 
-treat_analog_as_analog() {
+treat_dpad_as_dpad() {
 	_xx_dpad_swap 0
 }
