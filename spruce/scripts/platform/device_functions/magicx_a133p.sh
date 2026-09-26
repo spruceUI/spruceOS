@@ -45,8 +45,8 @@ magicx_touch_event_path() {
 # The rumble motor, the only pin spruce drives on these boards: RUMBLE_GPIO from the cfg.
 # On the Zero 40 and XU20 it is PH3 (gpio227), the enable pin of the stock trees'
 # "io-vibrator" regulator, which our trees leave to userland - felt on both 2026-09-24.
-# The Zero 28's motor is on a pin nobody has found (PH3 does nothing there), so its cfg
-# says "unknown" and nothing is driven. Needs sysfs GPIO in the kernel (oakMOSS 020).
+# The Zero 28 has no motor, so its cfg says "none" and nothing is driven. Needs sysfs GPIO
+# in the kernel (oakMOSS 020).
 # This used to be the TrimUI Brick's init, which also drove PD11 high and exported PH19:
 # neither is a MagicX pin, and PH19 is a pad button here.
 init_gpio_a133p() {
