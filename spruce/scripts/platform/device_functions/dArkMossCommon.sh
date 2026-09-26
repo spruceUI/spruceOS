@@ -203,6 +203,12 @@ device_headphones_connected() {
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
+# The base has no hwclock (trixie moved it to util-linux-extra); the RTC
+# publishes the same value in sysfs.
+device_get_hw_epoch() {
+    cat /sys/class/rtc/rtc0/since_epoch 2>/dev/null
+}
+
 # Through systemd so the base's system-sleep hook runs: it saves and restores
 # the backlight, mutes the speaker amp, and restores governors and LEDs. The
 # call returns before the suspend, so wait for the sleep unit to finish.
