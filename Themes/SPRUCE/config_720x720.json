@@ -49,5 +49,7 @@
     "fullScreenGridGameMenuResizeType": "FIT",
     "mainMenuTitle": "",
     "displayVolumeNumbers": true,
-    "gameSelectionViewType": "TEXT_AND_IMAGE"
+    "gameSelectionViewType": "TEXT_AND_IMAGE",
+    "gameSystemSelectColCount": 4,
+    "gameSystemSelectRowCount": 3
 }
