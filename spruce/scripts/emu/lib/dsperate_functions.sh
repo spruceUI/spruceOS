@@ -55,7 +55,7 @@ prepare_dsperate_cheevos() {
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	case "$rac_mode" in
-		Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0; } ;;
+		Casual|Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0; } ;;
 		Disabled) rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0 ;;
 		*) return 0 ;;
 	esac

@@ -831,7 +831,7 @@
                 "options": [
                     "Manual",
                     "Disabled",
-                    "Softcore",
+                    "Casual",
                     "Hardcore"
                 ],
                 "selected": "Manual"
@@ -848,7 +848,7 @@
             },
             "enableOfflineProxy": {
                 "display": "Offline Achievements",
-                "description": "Earn Softcore Cheevos Offline",
+                "description": "Earn Casual Cheevos Offline",
                 "options": [
                     "True",
                     "False"
