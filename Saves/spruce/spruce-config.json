@@ -336,9 +336,9 @@
                 "selected": "1"
             },
             "homeAction": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "MAGICX_XU20"],
                 "display": "Home button action",
-                "description": "What the top Home button does",
+                "description": "What the Home button does",
                 "options": [
                     "Game Switcher",
                     "Emulator menu",

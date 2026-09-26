@@ -371,6 +371,19 @@ set_backlight() {
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
+# The XU20's extra face button, on images that give it KEY_HOMEPAGE (B_HOME in XU20.cfg):
+# the same Home action as the Smart Pro S's top button (buttons_watchdog.sh calls this).
+device_home_button_pressed() {
+    action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
+    perform_action "$action"
+    case "$action" in
+        "Game Switcher"|"Exit game")
+            rm -f /tmp/cmd_to_run.sh
+            rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+            ;;
+    esac
+}
+
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     if [ "$MAGICX_REAL_SLEEP" = "1" ]; then
