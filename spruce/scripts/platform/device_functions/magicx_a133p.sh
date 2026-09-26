@@ -237,6 +237,8 @@ stage_ra_autoconfig() {
 
 # Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
 # reading with a good voltage becomes an estimate and holds the shutdown off.
+# Never on the charger: charging lifts the terminal voltage, and a flat cell
+# (gauge 1 %, truly empty) read 3704 mV and showed 40 % (Zero 28, 2026-09-27).
 MAGICX_VBAT_EMPTY_MV=3400
 MAGICX_VBAT_FULL_MV=4150
 MAGICX_VBAT_TRUST_MV=3500
@@ -250,7 +252,7 @@ magicx_battery_mv() {
 device_get_battery_percent() {
     cap=$(cat "$BATTERY/capacity" 2>/dev/null)
     case "$cap" in ''|*[!0-9]*) echo "$cap"; return ;; esac
-    if [ "$cap" -le 1 ]; then
+    if [ "$cap" -le 1 ] && [ "$(cat /sys/class/power_supply/axp2202-usb/online 2>/dev/null)" != "1" ]; then
         mv=$(magicx_battery_mv)
         if [ -n "$mv" ] && [ "$mv" -ge "$MAGICX_VBAT_TRUST_MV" ]; then
             est=$(( (mv - MAGICX_VBAT_EMPTY_MV) * 100 / (MAGICX_VBAT_FULL_MV - MAGICX_VBAT_EMPTY_MV) ))
