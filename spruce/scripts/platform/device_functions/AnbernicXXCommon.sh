@@ -522,7 +522,7 @@ device_prepare_for_ports_run() {
 }
 
 device_cleanup_after_ports_run() {
-    log_message "device_cleanup_after_ports_run unneeded" -v
+    treat_dpad_as_dpad
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
@@ -1168,7 +1168,20 @@ device_prepare_for_poweroff() {
 }
 
 
-_xx_dpad_swap () {
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+# The driver refuses a trailing newline, so no echo here.
+XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+_xx_dpad_swap() {
+
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	printf '%s' "$1" > "$XX_DPAD_SWAP"
+	log_message "xx d-pad as stick: $1"
+}
+
+# MENU+SELECT in game flips it, for games that only listen to the stick.
+swap_dpad_analog_toggle() {
 	[ "$XX_PAD_LAYOUT" = "nostick" ] || return 0
 	flag_check "in_menu" && return 0
 	case "$(cat "$XX_DPAD_SWAP" 2>/dev/null)" in

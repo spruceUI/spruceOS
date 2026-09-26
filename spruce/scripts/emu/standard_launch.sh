@@ -232,4 +232,5 @@ wifi_request apply
 
 log_message "-----Closing Emulator-----"
 
+treat_dpad_as_dpad
 auto_regen_tmp_update

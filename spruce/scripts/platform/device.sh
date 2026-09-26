@@ -547,3 +547,7 @@ treat_dpad_as_analog() {
 treat_dpad_as_dpad() { 
      log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
 }
+
+swap_dpad_analog_toggle() { 
+    log_message "Missing swap_dpad_analog_toggle function, assuming it does not the capability" -v
+}
