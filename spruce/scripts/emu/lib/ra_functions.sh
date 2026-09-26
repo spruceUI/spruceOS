@@ -100,10 +100,8 @@ prepare_ra_config() {
 			;;
 	esac
 
-	# The proxy cannot validate a hardcore run. Forced per launch rather than by
-	# rewriting modeToggle, so the user's chosen mode survives turning the proxy
-	# off again - and because PyUI writes spruce-config.json wholesale from a
-	# copy it holds in memory, so an outside edit is lost on its next save.
+	# The proxy cannot validate a hardcore run. Enabling it already drops the
+	# mode to Softcore (networkServiceToggle.sh); this covers Hardcore chosen after.
 	if [ "$rac_mode" = "Hardcore" ] &&
 		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
 		log_message "Offline proxy on; softcore for this launch"
