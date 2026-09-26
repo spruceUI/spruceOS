@@ -20,7 +20,7 @@ export EMU_DIR="/mnt/SDCARD/Emu/NDS" # override this so NDSi can refer back to N
 
 dsperate_bios_missing() {
 	_missing=""
-	for _f in bios9.bin bios7.bin firmware.bin; do
+	for _f in $1; do
 		[ -f "$DSPERATE_BIOS_DIR/$_f" ] || _missing="$_missing $_f"
 	done
 	echo "$_missing"
@@ -29,7 +29,7 @@ dsperate_bios_missing() {
 display_dsperate_bios_message() {
 	start_pyui_message_writer
 	log_and_display_message "DSperate needs a DS BIOS dump.\nMissing from BIOS/nds:$1\nDumps are not included."
-	sleep 6
+	sleep 8
 	stop_pyui_message_writer
 }
 
@@ -142,13 +142,16 @@ run_dsperate() {
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 
 	if [ "$GAME" = "BootMenu.nds" ]; then
-		_missing="$(dsperate_bios_missing)"
-		if [ -n "$_missing" ]; then
-			log_message "DSperate: missing BIOS:$_missing"
-			mkdir -p "$DSPERATE_BIOS_DIR"
-			display_dsperate_bios_message "$_missing"
-			return 1
-		fi
+		_missing="$(dsperate_bios_missing "bios9.bin bios7.bin firmware.bin")"
+	elif [ "$GAME" = "BootMenuDSi.nds" ]; then
+		_missing="$(dsperate_bios_missing "bios9.bin bios7.bin biosdsi9.bin biosdsi7.bin dsifirmware.bin nand.bin")"
+	fi
+
+	if [ -n "$_missing" ]; then
+		log_message "DSperate: missing BIOS:$_missing"
+		mkdir -p "$DSPERATE_BIOS_DIR"
+		display_dsperate_bios_message "$_missing"
+		return 1
 	fi
 
 	seed_dsperate_config
