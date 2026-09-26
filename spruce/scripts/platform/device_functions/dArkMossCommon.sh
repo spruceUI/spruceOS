@@ -14,6 +14,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 
 DARKMOSS_DEBUG_LOG="/mnt/SDCARD/Saves/spruce/darkmoss_debug.log"
 
@@ -194,6 +195,36 @@ device_get_charging_status() {
 
 device_headphones_connected() {
     are_headphones_plugged_in
+}
+
+  ###################
+#####   SLEEP   #####
+  ###################
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+
+# Through systemd so the base's system-sleep hook runs: it saves and restores
+# the backlight, mutes the speaker amp, and restores governors and LEDs. The
+# call returns before the suspend, so wait for the sleep unit to finish.
+trigger_device_sleep() {
+    systemctl suspend >/dev/null 2>&1 || return 1
+    sleep 2
+    while systemctl is-active --quiet systemd-suspend.service; do
+        sleep 0.5
+    done
+}
+
+device_enter_sleep() {
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
+device_exit_sleep() {
+    set_volume "$(get_volume_level)" false
+    echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
 }
 
 # extcon reports 1, a DRM connector reports "connected".
