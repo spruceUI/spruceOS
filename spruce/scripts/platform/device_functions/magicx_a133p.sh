@@ -371,6 +371,14 @@ set_backlight() {
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
+# No MagicX board has the TrimUI line's Fn switch. a133p.sh reads it from gpio243 (TrimUI's
+# PH19); on MagicX that pin is L1, so the shared reader must not apply here - nothing, which
+# apply-switch-action treats as "no switch". The XU20's extra button is its Home key (below),
+# never the switch or an Fn key (switchAction/fnF1Action/fnF2Action do not list MagicX).
+device_get_switch_position() {
+    :
+}
+
 # The XU20's extra face button, on images that give it KEY_HOMEPAGE (B_HOME in XU20.cfg):
 # the same Home action as the Smart Pro S's top button (buttons_watchdog.sh calls this).
 device_home_button_pressed() {
