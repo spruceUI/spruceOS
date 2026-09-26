@@ -50,21 +50,11 @@ case $INFO in
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)                                    # RK3566
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # The kernel names the board in the device tree.
-            DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
-            case "$DT_MODEL" in
-                *RGB30*) export PLATFORM="RGB30" ;;
-                *) export PLATFORM="RGB30" ;;
+            # dArkMoss stamps the unit into os-release (setup_spruce_handoff-rk3566.sh).
+            case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                *Miniloong*) export PLATFORM="Miniloong" ;;
+                *)           export PLATFORM="RGB30" ;;
             esac
-        elif [ -x /loong/loong_daemon ]; then
-            # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
-            # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
-            # cannot tell them apart. The vendor's stock launcher daemon is the
-            # reliable discriminator: it is present only on the loong firmware
-            # and Spruce is about to replace its boot path anyway. The device
-            # tree model string ("MIYOO RK3566 355 V10 Board" on the Flip) can
-            # corroborate once captured on a board, but the daemon is the key.
-            export PLATFORM="Miniloong"
         else
             export PLATFORM="Flip"
         fi
