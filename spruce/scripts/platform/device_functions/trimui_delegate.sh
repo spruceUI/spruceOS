@@ -91,9 +91,17 @@ rgb_led_trimui() {
 	# the switch position at boot.
 	flag_check "leds_forced_off" && return 0
 
-    # get and set peak rgb brightness
-    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "False")"
-    echo "$max_scale" > "/sys/class/led_anim/max_scale"
+    LED_DIR=/sys/class/led_anim
+
+    # Get and set peak rgb brightness for each zone that exposes the setting.
+    # This comes straight from spruce-config.json, NOT from the function call.
+    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    for _scale_zone in max_scale max_scale_lr max_scale_f1f2 ; do
+        if [ -e "$LED_DIR"/"$_scale_zone" ]; then
+            chmod a+rw "$LED_DIR"/"$_scale_zone"
+            echo "$max_scale" > "$LED_DIR"/"$_scale_zone"
+        fi
+    done
 
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
