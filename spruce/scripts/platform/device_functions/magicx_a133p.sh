@@ -340,6 +340,24 @@ device_lid_open() {
 MAGICX_SLEEP_STOP="MainUI retroarch ra64.trimui drastic drastic64 PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM scummvm ffplay OpenBOR_mod OpenBOR_new mupen64plus"
 MAGICX_SLEEP_BRIGHTNESS=/tmp/magicx_sleep_brightness
 
+# PyUI's SDL2 directory. The base's SDL2_image (2.0.3) predates QOI, so box art converted
+# by "Optimize boxart" would not load. PySDL2 takes a single directory: link the base's
+# SDL2 libraries (DEVICE_PYSDL2_DLL_PATH) next to PyUI's QOI-capable SDL2_image in tmpfs,
+# as the Brick pairs them in spruce/brick/sdl2. Prints the directory.
+magicx_pyui_sdl_dir() {
+    _dir=/tmp/pyui-sdl2
+    mkdir -p "$_dir"
+    rm -f "${_dir:?}"/*
+    for _lib in "${DEVICE_PYSDL2_DLL_PATH:-/usr/magicx/lib}"/libSDL2*; do
+        case "$_lib" in
+            */libSDL2_image*) ;;
+            *) ln -s "$_lib" "$_dir/" ;;
+        esac
+    done
+    ln -s /mnt/SDCARD/App/PyUI/dll/libSDL2_image-2.0.so "$_dir/"
+    echo "$_dir"
+}
+
 # The panel's raw brightness through /dev/disp (DISP_LCD_GET/SET_BRIGHTNESS). Raw on
 # purpose: the level is mirrored on the boards whose backlight PWM is inverted, so sleep
 # saves and restores the driver's value instead of re-deriving it from the user's level.

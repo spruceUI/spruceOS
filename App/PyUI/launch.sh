@@ -340,21 +340,7 @@ case "$PLATFORM" in
     "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
-        # The vendor SDL2_image (2.0.3) predates QOI, so box art converted by
-        # "Optimize boxart" would not load. PySDL2 takes a single directory:
-        # link the vendor SDL2 libraries next to PyUI's QOI-capable
-        # SDL2_image in tmpfs, as the Brick pairs them in spruce/brick/sdl2.
-        PYUI_SDL_DIR="/tmp/pyui-sdl2"
-        mkdir -p "$PYUI_SDL_DIR"
-        rm -f "${PYUI_SDL_DIR:?}"/*
-        for lib in /usr/magicx/lib/libSDL2*; do
-            case "$lib" in
-                */libSDL2_image*) ;;
-                *) ln -s "$lib" "$PYUI_SDL_DIR/" ;;
-            esac
-        done
-        ln -s /mnt/SDCARD/App/PyUI/dll/libSDL2_image-2.0.so "$PYUI_SDL_DIR/"
-        export PYSDL2_DLL_PATH="$PYUI_SDL_DIR"
+        export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         if [ "$PLATFORM" = "Zero40" ]; then
             DEVICE="MAGICX_ZERO40"
         elif [ "$PLATFORM" = "XU20" ]; then

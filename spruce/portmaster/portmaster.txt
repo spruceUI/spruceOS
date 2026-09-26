@@ -2,15 +2,15 @@
 # GUI launch hook: which SDL2 pysdl2 loads, and library paths, per device.
 command -v export_sdl_gamecontroller_map >/dev/null 2>&1 || . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# A board whose cfg names its own SDL2 set (DEVICE_PYSDL2_DLL_PATH; the MagicX boards: without
+# a path pysdl2 finds no SDL2 at all and the app dies on `import sdl2`, 2026-09-22).
+[ -n "$DEVICE_PYSDL2_DLL_PATH" ] && export PYSDL2_DLL_PATH="$DEVICE_PYSDL2_DLL_PATH"
+
 case "$PLATFORM" in
     Flip|SmartProS)          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;
     Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
     Anbernic*)               export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
     RGB30|Miniloong)         export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
-    # The vendor SDL 2.26.1 set the MagicX firmware ships, the same one PyUI loads on these boards.
-    # Without a path pysdl2 finds no SDL2 at all and the app dies on `import sdl2` (XU20, 2026-09-22).
-    # SDL2_gfx is not in it; PortMaster treats that module as optional.
-    XU20|Zero28|Zero40)      export PYSDL2_DLL_PATH="/usr/magicx/lib" ;;
 esac
 
 case "$PLATFORM" in

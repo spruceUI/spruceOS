@@ -39,10 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		# The Zero 40's and XU20's motor is PH3 (gpio227): stock switches it through an
-		# io-vibrator regulator on that pin, and oakMOSS leaves it to userland. The Zero 28
-		# has no motor, so it is not here.
-		"SmartPro"|"Brick"|"BrickPro"|"Zero40"|"XU20"|"Flip")
+		"SmartPro"|"Brick"|"BrickPro"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
