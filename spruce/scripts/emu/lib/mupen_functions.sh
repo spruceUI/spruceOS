@@ -217,9 +217,9 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 		# Stickless XX: the N64 stick is axes 0/1, which have no stick behind
 		# them there, so let the d-pad drive them for the run.
-		_xx_dpad_swap 2
+		treat_analog_as_dpad
 		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
-		_xx_dpad_swap 0
+		treat_analog_as_analog
 
 		case "$PLATFORM" in
 			"A30") kill -9 $(pidof a30_input_shim) 2>/dev/null ;;

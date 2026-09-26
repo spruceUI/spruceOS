@@ -1166,3 +1166,22 @@ device_prepare_for_poweroff() {
     device_wifi_power_off
     xx_rgb_off
 }
+
+
+_xx_dpad_swap () {
+	[ "$XX_PAD_LAYOUT" = "nostick" ] || return 0
+	flag_check "in_menu" && return 0
+	case "$(cat "$XX_DPAD_SWAP" 2>/dev/null)" in
+		2) _xx_dpad_swap 0 ;;
+		*) _xx_dpad_swap 2 ;;
+	esac
+	vibrate &
+}
+
+treat_analog_as_dpad() {
+	_xx_dpad_swap 2
+}
+
+treat_analog_as_analog() {
+	_xx_dpad_swap 0
+}
