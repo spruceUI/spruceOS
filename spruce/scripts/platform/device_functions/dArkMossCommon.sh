@@ -228,9 +228,13 @@ device_enter_sleep() {
     trigger_device_sleep
 }
 
-device_exit_sleep() {
+darkmoss_exit_sleep() {
     set_volume "$(get_volume_level)" false
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+}
+
+device_exit_sleep() {
+    darkmoss_exit_sleep
 }
 
 # extcon reports 1, a DRM connector reports "connected".
@@ -568,9 +572,13 @@ run_poweroff_cmd() {
 # The unit holds tty1 with TTYVHangup=yes, so stopping it SIGHUPs everything
 # still on that terminal, the shutdown script included. SIG_IGN survives exec,
 # so this covers stage 2 too.
-device_prepare_for_poweroff() {
+darkmoss_prepare_for_poweroff() {
     trap "" HUP
     sync
+}
+
+device_prepare_for_poweroff() {
+    darkmoss_prepare_for_poweroff
 }
 
   #####################
