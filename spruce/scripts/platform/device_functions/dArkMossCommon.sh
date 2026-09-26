@@ -196,8 +196,12 @@ device_headphones_connected() {
     are_headphones_plugged_in
 }
 
+# extcon reports 1, a DRM connector reports "connected".
 device_hdmi_connected() {
-    [ "$(cat "$HDMI_STATE_PATH" 2>/dev/null)" = "1" ]
+    case "$(cat "$HDMI_STATE_PATH" 2>/dev/null)" in
+        1|connected) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
   ###################
@@ -469,6 +473,31 @@ get_config_path() {
     echo "$SYSTEM_JSON"
 }
 
+# Values from a live RGB30's retroarch.cfg on the udev driver, which numbers
+# this pad the same way on every dArkMoss unit; hotkey is SELECT (8). The
+# entries shipped as "nul" are reset to "nul" too.
+set_default_ra_hotkeys() {
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+
+    log_message "Resetting RetroArch hotkeys to Spruce defaults."
+
+    update_ra_config_file_with_new_setting "$RA_FILE" \
+        "input_enable_hotkey_btn = \"8\"" \
+        "input_exit_emulator_btn = \"0\"" \
+        "input_fps_toggle_btn = \"2\"" \
+        "input_load_state_btn = \"4\"" \
+        "input_save_state_btn = \"5\"" \
+        "input_menu_toggle = \"f1\"" \
+        "input_menu_toggle_btn = \"3\"" \
+        "input_quit_gamepad_combo = \"0\"" \
+        "input_toggle_fast_forward_btn = \"10\"" \
+        "input_screenshot_btn = \"nul\"" \
+        "input_shader_toggle_btn = \"nul\"" \
+        "input_state_slot_decrease_btn = \"nul\"" \
+        "input_state_slot_increase_btn = \"nul\"" \
+        "input_toggle_slowmotion_btn = \"nul\""
+}
+
 # spruce's bundled netcat needs an ELF loader path this base lacks; Debian's
 # nc.openbsd at /usr/bin/nc does the job.
 send_menu_button_to_retroarch() {
@@ -553,6 +582,17 @@ darkmoss_debug_dump() {
             echo "  $(basename "$_dir"): $(cat "$_dir/device/name" 2>/dev/null) key=$(cat "$_dir/device/capabilities/key" 2>/dev/null) abs=$(cat "$_dir/device/capabilities/abs" 2>/dev/null) ff=$(cat "$_dir/device/capabilities/ff" 2>/dev/null)"
         done
         ls -l /dev/input/by-path/ 2>&1
+        for _dir in /sys/class/input/event*; do
+            echo "  $(basename "$_dir") sw=$(cat "$_dir/device/capabilities/sw" 2>/dev/null)"
+        done
+        echo "--- extcon"
+        for _x in /sys/class/extcon/*; do
+            echo "  $_x name=$(cat "$_x/name" 2>/dev/null) state=$(cat "$_x/state" 2>/dev/null | tr '\n' ' ')"
+        done
+        echo "--- leds"
+        for _l in /sys/class/leds/*; do
+            echo "  $_l: $(ls "$_l" 2>/dev/null | tr '\n' ' ')"
+        done
         echo "--- resolved: pad=$EVENT_PATH_READ_INPUTS_SPRUCE power=$EVENT_PATH_POWER volume=$EVENT_PATH_VOLUME on_pad=$VOLUME_KEYS_ON_PAD"
         echo "--- sound cards and controls"
         cat /proc/asound/cards 2>&1
