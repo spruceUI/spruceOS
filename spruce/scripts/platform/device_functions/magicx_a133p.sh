@@ -341,7 +341,7 @@ MAGICX_SLEEP_STOP="MainUI retroarch ra64.trimui drastic drastic64 PPSSPPSDL_Trim
 MAGICX_SLEEP_BRIGHTNESS=/tmp/magicx_sleep_brightness
 
 # The panel's raw brightness through /dev/disp (DISP_LCD_GET/SET_BRIGHTNESS). Raw on
-# purpose: PyUI mirrors the level on the boards whose backlight PWM is inverted, so sleep
+# purpose: the level is mirrored on the boards whose backlight PWM is inverted, so sleep
 # saves and restores the driver's value instead of re-deriving it from the user's level.
 magicx_disp_brightness() {
     "$DEVICE_PYTHON3_PATH" - "$@" <<'EOF'
@@ -357,18 +357,34 @@ finally:
 EOF
 }
 
-# Level 1..10 -> the panel. Overrides a133p.sh's set_backlight (sourced above), which
-# the brightness keys reach through brightness_up/down: on the boards whose backlight
-# PWM is inverted (MAGICX_BACKLIGHT_REVERSED, the XU20 and the Zero 40) the level has
-# to become a falling raw duty, as PyUI's own path already does, or the keys step the
-# panel the wrong way.
-set_backlight() {
+# Level 1..10 -> raw panel value, MagicX only. The curve is PyUI's own (DeviceCommon.
+# map_backlight_from_10_to_full_255: 25 a step, 255 at 10), the one all three panels were
+# tested on; a133p.sh's (level-1)*254/9+1 stays with the TrimUI boards. Mirrored where the
+# backlight PWM is inverted (MAGICX_BACKLIGHT_REVERSED: the XU20 and the Zero 40).
+magicx_backlight_raw() {
     val="$1"
+    case "$val" in ''|*[!0-9]*) val=1 ;; esac
     [ "$val" -lt 1 ] && val=1
     [ "$val" -gt 10 ] && val=10
-    val_255=$(( (val - 1) * 254 / 9 + 1 ))
-    [ "$MAGICX_BACKLIGHT_REVERSED" = "1" ] && val_255=$(( 256 - val_255 ))
-    magicx_disp_brightness set "$val_255" 2>/dev/null
+    if [ "$val" -eq 10 ]; then raw=255; else raw=$((val * 25)); fi
+    [ "$MAGICX_BACKLIGHT_REVERSED" = "1" ] && raw=$((256 - raw))
+    echo "$raw"
+}
+
+# The panel only, nothing saved: what PyUI calls for every change. PyUI keeps the level
+# itself, and the screensaver's dim to level 1 must never be saved as the user's level.
+magicx_apply_backlight() {
+    magicx_disp_brightness set "$(magicx_backlight_raw "$1")" 2>/dev/null
+}
+
+# The brightness keys (buttons_watchdog -> brightness_up/down): the panel, then the level
+# saved. Overrides a133p.sh's set_backlight (sourced above).
+set_backlight() {
+    val="$1"
+    case "$val" in ''|*[!0-9]*) return 1 ;; esac
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+    magicx_apply_backlight "$val"
     tmp="${SYSTEM_JSON}.tmp.$$"
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
