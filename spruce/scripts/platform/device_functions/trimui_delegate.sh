@@ -11,7 +11,7 @@
 # Controls RGB LEDs on TrimUI Brick / Smart Pro.
 #
 # PARAMETERS:
-#   <zones>        A string containing any combination of: l r m 1 2
+#   <zones>        A string containing any combination of: l r m 1 2 b
 #                  (order does not matter)
 #                  Zones resolve to:
 #                     l  → left LED
@@ -19,7 +19,8 @@
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                     b  → rear LEDs (BrickPro)
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
@@ -96,7 +97,7 @@ rgb_led_trimui() {
     # Get and set peak rgb brightness for each zone that exposes the setting.
     # This comes straight from spruce-config.json, NOT from the function call.
     max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
-    for _scale_zone in max_scale max_scale_lr max_scale_f1f2 ; do
+    for _scale_zone in max_scale max_scale_lr max_scale_f1f2 max_scale_rear; do
         if [ -e "$LED_DIR"/"$_scale_zone" ]; then
             chmod a+rw "$LED_DIR"/"$_scale_zone"
             echo "$max_scale" > "$LED_DIR"/"$_scale_zone"
@@ -106,13 +107,13 @@ rgb_led_trimui() {
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
         zones=""
-        for z in l r m 1 2; do
+        for z in l r m 1 2 b; do
             case "$1" in
                 *"$z"*) zones="$zones $z";;
             esac
         done
     else
-        zones="l r m 1 2"
+        zones="l r m 1 2 b"
     fi
 
     # translate 1 → f1 and 2 → f2
@@ -121,6 +122,7 @@ rgb_led_trimui() {
         case "$z" in
             1) new_zones="$new_zones f1" ;;
             2) new_zones="$new_zones f2" ;;
+            b) new_zones="$new_zones rear" ;;
             *) new_zones="$new_zones $z" ;;
         esac
     done

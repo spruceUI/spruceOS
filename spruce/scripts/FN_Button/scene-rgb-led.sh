@@ -48,7 +48,7 @@ get_emu_color() {
 case "$1" in
     1)  # switch on -> LEDs off (black)
         flag_remove "leds_forced_off"
-        rgb_led lrm12 static "000000"
+        rgb_led lrm12b static "000000"
         flag_add "leds_forced_off" --tmp
         ;;
     0)  # switch off -> LEDs on (configured colour)
@@ -67,6 +67,6 @@ case "$1" in
         else
             hex="$(map_color_name_to_hex "$color")"
         fi
-        rgb_led lrm12 "$effect" "$hex" "$duration" "-1"
+        rgb_led lrm12b "$effect" "$hex" "$duration" "-1"
         ;;
 esac

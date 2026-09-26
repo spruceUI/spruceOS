@@ -100,7 +100,7 @@ start_pyui_message_writer
 display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75
 
 # twinkle them lights
-rgb_led lrm12 breathe 00FF00 1900 "-1" mmc0
+rgb_led lrm12b breathe 00FF00 1900 "-1" mmc0
 
 log_message "Looking for backup files..."
 

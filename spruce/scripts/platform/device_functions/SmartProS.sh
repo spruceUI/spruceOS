@@ -98,9 +98,9 @@ toggle_led() {
     cur="$(cat /sys/class/led_anim/effect_rgb_hex_l 2>/dev/null | tr -d ' ')"
     hex="$(led_color_hex)"
     if [ "$cur" = "000000" ]; then
-        rgb_led lrm12 static "$hex" &
+        rgb_led lrm12b static "$hex" &
     else
-        rgb_led lrm12 static "000000" &
+        rgb_led lrm12b static "000000" &
     fi
 }
 

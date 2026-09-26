@@ -45,7 +45,7 @@ vibrate() {
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
