@@ -257,6 +257,13 @@ launch_trimui_startup_watchdogs() {
     /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
 
+    # Keep OSD events in sync (fan, led, wifi, bluetooth, rumble) when TrimUI OSD daemon is available
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/osd_sync_watchdog.sh
+    if [ -x /usr/trimui/osd/trimui_osdd ]; then
+        /mnt/SDCARD/spruce/scripts/osd_sync_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n osd_sync_watchdog.sh &
+    fi
+
     # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh). Only the devices
     # whose cfg points at dongle modules run it; the script itself exits at
     # once without WIFI_USB_MODULES_DIR, but there is no point starting it.

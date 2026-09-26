@@ -9,6 +9,19 @@
 # position. Going through rgb_led_trimui keeps the switch in sync with spruce's
 # own LED state, the LEDmaxScale brightness, and the disableLEDs setting.
 
+case "$1" in
+    1)
+        [ -x /usr/trimui/bin/shmvar ] && /usr/trimui/bin/shmvar ledswitch 0 2>/dev/null
+        mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+        echo 0 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
+        ;;
+    0)
+        [ -x /usr/trimui/bin/shmvar ] && /usr/trimui/bin/shmvar ledswitch 1 2>/dev/null
+        mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+        echo 1 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
+        ;;
+esac
+
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 
