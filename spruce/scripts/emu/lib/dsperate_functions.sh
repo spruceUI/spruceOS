@@ -191,6 +191,12 @@ run_dsperate() {
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
 	esac
 
+	# Allow user-provided usrcheat.dat in the BIOS/nds folder. If not provided,
+	# fall back to the spruce default one defined in the .ini.
+	if [ -f "$DSPERATE_BIOS_DIR"/usrcheat.dat ]; then 
+		set -- "$@" --cheats "$DSPERATE_BIOS_DIR"/usrcheat.dat
+	fi
+
 	# The game switcher's thumbnail, written by DSperate itself with the auto
 	# state (emu.autosave_png). The device's take_screenshot runs first in
 	# the hold-Home path and this overwrites it a moment later, which is the

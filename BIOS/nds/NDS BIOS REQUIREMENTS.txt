@@ -19,3 +19,6 @@ Add to those 4, two additional files if you would like to be able to boot into t
 - dsifirmware.bin
 - nand.bin
 
+If you wish to use your own cheats database with DSperate instead of the default set of cheats that spruce provides, you can add that file to BIOS/nds as well:
+
+- usrcheat.dat
