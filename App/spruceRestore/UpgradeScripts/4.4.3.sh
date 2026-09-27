@@ -33,6 +33,14 @@ for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce
     log_message "Renamed disableLEDs=$_old to enableLEDs=$_new in $_cfg"
 done
 
+# nuke per-device dsperate configs, and allow them to regenerate - but do not nuke those in the games subfolder, as those are user-created and should be preserved.
+for file in /mnt/SDCARD/Saves/dsperate/*.ini; do
+    [ -f "$file" ] || continue
+    rm -f "$file"
+    log_message "Removed old dsperate config $file. Will be regenerated on next launch."
+done
+
+
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
 if [ $? -eq 0 ]; then
