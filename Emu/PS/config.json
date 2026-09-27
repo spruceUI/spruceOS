@@ -25,7 +25,8 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30"
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "PCSX-ReARMed-standalone",

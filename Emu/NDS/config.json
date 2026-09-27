@@ -81,6 +81,7 @@
       "display": "Emulator",
       "devices": [
         "RGB30",
+        "MINILOONG_POCKET1",
         "ANBERNIC_RGXX"
       ],
       "options": [
@@ -102,6 +103,7 @@
         "ANBERNIC_RGXX",
         "GKD_PIXEL2",
         "RGB30",
+        "MINILOONG_POCKET1",
         "MIYOO_A30",
         "MAGICX_A133P"
       ],

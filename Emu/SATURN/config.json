@@ -25,7 +25,8 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30"
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "yabasanshiro-standalone-hle",
@@ -107,6 +108,7 @@
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
     "RGB30",
+    "MINILOONG_POCKET1",
     "MAGICX_A133P"
   ],
   "alternativeFolderNames": [

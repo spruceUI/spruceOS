@@ -16,15 +16,7 @@ case $INFO in
     *"TG3040"*)	export PLATFORM="Brick"	;;
     *"TG5050"*)	export PLATFORM="SmartProS"	;;
     *"TG4040"*)	export PLATFORM="BrickPro"	;;
-    *"0xd05"*)
-        # Flip and Miniloong share the RK3566 part id; the loong daemon is the
-        # reliable discriminator. See helperFunctions.sh.
-        if [ -x /loong/loong_daemon ]; then
-            export PLATFORM="Miniloong"
-        else
-            export PLATFORM="Flip"
-        fi
-        ;;
+    *"0xd05"*) export PLATFORM="Flip" ;;          # RK3566; dArkMoss units never run the updater
     *"0xd04"*) export PLATFORM="Pixel2" ;;
     *) export PLATFORM="MiyooMini" ;;
 esac
@@ -32,13 +24,12 @@ fi
 
 
 # The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh
-# with a crash-loop guard and a hand-off to the vendor UI. It is the only path
-# on the Miniloong; on the Flip it is opt-in through a flag while it is being
-# validated, so a card that has not asked for it boots exactly as before.
+# with a crash-loop guard and a hand-off to the vendor UI. On the Flip it is
+# opt-in through a flag while it is being validated, so a card that has not
+# asked for it boots exactly as before.
 SESSION=/mnt/SDCARD/spruce/scripts/boot/session.sh
 use_session=0
 case "$PLATFORM" in
-    Miniloong) use_session=1 ;;
     Flip) [ -e /mnt/SDCARD/spruce/flags/boot_session_enabled ] && use_session=1 ;;
 esac
 
