@@ -23,6 +23,7 @@ device_init() {
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
     resolve_key_event_node
     setup_mainui_alias
+    set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     darkmoss_debug_dump
 }
@@ -340,6 +341,30 @@ set_volume() {
     if [ "$SAVE_TO_CONFIG" = true ]; then
         save_volume_to_config_file "$VOLUME_LV" 2>/dev/null
     fi
+}
+
+get_backlight_level() {
+    jq -r '.backlight // 5' "$SYSTEM_JSON" 2>/dev/null || echo 5
+}
+
+set_backlight() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 10 ] && level=10
+    eval "raw=\$SYSTEM_BRIGHTNESS_$level"
+    echo "$raw" > "$DEVICE_BRIGHTNESS_PATH"
+    echo 0 > /sys/class/backlight/backlight/bl_power 2>/dev/null
+    log_message "$PLATFORM: backlight ${level}/10 (raw $raw)"
+    tmp="$SYSTEM_JSON.tmp.$$"
+    jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
+brightness_down() {
+    set_backlight $(( $(get_backlight_level) - 1 ))
+}
+
+brightness_up() {
+    set_backlight $(( $(get_backlight_level) + 1 ))
 }
 
 # The base's ALSA config is a per-user ~/.asoundrc and /etc/asound.conf is
