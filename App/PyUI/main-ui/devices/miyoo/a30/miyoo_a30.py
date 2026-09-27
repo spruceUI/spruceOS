@@ -203,33 +203,6 @@ class MiyooA30(MiyooDevice):
     def take_snapshot(self, path):
         return None
     
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
-    def get_ip_addr_text(self):
-        if self.is_wifi_enabled():
-            try:
-                # Run the system command to get wlan0 info
-                result = subprocess.run(
-                    ["ip", "addr", "show", "wlan0"],
-                    capture_output=True,
-                    text=True
-                )
-
-                if result.returncode != 0:
-                    return "Error"
-
-                # Look for an IPv4 address in the command output
-                for line in result.stdout.splitlines():
-                    line = line.strip()
-                    if line.startswith("inet "):  # Example: "inet 192.168.1.42/24 ..."
-                        ip = line.split()[1].split("/")[0]  # Take "192.168.1.42" part
-                        return ip
-
-                return "Connecting"  # wlan0 exists but no IP yet
-
-            except Exception:
-                return "Error"
-
-        return "Off"
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):

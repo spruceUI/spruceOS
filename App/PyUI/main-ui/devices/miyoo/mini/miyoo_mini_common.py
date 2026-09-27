@@ -790,44 +790,6 @@ class MiyooMiniCommon(MiyooDevice):
     def take_snapshot(self, path):
         return None
     
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
-    def get_ip_addr_text(self):
-        if self.miyoo_mini_specific_model_variables.supports_wifi:
-            if self.is_wifi_enabled():
-                try:
-                    # Run the system command to get wlan0 info
-                    result = subprocess.run(
-                        ["ip", "addr", "show", "wlan0"],
-                        capture_output=True,
-                        text=True
-                    )
-
-                    if result.returncode != 0:
-                        # `ip: can't find device 'wlan0'` - the interface does not
-                        # exist. While wifi.sh is bringing the
-                        # driver up (it arms the settle window first) that is the
-                        # normal state for a few seconds, not an error; the 15 s
-                        # cache otherwise pins "Error" on screen long after the
-                        # address arrives.
-                        if time.time() < self._wifi_settle_until:
-                            return "Connecting"
-                        return "Error"
-
-                    # Look for an IPv4 address in the command output
-                    for line in result.stdout.splitlines():
-                        line = line.strip()
-                        if line.startswith("inet "):  # Example: "inet 192.168.1.42/24 ..."
-                            ip = line.split()[1].split("/")[0]  # Take "192.168.1.42" part
-                            return ip
-
-                    return "Connecting"  # wlan0 exists but no IP yet
-
-                except Exception:
-                    return "Error"
-
-            return "Off"
-        else:
-            return "Unsupported"
 
     def supports_wifi(self):
         return self.miyoo_mini_specific_model_variables.supports_wifi

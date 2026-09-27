@@ -13,7 +13,6 @@ import os
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from menus.language.language import Language
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
@@ -159,46 +158,6 @@ class TrimUIDevice(DeviceCommon):
     def map_analog_input(self, sdl_axis, sdl_value):
         PyUiLogger.get_logger().error(f"Received analog input axis = {sdl_axis}, value = {sdl_value}")
 
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        try:
-            result = subprocess.run(
-                ["iw", "dev", "wlan0", "link"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            output = result.stdout.strip()
-
-            if "Not connected." in output or result.returncode != 0:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-            link_quality = 0  # This won't be available directly via iw, unless you derive it
-
-            # Extract signal level (in dBm); no reading is no signal, not full bars
-            signal_match = re.search(r"signal:\s*(-?\d+)\s*dBm", output)
-            if not signal_match:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-            signal_level = int(signal_match.group(1))
-
-            # Optional: derive link quality heuristically (e.g., map signal strength to 0–70 or 0–100)
-            # Example rough mapping:
-            if signal_level <= -100:
-                link_quality = 0
-            elif signal_level >= -50:
-                link_quality = 70
-            else:
-                link_quality = int((signal_level + 100) * 1.4)  # Maps -100..-50 dBm to 0..70
-
-            return WiFiConnectionQualityInfo(
-                noise_level=0,  # Not available via `iw`
-                signal_level=signal_level,
-                link_quality=link_quality
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-             
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 

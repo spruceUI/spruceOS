@@ -15,8 +15,6 @@ from devices.darkmoss_common import darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.nmcli_wifi_scanner import NmcliWifiScanner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
@@ -257,14 +255,6 @@ class Rgb30(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    def get_new_wifi_scanner(self):
-        return NmcliWifiScanner()
-
-    def get_wpa_supplicant_conf_path(self):
-        # Not used - wifi_connect is overridden - but return a harmless path
-        # rather than None so nothing downstream has to guard for it.
-        return "/tmp/wpa_supplicant.conf"
-
     def get_device_name(self):
         return self.device_name
 
@@ -406,33 +396,6 @@ class Rgb30(DeviceCommon):
                 self.change_volume(5)
             elif(ControllerInput.VOLUME_DOWN == controller_input):
                 self.change_volume(-5)
-
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        # Read RSSI straight from the kernel. Instant and, crucially, no scan:
-        # "nmcli device wifi" periodically triggers a rescan that blocks for
-        # seconds and freezes the whole UI on this device. /proc/net/wireless
-        # column 3 is the live signal level in dBm.
-        try:
-            with open("/proc/net/wireless") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("wlan0:"):
-                        rssi = int(float(line.split()[3].rstrip(".")))
-                        quality = max(0, min(100, 2 * (rssi + 100)))
-                        return WiFiConnectionQualityInfo(
-                            noise_level=0,
-                            signal_level=rssi,
-                            link_quality=quality,
-                        )
-        except Exception as e:
-            PyUiLogger.get_logger().error(
-                f"wifi quality read from /proc/net/wireless failed: {e}"
-            )
-
-        # -200 is what device_common reads as "no signal".
-        return WiFiConnectionQualityInfo(
-            noise_level=0, signal_level=-200, link_quality=0
-        )
 
     def get_app_finder(self):
         return MiyooAppFinder()

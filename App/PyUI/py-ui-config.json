@@ -11,7 +11,6 @@
     "ignoreMenuCombinationPresses": true,
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
-    "wpaSupplicantConfigFileLocation": "/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf",
     "cheevosRemoveCmd":"/mnt/SDCARD/spruce/scripts/raproxyRemoveCached.sh",
     "cheevosCachePath":"/mnt/SDCARD/Saves/pyui-cheevos-cache.json",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
@@ -19,6 +18,7 @@
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
+    "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "aboutEntries" : [

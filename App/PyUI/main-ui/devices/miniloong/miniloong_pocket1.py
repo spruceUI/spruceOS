@@ -15,8 +15,6 @@ from devices.device_common import DeviceCommon
 from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
-from devices.wifi.nmcli_wifi_scanner import NmcliWifiScanner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
@@ -276,34 +274,6 @@ class MiniloongPocket1(DeviceCommon):
 
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
-
-    def get_new_wifi_scanner(self):
-        return NmcliWifiScanner()
-
-    def get_wpa_supplicant_conf_path(self):
-        return "/tmp/wpa_supplicant.conf"
-
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        # /proc/net/wireless, no scan. The RTL8723DS reports its level column
-        # as 100+dBm (54 for -46 dBm), so a positive value is shifted back.
-        try:
-            with open("/proc/net/wireless") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("wlan0:"):
-                        rssi = int(float(line.split()[3].rstrip(".")))
-                        if rssi > 0:
-                            rssi -= 100
-                        quality = max(0, min(100, 2 * (rssi + 100)))
-                        return WiFiConnectionQualityInfo(
-                            noise_level=0,
-                            signal_level=rssi,
-                            link_quality=quality,
-                        )
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"wifi quality read from /proc/net/wireless failed: {e}")
-
-        return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
 
     # ---- bluetooth: not wired ----
 
