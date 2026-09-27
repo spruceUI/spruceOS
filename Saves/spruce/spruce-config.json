@@ -347,6 +347,17 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
                 "selected": "L3"
             },
+            "volumeButtons": {
+                "devices": ["RGB30"],
+                "display": "Volume buttons",
+                "description": "Swap up and down if your rocker is fitted the other way",
+                "options": [
+                    "Standard",
+                    "Swapped"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
+                "selected": "Standard"
+            },
             "fnF1Action": {
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
                 "display": "Left Fn key action",
