@@ -7,7 +7,7 @@
 # LEDs via rgb_led / the RGB LED Settings instead), so on this device shmvar 10 is
 # 0 and ledc.sh always resolves to max_scale 0 (LEDs dark) regardless of switch
 # position. Going through rgb_led_trimui keeps the switch in sync with spruce's
-# own LED state, the LEDmaxScale brightness, and the disableLEDs setting.
+# own LED state, the LEDmaxScale brightness, and the enableLEDs setting.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 

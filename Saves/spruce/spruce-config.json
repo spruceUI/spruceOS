@@ -661,16 +661,16 @@
             }
         },
         "RGB LED Settings": {
-            "disableLEDs": {
-                "display": "Disable RGB LEDs in all contexts",
+            "enableLEDs": {
+                "display": "RGB LEDs",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "applies immediately",
                 "options": [
-                    "True",
-                    "False"
+                    "On",
+                    "Off"
                 ],
-                "selected": "True"
+                "selected": "Off"
             },
             "LEDmaxScale": {
                 "display": "RGB LED brightness",

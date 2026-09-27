@@ -75,8 +75,7 @@ led_color_hex() {
 rgb_led_trimui() {
 
     # early out if disabled
-	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-	[ "$disable" = "True" ] && return 0
+	rgb_leds_enabled || return 0
 
 	# ...and if the switch or an Fn key has turned the LEDs off. That action
 	# writes black directly, which lasts only until something else writes a
@@ -85,7 +84,7 @@ rgb_led_trimui() {
 	# through here, so without this the LEDs came back on the moment you left a
 	# game and stayed on until the switch was cycled.
 	#
-	# Deliberately not the disableLEDs setting itself: that is the user's own
+	# Deliberately not the enableLEDs setting itself: that is the user's own
 	# "off in all contexts" preference, and a physical switch should not
 	# silently rewrite it. /tmp, so it clears on reboot - which matches the
 	# action, since scene.sh only runs on an actual flip and nothing re-applies
@@ -158,8 +157,7 @@ rgb_led_trimui() {
 
 enable_or_disable_rgb_trimui() {
     enable_file="/sys/class/led_anim/enable"
-    disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-    if [ "$disable_rgb" = "True" ]; then
+    if ! rgb_leds_enabled; then
         chmod 777 "$enable_file" 2>/dev/null
         echo 0 > "$enable_file" 2>/dev/null
         chmod 000 "$enable_file" 2>/dev/null

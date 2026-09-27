@@ -110,7 +110,7 @@ miniloong_led_apply() {
 # Zones are ignored: there is one ring.
 rgb_led() {
     has_rgb_leds || return 0
-    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    rgb_leds_enabled || return 0
     flag_check "leds_forced_off" && return 0
 
     _dur="${4:-1000}"
@@ -127,7 +127,7 @@ rgb_led() {
 enable_or_disable_rgb() {
     has_rgb_leds || return 0
     miniloong_led_take
-    if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
+    if ! rgb_leds_enabled; then
         miniloong_led_apply off off 1000
     fi
 }

@@ -338,7 +338,7 @@ xx_rgb_apply() {
 rgb_led() {
     has_rgb_leds || return 0
 
-    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    rgb_leds_enabled || return 0
     flag_check "leds_forced_off" && return 0
 
     _zones="${1:-lr}"
@@ -365,7 +365,7 @@ rgb_led() {
 enable_or_disable_rgb() {
     has_rgb_leds || return 0
 
-    if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
+    if ! rgb_leds_enabled; then
         xx_rgb_already_dark && return 0
         echo "000000 000000 1 1000" > "$XX_RGB_STATE"
         xx_rgb_static 0 000000 000000
@@ -393,7 +393,7 @@ xx_rgb_off() {
 xx_rgb_restore() {
     has_rgb_leds || return 0
     flag_check "leds_forced_off" && return 0
-    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    rgb_leds_enabled || return 0
 
     xx_rgb_load_state
     xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
