@@ -41,6 +41,12 @@ run_gvu() {
 	export GVU_CACERT_PATH="$EMU_DIR/resources/cacert.pem"
 
 	# Miyoo Mini family: display is physically upside-down (spruceOS reports rot=0)
+	# Miniloong: DRM hands GVU the 720x960 portrait mode; its Brick backend
+	# transposes the landscape canvas when told 90 or 270.
+	if [ "$PLATFORM" = "Miniloong" ]; then
+		export GVU_DISPLAY_ROTATION=270
+	fi
+
 	if [ "$PLATFORM" = "MiyooMini" ]; then
 		export GVU_DISPLAY_ROTATION=180
 		# Detect V4 (Mini Flip) by fb0 resolution
