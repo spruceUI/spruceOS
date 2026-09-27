@@ -255,6 +255,10 @@ class PyUiConfig:
         return cls.get("cpuModeCmd",None)
 
     @classmethod
+    def get_wifi_cmd(cls):
+        return cls.get("wifiCmd",None)
+
+    @classmethod
     def get_cache_cheevos_cmd(cls):
         return cls.get("cacheCheevosCmd",None)
 
