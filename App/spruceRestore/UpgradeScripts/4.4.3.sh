@@ -21,6 +21,18 @@ for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce
     fi
 done
 
+# "Disable RGB LEDs" True/False became "RGB LEDs" On/Off: rename the key and
+# map the saved choice so merge_configs.py carries it over.
+_leds='.menuOptions."RGB LED Settings"'
+for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce/backups/spruce-config.json; do
+    [ -f "$_cfg" ] || continue
+    _old="$(jq -r "$_leds.disableLEDs.selected // \"\"" "$_cfg")"
+    [ -n "$_old" ] || continue
+    if [ "$_old" = "True" ]; then _new="Off"; else _new="On"; fi
+    jq "$_leds.enableLEDs = ($_leds.disableLEDs | .selected = \"$_new\") | del($_leds.disableLEDs)" "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
+    log_message "Renamed disableLEDs=$_old to enableLEDs=$_new in $_cfg"
+done
+
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
 if [ $? -eq 0 ]; then

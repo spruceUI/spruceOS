@@ -78,8 +78,7 @@ device_get_switch_position() {
 
 enable_or_disable_rgb() {
     enable_file="/sys/class/led_anim/enable"
-    disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-    if [ "$disable_rgb" = "True" ]; then
+    if ! rgb_leds_enabled; then
         chmod 777 "$enable_file" 2>/dev/null
         echo 0 > "$enable_file" 2>/dev/null
         chmod 000 "$enable_file" 2>/dev/null

@@ -1028,6 +1028,10 @@ map_color_name_to_hex() {
     echo "$hex"
 }
 
+rgb_leds_enabled() {
+    [ "$(get_config_value '.menuOptions."RGB LED Settings".enableLEDs.selected' "Off")" = "On" ]
+}
+
 set_rgb_in_menu() {
     # get relevant variables from spruce-config.json
     color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
