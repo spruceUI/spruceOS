@@ -39,6 +39,10 @@ run_gvu() {
 	export GVU_INPUT_DEV="$EVENT_PATH_READ_INPUTS_SPRUCE"
 	export GVU_PYTHON="$DEVICE_PYTHON3_PATH"
 	export GVU_CACERT_PATH="$EMU_DIR/resources/cacert.pem"
+	for k in A B X Y L1 R1 L2 R2 START SELECT MENU; do
+		eval "v=\$B_$k"
+		case "$v" in "1 "*) export "GVU_KEY_$k=${v#1 }" ;; esac
+	done
 
 	# Miyoo Mini family: display is physically upside-down (spruceOS reports rot=0)
 	# Miniloong: DRM hands GVU the 720x960 portrait mode; its Brick backend
