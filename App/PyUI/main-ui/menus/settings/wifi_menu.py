@@ -51,7 +51,7 @@ class WifiMenu:
                 )
                 Device.get_device().wifi_connect(net.ssid, password)
                 Device.get_device().note_wifi_change()
-            else:
+            elif(password is not None and len(password) == 0):
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
         else:
             Device.get_device().wifi_connect(net.ssid, None)
