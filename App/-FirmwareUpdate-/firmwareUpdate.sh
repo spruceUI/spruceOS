@@ -24,6 +24,9 @@ case "$PLATFORM" in
 		# BaseOS updates itself from a .bosupd file at the root of the card.
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 		;;
+	"RGB30"|"Miniloong")
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
+		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
 		sleep 5

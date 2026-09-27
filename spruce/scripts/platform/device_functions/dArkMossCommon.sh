@@ -198,6 +198,31 @@ device_headphones_connected() {
     are_headphones_plugged_in
 }
 
+  ####################
+#####   FIRMWARE   #####
+  ####################
+
+# OS_VERSION is the release tag when CI cut one, else a build date. Anything
+# that is not three numbers means "do not nag".
+darkmoss_installed_version() {
+    sed -n 's/^OS_VERSION="\{0,1\}[vV]\{0,1\}\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null
+}
+
+check_if_fw_needs_update() {
+    _have="$(darkmoss_installed_version)"
+    if [ -z "$_have" ] || [ -z "$TARGET_DARKMOSS_VERSION" ]; then
+        echo "false"
+        return
+    fi
+    _have_n="$(printf '%s' "$_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+    _want_n="$(printf '%s' "$TARGET_DARKMOSS_VERSION" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+    if [ "$_have_n" -lt "$_want_n" ] 2>/dev/null; then
+        echo "true"
+    else
+        echo "false"
+    fi
+}
+
   ###################
 #####   SLEEP   #####
   ###################
