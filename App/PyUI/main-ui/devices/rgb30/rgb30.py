@@ -332,8 +332,16 @@ class Rgb30(DeviceCommon):
     def _set_brightness_to_config(self):
         pass
 
+    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
+    BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
+
     def _set_lumination_to_config(self):
-        pass
+        level = max(0, min(10, int(self.system_config.backlight)))
+        try:
+            with open("/sys/class/backlight/backlight/brightness", "w") as f:
+                f.write(str(self.BACKLIGHT_TABLE[level]))
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
 
     def _set_contrast_to_config(self):
         pass
