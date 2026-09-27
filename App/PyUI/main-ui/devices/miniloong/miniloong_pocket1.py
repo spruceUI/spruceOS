@@ -10,6 +10,7 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
+from devices.darkmoss_common import darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -255,6 +256,9 @@ class MiniloongPocket1(DeviceCommon):
 
     def sleep(self):
         pass
+
+    def get_fw_version(self):
+        return darkmoss_fw_version() or "Unknown"
 
     def power_off_cmd(self):
         return "systemctl poweroff"

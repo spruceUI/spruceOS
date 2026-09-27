@@ -50,11 +50,17 @@ case $INFO in
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)                                    # RK3566
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # dArkMoss stamps the unit into os-release (setup_spruce_handoff-rk3566.sh).
-            case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
-                *Miniloong*) export PLATFORM="Miniloong" ;;
-                *)           export PLATFORM="RGB30" ;;
-            esac
+            # dArkMoss stamps the spruce platform name into os-release
+            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+            # only HW_DEVICE.
+            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+            if [ -z "$PLATFORM" ]; then
+                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                    *Miniloong*) PLATFORM="Miniloong" ;;
+                    *)           PLATFORM="RGB30" ;;
+                esac
+            fi
+            export PLATFORM
         else
             export PLATFORM="Flip"
         fi
