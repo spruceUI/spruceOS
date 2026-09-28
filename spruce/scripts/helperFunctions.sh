@@ -1504,7 +1504,12 @@ wpa_conf_ensure() {
 # Replace any saved block for SSID $1 with a new one; $2 is the password, empty
 # for an open network. The password only ever goes through printf, a shell
 # builtin, so it never shows up in a process list or the log.
-wpa_add_network() {
+#
+# wpa_conf_save_network only edits the card's conf, which is what makes a
+# password travel with the card. Devices whose own OS runs the radio (dArkMoss)
+# call it alone; the rest go through wpa_add_network, which also points the
+# running supplicant at the new block.
+wpa_conf_save_network() {
     [ -n "$WPA_SUPPLICANT_FILE" ] && [ -n "$1" ] || return 1
     wpa_conf_ensure
     _wpa_tmp="$WPA_SUPPLICANT_FILE.tmp"
@@ -1535,8 +1540,29 @@ wpa_add_network() {
         printf '}\n'
     } >> "$_wpa_tmp"
     mv -f "$_wpa_tmp" "$WPA_SUPPLICANT_FILE" || { rm -f "$_wpa_tmp"; return 1; }
+    return 0
+}
+
+wpa_add_network() {
+    wpa_conf_save_network "$1" "$2" || return 1
     wpa_cli -i wlan0 reconfigure >/dev/null 2>&1
     return 0
+}
+
+# Print the card's saved networks as "ssid<TAB>password" lines, password empty
+# for an open network, quotes stripped. For hosts that keep their own store and
+# need to be told what the card knows.
+wpa_conf_list_networks() {
+    [ -n "$WPA_SUPPLICANT_FILE" ] && [ -f "$WPA_SUPPLICANT_FILE" ] || return 0
+    awk '
+        function unquote(v) { sub(/^"/, "", v); sub(/"$/, "", v); return v }
+        { line = $0; gsub(/^[ \t\r]+|[ \t\r]+$/, "", line) }
+        substr(line, 1, 8) == "network=" { inblock = 1; ssid = ""; psk = ""; next }
+        !inblock { next }
+        substr(line, 1, 5) == "ssid=" { ssid = unquote(substr(line, 6)) }
+        substr(line, 1, 4) == "psk=" { psk = unquote(substr(line, 5)) }
+        line == "}" { inblock = 0; if (ssid != "") printf "%s\t%s\n", ssid, psk }
+    ' "$WPA_SUPPLICANT_FILE"
 }
 
 wpa_forget_all_networks() {
@@ -1544,17 +1570,18 @@ wpa_forget_all_networks() {
 update_config=1"
 
     if command -v nmcli >/dev/null 2>&1 && { device_manages_own_wifi || [ -z "$WPA_SUPPLICANT_FILE" ]; }; then
-        # NetworkManager keeps its own profiles. Match on TYPE: an inactive profile has no DEVICE.
+        # NetworkManager keeps its own profiles. Match on TYPE: an inactive
+        # profile has no DEVICE. The card's conf is cleared below as well, or
+        # the next boot would import every network straight back.
         nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r uuid type; do
             [ "$type" = "802-11-wireless" ] && nmcli connection delete uuid "$uuid" >/dev/null 2>&1
         done
-        return 0
+    elif [ -n "$WPA_SUPPLICANT_FILE" ]; then
+        killall wpa_supplicant 2>/dev/null
+        device_stop_dhcp_client
+        sleep 1
     fi
     [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
-
-    killall wpa_supplicant 2>/dev/null
-    device_stop_dhcp_client
-    sleep 1
 
     printf '%s\n' "$_wpa_header" > "$WPA_SUPPLICANT_FILE"
 

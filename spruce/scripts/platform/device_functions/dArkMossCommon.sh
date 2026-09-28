@@ -301,9 +301,13 @@ device_stop_dhcp_client() {
     return 0
 }
 
-# nmcli's error output echoes the password back, so none of it is kept.
+# nmcli's error output echoes the password back, so none of it is kept. The
+# network is also saved to the card's wpa_supplicant.conf, where every other
+# spruce device keeps it, so the password travels with the card and a fresh
+# dArkMoss flash finds it again at boot (darkmoss_wifi_up).
 device_wifi_connect() {
     command -v nmcli >/dev/null 2>&1 || return 1
+    wpa_conf_save_network "$1" "$2"
     # NM 1.52 refuses "device wifi connect" when a profile for the SSID already exists
     nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r _uuid _type; do
         [ "$_type" = "802-11-wireless" ] || continue
@@ -750,24 +754,43 @@ darkmoss_ssh_up() {
     fi
 }
 
-# Bring-up WiFi through NetworkManager from Saves/spruce/darkmoss_wifi.conf
-# (SSID= and PSK= lines), which never enters the repo. The normal settings
-# flow handles WiFi once the menu is reachable; this is for when it is not.
-darkmoss_wifi_up() {
-    _conf="/mnt/SDCARD/Saves/spruce/darkmoss_wifi.conf"
+# Give NetworkManager every network the card knows. NetworkManager's own
+# profiles live on TF1, so a reflash or a new dArkMoss device starts with none;
+# the card's wpa_supplicant.conf is where the rest of the fleet keeps them.
+# Profiles are named after the SSID, as "nmcli device wifi connect" names them.
+# The password goes to nmcli as an argument, never through the log.
+darkmoss_import_card_networks() {
+    command -v nmcli >/dev/null 2>&1 || return 0
+    _known="$(nmcli -t -f NAME connection show 2>/dev/null | sed 's/\\:/:/g')"
+    wpa_conf_list_networks | while IFS="$(printf '\t')" read -r _ssid _psk; do
+        [ -n "$_ssid" ] || continue
+        printf '%s\n' "$_known" | grep -qxF "$_ssid" && continue
+        if [ -n "$_psk" ]; then
+            nmcli connection add type wifi ifname wlan0 con-name "$_ssid" ssid "$_ssid" \
+                wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$_psk" >/dev/null 2>&1
+        else
+            nmcli connection add type wifi ifname wlan0 con-name "$_ssid" ssid "$_ssid" >/dev/null 2>&1
+        fi && log_message "$PLATFORM: added network $_ssid from the card"
+    done
+}
 
-    [ -f "$_conf" ] || return 0
-    wifi_setting_wanted || return 0
+# At boot: hand the card's networks to NetworkManager, then, if WiFi is wanted
+# and not up, let it join whichever is in range and note the address.
+darkmoss_wifi_up() {
     command -v nmcli >/dev/null 2>&1 || return 0
 
-    _ssid="$(sed -n 's/^SSID=//p' "$_conf" | head -1)"
-    _psk="$(sed -n 's/^PSK=//p' "$_conf" | head -1)"
-
-    if [ -z "$_ssid" ] || [ -z "$_psk" ]; then
-        log_message "$PLATFORM: wifi config present but incomplete"
-        return 0
+    # The one-network bootstrap file this used to read; fold it into the card
+    # conf once so nothing is lost, then leave it alone.
+    _old="/mnt/SDCARD/Saves/spruce/darkmoss_wifi.conf"
+    if [ -f "$_old" ]; then
+        _ssid="$(sed -n 's/^SSID=//p' "$_old" | head -1)"
+        _psk="$(sed -n 's/^PSK=//p' "$_old" | head -1)"
+        [ -n "$_ssid" ] && wpa_conf_save_network "$_ssid" "$_psk" && mv -f "$_old" "$_old.imported"
     fi
 
+    darkmoss_import_card_networks
+
+    wifi_setting_wanted || return 0
     if nmcli -t -f STATE general 2>/dev/null | grep -q "^connected"; then
         log_message "$PLATFORM: already connected"
         return 0
@@ -775,37 +798,20 @@ darkmoss_wifi_up() {
 
     (
         nmcli radio wifi on >/dev/null 2>&1
-
-        _try=0
-        while [ "$_try" -lt 20 ]; do
-            nmcli device wifi rescan >/dev/null 2>&1
-
-            if nmcli connection up id "$_ssid" >/dev/null 2>&1 ||
-               nmcli device wifi connect "$_ssid" password "$_psk" >/dev/null 2>&1; then
-                _addr=""
-                _wait=0
-                while [ "$_wait" -lt 20 ]; do
-                    _addr="$(ip -4 -o addr show scope global 2>/dev/null |
-                        awk '{print $4}' | cut -d/ -f1 | head -1)"
-                    [ -n "$_addr" ] && break
-                    _wait=$((_wait + 1))
-                    sleep 1
-                done
-
-                if [ -n "$_addr" ]; then
-                    darkmoss_ssh_up
-                    log_message "$PLATFORM: wifi up at $_addr - ssh spruce@$_addr"
-                    printf '%s\n' "$_addr" > /mnt/SDCARD/Saves/spruce/darkmoss_ip.txt 2>/dev/null
-                else
-                    log_message "$PLATFORM: wifi associated but no DHCP lease after 20s"
-                fi
+        _wait=0
+        while [ "$_wait" -lt 60 ]; do
+            _addr="$(ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' | cut -d/ -f1 | head -1)"
+            if [ -n "$_addr" ]; then
+                darkmoss_ssh_up
+                log_message "$PLATFORM: wifi up at $_addr - ssh spruce@$_addr"
+                printf '%s\n' "$_addr" > /mnt/SDCARD/Saves/spruce/darkmoss_ip.txt 2>/dev/null
                 exit 0
             fi
-
-            _try=$((_try + 1))
-            sleep 3
+            # Every 15s, nudge a rescan so a network that came into range gets joined.
+            [ $((_wait % 15)) -eq 14 ] && nmcli device wifi rescan >/dev/null 2>&1
+            _wait=$((_wait + 1))
+            sleep 1
         done
-
         log_message "$PLATFORM: wifi did not connect after 60s"
     ) &
 }
