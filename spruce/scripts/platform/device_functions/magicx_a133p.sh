@@ -286,7 +286,8 @@ device_low_battery_shutdown_ok() {
 #
 # Real suspend-to-RAM where the board has been proven to resume (MAGICX_REAL_SLEEP=1 in its
 # cfg): the Zero 28 on the SDK's firmware and the Zero 40 on MagicX's both came back from
-# `mem` on the RTC alarm (2026-09-24); the XU20 resets at the wake and stays on faux sleep.
+# `mem` on the RTC alarm (2026-09-24). The XU20 too, with its devices suspending one at a
+# time (MAGICX_PM_ASYNC=0 in its cfg): async suspend never finished there (2026-09-28).
 device_uses_pseudo_sleep() {
     if [ "$MAGICX_REAL_SLEEP" = "1" ]; then echo "false"; else echo "true"; fi
 }
@@ -305,6 +306,7 @@ magicx_real_enter_sleep() {
     if usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan; then
         echo xradio_wlan > "$MAGICX_SLEEP_UNLOADED"
     fi
+    [ -n "$MAGICX_PM_ASYNC" ] && echo "$MAGICX_PM_ASYNC" > /sys/power/pm_async 2>/dev/null
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     trigger_device_sleep
