@@ -202,22 +202,19 @@ device_headphones_connected() {
 #####   FIRMWARE   #####
   ####################
 
-# OS_VERSION is the release tag when CI cut one, else a build date. Anything
-# that is not three numbers means "do not nag", except no OS_VERSION at all:
-# images from before the stamp are older than every tagged release.
+# OS_VERSION is the release tag when CI cut one, else a build date. Only a
+# tagged release is a version worth comparing; no stamp at all (images before
+# it existed) or a date (an untagged build, or v1.0.7 whose build-all dropped
+# the tag) is older than every tagged release and gets the update offered.
 darkmoss_installed_version() {
     sed -n 's/^OS_VERSION="\{0,1\}[vV]\{0,1\}\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null
 }
 
 check_if_fw_needs_update() {
     [ -n "$TARGET_DARKMOSS_VERSION" ] || { echo "false"; return; }
-    if ! grep -q '^OS_VERSION=' /etc/os-release 2>/dev/null; then
-        echo "true"
-        return
-    fi
     _have="$(darkmoss_installed_version)"
     if [ -z "$_have" ]; then
-        echo "false"
+        echo "true"
         return
     fi
     _have_n="$(printf '%s' "$_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
