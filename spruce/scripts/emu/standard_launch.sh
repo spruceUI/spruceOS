@@ -33,7 +33,6 @@ export ROM_FILE="$(readlink -f "$ROM_FILE")"
 
 . /mnt/SDCARD/spruce/scripts/emu/lib/led_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/network_functions.sh
-. /mnt/SDCARD/spruce/scripts/emu/lib/gtt_functions.sh
 . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
 
  ########################
@@ -46,7 +45,6 @@ if [ -z "$CORE" ] || [ "$CORE" = "null" ]; then	use_default_emulator ; fi
 get_core_override
 get_mode_override
 set_cpu_mode
-record_session_start_time
 handle_network_services
 led_effect &
 flag_add 'emulator_launched' --tmp
@@ -221,9 +219,6 @@ case $EMU_NAME in
 esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh) || true
-record_session_end_time
-calculate_current_session_duration
-update_gtt
 sync
 reconcile_cheevos_after_game
 
