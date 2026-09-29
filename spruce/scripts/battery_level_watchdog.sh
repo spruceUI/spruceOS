@@ -78,16 +78,16 @@ hard_shutdown() {
         CONFIRM=$(device_get_battery_percent)
         case "$CONFIRM" in
             ''|*[!0-9]*)
-                log_message "low_power_warning: unreadable battery confirm sample '$CONFIRM'; skipping forced shutdown"
+                log_message "battery_level_watchdog: unreadable battery confirm sample '$CONFIRM'; skipping forced shutdown"
                 return 0
                 ;;
         esac
         if [ "$CONFIRM" -gt 1 ]; then
-            log_message "low_power_warning: battery read $CAPACITY%% not confirmed (re-read $CONFIRM%%); skipping forced shutdown"
+            log_message "battery_level_watchdog: battery read $CAPACITY%% not confirmed (re-read $CONFIRM%%); skipping forced shutdown"
             return 0
         fi
         if ! device_low_battery_shutdown_ok; then
-            log_message "low_power_warning: device declined the forced shutdown at $CAPACITY%%"
+            log_message "battery_level_watchdog: device declined the forced shutdown at $CAPACITY%%"
             return 0
         fi
         flag_add "forced_shutdown" --tmp

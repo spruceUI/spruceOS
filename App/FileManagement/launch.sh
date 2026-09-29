@@ -4,7 +4,7 @@
 
 # Disable idle/shutdown timer while file manager is open
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 export HOME="$(dirname "$0")"
 cd "$HOME"

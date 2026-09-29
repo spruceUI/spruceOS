@@ -93,7 +93,7 @@ log_message "----------Starting Restore script----------"
 
 # Disable idle/shutdown timer during restore
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
@@ -191,7 +191,7 @@ log_message "Restoring theme customizations"
 restore_theme_configs
 
 log_message "Applying idlemon setting"
-sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
+sh /mnt/SDCARD/spruce/scripts/idle_watchdog.sh
 
 log_message "----------Restore and Upgrade completed----------"
 

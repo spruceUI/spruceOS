@@ -65,7 +65,7 @@ unmount_hall_overrides() {
 # polling the lid keeps seeing it open while music plays. On the XX line that
 # never takes effect: the app logs its override source as "/hall_override/hallkey",
 # having resolved the directory prefix to nothing, so the mount source does not
-# exist. spruce's lid_watchdog_v2.sh then reads the real sensor and suspends
+# exist. spruce's lid_watchdog.sh then reads the real sensor and suspends
 # mid-song.
 #
 # Do it here instead, for the whole session. Killing the watchdog is not an

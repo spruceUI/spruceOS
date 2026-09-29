@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-log_message "power_button_watchdog_v2.sh: Started up."
+log_message "power_button_watchdog.sh: Started up."
 
 LAST_POWER_DOWN=0
 power_hold_pid=""
@@ -72,7 +72,7 @@ power_key_down () {
             sleep "$power_hold_time"
             # Check if the powerbtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
             if [ -e /tmp/powerbtn ] && [ ! -e /tmp/powerbtn_cancelled ]; then
-                log_message "power_button_watchdog_v2.sh: Powering off due to power button hold."
+                log_message "power_button_watchdog.sh: Powering off due to power button hold."
                 vibrate &
                 rm -f /tmp/powerbtn
                 rm -f /tmp/powerbtn_cancelled
@@ -90,10 +90,10 @@ power_key_down () {
 }
 
 while true; do
-    log_message "power_button_watchdog_v2.sh: Monitoring power button events on $EVENT_PATH_POWER"
+    log_message "power_button_watchdog.sh: Monitoring power button events on $EVENT_PATH_POWER"
     rm -f "$POWER_EVENT_PIPE"
     if ! mkfifo "$POWER_EVENT_PIPE"; then
-        log_message "power_button_watchdog_v2.sh: Failed to create $POWER_EVENT_PIPE"
+        log_message "power_button_watchdog.sh: Failed to create $POWER_EVENT_PIPE"
         sleep 1
         continue
     fi
@@ -106,7 +106,7 @@ while true; do
         case $line in
             # Power key down
             *"key $B_POWER 1"*)
-                log_message "power_button_watchdog_v2.sh: power_key_down"
+                log_message "power_button_watchdog.sh: power_key_down"
                 if [ $((now - LAST_POWER_DOWN)) -ge 1 ]; then
                     power_key_down
                     LAST_POWER_DOWN=$(date +%s)
@@ -117,7 +117,7 @@ while true; do
 
             # Power key up
             *"key $B_POWER 0"*)
-                    log_message "power_button_watchdog_v2.sh: power_key_up"
+                    log_message "power_button_watchdog.sh: power_key_up"
                     power_key_up
                     LAST_POWER_DOWN=$(date +%s)
                 ;;
@@ -128,6 +128,6 @@ while true; do
     wait "$getevent_pid" 2>/dev/null
     getevent_pid=""
     rm -f "$POWER_EVENT_PIPE"
-    log_message "power_button_watchdog_v2.sh: getevent pipe exited, restarting..."
+    log_message "power_button_watchdog.sh: getevent pipe exited, restarting..."
     sleep 0.2
 done

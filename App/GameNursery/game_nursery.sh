@@ -4,7 +4,7 @@
 
 # Disable idle/shutdown timer during game downloads
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 ##### CONSTANTS #####
 

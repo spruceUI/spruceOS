@@ -407,10 +407,10 @@ launch_startup_watchdogs(){
     for _wd in \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
-        /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
-        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
-        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
+        /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/lid_watchdog.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -418,15 +418,15 @@ launch_startup_watchdogs(){
 
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh &
     # The override replaces launch_common_startup_watchdogs_v2 wholesale, and
-    # that launcher is low_power_warning.sh's only start site: without this
+    # that launcher is battery_level_watchdog.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
-    /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
 
     if has_lid >/dev/null; then
-        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
     fi
 }
 

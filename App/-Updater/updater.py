@@ -1750,7 +1750,7 @@ def main():
 
     killall(
         "idlemon",
-        "idlemon_mm.sh",
+        "idle_watchdog.sh",
         signal="-TERM"
     )
 

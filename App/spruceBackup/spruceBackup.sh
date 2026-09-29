@@ -46,7 +46,7 @@ log_message "----------Running Backup script----------"
 
 # Disable idle/shutdown timer during backup
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
