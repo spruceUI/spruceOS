@@ -780,6 +780,18 @@ brightness_up() {
     set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
 }
 
+turn_off_screen() {
+    "$DEVICE_PYTHON3_PATH" -c "
+import os, fcntl, struct
+
+fd = os.open('/dev/disp', os.O_RDWR)
+
+try:
+    fcntl.ioctl(fd, 0x102, struct.pack('QQQQ', 0, 0, 0, 0))
+finally:
+    os.close(fd)
+"
+}
 
 send_menu_button_to_retroarch() {
     # Every RetroArch binary this device can launch has to be listed here or the

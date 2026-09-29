@@ -20,3 +20,7 @@ device_init() {
 set_event_arg_for_idlemon() {
     log_message "TODO event arg for miyoo mini?" -v
 }
+
+turn_off_screen() {
+    log_message "turn_off_screen() not implemented for $PLATFORM ." -v
+}

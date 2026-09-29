@@ -41,4 +41,6 @@ get_ssh_service_name() {
     echo "dropbearmulti"
 }
 
-
+turn_off_screen() {
+    log_message "turn_off_screen() not implemented for $PLATFORM ." -v
+}
