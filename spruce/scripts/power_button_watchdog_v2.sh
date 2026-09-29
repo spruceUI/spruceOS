@@ -25,6 +25,10 @@ cleanup_power_watchdog () {
     rm -f /tmp/powerbtn /tmp/powerbtn_cancelled "$POWER_EVENT_PIPE"
 }
 
+get_pb_hold_time() {
+    get_config_value '.menuOptions."Button Settings".powerButtonHoldTime.selected' "2"
+}
+
 trap 'cleanup_power_watchdog; rm -f /tmp/powerbtn /tmp/powerbtn_cancelled' EXIT
 trap 'cleanup_power_watchdog; rm -f /tmp/powerbtn /tmp/powerbtn_cancelled; exit 0' INT TERM
 
@@ -64,7 +68,7 @@ power_key_down () {
 
         # Launch background timer that waits required seconds, then triggers the action
         (
-            power_hold_time=2
+            power_hold_time="$(get_pb_hold_time)"
             sleep "$power_hold_time"
             # Check if the powerbtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
             if [ -e /tmp/powerbtn ] && [ ! -e /tmp/powerbtn_cancelled ]; then
@@ -125,5 +129,5 @@ while true; do
     getevent_pid=""
     rm -f "$POWER_EVENT_PIPE"
     log_message "power_button_watchdog_v2.sh: getevent pipe exited, restarting..."
-    sleep 1
+    sleep 0.2
 done

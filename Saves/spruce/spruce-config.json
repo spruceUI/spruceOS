@@ -322,6 +322,19 @@
                 ],
                 "selected": "Both"
             },
+            "powerButtonHoldTime": {
+                "display": "Power button hold time",
+                "description": "for quick shutdown (seconds)",
+                "options": [
+                    "0.2",
+                    "0.5",
+                    "1",
+                    "1.5",
+                    "2",
+                    "3"
+                ],
+                "selected": "1"
+            },
             "homeAction": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
                 "display": "Home button action",
