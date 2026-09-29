@@ -44,7 +44,7 @@ class TrimUISmartPro(TrimUIDevice):
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/trim-ui-smart-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
             from controller.controller import Controller
-            self.volume_key_watcher = KeyWatcher("/dev/input/event3")
+            self.volume_key_watcher = KeyWatcher(TrimUIDevice.pad_event_path())
             Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
             volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
             volume_key_polling_thread.start()
@@ -111,7 +111,7 @@ class TrimUISmartPro(TrimUIDevice):
         return FfmpegImageUtils()
 
     def get_controller_interface(self):
-        return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
+        return KeyWatcherController(event_path=TrimUIDevice.pad_event_path(), mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
 
     def supports_analog_calibration(self):
         return True

@@ -24,6 +24,31 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class TrimUIDevice(DeviceCommon):
+
+    @staticmethod
+    def pad_event_path(default="/dev/input/event3"):
+        """The controller's input node, found by name rather than assumed.
+
+        The pad is the virtual "TRIMUI Player1" device that trimui_inputd
+        creates after boot, so its number is not fixed: a USB device with a HID
+        interface (many USB DACs have one for inline buttons) that is plugged in
+        at boot registers first and takes event3, and the pad lands on event4.
+        Reading event3 then reads the DAC, and no button works.
+        """
+        try:
+            with open("/proc/bus/input/devices") as f:
+                blocks = f.read().split("\n\n")
+        except OSError:
+            return default
+        for block in blocks:
+            if 'N: Name="TRIMUI Player1"' not in block:
+                continue
+            for line in block.splitlines():
+                if line.startswith("H: Handlers="):
+                    for handler in line.split("=", 1)[1].split():
+                        if handler.startswith("event"):
+                            return "/dev/input/" + handler
+        return default
     
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
