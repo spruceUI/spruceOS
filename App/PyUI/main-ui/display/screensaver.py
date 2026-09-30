@@ -518,11 +518,10 @@ class ScreenSaver:
 
         elif wtype == "date":
             now = datetime.datetime.now()
-            # Localized date data is optional;
+            # weekdays and months are used to translate the date in different languages, date_format helps format the date in any configuration. 
             weekdays = Language.get("dateWeekdays")
             months = Language.get("dateMonths")
             date_format = Language.get("screensaverDateFormat")
-            # If translation is missing, use datetime.now()
             if weekdays and months and date_format and len(weekdays) == 7 and len(months) == 12:
                 text = date_format.format(
                     weekday=weekdays[now.weekday()],
