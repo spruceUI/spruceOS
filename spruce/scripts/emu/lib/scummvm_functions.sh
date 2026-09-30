@@ -62,7 +62,7 @@ _set_scummvm_platform() {
 	esac
 
 	# Copy default config if user config doesn't exist yet (for all platforms)
-	for target in a30 anbernic brick flip mini pixel2 tsp tsps; do
+	for target in a30 anbernic brick brickpro flip mini pixel2 tsp tsps; do
 		T_PATH="/mnt/SDCARD/Saves/.config/scummvm-$target/scummvm.ini"
 		S_PATH="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$target/scummvm.ini"
 
@@ -200,7 +200,7 @@ sync_game_id() {
 	
 	local NEW_GAME_DATA=$(awk 'BEGIN {RS="["; FS="\n"} NR>1 { if ($0 ~ /gameid=/ && $0 ~ /path=/) printf "[%s", $0 }' "$SCUMMVM_CONFIG")
 	
-	for target in a30 anbernic brick flip mini pixel2 tsp tsps; do
+	for target in a30 anbernic brick brickpro flip mini pixel2 tsp tsps; do
 		local T_INI="/mnt/SDCARD/Saves/.config/scummvm-$target/scummvm.ini"
 		
 		if [ -f "$T_INI" ] && [ "$T_INI" != "$SCUMMVM_CONFIG" ]; then
