@@ -44,6 +44,15 @@ sed -i \
     -e "s|info.setdefault('name', 'Unknown')|info['name'] = 'spruce' if Path('/mnt/SDCARD/spruce').is_dir() else info.get('name', 'Unknown')|" \
     "$PM_DIR/pylibs/harbourmaster/hardware.py"
 
+# hardware.py has no Miniloong Pocket 1; without these it reports "default".
+if ! grep -q 'miniloong-pocket1' "$PM_DIR/pylibs/harbourmaster/hardware.py"; then
+    sed -i \
+        -e "/^        ('powkiddy rgb30',/a\        ('miniloong pocket*',  'miniloong-pocket1')," \
+        -e '/^    "Powkiddy RGB30":/a\    "MINILOONG Pocket1": {"device": "miniloong-pocket1", "manufacturer": "Miniloong", "cfw": ["dArkMoss"]},' \
+        -e '/^    "rgb30":  /a\    "miniloong-pocket1": {"resolution": ( 960,  720), "analogsticks": 1, "cpu": "rk3566", "capabilities": ["power"], "ram": 1024},' \
+        "$PM_DIR/pylibs/harbourmaster/hardware.py"
+fi
+
 # Every device hands pugwash a positional pad, so it needs the same A/B
 # correction as the other platforms to land on spruce's Nintendo labels.
 sed -i \

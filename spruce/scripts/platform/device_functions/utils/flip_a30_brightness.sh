@@ -93,3 +93,8 @@ brightness_up() {
 
     $SETSHAREDMEM_PATH "$VOLUME_LV" "$BRIGHTNESS_LV" "$CONTRAST_LV"
 }
+
+
+turn_off_screen() {
+    echo 0 > "$DEVICE_BRIGHTNESS_PATH"
+}

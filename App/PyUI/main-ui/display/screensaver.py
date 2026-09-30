@@ -522,7 +522,6 @@ class ScreenSaver:
             weekdays = Language.get("dateWeekdays")
             months = Language.get("dateMonths")
             date_format = Language.get("screensaverDateFormat")
-            # only localize the date if a translation is available
             if weekdays and months and date_format and len(weekdays) == 7 and len(months) == 12:
                 text = date_format.format(
                     weekday=weekdays[now.weekday()],

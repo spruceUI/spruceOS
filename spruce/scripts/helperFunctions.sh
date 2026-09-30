@@ -50,21 +50,17 @@ case $INFO in
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)                                    # RK3566
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # The kernel names the board in the device tree.
-            DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
-            case "$DT_MODEL" in
-                *RGB30*) export PLATFORM="RGB30" ;;
-                *) export PLATFORM="RGB30" ;;
-            esac
-        elif [ -x /loong/loong_daemon ]; then
-            # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
-            # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
-            # cannot tell them apart. The vendor's stock launcher daemon is the
-            # reliable discriminator: it is present only on the loong firmware
-            # and Spruce is about to replace its boot path anyway. The device
-            # tree model string ("MIYOO RK3566 355 V10 Board" on the Flip) can
-            # corroborate once captured on a board, but the daemon is the key.
-            export PLATFORM="Miniloong"
+            # dArkMoss stamps the spruce platform name into os-release
+            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+            # only HW_DEVICE.
+            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+            if [ -z "$PLATFORM" ]; then
+                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                    *Miniloong*) PLATFORM="Miniloong" ;;
+                    *)           PLATFORM="RGB30" ;;
+                esac
+            fi
+            export PLATFORM
         else
             export PLATFORM="Flip"
         fi
@@ -1032,6 +1028,10 @@ map_color_name_to_hex() {
     echo "$hex"
 }
 
+rgb_leds_enabled() {
+    [ "$(get_config_value '.menuOptions."RGB LED Settings".enableLEDs.selected' "Off")" = "On" ]
+}
+
 set_rgb_in_menu() {
     # get relevant variables from spruce-config.json
     color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
@@ -1041,7 +1041,7 @@ set_rgb_in_menu() {
     # map color names to hex values
     color_hex="$(map_color_name_to_hex "$color_name")"
 
-    rgb_led "lrm12" "$effect" "$color_hex" "$duration" "-1"
+    rgb_led "lrm12b" "$effect" "$color_hex" "$duration" "-1"
 
 }
 
@@ -1213,16 +1213,6 @@ export_sdl_gamecontroller_map() {
     esac
 
     export SDL_GAMECONTROLLERCONFIG
-}
-
-
-# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
-# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
-_xx_dpad_swap() {
-	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
-	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
-	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
-	echo "$1" > "$XX_DPAD_SWAP"
 }
 
 ##### WIFI HANDLING #####
@@ -1514,7 +1504,12 @@ wpa_conf_ensure() {
 # Replace any saved block for SSID $1 with a new one; $2 is the password, empty
 # for an open network. The password only ever goes through printf, a shell
 # builtin, so it never shows up in a process list or the log.
-wpa_add_network() {
+#
+# wpa_conf_save_network only edits the card's conf, which is what makes a
+# password travel with the card. Devices whose own OS runs the radio (dArkMoss)
+# call it alone; the rest go through wpa_add_network, which also points the
+# running supplicant at the new block.
+wpa_conf_save_network() {
     [ -n "$WPA_SUPPLICANT_FILE" ] && [ -n "$1" ] || return 1
     wpa_conf_ensure
     _wpa_tmp="$WPA_SUPPLICANT_FILE.tmp"
@@ -1545,8 +1540,29 @@ wpa_add_network() {
         printf '}\n'
     } >> "$_wpa_tmp"
     mv -f "$_wpa_tmp" "$WPA_SUPPLICANT_FILE" || { rm -f "$_wpa_tmp"; return 1; }
+    return 0
+}
+
+wpa_add_network() {
+    wpa_conf_save_network "$1" "$2" || return 1
     wpa_cli -i wlan0 reconfigure >/dev/null 2>&1
     return 0
+}
+
+# Print the card's saved networks as "ssid<TAB>password" lines, password empty
+# for an open network, quotes stripped. For hosts that keep their own store and
+# need to be told what the card knows.
+wpa_conf_list_networks() {
+    [ -n "$WPA_SUPPLICANT_FILE" ] && [ -f "$WPA_SUPPLICANT_FILE" ] || return 0
+    awk '
+        function unquote(v) { sub(/^"/, "", v); sub(/"$/, "", v); return v }
+        { line = $0; gsub(/^[ \t\r]+|[ \t\r]+$/, "", line) }
+        substr(line, 1, 8) == "network=" { inblock = 1; ssid = ""; psk = ""; next }
+        !inblock { next }
+        substr(line, 1, 5) == "ssid=" { ssid = unquote(substr(line, 6)) }
+        substr(line, 1, 4) == "psk=" { psk = unquote(substr(line, 5)) }
+        line == "}" { inblock = 0; if (ssid != "") printf "%s\t%s\n", ssid, psk }
+    ' "$WPA_SUPPLICANT_FILE"
 }
 
 wpa_forget_all_networks() {
@@ -1554,17 +1570,18 @@ wpa_forget_all_networks() {
 update_config=1"
 
     if command -v nmcli >/dev/null 2>&1 && { device_manages_own_wifi || [ -z "$WPA_SUPPLICANT_FILE" ]; }; then
-        # NetworkManager keeps its own profiles. Match on TYPE: an inactive profile has no DEVICE.
+        # NetworkManager keeps its own profiles. Match on TYPE: an inactive
+        # profile has no DEVICE. The card's conf is cleared below as well, or
+        # the next boot would import every network straight back.
         nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r uuid type; do
             [ "$type" = "802-11-wireless" ] && nmcli connection delete uuid "$uuid" >/dev/null 2>&1
         done
-        return 0
+    elif [ -n "$WPA_SUPPLICANT_FILE" ]; then
+        killall wpa_supplicant 2>/dev/null
+        device_stop_dhcp_client
+        sleep 1
     fi
     [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
-
-    killall wpa_supplicant 2>/dev/null
-    device_stop_dhcp_client
-    sleep 1
 
     printf '%s\n' "$_wpa_header" > "$WPA_SUPPLICANT_FILE"
 

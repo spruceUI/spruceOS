@@ -72,7 +72,7 @@ prepare_ra_config() {
 				rm -f "$TMP_CFG"
 			fi
 			;;
-		"Softcore")
+		"Casual"|"Softcore")
 			TMP_CFG="$(mktemp)"
 			if sed \
 				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
@@ -100,13 +100,11 @@ prepare_ra_config() {
 			;;
 	esac
 
-	# The proxy cannot validate a hardcore run. Forced per launch rather than by
-	# rewriting modeToggle, so the user's chosen mode survives turning the proxy
-	# off again - and because PyUI writes spruce-config.json wholesale from a
-	# copy it holds in memory, so an outside edit is lost on its next save.
+	# The proxy cannot validate a hardcore run. Enabling it already drops the
+	# mode to Casual (networkServiceToggle.sh); this covers Hardcore chosen after.
 	if [ "$rac_mode" = "Hardcore" ] &&
 		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
-		log_message "Offline proxy on; softcore for this launch"
+		log_message "Offline proxy on; casual for this launch"
 		TMP_CFG="$(mktemp)"
 		if sed -e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
 			mv "$TMP_CFG" "$PLATFORM_CFG"
@@ -487,7 +485,7 @@ backup_rac_creds_to_spruce_cfg() {
 	# if spruce setting for RAC mode is auto or disabled, do nothing.
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	case "$rac_mode" in
-		"Softcore"|"Hardcore") ;;
+		"Casual"|"Softcore"|"Hardcore") ;;
 		*) return ;;
 	esac
 

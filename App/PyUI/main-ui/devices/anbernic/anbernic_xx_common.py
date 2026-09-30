@@ -15,8 +15,6 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
-from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
@@ -488,105 +486,5 @@ class AnbernicXXCommon(DeviceCommon):
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
-    @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        if(not self.is_wifi_enabled()):
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-        # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
-        # /proc/net/wireless - the two sources every other device uses - so this
-        # threw "[Errno 2] No such file or directory: 'iw'" on every poll and
-        # returned zeroes, meaning the signal indicator has never worked on any
-        # XX device. wpa_supplicant is already running and wpa_cli is already a
-        # dependency of the scanner, so signal_poll costs nothing new. It reports:
-        #     RSSI=-43
-        #     LINKSPEED=434
-        #     NOISE=9999
-        #     FREQUENCY=5220
-        # NOISE is 9999 when the driver does not report it, which is the case
-        # here, so it is treated as unavailable rather than passed through.
-        try:
-            result = ProcessRunner.run(
-                ["wpa_cli", "-i", "wlan0", "signal_poll"],
-                timeout=3,
-                print=False,
-            )
-            output = result.stdout or ""
-
-            if result.returncode != 0 or "FAIL" in output:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-            signal_level = 0
-            noise_level = 0
-            have_signal = False
-            for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("RSSI="):
-                    try:
-                        signal_level = int(line.split("=", 1)[1])
-                        have_signal = True
-                    except ValueError:
-                        pass
-                elif line.startswith("NOISE="):
-                    try:
-                        noise = int(line.split("=", 1)[1])
-                    except ValueError:
-                        noise = 9999
-                    # 9999 is wpa_supplicant's "not reported" sentinel.
-                    if noise != 9999:
-                        noise_level = noise
-
-            # No usable RSSI means unknown, not excellent. Falling through with
-            # signal_level still 0 would map to the top of the scale below, so a
-            # reading we could not parse would show as a full-strength signal.
-            if not have_signal:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-            # Same dBm -> 0..70 mapping the other devices use, so the status bar
-            # thresholds behave identically across the fleet.
-            if signal_level <= -100:
-                link_quality = 0
-            elif signal_level >= -50:
-                link_quality = 70
-            else:
-                link_quality = int((signal_level + 100) * 1.4)
-
-            return WiFiConnectionQualityInfo(
-                noise_level=noise_level,
-                signal_level=signal_level,
-                link_quality=link_quality
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
-    def _get_ip_addr_text(self):
-        import socket
-        import fcntl
-        import struct
-
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            iface = b"wlan0"  # interface name must be bytes
-            ip = fcntl.ioctl(
-                sock.fileno(),
-                0x8915,  # SIOCGIFADDR
-                struct.pack('256s', iface[:15])
-            )[20:24]
-            return socket.inet_ntoa(ip)
-        except OSError:
-            # No address yet: "Connecting" if a network is saved, otherwise
-            # "No network selected" so the fix (open the list) is obvious.
-            return self.wifi_pending_text()
-        except Exception:
-            return "Error"
-        
-    def get_ip_addr_text(self):
-        if not self.is_wifi_enabled():
-            return "Off"
-        return self._get_ip_addr_text()
-             
     def uses_deinit_v2(self):
         return True

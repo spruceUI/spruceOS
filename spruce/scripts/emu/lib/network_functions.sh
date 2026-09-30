@@ -68,7 +68,7 @@ handle_network_services() {
 	# Manual leaves RetroArch's own per-platform cfg in charge
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	case "$rac_mode" in
-		Softcore|Hardcore) cheevos_wanted=true ;;
+		Casual|Softcore|Hardcore) cheevos_wanted=true ;;
 		Disabled)          cheevos_wanted=false ;;
 		*)
 			cheevos_wanted=false

@@ -46,14 +46,14 @@ log_message "----------Running Backup script----------"
 
 # Disable idle/shutdown timer during backup
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Backing up your spruce configs and files! Please wait.........." 75
 
 # twinkle them lights
-rgb_led lrm12 breathe FFFF00 2100 "-1" mmc0
+rgb_led lrm12b breathe FFFF00 2100 "-1" mmc0
 
 # Create Saves/spruce directory and 'backups' subdirectory if they don't exist
 mkdir -p "$BACKUP_DIR/backups"

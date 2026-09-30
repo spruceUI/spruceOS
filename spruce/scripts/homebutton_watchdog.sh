@@ -122,8 +122,13 @@ getevent -pid $$ $HOMEBTN_EVENTS | while read line; do
                 home_key_up
             ;;
 
+        *"key $B_SELECT 1"*)
+            [ -e /tmp/menubtn ] && swap_dpad_analog_toggle
+            cancel_menu_hold
+            resume_drastic
+            ;;
+
         *"key $B_START 1"*  | \
-        *"key $B_SELECT 1"* | \
         *"key $B_R1"*      | \
         *"key $B_R2"*      | \
         *"key $B_L1"*      | \

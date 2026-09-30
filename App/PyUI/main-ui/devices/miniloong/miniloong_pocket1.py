@@ -1,26 +1,24 @@
-import fcntl
 import os
 import subprocess
 import sys
 import threading
 from pathlib import Path
 
-import sdl2
-
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
-from controller.key_watcher import KeyWatcher
+from controller.key_state import KeyState
 from controller.key_watcher_controller import KeyWatcherController
-from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
+from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
+from devices.darkmoss_common import darkmoss_fw_version
 from devices.device_common import DeviceCommon
-from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from menus.games.utils.rom_info import RomInfo
-from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from devices.miyoo_trim_common import MiyooTrimCommon
+from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
+from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.logger import PyUiLogger
@@ -28,65 +26,35 @@ from utils.py_ui_config import PyUiConfig
 
 
 class MiniloongPocket1(DeviceCommon):
-    """Miniloong Pocket 1 (RK3566, Mali-G52) on the vendor buildroot firmware.
+    """Miniloong Pocket 1 (RK3566, Mali-G52) on dArkMoss.
 
-    Same silicon as the Miyoo Flip, but none of Miyoo's daemons: the pad is a
-    plain kernel evdev device, power is the rk805 pwrkey node, audio is the
-    rk817 codec on ALSA card 1. The panel is a fixed 720x960 portrait mode used
-    in landscape, so this is the A30's rotation situation at 960x720 - PyUI
-    renders a 960x720 canvas and Display rotates it by screen_rotation().
-
-    Shape follows the RGB30 class (DeviceCommon + raw evdev), the other
-    non-Miyoo RK3566 port. Hardware facts marked UNVERIFIED come from source
-    reading, not a board; see ~/ai/CFW/Miniloong/TODO.md.
+    Shape follows the RGB30 class: same base OS, same retrogame_joypad driver,
+    same Mali blob. The differences are the 960x720 panel (a portrait mode used
+    in landscape, rendered at 1.5x), a real menu button, one stick, and the
+    backlight table.
     """
 
-    # Stable by-path link the stock firmware creates for the pad
-    # (Jawaka input_roster_mlp1.c). UNVERIFIED on hardware.
-    JOYPAD_NODE = "/dev/input/by-path/platform-loong1_joypad-event-joystick"
-    INPUT_NODES_FILE = "/tmp/miniloong_input_nodes"
+    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/miniloong-system.json"
+    JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
 
-    KEY_VOLUMEDOWN = 114
-    KEY_VOLUMEUP = 115
-    KEY_POWER = 116
-    EVIOCGRAB = 0x40044590
-
-    AUDIO_CARD = "1"
-    # rk817 DAC Playback Volume per 0..20 level, mirroring SYSTEM_VOLUME_0..20 in
-    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
-    # Leaf measured ~167 barely audible, 210 comfortable, 252 painful; the old
-    # linear 150..210 ramp put the first six steps below audibility (SPR-MED-182).
-    DAC_TABLE = (0, 168, 171, 175, 178, 181, 185, 188, 192, 195, 198, 202,
-                 205, 208, 212, 215, 219, 222, 225, 229, 232)
     # Backlight raw per 0..10 level, mirroring SYSTEM_BRIGHTNESS_0..10 in
-    # spruce/scripts/platform/Miniloong.cfg (contract test keeps them equal).
-    # Measured 2026-09-04: the panel lights from off at raw 62 and goes dark
-    # stepping down at 62; 60 and below are black (the old floor of 60 booted
-    # to a dark screen). Floor 70 = stock's charger floor with margin; above
-    # ~135 nothing changes. Level 0 is the dimmest safe level, never dark.
+    # spruce/scripts/platform/Miniloong.cfg. Measured 2026-09-04: the panel is
+    # black at raw 60 and below; level 0 is the dimmest safe level.
     BACKLIGHT_TABLE = (70, 77, 83, 90, 96, 103, 109, 116, 122, 129, 135)
     BACKLIGHT_FLOOR = 70
 
     def __init__(self, device_name, main_ui_mode=True):
         self.device_name = device_name
-        os.environ.setdefault("SDL_VIDEODRIVER", "KMSDRM")
-        os.environ.setdefault("SDL_RENDER_DRIVER", "kmsdrm")
-        os.environ.setdefault("KMSDRM_DEVICE", "/dev/dri/card0")
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_DRIVER, b"opengles2")
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_OPENGL_SHADERS, b"1")
-        sdl2.SDL_SetHint(sdl2.SDL_HINT_FRAMEBUFFER_ACCELERATION, b"1")
         self.load_miniloong_system_json()
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         self.miyoo_games_file_parser = MiyooGamesFileParser()
         DeviceCommon.__init__(self)
         if main_ui_mode:
-            threading.Thread(target=self.startup_init, daemon=True).start()
-            self._start_key_watchers()
+            threading.Thread(target=self._set_lumination_to_config, daemon=True).start()
+        self._start_volume_watcher()
 
     def wants_gles_context(self):
-        # The Mali-G52 blob offers GLES configs only (measured on the RGB30's
-        # identical GPU; see rgb30_gbm_probe.py).
         return True
 
     # ---- config ----
@@ -95,111 +63,63 @@ class MiniloongPocket1(DeviceCommon):
         base_dir = os.path.abspath(sys.path[0])
         self.script_dir = os.path.join(base_dir, "devices", "miniloong")
         source = os.path.join(self.script_dir, "miniloong-system.json")
-        self._load_system_config("/mnt/SDCARD/Saves/miniloong-system.json", Path(source))
+        self._load_system_config(self.SYSTEM_JSON, Path(source))
 
-    def startup_init(self, include_wifi=True):
-        self._set_lumination_to_config()
-        self._set_volume(self.get_volume())
+    # The shell owns the volume keys; PyUI reflects the config it writes.
+    def _start_volume_watcher(self):
+        from devices.utils.file_watcher import FileWatcher
+        self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+            self.SYSTEM_JSON, self.on_system_config_changed,
+            interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
+
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if old_volume != new_volume:
+            Display.volume_changed(new_volume)
 
     # ---- input ----
 
-    def _read_input_nodes_file(self):
-        nodes = {}
-        try:
-            with open(self.INPUT_NODES_FILE) as f:
-                for line in f:
-                    if "=" in line:
-                        key, value = line.strip().split("=", 1)
-                        nodes[key] = value.strip("'\"")
-        except OSError:
-            pass
-        return nodes
-
-    def _resolve_named_node(self, name_fragments):
-        try:
-            with open("/proc/bus/input/devices") as f:
-                blocks = f.read().split("\n\n")
-            for blk in blocks:
-                if any(f'Name="{frag}' in blk or frag in blk.split("\n")[0] for frag in name_fragments):
-                    for tok in blk.split():
-                        if tok.startswith("event"):
-                            return "/dev/input/" + tok
-        except OSError:
-            pass
-        return None
-
-    def _resolve_power_node(self):
-        node = self._read_input_nodes_file().get("EVENT_PATH_POWER")
-        if node and os.path.exists(node):
-            return node
-        return self._resolve_named_node(["rk805 pwrkey", "pwrkey"])
-
-    def _resolve_volume_node(self):
-        node = self._read_input_nodes_file().get("EVENT_PATH_VOLUME")
-        power = self._resolve_power_node()
-        if node and os.path.exists(node) and node != power:
-            return node
-        # The volume keys are on the gamepad node (captured 2026-09-04), which the
-        # main controller already reads and maps (MiniloongKeyMappingProvider);
-        # the shell parks EVENT_PATH_VOLUME on the power node. Never attach a
-        # second, grabbing watcher to the pad.
-        return None
-
-    def _start_key_watchers(self):
-        from controller.controller import Controller
-
-        for label, node in (("power", self._resolve_power_node()), ("volume", self._resolve_volume_node())):
-            if not node:
-                PyUiLogger.get_logger().info(f"Miniloong: no {label} key node")
-                continue
-            try:
-                watcher = KeyWatcher(node)
-                if getattr(watcher, "fd", None) is not None and label == "volume":
-                    try:
-                        fcntl.ioctl(watcher.fd, self.EVIOCGRAB, 1)
-                    except OSError as e:
-                        PyUiLogger.get_logger().warning(f"Miniloong: could not grab {node}: {e}")
-                Controller.add_button_watcher(watcher.poll_keyboard)
-                threading.Thread(target=watcher.poll_keyboard, daemon=True).start()
-                setattr(self, f"{label}_key_watcher", watcher)
-                PyUiLogger.get_logger().info(f"Miniloong: {label} watcher on {node}")
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Miniloong: {label} watcher failed: {e}")
-
-    def map_key(self, key_code):
-        if key_code == self.KEY_VOLUMEUP:
-            return ControllerInput.VOLUME_UP
-        if key_code == self.KEY_VOLUMEDOWN:
-            return ControllerInput.VOLUME_DOWN
-        if key_code == self.KEY_POWER:
-            return ControllerInput.POWER_BUTTON
-        return None
-
-    # The pad enumerates as evdev name "Loong Gamepad" (verified on hardware:
-    # event4). Resolve it by NAME rather than a by-path link, which the stock
-    # firmware does not always create - a wrong node = no input, and PyUI then
-    # screensavers/idles to a black screen after ~15s.
-    JOYPAD_NAME = "Loong Gamepad"
-
     def _resolve_joypad(self):
-        node = self._resolve_named_node([self.JOYPAD_NAME])
-        if node and os.path.exists(node):
-            PyUiLogger.get_logger().info(f"Miniloong: joypad '{self.JOYPAD_NAME}' at {node}")
-            return node
         if os.path.exists(self.JOYPAD_NODE):
             PyUiLogger.get_logger().info(f"Miniloong: joypad at {self.JOYPAD_NODE}")
-            return self.JOYPAD_NODE
-        PyUiLogger.get_logger().error("Miniloong: no Loong Gamepad node found, controls will not respond")
+        else:
+            PyUiLogger.get_logger().error("Miniloong: no singleadc joypad node found, controls will not respond")
         return self.JOYPAD_NODE
 
     def get_controller_interface(self):
-        # The Flip/TrimUI table with this pad's measured differences layered on
-        # top: X is BTN_NORTH (307) here, the triggers are keys (312/313) and
-        # there is one thumb click (317). See MiniloongKeyMappingProvider.
+        key_mappings = {}
+
+        def bind(code, control):
+            key_mappings[KeyEvent(1, code, 1)] = [InputResult(control, KeyState.PRESS)]
+            key_mappings[KeyEvent(1, code, 0)] = [InputResult(control, KeyState.RELEASE)]
+
+        bind(305, ControllerInput.A)          # BTN_EAST
+        bind(304, ControllerInput.B)          # BTN_SOUTH
+        bind(307, ControllerInput.X)          # BTN_NORTH
+        bind(308, ControllerInput.Y)          # BTN_WEST
+
+        bind(310, ControllerInput.L1)
+        bind(311, ControllerInput.R1)
+        bind(312, ControllerInput.L2)
+        bind(313, ControllerInput.R2)
+
+        bind(315, ControllerInput.START)
+        bind(314, ControllerInput.SELECT)
+        bind(316, ControllerInput.MENU)       # BTN_MODE, a real button here
+        bind(317, ControllerInput.L3)
+        bind(318, ControllerInput.R3)
+
+        bind(544, ControllerInput.DPAD_UP)
+        bind(545, ControllerInput.DPAD_DOWN)
+        bind(546, ControllerInput.DPAD_LEFT)
+        bind(547, ControllerInput.DPAD_RIGHT)
+
         return KeyWatcherController(
-            event_path=self._resolve_joypad(),
-            mapping_provider=MiniloongKeyMappingProvider(),
             event_format="llHHi",
+            event_path=self._resolve_joypad(),
+            mapping_provider=MiniloongKeyMappingProvider(key_mappings),
         )
 
     def map_digital_input(self, sdl_input):
@@ -220,23 +140,19 @@ class MiniloongPocket1(DeviceCommon):
         return 720
 
     def screen_rotation(self):
-        # A30 convention for a portrait panel used in landscape. Direction
-        # UNVERIFIED (MLP1-003) - flip to 90 if the image comes up upside down.
         return 270
 
     def output_screen_width(self):
         if self.should_scale_screen():
             return 1920
-        return int(self.screen_width() * 1.5)   # 1440
+        return int(self.screen_width() * 1.5)
 
     def output_screen_height(self):
         if self.should_scale_screen():
             return 1080
-        return int(self.screen_height() * 1.5)  # 1080
+        return int(self.screen_height() * 1.5)
 
-    # Panel scale. The Miniloong panel is higher-DPI than the 960x720 base render,
-    # so UI/assets scale by 1.5 (measured on hardware 2026-08-28). HDMI keeps its
-    # own factor. output_screen_* below are screen dims x1.5 to match.
+    # The panel is higher-DPI than the 960x720 base render.
     def get_scale_factor(self):
         return 2 if self.is_hdmi_connected() else 1.5
 
@@ -257,8 +173,6 @@ class MiniloongPocket1(DeviceCommon):
         try:
             with open("/sys/class/backlight/backlight/brightness", "w") as f:
                 f.write(str(raw))
-            # A level write is also a "screen on" request: make sure the panel is
-            # not left blanked by an earlier bl_power=4.
             with open("/sys/class/backlight/backlight/bl_power", "w") as f:
                 f.write("0")
         except OSError as e:
@@ -281,26 +195,17 @@ class MiniloongPocket1(DeviceCommon):
     def get_volume(self):
         return self.system_config.get_volume()
 
+    # change_volume passes 0-100, which maps straight to the softvol Master.
     def _set_volume(self, volume):
         pct = max(0, min(100, int(volume)))
-        level = max(0, min(20, (pct + 2) // 5))   # the shell's 0..20 level
         try:
-            if level == 0:
-                subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "sset", "Playback Path", "OFF"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            else:
-                raw = self.DAC_TABLE[level]
-                subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "cset",
-                                "name='DAC Playback Volume'", f"{raw},{raw}"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                subprocess.run(["amixer", "-c", self.AUDIO_CARD, "-q", "sset", "Playback Path", "SPK"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["amixer", "-M", "-q", "sset", "Master", f"{pct}%"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Miniloong: _set_volume failed: {e}")
         return volume
 
     def change_volume(self, amount):
-        from display.display import Display
         self.system_config.reload_config()
         volume = max(0, min(100, self.get_volume() + amount))
         self._set_volume(volume)
@@ -348,80 +253,29 @@ class MiniloongPocket1(DeviceCommon):
         return ChargeStatus.DISCONNECTED
 
     def sleep(self):
-        # TODO not implemented yet
-        return
+        pass
+
+    def get_fw_version(self):
+        return darkmoss_fw_version() or "Unknown"
 
     def power_off_cmd(self):
-        return "poweroff"
+        return "systemctl poweroff"
 
     def reboot_cmd(self):
-        return "reboot"
+        return "systemctl reboot"
 
     def prompt_power_down(self):
         DeviceCommon.prompt_power_down(self)
 
-    # ---- wifi: spruce's wifi.sh owns the radio; PyUI scans and reads status ----
+    # ---- wifi ----
 
     def supports_wifi(self):
         return True
 
     def is_wifi_enabled(self):
-        # The Spruce convention on EVERY device (miyoo, trimui, muos, rocknix,
-        # gkd, anbernic): the toggle reflects the user's saved intent (config),
-        # not live operstate. Reading operstate here made the toggle label and
-        # wifi_adjust() read the state at different instants during associate/
-        # deassociate, so a press could do the opposite of the label and the menu
-        # looked frozen at "Off".
         return self.system_config.is_wifi_enabled()
 
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        # RSSI from wpa_cli signal_poll (RSSI=-46 / LINKSPEED=72 / NOISE=9999 /
-        # FREQUENCY=2422, measured on the MLP1 2026-09-04), the Anbernic XX
-        # reading. Not /proc/net/wireless: the RTL8723DS reports its "level"
-        # column as 100+dBm (54 for -46 dBm), which device_common would grade
-        # as a positive, perfect signal. wpa_supplicant is already ours.
-        # -200 is what device_common reads as "no signal" - returned on any
-        # failure so the top-bar icon falls back to the off/locked glyph
-        # instead of a full-strength one.
-        no_signal = WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-        if not self.is_wifi_enabled():
-            return no_signal
-        try:
-            result = ProcessRunner.run(["wpa_cli", "-i", "wlan0", "signal_poll"], timeout=3, print=False)
-            output = result.stdout or ""
-            if result.returncode != 0 or "FAIL" in output:
-                return no_signal
-            signal_level = None
-            noise_level = 0
-            for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("RSSI="):
-                    try:
-                        signal_level = int(line.split("=", 1)[1])
-                    except ValueError:
-                        pass
-                elif line.startswith("NOISE="):
-                    try:
-                        noise = int(line.split("=", 1)[1])
-                    except ValueError:
-                        noise = 9999
-                    if noise != 9999:  # wpa_supplicant's "not reported" sentinel
-                        noise_level = noise
-            if signal_level is None:
-                return no_signal
-            # Same dBm -> 0..70 mapping the other devices use.
-            if signal_level <= -100:
-                link_quality = 0
-            elif signal_level >= -50:
-                link_quality = 70
-            else:
-                link_quality = int((signal_level + 100) * 1.4)
-            return WiFiConnectionQualityInfo(noise_level=noise_level, signal_level=signal_level, link_quality=link_quality)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Miniloong wifi signal_poll failed: {e}")
-            return no_signal
-
-    # ---- bluetooth: not wired (stock btmanager equivalent unknown) ----
+    # ---- bluetooth: not wired ----
 
     def is_bluetooth_enabled(self):
         return False
@@ -435,16 +289,17 @@ class MiniloongPocket1(DeviceCommon):
     def get_bluetooth_scanner(self):
         return None
 
-    # ---- launching / paths: the generic spruce flow (Emu launch.sh -> principal) ----
+    # ---- launching / paths ----
 
     def run_cmd(self, args, dir=None, is_power_cmd=False):
         PyUiLogger.get_logger().debug(f"About to launch {args} from dir {dir}")
         subprocess.run(args, cwd=dir)
 
     def run_app(self, folder, launch):
-        directory = os.path.dirname(launch)
-        PyUiLogger.get_logger().debug(f"About to launch app {launch} from dir {directory}")
-        subprocess.run([launch], cwd=directory)
+        return MiyooTrimCommon.run_app(self, folder, launch)
+
+    def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
+        return MiyooTrimCommon.run_game(self, rom_info)
 
     def get_app_finder(self):
         return MiyooAppFinder()
@@ -471,8 +326,6 @@ class MiniloongPocket1(DeviceCommon):
         return "/mnt/SDCARD/Collections/"
 
     def launch_stock_os_menu(self):
-        # Exit-to-stock is a boot-session decision (a flag the supervisor reads);
-        # PyUI just leaves.
         os._exit(0)
 
     def get_state_path(self):
@@ -493,25 +346,12 @@ class MiniloongPocket1(DeviceCommon):
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
 
-    def run_game(self, rom_info: RomInfo) -> "subprocess.Popen":
-        # Launch through the standard spruce Emu flow: MiyooTrimCommon writes
-        # the platform launch command and lets principal.sh run it, so the
-        # per-emulator setup in spruce/scripts/emu/lib (setup_for_retroarch,
-        # the retroarch-Miniloong.cfg staging, core resolution) all applies -
-        # exactly as on the Flip. The same helper the Flip's run_game uses.
-        return MiyooTrimCommon.run_game(self, rom_info)
-
     def take_snapshot(self, path):
-        # Screenshots are taken by the shell (spruce/flip/screenshot.sh via
-        # take_screenshot in Miniloong.sh); PyUI has no in-menu capture here.
         return None
 
     def get_save_state_image(self, rom_info: RomInfo):
-        # Save-state thumbnails are not wired for this platform yet (MLP1-009).
-        return None
+        return self.get_game_system_utils().get_save_state_image(rom_info)
 
-    # Panel colour calibration (modetest on the Flip) is UNVERIFIED on this
-    # board, so the display menu hides these knobs until a device confirms them.
     def supports_brightness_calibration(self):
         return False
 
@@ -529,3 +369,9 @@ class MiniloongPocket1(DeviceCommon):
 
     def get_extra_settings_options(self):
         return []
+
+    def keep_running_on_error(self):
+        return False
+
+    def perform_sdcard_ro_check(self):
+        PyUiLogger.get_logger().info("Miniloong: not checking read-only SD card status.")

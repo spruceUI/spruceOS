@@ -1,0 +1,72 @@
+{
+    "showBottomBar": true,
+    "name": "Spruce",
+    "author": "tenlevels",
+    "description": "spruce theme for a30",
+    "batteryPercentage": {
+        "color": "#EBDBB2",
+        "font": "nunwen.ttf",
+        "size": 18
+    },
+    "title": {
+        "font": "nunwen.ttf",
+        "size": 25,
+        "color": "#EBDBB2"
+    },
+    "hint": {
+        "font": "nunwen.ttf",
+        "size": 25,
+        "color": "#EBDBB2"
+    },
+    "currentpage": {
+        "font": "nunwen.ttf",
+        "size": 22,
+        "color": "#EBDBB2"
+    },
+    "total": {
+        "font": "nunwen.ttf",
+        "size": 22,
+        "color": "#D65D0E"
+    },
+    "grid": {
+        "font": "nunwen.ttf",
+        "grid1x4": 25,
+        "grid3x4": 18,
+        "color": "#7C6F64",
+        "selectedcolor": "#FBF1C7"
+    },
+    "list": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#FBF1C7",
+        "selectedcolor": "#FBF1C7"
+    },
+    "bindOverMiyooTheme": true,
+    "recentsEnabled": true,
+    "topBarInitialXOffset": 55,
+    "setTopBarTextToGameSelection": true,
+    "fullScreenGridGameMenuResizeType": "FIT",
+    "mainMenuTitle": "",
+    "displayVolumeNumbers": true,
+    "mainMenuColCount": 2,
+    "mainMenuRowCount": 3,
+    "collectionsEnabled": true,
+    "gameSelectionViewType": "TEXT_AND_IMAGE",
+    "gameSystemSelectColCount": 3,
+    "gameSystemSelectRowCount": 3,
+    "listFontSize": 22,
+    "messageFontSize": 22,
+    "descListFontSize": 22,
+    "batteryPercentFontSize": 22,
+    "topBarFontSize": 22,
+    "gridMultiRowFontSize": 22,
+    "indexTotalSize": 22,
+    "indexSelectedFontSize": 22,
+    "gridSingleRowFontSize": 22,
+    "displayBatteryIcon": true,
+    "showBottomBarButtons": false,
+    "showClock": true,
+    "multiRowGridTextYOffset": -16,
+    "gridMultiRowImageYOffset": 12,
+    "gridBgOffsetToImageOffset": true
+}

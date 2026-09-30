@@ -96,7 +96,7 @@ display() {
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
@@ -185,7 +185,7 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
-# May low_power_warning.sh force a shutdown when the gauge reads 1 % or less?
+# May battery_level_watchdog.sh force a shutdown when the gauge reads 1 % or less?
 # Default yes; a platform whose gauge is not trusted overrides this.
 device_low_battery_shutdown_ok() {
     return 0
@@ -424,9 +424,8 @@ device_power_transition_bypasses_init() {
     #
     # Whether `poweroff`/`reboot` can be trusted to do anything on this device.
     # The busybox applets only signal PID 1 and return; if init is blocked for
-    # the whole Spruce session (the Miniloong's rcS is held by the boot
-    # supervisor, S49spruce -> session.sh -> runtime.sh) those signals are never
-    # serviced and the device just sits there with its card unmounted. A device
+    # the whole Spruce session those signals are never serviced and the device
+    # just sits there with its card unmounted. A device
     # answering true tells stage 2 to skip the plain applets and the 10 s waits
     # on them, take the filesystems down the REISUB way (sysrq s/u/s) and call
     # the forced form straight away, which is reboot(2) and needs no init.
@@ -538,4 +537,16 @@ device_boot_pre_session() {
 # devices whose stub blocks the stock init script leave this empty.
 device_stock_ui_command() {
     printf ''
+}
+
+treat_dpad_as_analog() {
+     log_message "Missing treat_dpad_as_analog function, assuming it does not the capability" -v
+}
+
+treat_dpad_as_dpad() { 
+     log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
+}
+
+swap_dpad_analog_toggle() { 
+    log_message "Missing swap_dpad_analog_toggle function, assuming it does not the capability" -v
 }

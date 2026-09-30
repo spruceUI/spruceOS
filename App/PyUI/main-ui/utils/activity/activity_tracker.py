@@ -10,6 +10,7 @@ from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
+from utils.logger import PyUiLogger
 
 
 class ActivityTracker:
@@ -165,26 +166,29 @@ class ActivityTracker:
     def display_activity_details(self, activity_list: Dict[str, int]):
         option_list = []
         for app, total_seconds in activity_list.items():
-            if(app != "PyUI"):
-                img = Device.get_device().get_image_for_activity(app)
-                hours = total_seconds // 3600
-                minutes = (total_seconds % 3600) // 60
-                if hours > 0:
-                    time_str = Language.label("activityTimeHoursMinutes", "{hours}h {minutes}m").replace("{hours}", str(hours)).replace("{minutes}", str(minutes))
-                else:
-                    time_str = Language.label("activityTimeMinutesOnly", "{minutes}m").replace("{minutes}", str(minutes))
-                if app.endswith("launch.sh"):
-                    primary = app.rsplit("/", 2)[-2]   # directory before launch.sh
-                else:
-                    primary = app.rsplit("/", 1)[-1].rsplit(".", 1)[0]
-                option_list.append(
-                    GridOrListEntry(
-                        primary_text=primary,
-                        value_text=time_str,
-                        icon=img
+            try:
+                if(app != "PyUI"):
+                    img = Device.get_device().get_image_for_activity(app)
+                    hours = total_seconds // 3600
+                    minutes = (total_seconds % 3600) // 60
+                    if hours > 0:
+                        time_str = Language.label("activityTimeHoursMinutes", "{hours}h {minutes}m").replace("{hours}", str(hours)).replace("{minutes}", str(minutes))
+                    else:
+                        time_str = Language.label("activityTimeMinutesOnly", "{minutes}m").replace("{minutes}", str(minutes))
+                    if app.endswith("launch.sh"):
+                        primary = app.rsplit("/", 2)[-2]   # directory before launch.sh
+                    else:
+                        primary = app.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+                    option_list.append(
+                        GridOrListEntry(
+                            primary_text=primary,
+                            value_text=time_str,
+                            icon=img
+                        )
                     )
-                )
-
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"Error processing activity '{app}': {e}")
+    
         view = ViewCreator.create_view(
                 view_type=ViewType.ICON_AND_DESC,
                 top_bar_text=Language.label("activityTracker", "Activity Tracker"), 

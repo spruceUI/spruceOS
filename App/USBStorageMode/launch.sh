@@ -76,7 +76,7 @@ fi
 
 # Disable idle/shutdown timer while in USB mode (device reboots on exit, so no need to restart)
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 # 4. Export. The PC must not be handed a filesystem the kernel still has
 # mounted (SPR-MED-198), so wherever spruce owns the card the export is a

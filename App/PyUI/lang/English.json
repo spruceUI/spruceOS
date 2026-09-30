@@ -228,8 +228,8 @@
         "NONE": "None"
     },
     "booleans": {
-        "true": "Enabled",
-        "false": "Disabled"
+        "true": "True",
+        "false": "False"
     },
     "onOff": {
         "on": "On",

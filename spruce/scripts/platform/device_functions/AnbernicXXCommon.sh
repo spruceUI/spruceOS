@@ -338,7 +338,7 @@ xx_rgb_apply() {
 rgb_led() {
     has_rgb_leds || return 0
 
-    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    rgb_leds_enabled || return 0
     flag_check "leds_forced_off" && return 0
 
     _zones="${1:-lr}"
@@ -365,7 +365,7 @@ rgb_led() {
 enable_or_disable_rgb() {
     has_rgb_leds || return 0
 
-    if [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ]; then
+    if ! rgb_leds_enabled; then
         xx_rgb_already_dark && return 0
         echo "000000 000000 1 1000" > "$XX_RGB_STATE"
         xx_rgb_static 0 000000 000000
@@ -393,7 +393,7 @@ xx_rgb_off() {
 xx_rgb_restore() {
     has_rgb_leds || return 0
     flag_check "leds_forced_off" && return 0
-    [ "$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")" = "True" ] && return 0
+    rgb_leds_enabled || return 0
 
     xx_rgb_load_state
     xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
@@ -407,10 +407,10 @@ launch_startup_watchdogs(){
     for _wd in \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
-        /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
-        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
-        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
+        /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/lid_watchdog.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -418,15 +418,15 @@ launch_startup_watchdogs(){
 
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh &
     # The override replaces launch_common_startup_watchdogs_v2 wholesale, and
-    # that launcher is low_power_warning.sh's only start site: without this
+    # that launcher is battery_level_watchdog.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
-    /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
 
     if has_lid >/dev/null; then
-        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
     fi
 }
 
@@ -522,7 +522,7 @@ device_prepare_for_ports_run() {
 }
 
 device_cleanup_after_ports_run() {
-    log_message "device_cleanup_after_ports_run unneeded" -v
+    treat_dpad_as_dpad
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
@@ -780,6 +780,18 @@ brightness_up() {
     set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
 }
 
+turn_off_screen() {
+    "$DEVICE_PYTHON3_PATH" -c "
+import os, fcntl, struct
+
+fd = os.open('/dev/disp', os.O_RDWR)
+
+try:
+    fcntl.ioctl(fd, 0x102, struct.pack('QQQQ', 0, 0, 0, 0))
+finally:
+    os.close(fd)
+"
+}
 
 send_menu_button_to_retroarch() {
     # Every RetroArch binary this device can launch has to be listed here or the
@@ -1165,4 +1177,36 @@ device_ensure_wifi_interface() {
 device_prepare_for_poweroff() {
     device_wifi_power_off
     xx_rgb_off
+}
+
+
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+# The driver refuses a trailing newline, so no echo here.
+XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+_xx_dpad_swap() {
+
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	printf '%s' "$1" > "$XX_DPAD_SWAP"
+	log_message "xx d-pad as stick: $1"
+}
+
+# MENU+SELECT in game flips it, for games that only listen to the stick.
+swap_dpad_analog_toggle() {
+	[ "$XX_PAD_LAYOUT" = "nostick" ] || return 0
+	flag_check "in_menu" && return 0
+	case "$(cat "$XX_DPAD_SWAP" 2>/dev/null)" in
+		2) _xx_dpad_swap 0 ;;
+		*) _xx_dpad_swap 2 ;;
+	esac
+	vibrate &
+}
+
+treat_dpad_as_analog() {
+	_xx_dpad_swap 2
+}
+
+treat_dpad_as_dpad() {
+	_xx_dpad_swap 0
 }

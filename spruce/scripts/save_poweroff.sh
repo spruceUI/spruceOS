@@ -217,7 +217,7 @@ stop_problematic_scripts() {
     sleep 0.5
 
     # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
-    pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
+    pgrep -f "lid_watchdog.sh" | xargs -r kill
 
     # kill enforceSmartCPU first so no CPU setting is changed during shutdown
     killall -q -15 enforceSmartCPU.sh
@@ -225,8 +225,8 @@ stop_problematic_scripts() {
     # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
     killall -q -9 homebutton_watchdog.sh
     killall -q -9 buttons_watchdog.sh
-    killall -q -9 idlemon_mm.sh
-    killall -q -9 low_power_warning.sh
+    killall -q -9 idle_watchdog.sh
+    killall -q -9 battery_level_watchdog.sh
     killall -q -9 theme_watchdog.sh
     killall -q -9 volume_sync_watchdog.sh
     killall -q -9 inotifywait
