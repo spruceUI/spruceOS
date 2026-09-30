@@ -82,7 +82,15 @@ class ImageListView(NonDescriptiveListView):
             if actual_index == self.selected:
                 color = Theme.text_color_selected(FontPurpose.LIST)
                 if(self.selected_bg is not None):
-                    Display.render_image(self.selected_bg,x_value, y_value, render_mode,crop_w=text_available_width + text_pad * 2)
+                    selected_bg_y = y_value - self.line_height // 2
+                    Display.render_image(
+                        self.selected_bg,
+                        x_value,
+                        selected_bg_y,
+                        RenderMode.TOP_LEFT_ALIGNED,
+                        crop_w=text_available_width + text_pad * 2,
+                        crop_h=self.line_height
+                    )
                 if(self.prev_index == self.selected):
                     scroll_amt = self.scroll_text_amount
                     if(time.time() - self.selected_same_entry_time > 1):

@@ -18,6 +18,7 @@ class DescriptiveListView(ListView):
                  options: List[GridOrListEntry], selected_bg, selected : int = 0,
                  icon_and_desc_use_image_in_place_of_icon=None):
         super().__init__()
+        self.use_icons_to_calculate_line_height = True
         self.icon_and_desc_use_image_in_place_of_icon = icon_and_desc_use_image_in_place_of_icon
         self.top_bar_text = top_bar_text
         self.set_options(options)
@@ -25,6 +26,9 @@ class DescriptiveListView(ListView):
 
         self.selected_bg = selected_bg
         self.each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
+        if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+            self.each_entry_height = self._calculate_line_height(include_description_line=True)   
+
 
         usable = Display.get_usable_screen_height(force_include_top_bar=True) / self.each_entry_height
 
