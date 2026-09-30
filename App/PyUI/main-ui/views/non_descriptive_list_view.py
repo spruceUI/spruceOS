@@ -3,6 +3,7 @@ from typing import List
 from display.display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
+from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.list_view import ListView
 
@@ -26,7 +27,7 @@ class NonDescriptiveListView(ListView):
         self.use_icons_to_calculate_line_height = use_icons_to_calculate_line_height
         self.image_render_mode = image_render_mode
         self.selected_bg = selected_bg
-        self.line_height = self._calculate_line_height()   
+        self.line_height = self._calculate_line_height(include_description_line=False)   
         if(usable_height is None):
             usable_height = Display.get_usable_screen_height()
         self.max_rows = usable_height // self.line_height
@@ -43,22 +44,6 @@ class NonDescriptiveListView(ListView):
     def options_are_alphabetized(self):
         return self.options_are_sorted
     
-    def _calculate_line_height(self):
-        text_line_height = Display.get_line_height(FontPurpose.LIST) + 10  # add 10px padding between lines
-        icon_line_height = 0
-        if(self.use_icons_to_calculate_line_height):
-            for gridOrListEntry in self.options:
-                if(gridOrListEntry.get_icon() is not None):
-                    icon_w, icon_h = Display.get_image_dimensions(gridOrListEntry.get_icon())
-                    icon_line_height = max(icon_line_height, icon_h)
-
-        bg_height = 0
-        if(self.selected_bg is not None):
-            bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
-
-        return max(text_line_height, icon_line_height, bg_height)
-
-
 
     @abstractmethod
     def _render_text(self, visible_options):

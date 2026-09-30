@@ -839,3 +839,7 @@ class Language:
     def aboutThisDevice(cls):
         return cls._data.get("aboutThisDevice","About this Device")
 
+    @classmethod
+    def useTextForLineHeight(cls):
+        return cls._data.get("useTextForLineHeight","Use Text For Line Height")
+

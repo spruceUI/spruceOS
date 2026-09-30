@@ -1775,3 +1775,12 @@ class Theme():
     @classmethod
     def get_screensaver_dim_backlight(cls):
         return cls._data.get("screensaver", {}).get("dimBacklight", True)
+
+    @classmethod
+    def get_use_text_for_line_height_non_descriptive_list_view(cls):
+        return cls._data.get("useTextForLineHeightForNonDescriptiveListView", False)
+
+    @classmethod
+    def set_use_text_for_line_height_non_descriptive_list_view(cls, value):
+        cls._data["useTextForLineHeightForNonDescriptiveListView"] = value
+        cls.save_changes()

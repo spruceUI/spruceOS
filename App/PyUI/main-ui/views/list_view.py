@@ -4,7 +4,9 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from display.font_purpose import FontPurpose
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.text_utils import TextUtils
 from views.view import View
@@ -185,3 +187,31 @@ class ListView(View):
                                     text_available_width=text_available_width)
         else:
             return text
+
+    def _calculate_line_height(self, include_description_line):
+        use_text_for_line_height_non_descriptive_list_view = Theme.get_use_text_for_line_height_non_descriptive_list_view()
+        padding = 10  # add 10px padding between lines <-- Configure based on resolution
+        text_line_height = Display.get_line_height(FontPurpose.LIST)
+        text_line_height += padding
+        icon_line_height = 0
+        any_descriptions = False
+        if(self.use_icons_to_calculate_line_height):
+            for gridOrListEntry in self.options:
+                if(gridOrListEntry.get_icon() is not None):
+                    icon_w, icon_h = Display.get_image_dimensions(gridOrListEntry.get_icon())
+                    icon_line_height = max(icon_line_height, icon_h)
+        if(include_description_line):
+            for gridOrListEntry in self.options:
+                if(gridOrListEntry.get_description() is not None):
+                    any_descriptions = True
+
+        if(any_descriptions and include_description_line):
+            use_text_for_line_height_non_descriptive_list_view = False # TODO Broken -- Will need to ignore offset or require all themes to update
+            
+        if(self.selected_bg is not None):
+            bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
+
+        if(use_text_for_line_height_non_descriptive_list_view):
+            return max(text_line_height, icon_line_height)
+        else:
+            return max(icon_line_height, bg_height)
