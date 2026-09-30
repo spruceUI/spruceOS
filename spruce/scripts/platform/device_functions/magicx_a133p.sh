@@ -42,26 +42,25 @@ magicx_touch_event_path() {
     magicx_find_event_by_name "*[Tt]ouch*" "*ts*" "*gt9*" "*ft5*" "*goodix*" "*[Ff]ocal*" "*hyn*" "*cst*"
 }
 
-# Board pin pokes for boards whose device tree leaves these pins to userland. The
-# XU20's tree already drives them, so its cfg sets MAGICX_INIT_GPIO=false.
+# The rumble motor, the only pin spruce drives on these boards: RUMBLE_GPIO from the cfg.
+# On the Zero 40 and XU20 it is PH3 (gpio227), the enable pin of the stock trees'
+# "io-vibrator" regulator, which our trees leave to userland - felt on both 2026-09-24.
+# The Zero 28 has no motor, so its cfg says "none" and nothing is driven. Needs sysfs GPIO
+# in the kernel (oakMOSS 020).
+# This used to be the TrimUI Brick's init, which also drove PD11 high and exported PH19:
+# neither is a MagicX pin, and PH19 is a pad button here.
 init_gpio_a133p() {
-    if [ "$MAGICX_INIT_GPIO" = "false" ]; then
-        log_message "MagicX: skipping the Tina GPIO init on $PLATFORM (its device tree owns these pins)" -v
+    case "$RUMBLE_GPIO" in
+        gpio[0-9]*) ;;
+        *) return 0 ;;
+    esac
+    if [ ! -w /sys/class/gpio/export ]; then
+        log_message "MagicX: no sysfs GPIO in this kernel, rumble unavailable" -v
         return 0
     fi
-    #PD11 pull high for VCC-5v
-    echo 107 > /sys/class/gpio/export
-    printf '%s' out > /sys/class/gpio/gpio107/direction
-    printf '%s' 1 > /sys/class/gpio/gpio107/value
-
-    #rumble motor PH3
-    echo 227 > /sys/class/gpio/export
-    printf '%s' out > /sys/class/gpio/gpio227/direction
-    printf '%s' 0 > /sys/class/gpio/gpio227/value
-
-    #DIP Switch PH19
-    echo 243 > /sys/class/gpio/export
-    printf '%s' in > /sys/class/gpio/gpio243/direction
+    [ -d "/sys/class/gpio/$RUMBLE_GPIO" ] || echo "${RUMBLE_GPIO#gpio}" > /sys/class/gpio/export
+    printf '%s' out > "/sys/class/gpio/$RUMBLE_GPIO/direction"
+    printf '%s' 0 > "/sys/class/gpio/$RUMBLE_GPIO/value"
 }
 
 # trimui's runtime_mounts_a133p also runs spruce/brick/sdl2/bind.sh, which binds
@@ -238,6 +237,8 @@ stage_ra_autoconfig() {
 
 # Battery. The AXP2202 gauge read 0-1 % on a healthy cell (Zero 40), so a low
 # reading with a good voltage becomes an estimate and holds the shutdown off.
+# Never on the charger: charging lifts the terminal voltage, and a flat cell
+# (gauge 1 %, truly empty) read 3704 mV and showed 40 % (Zero 28, 2026-09-27).
 MAGICX_VBAT_EMPTY_MV=3400
 MAGICX_VBAT_FULL_MV=4150
 MAGICX_VBAT_TRUST_MV=3500
@@ -251,7 +252,7 @@ magicx_battery_mv() {
 device_get_battery_percent() {
     cap=$(cat "$BATTERY/capacity" 2>/dev/null)
     case "$cap" in ''|*[!0-9]*) echo "$cap"; return ;; esac
-    if [ "$cap" -le 1 ]; then
+    if [ "$cap" -le 1 ] && [ "$(cat /sys/class/power_supply/axp2202-usb/online 2>/dev/null)" != "1" ]; then
         mv=$(magicx_battery_mv)
         if [ -n "$mv" ] && [ "$mv" -ge "$MAGICX_VBAT_TRUST_MV" ]; then
             est=$(( (mv - MAGICX_VBAT_EMPTY_MV) * 100 / (MAGICX_VBAT_FULL_MV - MAGICX_VBAT_EMPTY_MV) ))
@@ -282,8 +283,54 @@ device_low_battery_shutdown_ok() {
 # `echo mem` neither the power key nor the +300 s RTC alarm woke it, and no driver's
 # resume ran). The panel goes dark and the session stops until sleep_helper's pseudo loop
 # sees the power button, or its idle timer powers the board off. The radio stays up.
+#
+# Real suspend-to-RAM where the board has been proven to resume (MAGICX_REAL_SLEEP=1 in its
+# cfg): the Zero 28 on the SDK's firmware and the Zero 40 on MagicX's both came back from
+# `mem` on the RTC alarm (2026-09-24). The XU20 too, with its devices suspending one at a
+# time (MAGICX_PM_ASYNC=0 in its cfg): async suspend never finished there (2026-09-28).
 device_uses_pseudo_sleep() {
-    echo "true"
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then echo "false"; else echo "true"; fi
+}
+
+# The TrimUI boards' real-sleep path (a133p.sh, overridden by the faux-sleep functions
+# below), with one difference: only a module this path unloaded is loaded again, since the
+# Zero 28's radio is an RTL8188ES, not the XR829 a133p.sh reloads unconditionally. The
+# XR829 (Zero 40) has to go: loaded and associated, it refuses the suspend (-EBUSY).
+MAGICX_SLEEP_UNLOADED=/tmp/magicx_sleep_unloaded
+magicx_real_enter_sleep() {
+    log_message "Entering sleep (suspend to RAM) w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    wifi_request suspend --wait
+    usb_wifi_note_sleep
+    usb_wifi_tear_down
+    rm -f "$MAGICX_SLEEP_UNLOADED"
+    if usb_wifi_module_loaded xradio_wlan && rmmod xradio_wlan; then
+        echo xradio_wlan > "$MAGICX_SLEEP_UNLOADED"
+    fi
+    [ -n "$MAGICX_PM_ASYNC" ] && echo "$MAGICX_PM_ASYNC" > /sys/power/pm_async 2>/dev/null
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    trigger_device_sleep
+}
+
+magicx_real_exit_sleep() {
+    clear_wake_alarm "$WAKE_ALARM_PATH"
+    if usb_wifi_wait_after_resume; then
+        wifi_request apply --wait
+        return 0
+    fi
+    _mod=$(cat "$MAGICX_SLEEP_UNLOADED" 2>/dev/null)
+    rm -f "$MAGICX_SLEEP_UNLOADED"
+    if [ -n "$_mod" ]; then
+        modprobe "$_mod"
+        if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
+            for _ in 1 2 3 4 5; do
+                ip link show wlan0 >/dev/null 2>&1 && break
+                sleep 1
+            done
+        fi
+    fi
+    wifi_request apply --wait
+    log_message "Left sleep (suspend to RAM)"
 }
 
 # No MagicX board has a lid; sleep_helper's pseudo loop takes the power button only
@@ -295,8 +342,26 @@ device_lid_open() {
 MAGICX_SLEEP_STOP="MainUI retroarch ra64.trimui drastic drastic64 PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM scummvm ffplay OpenBOR_mod OpenBOR_new mupen64plus"
 MAGICX_SLEEP_BRIGHTNESS=/tmp/magicx_sleep_brightness
 
+# PyUI's SDL2 directory. The base's SDL2_image (2.0.3) predates QOI, so box art converted
+# by "Optimize boxart" would not load. PySDL2 takes a single directory: link the base's
+# SDL2 libraries (DEVICE_PYSDL2_DLL_PATH) next to PyUI's QOI-capable SDL2_image in tmpfs,
+# as the Brick pairs them in spruce/brick/sdl2. Prints the directory.
+magicx_pyui_sdl_dir() {
+    _dir=/tmp/pyui-sdl2
+    mkdir -p "$_dir"
+    rm -f "${_dir:?}"/*
+    for _lib in "${DEVICE_PYSDL2_DLL_PATH:-/usr/magicx/lib}"/libSDL2*; do
+        case "$_lib" in
+            */libSDL2_image*) ;;
+            *) ln -s "$_lib" "$_dir/" ;;
+        esac
+    done
+    ln -s /mnt/SDCARD/App/PyUI/dll/libSDL2_image-2.0.so "$_dir/"
+    echo "$_dir"
+}
+
 # The panel's raw brightness through /dev/disp (DISP_LCD_GET/SET_BRIGHTNESS). Raw on
-# purpose: PyUI mirrors the level on the boards whose backlight PWM is inverted, so sleep
+# purpose: the level is mirrored on the boards whose backlight PWM is inverted, so sleep
 # saves and restores the driver's value instead of re-deriving it from the user's level.
 magicx_disp_brightness() {
     "$DEVICE_PYTHON3_PATH" - "$@" <<'EOF'
@@ -312,8 +377,65 @@ finally:
 EOF
 }
 
+# Level 1..10 -> raw panel value, MagicX only. The curve is PyUI's own (DeviceCommon.
+# map_backlight_from_10_to_full_255: 25 a step, 255 at 10), the one all three panels were
+# tested on; a133p.sh's (level-1)*254/9+1 stays with the TrimUI boards. Mirrored where the
+# backlight PWM is inverted (MAGICX_BACKLIGHT_REVERSED: the XU20 and the Zero 40).
+magicx_backlight_raw() {
+    val="$1"
+    case "$val" in ''|*[!0-9]*) val=1 ;; esac
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+    if [ "$val" -eq 10 ]; then raw=255; else raw=$((val * 25)); fi
+    [ "$MAGICX_BACKLIGHT_REVERSED" = "1" ] && raw=$((256 - raw))
+    echo "$raw"
+}
+
+# The panel only, nothing saved: what PyUI calls for every change. PyUI keeps the level
+# itself, and the screensaver's dim to level 1 must never be saved as the user's level.
+magicx_apply_backlight() {
+    magicx_disp_brightness set "$(magicx_backlight_raw "$1")" 2>/dev/null
+}
+
+# The brightness keys (buttons_watchdog -> brightness_up/down): the panel, then the level
+# saved. Overrides a133p.sh's set_backlight (sourced above).
+set_backlight() {
+    val="$1"
+    case "$val" in ''|*[!0-9]*) return 1 ;; esac
+    [ "$val" -lt 1 ] && val=1
+    [ "$val" -gt 10 ] && val=10
+    magicx_apply_backlight "$val"
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
+# No MagicX board has the TrimUI line's Fn switch. a133p.sh reads it from gpio243 (TrimUI's
+# PH19); on MagicX that pin is L1, so the shared reader must not apply here - nothing, which
+# apply-switch-action treats as "no switch". The XU20's extra button is its Home key (below),
+# never the switch or an Fn key (switchAction/fnF1Action/fnF2Action do not list MagicX).
+device_get_switch_position() {
+    :
+}
+
+# The XU20's extra face button, on images that give it KEY_HOMEPAGE (B_HOME in XU20.cfg):
+# the same Home action as the Smart Pro S's top button (buttons_watchdog.sh calls this).
+device_home_button_pressed() {
+    action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
+    perform_action "$action"
+    case "$action" in
+        "Game Switcher"|"Exit game")
+            rm -f /tmp/cmd_to_run.sh
+            rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
+            ;;
+    esac
+}
+
 device_enter_sleep() {
     IDLE_TIMEOUT="$1"
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then
+        magicx_real_enter_sleep
+        return
+    fi
     log_message "Entering pseudo sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
     # The power watchdog holds the power key with an exclusive grab and runs
     # sleep_helper in the foreground, so sleep_helper's own reader would never see the
@@ -328,6 +450,10 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
+    if [ "$MAGICX_REAL_SLEEP" = "1" ]; then
+        magicx_real_exit_sleep
+        return
+    fi
     echo 0 > /sys/class/graphics/fb0/blank 2>/dev/null
     _raw=$(cat "$MAGICX_SLEEP_BRIGHTNESS" 2>/dev/null)
     rm -f "$MAGICX_SLEEP_BRIGHTNESS"

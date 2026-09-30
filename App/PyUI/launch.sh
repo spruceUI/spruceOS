@@ -340,7 +340,7 @@ case "$PLATFORM" in
     "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
-        export PYSDL2_DLL_PATH="/usr/magicx/lib"
+        export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         if [ "$PLATFORM" = "Zero40" ]; then
             DEVICE="MAGICX_ZERO40"
         elif [ "$PLATFORM" = "XU20" ]; then

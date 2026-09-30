@@ -39,9 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		# The XU20 is deliberately absent: its motor is driven by the vendor's
-		# sunxi-vibrator off a regulator, not a GPIO, so there is no sysfs value here.
-		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"Flip")
+		"SmartPro"|"Brick"|"BrickPro"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac

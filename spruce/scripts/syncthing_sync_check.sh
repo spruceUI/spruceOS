@@ -186,7 +186,7 @@ monitor_start_button() {
     echo "$GE_PID" > /tmp/syncthing_getevent.pid
 
     while true; do
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "SyncthingCheck: START button pressed - cancelling sync"

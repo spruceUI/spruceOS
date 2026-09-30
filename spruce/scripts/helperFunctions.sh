@@ -144,6 +144,21 @@ ensure_ra_config_path() {
     unset _rac_live _rac_bak
 }
 
+# last_key_line FILE KEY...: the latest line of a getevent capture that is one of KEY
+# (each a "<type> <code>" pair as in B_A, or a Miyoo Mini key name). Not the capture's
+# last line: a pad may send a second code for one press (MagicX simplepad "code2": A is
+# 305 then 353, XU20 B is 304 then 158), and that rider would hide the key pressed.
+last_key_line() {
+    _klf=$1
+    shift
+    for _k in "$@"; do
+        shift
+        [ -n "$_k" ] && set -- "$@" -e "key $_k "
+    done
+    [ $# -gt 0 ] || return 0
+    grep -F "$@" "$_klf" 2>/dev/null | tail -n 1
+}
+
 # Call this just by having "acknowledge" in your script
 # This will pause until the user presses the A, B, or Start button
 acknowledge() {
@@ -154,7 +169,7 @@ acknowledge() {
     GE_PID=$!
 
     while true; do
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START_2" "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
                     log_message "last_line: $line" -v
@@ -194,7 +209,7 @@ confirm() {
     RET_VAL=2
     while [ "$RET_VAL" -eq 2 ]; do
         # 1. Check for User Input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
@@ -582,6 +597,22 @@ log_precise() {
     uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
     timestamp="${date_part}.${uptime_part#*.}"
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
+}
+
+# battery_snapshot EVENT: one line per power-off and per boot in Saves/spruce/battery-history.log
+# (epoch, event, percent, gauge raw percent, mV), so drain while the device was off can be read as
+# the difference between a "poweroff" line and the next "boot" line. Kept to the last 200 lines.
+battery_snapshot() {
+    _bs_log=/mnt/SDCARD/Saves/spruce/battery-history.log
+    _bs_raw=$(cat "$BATTERY/capacity" 2>/dev/null)
+    _bs_uv=$(cat "$BATTERY/voltage_now" 2>/dev/null)
+    case "$_bs_uv" in ''|*[!0-9]*) _bs_mv=- ;; *) [ "$_bs_uv" -gt 100000 ] && _bs_mv=$((_bs_uv / 1000)) || _bs_mv=$_bs_uv ;; esac
+    printf '%s %s %s%% raw=%s%% %smV\n' "$(date +%s)" "$1" "$(device_get_battery_percent 2>/dev/null)" \
+        "${_bs_raw:--}" "$_bs_mv" >> "$_bs_log" 2>/dev/null
+    if [ "$(wc -l < "$_bs_log" 2>/dev/null || echo 0)" -gt 200 ]; then
+        tail -n 200 "$_bs_log" > "$_bs_log.tmp" 2>/dev/null && mv "$_bs_log.tmp" "$_bs_log"
+    fi
+    unset _bs_log _bs_raw _bs_uv _bs_mv
 }
 
 low_battery_check() {
@@ -1691,7 +1722,7 @@ check_and_connect_wifi() {
 
     while true; do
         # 1. Check for user input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
