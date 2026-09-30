@@ -69,7 +69,7 @@ confirm_update() {
 		"Flip")
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
-		"Brick"|"SmartPro"*)
+		"Brick"|"BrickPro"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
 	esac
