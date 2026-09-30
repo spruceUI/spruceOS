@@ -14,6 +14,7 @@ from devices.utils.file_watcher import FileWatcher
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class MagicXA133PDevice(TrimUIDevice):
@@ -72,16 +73,16 @@ class MagicXA133PDevice(TrimUIDevice):
         self.touch_watcher = TouchWatcher(self.touch_event_path, self)
         threading.Thread(target=self.touch_watcher.poll, daemon=True).start()
 
-    # The panel belongs to the shell: magicx_apply_backlight (magicx_a133p.sh) owns the
-    # level -> raw curve and, on the XU20 and the Zero 40, the inverted backlight PWM.
-    # PyUI hands it the level and nothing else. Panel only: PyUI saves the level itself,
-    # and the screensaver's dim must not be saved.
-    SPRUCE_HELPER_FUNCTIONS = "/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
-
+    # The level -> raw curve and, on the XU20 and the Zero 40, the inverted backlight PWM
+    # live behind py-ui-config's backlightCmd; PyUI hands it the level and nothing else.
+    # Panel only: PyUI saves the level itself, and the screensaver's dim must not be saved.
     def _set_lumination_to_config(self):
         level = int(self.system_config.backlight)
+        backlight_cmd = PyUiConfig.get_backlight_cmd()
+        if not backlight_cmd or not os.path.exists(backlight_cmd):
+            return
         try:
-            subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && magicx_apply_backlight {level}"],
+            subprocess.run([backlight_cmd, str(level)],
                            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                            timeout=10, check=False)
         except Exception as e:

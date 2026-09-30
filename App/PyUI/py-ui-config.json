@@ -18,6 +18,7 @@
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
+    "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
     "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",

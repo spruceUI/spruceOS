@@ -255,6 +255,10 @@ class PyUiConfig:
         return cls.get("cpuModeCmd",None)
 
     @classmethod
+    def get_backlight_cmd(cls):
+        return cls.get("backlightCmd",None)
+
+    @classmethod
     def get_wifi_cmd(cls):
         return cls.get("wifiCmd",None)
 

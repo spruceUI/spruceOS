@@ -391,9 +391,10 @@ magicx_backlight_raw() {
     echo "$raw"
 }
 
-# The panel only, nothing saved: what PyUI calls for every change. PyUI keeps the level
-# itself, and the screensaver's dim to level 1 must never be saved as the user's level.
-magicx_apply_backlight() {
+# The panel only, nothing saved: PyUI's backlightCmd (App/PyUI/set-backlight.sh) calls it
+# for every change. PyUI keeps the level itself, and the screensaver's dim to level 1 must
+# never be saved as the user's level.
+apply_backlight() {
     magicx_disp_brightness set "$(magicx_backlight_raw "$1")" 2>/dev/null
 }
 
@@ -404,7 +405,7 @@ set_backlight() {
     case "$val" in ''|*[!0-9]*) return 1 ;; esac
     [ "$val" -lt 1 ] && val=1
     [ "$val" -gt 10 ] && val=10
-    magicx_apply_backlight "$val"
+    apply_backlight "$val"
     tmp="${SYSTEM_JSON}.tmp.$$"
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
