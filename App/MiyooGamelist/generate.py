@@ -150,8 +150,8 @@ class GamelistGenerator:
 
     EXCLUDED_SYSTEMS = {
         "PORTS", "FBNEO", "MAME2003PLUS", "ARCADE", "NEOGEO",
-        "CPS1", "CPS2", "CPS3", "FFPLAY", "EASYRPG", "MSUMD",
-        "SCUMMVM", "WOLF", "QUAKE", "DOOM",
+        "CPS1", "CPS2", "CPS3", "NAOMI", "ATOMISWAVE", "FFPLAY",
+        "EASYRPG", "MSUMD", "SCUMMVM", "WOLF", "QUAKE", "DOOM",
     }
 
     # Patterns used by delete_gamelist_files to skip certain directories
