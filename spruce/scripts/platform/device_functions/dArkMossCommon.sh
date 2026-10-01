@@ -30,6 +30,10 @@ device_init() {
     clear_stale_pmic_power_en &
 }
 
+new_execution_loop() {
+    log_message "new_execution_loop unneeded on this device" -v
+}
+
 # Debian's sshd owns port 22; anything but "dropbearmulti" sends the SSH toggle
 # down its systemctl branch. The unit is "ssh", not "sshd". The spruce login is
 # baked into the image by setup_spruce_handoff-rk3566.sh.
