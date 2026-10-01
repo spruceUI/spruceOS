@@ -68,6 +68,19 @@ emu_option_key_for_device() {
 }
 
 set_emu_core_from_emu_json() {
+    # An Emulator_32/Emulator_64 picked by raBuild wins over Emulator_$PLATFORM,
+    # as in PyUI's get_selected_emulator.
+    DEV_KEY="$(emu_option_key_for_device)"
+    case "$RA_BUILD:$DEV_KEY" in
+        32-bit:Emulator_32|64-bit:Emulator_64)
+            CORE_SEL="$(jq -r --arg k "$DEV_KEY" '.menuOptions[$k].selected // empty' "$EMU_JSON_PATH" 2>/dev/null)"
+            if [ -n "$CORE_SEL" ]; then
+                export CORE="$CORE_SEL"
+                return
+            fi
+            ;;
+    esac
+
     # Try to use platform-specific emulator if it exists
     CORE_PATH=".menuOptions.Emulator_$PLATFORM.selected"
     if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then

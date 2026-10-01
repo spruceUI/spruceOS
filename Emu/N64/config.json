@@ -49,7 +49,9 @@
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "64-bit",
@@ -83,7 +85,9 @@
       "display": "Emulator32",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",

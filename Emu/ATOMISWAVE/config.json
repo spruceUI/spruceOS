@@ -37,7 +37,9 @@
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "64-bit",
@@ -55,7 +57,9 @@
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "RGB30",
+        "MINILOONG_POCKET1"
       ],
       "options": [
         "Flycast-libretro",
