@@ -241,7 +241,7 @@ run_dsperate() {
 				_config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini" 
 				;;
 			*)
-				if [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ]; then
+				if [ "$PLATFORM" = "RGB30" ]; then
 					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
 					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini"
 
