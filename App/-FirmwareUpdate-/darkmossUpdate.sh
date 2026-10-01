@@ -1,5 +1,5 @@
 #!/bin/sh
-# dArkMoss update for the RGB30 and Miniloong, called by firmwareUpdate.sh.
+# dArkMoss update for the RGB30, RGB20SX and Miniloong, called by firmwareUpdate.sh.
 #
 # Every dArkMoss release ships a dArkMoss_<UNIT>_<tag>.dmupd beside its image:
 # the boot partition plus the rootfs files the dArkMoss build authored, with its
@@ -12,7 +12,9 @@
 SD_ROOT="/mnt/SDCARD"
 API="https://api.github.com/repos/spruceUI/dArkMoss/releases/latest"
 MANUAL_HELP="Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device."
-UNIT="$(printf '%s' "$PLATFORM" | tr 'a-z' 'A-Z')"
+# The image's unit, not $PLATFORM: the RGB20SX runs the RGB30 image.
+UNIT="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+UNIT="$(printf '%s' "${UNIT:-$PLATFORM}" | tr 'a-z' 'A-Z')"
 
 bail() {
     log_and_display_message "$1"

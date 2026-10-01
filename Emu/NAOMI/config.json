@@ -37,7 +37,8 @@
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",
@@ -55,7 +56,8 @@
         "TRIMUI_BRICK",
         "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "DARKMOSS"
       ],
       "options": [
         "Flycast-libretro",

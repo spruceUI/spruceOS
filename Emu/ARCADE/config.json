@@ -28,14 +28,16 @@
       "overrides": {},
       "devices": [
         "MIYOO_A30",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
       ]
     },
     "raBuild": {
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",

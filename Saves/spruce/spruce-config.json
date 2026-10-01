@@ -361,7 +361,7 @@
                 "selected": "L3"
             },
             "volumeButtons": {
-                "devices": ["RGB30"],
+                "devices": ["RGB30", "RGB20SX"],
                 "display": "Volume buttons",
                 "description": "Swap up and down if your rocker is fitted the other way",
                 "options": [

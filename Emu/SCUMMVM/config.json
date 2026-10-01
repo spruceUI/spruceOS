@@ -22,7 +22,8 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "DARKMOSS"
       ]
     },
     {
@@ -41,7 +42,8 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "DARKMOSS"
       ]
     },
     {
@@ -60,7 +62,8 @@
         "MIYOO_MINI_V4",
         "MIYOO_MINI_PLUS",
         "MIYOO_MINI_FLIP",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "DARKMOSS"
       ]
     }
   ],
@@ -113,7 +116,8 @@
         "MIYOO_FLIP",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P"
+        "MAGICX_A133P",
+        "DARKMOSS"
       ],
       "selected": "scummvm-standalone",
       "overrides": {}
@@ -132,8 +136,7 @@
     "MIYOO_MINI_V4",
     "MIYOO_MINI_PLUS",
     "MIYOO_MINI_FLIP",
-    "RGB30",
-    "MINILOONG_POCKET1",
+    "DARKMOSS",
     "MAGICX_A133P"
   ],
   "sortOrder": 5600,
