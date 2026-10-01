@@ -30,8 +30,8 @@ class ThemeSettingsFonts(ThemeSettingsMenuCommon):
         option_list.append(
                 self.build_enabled_disabled_entry(
                     primary_text=Language.useTextForLineHeight(),
-                    get_value_func=lambda  :  Theme.get_use_text_for_line_height_non_descriptive_list_view(),
-                    set_value_func=lambda  val :  Theme.set_use_text_for_line_height_non_descriptive_list_view(val)
+                    get_value_func=lambda  :  Theme.get_use_text_for_line_height(),
+                    set_value_func=lambda  val :  Theme.set_use_text_for_line_height(val)
                 )
             )        
         return option_list

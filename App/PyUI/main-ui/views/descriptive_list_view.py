@@ -26,7 +26,7 @@ class DescriptiveListView(ListView):
 
         self.selected_bg = selected_bg
         self.each_entry_width, self.each_entry_height = Display.get_image_dimensions(selected_bg)
-        if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+        if(Theme.get_use_text_for_line_height()):
             self.each_entry_height = self._calculate_line_height(include_description_line=True)   
 
 
@@ -136,7 +136,7 @@ class DescriptiveListView(ListView):
 
                     value_text = "< " + value_text + " >"
 
-                if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+                if(Theme.get_use_text_for_line_height()):
                     value_y = title_y_offset
                     value_render_mode = title_render_mode
                     value_width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, value_text)
