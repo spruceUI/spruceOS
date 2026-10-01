@@ -10,7 +10,7 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
-from devices.darkmoss_common import darkmoss_fw_version
+from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -25,7 +25,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 
-class MiniloongPocket1(DeviceCommon):
+class MiniloongPocket1(DarkmossPanelCalibration, DeviceCommon):
     """Miniloong Pocket 1 (RK3566, Mali-G52) on dArkMoss.
 
     Shape follows the RGB30 class: same base OS, same retrogame_joypad driver,
@@ -180,18 +180,6 @@ class MiniloongPocket1(DeviceCommon):
                 f.write("0")
         except OSError as e:
             PyUiLogger.get_logger().error(f"Miniloong: backlight write failed: {e}")
-
-    def _set_brightness_to_config(self):
-        pass
-
-    def _set_contrast_to_config(self):
-        pass
-
-    def _set_saturation_to_config(self):
-        pass
-
-    def _set_hue_to_config(self):
-        pass
 
     # ---- audio ----
 
@@ -354,18 +342,6 @@ class MiniloongPocket1(DeviceCommon):
 
     def get_save_state_image(self, rom_info: RomInfo):
         return self.get_game_system_utils().get_save_state_image(rom_info)
-
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False
 
     def get_game_system_utils(self):
         return self.game_utils

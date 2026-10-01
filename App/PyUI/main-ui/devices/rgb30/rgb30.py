@@ -11,7 +11,7 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller import HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
-from devices.darkmoss_common import darkmoss_fw_version
+from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
@@ -108,7 +108,7 @@ class Rgb30KeyMappingProvider:
         return axis.get_mapped_events(key_event.value, self.DEADZONE)
 
 
-class Rgb30(DeviceCommon):
+class Rgb30(DarkmossPanelCalibration, DeviceCommon):
     """Powkiddy RGB30 running dArkMoss.
 
     dArkMoss is our fork of dArkOS - Debian trixie - on TF1; spruce runs from
@@ -329,9 +329,6 @@ class Rgb30(DeviceCommon):
     #def reboot(self):
     #    ProcessRunner.run(["/opt/muos/script/system/halt.sh", "reboot"])
 
-    def _set_brightness_to_config(self):
-        pass
-
     # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
     BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
 
@@ -342,15 +339,6 @@ class Rgb30(DeviceCommon):
                 f.write(str(self.BACKLIGHT_TABLE[level]))
         except OSError as e:
             PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
-
-    def _set_contrast_to_config(self):
-        pass
-
-    def _set_saturation_to_config(self): 
-        pass
-
-    def _set_hue_to_config(self):
-        pass
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -507,18 +495,6 @@ class Rgb30(DeviceCommon):
         # which was invisible until take_screenshot() started producing files
         # on this device at all.
         return self.get_game_system_utils().get_save_state_image(rom_info)
-
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False
 
     def keep_running_on_error(self):
         return False
