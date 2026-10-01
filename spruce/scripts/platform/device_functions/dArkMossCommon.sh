@@ -26,6 +26,7 @@ device_init() {
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     darkmoss_debug_dump
+    clear_stale_pmic_power_en &
 }
 
 # Debian's sshd owns port 22; anything but "dropbearmulti" sends the SSH toggle
@@ -655,6 +656,22 @@ darkmoss_drm_holders() {
                 ;;
         esac
     done
+}
+
+# Mainline (ROCKNIX) leaves fuel gauge data in RK817 0x99/0xa4; the BSP kernel
+# restores regulator enables from them at poweroff, which reboots the device.
+clear_stale_pmic_power_en() {
+    "$DEVICE_PYTHON3_PATH" - <<'EOF' | while read -r line; do log_message "$line"; done
+import fcntl, os
+fd = os.open("/dev/i2c-0", os.O_RDWR)
+fcntl.ioctl(fd, 0x0706, 0x20)
+for reg in (0x99, 0xa4):
+    os.write(fd, bytes([reg]))
+    value = os.read(fd, 1)[0]
+    if value:
+        os.write(fd, bytes([reg, 0]))
+        print(f"RK817: cleared stale 0x{reg:02x} (was 0x{value:02x})")
+EOF
 }
 
 # A snapshot of the machine on every boot, for reading off the card.
