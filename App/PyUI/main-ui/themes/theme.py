@@ -1111,6 +1111,11 @@ class Theme():
         return cls._data.get("textAndImageListViewMode", "TEXT_LEFT_IMAGE_RIGHT")
 
     @classmethod
+    def set_text_and_image_list_view_mode(cls, value):
+        cls._data["textAndImageListViewMode"] = value
+        cls.save_changes()
+
+    @classmethod
     def scroll_rom_selection_text(cls):
         return cls._data.get("scrollRomSelectionText", True)
 
@@ -1366,6 +1371,25 @@ class Theme():
     @classmethod
     def set_list_game_select_img_height(cls, value):
         cls._data["listGameSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_img_height_for_top_bottom_view(cls):
+        from display.display import Display
+        return cls._data.get("listGameSelectImgHeightTopBottomView", int(Display.get_usable_screen_height() * Theme.get_img_percent_top_bottom_view()/100))
+    
+    @classmethod
+    def set_img_height_for_top_bottom_view(cls, value):
+        cls._data["imgPercentTopBottomView"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_img_percent_top_bottom_view(cls):
+        return cls._data.get("imgPercentTopBottomView", 60)
+    
+    @classmethod
+    def set_img_percent_top_bottom_view(cls, value):
+        cls._data["imgPercentTopBottomView"] = value
         cls.save_changes()
 
     @classmethod

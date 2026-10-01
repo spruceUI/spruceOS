@@ -7,7 +7,6 @@ from display.render_mode import RenderMode
 from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from themes.theme import Theme
-from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
@@ -34,7 +33,7 @@ class ImageListView(NonDescriptiveListView):
         self.scroll_text_amount = 0
         self.selected_same_entry_time = time.time()
         self.space_width, self.char_height = Display.get_text_dimensions(FontPurpose.LIST," ")
-    
+
     def _render_text(self, visible_options):
         for visible_index, (imageTextPair) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
