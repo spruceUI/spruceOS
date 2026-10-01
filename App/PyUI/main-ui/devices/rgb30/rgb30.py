@@ -55,8 +55,9 @@ class Rgb30KeyMappingProvider:
         BTN_THUMBR: ControllerInput.R3,
     }
 
-    def __init__(self, key_mappings):
+    def __init__(self, key_mappings, menu_from_thumb=True):
         self.key_mappings = key_mappings
+        self.menu_from_thumb = menu_from_thumb
         self.stick_axes = {
             self.ABS_X: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
             self.ABS_Y: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
@@ -68,6 +69,8 @@ class Rgb30KeyMappingProvider:
         self.thumb_pressed_as = {}
 
     def _menu_thumb_code(self):
+        if not self.menu_from_thumb:
+            return None
         # Read per click rather than caching: the controller is built once at
         # init, so a cached value would need a PyUI restart to take effect.
         # CfwSystemConfig serves this from its in-memory copy, and a stick click
@@ -119,6 +122,7 @@ class Rgb30(DeviceCommon):
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
     SYSTEM_JSON_DEFAULT = "rgb30-system.json"
+    MENU_KEY = None
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -209,6 +213,8 @@ class Rgb30(DeviceCommon):
 
         bind(315, ControllerInput.START)
         bind(314, ControllerInput.SELECT)
+        if self.MENU_KEY is not None:
+            bind(self.MENU_KEY, ControllerInput.MENU)
 
         # 317/318 are BTN_THUMBL/BTN_THUMBR. The device has no dedicated menu
         # button, so one stick click has to be it - a deliberate trade of L3 or
@@ -232,7 +238,7 @@ class Rgb30(DeviceCommon):
             # this too.
             event_format="llHHi",
             event_path=self._resolve_joypad(),
-            mapping_provider=Rgb30KeyMappingProvider(key_mappings),
+            mapping_provider=Rgb30KeyMappingProvider(key_mappings, menu_from_thumb=self.MENU_KEY is None),
         )
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
