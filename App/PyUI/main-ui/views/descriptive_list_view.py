@@ -18,7 +18,7 @@ class DescriptiveListView(ListView):
                  options: List[GridOrListEntry], selected_bg, selected : int = 0,
                  icon_and_desc_use_image_in_place_of_icon=None):
         super().__init__()
-        self.use_icons_to_calculate_line_height = True
+        self.use_icons_to_calculate_line_height = False
         self.icon_and_desc_use_image_in_place_of_icon = icon_and_desc_use_image_in_place_of_icon
         self.top_bar_text = top_bar_text
         self.set_options(options)
