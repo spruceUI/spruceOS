@@ -1781,9 +1781,9 @@ class Theme():
 
     @classmethod
     def get_use_text_for_line_height_non_descriptive_list_view(cls):
-        return cls._data.get("useTextForLineHeightForNonDescriptiveListView", False)
+        return cls._data.get("useTextForLineHeight", True)
 
     @classmethod
     def set_use_text_for_line_height_non_descriptive_list_view(cls, value):
-        cls._data["useTextForLineHeightForNonDescriptiveListView"] = value
+        cls._data["useTextForLineHeight"] = value
         cls.save_changes()
