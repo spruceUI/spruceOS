@@ -783,7 +783,7 @@ class Theme():
 
     @classmethod
     def get_descriptive_list_text_offset_y(cls):
-        if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+        if(Theme.get_use_text_for_line_height()):
             return cls._data.get("descriptiveListTextOffsetY", 0)
         else:
             return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
@@ -1780,10 +1780,10 @@ class Theme():
         return cls._data.get("screensaver", {}).get("dimBacklight", True)
 
     @classmethod
-    def get_use_text_for_line_height_non_descriptive_list_view(cls):
-        return cls._data.get("useTextForLineHeightForNonDescriptiveListView", False)
+    def get_use_text_for_line_height(cls):
+        return cls._data.get("useTextForLineHeight", False)
 
     @classmethod
-    def set_use_text_for_line_height_non_descriptive_list_view(cls, value):
-        cls._data["useTextForLineHeightForNonDescriptiveListView"] = value
+    def set_use_text_for_line_height(cls, value):
+        cls._data["useTextForLineHeight"] = value
         cls.save_changes()

@@ -189,7 +189,7 @@ class ListView(View):
             return text
 
     def _calculate_line_height(self, include_description_line):
-        use_text_for_line_height_non_descriptive_list_view = Theme.get_use_text_for_line_height_non_descriptive_list_view()
+        use_text_for_line_height_non_descriptive_list_view = Theme.get_use_text_for_line_height()
         padding = 10  # add 10px padding between lines <-- Configure based on resolution
         text_line_height = Display.get_line_height(FontPurpose.LIST)
         text_line_height += padding
