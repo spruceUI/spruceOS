@@ -60,6 +60,10 @@ case $INFO in
                     *)           PLATFORM="RGB30" ;;
                 esac
             fi
+            # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
+            if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
+                PLATFORM="RGB20SX"
+            fi
             export PLATFORM
         else
             export PLATFORM="Flip"
@@ -109,8 +113,9 @@ device_names() {
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
         Flip)             echo "MIYOO_FLIP" ;;
         Pixel2)           echo "GKD_PIXEL2" ;;
-        RGB30)            echo "RGB30" ;;
-        Miniloong)        echo "MINILOONG_POCKET1" ;;
+        RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
+        RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
+        Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;

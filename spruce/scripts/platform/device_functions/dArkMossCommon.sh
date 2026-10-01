@@ -19,6 +19,7 @@
 DARKMOSS_DEBUG_LOG="/mnt/SDCARD/Saves/spruce/darkmoss_debug.log"
 
 device_init() {
+    migrate_platform_files
     resolve_pad_node
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
     resolve_key_event_node
@@ -655,6 +656,27 @@ darkmoss_drm_holders() {
                 echo "  pid $_pid ($_cmd) -> $_tgt"
                 ;;
         esac
+    done
+}
+
+# A device that used to run as another platform (the RGB20SX ran as RGB30)
+# keeps what it saved under the old name.
+migrate_platform_files() {
+    [ -n "$PLATFORM_MIGRATE_FROM" ] || return 0
+    _old="$PLATFORM_MIGRATE_FROM"
+    _old_lc="$(echo "$_old" | tr 'A-Z' 'a-z')"
+    _ppsspp="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
+    for _pair in \
+        "/mnt/SDCARD/App/PyUI/config/${_old_lc}-system.json|$SYSTEM_JSON" \
+        "/mnt/SDCARD/Saves/ra-configs/retroarch-$_old.cfg|/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg" \
+        "$_ppsspp/ppsspp-$_old.ini|$_ppsspp/ppsspp-$PLATFORM.ini" \
+        "$_ppsspp/controls-$_old.ini|$_ppsspp/controls-$PLATFORM.ini" \
+        "/mnt/SDCARD/Saves/saves/advmame/$_old|/mnt/SDCARD/Saves/saves/advmame/$PLATFORM"; do
+        _src="${_pair%%|*}"
+        _dst="${_pair#*|}"
+        if [ -e "$_src" ] && [ ! -e "$_dst" ]; then
+            cp -a "$_src" "$_dst" && log_message "$PLATFORM: carried over $_src"
+        fi
     done
 }
 

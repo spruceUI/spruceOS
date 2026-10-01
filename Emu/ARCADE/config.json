@@ -36,8 +36,7 @@
       "devices": [
         "MIYOO_FLIP",
         "ANBERNIC_RGXX",
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",

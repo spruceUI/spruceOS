@@ -25,8 +25,7 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "PCSX-ReARMed-standalone",
@@ -54,8 +53,7 @@
       "devices": [
         "MIYOO_FLIP",
         "ANBERNIC_RGXX",
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",

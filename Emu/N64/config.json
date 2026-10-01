@@ -20,8 +20,7 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "mupen64plus-standalone",
@@ -50,8 +49,7 @@
       "devices": [
         "MIYOO_FLIP",
         "ANBERNIC_RGXX",
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",
@@ -86,8 +84,7 @@
       "devices": [
         "MIYOO_FLIP",
         "ANBERNIC_RGXX",
-        "RGB30",
-        "MINILOONG_POCKET1"
+        "DARKMOSS"
       ],
       "options": [
         "km_ludicrousn64_2k22_xtreme_amped",
@@ -123,8 +120,7 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30",
-    "MINILOONG_POCKET1",
+    "DARKMOSS",
     "MAGICX_A133P"
   ],
   "alternativeFolderNames": [
