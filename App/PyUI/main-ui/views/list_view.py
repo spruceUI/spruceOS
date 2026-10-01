@@ -209,7 +209,6 @@ class ListView(View):
         if(self.selected_bg is not None):
             bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
 
-        PyUiLogger.get_logger().info(f"text_line_height={text_line_height}, icon_line_height={icon_line_height}, bg_height={bg_height}")
         if(use_text_for_line_height_non_descriptive_list_view):
             return max(text_line_height, icon_line_height)
         else:

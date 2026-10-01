@@ -556,12 +556,20 @@ class Language:
         return cls._data.get("animationSpeed","Animation Speed")
 
     @classmethod
+    def image_list_view_mode(cls):
+        return cls._data.get("imageListViewMode","Image List Mode")
+
+    @classmethod
+    def image_list_view_mode(cls):
+        return cls._data.get("imageListViewMode","Image List Mode")
+
+    @classmethod
     def input_rate_limit_ms(cls):
         return cls._data.get("inputRateLimitMs","Input Rate Limiting (ms)")
 
     @classmethod
-    def stock_os_menu(cls):
-        return cls._data.get("stockOsMenu","Stock OS Menu")
+    def image_top_bottom_percent(cls):
+        return cls._data.get("imageTopBottomPercent","Image % of Screen")
 
     @classmethod
     def optimize_boxart(cls):
@@ -822,6 +830,10 @@ class Language:
     @classmethod
     def fonts(cls):
         return cls._data.get("Fonts","Fonts")
+
+    @classmethod
+    def misc(cls):
+        return cls._data.get("Miscellaneous","Miscellaneous")
 
     @classmethod
     def grid_view_theme_options(cls):
