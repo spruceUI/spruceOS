@@ -117,6 +117,8 @@ class Rgb30(DeviceCommon):
     # The pad's stable by-path node - singleadc-joypad, with no distro prefix,
     # confirmed on hardware.
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
+    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
+    SYSTEM_JSON_DEFAULT = "rgb30-system.json"
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -142,7 +144,7 @@ class Rgb30(DeviceCommon):
         # the Anbernic XX.
         from devices.utils.file_watcher import FileWatcher
         self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-            "/mnt/SDCARD/App/PyUI/config/rgb30-system.json", self.on_system_config_changed,
+            self.SYSTEM_JSON, self.on_system_config_changed,
             interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
     def on_system_config_changed(self):
@@ -171,9 +173,8 @@ class Rgb30(DeviceCommon):
         base_dir = os.path.abspath(sys.path[0])
         self.script_dir = os.path.join(base_dir, "devices", "rgb30")
         self.parent_dir = os.path.dirname(base_dir)
-        source = os.path.join(self.script_dir, "rgb30-system.json")
-        system_json_path = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
-        self._load_system_config(system_json_path, Path(source))
+        source = os.path.join(self.script_dir, self.SYSTEM_JSON_DEFAULT)
+        self._load_system_config(self.SYSTEM_JSON, Path(source))
 
     def _resolve_joypad(self):
         if os.path.exists(self.JOYPAD_NODE):
@@ -257,6 +258,9 @@ class Rgb30(DeviceCommon):
 
     def get_device_name(self):
         return self.device_name
+
+    def get_device_names(self):
+        return [self.device_name, "DARKMOSS"]
 
     def screen_width(self):
         return 720

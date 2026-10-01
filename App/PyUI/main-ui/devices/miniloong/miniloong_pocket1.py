@@ -133,6 +133,9 @@ class MiniloongPocket1(DeviceCommon):
     def get_device_name(self):
         return self.device_name
 
+    def get_device_names(self):
+        return [self.device_name, "DARKMOSS"]
+
     def screen_width(self):
         return 960
 
