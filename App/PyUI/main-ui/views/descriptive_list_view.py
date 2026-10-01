@@ -135,13 +135,24 @@ class DescriptiveListView(ListView):
                         value_text = value_text[:max_value_text_length-3] + "..."
 
                     value_text = "< " + value_text + " >"
+
+                if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+                    value_y = title_y_offset
+                    value_render_mode = title_render_mode
+                    value_width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, value_text)
+                    value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset() - value_width
+                else:
+                    value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset()
+                    value_y = row_offset_y + self.each_entry_height // 2
+                    value_render_mode = RenderMode.MIDDLE_RIGHT_ALIGNED
+
                 Display.render_text(
                     value_text, 
-                    Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset(), 
-                    row_offset_y + self.each_entry_height // 2, 
+                    value_x, 
+                    value_y, 
                     color, 
                     FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                    RenderMode.MIDDLE_RIGHT_ALIGNED)
+                    value_render_mode)
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)
             

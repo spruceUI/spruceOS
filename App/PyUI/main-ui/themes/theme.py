@@ -783,7 +783,10 @@ class Theme():
 
     @classmethod
     def get_descriptive_list_text_offset_y(cls):
-        return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
+        if(Theme.get_use_text_for_line_height_non_descriptive_list_view()):
+            return cls._data.get("descriptiveListTextOffsetY", 0)
+        else:
+            return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
 
     @classmethod
     def get_descriptive_list_text_from_icon_offset(cls):
