@@ -55,9 +55,8 @@ class Rgb30KeyMappingProvider:
         BTN_THUMBR: ControllerInput.R3,
     }
 
-    def __init__(self, key_mappings, menu_from_thumb=True):
+    def __init__(self, key_mappings):
         self.key_mappings = key_mappings
-        self.menu_from_thumb = menu_from_thumb
         self.stick_axes = {
             self.ABS_X: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
             self.ABS_Y: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
@@ -69,15 +68,18 @@ class Rgb30KeyMappingProvider:
         self.thumb_pressed_as = {}
 
     def _menu_thumb_code(self):
-        if not self.menu_from_thumb:
-            return None
         # Read per click rather than caching: the controller is built once at
         # init, so a cached value would need a PyUI restart to take effect.
         # CfwSystemConfig serves this from its in-memory copy, and a stick click
         # is not a hot path. Anything but R3, including a missing option on an
-        # older config, leaves the L3 default.
+        # older config, leaves the L3 default. A device the option does not
+        # list has a real menu key, so neither click is the menu.
+        from devices.device import Device
         from utils.cfw_system_config import CfwSystemConfig
-        if "R3" == CfwSystemConfig.get_selected_value("Button Settings", "menuButton"):
+        option = CfwSystemConfig.get_menu_option("Button Settings", "menuButton") or {}
+        if not Device.supports_device(option.get("devices")):
+            return None
+        if "R3" == option.get("selected"):
             return self.BTN_THUMBR
         return self.BTN_THUMBL
 
@@ -238,7 +240,7 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
             # this too.
             event_format="llHHi",
             event_path=self._resolve_joypad(),
-            mapping_provider=Rgb30KeyMappingProvider(key_mappings, menu_from_thumb=self.MENU_KEY is None),
+            mapping_provider=Rgb30KeyMappingProvider(key_mappings),
         )
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
