@@ -526,7 +526,7 @@ for f in /mnt/SDCARD/Saves/*.json \
          /mnt/SDCARD/Saves/spruce/*.json \
          /mnt/SDCARD/RetroArch/.retroarch/logs/* \
          /mnt/SDCARD/RetroArch/.retroarch/config/* \
-         /mnt/SDCARD/RetroArch/platform/* \
+         /mnt/SDCARD/Saves/ra-configs/* \
          /mnt/SDCARD/App/*/log.txt \
          /mnt/SDCARD/App/*/*/log.txt \
          /mnt/SDCARD/spruce/spruce; do
