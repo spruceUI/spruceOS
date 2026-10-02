@@ -347,7 +347,6 @@ set_api_key() {
     fi
 
     API_KEY=$(sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$CONFIG_XML")
-    log_message "SyncthingCheck: API key: $API_KEY"
 
     if [ -z "$API_KEY" ]; then
         log_message "SyncthingCheck: Error: No API key found in config.xml" >&2

@@ -513,16 +513,91 @@ SCANEOF
     if [ -n "$_klog" ]; then echo "$_klog" | redact_mac | sed 's/^/  /'; else echo "  <nothing matched>"; fi
 } > "$device_state" 2>&1
 
-7zr a -spf2 "$output7z" \
-            -i'!/mnt/SDCARD/Saves/*.json' \
-            -i'!/mnt/SDCARD/Saves/cache/*.json' \
-            -i'!/mnt/SDCARD/Saves/spruce/*.log' \
-            -i'!/mnt/SDCARD/Saves/spruce/*.json' \
-            -i'!/mnt/SDCARD/RetroArch/.retroarch/logs/*' \
-            -i'!/mnt/SDCARD/RetroArch/.retroarch/config/*' \
-            -i'!/mnt/SDCARD/RetroArch/platform/*' \
-            -i'!/mnt/SDCARD/App/*/log.txt' \
-            -i'!/mnt/SDCARD/App/*/*/log.txt' \
-            -i'!/mnt/SDCARD/spruce/spruce'
+# Nothing is packed from where it lives. The files are copied to a staging
+# folder, the copies are redacted, and only the copies go into the archive.
+stage=/mnt/SDCARD/.bug_report_staging
+secrets=/tmp/bug_report_secrets
+rules=/tmp/bug_report_rules.sed
+
+rm -rf "$stage"
+for f in /mnt/SDCARD/Saves/*.json \
+         /mnt/SDCARD/Saves/cache/*.json \
+         /mnt/SDCARD/Saves/spruce/*.log \
+         /mnt/SDCARD/Saves/spruce/*.json \
+         /mnt/SDCARD/RetroArch/.retroarch/logs/* \
+         /mnt/SDCARD/RetroArch/.retroarch/config/* \
+         /mnt/SDCARD/RetroArch/platform/* \
+         /mnt/SDCARD/App/*/log.txt \
+         /mnt/SDCARD/App/*/*/log.txt \
+         /mnt/SDCARD/spruce/spruce; do
+    [ -e "$f" ] || continue
+    mkdir -p "$stage${f%/*}"
+    cp -r "$f" "$stage$f"
+done
+
+# Every credential and network name this device holds, one per line, longest
+# first. Each is replaced wherever it turns up, whatever wrote it there.
+# Anything under 4 characters would shred the logs and is left to the rules.
+{
+    jq -r '.menuOptions[]?[]? | select(type == "object" and .type == "freeText") | .selected // empty' \
+        /mnt/SDCARD/Saves/spruce/spruce-config.json
+    sed -n -e 's/^[[:space:]]*ssid="\(.*\)"[[:space:]]*$/\1/p' \
+           -e 's/^[[:space:]]*psk="\(.*\)"[[:space:]]*$/\1/p' \
+           -e 's/^[[:space:]]*psk=\([0-9a-fA-F]*\)[[:space:]]*$/\1/p' \
+        "$WPA_SUPPLICANT_FILE" $WPA_LEGACY_CONFS
+    sed -n -e 's/^ssid=\(.*\)$/\1/p' -e 's/^psk=\(.*\)$/\1/p' \
+        /etc/NetworkManager/system-connections/*
+    sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' /mnt/SDCARD/Saves/syncthing/config/config.xml
+    sed -n -e 's/^cheevos_username = "\(.*\)"/\1/p' \
+           -e 's/^cheevos_password = "\(.*\)"/\1/p' \
+           -e 's/^cheevos_token = "\(.*\)"/\1/p' \
+        /mnt/SDCARD/Saves/ra-configs/*.cfg /mnt/SDCARD/RetroArch/platform/*.cfg* \
+        /mnt/SDCARD/RetroArch/*.cfg /mnt/SDCARD/Saves/spruce/cheevos.cfg
+} 2>/dev/null | tr -d '\r' | awk 'length($0) >= 4 { print length($0) "\t" $0 }' \
+    | sort -rn | cut -f2- | uniq > "$secrets"
+
+cat > "$rules" <<'EOF'
+s/^\([a-z0-9_]*password = \)"[^"][^"]*"/\1"<redacted>"/
+s/^\([a-z0-9_]*username = \)"[^"][^"]*"/\1"<redacted>"/
+s/^\([a-z0-9_]*token = \)"[^"][^"]*"/\1"<redacted>"/
+s/^\([a-z0-9_]*stream_key = \)"[^"][^"]*"/\1"<redacted>"/
+s/\(API key: \).*/\1<redacted>/
+s/\(saved network \).*/\1<redacted>/
+s/\(could not save network \).*/\1<redacted>/
+s/\(added network \).*\( from the card\)/\1<redacted>\2/
+s/\(Selected \).*!$/\1<redacted>!/
+s/\(escaped SSID: \).*/\1<redacted>/
+s/\(Copying freeText '[^']*': \).*/\1<redacted>/
+s/\([?&][upt]=\)[^& "']*/\1<redacted>/g
+EOF
+
+# A config that cannot be parsed cannot be redacted, so it does not ship.
+cfg="$stage/mnt/SDCARD/Saves/spruce/spruce-config.json"
+if [ -f "$cfg" ]; then
+    jq '(.menuOptions[]?[]? | select(type == "object" and .type == "freeText" and .selected != "") | .selected) = "<redacted>"' \
+        "$cfg" > "$cfg.redacted" 2>/dev/null && mv "$cfg.redacted" "$cfg" || rm -f "$cfg" "$cfg.redacted"
+fi
+
+find "$stage" -type f | while IFS= read -r f; do
+    SECRETS="$secrets" awk '
+        BEGIN { while ((getline s < ENVIRON["SECRETS"]) > 0) lit[++n] = s }
+        {
+            line = $0
+            for (i = 1; i <= n; i++) {
+                out = ""
+                while ((p = index(line, lit[i])) > 0) {
+                    out = out substr(line, 1, p - 1) "<redacted>"
+                    line = substr(line, p + length(lit[i]))
+                }
+                line = out line
+            }
+            print line
+        }' "$f" | sed -f "$rules" | redact_mac > "$f.redacted" && mv "$f.redacted" "$f" || rm -f "$f" "$f.redacted"
+done
+
+( cd "$stage" && 7zr a "$output7z" mnt )
+
+rm -rf "$stage"
+rm -f "$secrets" "$rules"
 
 log_message "Debug: Logs and configs saved to ${output7z}"

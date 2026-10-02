@@ -43,7 +43,7 @@ def merge_selected(old, new, path=""):
 
             # Free-text settings (no options key at all)
             elif "options" not in new:
-                print(f"Copying freeText '{current_path}': {new_val} -> {old_val}")
+                print(f"Copying freeText '{current_path}'")
                 new[key] = old_val
         else:
             merge_selected(old_val, new_val, current_path)
