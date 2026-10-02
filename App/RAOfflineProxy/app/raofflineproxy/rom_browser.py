@@ -1,27 +1,34 @@
 from __future__ import annotations
 
+import enum
 import json
 import logging
 import tempfile
+import time
+import urllib.error
 import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.parse import urljoin
 
-from . import cache_keys
+from . import cache_budget, cache_keys, cache_queue, rate_limit, usage_stats
 from .auth import resolve_credentials
+from .cache_queue import QueuedRom
 from .config import FALLBACK_USER_AGENT, RA_MEDIA_HOST, image_caching_enabled, upstream_host
 from .image_cache import (
     STATIC_DIR,
     clear_all_cached_images,
     delete_cached_images_for_game,
+    download_static_image,
     extract_image_path,
     game_image_dir,
+    images_downloaded_inline,
     resolve_cached_static_asset,
     schedule_image_download,
 )
-from .network import build_api_url, http_get
+from .network import apply_scan_batch_cooldown, build_api_url, http_get
 from .rom_cache import (
+    CacheGameAuthError,
     build_achievement_game_ids,
     cache_game,
     filter_warning_achievement_ids,
@@ -36,7 +43,7 @@ from .rom_hashing import (
     list_7z_entries,
     supported_rom_extensions,
 )
-from .storage import Storage
+from .storage import Storage, current_millis
 from .utils import proxy_user_agent, self_user_agent
 
 LOGGER = logging.getLogger("raofflineproxy")
@@ -46,9 +53,11 @@ SUPPORTED_ARCHIVE_EXTENSIONS = {".zip", ".7z"}
 # which bundles a 7z reader (third_party/lzma-sdk), so it never reaches zipfile.
 ZIP_READABLE_ARCHIVE_EXTENSIONS = {".zip"}
 EXCLUDED_BROWSER_DIR_NAMES = {"Imgs"}
-MAX_CACHED_GAMES = 100
 MAX_SCAN_ENTRIES = 5000
 MAX_SCAN_DEPTH = 12
+# RetroAchievements adds hashes over time, so a "no match" is only cached long enough to
+# stop a repeated scan of the same folder from re-querying every unsupported ROM.
+GAMEID_MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 
 @dataclass
@@ -63,6 +72,44 @@ class AddRomResult:
     success: bool
     message: str
     game: CachedGameEntry | None = None
+    already_cached: bool = False
+    queued: bool = False
+
+
+@dataclass(frozen=True)
+class LocalGameIdAnswer:
+    """A ROM's game id as far as the local gameid cache knows it, without asking RA."""
+
+    game_id: int | None = None
+    hash_value: str | None = None
+    no_match: bool = False
+
+
+class QueuedRomOutcome(enum.Enum):
+    CACHED = "cached"
+    NO_MATCH = "no_match"
+    ALREADY_CACHED = "already_cached"
+    FAILED = "failed"
+    AUTH_REJECTED = "auth_rejected"
+
+
+class DrainStop(enum.Enum):
+    EMPTY = "empty"
+    BUDGET_EXHAUSTED = "budget_exhausted"
+    RATE_LIMITED = "rate_limited"
+    PAUSED = "paused"
+    FAILED = "failed"
+    AUTH_REJECTED = "auth_rejected"
+    BUSY = "busy"
+
+
+@dataclass
+class DrainResult:
+    cached: int
+    no_match: int
+    stop: DrainStop
+    next_attempt_at: int | None = None
+    time_limited: bool = False
 
 
 @dataclass
@@ -414,6 +461,25 @@ def hash_candidates_for_manual_cache(path: Path) -> list[str]:
     return hash_rom_candidates(path)
 
 
+def is_cacheable_game_id_response(body: str) -> bool:
+    try:
+        payload = json.loads(body)
+    except Exception:
+        return False
+    if not isinstance(payload, dict):
+        return False
+    return game_id_from_response(body) is not None or payload.get("Success") is True
+
+
+def game_id_from_response(body: str) -> int | None:
+    try:
+        payload = json.loads(body)
+    except Exception:
+        return None
+    game_id = payload.get("GameID") if isinstance(payload, dict) else None
+    return game_id if isinstance(game_id, int) and game_id > 0 else None
+
+
 def fetch_game_id(
     hash_value: str,
     credentials: dict,
@@ -421,6 +487,14 @@ def fetch_game_id(
     config_data: dict,
     storage: Storage,
 ) -> int | None:
+    cached = storage.get_cache(cache_keys.game_id(hash_value))
+    if cached is not None:
+        cached_game_id = game_id_from_response(cached["responseBody"])
+        if cached_game_id is not None:
+            return cached_game_id
+        if current_millis() - cached["cachedAt"] < GAMEID_MISS_TTL_MS:
+            return None
+
     url = build_api_url(
         upstream_host(config_data),
         "gameid",
@@ -432,15 +506,17 @@ def fetch_game_id(
     )
     response_body = http_get(url, proxy_user_agent(user_agent or FALLBACK_USER_AGENT))
     payload = json.loads(response_body)
+    if is_cacheable_game_id_response(response_body):
+        storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
     game_id = payload.get("GameID")
     if not isinstance(game_id, int) or game_id <= 0:
         return None
-
-    storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
     return int(game_id)
 
 
 def add_rom_to_cache(path: Path, storage: Storage, config_data: dict) -> AddRomResult:
+    """Caches one ROM right away if the caching budget allows it, otherwise queues it for the
+    proxy service."""
     user_agent = self_user_agent()
     credentials = resolve_credentials(storage, config_data, user_agent)
     if credentials is None:
@@ -453,65 +529,392 @@ def add_rom_to_cache(path: Path, storage: Storage, config_data: dict) -> AddRomR
     except Exception as exc:
         return AddRomResult(False, f"Hash failed: {exc}")
 
-    game_id = None
-    used_hash = None
-    for hash_value in hash_candidates:
-        try:
-            candidate_game_id = fetch_game_id(
-                hash_value, credentials, user_agent, config_data, storage
-            )
-        except Exception as exc:
-            return AddRomResult(False, f"Game lookup failed: {exc}")
-
-        if candidate_game_id is None:
-            continue
-
-        game_id = candidate_game_id
-        used_hash = hash_value
-        break
-
-    if game_id is None:
+    local = local_game_id_answer(storage, hash_candidates)
+    if local.no_match:
         return AddRomResult(False, "No RetroAchievements match")
+    if local.game_id is not None and local.game_id in cached_game_ids(storage):
+        remember_source_rom_path(storage, local.game_id, credentials["user"], path)
+        return already_cached_result(storage, local.game_id)
 
-    cached_games = list_cached_games(storage)
-    if len(cached_games) >= MAX_CACHED_GAMES and not any(
-        game.game_id == game_id for game in cached_games
-    ):
-        return AddRomResult(
-            False, f"Cache limit reached: {MAX_CACHED_GAMES} / {MAX_CACHED_GAMES}"
-        )
-
-    persist_game_id_aliases(storage, hash_candidates, used_hash, game_id)
-
-    try:
-        cache_game(
-            game_id,
-            used_hash,
-            credentials,
-            proxy_user_agent(user_agent),
+    rom = QueuedRom(
+        hashes=hash_candidates,
+        source_rom_path=normalize_cached_rom_path(path),
+        label=path.name,
+        queued_at=current_millis(),
+    )
+    outcomes: dict[str, tuple[QueuedRomOutcome, int | None, str]] = {}
+    with cache_queue.bulk_run_lock.hold(shared=True):
+        added = cache_queue.enqueue(storage, rom)
+        drain = drain_cache_queue(
             storage,
             config_data,
-            cache_images=image_caching_enabled(config_data),
-        )
-    except Exception as exc:
-        return AddRomResult(False, f"Caching failed: {exc}")
-
-    patch_entry = storage.get_cache(cache_keys.patch(game_id, credentials["user"]))
-    if patch_entry is not None:
-        storage.upsert_cache(
-            cache_keys.patch(game_id, credentials["user"]),
-            patch_entry["responseBody"],
-            source_rom_path=normalize_cached_rom_path(path),
+            credentials,
+            user_agent,
+            wait_for_lock=True,
+            keys=[rom.key],
+            on_outcome=lambda queued, outcome, game_id, message: outcomes.__setitem__(
+                queued.key, (outcome, game_id, message)
+            ),
         )
 
-    game = next(
+    if rom.key not in outcomes:
+        if drain.stop is DrainStop.AUTH_REJECTED:
+            if added:
+                cache_queue.remove(storage, rom)
+            return AddRomResult(False, "RetroAchievements rejected the login")
+        return AddRomResult(
+            True, queued_message(rom.label, drain.next_attempt_at), queued=True
+        )
+
+    outcome, game_id, message = outcomes[rom.key]
+    if outcome is QueuedRomOutcome.FAILED and added:
+        cache_queue.remove(storage, rom)
+    if outcome is QueuedRomOutcome.ALREADY_CACHED and game_id is not None:
+        return already_cached_result(storage, game_id)
+    if outcome is not QueuedRomOutcome.CACHED or game_id is None:
+        return AddRomResult(False, message)
+    game = find_cached_game(storage, game_id)
+    if game is None:
+        return AddRomResult(False, "Caching failed: patch data was not stored")
+    return AddRomResult(True, f"Cached {game.title}", game=game)
+
+
+def queued_message(label: str, next_attempt_at: int | None) -> str:
+    if next_attempt_at is None:
+        return f"Queued {label}: caching continues while the proxy is running"
+    return (
+        f"Queued {label}: caching continues at "
+        f"{format_clock_time(next_attempt_at)} while the proxy is running"
+    )
+
+
+def format_clock_time(millis: int) -> str:
+    return time.strftime("%H:%M", time.localtime(millis / 1000))
+
+
+def find_cached_game(storage: Storage, game_id: int) -> CachedGameEntry | None:
+    return next(
         (entry for entry in list_cached_games(storage) if entry.game_id == game_id),
         None,
     )
-    if game is None:
-        return AddRomResult(False, "Caching failed: patch data was not stored")
 
-    return AddRomResult(True, f"Cached {game.title}", game=game)
+
+def already_cached_result(storage: Storage, game_id: int) -> AddRomResult:
+    game = find_cached_game(storage, game_id)
+    title = game.title if game is not None else f"Game {game_id}"
+    return AddRomResult(True, f"Already cached {title}", game=game, already_cached=True)
+
+
+def cached_game_ids(storage: Storage) -> set[int]:
+    return {
+        game_id
+        for game_id in (
+            cache_keys.parse_game_id_from_patch_key(key)
+            for key in storage.cache_keys_by_prefix(cache_keys.PREFIX_PATCH)
+        )
+        if game_id is not None
+    }
+
+
+def local_game_id_answer(
+    storage: Storage, candidates: list[str], now: int | None = None
+) -> LocalGameIdAnswer:
+    """Walks the candidates in the same order as the RA lookup does."""
+    current = now if now is not None else current_millis()
+    for hash_value in candidates:
+        cached = storage.get_cache(cache_keys.game_id(hash_value))
+        if cached is None:
+            return LocalGameIdAnswer()
+        game_id = game_id_from_response(cached["responseBody"])
+        if game_id is not None:
+            return LocalGameIdAnswer(game_id=game_id, hash_value=hash_value)
+        if current - cached["cachedAt"] >= GAMEID_MISS_TTL_MS:
+            return LocalGameIdAnswer()
+    return LocalGameIdAnswer(no_match=True)
+
+
+def enqueue_rom_if_needed(
+    storage: Storage,
+    candidates: list[str],
+    known_game_ids: set[int],
+    path: Path,
+    on_queued=None,
+    now: int | None = None,
+) -> QueuedRom | None:
+    """Queues a hashed ROM unless the local cache already answers it: an already-cached game or
+    a fresh cached no-match costs RA nothing. Returns the ROM when it is waiting in the queue;
+    on_queued only hears about rows this call actually added."""
+    local = local_game_id_answer(storage, candidates, now)
+    if local.no_match:
+        return None
+    if local.game_id is not None and local.game_id in known_game_ids:
+        return None
+    rom = QueuedRom(
+        hashes=candidates,
+        source_rom_path=normalize_cached_rom_path(path),
+        label=path.name,
+        queued_at=now if now is not None else current_millis(),
+    )
+    if cache_queue.enqueue(storage, rom) and on_queued is not None:
+        on_queued(rom.key)
+    return rom
+
+
+def drain_cache_queue(
+    storage: Storage,
+    config_data: dict,
+    credentials: dict,
+    user_agent: str,
+    *,
+    should_pause=None,
+    wait_for_lock: bool = False,
+    keys: list[str] | None = None,
+    on_item=None,
+    on_outcome=None,
+) -> DrainResult:
+    """The single place that sends RA requests for bulk caching: works through the queue oldest
+    first (or through keys, in order) within the caching budget. A window allows
+    CACHE_BUDGET_LIMIT cached games; ROMs RetroAchievements doesn't know don't count. A batch ends
+    after CACHE_BATCH_MAX_MS at the latest and leaves the rest for the next window. A 429 stops
+    the queue for at least RATE_LIMIT_PAUSE_MS. Only one caller drains at a time; without
+    wait_for_lock a concurrent call returns BUSY at once. A failed ROM keeps its place and is
+    retried on a later round instead of back to back. on_item reports progress in games within
+    the current window."""
+    pause = should_pause or (lambda: False)
+    with cache_queue.drain_lock.hold(blocking=wait_for_lock, should_abort=pause) as acquired:
+        if not acquired:
+            return DrainResult(0, 0, DrainStop.BUSY)
+        with rate_limit.background():
+            return _drain_locked(
+                storage,
+                config_data,
+                credentials,
+                user_agent,
+                pause,
+                None if keys is None else list(dict.fromkeys(keys)),
+                on_item,
+                on_outcome,
+            )
+
+
+def _drain_locked(
+    storage: Storage,
+    config_data: dict,
+    credentials: dict,
+    user_agent: str,
+    should_pause,
+    pending_keys: list[str] | None,
+    on_item,
+    on_outcome,
+) -> DrainResult:
+    cached = 0
+    no_match = 0
+    requested = 0
+    started_at = current_millis()
+    stop_at = started_at + cache_budget.CACHE_BATCH_MAX_MS
+    known_game_ids = cached_game_ids(storage)
+
+    def result(
+        stop: DrainStop, next_attempt_at: int | None = None, time_limited: bool = False
+    ) -> DrainResult:
+        drained = DrainResult(cached, no_match, stop, next_attempt_at, time_limited)
+        usage_stats.record_batch(
+            cached, no_match, stop.value, time_limited, current_millis() - started_at
+        )
+        return drained
+
+    def rate_limited() -> DrainResult | None:
+        until = rate_limit.paused_until()
+        if until is None:
+            return None
+        cache_budget.pause_until(storage, until)
+        LOGGER.warning("Cache queue paused: RetroAchievements answered 429")
+        return result(DrainStop.RATE_LIMITED, until)
+
+    def next_rom() -> QueuedRom | None:
+        if pending_keys is None:
+            return cache_queue.oldest(storage)
+        while pending_keys:
+            rom = cache_queue.get(storage, pending_keys[0])
+            if rom is not None:
+                return rom
+            pending_keys.pop(0)
+        return None
+
+    def report(rom: QueuedRom, outcome: QueuedRomOutcome, game_id: int | None, message: str) -> None:
+        if on_outcome is not None:
+            on_outcome(rom, outcome, game_id, message)
+
+    while True:
+        if should_pause():
+            return result(DrainStop.PAUSED)
+        stopped = rate_limited()
+        if stopped is not None:
+            return stopped
+        if current_millis() >= stop_at:
+            window_end = cache_budget.window_ends_at(storage)
+            cache_budget.pause_until(storage, window_end)
+            LOGGER.info("Cache queue: batch time limit reached, rest waits for the next window")
+            return result(DrainStop.BUDGET_EXHAUSTED, window_end, time_limited=True)
+        rom = next_rom()
+        if rom is None:
+            return result(DrainStop.EMPTY)
+
+        local = local_game_id_answer(storage, rom.hashes)
+        if local.no_match:
+            cache_queue.remove(storage, rom)
+            no_match += 1
+            report(rom, QueuedRomOutcome.NO_MATCH, None, "No RetroAchievements match")
+            continue
+        if local.game_id is not None and local.game_id in known_game_ids:
+            remember_source_rom_path(storage, local.game_id, credentials["user"], rom.source_rom_path)
+            cache_queue.remove(storage, rom)
+            report(rom, QueuedRomOutcome.ALREADY_CACHED, local.game_id, "")
+            continue
+
+        games_left = cache_budget.remaining(storage)
+        if games_left == 0:
+            return result(DrainStop.BUDGET_EXHAUSTED, cache_budget.next_available_at(storage))
+        apply_scan_batch_cooldown(requested)
+        if on_item is not None:
+            queued = len(pending_keys) if pending_keys is not None else cache_queue.count(storage)
+            on_item(cached + 1, window_progress_total(cached, queued, games_left), rom.label)
+        requested += 1
+        outcome, game_id, message = cache_queued_rom(
+            storage, config_data, credentials, user_agent, rom, local, known_game_ids
+        )
+        if outcome is QueuedRomOutcome.CACHED:
+            cache_budget.charge_game(storage)
+        stopped = rate_limited()
+        if stopped is not None:
+            return stopped
+
+        if outcome is QueuedRomOutcome.AUTH_REJECTED:
+            LOGGER.warning("Cache queue paused: RetroAchievements rejected the login")
+            return result(DrainStop.AUTH_REJECTED)
+        if outcome is QueuedRomOutcome.FAILED:
+            record_failed_attempt(storage, rom)
+            report(rom, outcome, game_id, message)
+            return result(DrainStop.FAILED)
+
+        cache_queue.remove(storage, rom)
+        if outcome is QueuedRomOutcome.CACHED:
+            cached += 1
+            if game_id is not None:
+                known_game_ids.add(game_id)
+        elif outcome is QueuedRomOutcome.NO_MATCH:
+            no_match += 1
+        report(rom, outcome, game_id, message)
+
+
+def cache_queued_rom(
+    storage: Storage,
+    config_data: dict,
+    credentials: dict,
+    user_agent: str,
+    rom: QueuedRom,
+    local: LocalGameIdAnswer,
+    known_game_ids: set[int],
+) -> tuple[QueuedRomOutcome, int | None, str]:
+    game_id = local.game_id
+    used_hash = local.hash_value
+    if game_id is None:
+        for hash_value in rom.hashes:
+            try:
+                candidate_game_id = fetch_game_id(
+                    hash_value, credentials, user_agent, config_data, storage
+                )
+            except urllib.error.HTTPError as exc:
+                outcome = (
+                    QueuedRomOutcome.AUTH_REJECTED
+                    if exc.code in (401, 403)
+                    else QueuedRomOutcome.FAILED
+                )
+                return outcome, None, f"Game lookup failed: {exc}"
+            except Exception as exc:
+                return QueuedRomOutcome.FAILED, None, f"Game lookup failed: {exc}"
+            if candidate_game_id is None:
+                continue
+            game_id = candidate_game_id
+            used_hash = hash_value
+            break
+    if game_id is None:
+        return QueuedRomOutcome.NO_MATCH, None, "No RetroAchievements match"
+
+    persist_game_id_aliases(storage, rom.hashes, used_hash, game_id)
+    if game_id in known_game_ids:
+        remember_source_rom_path(storage, game_id, credentials["user"], rom.source_rom_path)
+        return QueuedRomOutcome.ALREADY_CACHED, game_id, ""
+
+    try:
+        with images_downloaded_inline():
+            cache_game(
+                game_id,
+                used_hash,
+                credentials,
+                proxy_user_agent(user_agent),
+                storage,
+                config_data,
+                cache_images=image_caching_enabled(config_data),
+            )
+    except CacheGameAuthError as exc:
+        return QueuedRomOutcome.AUTH_REJECTED, game_id, f"Caching failed: {exc}"
+    except Exception as exc:
+        return QueuedRomOutcome.FAILED, game_id, f"Caching failed: {exc}"
+
+    remember_source_rom_path(storage, game_id, credentials["user"], rom.source_rom_path)
+    patch_entry = storage.get_cache(cache_keys.patch(game_id, credentials["user"]))
+    if patch_entry is None:
+        return QueuedRomOutcome.FAILED, game_id, "Caching failed: patch data was not stored"
+    if not image_caching_enabled(config_data):
+        cache_game_icon(game_id, patch_entry["responseBody"], proxy_user_agent(user_agent))
+    return QueuedRomOutcome.CACHED, game_id, ""
+
+
+def cache_game_icon(game_id: int, patch_body: str, user_agent: str) -> None:
+    """Saves the cover the menu shows even where badge images are not cached (Onion): fetching
+    it here, while the batch runs anyway, keeps the download off the menu's single core."""
+    try:
+        patch_data = json.loads(patch_body).get("PatchData") or {}
+    except Exception:
+        return
+    image_path = extract_image_path(patch_data.get("ImageIcon") or "")
+    if image_path is None or resolve_cached_static_asset(image_path) is not None:
+        return
+    download_static_image(f"{RA_MEDIA_HOST}{image_path}", image_path, user_agent, game_id)
+
+
+def window_progress_total(cached_before: int, queued_including_current: int, games_left: int) -> int:
+    """Games this drain can still cache in the current window, counting the one in progress:
+    bounded by what is queued and by the games left in the budget."""
+    return cached_before + max(1, min(queued_including_current, games_left))
+
+
+def record_failed_attempt(storage: Storage, rom: QueuedRom) -> None:
+    retry = rom.after_failed_attempt()
+    if retry is None:
+        LOGGER.warning(
+            "Cache queue dropped %s after %d failed attempts",
+            rom.label,
+            cache_queue.CACHE_QUEUE_MAX_ATTEMPTS,
+        )
+        cache_queue.remove(storage, rom)
+    else:
+        cache_queue.update(storage, retry)
+
+
+def remember_source_rom_path(
+    storage: Storage, game_id: int, user: str, path: str | Path | None
+) -> None:
+    if path is None:
+        return
+    patch_entry = storage.get_cache(cache_keys.patch(game_id, user))
+    if patch_entry is not None:
+        storage.upsert_cache(
+            cache_keys.patch(game_id, user),
+            patch_entry["responseBody"],
+            source_rom_path=normalize_cached_rom_path(path),
+        )
 
 
 def persist_game_id_aliases(
@@ -531,6 +934,7 @@ def remove_cached_game(storage: Storage, game_id: int) -> None:
     storage.delete_cache_by_prefix(cache_keys.patch_prefix(game_id))
     storage.delete_cache_by_prefix(f"{cache_keys.PREFIX_UNLOCKS}{game_id}:")
     storage.delete_cache_by_prefix(f"{cache_keys.PREFIX_STARTSESSION}{game_id}:")
+    storage.delete_cache(cache_keys.last_played(game_id))
     remove_achievementsets_for_game(storage, game_id)
     remove_gameid_aliases_for_game(storage, game_id)
     delete_cached_images_for_game(game_id)

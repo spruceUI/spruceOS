@@ -879,6 +879,16 @@
                 ],
                 "selected": "False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
+            },
+            "raproxyUsageStats": {
+                "display": "Share RAOfflineProxy statistics",
+                "description": "Sends app version, device, cache counts and a hashed user ID daily",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/raproxyUsageStats.sh"
             }
         },
         "Audio Settings": {

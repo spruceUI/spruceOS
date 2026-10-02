@@ -5,7 +5,7 @@ import logging
 import time
 from dataclasses import dataclass
 
-from . import cache_keys
+from . import cache_keys, usage_stats
 from .auth import resolve_credentials
 from .award_signing import public_key_base64, sign_award, verify_award
 from .config import FALLBACK_USER_AGENT, MAX_PROXY_PORT, upstream_host
@@ -253,6 +253,7 @@ def send_award(award: dict, config_data: dict, credentials: dict) -> tuple[str, 
         url,
         body,
         headers={"User-Agent": user_agent},
+        usage_source=usage_stats.SOURCE_AWARD_SYNC,
     )
 
     if status in (401, 403):

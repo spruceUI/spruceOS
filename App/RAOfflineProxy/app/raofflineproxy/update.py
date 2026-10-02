@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 import os
@@ -20,6 +21,9 @@ from .state import load_update_status, save_update_status
 
 LOGGER = logging.getLogger("raofflineproxy")
 GITHUB_RELEASES_URL = "https://api.github.com/repos/misantronic/RAOfflineProxy/releases"
+GITHUB_NIGHTLY_RELEASE_URL = "https://api.github.com/repos/misantronic/RAOfflineProxy-nightly/releases/tags/nightly-linux"
+NIGHTLY_VERSION_SEPARATOR = "-nightly."
+STABLE_NIGHTLY_NUMBER = -1
 UPDATE_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
 PLATFORM_KNULLI = "knulli"
 PLATFORM_ONION = "onion"
@@ -65,6 +69,11 @@ class ParsedVersion:
     patch: int
     stage_rank: int
     stage_number: int
+    nightly_number: int = STABLE_NIGHTLY_NUMBER
+
+    @property
+    def is_nightly(self) -> bool:
+        return self.nightly_number != STABLE_NIGHTLY_NUMBER
 
 
 @dataclass(frozen=True)
@@ -144,15 +153,48 @@ def fetch_latest_release(
     releases = fetch_releases(platform)
     if releases is None:
         return False, None
-    newer = [release for release in releases if release.parsed_version > current_parsed]
+    nightly_releases = fetch_nightly_releases(platform) if current_parsed.is_nightly else []
+    newer = [
+        release
+        for release in releases + nightly_releases
+        if release.parsed_version > current_parsed
+        and (current_parsed.is_nightly or not release.parsed_version.is_nightly)
+    ]
     if not newer:
         return True, None
     return True, max(newer, key=lambda release: release.parsed_version)
 
 
 def fetch_releases(platform: str) -> list[ReleaseCandidate] | None:
+    data = fetch_github_json(GITHUB_RELEASES_URL)
+    if data is None:
+        return None
+
+    accepted = [
+        candidate
+        for release in data
+        if (candidate := parse_release(platform, release, str(release.get("tag_name") or ""))) is not None
+    ]
+    LOGGER.info("Fetched %s %s release candidates", len(accepted), platform)
+    return accepted
+
+
+def fetch_nightly_releases(platform: str) -> list[ReleaseCandidate]:
+    LOGGER.info("Checking nightly release for platform=%s", platform)
+    data = fetch_github_json(GITHUB_NIGHTLY_RELEASE_URL)
+    if not isinstance(data, dict):
+        return []
+
+    candidate = parse_release(platform, data, nightly_version_name(data))
+    if candidate is None or not candidate.parsed_version.is_nightly:
+        LOGGER.info("No usable nightly release for platform=%s", platform)
+        return []
+    return [candidate]
+
+
+def fetch_github_json(url: str) -> object | None:
     request = urllib.request.Request(
-        GITHUB_RELEASES_URL,
+        url,
         headers={
             "Accept": "application/vnd.github+json",
             "User-Agent": f"RAOfflineProxy/Linux/{APP_VERSION}",
@@ -171,7 +213,8 @@ def fetch_releases(platform: str) -> list[ReleaseCandidate] | None:
             break
         except urllib.error.HTTPError as error:
             LOGGER.warning(
-                "GitHub releases request failed attempt=%s/%s status=%s reason=%s",
+                "GitHub request failed url=%s attempt=%s/%s status=%s reason=%s",
+                url,
                 attempt,
                 RELEASES_FETCH_RETRIES,
                 error.code,
@@ -181,7 +224,8 @@ def fetch_releases(platform: str) -> list[ReleaseCandidate] | None:
                 return None
         except (urllib.error.URLError, TimeoutError, socket.timeout, http.client.RemoteDisconnected) as error:
             LOGGER.warning(
-                "GitHub releases request failed attempt=%s/%s reason=%s",
+                "GitHub request failed url=%s attempt=%s/%s reason=%s",
+                url,
                 attempt,
                 RELEASES_FETCH_RETRIES,
                 error,
@@ -189,7 +233,7 @@ def fetch_releases(platform: str) -> list[ReleaseCandidate] | None:
             if attempt >= RELEASES_FETCH_RETRIES:
                 return None
         except Exception:
-            LOGGER.exception("GitHub releases request failed attempt=%s/%s", attempt, RELEASES_FETCH_RETRIES)
+            LOGGER.exception("GitHub request failed url=%s attempt=%s/%s", url, attempt, RELEASES_FETCH_RETRIES)
             if attempt >= RELEASES_FETCH_RETRIES:
                 return None
 
@@ -198,42 +242,47 @@ def fetch_releases(platform: str) -> list[ReleaseCandidate] | None:
     if body is None:
         return None
 
-    data = json.loads(body)
-    accepted: list[ReleaseCandidate] = []
-    for release in data:
-        if release.get("draft"):
-            LOGGER.debug("Skipping draft release")
-            continue
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError as error:
+        LOGGER.warning("GitHub response was not valid JSON url=%s reason=%s", url, error)
+        return None
 
-        tag_name = str(release.get("tag_name") or "").strip()
-        version_name = tag_name.removeprefix("v")
-        parsed_version = parse_version(version_name)
-        if parsed_version is None:
-            LOGGER.debug("Skipping release tag=%s unsupported version format", tag_name)
-            continue
 
-        release_url = str(release.get("html_url") or "").strip()
-        if not release_url:
-            LOGGER.debug("Skipping release tag=%s missing html_url", tag_name)
-            continue
+def nightly_version_name(release: dict) -> str:
+    title = str(release.get("name") or "").strip()
+    return title.rsplit(" ", 1)[-1]
 
-        asset_url = find_platform_asset_url(platform, release.get("assets") or [])
-        if asset_url is None:
-            LOGGER.debug("Skipping release tag=%s no %s asset", tag_name, platform)
-            continue
 
-        LOGGER.debug("Accepted %s release tag=%s asset_url=%s", platform, tag_name, asset_url)
-        accepted.append(
-            ReleaseCandidate(
-                version_name=version_name,
-                parsed_version=parsed_version,
-                release_url=release_url,
-                asset_url=asset_url,
-            )
-        )
+def parse_release(platform: str, release: dict, raw_version_name: str) -> ReleaseCandidate | None:
+    if release.get("draft"):
+        LOGGER.debug("Skipping draft release")
+        return None
 
-    LOGGER.info("Fetched %s %s release candidates", len(accepted), platform)
-    return accepted
+    tag_name = str(release.get("tag_name") or "").strip()
+    version_name = raw_version_name.strip().removeprefix("v")
+    parsed_version = parse_version(version_name)
+    if parsed_version is None:
+        LOGGER.debug("Skipping release tag=%s unsupported version format", tag_name)
+        return None
+
+    release_url = str(release.get("html_url") or "").strip()
+    if not release_url:
+        LOGGER.debug("Skipping release tag=%s missing html_url", tag_name)
+        return None
+
+    asset_url = find_platform_asset_url(platform, release.get("assets") or [])
+    if asset_url is None:
+        LOGGER.debug("Skipping release tag=%s no %s asset", tag_name, platform)
+        return None
+
+    LOGGER.debug("Accepted %s release tag=%s asset_url=%s", platform, tag_name, asset_url)
+    return ReleaseCandidate(
+        version_name=version_name,
+        parsed_version=parsed_version,
+        release_url=release_url,
+        asset_url=asset_url,
+    )
 
 
 def should_retry_release_fetch(error: urllib.error.HTTPError) -> bool:
@@ -605,6 +654,16 @@ def atomic_write_executable(path: Path, body: bytes, executable: bool = True) ->
 
 def parse_version(raw: str) -> ParsedVersion | None:
     normalized = raw.strip().removeprefix("v")
+    base, separator, nightly_number = normalized.partition(NIGHTLY_VERSION_SEPARATOR)
+    base_version = parse_base_version(base)
+    if base_version is None or not separator:
+        return base_version
+    if not (nightly_number.isascii() and nightly_number.isdigit()):
+        return None
+    return dataclasses.replace(base_version, nightly_number=int(nightly_number))
+
+
+def parse_base_version(normalized: str) -> ParsedVersion | None:
     parts = normalized.split("-", maxsplit=1)
     version_numbers = parts[0].split(".")
     if len(version_numbers) != 3:

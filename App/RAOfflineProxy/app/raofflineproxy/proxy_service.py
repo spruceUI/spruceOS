@@ -13,7 +13,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlsplit
 
-from . import cache_keys, log_uploader, storage_corruption
+from . import cache_budget, cache_keys, cache_queue, log_uploader, rate_limit, storage_corruption, usage_report, usage_stats
 from .auth import resolve_credentials
 from .boot import adopt_listen_socket
 from .award_signing import sign_award
@@ -55,6 +55,8 @@ from .rom_cache import (
     merged_unlock_ids,
     refresh_game_patch,
 )
+from .last_played import LAST_PLAYED_ACTIONS, load_recently_played_game_ids, record_game_played
+from .rom_browser import DrainResult, DrainStop, drain_cache_queue, format_clock_time
 from .state import save_online_state
 from .storage import Storage, current_millis, migrate_user_case_in_cache_keys
 from .utils import (
@@ -76,6 +78,10 @@ SOCKET_TIMEOUT_SECONDS = 30
 
 AWARD_ACTIONS = {"awardachievement", "submitlbentry"}
 FAKE_OFFLINE_SUCCESS_ACTIONS = {"ping", "postactivity"}
+REFRESH_PLAYED_WINDOW_DAYS = 7
+ONLINE_REFRESH_IDLE_DELAY_SECONDS = 5 * 60
+REFRESH_PLAYED_WINDOW_MS = REFRESH_PLAYED_WINDOW_DAYS * 24 * 60 * 60 * 1000
+CACHE_QUEUE_POLL_SECONDS = 60
 ALWAYS_TRY_UPSTREAM_ACTIONS = {"login", "login2"}
 
 
@@ -268,6 +274,7 @@ class ProxyRuntimeServer(ThreadingTCPServer):
         self.storage = storage
         self.running = True
         self.has_internet = False
+        self.activity = GameActivityTracker()
         self.flush_lock = threading.Lock()
         self.pending_award_lock = threading.Lock()
         host = proxy_host(self.config_data)
@@ -314,6 +321,15 @@ class ProxyRuntimeServer(ThreadingTCPServer):
             schedule_image_download(url, clean_path, user_agent)
         return raw_response_bytes(200, body_bytes, content_type, "OK")
 
+    def note_game_request(self, path: str, raw_body: str) -> None:
+        if extract_request_param(path, raw_body, "g") or extract_request_param(path, raw_body, "i"):
+            self.activity.note()
+
+    def record_game_activity(self, path: str, raw_body: str) -> None:
+        game_id = extract_request_param(path, raw_body, "g")
+        if game_id and game_id.isdigit():
+            record_game_played(self.storage, int(game_id))
+
     def process_proxy_request(
         self, method: str, path: str, raw_body: str, headers: dict[str, str]
     ) -> bytes:
@@ -331,6 +347,10 @@ class ProxyRuntimeServer(ThreadingTCPServer):
             self.storage.upsert_cache(cache_keys.USER_AGENT, user_agent)
 
         action = extract_action(path, raw_body)
+        self.note_game_request(path, raw_body)
+        if action in LAST_PLAYED_ACTIONS:
+            self.record_game_activity(path, raw_body)
+
         if action in AWARD_ACTIONS:
             return self.handle_award_request(path, raw_body, headers)
 
@@ -736,10 +756,14 @@ class ProxyRuntimeServer(ThreadingTCPServer):
     ) -> tuple[str, int, str, bytes, str | None, str | None]:
         url = f"{upstream_host(self.config_data)}{path}"
         request_headers = build_forward_headers(headers)
+        counted = path.startswith("/dorequest.php")
         try:
             if method == "POST":
                 status, reason, response_body = http_post(
-                    url, raw_body, request_headers
+                    url,
+                    raw_body,
+                    request_headers,
+                    usage_source=usage_stats.SOURCE_EMULATOR if counted else None,
                 )
                 response_bytes_body = response_body.encode("utf-8")
                 content_type = "application/json"
@@ -749,9 +773,13 @@ class ProxyRuntimeServer(ThreadingTCPServer):
                 request = urllib.request.Request(
                     url, headers=request_headers, method="GET"
                 )
+                responded = False
                 try:
                     with urllib.request.urlopen(request, timeout=15) as response:
                         status = response.status
+                        responded = True
+                        if counted:
+                            usage_stats.record_request(usage_stats.SOURCE_EMULATOR, status)
                         reason = response.reason
                         response_bytes_body = read_response_bytes(response)
                         content_type = response_content_type(response)
@@ -764,6 +792,8 @@ class ProxyRuntimeServer(ThreadingTCPServer):
                 except Exception as error:
                     if hasattr(error, "read"):
                         status = getattr(error, "code", 500)
+                        if counted:
+                            usage_stats.record_request(usage_stats.SOURCE_EMULATOR, status)
                         reason = getattr(
                             error, "reason", canonical_reason_phrase(status)
                         )
@@ -776,6 +806,8 @@ class ProxyRuntimeServer(ThreadingTCPServer):
                         else:
                             response_body = ""
                     else:
+                        if counted and not responded:
+                            usage_stats.record_request(usage_stats.SOURCE_EMULATOR, None)
                         raise
 
             if 200 <= status < 300:
@@ -982,6 +1014,23 @@ class ConnectivityMonitor(threading.Thread):
             was_online = is_online
 
 
+class GameActivityTracker:
+    # Monotonic on purpose: handhelds without an RTC battery jump their wall clock by years
+    # once NTP syncs, which would make a wall-clock idle timer fire or stall at random.
+    def __init__(self, clock=time.monotonic) -> None:
+        self._clock = clock
+        self._last_activity_at: float | None = None
+
+    def note(self) -> None:
+        self._last_activity_at = self._clock()
+
+    def idle_delay_seconds(self) -> float:
+        if self._last_activity_at is None:
+            return 0.0
+        elapsed = self._clock() - self._last_activity_at
+        return max(0.0, ONLINE_REFRESH_IDLE_DELAY_SECONDS - elapsed)
+
+
 class PeriodicRefresh(threading.Thread):
     def __init__(
         self,
@@ -1010,32 +1059,162 @@ class PeriodicRefresh(threading.Thread):
             )
             if credentials is None:
                 continue
+            if rate_limit.paused_until() is not None:
+                LOGGER.info("Periodic refresh skipped; RetroAchievements asked to slow down")
+                continue
+            if not self.wait_until_idle():
+                continue
             patch_entries = self.server.storage.get_all_cache_by_prefix(
                 cache_keys.PREFIX_PATCH
             )
-            game_ids: list[int] = []
-            for entry in patch_entries:
-                game_id = cache_keys.parse_game_id_from_patch_key(entry["cacheKey"])
-                if game_id is not None and game_id not in game_ids:
-                    refresh_game_patch(
-                        game_id,
-                        credentials,
-                        user_agent,
-                        self.server.storage,
-                        self.server.config_data,
-                        cache_images=image_caching_enabled(self.server.config_data),
-                    )
-                    cache_unlocks(
-                        game_id,
-                        credentials,
-                        user_agent,
-                        self.server.config_data,
-                        self.server.storage,
-                    )
-                    cache_session(game_id, credentials, self.server.storage)
-                    game_ids.append(game_id)
+            recently_played = load_recently_played_game_ids(
+                self.server.storage, current_millis() - REFRESH_PLAYED_WINDOW_MS
+            )
+            due_game_ids = due_refresh_game_ids(patch_entries, recently_played)
+            LOGGER.info(
+                "Periodic refresh: %d of %d cached game(s) played in the last %d day(s)",
+                len(due_game_ids),
+                len(patch_entries),
+                REFRESH_PLAYED_WINDOW_DAYS,
+            )
+            with rate_limit.background():
+                self.refresh_games(due_game_ids, credentials, user_agent)
             before = current_millis() - (self.cache_ttl_seconds * 1000)
             self.server.storage.evict_cache_older_than(before)
+
+    def wait_until_idle(self) -> bool:
+        idle_delay = self.server.activity.idle_delay_seconds()
+        if idle_delay <= 0:
+            return True
+        LOGGER.info("Periodic refresh deferred; proxy active recently")
+        if self.stop_event.wait(idle_delay):
+            return False
+        return self.server.is_online() and self.server.activity.idle_delay_seconds() <= 0
+
+    def refresh_games(self, game_ids: list[int], credentials: dict, user_agent: str) -> int:
+        refreshed = 0
+        for game_id in game_ids:
+            if self.server.activity.idle_delay_seconds() > 0:
+                LOGGER.info("Periodic refresh paused; proxy became active")
+                break
+            try:
+                refresh_game_patch(
+                    game_id,
+                    credentials,
+                    user_agent,
+                    self.server.storage,
+                    self.server.config_data,
+                    cache_images=image_caching_enabled(self.server.config_data),
+                )
+                cache_unlocks(
+                    game_id,
+                    credentials,
+                    user_agent,
+                    self.server.config_data,
+                    self.server.storage,
+                )
+                cache_session(game_id, credentials, self.server.storage)
+                refreshed += 1
+            except Exception as exc:
+                LOGGER.warning("Periodic refresh failed for game %s: %s", game_id, exc)
+            if rate_limit.paused_until() is not None:
+                LOGGER.warning("Periodic refresh stopped; RetroAchievements answered 429")
+                break
+        return refreshed
+
+
+class UsageReporter(threading.Thread):
+    """Checks shortly after start and then every 15 minutes, so a device whose proxy autostarts
+    and whose menu is never opened still reports once per UTC day."""
+
+    def __init__(
+        self,
+        server: ProxyRuntimeServer,
+        initial_delay_seconds: int = 60,
+        interval_seconds: int = 15 * 60,
+    ):
+        super().__init__(daemon=True)
+        self.server = server
+        self.initial_delay_seconds = initial_delay_seconds
+        self.interval_seconds = interval_seconds
+        self.stop_event = threading.Event()
+
+    def stop(self) -> None:
+        self.stop_event.set()
+
+    def run(self) -> None:
+        delay = self.initial_delay_seconds
+        while not self.stop_event.wait(delay):
+            delay = self.interval_seconds
+            if self.server.is_online():
+                usage_report.report_if_due(self.server.storage)
+
+
+class CacheQueueWorker(threading.Thread):
+    """Drains the caching queue in later budget windows while the proxy runs, is online and
+    idle, so it never competes with gameplay. It polls rather than sleeping until the next
+    window: a handheld's suspend stops the monotonic clock that Event.wait counts on."""
+
+    def __init__(
+        self, server: ProxyRuntimeServer, poll_seconds: float = CACHE_QUEUE_POLL_SECONDS
+    ):
+        super().__init__(daemon=True)
+        self.server = server
+        self.poll_seconds = poll_seconds
+        self.stop_event = threading.Event()
+
+    def stop(self) -> None:
+        self.stop_event.set()
+
+    def run(self) -> None:
+        while not self.stop_event.wait(self.poll_seconds):
+            try:
+                self.process_once()
+            except Exception:
+                LOGGER.exception("Cache queue round failed")
+
+    def can_work(self) -> bool:
+        return (
+            not cache_queue.bulk_run_active()
+            and self.server.activity.idle_delay_seconds() <= 0
+            and self.server.is_online()
+        )
+
+    def process_once(self) -> DrainResult | None:
+        storage = self.server.storage
+        if cache_queue.count(storage) == 0:
+            return None
+        now = current_millis()
+        if cache_budget.next_available_at(storage, now) > now or not self.can_work():
+            return None
+        user_agent = self_user_agent()
+        credentials = resolve_credentials(storage, self.server.config_data, user_agent)
+        if credentials is None:
+            return None
+        result = drain_cache_queue(
+            storage,
+            self.server.config_data,
+            credentials,
+            user_agent,
+            should_pause=lambda: self.stop_event.is_set() or not self.can_work(),
+        )
+        if result.stop is not DrainStop.BUSY:
+            LOGGER.info(
+                "Cache queue: processed %d, %d left, next window at %s",
+                result.cached,
+                cache_queue.count(storage),
+                format_clock_time(cache_budget.next_available_at(storage)),
+            )
+        return result
+
+
+def due_refresh_game_ids(patch_entries: list[dict], recently_played: set[int]) -> list[int]:
+    due: list[int] = []
+    for entry in patch_entries:
+        game_id = cache_keys.parse_game_id_from_patch_key(entry["cacheKey"])
+        if game_id is not None and game_id in recently_played and game_id not in due:
+            due.append(game_id)
+    return due
 
 
 def retry_storage_corruption_report() -> None:
@@ -1071,6 +1250,8 @@ def run_proxy_service(
     ensure_ra_proxy_chained(config_data)
     connectivity_monitor = ConnectivityMonitor(server)
     periodic_refresh = PeriodicRefresh(server)
+    cache_queue_worker = CacheQueueWorker(server)
+    usage_reporter = UsageReporter(server)
 
     try:
         serving_thread = threading.Thread(
@@ -1088,6 +1269,8 @@ def run_proxy_service(
             retry_storage_corruption_report()
         connectivity_monitor.start()
         periodic_refresh.start()
+        cache_queue_worker.start()
+        usage_reporter.start()
 
         if stop_event is None:
             serving_thread.join()
@@ -1100,6 +1283,9 @@ def run_proxy_service(
     finally:
         connectivity_monitor.stop()
         periodic_refresh.stop()
+        cache_queue_worker.stop()
+        usage_reporter.stop()
+        usage_stats.flush()
         stop_ra_proxy_chain()
         server.server_close()
         storage.close()

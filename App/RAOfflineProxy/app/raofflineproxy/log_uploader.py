@@ -124,7 +124,7 @@ def _zip_logs(files: dict[str, str]) -> bytes:
 def _request_upload_target() -> tuple[str, str]:
     request = urllib.request.Request(
         REQUEST_UPLOAD_URL,
-        data=json.dumps(_upload_metadata()).encode("utf-8"),
+        data=json.dumps(device_metadata()).encode("utf-8"),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
@@ -301,7 +301,7 @@ def _os_version_value(platform: str) -> str | None:
     return _os_release_field("OS_VERSION", "VERSION", "PRETTY_NAME", "VERSION_ID")
 
 
-def _upload_metadata() -> dict[str, str | list[str]]:
+def device_metadata() -> dict[str, str | list[str]]:
     # Submitted alongside the log so the support form can skip asking for this again once the
     # user provides a Log ID. Best-effort: precise emulator/core isn't reliably detectable
     # across these distros, so that field is coarser than the Android equivalent (only whether
