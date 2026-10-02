@@ -29,17 +29,29 @@ bt_running() {
 }
 
 # Headsets that stayed on while the radio was down will not call back on
-# their own.
-reconnect_trusted() {
+# their own, and right after boot the first attempt can come too early.
+reconnect_pending() {
     timeout 5 bluetoothctl devices 2>/dev/null | while read -r _ mac _; do
         case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
-            *"Paired: yes"*"Trusted: yes"*"Connected: no"*) ;;
-            *) continue ;;
+            *"Paired: yes"*"Trusted: yes"*"Connected: no"*) echo "$mac" ;;
         esac
-        timeout 15 bluetoothctl connect "$mac" >/dev/null 2>&1
-        case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
-            *"Connected: yes"*) log_message "bluetooth.sh: reconnected a device" ;;
-        esac
+    done
+}
+
+reconnect_trusted() {
+    _try=1
+    while [ "$_try" -le 6 ]; do
+        _pending="$(reconnect_pending)"
+        [ -n "$_pending" ] || return 0
+        for mac in $_pending; do
+            out="$(timeout 15 bluetoothctl connect "$mac" 2>&1)"
+            case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
+                *"Connected: yes"*) log_message "bluetooth.sh: reconnected a device (try $_try)" ;;
+                *) [ "$_try" -eq 6 ] && log_message "bluetooth.sh: reconnect failed: $(bluez_error "$out")" ;;
+            esac
+        done
+        _try=$((_try + 1))
+        sleep 5
     done
 }
 
