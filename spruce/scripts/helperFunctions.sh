@@ -94,6 +94,9 @@ fi
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
+# Stock busybox on some devices has no timeout applet; spruce's does.
+command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
+
 # Every name this device answers to in an Emu config.json "devices" list, most
 # specific first. Mirrors PyUI's Device.get_device_names(): almost every device
 # answers to one name, and the Anbernic XX line also answers to a family token
