@@ -109,6 +109,7 @@ set_volume() {
 
     mkdir -p /tmp/system 2>/dev/null
     echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
+    smartpros_bt_volume "$new_vol"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -274,16 +275,7 @@ device_init() {
         modprobe aic8800_fdrv.ko
         modprobe aic8800_btlpm.ko
 
-        if [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-            /etc/bluetooth/bt_init.sh start
-
-            hpid="$(pgrep hciattach)"
-            if [ -z "$hpid" ]; then
-                hciattach -n ttyAS1 aic &
-            fi
-
-            /etc/bluetooth/bluetoothd start
-        fi
+        /mnt/SDCARD/spruce/scripts/bluetooth.sh apply
     ) &
 
 
@@ -498,6 +490,55 @@ device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
     return 1 # SmartProS leaves dirty bit set?
+}
+
+device_bluetooth_supported() {
+    return 0
+}
+
+# The stock bt_init.sh attaches on ttyS1, which is not this board's port.
+device_bluetooth_up() {
+    if [ ! -d /sys/class/bluetooth/hci0 ]; then
+        echo 1 > /proc/bluetooth/sleep/btwrite
+        echo 0 > /sys/class/rfkill/rfkill0/state
+        sleep 1
+        echo 1 > /sys/class/rfkill/rfkill0/state
+        sleep 1
+        ( cd / && exec hciattach -n ttyAS1 aic ) >/dev/null 2>&1 &
+        _n=0
+        while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 70 ]; do
+            usleep 100000
+            _n=$((_n + 1))
+        done
+    fi
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && /etc/bluetooth/bluetoothd start >/dev/null 2>&1 )
+        sleep 1
+    fi
+    hciconfig hci0 up
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec bluealsa -p a2dp-source ) >/dev/null 2>&1 &
+    fi
+}
+
+# bluealsa's mixer, 0-127, on the headset's A2DP control.
+smartpros_bt_volume() {
+    pidof bluealsa >/dev/null 2>&1 || return 0
+    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.* - A2DP\)',0$/\1/p" | while read -r _ctl; do
+        amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    done
+}
+
+device_bt_audio_connected() {
+    smartpros_bt_volume "$(get_volume_level)"
+}
+
+device_bluetooth_down() {
+    killall bluealsa bluetoothd 2>/dev/null
+    hciconfig hci0 down 2>/dev/null
+    killall hciattach 2>/dev/null
+    echo 0 > /proc/bluetooth/sleep/btwrite
+    echo 0 > /sys/class/rfkill/rfkill0/state
 }
 
 # Strict unmount by default (SPR-MED-199). Measured 2026-09-06: the original
