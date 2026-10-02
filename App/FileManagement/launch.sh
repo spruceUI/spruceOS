@@ -9,6 +9,8 @@ killall -q idle_watchdog.sh 2>/dev/null
 export HOME="$(dirname "$0")"
 cd "$HOME"
 
+LOG_PATH="/mnt/SDCARD/Saves/spruce/vtree-${PLATFORM}.log"
+
 # Force vtree to re-auto-detect screen res every launch (config.ini is shared
 # across devices but the saved dims would be stale if you swap cards between
 # Brick/TSPS/Flip/etc.). Other settings (theme, keybinds) are preserved.
@@ -38,13 +40,11 @@ case "$PLATFORM" in
     "A30")
         export LD_LIBRARY_PATH="$HOME/lib-A30:$LD_LIBRARY_PATH"
         killall -q -USR2 joystickinput
-        ./vtree.a30 --rotate=3 >"$HOME/log.txt" 2>&1
-        sync
+        ./vtree.a30 --rotate=3 >"$LOG_PATH" 2>&1
         killall -q -USR2 joystickinput
         ;;
-    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"RGB20SX"|"Zero"*)
-        ./vtree.aarch64 >"$HOME/log.txt" 2>&1
-        sync
+    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"RGB20SX"|"Zero"*|"XU20")
+        ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
     "MiyooMini")
         # freemma releases the display from PyUI before vtree takes over.
@@ -55,16 +55,16 @@ case "$PLATFORM" in
         export EGL_VIDEODRIVER=mmiyoo
         export SDL_MMIYOO_DOUBLE_BUFFER=1
         freemma
-        ./vtree.mini >"$HOME/log.txt" 2>&1
-        sync
+        ./vtree.mini >"$LOG_PATH" 2>&1
         ;;
     "Anbernic"*)
         export_sdl_gamecontroller_map positional
-        ./vtree.aarch64 >"$HOME/log.txt" 2>&1
-        sync
+        ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
     *)
         log_message "File Management: unsupported PLATFORM: $PLATFORM"
         exit 1
         ;;
 esac
+
+sync

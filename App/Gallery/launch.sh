@@ -5,6 +5,9 @@
 export HOME="$(dirname "$0")"
 cd "$HOME"
 
+LOG_PATH="/mnt/SDCARD/Saves/spruce/gallery-${PLATFORM}.log"
+
+
 # Miyoo Mini is not enabled for this app in the config.json; should it be?
 # A30 is also notably missing from both this script and the json.
 if [ "$PLATFORM" = "MiyooMini" ]; then
@@ -13,7 +16,7 @@ if [ "$PLATFORM" = "MiyooMini" ]; then
     sed -e "s/SCREEN_W/${DISPLAY_WIDTH}/" -e "s/SCREEN_H/${DISPLAY_HEIGHT}/" config.conf > config.conf.tmp && mv config.conf.tmp config.conf
 
     export LD_LIBRARY_PATH="$HOME/lib32:$LD_LIBRARY_PATH"
-    ./gallery32 > gallery.log
+    ./gallery32  > "$LOG_PATH" 2>&1
 else
     cp config_all.conf config.conf
     
@@ -93,10 +96,10 @@ else
     # command rather than exported.
     case "$PLATFORM" in
         "Anbernic"*)
-            LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./gallery64 > gallery.log
+            LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./gallery64 > "$LOG_PATH" 2>&1
             ;;
         *)
-            ./gallery64 > gallery.log
+            ./gallery64 > "$LOG_PATH" 2>&1
             ;;
     esac
     sync
