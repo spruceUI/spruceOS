@@ -716,6 +716,10 @@ class Language:
         return cls._data.get("imgMode","Img Mode")
 
     @classmethod
+    def scroll_game_selection(cls):
+        return cls._data.get("scrollGameSelection","Scroll Game Selection")
+
+    @classmethod
     def rows(cls):
         return cls._data.get("Rows","Rows")
 

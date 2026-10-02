@@ -26,7 +26,20 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         elif (ViewType.CAROUSEL == Theme.get_game_selection_view_type()):
             option_list += self.build_carousel_specific_options()
         elif(ViewType.FULLSCREEN_GRID == Theme.get_game_selection_view_type()):
-            option_list += self.build_full_screen_grid_specific_options()
+            option_list += self.build_full_screen_grid_specific_options() 
+        else:
+            option_list += self.build_list_specific_options()
+        return option_list
+
+    def build_list_specific_options(self):
+        option_list = []
+        option_list.append(
+                self.build_enabled_disabled_entry(
+                    primary_text=Language.scroll_game_selection(),
+                    get_value_func=Theme.scroll_rom_selection_text,
+                    set_value_func=Theme.set_scroll_rom_selection_text
+                )
+            )
         return option_list
 
     def build_grid_specific_options(self):

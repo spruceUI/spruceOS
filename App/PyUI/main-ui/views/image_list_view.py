@@ -39,7 +39,6 @@ class ImageListView(NonDescriptiveListView):
             actual_index = self.current_top + visible_index
             text_available_width = None #just take up as much space as needed
             text_pad = Theme.scale_with_width_multiplier( 20 )
-            scroll = True
             if(TextToImageRelationship.LEFT_OF_IMAGE == self.text_to_image_relationship):
                 render_mode=RenderMode.MIDDLE_LEFT_ALIGNED
                 x_value = 0 
@@ -51,14 +50,12 @@ class ImageListView(NonDescriptiveListView):
                 y_value = self.base_y_offset + self.line_height//2
                 text_available_width = Device.get_device().screen_width() - self.img_width - text_pad*2
             elif(TextToImageRelationship.BELOW_IMAGE == self.text_to_image_relationship):
-                scroll = False
                 render_mode=RenderMode.MIDDLE_CENTER_ALIGNED
                 x_value = Device.get_device().screen_width() // 2
                 y_pad = 20 #TODO get from somewhere
                 y_value = (Display.get_top_bar_height() + y_pad*2 + self.img_height)  + self.line_height//2
                 text_available_width = Device.get_device().screen_width() - text_pad * 2
             elif(TextToImageRelationship.ABOVE_IMAGE == self.text_to_image_relationship):
-                scroll = False
                 render_mode=RenderMode.MIDDLE_CENTER_ALIGNED
                 x_value = Device.get_device().screen_width() // 2
                 y_value = self.base_y_offset + self.line_height//2
@@ -121,11 +118,7 @@ class ImageListView(NonDescriptiveListView):
                 icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
                 text_x_value += icon_width + 5 #TODO get 5 from somewhere
 
-            text = imageTextPair.get_primary_text()
-            if(scroll):
-                text = self.scroll_string(imageTextPair.get_primary_text(),scroll_amt, text_available_width)
-
-            Display.render_text(text, text_x_value, y_value, color, FontPurpose.LIST,
+            Display.render_text(self.scroll_string(imageTextPair.get_primary_text(),scroll_amt, text_available_width), text_x_value, y_value, color, FontPurpose.LIST,
                                     render_mode, crop_w=text_available_width, crop_h=None)
         self.prev_index = self.selected
 

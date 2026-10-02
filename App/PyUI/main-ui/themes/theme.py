@@ -1123,6 +1123,11 @@ class Theme():
         return cls._data.get("scrollRomSelectionText", True)
 
     @classmethod
+    def set_scroll_rom_selection_text(cls, value):
+        cls._data["scrollRomSelectionText"] = value
+        cls.save_changes()
+
+    @classmethod
     def show_index_text(cls):
         return cls._data.get("showIndexText", True)
 
