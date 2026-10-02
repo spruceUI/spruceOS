@@ -389,6 +389,21 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
+# Bluetooth, driven by bluetooth.sh. A device with a usable radio answers 0
+# from device_bluetooth_supported and starts and stops its daemons in the two
+# hooks; pairing and scanning are bluetoothctl everywhere.
+device_bluetooth_supported() {
+    return 1
+}
+
+device_bluetooth_up() {
+    :
+}
+
+device_bluetooth_down() {
+    :
+}
+
 # Whether wifi_watchdog.sh restarts a link that has no address. Off where the OS owns the radio.
 device_wifi_watchdog_enabled() {
     ! device_manages_own_wifi

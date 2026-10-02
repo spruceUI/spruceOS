@@ -7,3 +7,7 @@
 get_firstboot_key() {
     echo "RGB30"
 }
+
+device_bluetooth_supported() {
+    return 0
+}

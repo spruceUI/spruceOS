@@ -26,6 +26,7 @@ device_init() {
     setup_mainui_alias
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
+    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh apply &
     darkmoss_debug_dump
     clear_stale_pmic_power_en &
 }
@@ -373,12 +374,38 @@ set_volume() {
     [ "$VOLUME_PCT" -lt 0 ] && VOLUME_PCT=0
 
     amixer -q sset -M 'Master' "${VOLUME_PCT}%" 2>/dev/null
+    darkmoss_bt_volume "$VOLUME_PCT"
     apply_playback_path
     log_message "$PLATFORM: volume ${VOLUME_LV}/20 (${VOLUME_PCT}%)"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         save_volume_to_config_file "$VOLUME_LV" 2>/dev/null
     fi
+}
+
+# dArkMoss ships both services disabled; bluetooth.sh starts them from the
+# saved setting, at boot and when it changes.
+device_bluetooth_up() {
+    systemctl start bluetooth bluealsa
+}
+
+device_bluetooth_down() {
+    systemctl stop bluealsa bluetooth
+}
+
+# Soft volume, so the level holds on headsets that ignore the remote one.
+darkmoss_bt_volume() {
+    pgrep -x bluealsad >/dev/null 2>&1 || return 0
+    for _pcm in $(bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
+        bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
+        bluealsactl volume "$_pcm" "$(( $1 * 127 / 100 ))" "$(( $1 * 127 / 100 ))" >/dev/null 2>&1
+    done
+}
+
+# Called once audio is routed to a headset or one has just been connected.
+device_bt_audio_connected() {
+    _lv="$(get_volume_level)"
+    darkmoss_bt_volume "$(( _lv * 5 ))"
 }
 
 get_backlight_level() {
