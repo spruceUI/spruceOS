@@ -1,6 +1,5 @@
 import os
 import subprocess
-import threading
 
 from utils.logger import PyUiLogger
 
@@ -74,15 +73,22 @@ class DarkmossPanelCalibration:
     PANEL_SCALE = 5
     _panel = None
 
+    def __init__(self, system_config):
+        self.system_config = system_config
+
     def _panel_info(self):
         if DarkmossPanelCalibration._panel is None:
             DarkmossPanelCalibration._panel = _read_panel()
         return DarkmossPanelCalibration._panel
 
-    def _set_panel(self, name, value):
+    def supports(self, name):
+        return name in self._panel_info()[2]
+
+    def apply(self, name):
         card, connector, props = self._panel_info()
         if name not in props:
             return
+        value = getattr(self.system_config, name)
         try:
             subprocess.run([PANEL_DRM_TOOL, "set", card, connector, name,
                             str(value * self.PANEL_SCALE)], stdout=subprocess.DEVNULL,
@@ -90,35 +96,6 @@ class DarkmossPanelCalibration:
         except (OSError, subprocess.SubprocessError) as e:
             PyUiLogger.get_logger().error(f"dArkMoss: setting panel {name} failed: {e}")
 
-    def _set_brightness_to_config(self):
-        self._set_panel("brightness", self.system_config.brightness)
-
-    def _set_contrast_to_config(self):
-        self._set_panel("contrast", self.system_config.contrast)
-
-    def _set_saturation_to_config(self):
-        self._set_panel("saturation", self.system_config.saturation)
-
-    def _set_hue_to_config(self):
-        self._set_panel("hue", self.system_config.hue)
-
-    def supports_brightness_calibration(self):
-        return "brightness" in self._panel_info()[2]
-
-    def supports_contrast_calibration(self):
-        return "contrast" in self._panel_info()[2]
-
-    def supports_saturation_calibration(self):
-        return "saturation" in self._panel_info()[2]
-
-    def supports_hue_calibration(self):
-        return "hue" in self._panel_info()[2]
-
-    def _apply_panel_calibration(self):
-        self._set_brightness_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_hue_to_config()
-
-    def startup_init(self, include_wifi=True):
-        threading.Thread(target=self._apply_panel_calibration, daemon=True).start()
+    def apply_all(self):
+        for name in PANEL_PROPERTIES:
+            self.apply(name)

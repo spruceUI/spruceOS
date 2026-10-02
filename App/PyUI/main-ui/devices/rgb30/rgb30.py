@@ -110,7 +110,7 @@ class Rgb30KeyMappingProvider:
         return axis.get_mapped_events(key_event.value, self.DEADZONE)
 
 
-class Rgb30(DarkmossPanelCalibration, DeviceCommon):
+class Rgb30(DeviceCommon):
     """Powkiddy RGB30 running dArkMoss.
 
     dArkMoss is our fork of dArkOS - Debian trixie - on TF1; spruce runs from
@@ -129,6 +129,7 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
     def __init__(self, device_name):
         self.device_name = device_name
         self.load_rgb30_system_json()
+        self.panel_calibration = DarkmossPanelCalibration(self.system_config)
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         DeviceCommon.__init__(self)
@@ -341,6 +342,33 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
                 f.write(str(self.BACKLIGHT_TABLE[level]))
         except OSError as e:
             PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
+
+    def _set_brightness_to_config(self):
+        self.panel_calibration.apply("brightness")
+
+    def _set_contrast_to_config(self):
+        self.panel_calibration.apply("contrast")
+
+    def _set_saturation_to_config(self):
+        self.panel_calibration.apply("saturation")
+
+    def _set_hue_to_config(self):
+        self.panel_calibration.apply("hue")
+
+    def supports_brightness_calibration(self):
+        return self.panel_calibration.supports("brightness")
+
+    def supports_contrast_calibration(self):
+        return self.panel_calibration.supports("contrast")
+
+    def supports_saturation_calibration(self):
+        return self.panel_calibration.supports("saturation")
+
+    def supports_hue_calibration(self):
+        return self.panel_calibration.supports("hue")
+
+    def startup_init(self, include_wifi=True):
+        threading.Thread(target=self.panel_calibration.apply_all, daemon=True).start()
 
     def get_volume(self):
         return self.system_config.get_volume()
