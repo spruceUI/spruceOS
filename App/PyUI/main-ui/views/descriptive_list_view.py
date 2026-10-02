@@ -112,6 +112,9 @@ class DescriptiveListView(ListView):
             if(gridOrListEntry.get_description() is None):
                 title_y_offset = row_offset_y + self.each_entry_height // 2
                 title_render_mode = RenderMode.MIDDLE_LEFT_ALIGNED
+            elif (Theme.get_use_text_for_line_height()):
+                # Make the distance between the title and description less when using smaller rows
+                title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y() + Theme.scale_with_height_multiplier(5)
 
             title_w, title_h = Display.render_text(
                 gridOrListEntry.get_primary_text(), 

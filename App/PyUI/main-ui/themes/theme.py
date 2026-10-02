@@ -84,6 +84,13 @@ class Theme():
         cls.button_press_sounds_changed()
         cls.bgm_setting_changed()
 
+    @classmethod
+    def scale_with_height_multiplier(cls, val):
+        return int(cls.height_multiplier * val)
+    
+    @classmethod
+    def scale_with_width_multiplier(cls, val):
+        return int(cls.width_multiplier * val)       
 
     @classmethod
     def bgm_setting_changed(cls):
@@ -784,7 +791,7 @@ class Theme():
     @classmethod
     def get_descriptive_list_text_offset_y(cls):
         if(Theme.get_use_text_for_line_height()):
-            return cls._data.get("descriptiveListTextOffsetY", 0)
+            return cls._data.get("descriptiveListTextOffsetY", int(5*cls._default_multiplier))
         else:
             return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
 

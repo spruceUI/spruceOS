@@ -189,8 +189,7 @@ class ListView(View):
             return text
 
     def _calculate_line_height(self, include_description_line):
-        use_text_for_line_height_non_descriptive_list_view = Theme.get_use_text_for_line_height()
-        padding = 10  # add 10px padding between lines <-- Configure based on resolution
+        padding = int(10 * Device.get_device().screen_height() / 480)
         text_line_height = Display.get_line_height(FontPurpose.LIST)
         text_line_height += padding
         icon_line_height = 0
@@ -204,12 +203,12 @@ class ListView(View):
                 if(gridOrListEntry.get_description() is not None):
                     _, title_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, gridOrListEntry.get_primary_text())
                     _, description_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, gridOrListEntry.get_description())
-                    text_line_height = max(text_line_height, Theme.get_descriptive_list_text_offset_y() + title_h + description_h)
+                    text_line_height = max(text_line_height, Theme.get_descriptive_list_text_offset_y() + title_h + description_h + padding)
 
         if(self.selected_bg is not None):
             bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
 
-        if(use_text_for_line_height_non_descriptive_list_view):
+        if(Theme.get_use_text_for_line_height()):
             return max(text_line_height, icon_line_height)
         else:
             return max(icon_line_height, bg_height)
