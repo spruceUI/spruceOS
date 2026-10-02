@@ -21,10 +21,22 @@ if [ "$CURRENT" = "1" ]; then
     echo "set LED off"
     chmod 777 "$ENABLE_FILE" 2>/dev/null
     echo 0 > "$ENABLE_FILE" 2>/dev/null
+    flag_add "leds_forced_off" --tmp
+    if [ -x /usr/trimui/bin/shmvar ]; then
+        /usr/trimui/bin/shmvar ledswitch 0 2>/dev/null
+    fi
+    mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+    echo 0 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
 else
     echo "set LED on"
     chmod 777 "$ENABLE_FILE" 2>/dev/null
     echo 1 > "$ENABLE_FILE" 2>/dev/null
+    flag_remove "leds_forced_off"
+    if [ -x /usr/trimui/bin/shmvar ]; then
+        /usr/trimui/bin/shmvar ledswitch 1 2>/dev/null
+    fi
+    mkdir -p /tmp/trimui_osd/toggle_led 2>/dev/null
+    echo 1 > /tmp/trimui_osd/toggle_led/status 2>/dev/null
     # Restore spruce's configured colour/effect so "on" matches the menu state.
     set_rgb_in_menu
 fi
