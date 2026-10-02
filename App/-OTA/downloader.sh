@@ -4,6 +4,7 @@
 
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/update.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
+CONFIG_FILE="/mnt/SDCARD/App/-OTA/config.json"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
@@ -665,7 +666,15 @@ display_image_and_text "$IMAGE_PATH" 35 25 "Download successful! Press A to inst
 
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
+
+    # Reset label on OTA app so it doesn't appear there's immediately an update after updating
+    if grep -q '"label"' "$CONFIG_FILE"; then
+        jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
+            "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+    fi
+
     "$(get_python_path)" /mnt/SDCARD/App/-Updater/updater.py
+
 else
     log_message "OTA: Update declined"
     exit 0
