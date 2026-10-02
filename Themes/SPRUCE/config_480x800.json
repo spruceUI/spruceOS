@@ -68,5 +68,7 @@
     "showClock": true,
     "multiRowGridTextYOffset": -16,
     "gridMultiRowImageYOffset": 12,
-    "gridBgOffsetToImageOffset": true
+    "gridBgOffsetToImageOffset": true,
+    "textAndImageListViewMode": "TEXT_BELOW_IMAGE",
+    "imgPercentTopBottomView": 35
 }
