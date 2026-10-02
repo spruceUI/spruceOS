@@ -207,7 +207,7 @@ class MiniloongPocket1(DeviceCommon):
         return self.panel_calibration.supports("hue")
 
     def startup_init(self, include_wifi=True):
-        threading.Thread(target=self.panel_calibration.apply_all, daemon=True).start()
+        self.panel_calibration.apply_all()
 
     # ---- audio ----
 
