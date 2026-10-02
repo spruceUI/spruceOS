@@ -41,6 +41,7 @@ import json
 import logging
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -339,20 +340,8 @@ def parse_version(version):
 def start_pyui():
 
     # Bring loopback up for the PyUI message listener below.
-    #
-    # RGB30 runs dArkMoss, which is Debian and ships no net-tools, so ifconfig
-    # does not exist there. subprocess raises FileNotFoundError on a missing
-    # binary whatever check= says, nothing here catches it, and the updater died
-    # on this line - before main() had read the OTA queue or even logged that it
-    # had started. That took out every update type on that device, full and
-    # incremental alike; incremental was just what got tried first.
-    #
-    # Gated to RGB30 on purpose: every other platform is busybox-based, has
-    # ifconfig, and keeps exactly the behaviour it has today.
-    #
-    # Same class of bug as iface_has_address() in helperFunctions.sh, which was
-    # ifconfig-only until Debian made it answer "no address" forever.
-    if PLATFORM == "RGB30":
+    # dArkMoss devices have no ifconfig, and a missing binary raises.
+    if shutil.which("ifconfig") is None:
 
         run([
             "ip",
