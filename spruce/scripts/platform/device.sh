@@ -404,6 +404,18 @@ device_bluetooth_down() {
     :
 }
 
+# bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
+bt_headset_volume() {
+    pidof bluealsa >/dev/null 2>&1 || return 0
+    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP\)',0$/\1/p" | while read -r _ctl; do
+        amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    done
+}
+
+device_bt_audio_connected() {
+    bt_headset_volume "$(get_volume_level)"
+}
+
 # Whether wifi_watchdog.sh restarts a link that has no address. Off where the OS owns the radio.
 device_wifi_watchdog_enabled() {
     ! device_manages_own_wifi

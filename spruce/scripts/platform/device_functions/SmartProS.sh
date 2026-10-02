@@ -109,7 +109,7 @@ set_volume() {
 
     mkdir -p /tmp/system 2>/dev/null
     echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
-    smartpros_bt_volume "$new_vol"
+    bt_headset_volume "$new_vol"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -519,18 +519,6 @@ device_bluetooth_up() {
     if ! pidof bluealsa >/dev/null 2>&1; then
         ( cd / && exec bluealsa -p a2dp-source ) >/dev/null 2>&1 &
     fi
-}
-
-# bluealsa's mixer, 0-127, on the headset's A2DP control.
-smartpros_bt_volume() {
-    pidof bluealsa >/dev/null 2>&1 || return 0
-    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.* - A2DP\)',0$/\1/p" | while read -r _ctl; do
-        amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
-    done
-}
-
-device_bt_audio_connected() {
-    smartpros_bt_volume "$(get_volume_level)"
 }
 
 device_bluetooth_down() {
