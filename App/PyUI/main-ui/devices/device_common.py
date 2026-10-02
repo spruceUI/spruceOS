@@ -225,7 +225,6 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     # ---- WiFi -------------------------------------------------------------
     # The shell owns the radio and reports on it; PyUI only saves the on/off
     # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
@@ -253,7 +252,11 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().error(f"wifi {args[0]} failed: {e}")
             return None
 
-    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
+    # background: the top bar asks for this every frame, and `wifiCmd status` takes
+    # ~0.2 s on an A133P. Read on the UI thread, that stalled one frame per refresh
+    # (every second while a change settles), and Controller.get_input drops a key
+    # pressed during a frame longer than 0.2 s: typing a WiFi password lost keys.
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until", background=True)
     def _wifi_status(self):
         """`wifiCmd status` as a dict of its key=value lines."""
         out = self._wifi_cmd("status", timeout=15)
