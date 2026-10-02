@@ -651,17 +651,13 @@ class Theme():
                 case FontPurpose.LIST_TOTAL:
                     cls._data["indexTotalSize"] = size
                 case FontPurpose.SHADOWED:
-                    cls._data["indexSelectedFontSize"] = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontSize"] = size 
                 case FontPurpose.SHADOWED_BACKDROP:
-                    cls._data["indexTotalSize"] = size
-                case FontPurpose.SHADOWED:
-                    cls._data["shadowed"]["shadowedFontSize"] = size
-                case FontPurpose.SHADOWED_BACKDROP:
-                    cls._data["shadowed"]["shadowedFontBackdropSize"]  = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontBackdropSize"] = size 
                 case FontPurpose.SHADOWED_SMALL:
-                    cls._data["shadowed"]["shadowedFontSmallSize"] = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontSmallSize"] = size 
                 case FontPurpose.SHADOWED_BACKDROP_SMALL:
-                    cls._data["shadowed"]["shadowedFontBackdropSmallSize"]  = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontBackdropSmallSize"] = size 
                 case _:
                     PyUiLogger.get_logger().error(
                         f"set_font_size: Unknown font purpose {font_purpose}")
