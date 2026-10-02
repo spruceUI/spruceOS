@@ -38,7 +38,7 @@ class ImageListView(NonDescriptiveListView):
         for visible_index, (imageTextPair) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
             text_available_width = None #just take up as much space as needed
-            text_pad = int(30 * Device.get_device().screen_height() / 480 )  #TODO get this from somewhere
+            text_pad = Theme.scale_with_width_multiplier( 20 )
             if(TextToImageRelationship.LEFT_OF_IMAGE == self.text_to_image_relationship):
                 x_value = 0 
                 y_value = self.base_y_offset + self.line_height//2

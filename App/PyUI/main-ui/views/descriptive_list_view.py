@@ -126,7 +126,7 @@ class DescriptiveListView(ListView):
 
             if(gridOrListEntry.get_value_text() is not None):
                 value_text = gridOrListEntry.get_value_text()
-                max_value_text_length = 25
+                max_value_text_length = Theme.scale_with_width_multiplier(25)
                 
                 if(len(value_text) > max_value_text_length):
                     value_text = value_text[1:-1].strip()
@@ -158,10 +158,16 @@ class DescriptiveListView(ListView):
                     value_render_mode)
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)
-            
             if(gridOrListEntry.get_description() is not None):
+                description_max_width = Theme.scale_with_width_multiplier(70)
+                description_text = gridOrListEntry.get_description()
+                if(len(description_text) > description_max_width and actual_index == self.selected):
+                    description_text = TextUtils.scroll_string_chars(text=description_text,
+                                            amt=self.scroll_value_text_amount,
+                                            max_chars=description_max_width)
+
                 text_w, text_h = Display.render_text(
-                    gridOrListEntry.get_description(), 
+                    description_text, 
                     row_offset_x + icon_w + Theme.get_descriptive_list_text_from_icon_offset(), 
                     row_offset_y + Theme.get_descriptive_list_text_offset_y() + title_h, 
                     color, 
