@@ -55,9 +55,8 @@ class Rgb30KeyMappingProvider:
         BTN_THUMBR: ControllerInput.R3,
     }
 
-    def __init__(self, key_mappings, menu_from_thumb=True):
+    def __init__(self, key_mappings):
         self.key_mappings = key_mappings
-        self.menu_from_thumb = menu_from_thumb
         self.stick_axes = {
             self.ABS_X: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
             self.ABS_Y: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
@@ -69,15 +68,18 @@ class Rgb30KeyMappingProvider:
         self.thumb_pressed_as = {}
 
     def _menu_thumb_code(self):
-        if not self.menu_from_thumb:
-            return None
         # Read per click rather than caching: the controller is built once at
         # init, so a cached value would need a PyUI restart to take effect.
         # CfwSystemConfig serves this from its in-memory copy, and a stick click
         # is not a hot path. Anything but R3, including a missing option on an
-        # older config, leaves the L3 default.
+        # older config, leaves the L3 default. A device the option does not
+        # list has a real menu key, so neither click is the menu.
+        from devices.device import Device
         from utils.cfw_system_config import CfwSystemConfig
-        if "R3" == CfwSystemConfig.get_selected_value("Button Settings", "menuButton"):
+        option = CfwSystemConfig.get_menu_option("Button Settings", "menuButton") or {}
+        if not Device.supports_device(option.get("devices")):
+            return None
+        if "R3" == option.get("selected"):
             return self.BTN_THUMBR
         return self.BTN_THUMBL
 
@@ -108,7 +110,7 @@ class Rgb30KeyMappingProvider:
         return axis.get_mapped_events(key_event.value, self.DEADZONE)
 
 
-class Rgb30(DarkmossPanelCalibration, DeviceCommon):
+class Rgb30(DeviceCommon):
     """Powkiddy RGB30 running dArkMoss.
 
     dArkMoss is our fork of dArkOS - Debian trixie - on TF1; spruce runs from
@@ -127,6 +129,7 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
     def __init__(self, device_name):
         self.device_name = device_name
         self.load_rgb30_system_json()
+        self.panel_calibration = DarkmossPanelCalibration(self.system_config)
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         DeviceCommon.__init__(self)
@@ -238,7 +241,7 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
             # this too.
             event_format="llHHi",
             event_path=self._resolve_joypad(),
-            mapping_provider=Rgb30KeyMappingProvider(key_mappings, menu_from_thumb=self.MENU_KEY is None),
+            mapping_provider=Rgb30KeyMappingProvider(key_mappings),
         )
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
@@ -339,6 +342,33 @@ class Rgb30(DarkmossPanelCalibration, DeviceCommon):
                 f.write(str(self.BACKLIGHT_TABLE[level]))
         except OSError as e:
             PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
+
+    def _set_brightness_to_config(self):
+        self.panel_calibration.apply("brightness")
+
+    def _set_contrast_to_config(self):
+        self.panel_calibration.apply("contrast")
+
+    def _set_saturation_to_config(self):
+        self.panel_calibration.apply("saturation")
+
+    def _set_hue_to_config(self):
+        self.panel_calibration.apply("hue")
+
+    def supports_brightness_calibration(self):
+        return self.panel_calibration.supports("brightness")
+
+    def supports_contrast_calibration(self):
+        return self.panel_calibration.supports("contrast")
+
+    def supports_saturation_calibration(self):
+        return self.panel_calibration.supports("saturation")
+
+    def supports_hue_calibration(self):
+        return self.panel_calibration.supports("hue")
+
+    def startup_init(self, include_wifi=True):
+        self.panel_calibration.apply_all()
 
     def get_volume(self):
         return self.system_config.get_volume()
