@@ -25,7 +25,61 @@ bt_setting() {
 }
 
 bt_running() {
-    pgrep -x bluetoothd >/dev/null 2>&1
+    pidof bluetoothd >/dev/null 2>&1
+}
+
+# Headsets that stayed on while the radio was down will not call back on
+# their own.
+reconnect_trusted() {
+    timeout 5 bluetoothctl devices 2>/dev/null | while read -r _ mac _; do
+        case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
+            *"Paired: yes"*"Trusted: yes"*"Connected: no"*) ;;
+            *) continue ;;
+        esac
+        timeout 15 bluetoothctl connect "$mac" >/dev/null 2>&1
+        case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
+            *"Connected: yes"*) log_message "bluetooth.sh: reconnected a device" ;;
+        esac
+    done
+}
+
+connections() {
+    if command -v hcitool >/dev/null 2>&1; then
+        hcitool con 2>/dev/null | awk '/ACL/ { print $3 }'
+    else
+        list_devices | awk -F'\t' '$3 == 1 { print $1 }'
+    fi
+}
+
+# PyUI reads $HOME/.asoundrc and reopens its output when the flag appears.
+route_audio() {
+    /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
+    touch /tmp/audio_reinit_needed
+}
+
+# Headsets connect and drop on their own, so the routing follows the links
+# rather than the commands. A change is acted on once it has held for one
+# poll, as the audio profile comes up a moment after the link.
+WATCH_PID=/tmp/bluetooth_watch.pid
+
+watch_connections() {
+    _routed="-"
+    _prev=""
+    while bt_running; do
+        _now="$(connections | sort | tr '\n' ' ')"
+        if [ "$_now" != "$_routed" ] && [ "$_now" = "$_prev" ]; then
+            route_audio
+            _routed="$_now"
+        fi
+        _prev="$_now"
+        sleep 3
+    done
+    rm -f "$WATCH_PID"
+}
+
+stop_watch() {
+    [ -f "$WATCH_PID" ] && kill "$(cat "$WATCH_PID")" 2>/dev/null
+    rm -f "$WATCH_PID"
 }
 
 # Pairable does not survive a daemon restart, and a pairing made without it
@@ -37,7 +91,12 @@ apply_setting() {
         timeout 10 bluetoothctl power on >/dev/null 2>&1
         timeout 10 bluetoothctl pairable on >/dev/null 2>&1
         log_message "bluetooth.sh: on" >/dev/null
+        stop_watch
+        watch_connections >/dev/null 2>&1 &
+        echo $! > "$WATCH_PID"
+        reconnect_trusted >/dev/null 2>&1 &
     else
+        stop_watch
         device_bluetooth_down
         log_message "bluetooth.sh: off" >/dev/null
     fi
