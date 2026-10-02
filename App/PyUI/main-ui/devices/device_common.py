@@ -226,13 +226,6 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
-    # ---- WiFi -------------------------------------------------------------
-    # The shell owns the radio and reports on it; PyUI only saves the on/off
-    # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
-    # for the command contract. With no wifiCmd configured, the reads fall back
-    # to the interface and /proc so hosts without spruce's script still work.
-
     # ---- Bluetooth --------------------------------------------------------
     # As with WiFi: the shell owns the radio and its daemons, PyUI saves the
     # on/off setting and calls bluetoothCmd for the rest. See
@@ -269,6 +262,13 @@ class DeviceCommon(AbstractDevice):
             status = (self._bluetooth_cmd("status") or "").splitlines()
             self._bluetooth_scanner = BluetoothCommand(self._bluetooth_cmd) if "radio=1" in status else None
         return self._bluetooth_scanner
+
+    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
+    # ---- WiFi -------------------------------------------------------------
+    # The shell owns the radio and reports on it; PyUI only saves the on/off
+    # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
+    # for the command contract. With no wifiCmd configured, the reads fall back
+    # to the interface and /proc so hosts without spruce's script still work.
 
     def _wifi_cmd(self, *args, stdin_text=None, timeout=10):
         """Run the configured WiFi command. Returns stdout, or None when there

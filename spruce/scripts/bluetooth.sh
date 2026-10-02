@@ -86,9 +86,24 @@ bluez_error() {
     echo "${_err:-no answer}"
 }
 
+pair_failed() {
+    _reason="$(bluez_error "$2")"
+    log_message "bluetooth.sh: $1 failed: $_reason" >/dev/null
+    printf '%s\n' "$2" | sed -e 's/\x1b\[[0-9;]*m//g' -e 's/[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]/<address>/g' \
+        | tail -n 6 > /tmp/bluetooth_last_failure 2>/dev/null
+    echo "failed $1 $_reason"
+}
+
 pair_device() {
     mac="$1"
-    if [ -z "$mac" ] || ! bt_running; then
+    _addr=missing
+    [ -n "$mac" ] && _addr=given
+    log_message "bluetooth.sh: pair requested (address $_addr, daemon $(bt_running && echo up || echo down))" >/dev/null
+    if [ -z "$mac" ]; then
+        echo "failed pair no address"
+        return
+    fi
+    if ! bt_running; then
         echo "failed pair bluetooth is off"
         return
     fi
@@ -99,22 +114,19 @@ pair_device() {
             out="$(timeout 40 bluetoothctl pair "$mac" 2>&1)"
             case "$out" in
                 *"Pairing successful"*) ;;
-                *) echo "failed pair $(bluez_error "$out")"; return ;;
+                *) pair_failed pair "$out"; return ;;
             esac
             ;;
     esac
 
     timeout 10 bluetoothctl trust "$mac" >/dev/null 2>&1
 
-    case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
-        *"Connected: yes"*) ;;
-        *)
-            out="$(timeout 30 bluetoothctl connect "$mac" 2>&1)"
-            case "$out" in
-                *"Connection successful"*) ;;
-                *) echo "failed connect $(bluez_error "$out")"; return ;;
-            esac
-            ;;
+    # Always: pairing leaves only the bare link up, which reads as connected
+    # and then drops. connect is what brings up the audio profile.
+    out="$(timeout 30 bluetoothctl connect "$mac" 2>&1)"
+    case "$out" in
+        *"Connection successful"*) ;;
+        *) pair_failed connect "$out"; return ;;
     esac
 
     command -v device_bt_audio_connected >/dev/null 2>&1 && device_bt_audio_connected
