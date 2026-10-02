@@ -225,7 +225,6 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
     # ---- WiFi -------------------------------------------------------------
     # The shell owns the radio and reports on it; PyUI only saves the on/off
     # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
