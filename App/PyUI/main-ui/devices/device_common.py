@@ -10,6 +10,7 @@ from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
+from devices.bluetooth.bluetooth_command import BluetoothCommand
 from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
@@ -231,6 +232,43 @@ class DeviceCommon(AbstractDevice):
     # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
     # for the command contract. With no wifiCmd configured, the reads fall back
     # to the interface and /proc so hosts without spruce's script still work.
+
+    # ---- Bluetooth --------------------------------------------------------
+    # As with WiFi: the shell owns the radio and its daemons, PyUI saves the
+    # on/off setting and calls bluetoothCmd for the rest. See
+    # App/PyUI/bluetooth_readme.txt for the command contract.
+
+    def _bluetooth_cmd(self, *args, timeout=20):
+        cmd = PyUiConfig.get_bluetooth_cmd()
+        if not cmd or not os.path.exists(cmd):
+            return None
+        try:
+            result = subprocess.run([cmd, *args], capture_output=True, text=True,
+                                    stdin=subprocess.DEVNULL, timeout=timeout)
+            if result.returncode != 0:
+                PyUiLogger.get_logger().error(f"bluetooth {args[0]} exited {result.returncode}")
+                return None
+            return result.stdout
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"bluetooth {args[0]} failed: {e}")
+            return None
+
+    def is_bluetooth_enabled(self):
+        return self.system_config.is_bluetooth_enabled()
+
+    def enable_bluetooth(self):
+        self.system_config.set_bluetooth(1)
+        self._bluetooth_cmd("apply", timeout=30)
+
+    def disable_bluetooth(self):
+        self.system_config.set_bluetooth(0)
+        self._bluetooth_cmd("apply", timeout=30)
+
+    def get_bluetooth_scanner(self):
+        if not hasattr(self, "_bluetooth_scanner"):
+            status = (self._bluetooth_cmd("status") or "").splitlines()
+            self._bluetooth_scanner = BluetoothCommand(self._bluetooth_cmd) if "radio=1" in status else None
+        return self._bluetooth_scanner
 
     def _wifi_cmd(self, *args, stdin_text=None, timeout=10):
         """Run the configured WiFi command. Returns stdout, or None when there

@@ -263,6 +263,10 @@ class PyUiConfig:
         return cls.get("wifiCmd",None)
 
     @classmethod
+    def get_bluetooth_cmd(cls):
+        return cls.get("bluetoothCmd",None)
+
+    @classmethod
     def get_cache_cheevos_cmd(cls):
         return cls.get("cacheCheevosCmd",None)
 

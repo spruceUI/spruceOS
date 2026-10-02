@@ -20,6 +20,7 @@
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
     "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
+    "bluetoothCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_bluetooth",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "aboutEntries" : [

@@ -16,7 +16,7 @@ from menus.language.language import Language
 
 class BluetoothMenu:
     def __init__(self):
-        self.bluetooth_scanner = BluetoothScanner()
+        self.bluetooth_scanner = Device.get_device().get_bluetooth_scanner()
 
     def bluetooth_adjust(self):
         if Device.get_device().is_bluetooth_enabled():
@@ -33,28 +33,16 @@ class BluetoothMenu:
         log = PyUiLogger.get_logger()
         log.info(f"connecting to ({device.address})")
 
-        steps = [
-            ("pair",    ["bluetoothctl", "pair", device.address],    "Pairing successful"),
-            ("trust",   ["bluetoothctl", "trust", device.address],   "trust succeeded"),
-            ("connect", ["bluetoothctl", "connect", device.address], "Connection successful"),
-        ]
-
-        for name, cmd, success_token in steps:
-            log.info(f"Bluetooth connect step: {name}")
-
-            output = ProcessRunner.run_cmd("BluetoothMenu", cmd)
-            log.info(f"{name} output: {output}")
-
-            if not output or success_token.lower() not in output.lower():
-                log.info(f"{name} FAILED for {device.address}")
-                Display.display_message(
-                    Language.label("bluetoothConnectFailed", "Bluetooth device {name} failed to connect at step: {step}. {output}")
-                    .replace("{name}", device.name)
-                    .replace("{step}", name)
-                    .replace("{output}", output),
-                    duration_ms=5000,
-                )
-                return False
+        ok, step, output = self.bluetooth_scanner.connect(device)
+        if not ok:
+            Display.display_message(
+                Language.label("bluetoothConnectFailed", "Bluetooth device {name} failed to connect at step: {step}. {output}")
+                .replace("{name}", device.name)
+                .replace("{step}", step)
+                .replace("{output}", output or ""),
+                duration_ms=5000,
+            )
+            return False
 
         Display.display_message(
             Language.label("bluetoothConnectSuccess", "Bluetooth device {name} connected successfully").replace("{name}", device.name),
