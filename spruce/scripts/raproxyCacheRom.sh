@@ -26,14 +26,22 @@ OUT="$(raproxy_cache_rom "$ROM")"
 RC=$?
 
 MSG="$(printf '%s\n' "$OUT" | tail -n 1)"
+QUEUED="$(printf '%s' "$MSG" | jq -r '.queued // false' 2>/dev/null)"
 PARSED="$(printf '%s' "$MSG" | jq -r '.message // empty' 2>/dev/null)"
 [ -n "$PARSED" ] && MSG="$PARSED"
 
 log_message "RAOfflineProxy cache-rom: $(basename "$ROM") -> $MSG"
 
+# Over the caching budget: the daemon caches it later, so it is not cached yet.
+if [ "$QUEUED" = "true" ]; then
+	jq -nc --arg m "$MSG" '{message:$m,game_id:null}'
+	exit 2
+fi
+
 GAME_ID=""
 if [ "$RC" = "0" ]; then
-	GAME_ID="$(raproxy_cached_games | awk -v title="${MSG#Cached }" '
+	TITLE="${MSG#Already cached }"
+	GAME_ID="$(raproxy_cached_games | awk -v title="${TITLE#Cached }" '
 		{
 			line = $0
 			sub(/ ##GAMEID:[0-9]+$/, "", line)

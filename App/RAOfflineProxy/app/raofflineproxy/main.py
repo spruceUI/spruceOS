@@ -19,6 +19,7 @@ from .config import (
     running_on_onion,
 )
 from .darkos_service import systemd_install_service
+from . import usage_stats
 from .log_uploader import onion_os_version, onion_version_supported
 from .platform import (
     disable_autostart,
@@ -61,7 +62,7 @@ from .service import (
     stop_service_process,
 )
 from .menu_sdl import run_menu_sdl
-from .network import apply_scan_batch_cooldown, online_check
+from .network import online_check
 from .pending_awards import list_pending_awards
 from .rom_browser import (
     add_rom_to_cache,
@@ -72,16 +73,17 @@ from .rom_browser import (
     describe_browser_entries,
     describe_browser_entries_fast,
     list_cached_games,
-    load_cached_rom_paths,
-    normalize_cached_rom_path,
     remove_cached_game,
 )
 from .smart_cache import (
-    SMART_CACHE_LIMIT,
-    load_content_history_paths,
+    ROM_RESULT_FAIL,
+    ROM_RESULT_OK,
+    ROM_RESULT_QUEUED,
+    run_cache_paths,
     run_folder_cache,
     run_smart_cache,
     should_offer_smart_cache,
+    smart_cache_paths,
 )
 from .storage import Storage
 from .state import load_online_state, load_patch_state, save_patch_state, save_online_state
@@ -260,6 +262,9 @@ def main() -> None:
             "enable-autostart",
             "disable-autostart",
             "autostart-status",
+            "enable-usage-stats",
+            "disable-usage-stats",
+            "usage-stats-status",
             "cached-games",
             "cached-games-count",
             "cached-unlock-titles",
@@ -458,6 +463,24 @@ def main() -> None:
             print("enabled" if is_autostart_enabled(config_data) else "disabled")
             return
 
+        if args.command == "enable-usage-stats":
+            usage_stats.save_consent(True)
+            print("Usage stats enabled")
+            return
+
+        if args.command == "disable-usage-stats":
+            usage_stats.save_consent(False)
+            print("Usage stats disabled")
+            return
+
+        if args.command == "usage-stats-status":
+            status = usage_stats.consent_status(config_data)
+            if args.as_json:
+                print(json.dumps(status, separators=(",", ":")))
+            else:
+                print(usage_stats.consent_status_label(status["consent"]))
+            return
+
         if args.command == "cached-games":
             storage = Storage()
             try:
@@ -646,37 +669,48 @@ def main() -> None:
             if not rom_paths:
                 raise ValueError("cache-roms paths file is empty")
 
-            cached_count = 0
-            failed_count = 0
             total = len(rom_paths)
+            index_by_path = {
+                path: index for index, path in reversed(list(enumerate(rom_paths, start=1)))
+            }
+            counts = {"cached": 0, "failed": 0, "queued": 0}
+
+            def on_rom_result(rom_path: Path, status: str, message: str) -> None:
+                index = index_by_path[rom_path]
+                label = rom_path.name
+                if status == ROM_RESULT_OK:
+                    counts["cached"] += 1
+                    print(f"OK {index}/{total} {label}", flush=True)
+                elif status == ROM_RESULT_QUEUED:
+                    counts["queued"] += 1
+                    print(f"QUEUED {index}/{total} {label}", flush=True)
+                else:
+                    counts["failed"] += 1
+                    print(f"FAIL {index}/{total} {label}: {message}", flush=True)
+
+            existing_paths = []
+            for rom_path in rom_paths:
+                if rom_path.is_file():
+                    existing_paths.append(rom_path)
+                else:
+                    on_rom_result(rom_path, ROM_RESULT_FAIL, "not found")
+
             storage = Storage()
             try:
-                for index, rom_path in enumerate(rom_paths, start=1):
-                    apply_scan_batch_cooldown(index - 1)
-                    label = rom_path.name
-                    if not rom_path.is_file():
-                        failed_count += 1
-                        print(f"FAIL {index}/{total} {label}: not found", flush=True)
-                        continue
-                    try:
-                        result = add_rom_to_cache(rom_path, storage, config_data)
-                    except Exception as error:
-                        failed_count += 1
-                        print(f"FAIL {index}/{total} {label}: {error}", flush=True)
-                        continue
-                    if result.success:
-                        cached_count += 1
-                        print(f"OK {index}/{total} {label}", flush=True)
-                    else:
-                        failed_count += 1
-                        print(
-                            f"FAIL {index}/{total} {label}: {result.message}",
-                            flush=True,
-                        )
+                run_cache_paths(
+                    storage,
+                    config_data,
+                    existing_paths,
+                    should_abort=should_abort_from_env,
+                    on_rom_result=on_rom_result,
+                )
             finally:
                 storage.close()
 
-            print(f"DONE cached={cached_count} failed={failed_count}", flush=True)
+            print(
+                f"DONE cached={counts['cached']} failed={counts['failed']} queued={counts['queued']}",
+                flush=True,
+            )
             return
 
         if args.command == "export-cached-ids":
@@ -704,7 +738,11 @@ def main() -> None:
 
             if args.as_json:
                 print(json.dumps(
-                    {"success": result.success, "message": result.message},
+                    {
+                        "success": result.success,
+                        "message": result.message,
+                        "queued": result.queued,
+                    },
                     separators=(",", ":"),
                 ))
                 if not result.success:
@@ -733,6 +771,7 @@ def main() -> None:
                         json.dumps(
                             {
                                 "type": "progress",
+                                "phase": progress.phase,
                                 "scanned": progress.scanned,
                                 "total": progress.total,
                                 "cached": progress.cached,
@@ -764,7 +803,7 @@ def main() -> None:
                         "total": result.total,
                         "cached": result.cached,
                         "skipped": result.skipped,
-                        "limit_reached": result.limit_reached,
+                        "queued": result.queued,
                     },
                     separators=(",", ":"),
                 )
@@ -774,16 +813,9 @@ def main() -> None:
         if args.command == "smart-cache-status":
             storage = Storage()
             try:
-                cached_rom_paths = load_cached_rom_paths(storage)
-                history_paths = [
-                    path
-                    for path in load_content_history_paths(config_data)
-                    if normalize_cached_rom_path(path) not in cached_rom_paths
-                ]
-                total_candidates = min(len(history_paths), SMART_CACHE_LIMIT)
+                total_candidates = len(smart_cache_paths(storage, config_data))
                 LOGGER.info(
-                    "Smart Cache status path-aware candidates=%s capped=%s",
-                    len(history_paths),
+                    "Smart Cache status path-aware candidates=%s",
                     total_candidates,
                 )
                 print(
@@ -818,6 +850,7 @@ def main() -> None:
                         json.dumps(
                             {
                                 "type": "progress",
+                                "phase": progress.phase,
                                 "scanned": progress.scanned,
                                 "total": progress.total,
                                 "cached": progress.cached,
@@ -831,7 +864,6 @@ def main() -> None:
                 result = run_smart_cache(
                     storage,
                     config_data,
-                    SMART_CACHE_LIMIT,
                     should_abort=should_abort_from_env,
                     on_progress=on_progress,
                 )
@@ -843,7 +875,7 @@ def main() -> None:
                             "total": result.total,
                             "cached": result.cached,
                             "skipped": result.skipped,
-                            "limit_reached": result.limit_reached,
+                            "queued": result.queued,
                         },
                         separators=(",", ":"),
                     )

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
+import os
 import shutil
+import sys
+import threading
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -10,7 +14,26 @@ from pathlib import Path
 from .config import CONFIG_DIR
 
 _IMAGE_DOWNLOAD_POOL_SIZE = 4
-_image_download_executor = ThreadPoolExecutor(max_workers=_IMAGE_DOWNLOAD_POOL_SIZE)
+_LOWEST_PRIORITY = 19
+
+
+def _lower_thread_priority() -> None:
+    """Image downloads are best-effort, and a TLS handshake costs a handheld's single core
+    hundreds of milliseconds: at the lowest priority it never stalls the menu or the proxy."""
+    if not sys.platform.startswith("linux"):
+        return
+    try:
+        os.setpriority(os.PRIO_PROCESS, threading.get_native_id(), _LOWEST_PRIORITY)
+    except (AttributeError, OSError):
+        pass
+
+
+_image_download_executor = ThreadPoolExecutor(
+    max_workers=_IMAGE_DOWNLOAD_POOL_SIZE, initializer=_lower_thread_priority
+)
+_inline_downloads = threading.local()
+_pending_downloads: set[str] = set()
+_pending_downloads_lock = threading.Lock()
 
 LOGGER = logging.getLogger("raofflineproxy")
 IMAGE_CACHE_DIR = CONFIG_DIR / "image_cache"
@@ -193,7 +216,50 @@ def schedule_image_download(
     user_agent: str,
     game_id: int | None = None,
 ) -> None:
-    _image_download_executor.submit(download_static_image, url, image_path, user_agent, game_id)
+    collected = getattr(_inline_downloads, "items", None)
+    if collected is not None:
+        collected.append((url, image_path, user_agent, game_id))
+        return
+    with _pending_downloads_lock:
+        if image_path in _pending_downloads:
+            return
+        _pending_downloads.add(image_path)
+    _image_download_executor.submit(_download_pending_image, url, image_path, user_agent, game_id)
+
+
+def _download_pending_image(url: str, image_path: str, user_agent: str, game_id: int | None) -> None:
+    try:
+        download_static_image(url, image_path, user_agent, game_id)
+    finally:
+        with _pending_downloads_lock:
+            _pending_downloads.discard(image_path)
+
+
+@contextlib.contextmanager
+def images_downloaded_inline():
+    """Downloads the images a game schedules on this thread before the block returns, 4 at a
+    time, instead of handing them to the shared background executor.
+
+    Bulk caching goes through here: dozens of badges per game queued behind each other on the
+    executor pile up into a backlog that keeps a handheld busy for hours after the batch ended.
+    """
+    previous = getattr(_inline_downloads, "items", None)
+    collected: list[tuple[str, str, str, int | None]] = []
+    _inline_downloads.items = collected
+    try:
+        yield
+    finally:
+        _inline_downloads.items = previous
+    pending: dict[str, tuple[str, str, str, int | None]] = {}
+    for item in collected:
+        if item[1] not in pending and resolve_cached_static_asset(item[1]) is None:
+            pending[item[1]] = item
+    if not pending:
+        return
+    with ThreadPoolExecutor(
+        max_workers=_IMAGE_DOWNLOAD_POOL_SIZE, initializer=_lower_thread_priority
+    ) as pool:
+        list(pool.map(lambda item: download_static_image(*item), pending.values()))
 
 
 def shutdown_image_downloads() -> None:

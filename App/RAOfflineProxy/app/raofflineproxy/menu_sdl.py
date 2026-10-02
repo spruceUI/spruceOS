@@ -6,6 +6,7 @@ import sys
 import threading
 import traceback
 import time
+from collections import OrderedDict
 from pathlib import Path
 
 from .batocera_conf import (
@@ -56,8 +57,10 @@ from .retroarch_cfg import (
     revert_retroarch_cfg,
 )
 from .image_cache import shutdown_image_downloads
+from . import cache_budget, cache_keys, cache_queue, usage_report, usage_stats
 from .rom_browser import (
-    MAX_CACHED_GAMES,
+    format_clock_time,
+    AddRomResult,
     add_rom_to_cache,
     cached_unlock_badge_paths,
     cached_unlock_count,
@@ -80,14 +83,17 @@ from .knulli_service import (
     stop_service,
 )
 from .smart_cache import (
-    SMART_CACHE_LIMIT,
-    load_content_history_paths,
+    PHASE_HASHING,
+    cache_completion_message,
+    estimate_queue_for_paths,
+    queue_confirm_message,
     run_folder_cache,
     run_smart_cache,
     should_offer_smart_cache,
+    smart_cache_paths,
 )
 from .state import load_patch_state, save_patch_state
-from .storage import Storage
+from .storage import Storage, current_millis
 from . import storage_corruption
 from .update import (
     download_knulli_update_installer,
@@ -145,7 +151,12 @@ FPS = 60
 LEFT_MARGIN = 32
 GROUP_GAP = 14
 MAIN_MENU_STATE_REFRESH_SECONDS = 1.0
+CACHE_COUNTS_REFRESH_SECONDS = 5.0
 PREVIEW_RETRY_SECONDS = 2.0
+# Scrolling past a game loads nothing: decoding a cover or starting its download on the
+# Miyoo's single core would stall every step of the scroll.
+PREVIEW_SETTLE_SECONDS = 0.5
+PREVIEW_SURFACE_CACHE_SIZE = 48
 KNULLI_FONT_CANDIDATES = [
     "DejaVu Sans Mono",
     "Monospace",
@@ -175,6 +186,18 @@ ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 SUPPORT_SUBTITLE = "Free & open source, made in my spare time"
 SUPPORT_DESCRIPTION = "If it's been useful to you, a small donation helps keep it going. Thank you!"
 SUPPORT_DONATE_URL = "https://raofflineproxy.com/donate.html"
+USAGE_CONSENT_TITLE = usage_stats.CONSENT_TITLE
+USAGE_CONSENT_ACCEPT = usage_stats.CONSENT_ACCEPT
+USAGE_CONSENT_DECLINE = usage_stats.CONSENT_DECLINE
+# Kept short on purpose: on 640x480 (Miyoo Mini) anything longer pushes the two choices under
+# the hint line.
+USAGE_CONSENT_TEXT = (
+    usage_stats.CONSENT_MESSAGE
+    + "\nTurn off anytime in the main menu.\n"
+    + "Details: raofflineproxy.com/privacy-policy.html"
+)
+USAGE_STATS_ENABLE_LABEL = "Enable usage stats"
+USAGE_STATS_DISABLE_LABEL = "Disable usage stats"
 # Monthly-only: Stripe can't combine a customer-chosen amount with a
 # recurring price, so unlike one-time (any amount), monthly is a fixed set
 # of preset tiers, each its own Payment Link/QR image.
@@ -426,6 +449,14 @@ def log_menu_sdl(message: str) -> None:
         handle.write(f"{timestamp} {message}\n")
 
 
+def single_cache_completion_message(result: AddRomResult, aborted: bool) -> str:
+    if not result.success or result.queued:
+        return result.message
+    cached = 0 if result.already_cached else 1
+    prefix = "Aborted: scanned" if aborted else "Scanned"
+    return f"{prefix} 1, cached {cached}, skipped {1 - cached}"
+
+
 def log_action_failure(action: str, exc: Exception) -> None:
     log_menu_sdl(f"{action} failed error={exc}")
     log_menu_sdl(traceback.format_exc().rstrip())
@@ -525,6 +556,10 @@ class MenuSdlSession:
         self.message: tuple[str, float] | None = None
         self.storage = Storage()
         self.cached_games = []
+        self.queued_count = 0
+        self.queue_confirm_text: str | None = None
+        self.queue_confirm_action = None
+        self.queue_confirm_return_view = "cached_games"
         self.pending_awards = []
         self.active_game = None
         self.active_pending_award = None
@@ -647,6 +682,7 @@ class MenuSdlSession:
             while self.running:
                 self.handle_events()
                 self.handle_raw_input()
+                self.refresh_cache_counts()
                 self.render()
                 if first_frame:
                     signal_menu_ready()
@@ -764,11 +800,17 @@ class MenuSdlSession:
         if self.view == "clear_cache_confirm":
             return ["YES", "NO"]
 
+        if self.view == "queue_confirm":
+            return ["Continue", "Cancel"]
+
         if self.view == "cache_progress":
             return ["Back"] if getattr(self, "cache_completed", False) else ["Abort"]
 
         if self.view == "update_prompt":
             return ["Download and install", "Later"]
+
+        if self.view == "usage_consent":
+            return [USAGE_CONSENT_ACCEPT, USAGE_CONSENT_DECLINE]
 
         if self.view == "send_logs_confirm":
             return ["YES", "NO"]
@@ -823,6 +865,11 @@ class MenuSdlSession:
                 if self.main_autostart_enabled
                 else "Enable autostart"
             )
+        labels.append(
+            USAGE_STATS_DISABLE_LABEL
+            if getattr(self, "main_usage_consent", None) is True
+            else USAGE_STATS_ENABLE_LABEL
+        )
         if (
             ((self.is_knulli_platform() or running_on_darkos()) and not service_mode)
             or running_on_muos()
@@ -882,8 +929,12 @@ class MenuSdlSession:
             return "Add ROM"
         if self.view == "update_prompt":
             return "Update Available"
+        if self.view == "usage_consent":
+            return USAGE_CONSENT_TITLE
         if self.view == "clear_cache_confirm":
             return "Clear Cache?"
+        if self.view == "queue_confirm":
+            return "Cache in the background?"
         if self.view == "cache_progress":
             return self.cache_progress_title or "Caching"
         if self.view == "send_logs_confirm":
@@ -947,7 +998,16 @@ class MenuSdlSession:
                 return "Press the button labeled B"
             return "Controller setup complete"
         if self.view == "cached_games":
-            return f"CACHED: {len(self.cached_games)} / {MAX_CACHED_GAMES}"
+            queued = getattr(self, "queued_count", 0)
+            if queued <= 0:
+                return f"CACHED: {len(self.cached_games)}"
+            status = f"CACHED: {len(self.cached_games)} | QUEUED: {queued}"
+            if not running:
+                return f"{status} (PAUSED, PROXY STOPPED)"
+            queue_status = getattr(self, "queue_status", None)
+            return f"{status} | {queue_status}" if queue_status else status
+        if self.view == "queue_confirm":
+            return self.queue_confirm_text or ""
         if self.view == "pending_awards":
             return f"PENDING: {len(self.pending_awards)}"
         if self.view == "pending_award_actions":
@@ -982,6 +1042,8 @@ class MenuSdlSession:
                 if self.main_update_version is not None
                 else "A new version is available."
             )
+        if self.view == "usage_consent":
+            return USAGE_CONSENT_TEXT
         if self.view == "send_logs_confirm":
             return "Send logs for support?"
         if self.view == "send_logs_progress":
@@ -1025,10 +1087,14 @@ class MenuSdlSession:
                 return None
             if self.view == "clear_cache_confirm":
                 return self.confirm_cancel_hint("confirm", "cancel")
+            if self.view == "queue_confirm":
+                return self.confirm_cancel_hint("confirm", "cancel")
             if self.view == "cache_progress":
                 return None
             if self.view == "update_prompt":
                 return self.confirm_cancel_hint("install", None)
+            if self.view == "usage_consent":
+                return self.confirm_cancel_hint("choose", "decide later")
             if self.view == "send_logs_confirm":
                 return self.confirm_cancel_hint("confirm", "cancel")
             if self.view == "send_logs_progress":
@@ -1181,8 +1247,16 @@ class MenuSdlSession:
             self.activate_clear_cache_confirm_selected()
             return
 
+        if self.view == "queue_confirm":
+            self.activate_queue_confirm_selected()
+            return
+
         if self.view == "update_prompt":
             self.activate_update_prompt_selected()
+            return
+
+        if self.view == "usage_consent":
+            self.activate_usage_consent_selected()
             return
 
         if self.view == "send_logs_confirm":
@@ -1240,10 +1314,15 @@ class MenuSdlSession:
             self.toggle_autostart(config_data)
             return
 
+        if selected_label in (USAGE_STATS_ENABLE_LABEL, USAGE_STATS_DISABLE_LABEL):
+            self.set_usage_consent(selected_label == USAGE_STATS_ENABLE_LABEL)
+            return
+
         if selected_label.startswith("Cached games"):
             self.save_view_position("main")
             self.view = "cached_games"
-            self.restore_view_position("cached_games")
+            self.view_positions.pop("cached_games", None)
+            self.reset_selection()
             self.refresh_cached_games()
             return
 
@@ -1415,12 +1494,47 @@ class MenuSdlSession:
         if self.view == "cached_games":
             self.refresh_cached_games()
 
+    def start_bulk_run(self, paths: list[Path], return_view: str, run) -> None:
+        """A run that fits one budget window is cached right here with progress. A larger one
+        is confirmed first, then only hashed and left to the proxy service, since watching up to
+        a window's worth of games being cached tells nothing more than the result."""
+        estimate = estimate_queue_for_paths(self.storage, paths)
+        if not estimate.needs_confirmation:
+            run(True)
+            return
+        self.queue_confirm_text = queue_confirm_message(estimate)
+        self.queue_confirm_action = lambda: run(False)
+        self.queue_confirm_return_view = return_view
+        self.view = "queue_confirm"
+        self.reset_selection()
+
+    def activate_queue_confirm_selected(self) -> None:
+        if self.selected_index != 0:
+            self.cancel_queue_confirm()
+            return
+        action = self.queue_confirm_action
+        self.queue_confirm_action = None
+        self.queue_confirm_text = None
+        if action is not None:
+            action()
+
+    def cancel_queue_confirm(self) -> None:
+        self.queue_confirm_action = None
+        self.queue_confirm_text = None
+        self.view = self.queue_confirm_return_view
+        if self.view == "file_browser" and self.browser_dir is not None:
+            self.set_browser_dir(self.browser_dir, restore=True)
+        elif self.view == "main":
+            self.restore_view_position("main")
+        self.message = ("Caching cancelled", time.monotonic() + 1.5)
+
     def clear_cache_and_return(self) -> None:
         clear_cached_games(self.storage)
         self.active_game = None
         self.refresh_cached_games()
         self.view = self.clear_cache_return_view
-        self.restore_view_position(self.clear_cache_return_view)
+        self.view_positions.pop(self.clear_cache_return_view, None)
+        self.reset_selection()
         self.message = ("Cache cleared", time.monotonic() + 1.5)
 
     def is_knulli_platform(self) -> bool:
@@ -1692,13 +1806,46 @@ class MenuSdlSession:
         self.reset_selection()
 
     def refresh_cached_games(self) -> None:
+        self.cache_counts = self.read_cache_counts()
         self.cached_games = list_cached_games(self.storage)
+        self.queued_count = self.cache_counts[1]
+        self.queue_status = self.read_queue_status()
         self.pending_awards = list_pending_awards(self.storage)
         self.preview_surface = None
         self.preview_game_id = None
         self.achievement_preview_surface = None
         self.achievement_preview_game_id = None
         self.achievement_preview_title = None
+
+    def read_cache_counts(self) -> tuple[int, int]:
+        return (
+            self.storage.count_cache_by_prefix(cache_keys.PREFIX_PATCH),
+            cache_queue.count(self.storage),
+        )
+
+    def refresh_cache_counts(self) -> None:
+        """Follows the proxy service's background queue while the menu is open: cheap counts
+        every few seconds, the full game list only once they changed."""
+        if self.view not in ("main", "cached_games"):
+            return
+        now = time.monotonic()
+        if now - getattr(self, "cache_counts_checked_at", 0.0) < CACHE_COUNTS_REFRESH_SECONDS:
+            return
+        self.cache_counts_checked_at = now
+        if self.read_cache_counts() != getattr(self, "cache_counts", None):
+            self.refresh_cached_games()
+        elif self.view == "cached_games":
+            self.queue_status = self.read_queue_status()
+
+    def read_queue_status(self) -> str | None:
+        if getattr(self, "queued_count", 0) <= 0:
+            return None
+        if cache_queue.drain_lock.held_elsewhere():
+            return "CACHING NOW"
+        next_batch_at = cache_budget.next_available_at(self.storage)
+        if next_batch_at > current_millis():
+            return f"NEXT BATCH: {format_clock_time(next_batch_at)}"
+        return "NEXT BATCH: SOON"
 
     def refresh_pending_awards(self) -> None:
         self.pending_awards = list_pending_awards(self.storage)
@@ -1726,16 +1873,8 @@ class MenuSdlSession:
                 result = add_rom_to_cache(path, self.storage, load_config())
                 aborted = self.cache_abort_requested
                 self.cache_result = (result.message, time.monotonic() + 1.5)
-                self.cache_completion_message = (
-                    "Aborted: scanned 1, cached 1, skipped 0"
-                    if aborted and result.success
-                    else result.message
-                    if not result.success
-                    else "Aborted: scanned 1, cached 0, skipped 1"
-                    if aborted
-                    else "Scanned 1, cached 1, skipped 0"
-                    if result.success
-                    else "Scanned 1, cached 0, skipped 1"
+                self.cache_completion_message = single_cache_completion_message(
+                    result, aborted
                 )
                 self.cache_completed = True
             except Exception as exc:
@@ -1759,10 +1898,19 @@ class MenuSdlSession:
         current_dir = self.browser_dir
         cache_paths = list_scannable_files_recursive(current_dir)
         self.save_browser_position()
+        self.start_bulk_run(
+            cache_paths,
+            "file_browser",
+            lambda cache_now: self.run_folder_cache_for(current_dir, cache_paths, cache_now),
+        )
+
+    def run_folder_cache_for(
+        self, current_dir: Path, cache_paths: list[Path], cache_now: bool
+    ) -> None:
         self.cache_progress_title = f"Caching: {current_dir.name}"
         if cache_paths:
             self.cache_progress_text = (
-                f"Caching 1/{len(cache_paths)}: {cache_paths[0].name}"
+                f"Hashing 1/{len(cache_paths)}: {cache_paths[0].name}"
             )
         else:
             self.cache_progress_text = "Preparing cache..."
@@ -1784,16 +1932,15 @@ class MenuSdlSession:
                     paths=cache_paths,
                     should_abort=lambda: self.cache_abort_requested,
                     on_progress=self.update_cache_progress,
+                    cache_now=cache_now,
                 )
                 if result.total <= 0:
                     self.cache_result = (
                         "No ROM files in this folder",
                         time.monotonic() + ERROR_SECONDS,
                     )
-                    self.cache_completion_message = (
-                        "Aborted: scanned 0, cached 0, skipped 0"
-                        if self.cache_abort_requested
-                        else "Scanned 0, cached 0, skipped 0"
+                    self.cache_completion_message = cache_completion_message(
+                        result, self.cache_abort_requested, self.proxy_running()
                     )
                     self.cache_completed = True
                 else:
@@ -1801,10 +1948,8 @@ class MenuSdlSession:
                         f"Folder cache complete: {result.cached} / {result.total}",
                         time.monotonic() + 1.5,
                     )
-                    self.cache_completion_message = (
-                        f"Aborted: scanned {result.scanned}, cached {result.cached}, skipped {result.skipped}"
-                        if self.cache_abort_requested
-                        else f"Scanned {result.scanned}, cached {result.cached}, skipped {result.skipped}"
+                    self.cache_completion_message = cache_completion_message(
+                        result, self.cache_abort_requested, self.proxy_running()
                     )
                     self.cache_completed = True
             except Exception as exc:
@@ -1822,8 +1967,9 @@ class MenuSdlSession:
         self.cache_worker_thread.start()
 
     def update_cache_progress(self, progress) -> None:
+        verb = "Hashing" if progress.phase == PHASE_HASHING else "Caching"
         self.cache_progress_text = (
-            f"Caching {progress.scanned}/{progress.total}: {progress.current_label}"
+            f"{verb} {progress.scanned}/{progress.total}: {progress.current_label}"
         )
 
     def finish_cache_progress(self) -> None:
@@ -1916,8 +2062,16 @@ class MenuSdlSession:
                 self.refresh_cached_games()
             return
 
+        if self.view == "queue_confirm":
+            self.cancel_queue_confirm()
+            return
+
         if self.view == "update_prompt":
             self.dismiss_update_prompt()
+            return
+
+        if self.view == "usage_consent":
+            self.dismiss_usage_consent()
             return
 
         if self.view == "cache_progress":
@@ -1978,17 +2132,11 @@ class MenuSdlSession:
             self.achievement_preview_title = None
             return
 
-        if (
-            self.preview_game_id != game.game_id or self.preview_surface is None
-        ) and self.should_load_preview(game.game_id):
-            self.preview_surface = self.load_game_preview_surface(game)
+        if self.preview_game_id != game.game_id or self.preview_surface is None:
+            self.preview_surface = self.cached_or_settled_preview(game)
             self.preview_game_id = (
                 game.game_id if self.preview_surface is not None else None
             )
-            self.preview_failed_game_id = (
-                game.game_id if self.preview_surface is None else None
-            )
-            self.preview_failed_at = time.monotonic()
 
         if self.preview_surface is None:
             return
@@ -2005,6 +2153,36 @@ class MenuSdlSession:
             centery=preview_rect.centery,
         )
         self.surface.blit(achievement_surface, award_rect)
+
+    def cached_or_settled_preview(self, game):
+        cache = self.preview_surface_cache()
+        if game.game_id in cache:
+            cache.move_to_end(game.game_id)
+            return cache[game.game_id]
+
+        now = time.monotonic()
+        if getattr(self, "preview_candidate_id", None) != game.game_id:
+            self.preview_candidate_id = game.game_id
+            self.preview_candidate_since = now
+        if now - self.preview_candidate_since < PREVIEW_SETTLE_SECONDS:
+            return None
+        if not self.should_load_preview(game.game_id):
+            return None
+
+        surface = self.load_game_preview_surface(game)
+        if surface is None:
+            self.preview_failed_game_id = game.game_id
+            self.preview_failed_at = now
+            return None
+        cache[game.game_id] = surface
+        while len(cache) > PREVIEW_SURFACE_CACHE_SIZE:
+            cache.popitem(last=False)
+        return surface
+
+    def preview_surface_cache(self) -> OrderedDict:
+        if not hasattr(self, "_preview_surface_cache"):
+            self._preview_surface_cache = OrderedDict()
+        return self._preview_surface_cache
 
     def should_load_preview(self, game_id: int) -> bool:
         if getattr(self, "preview_failed_game_id", None) != game_id:
@@ -2347,13 +2525,20 @@ class MenuSdlSession:
         if self.smart_cache_in_progress:
             return
 
-        history_paths = load_content_history_paths(self.config_data)
-        total_candidates = min(len(history_paths), SMART_CACHE_LIMIT)
+        history_paths = smart_cache_paths(self.storage, self.config_data)
+        return_view = "main" if self.view == "smart_cache_prompt" else self.view
+        self.start_bulk_run(
+            history_paths,
+            return_view,
+            lambda cache_now: self.run_smart_cache_for(history_paths, cache_now),
+        )
+
+    def run_smart_cache_for(self, history_paths: list[Path], cache_now: bool) -> None:
         self.smart_cache_in_progress = True
         self.cache_progress_title = "Smart Cache"
-        if total_candidates > 0:
+        if history_paths:
             self.cache_progress_text = (
-                f"Caching 1/{total_candidates}: {history_paths[0].name}"
+                f"Hashing 1/{len(history_paths)}: {history_paths[0].name}"
             )
         else:
             self.cache_progress_text = "Preparing cache..."
@@ -2373,14 +2558,13 @@ class MenuSdlSession:
                 result = run_smart_cache(
                     self.storage,
                     self.config_data,
-                    SMART_CACHE_LIMIT,
                     should_abort=lambda: self.cache_abort_requested,
                     on_progress=self.update_smart_cache_progress,
+                    paths=history_paths,
+                    cache_now=cache_now,
                 )
-                self.cache_completion_message = (
-                    f"Aborted: scanned {result.scanned}, cached {result.cached}, skipped {result.skipped}"
-                    if self.cache_abort_requested
-                    else f"Scanned {result.scanned}, cached {result.cached}, skipped {result.skipped}"
+                self.cache_completion_message = cache_completion_message(
+                    result, self.cache_abort_requested, self.proxy_running()
                 )
                 self.cache_completed = True
             except Exception as exc:
@@ -2395,9 +2579,7 @@ class MenuSdlSession:
         self.smart_cache_thread.start()
 
     def update_smart_cache_progress(self, progress) -> None:
-        self.cache_progress_text = (
-            f"Caching {progress.scanned}/{progress.total}: {progress.current_label}"
-        )
+        self.update_cache_progress(progress)
 
     def refresh_main_menu_state(self, force: bool = False) -> None:
         if not hasattr(self, "main_state_refreshed_at"):
@@ -2422,6 +2604,12 @@ class MenuSdlSession:
             self.main_update_asset_url = None
         if not hasattr(self, "main_update_dialog_seen"):
             self.main_update_dialog_seen = False
+        if not hasattr(self, "main_usage_consent"):
+            self.main_usage_consent = None
+        if not hasattr(self, "usage_consent_seen"):
+            self.usage_consent_seen = False
+        if not hasattr(self, "usage_report_started"):
+            self.usage_report_started = False
         if not hasattr(self, "storage_corruption_active"):
             self.storage_corruption_active = False
         if not hasattr(self, "storage_corruption_notice_seen"):
@@ -2445,6 +2633,7 @@ class MenuSdlSession:
         self.main_running = self.read_proxy_running()
         self.main_online = online_check(self.config_data)
         self.main_logged_in = self.is_logged_in(self.config_data)
+        self.main_usage_consent = usage_stats.load_consent(self.config_data)
         self.main_service_mode = service_mode_active()
         if self.main_service_mode:
             self.main_autostart_supported = True
@@ -2483,7 +2672,52 @@ class MenuSdlSession:
             self.view = "update_prompt"
             self.reset_selection()
 
+        self.maybe_show_usage_consent()
+        self.maybe_start_usage_report()
         self.maybe_show_storage_corruption_notice()
+
+    def maybe_show_usage_consent(self) -> None:
+        if (
+            self.usage_consent_seen
+            or self.view != "main"
+            or not self.main_logged_in
+            or self.main_usage_consent is not None
+        ):
+            return
+        self.usage_consent_seen = True
+        self.save_view_position("main")
+        self.view = "usage_consent"
+        self.reset_selection()
+
+    def maybe_start_usage_report(self) -> None:
+        if self.usage_report_started or not self.main_online or self.main_usage_consent is not True:
+            return
+        self.usage_report_started = True
+        threading.Thread(
+            target=usage_report.report_if_due, args=(self.storage,), daemon=True
+        ).start()
+
+    def activate_usage_consent_selected(self) -> None:
+        self.set_usage_consent(self.selected_index == 0)
+        self.dismiss_usage_consent()
+
+    def dismiss_usage_consent(self) -> None:
+        self.view = "main"
+        self.restore_view_position("main")
+
+    def set_usage_consent(self, granted: bool) -> None:
+        try:
+            usage_stats.save_consent(granted)
+        except Exception as exc:
+            log_action_failure("set_usage_consent", exc)
+            self.message = (f"Saving failed: {exc}", time.monotonic() + ERROR_SECONDS)
+            return
+        self.main_usage_consent = granted
+        self.usage_report_started = False
+        self.message = (
+            ("Usage stats enabled, thank you!" if granted else "Usage stats disabled"),
+            time.monotonic() + 1.2,
+        )
 
     def maybe_show_storage_corruption_notice(self) -> None:
         if self.storage_corruption_notice_seen or self.view != "main":

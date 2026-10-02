@@ -7,23 +7,26 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import cache_budget, cache_queue, rom_browser
+from .auth import resolve_credentials
 from .config import detect_dolphin_config_dir, detect_ppsspp_ini
-from .network import RA_MIN_REQUEST_INTERVAL_SECONDS, apply_scan_batch_cooldown
 from .platform import read_retroarch_cfg_values, resolve_retroarch_cfg
 from .rom_browser import (
-    MAX_CACHED_GAMES,
-    add_rom_to_cache,
-    list_cached_games,
+    QueuedRomOutcome,
     list_scannable_files_recursive,
     load_cached_rom_paths,
     normalize_cached_rom_path,
 )
 from .storage import Storage
+from .utils import self_user_agent
 
 LOGGER = logging.getLogger("raofflineproxy")
 
-SMART_CACHE_LIMIT = MAX_CACHED_GAMES
-SMART_CACHE_DELAY_SECONDS = RA_MIN_REQUEST_INTERVAL_SECONDS
+PHASE_HASHING = "hashing"
+PHASE_CACHING = "caching"
+ROM_RESULT_OK = "ok"
+ROM_RESULT_FAIL = "fail"
+ROM_RESULT_QUEUED = "queued"
 MUOS_HISTORY_DIR = Path("/run/muos/storage/info/history")
 DOLPHIN_RECENT_WINDOW_SECONDS = 60 * 24 * 60 * 60
 DOLPHIN_GCI_CODE_REGEX = re.compile(r"^\d{2}-([A-Za-z0-9]{4})-.*\.gci$", re.IGNORECASE)
@@ -60,6 +63,7 @@ class SmartCacheProgress:
     total: int
     cached: int
     current_label: str
+    phase: str = PHASE_CACHING
 
 
 @dataclass
@@ -68,7 +72,7 @@ class SmartCacheResult:
     total: int
     cached: int
     skipped: int
-    limit_reached: bool
+    queued: int = 0
 
 
 def should_offer_smart_cache(
@@ -100,7 +104,7 @@ def should_offer_smart_cache(
         for path in all_paths
         if normalize_cached_rom_path(path) not in cached_rom_paths
     ]
-    total_candidates = min(len(paths), SMART_CACHE_LIMIT)
+    total_candidates = len(paths)
 
     if total_candidates == 0:
         return SmartCacheStatus(
@@ -121,25 +125,30 @@ def should_offer_smart_cache(
     )
 
 
+def smart_cache_paths(storage: Storage, config_data: dict) -> list[Path]:
+    cached_rom_paths = load_cached_rom_paths(storage)
+    return [
+        path
+        for path in load_content_history_paths(config_data)
+        if normalize_cached_rom_path(path) not in cached_rom_paths
+    ]
+
+
 def run_smart_cache(
     storage: Storage,
     config_data: dict,
-    limit: int = SMART_CACHE_LIMIT,
     should_abort=None,
     on_progress=None,
+    paths: list[Path] | None = None,
+    cache_now: bool = True,
 ) -> SmartCacheResult:
-    cached_rom_paths = load_cached_rom_paths(storage)
     return run_cache_paths(
         storage,
         config_data,
-        [
-            path
-            for path in load_content_history_paths(config_data)
-            if normalize_cached_rom_path(path) not in cached_rom_paths
-        ],
-        limit=limit,
+        smart_cache_paths(storage, config_data) if paths is None else paths,
         should_abort=should_abort,
         on_progress=on_progress,
+        cache_now=cache_now,
     )
 
 
@@ -150,14 +159,27 @@ def run_folder_cache(
     paths: list[Path] | None = None,
     should_abort=None,
     on_progress=None,
+    cache_now: bool = True,
 ) -> SmartCacheResult:
     return run_cache_paths(
         storage,
         config_data,
         list_scannable_files_recursive(current_dir) if paths is None else paths,
-        limit=MAX_CACHED_GAMES,
         should_abort=should_abort,
         on_progress=on_progress,
+        cache_now=cache_now,
+    )
+
+
+def estimate_queue_for_paths(storage: Storage, paths: list[Path]) -> cache_queue.QueueEstimate:
+    known_paths = load_cached_rom_paths(storage) | cache_queue.queued_rom_paths(
+        storage, normalize_cached_rom_path
+    )
+    return cache_queue.estimate_queue(
+        candidates=len(paths),
+        already_known=sum(1 for path in paths if normalize_cached_rom_path(path) in known_paths),
+        budget_remaining=cache_budget.remaining(storage),
+        queued_now=cache_queue.count(storage),
     )
 
 
@@ -166,53 +188,116 @@ def run_cache_paths(
     config_data: dict,
     paths: list[Path],
     *,
-    limit: int,
     should_abort=None,
     on_progress=None,
+    on_rom_result=None,
+    cache_now: bool = True,
 ) -> SmartCacheResult:
-    total = min(len(paths), limit, MAX_CACHED_GAMES)
-    cached = 0
-    scanned = 0
+    """Hashes every ROM first, which only fills the queue, then caches the current budget window
+    right away; the rest stays queued for the proxy service. Without cache_now the whole run is
+    left to the proxy service. Aborting removes the ROMs this run queued; games it already cached
+    stay. on_rom_result hears each path's fate once: ok, fail or queued."""
+    total = len(paths)
+    if total == 0:
+        return SmartCacheResult(scanned=0, total=0, cached=0, skipped=0)
 
-    for path in paths[:total]:
-        if should_abort is not None and should_abort():
-            break
+    user_agent = self_user_agent()
+    credentials = resolve_credentials(storage, config_data, user_agent)
+    if credentials is None:
+        raise RuntimeError("RetroAchievements login required")
 
-        if len(list_cached_games(storage)) >= MAX_CACHED_GAMES or cached >= limit:
-            break
+    abort = should_abort or (lambda: False)
 
-        scanned += 1
-
+    def progress(phase: str, current: int, of: int, cached: int, label: str) -> None:
         if on_progress is not None:
-            on_progress(
-                SmartCacheProgress(
-                    scanned=scanned,
-                    total=total,
-                    cached=cached,
-                    current_label=path.name,
-                )
+            on_progress(SmartCacheProgress(current, of, cached, label, phase))
+
+    def rom_result(path: Path, status: str, message: str = "") -> None:
+        if on_rom_result is not None:
+            on_rom_result(path, status, message)
+
+    known_game_ids = rom_browser.cached_game_ids(storage)
+    queued_this_run: list[str] = []
+    paths_by_key: dict[str, list[Path]] = {}
+    scanned = 0
+    skipped = 0
+    cached = 0
+
+    def on_outcome(rom, outcome, _game_id, message) -> None:
+        nonlocal skipped
+        if outcome is QueuedRomOutcome.FAILED:
+            return
+        if outcome is not QueuedRomOutcome.CACHED:
+            skipped += 1
+        succeeded = outcome in (QueuedRomOutcome.CACHED, QueuedRomOutcome.ALREADY_CACHED)
+        for path in paths_by_key.pop(rom.key, []):
+            rom_result(path, ROM_RESULT_OK if succeeded else ROM_RESULT_FAIL, message)
+
+    with cache_queue.bulk_run_lock.hold(shared=True):
+        for path in paths:
+            if abort():
+                break
+            scanned += 1
+            progress(PHASE_HASHING, scanned, total, 0, path.name)
+            try:
+                candidates = rom_browser.hash_candidates_for_manual_cache(path)
+            except Exception as exc:
+                skipped += 1
+                rom_result(path, ROM_RESULT_FAIL, f"Hash failed: {exc}")
+                continue
+            if not candidates:
+                skipped += 1
+                rom_result(path, ROM_RESULT_FAIL, "Hash failed: unsupported or unreadable ROM")
+                continue
+            rom = rom_browser.enqueue_rom_if_needed(
+                storage, candidates, known_game_ids, path, on_queued=queued_this_run.append
             )
+            if rom is None:
+                skipped += 1
+                local = rom_browser.local_game_id_answer(storage, candidates)
+                if local.no_match:
+                    rom_result(path, ROM_RESULT_FAIL, "No RetroAchievements match")
+                else:
+                    rom_result(path, ROM_RESULT_OK)
+                continue
+            paths_by_key.setdefault(rom.key, []).append(path)
 
-        result = add_rom_to_cache(path, storage, config_data)
-        if result.success:
-            cached += 1
+        if cache_now and not abort() and paths_by_key:
+            drain = rom_browser.drain_cache_queue(
+                storage,
+                config_data,
+                credentials,
+                user_agent,
+                should_pause=abort,
+                wait_for_lock=True,
+                keys=list(paths_by_key),
+                on_item=lambda current, of, label: progress(
+                    PHASE_CACHING, current, of, current - 1, label
+                ),
+                on_outcome=on_outcome,
+            )
+            cached = drain.cached
 
-        if should_abort is not None and should_abort():
-            break
+        aborted = abort()
+        if aborted:
+            cache_queue.remove_keys(storage, queued_this_run)
 
-        if scanned < total and not apply_scan_batch_cooldown(scanned):
-            time.sleep(SMART_CACHE_DELAY_SECONDS)
-
-    skipped = max(0, scanned - cached)
-    limit_reached = (
-        cached >= limit or len(list_cached_games(storage)) >= MAX_CACHED_GAMES
-    )
+    queued = 0
+    for key, key_paths in paths_by_key.items():
+        if cache_queue.get(storage, key) is not None:
+            queued += len(key_paths)
+            for path in key_paths:
+                rom_result(path, ROM_RESULT_QUEUED)
+        elif not aborted:
+            skipped += len(key_paths)
+            for path in key_paths:
+                rom_result(path, ROM_RESULT_FAIL, "Caching failed")
     return SmartCacheResult(
         scanned=scanned,
         total=total,
         cached=cached,
         skipped=skipped,
-        limit_reached=limit_reached,
+        queued=queued,
     )
 
 
@@ -692,3 +777,32 @@ def find_content_history_lpl(config_data: dict) -> Path | None:
         if candidate.exists():
             return candidate
     return None
+
+
+def format_eta(minutes: int) -> str:
+    if minutes < 60:
+        return f"{minutes} minutes"
+    return f"{minutes // 60} h {minutes % 60} min"
+
+
+def queue_confirm_message(estimate: cache_queue.QueueEstimate) -> str:
+    return (
+        f"Up to {estimate.cached_now + estimate.queued_after} games are cached in the background: "
+        f"{cache_budget.CACHE_BUDGET_LIMIT} every 30 minutes while the proxy is running "
+        f"(about {format_eta(estimate.eta_minutes)})."
+    )
+
+
+def cache_completion_message(
+    result: SmartCacheResult, aborted: bool, proxy_running: bool = True
+) -> str:
+    prefix = "Aborted: cached" if aborted else "Cached"
+    summary = f"{prefix} {result.cached}, queued {result.queued}, skipped {result.skipped}"
+    if result.queued <= 0:
+        return summary
+    if not proxy_running:
+        return f"{summary}\nCaching starts when the proxy is running."
+    return (
+        f"{summary}\nQueued games are cached in the background, up to "
+        f"{cache_budget.CACHE_BUDGET_LIMIT} every 30 minutes."
+    )
