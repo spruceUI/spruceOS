@@ -12,6 +12,12 @@ device_init() {
 	anbernic_xx_common_init
 }
 
+# WiFi-only USB RTL8188EU: BaseOS's devices.json lists the RG28XX as the one
+# H700 board without Bluetooth.
+device_bluetooth_supported() {
+	return 1
+}
+
 # Radio availability on this model is two facts. A module that refused to
 # load (WIFI_UNAVAILABLE_FLAG) is sticky for the session. An adapter that was
 # not on the bus (WIFI_RADIO_ABSENT_FLAG) is not: the marker is re-checked
