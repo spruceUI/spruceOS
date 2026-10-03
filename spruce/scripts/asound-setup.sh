@@ -8,7 +8,23 @@
 BASE_HOME="${1:-$HOME}"
 ASOUND_CONF="$BASE_HOME/.asoundrc"
 
-BTCTL_TIMEOUT="timeout 2"
+# A device whose userland has no timeout sets BTCTL_TIMEOUT in its
+# device_functions file.
+BTCTL_TIMEOUT="${BTCTL_TIMEOUT:-timeout 2}"
+
+# From bluez-alsa 4.3 the ALSA plugin switches the headset's codec to each
+# client's sample rate, which restarts the A2DP stream, and headsets announce
+# that as a disconnect: PyUI opens at 44.1 kHz and games at 48 kHz, so every
+# switch between them did it. A device with such a bluealsa sets BT_PCM_RATE
+# in its device_functions file; the headset PCM then keeps that rate and plug
+# resamples. Older plugins accept only the stream's current rate, so leave it
+# unset there.
+BT_PCM_FIXED=""
+if [ -n "$BT_PCM_RATE" ]; then
+    BT_PCM_FIXED="    slave.rate $BT_PCM_RATE
+    slave.channels 2
+"
+fi
 
 get_connected_audio_bt_mac() {
     # Save 2s from the timeout
@@ -54,14 +70,16 @@ pcm.!default {
         profile "a2dp"
         delay 64
     }
-}
+${BT_PCM_FIXED}}
 ctl.!default {
     type hw
     card 0
 }
 EOF
     command -v device_bt_audio_connected >/dev/null 2>&1 && device_bt_audio_connected
+    device_on_bt_audio_route "$mac"
 else
     [ -f "$ASOUND_CONF" ] && rm "$ASOUND_CONF"
     device_write_default_asound_rc
+    device_on_bt_audio_route
 fi

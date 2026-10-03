@@ -787,6 +787,11 @@ class DeviceCommon(AbstractDevice):
     def get_audio_system(self):
         return AudioPlayerNone()
 
+    def refresh_audio_route(self):
+        # Called when a Bluetooth audio device connects or Bluetooth is turned
+        # off, for devices that can move their output to it. Default: nothing.
+        pass
+
     def get_extra_settings_options(self):
         return []
     

@@ -405,10 +405,16 @@ device_bluetooth_down() {
 }
 
 # bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
+# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
+# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
+# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
+# anywhere and leave the switch alone. Each call is bounded: a bluealsa that has
+# stopped answering must not hang the volume keys or the connection watcher.
 bt_headset_volume() {
     pidof bluealsa >/dev/null 2>&1 || return 0
-    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP\)',0$/\1/p" | while read -r _ctl; do
-        amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    $_bt_to amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
+        $_bt_to amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
     done
 }
 
@@ -474,6 +480,13 @@ device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently
     log_message "Missing device_write_default_asound_rc function" -v
+}
+
+device_on_bt_audio_route() {
+    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
+    # at it, and with no argument when audio stays on the device - for firmware
+    # whose own volume path has to be told where the audio went. Default: nothing.
+    :
 }
 
 

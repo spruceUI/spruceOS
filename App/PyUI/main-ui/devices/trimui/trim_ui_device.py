@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 import re
 import subprocess
+import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
@@ -222,9 +223,40 @@ class TrimUIDevice(DeviceCommon):
         time.sleep(0.1)  
         ProcessRunner.run(["killall","-9","bluetoothd"])
         self.system_config.set_bluetooth(0)
+        self.refresh_audio_route()
 
     def perform_startup_tasks(self):
-        pass
+        self.refresh_audio_route()
+
+    def refresh_audio_route(self):
+        threading.Thread(target=self._refresh_audio_route, name="AudioRoute", daemon=True).start()
+
+    def _refresh_audio_route(self):
+        # The command prints the ALSA device to play through - a connected
+        # Bluetooth headset - or an empty last line for the default output.
+        cmd = PyUiConfig.get_bt_audio_device_cmd()
+        if not cmd:
+            return
+        try:
+            result = subprocess.run([cmd], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    text=True, timeout=30)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Audio route check failed: {e}")
+            return
+        if result.returncode != 0:
+            return
+        lines = result.stdout.splitlines()
+        device = lines[-1].strip() if lines else ""
+        if device == os.environ.get("AUDIODEV", ""):
+            return
+        if device:
+            os.environ["AUDIODEV"] = device
+        else:
+            os.environ.pop("AUDIODEV", None)
+        PyUiLogger.get_logger().info(f"Audio output now {device or 'the default device'}")
+        self.get_audio_system().audio_reopen()
+        from themes.theme import Theme
+        Theme.bgm_setting_changed()
 
     def get_bluetooth_scanner(self):
         return BluetoothScanner()

@@ -8,6 +8,11 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh"
 
+# The stock BusyBox (1.27.2) has no timeout applet, so asound-setup.sh's
+# "timeout 2 bluetoothctl ..." failed and never routed audio to a connected
+# Bluetooth headset. spruce's own BusyBox has one.
+BTCTL_TIMEOUT="/mnt/SDCARD/spruce/bin64/busybox timeout 2"
+
 
 ###############################################################################
 
@@ -40,6 +45,45 @@ set_volume() {
 
 }
 
+# hardwareservice owns the volume keys and, on each change, also runs
+# 'amixer -D bluealsa sset "<control>" vol*127/20' - but only while
+# /tmp/bt_alsa_volume_dev names the headset's mixer control. The stock keymon
+# wrote that file; spruce does not run keymon, so the keys never reached a
+# Bluetooth headset.
+device_on_bt_audio_route() {
+    if [ -z "$1" ]; then
+        rm -f /tmp/bt_alsa_volume_dev
+        return 0
+    fi
+    control=$($BTCTL_TIMEOUT amixer -D bluealsa scontents 2>/dev/null |
+        sed -n "s/^Simple mixer control '\(.* - A2DP\)',[0-9]*$/\1/p" | head -n 1)
+    [ -n "$control" ] || return 0
+    printf '%s' "$control" > /tmp/bt_alsa_volume_dev
+    # Start the headset at spruce's level rather than bluealsa's 100%.
+    vol=$(get_volume_level)
+    case "$vol" in ''|*[!0-9]*) return 0 ;; esac
+    $BTCTL_TIMEOUT amixer -q -D "bluealsa:DEV=$1" sset A2DP $((vol * 127 / 20)) 2>/dev/null
+}
+
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
+# first headset bluealsa holds an A2DP transport for, or nothing for the
+# speaker. Points the volume keys at it the way asound-setup.sh does for games.
+bt_audio_device() {
+    pcm=""
+    # PyUI asks right after killing bluetoothd or disconnecting the headset, and
+    # bluealsa can still list the transport for a moment: check both directly.
+    if pidof bluetoothd >/dev/null 2>&1; then
+        pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
+    fi
+    mac=$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')
+    if [ -n "$mac" ] && ! $BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+        pcm=""
+        mac=""
+    fi
+    device_on_bt_audio_route "$mac"
+    [ -z "$pcm" ] || echo "$pcm"
+}
+
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick
@@ -55,6 +99,9 @@ runtime_mounts_a133p() {
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    # Bound from /tmp so the mount does not hold the card. See bluetooth-main.conf.
+    { cp "${SPRUCE_ETC_DIR}/bluetooth-main.conf" /tmp/bluetooth-main.conf &&
+        mount -o bind /tmp/bluetooth-main.conf /etc/bluetooth/main.conf; } &
     /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
@@ -107,7 +154,9 @@ device_init_a133p() {
     (
         syslogd -S
         hwclock -s -u
-        /etc/bluetooth/bluetoothd start
+        # Restart, not start: the stock runtrimui.sh already started it with the
+        # stock main.conf, before runtime_mounts_a133p bound ours over it.
+        /etc/bluetooth/bluetoothd restart
     ) &
     amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"

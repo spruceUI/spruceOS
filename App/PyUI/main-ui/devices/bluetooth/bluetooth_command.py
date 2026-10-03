@@ -40,6 +40,23 @@ class BluetoothCommand:
             return False, parts[1], parts[2]
         return False, "pair", answer
 
+    def is_connected(self, device):
+        for line in (self._run("devices") or "").splitlines():
+            fields = line.split("\t", 3)
+            if len(fields) == 4 and fields[0] == device.address:
+                return fields[2] == "1"
+        return False
+
+    def disconnect(self, device):
+        """(ok, output)."""
+        answer = (self._run("disconnect", device.address, timeout=30) or "").strip()
+        return answer == "ok", answer
+
+    def forget(self, device):
+        """(ok, output)."""
+        answer = self._run("forget", device.address, timeout=30)
+        return answer is not None, ""
+
     def _scan_loop(self, stop_event):
         while not stop_event.is_set():
             self._store(self._run("scan", timeout=30))

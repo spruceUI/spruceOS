@@ -24,3 +24,7 @@ class AudioPlayerDelegateSdl2:
 
     def load_wav(self,file_path: str):
         Sdl2AudioPlayer.load_wav(file_path)
+
+    def audio_reopen(self):
+        # Closes the output; the next sound opens it again, picking up AUDIODEV.
+        Sdl2AudioPlayer.audio_cleanup()
