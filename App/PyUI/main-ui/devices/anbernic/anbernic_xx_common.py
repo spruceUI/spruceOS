@@ -7,6 +7,7 @@ import time
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
@@ -54,6 +55,7 @@ ANBERNIC_XX_RGB_TARGETS = ("rg40xx", "rgcubexx")
 
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
+        self.audio_player = AudioPlayerDelegateSdl2()
         self.has_rgb_rings = self._read_rgb_rings()
         # device_name is set by the subclass before it calls up here. This used
         # to assign a model name unconditionally, which ran *after* the subclass
@@ -255,6 +257,9 @@ class AnbernicXXCommon(DeviceCommon):
 
     def perform_startup_tasks(self):
         pass
+
+    def get_audio_system(self):
+        return self.audio_player
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"
