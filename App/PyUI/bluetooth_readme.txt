@@ -28,6 +28,7 @@ stdout. Exit status is 0 unless the command name is unknown.
         connected  the name of a connected device, else empty
         connected_icon  BlueZ's type for every connected device, comma
                    separated, e.g. audio-headset,input-gaming
+        audio      1 once a headset's audio stream is up, else 0
 
   scan
       Look for devices for about six seconds, then list every named device
