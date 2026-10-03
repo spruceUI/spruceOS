@@ -7,6 +7,7 @@
 #
 # Usage: bluetooth.sh <command> [address]
 #   apply     make the radio match the saved .bluetooth setting
+#   suspend   disconnect everything, without changing the setting (poweroff)
 #   status    key=value lines: radio, setting, state, connected
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
@@ -94,6 +95,12 @@ stop_watch() {
     rm -f "$WATCH_PID"
 }
 
+# Powering the adapter off sends each device a proper disconnect, as a phone
+# does; killing the daemons only drops the link.
+disconnect_all() {
+    bt_running && timeout 5 bluetoothctl power off >/dev/null 2>&1
+}
+
 # Pairable does not survive a daemon restart, and a pairing made without it
 # is not kept.
 apply_setting() {
@@ -109,6 +116,7 @@ apply_setting() {
         reconnect_trusted >/dev/null 2>&1 &
     else
         stop_watch
+        disconnect_all
         device_bluetooth_down
         route_audio >/dev/null 2>&1
         log_message "bluetooth.sh: off" >/dev/null
@@ -213,10 +221,11 @@ forget_device() {
 
 case "$1" in
     apply)   apply_setting ;;
+    suspend) disconnect_all ;;
     status)  show_status ;;
     scan)    scan_devices ;;
     devices) list_devices ;;
     pair)    pair_device "$2" ;;
     forget)  forget_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|status|scan|devices|pair <address>|forget <address>" >&2; exit 2 ;;
+    *)       echo "usage: bluetooth.sh apply|suspend|status|scan|devices|pair <address>|forget <address>" >&2; exit 2 ;;
 esac

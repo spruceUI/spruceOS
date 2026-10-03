@@ -13,7 +13,12 @@ stdout. Exit status is 0 unless the command name is unknown.
 
   apply
       Make the radio match the saved setting. PyUI writes the setting first,
-      then calls this and waits; it takes a second or two. Output: none.
+      then calls this on a background thread; it can take several seconds.
+      Turning off disconnects every device first. Output: none.
+
+  suspend
+      Disconnect every device without changing the setting. spruce calls it
+      on the way to a poweroff or reboot. Output: none.
 
   status
       key=value lines, one per line:
