@@ -497,32 +497,15 @@ device_bluetooth_supported() {
 }
 
 # The stock bt_init.sh attaches on ttyS1, which is not this board's port.
-device_bluetooth_up() {
-    if [ ! -d /sys/class/bluetooth/hci0 ]; then
-        echo 1 > /proc/bluetooth/sleep/btwrite
-        echo 0 > /sys/class/rfkill/rfkill0/state
-        sleep 1
-        echo 1 > /sys/class/rfkill/rfkill0/state
-        sleep 1
-        ( cd / && exec hciattach -n ttyAS1 aic ) >/dev/null 2>&1 &
-        _n=0
-        while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 70 ]; do
-            usleep 100000
-            _n=$((_n + 1))
-        done
-    fi
-    if ! pidof bluetoothd >/dev/null 2>&1; then
-        ( cd / && /etc/bluetooth/bluetoothd start >/dev/null 2>&1 )
-        sleep 1
-    fi
-    hciconfig hci0 up
-    if ! pidof bluealsa >/dev/null 2>&1; then
-        ( cd / && exec bluealsa -p a2dp-source ) >/dev/null 2>&1 &
-    fi
+BT_HCI_WAIT=7
+device_bluetooth_radio_up() {
+    [ -d /sys/class/bluetooth/hci0 ] && return 0
+    echo 1 > /proc/bluetooth/sleep/btwrite
+    bt_rfkill_pulse /sys/class/rfkill/rfkill0/state
+    bt_spawn hciattach -n ttyAS1 aic
 }
 
-device_bluetooth_down() {
-    killall bluealsa bluetoothd 2>/dev/null
+device_bluetooth_radio_down() {
     hciconfig hci0 down 2>/dev/null
     killall hciattach 2>/dev/null
     echo 0 > /proc/bluetooth/sleep/btwrite
