@@ -30,10 +30,15 @@ bt_running() {
     pidof bluetoothd >/dev/null 2>&1
 }
 
+# Devices the user disconnected since the radio came on. reconnect_trusted
+# leaves them alone until they are connected again or the radio restarts.
+USER_DISCONNECTED=/tmp/bluetooth_user_disconnected
+
 # Headsets that stayed on while the radio was down will not call back on
 # their own, and right after boot the first attempt can come too early.
 reconnect_pending() {
     timeout 5 bluetoothctl devices 2>/dev/null | while read -r _ mac _; do
+        grep -qix "$mac" "$USER_DISCONNECTED" 2>/dev/null && continue
         case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
             *"Paired: yes"*"Trusted: yes"*"Connected: no"*) echo "$mac" ;;
         esac
@@ -107,14 +112,18 @@ disconnect_all() {
 apply_setting() {
     device_bluetooth_supported || return 0
     if [ "$(bt_setting)" = "1" ]; then
+        rm -f "$USER_DISCONNECTED"
         device_bluetooth_up
         timeout 10 bluetoothctl power on >/dev/null 2>&1
         timeout 10 bluetoothctl pairable on >/dev/null 2>&1
         log_message "bluetooth.sh: on" >/dev/null
         stop_watch
-        watch_connections >/dev/null 2>&1 &
+        # A subshell that drops its descriptors: "func >/dev/null &" keeps the
+        # caller's stdout and stderr open as saved descriptors, so a caller
+        # that reads them (PyUI) would wait for the watcher, which never ends.
+        ( exec </dev/null >/dev/null 2>&1; watch_connections ) &
         echo $! > "$WATCH_PID"
-        reconnect_trusted >/dev/null 2>&1 &
+        ( exec </dev/null >/dev/null 2>&1; reconnect_trusted ) &
     else
         stop_watch
         disconnect_all
@@ -194,6 +203,10 @@ pair_device() {
         echo "failed pair bluetooth is off"
         return
     fi
+    if [ -f "$USER_DISCONNECTED" ]; then
+        grep -vix "$mac" "$USER_DISCONNECTED" > "$USER_DISCONNECTED.tmp" 2>/dev/null
+        mv "$USER_DISCONNECTED.tmp" "$USER_DISCONNECTED"
+    fi
 
     case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
         *"Paired: yes"*) ;;
@@ -231,9 +244,12 @@ disconnect_device() {
         echo "failed disconnect bluetooth is off"
         return
     fi
+    # Hold it first, so reconnect_trusted cannot bring it straight back.
+    echo "$1" >> "$USER_DISCONNECTED"
     out="$(timeout 10 bluetoothctl disconnect "$1" 2>&1)"
     case "$out" in
-        *"Successful disconnected"*) ;;
+        # BlueZ 5.82 says "Disconnection successful"; older ones the other.
+        *"Successful disconnected"*|*"Disconnection successful"*) ;;
         *) pair_failed disconnect "$out"; return ;;
     esac
     route_audio >/dev/null 2>&1

@@ -210,7 +210,8 @@ class BluetoothScanner:
     def disconnect(self, device):
         """(ok, output)."""
         output = self._run_cmd(["bluetoothctl", "disconnect", device.address]) or ""
-        return "Successful disconnected" in output, output
+        # BlueZ 5.82 says "Disconnection successful"; older ones the other.
+        return ("Successful disconnected" in output or "Disconnection successful" in output), output
 
     def forget(self, device):
         """(ok, output)."""
