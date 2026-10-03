@@ -374,7 +374,7 @@ set_volume() {
     [ "$VOLUME_PCT" -lt 0 ] && VOLUME_PCT=0
 
     amixer -q sset -M 'Master' "${VOLUME_PCT}%" 2>/dev/null
-    darkmoss_bt_volume "$VOLUME_PCT"
+    bt_headset_volume "$(( VOLUME_PCT / 5 ))"
     apply_playback_path
     log_message "$PLATFORM: volume ${VOLUME_LV}/20 (${VOLUME_PCT}%)"
 
@@ -417,19 +417,15 @@ device_bluetooth_down() {
 # asound-setup.sh); 48 kHz is what it picks at connect and what games use.
 BT_PCM_RATE=48000
 
-# Soft volume, so the level holds on headsets that ignore the remote one.
-darkmoss_bt_volume() {
+# bluealsad 5 has bluealsactl: soft volume, so the level holds on headsets that
+# ignore the remote one. Same 0-20 level as device.sh's default.
+bt_headset_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
-    for _pcm in $(bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
-        bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
-        bluealsactl volume "$_pcm" "$(( $1 * 127 / 100 ))" "$(( $1 * 127 / 100 ))" >/dev/null 2>&1
+    _v=$(( $1 * 127 / 20 ))
+    for _pcm in $(${BTCTL_TIMEOUT:-timeout 2} bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
+        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
+        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl volume "$_pcm" "$_v" "$_v" >/dev/null 2>&1
     done
-}
-
-# Called once audio is routed to a headset or one has just been connected.
-device_bt_audio_connected() {
-    _lv="$(get_volume_level)"
-    darkmoss_bt_volume "$(( _lv * 5 ))"
 }
 
 get_backlight_level() {
