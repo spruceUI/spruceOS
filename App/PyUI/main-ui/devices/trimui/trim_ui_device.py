@@ -8,7 +8,6 @@ import threading
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
-from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
@@ -213,18 +212,6 @@ class TrimUIDevice(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        return self.system_config.is_bluetooth_enabled()
-    
-    
-    def disable_bluetooth(self):
-        PyUiLogger.get_logger().info(f"Disabling Bluetooth")
-        ProcessRunner.run(["killall","-15","bluetoothd"])
-        time.sleep(0.1)  
-        ProcessRunner.run(["killall","-9","bluetoothd"])
-        self.system_config.set_bluetooth(0)
-        self.refresh_audio_route()
-
     def perform_startup_tasks(self):
         self.refresh_audio_route()
 
@@ -257,9 +244,6 @@ class TrimUIDevice(DeviceCommon):
         self.get_audio_system().audio_reopen()
         from themes.theme import Theme
         Theme.bgm_setting_changed()
-
-    def get_bluetooth_scanner(self):
-        return BluetoothScanner()
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"

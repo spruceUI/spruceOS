@@ -264,6 +264,7 @@ class DeviceCommon(AbstractDevice):
     _bt_apply_lock = threading.Lock()
     _bt_apply_running = False
     _bt_apply_again = False
+    _bt_last_connected = None
 
     def _apply_bluetooth(self):
         with self._bt_apply_lock:
@@ -277,6 +278,7 @@ class DeviceCommon(AbstractDevice):
         while True:
             self._bluetooth_cmd("apply", timeout=30)
             self._bluetooth_status.force_refresh()
+            self.refresh_audio_route()
             with self._bt_apply_lock:
                 if not self._bt_apply_again:
                     self._bt_apply_running = False
@@ -296,6 +298,10 @@ class DeviceCommon(AbstractDevice):
         status = self._bluetooth_status()
         if status.get("radio") != "1":
             return None
+        # Headsets also connect and drop on their own (boot reconnect, power off).
+        if status.get("connected") != self._bt_last_connected:
+            self._bt_last_connected = status.get("connected")
+            self.refresh_audio_route()
         icons = [i for i in status.get("connected_icon", "").split(",") if i]
         if not icons:
             return None
