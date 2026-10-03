@@ -54,8 +54,8 @@ class BluetoothCommand:
 
     def forget(self, device):
         """(ok, output)."""
-        answer = self._run("forget", device.address, timeout=30)
-        return answer is not None, ""
+        answer = (self._run("forget", device.address, timeout=30) or "").strip()
+        return answer == "ok", answer
 
     def _scan_loop(self, stop_event):
         while not stop_event.is_set():

@@ -13,7 +13,7 @@
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
-#   forget    remove <address>
+#   forget    remove <address>; prints "ok" or "failed forget <reason>"
 #   disconnect  disconnect <address>, keeping the pairing; prints "ok" or "failed disconnect <reason>"
 #
 # scan and devices print one device per line, tab separated:
@@ -115,7 +115,13 @@ apply_setting() {
     device_bluetooth_supported || return 0
     if [ "$(bt_setting)" = "1" ]; then
         rm -f "$USER_DISCONNECTED"
-        device_bluetooth_up
+        if ! device_bluetooth_up; then
+            # e.g. a combo chip whose WiFi half is off: say so rather than
+            # powering on a controller or a daemon that is not there.
+            log_message "bluetooth.sh: on, but the radio did not come up" >/dev/null
+            device_bluetooth_down
+            return 1
+        fi
         timeout 10 bluetoothctl power on >/dev/null 2>&1
         timeout 10 bluetoothctl pairable on >/dev/null 2>&1
         log_message "bluetooth.sh: on" >/dev/null
@@ -230,17 +236,35 @@ pair_device() {
     out="$(timeout 30 bluetoothctl connect "$mac" 2>&1)"
     case "$out" in
         *"Connection successful"*) ;;
+        *"org.bluez.Error.InProgress"*)
+            # reconnect_trusted is connecting it already: wait for that.
+            _n=0
+            until timeout 5 bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; do
+                _n=$((_n + 1))
+                [ "$_n" -le 15 ] || { pair_failed connect "$out"; return; }
+                sleep 1
+            done
+            ;;
         *) pair_failed connect "$out"; return ;;
     esac
 
-    command -v device_bt_audio_connected >/dev/null 2>&1 && device_bt_audio_connected
+    device_bt_audio_connected
     log_message "bluetooth.sh: connected a device" >/dev/null
     echo "ok"
 }
 
 forget_device() {
-    [ -n "$1" ] && bt_running || return 0
-    timeout 10 bluetoothctl remove "$1" >/dev/null 2>&1
+    if [ -z "$1" ] || ! bt_running; then
+        echo "failed forget bluetooth is off"
+        return
+    fi
+    out="$(timeout 10 bluetoothctl remove "$1" 2>&1)"
+    case "$out" in
+        *"Device has been removed"*) ;;
+        *) pair_failed forget "$out"; return ;;
+    esac
+    route_audio >/dev/null 2>&1
+    echo "ok"
 }
 
 disconnect_device() {
@@ -281,7 +305,7 @@ case "$1" in
         /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME" >/dev/null 2>&1
         device_bluetooth_supported && wait_for_wifi
         apply_setting ;;
-    suspend) disconnect_all ;;
+    suspend) device_bluetooth_supported && disconnect_all ;;
     status)  show_status ;;
     scan)    scan_devices ;;
     devices) list_devices ;;
