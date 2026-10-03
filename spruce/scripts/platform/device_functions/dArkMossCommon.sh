@@ -413,6 +413,10 @@ device_bluetooth_down() {
     systemctl stop bluealsa bluetooth
 }
 
+# bluealsad 5's ALSA plugin would switch the codec to each client's rate (see
+# asound-setup.sh); 48 kHz is what it picks at connect and what games use.
+BT_PCM_RATE=48000
+
 # Soft volume, so the level holds on headsets that ignore the remote one.
 darkmoss_bt_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
