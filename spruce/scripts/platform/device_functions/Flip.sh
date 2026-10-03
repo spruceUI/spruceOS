@@ -608,34 +608,22 @@ device_stock_ui_command() {
     printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
 }
 
-# Strict unmount: btmanager, hardwareservice, miyoo_inputd and gpiowait hold
-# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+# USB radio: device_init loads rtk_btusb and hci0 follows. The stock init
+# script owns bluetoothd.
 device_bluetooth_supported() {
     return 0
 }
 
-device_bluetooth_up() {
-    _n=0
-    while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 50 ]; do
-        sleep 0.1
-        _n=$((_n + 1))
-    done
-    hciconfig hci0 up
-    if ! pidof bluetoothd >/dev/null 2>&1; then
-        ( cd / && /etc/init.d/S40bluetooth start ) >/dev/null 2>&1
-        sleep 1
-    fi
-    if ! pidof bluealsa >/dev/null 2>&1; then
-        ( cd / && exec bluealsa -p a2dp-source ) >/dev/null 2>&1 &
-    fi
+device_bluetoothd_start() {
+    /etc/init.d/S40bluetooth start
 }
 
-device_bluetooth_down() {
-    killall bluealsa 2>/dev/null
+device_bluetoothd_stop() {
     /etc/init.d/S40bluetooth stop >/dev/null 2>&1 || killall bluetoothd 2>/dev/null
-    hciconfig hci0 down 2>/dev/null
 }
 
+# Strict unmount: btmanager, hardwareservice, miyoo_inputd and gpiowait hold
+# the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
 device_needs_strict_unmount() {
     return 0
 }
