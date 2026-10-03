@@ -8,7 +8,7 @@
 # Usage: bluetooth.sh <command> [address]
 #   apply     make the radio match the saved .bluetooth setting
 #   suspend   disconnect everything, without changing the setting (poweroff)
-#   status    key=value lines: radio, setting, state, connected
+#   status    key=value lines: radio, setting, state, connected, connected_icon
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
@@ -153,12 +153,18 @@ show_status() {
     device_bluetooth_supported && radio=1
     state=off
     connected=""
+    icons=""
     if bt_running; then
         state=on
-        connected="$(list_devices | awk -F'\t' '$3 == 1 { print $4; exit }')"
+        _connected="$(list_devices | awk -F'\t' '$3 == 1')"
+        connected="$(printf '%s\n' "$_connected" | head -n 1 | cut -f4)"
+        for _mac in $(printf '%s\n' "$_connected" | cut -f1); do
+            _icon="$(timeout 5 bluetoothctl info "$_mac" 2>/dev/null | sed -n 's/^[[:space:]]*Icon: //p' | head -n 1)"
+            icons="${icons:+$icons,}${_icon:-unknown}"
+        done
     fi
-    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\n' \
-        "$radio" "$(bt_setting)" "$state" "$connected"
+    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\nconnected_icon=%s\n' \
+        "$radio" "$(bt_setting)" "$state" "$connected" "$icons"
 }
 
 bluez_error() {

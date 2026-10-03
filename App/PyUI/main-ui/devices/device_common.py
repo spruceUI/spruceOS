@@ -276,11 +276,32 @@ class DeviceCommon(AbstractDevice):
     def _bluetooth_apply_worker(self):
         while True:
             self._bluetooth_cmd("apply", timeout=30)
+            self._bluetooth_status.force_refresh()
             with self._bt_apply_lock:
                 if not self._bt_apply_again:
                     self._bt_apply_running = False
                     return
                 self._bt_apply_again = False
+
+    @throttle.limit_refresh(10, background=True)
+    def _bluetooth_status(self):
+        out = self._bluetooth_cmd("status", timeout=15) or ""
+        return dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
+
+    def get_bluetooth_status(self):
+        """For the top bar: None while off, else "audio" or "gamepad" when only
+        that kind is connected, otherwise "on"."""
+        if not self.is_bluetooth_enabled():
+            return None
+        status = self._bluetooth_status()
+        if status.get("radio") != "1":
+            return None
+        icons = [i for i in status.get("connected_icon", "").split(",") if i]
+        if icons and all(i.startswith("audio") for i in icons):
+            return "audio"
+        if icons and all(i == "input-gaming" for i in icons):
+            return "gamepad"
+        return "on"
 
     def get_bluetooth_scanner(self):
         if not hasattr(self, "_bluetooth_scanner"):

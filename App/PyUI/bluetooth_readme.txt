@@ -26,6 +26,8 @@ stdout. Exit status is 0 unless the command name is unknown.
         setting    the saved on/off choice, 1 or 0
         state      on while the Bluetooth daemon is running, else off
         connected  the name of a connected device, else empty
+        connected_icon  BlueZ's type for every connected device, comma
+                   separated, e.g. audio-headset,input-gaming
 
   scan
       Look for devices for about six seconds, then list every named device
