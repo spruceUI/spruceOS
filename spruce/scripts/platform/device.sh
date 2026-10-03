@@ -389,19 +389,103 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
-# Bluetooth, driven by bluetooth.sh. A device with a usable radio answers 0
-# from device_bluetooth_supported and starts and stops its daemons in the two
-# hooks; pairing and scanning are bluetoothctl everywhere.
+# Bluetooth, driven by bluetooth.sh. A board with a radio answers 0 here and overrides
+# only the hooks its hardware needs; dArkMoss (systemd) overrides up/down whole.
 device_bluetooth_supported() {
     return 1
 }
 
-device_bluetooth_up() {
+# Attach the controller so hci0 appears; non-zero when it cannot come up.
+device_bluetooth_radio_up() {
     :
 }
 
+device_bluetooth_radio_down() {
+    hciconfig hci0 down 2>/dev/null
+}
+
+device_bluetoothd_start() {
+    /etc/bluetooth/bluetoothd start
+}
+
+device_bluetoothd_stop() {
+    killall bluetoothd 2>/dev/null
+}
+
+# BT_HCI_WAIT (seconds, 5) and BT_BLUEALSA_ARGS (-p a2dp-source) tune the sequence.
+device_bluetooth_up() {
+    device_bluetooth_radio_up || return 1
+    bt_wait_hci || return 1
+    hciconfig hci0 up 2>/dev/null
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && device_bluetoothd_start ) </dev/null >/dev/null 2>&1
+        _n=0
+        while ! pidof bluetoothd >/dev/null 2>&1 && [ "$_n" -lt 5 ]; do
+            sleep 1
+            _n=$((_n + 1))
+        done
+        pidof bluetoothd >/dev/null 2>&1 || return 1
+        sleep 1    # let it claim org.bluez: bluez-alsa 1.3.1 registers only at start
+    fi
+    bt_start_bluealsa
+}
+
 device_bluetooth_down() {
-    :
+    bt_stop_bluealsa
+    device_bluetoothd_stop
+    device_bluetooth_radio_down
+}
+
+# Start a daemon away from its caller: no inherited descriptors (PyUI waits
+# on its pipes), no working directory on the card (unmount), its own session.
+bt_spawn() {
+    if command -v setsid >/dev/null 2>&1; then
+        ( cd / && exec setsid "$@" ) </dev/null >/dev/null 2>&1 &
+    else
+        ( cd / && exec "$@" ) </dev/null >/dev/null 2>&1 &
+    fi
+}
+
+# Wait up to $1 seconds (BT_HCI_WAIT, 5) for the controller to appear as hci0.
+# Some BusyBox builds have no fractional sleep.
+bt_wait_hci() {
+    _n=$(( ${1:-${BT_HCI_WAIT:-5}} * 10 ))
+    while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -gt 0 ]; do
+        if sleep 0.1 2>/dev/null; then
+            _n=$((_n - 1))
+        else
+            sleep 1
+            _n=$((_n - 10))
+        fi
+    done
+    [ -d /sys/class/bluetooth/hci0 ]
+}
+
+# Power-cycle the rfkill switch $1 (its state file) of a chip on a UART.
+bt_rfkill_pulse() {
+    echo 0 > "$1"
+    sleep 1
+    echo 1 > "$1"
+    sleep 1
+}
+
+bt_start_bluealsa() {
+    pidof bluealsa >/dev/null 2>&1 && return 0
+    # shellcheck disable=SC2086 # the options split on purpose
+    bt_spawn bluealsa ${BT_BLUEALSA_ARGS:--p a2dp-source}
+}
+
+# A wedged bluealsa (bluez-alsa 1.3.1, seen on the Zero 40) ignores SIGTERM:
+# the stuck thread is its main loop.
+bt_stop_bluealsa() {
+    killall bluealsa 2>/dev/null || return 0
+    _n=0
+    while pidof bluealsa >/dev/null 2>&1 && [ "$_n" -lt 2 ]; do
+        sleep 1
+        _n=$((_n + 1))
+    done
+    killall -9 bluealsa 2>/dev/null
+    return 0
 }
 
 # bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
