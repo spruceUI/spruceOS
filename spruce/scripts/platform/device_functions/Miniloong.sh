@@ -4,6 +4,12 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/dArkMossCommon.sh"
 
+# The radio is attached by the kernel (hci0 exists from boot); dArkMossCommon's
+# device_bluetooth_up/down start and stop bluetoothd and bluealsa.
+device_bluetooth_supported() {
+    return 0
+}
+
 # The jack is the extcon named rk-headset; its index follows probe order.
 are_headphones_plugged_in() {
     for _x in /sys/class/extcon/*; do
