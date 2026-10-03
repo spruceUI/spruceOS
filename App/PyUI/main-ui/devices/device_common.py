@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
@@ -251,11 +252,35 @@ class DeviceCommon(AbstractDevice):
 
     def enable_bluetooth(self):
         self.system_config.set_bluetooth(1)
-        self._bluetooth_cmd("apply", timeout=30)
+        self._apply_bluetooth()
 
     def disable_bluetooth(self):
         self.system_config.set_bluetooth(0)
-        self._bluetooth_cmd("apply", timeout=30)
+        self._apply_bluetooth()
+
+    # apply brings the radio up or down, which takes seconds; keep it off the
+    # UI thread. A toggle made while one is running gets one more apply, which
+    # reads the saved setting, so the last toggle wins.
+    _bt_apply_lock = threading.Lock()
+    _bt_apply_running = False
+    _bt_apply_again = False
+
+    def _apply_bluetooth(self):
+        with self._bt_apply_lock:
+            if self._bt_apply_running:
+                self._bt_apply_again = True
+                return
+            self._bt_apply_running = True
+        threading.Thread(target=self._bluetooth_apply_worker, daemon=True).start()
+
+    def _bluetooth_apply_worker(self):
+        while True:
+            self._bluetooth_cmd("apply", timeout=30)
+            with self._bt_apply_lock:
+                if not self._bt_apply_again:
+                    self._bt_apply_running = False
+                    return
+                self._bt_apply_again = False
 
     def get_bluetooth_scanner(self):
         if not hasattr(self, "_bluetooth_scanner"):
