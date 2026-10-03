@@ -40,7 +40,7 @@
     "Update RAOfflineProxy": "install the latest RAOfflineProxy release from GitHub",
     "Clean up macOS dotfiles": "delete any junk files created by macOS",
     "Repair SD Card": "reboot and attempt an fsck.fat on your card",
-    "Bug report": "collect logs and other info for bug reports",
+    "Bug report": "Collect and send logs to spruce team via wifi",
     "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM",
     "Clear all Recents": "delete your recently played games list",
     "Clear all Favorites": "delete your favorited games list"

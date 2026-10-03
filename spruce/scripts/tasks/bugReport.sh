@@ -3,11 +3,17 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 output7z=/mnt/SDCARD/bug_report.7z
+code_file=/mnt/SDCARD/bug_report_code.txt
 device_state=/mnt/SDCARD/Saves/spruce/device_state.log
+UPLOAD_URL="https://spruce-bug-reports.thespruceosteam.workers.dev/upload"
 
 if [ -f $output7z ] ; then
     rm $output7z
 fi
+rm -f "$code_file"
+
+start_pyui_message_writer
+log_and_display_message "Collecting logs for the bug report..."
 
 # Hardware state that the logs don't record. Landing it in Saves/spruce as a
 # .log means the include patterns below already pick it up.
@@ -601,3 +607,34 @@ rm -rf "$stage"
 rm -f "$secrets" "$rules"
 
 log_message "Debug: Logs and configs saved to ${output7z}"
+
+# The archive stays on the card either way.
+upload_report() {
+    [ -f "$output7z" ] && [ -n "$(wifi_request ip)" ] || return 1
+    command -v curl >/dev/null 2>&1 || return 1
+    log_and_display_message "Sending the bug report to the spruce team..."
+    for _insecure in "" -k; do
+        _answer="$(curl -sS -f $_insecure --connect-timeout 15 --max-time 120 \
+            -H "X-Spruce-Platform: $PLATFORM" -H "X-Spruce-Version: $(get_version_complex)" \
+            --data-binary @"$output7z" "$UPLOAD_URL" 2>&1)"
+        _result=$?
+        case "$_result" in
+            35|51|58|59|60|77) continue ;;
+        esac
+        break
+    done
+    case "$_answer" in
+        SPR-*) report_code="$(echo "$_answer" | head -n 1)" ;;
+        *) log_message "bugReport.sh: upload failed (curl $_result): $_answer"; return 1 ;;
+    esac
+}
+
+if upload_report; then
+    echo "$report_code" > "$code_file"
+    log_message "bugReport.sh: uploaded as $report_code"
+    log_and_display_message "Bug report sent. Your code is\n\n$report_code\n\nPost this code in the spruce Discord.\nIt is also saved in bug_report_code.txt on the SD card.\n\nPress A to continue."
+else
+    log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in the spruce Discord.\n\nPress A to continue."
+fi
+acknowledge
+stop_pyui_message_writer
