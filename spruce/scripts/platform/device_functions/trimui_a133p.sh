@@ -69,8 +69,18 @@ device_on_bt_audio_route() {
 # first headset bluealsa holds an A2DP transport for, or nothing for the
 # speaker. Points the volume keys at it the way asound-setup.sh does for games.
 bt_audio_device() {
-    pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
-    device_on_bt_audio_route "$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')"
+    pcm=""
+    # PyUI asks right after killing bluetoothd or disconnecting the headset, and
+    # bluealsa can still list the transport for a moment: check both directly.
+    if pidof bluetoothd >/dev/null 2>&1; then
+        pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
+    fi
+    mac=$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')
+    if [ -n "$mac" ] && ! $BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+        pcm=""
+        mac=""
+    fi
+    device_on_bt_audio_route "$mac"
     [ -z "$pcm" ] || echo "$pcm"
 }
 
