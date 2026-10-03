@@ -4,12 +4,14 @@ import os
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
+from devices.bluetooth.bluetooth_command import BluetoothCommand
 from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
@@ -225,6 +227,90 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
+    # ---- Bluetooth --------------------------------------------------------
+    # As with WiFi: the shell owns the radio and its daemons, PyUI saves the
+    # on/off setting and calls bluetoothCmd for the rest. See
+    # App/PyUI/bluetooth_readme.txt for the command contract.
+
+    def _bluetooth_cmd(self, *args, timeout=20):
+        cmd = PyUiConfig.get_bluetooth_cmd()
+        if not cmd or not os.path.exists(cmd):
+            return None
+        try:
+            result = subprocess.run([cmd, *args], capture_output=True, text=True,
+                                    stdin=subprocess.DEVNULL, timeout=timeout)
+            if result.returncode != 0:
+                PyUiLogger.get_logger().error(f"bluetooth {args[0]} exited {result.returncode}")
+                return None
+            return result.stdout
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"bluetooth {args[0]} failed: {e}")
+            return None
+
+    def is_bluetooth_enabled(self):
+        return self.system_config.is_bluetooth_enabled()
+
+    def enable_bluetooth(self):
+        self.system_config.set_bluetooth(1)
+        self._apply_bluetooth()
+
+    def disable_bluetooth(self):
+        self.system_config.set_bluetooth(0)
+        self._apply_bluetooth()
+
+    # apply brings the radio up or down, which takes seconds; keep it off the
+    # UI thread. A toggle made while one is running gets one more apply, which
+    # reads the saved setting, so the last toggle wins.
+    _bt_apply_lock = threading.Lock()
+    _bt_apply_running = False
+    _bt_apply_again = False
+
+    def _apply_bluetooth(self):
+        with self._bt_apply_lock:
+            if self._bt_apply_running:
+                self._bt_apply_again = True
+                return
+            self._bt_apply_running = True
+        threading.Thread(target=self._bluetooth_apply_worker, daemon=True).start()
+
+    def _bluetooth_apply_worker(self):
+        while True:
+            self._bluetooth_cmd("apply", timeout=30)
+            self._bluetooth_status.force_refresh()
+            with self._bt_apply_lock:
+                if not self._bt_apply_again:
+                    self._bt_apply_running = False
+                    return
+                self._bt_apply_again = False
+
+    @throttle.limit_refresh(10, background=True)
+    def _bluetooth_status(self):
+        out = self._bluetooth_cmd("status", timeout=15) or ""
+        return dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
+
+    def get_bluetooth_status(self):
+        """For the top bar: None unless something is connected, then "audio" or
+        "gamepad" when only that kind is, otherwise "on"."""
+        if not self.is_bluetooth_enabled():
+            return None
+        status = self._bluetooth_status()
+        if status.get("radio") != "1":
+            return None
+        icons = [i for i in status.get("connected_icon", "").split(",") if i]
+        if not icons:
+            return None
+        if all(i.startswith("audio") for i in icons):
+            return "audio"
+        if all(i == "input-gaming" for i in icons):
+            return "gamepad"
+        return "on"
+
+    def get_bluetooth_scanner(self):
+        if not hasattr(self, "_bluetooth_scanner"):
+            status = (self._bluetooth_cmd("status") or "").splitlines()
+            self._bluetooth_scanner = BluetoothCommand(self._bluetooth_cmd) if "radio=1" in status else None
+        return self._bluetooth_scanner
+
     # ---- WiFi -------------------------------------------------------------
     # The shell owns the radio and reports on it; PyUI only saves the on/off
     # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt

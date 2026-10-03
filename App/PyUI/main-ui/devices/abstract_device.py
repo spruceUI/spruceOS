@@ -77,6 +77,10 @@ class AbstractDevice(ABC):
         pass
 
     @abstractmethod
+    def get_bluetooth_status(self):
+        pass
+
+    @abstractmethod
     def disable_wifi(self):
         pass
 

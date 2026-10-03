@@ -150,32 +150,6 @@ class MiyooDevice(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        try:
-            # Run 'ps' to check for bluetoothd process
-            result = self.get_running_processes()
-            # Check if bluetoothd is in the process list
-            return 'bluetoothd' in result.stdout
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
-            return False
-    
-    
-    def disable_bluetooth(self):
-        PyUiLogger.get_logger().info(f"Disabling Bluetooth")
-        ProcessRunner.run(["killall","-15","bluetoothd"])
-        time.sleep(0.1)  
-        ProcessRunner.run(["killall","-9","bluetoothd"])
-        self.system_config.set_bluetooth(0)
-
-    def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/libexec/bluetooth/',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
-            
     def perform_startup_tasks(self):
         pass
 

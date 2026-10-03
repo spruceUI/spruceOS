@@ -10,6 +10,7 @@ from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
+from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
@@ -173,12 +174,13 @@ class TrimUISmartProS(TrimUIDevice):
             PyUiLogger.get_logger().error(f"Error setting backlight: {e}")
 
     def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/libexec/bluetooth/',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
+        DeviceCommon.enable_bluetooth(self)
+
+    def disable_bluetooth(self):
+        DeviceCommon.disable_bluetooth(self)
+
+    def get_bluetooth_scanner(self):
+        return DeviceCommon.get_bluetooth_scanner(self)
 
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event0",115)

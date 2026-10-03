@@ -180,6 +180,26 @@ class BluetoothScanner:
         """Clears the device list to force re-scan."""
         with self._lock:
             self._devices.clear()
+
+    def connect(self, device):
+        """(ok, failed step, output)."""
+        steps = [
+            ("pair",    ["bluetoothctl", "pair", device.address],    "Pairing successful"),
+            ("trust",   ["bluetoothctl", "trust", device.address],   "trust succeeded"),
+            ("connect", ["bluetoothctl", "connect", device.address], "Connection successful"),
+        ]
+
+        for name, cmd, success_token in steps:
+            self.log.info(f"Bluetooth connect step: {name}")
+
+            output = ProcessRunner.run_cmd("BluetoothMenu", cmd)
+            self.log.info(f"{name} output: {output}")
+
+            if not output or success_token.lower() not in output.lower():
+                self.log.info(f"{name} FAILED for {device.address}")
+                return False, name, output
+
+        return True, None, None
     
     def _run_cmd(self, cmd, log_stdout=True):
         return ProcessRunner.run_cmd("BluetoothScanner", cmd, log_stdout=log_stdout)

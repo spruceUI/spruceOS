@@ -468,6 +468,13 @@ class Theme():
             return cls._asset("icon-wifi-locked.qoi")
 
     @classmethod
+    def get_bluetooth_icon(cls, status):
+        names = {"audio": "icon-bluetooth-headphone.qoi",
+                 "gamepad": "icon-bluetooth-gamepad.qoi",
+                 "on": "icon-bluetooth-default.qoi"}
+        return cls._asset(names[status]) if status in names else None
+
+    @classmethod
     def get_volume_indicator(cls, volume):
         return cls._asset(f"icon-volume-{volume:02d}.qoi")
 
