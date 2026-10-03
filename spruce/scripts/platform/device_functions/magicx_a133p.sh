@@ -6,6 +6,12 @@
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 
+# The base's /usr/bin/timeout is BusyBox 1.27's, which wants -t SECS and fails on
+# the "timeout SECS PROG" form spruce's scripts use (bluetooth.sh, asound-setup.sh).
+timeout() {
+    /mnt/SDCARD/spruce/bin64/busybox timeout "$@"
+}
+
 # zero28 | zero40 | xu20, from the base image's marker. Images without one
 # predate the marker and are Zero 28 (Moss-zero28 itself).
 magicx_model() {
@@ -200,8 +206,9 @@ device_init() {
         syslogd -S
         hwclock -s -u
     ) &
-    # Bluetooth: the base ships bluez and the XR829 BT firmware, but the HCI attach
-    # sequence is not wired on this family yet; PyUI's Bluetooth toggle owns it.
+    # Bluetooth to the saved setting; a board without a radio returns at once.
+    # Double-forked: runtime.sh waits for device_init's children.
+    ( ( /mnt/SDCARD/spruce/scripts/bluetooth.sh apply ) & ) </dev/null >/dev/null 2>&1
     magicx_init_audio
     stage_ra_autoconfig
 
