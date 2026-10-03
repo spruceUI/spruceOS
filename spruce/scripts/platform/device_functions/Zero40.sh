@@ -38,9 +38,9 @@ device_bluetoothd_stop() {
 BT_BLUEALSA_ARGS="-p a2dp-source --a2dp-volume"
 
 # 1.3.1 can wedge (a drain waits forever under its lock) and then answers neither
-# BlueZ nor amixer: a headset coming up restarts it, so the next connect works.
+# BlueZ nor amixer: a headset coming up restarts it. 4.x cannot wedge that way.
 device_bt_audio_connected() {
-    if pidof bluealsa >/dev/null 2>&1; then
+    if pidof bluealsa >/dev/null 2>&1 && bluealsa --version 2>/dev/null | grep -q '^1\.'; then
         timeout 3 amixer -D bluealsa scontrols >/dev/null 2>&1
         if [ $? -ge 124 ]; then
             log_message "Zero 40: bluealsa stopped answering; restarting it"
