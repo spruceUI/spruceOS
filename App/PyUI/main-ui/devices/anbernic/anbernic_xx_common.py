@@ -253,20 +253,8 @@ class AnbernicXXCommon(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        return False # TODO
-    
-    def disable_bluetooth(self):
-        pass
-
-    def enable_bluetooth(self):
-        pass
-            
     def perform_startup_tasks(self):
         pass
-
-    def get_bluetooth_scanner(self):
-        return None
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"

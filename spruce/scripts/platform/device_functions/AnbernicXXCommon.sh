@@ -511,6 +511,7 @@ stage_ra_autoconfig() {
 
 device_init() {
     anbernic_xx_common_init
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh apply </dev/null >/dev/null 2>&1 &
 }
 
 # Nothing to swap in or out around a port on this line: the SDL2 a port needs is
@@ -713,6 +714,7 @@ set_volume() {
     system_volume=$(( (new_vol * 31 + 10) / 20 ))
 
     amixer -q set 'lineout volume' "$system_volume"
+    bt_headset_volume "$new_vol"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -1177,6 +1179,43 @@ device_ensure_wifi_interface() {
 device_prepare_for_poweroff() {
     device_wifi_power_off
     xx_rgb_off
+}
+
+device_bluetooth_supported() {
+    return 0
+}
+
+# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second. BaseOS
+# leaves D-Bus and every Bluetooth daemon to the frontend.
+device_bluetooth_up() {
+    _n=0
+    while [ ! -d /sys/class/net/wlan0 ] && [ "$_n" -lt 30 ]; do
+        sleep 1
+        _n=$((_n + 1))
+    done
+    [ -d /sys/class/net/wlan0 ] || return 1
+    pidof dbus-daemon >/dev/null 2>&1 || setsid dbus-daemon --system --fork </dev/null >/dev/null 2>&1
+    rfkill unblock bluetooth
+    if [ ! -d /sys/class/bluetooth/hci0 ]; then
+        ( cd / && exec setsid rtk_hciattach -n -s 115200 ttyS1 rtk_h5 ) </dev/null >/dev/null 2>&1 &
+        _n=0
+        while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 50 ]; do
+            sleep 0.1
+            _n=$((_n + 1))
+        done
+    fi
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && exec setsid /usr/libexec/bluetooth/bluetoothd -n ) </dev/null >/dev/null 2>&1 &
+        sleep 1
+    fi
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec setsid bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
+    fi
+}
+
+device_bluetooth_down() {
+    killall bluealsa bluetoothd rtk_hciattach 2>/dev/null
+    rfkill block bluetooth
 }
 
 
