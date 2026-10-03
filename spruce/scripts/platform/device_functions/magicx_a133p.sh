@@ -504,6 +504,7 @@ set_volume() {
     [ "$new_vol" -lt 0 ] 2>/dev/null && new_vol=0
     [ "$new_vol" -gt 20 ] 2>/dev/null && new_vol=20
     magicx_apply_volume "$new_vol"
+    bt_headset_volume "$new_vol"
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol // 0' "$SYSTEM_JSON" 2>/dev/null)
         [ "$current_volume" = "$new_vol" ] || save_volume_to_config_file "$new_vol"
