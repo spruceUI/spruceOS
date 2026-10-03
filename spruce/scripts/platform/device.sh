@@ -476,6 +476,13 @@ device_write_default_asound_rc() {
     log_message "Missing device_write_default_asound_rc function" -v
 }
 
+device_on_bt_audio_route() {
+    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
+    # at it, and with no argument when audio stays on the device - for firmware
+    # whose own volume path has to be told where the audio went. Default: nothing.
+    :
+}
+
 
 device_get_hw_epoch() {
     # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds

@@ -63,7 +63,9 @@ ctl.!default {
 }
 EOF
     command -v device_bt_audio_connected >/dev/null 2>&1 && device_bt_audio_connected
+    device_on_bt_audio_route "$mac"
 else
     [ -f "$ASOUND_CONF" ] && rm "$ASOUND_CONF"
     device_write_default_asound_rc
+    device_on_bt_audio_route
 fi
