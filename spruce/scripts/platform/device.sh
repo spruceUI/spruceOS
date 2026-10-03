@@ -405,9 +405,13 @@ device_bluetooth_down() {
 }
 
 # bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
+# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
+# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
+# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
+# anywhere and leave the switch alone.
 bt_headset_volume() {
     pidof bluealsa >/dev/null 2>&1 || return 0
-    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP\)',0$/\1/p" | while read -r _ctl; do
+    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
         amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
     done
 }
