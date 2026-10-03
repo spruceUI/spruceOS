@@ -48,6 +48,9 @@ else
             # .gptk on the wrong physical key.
             export_sdl_gamecontroller_map positional
             ;;
+        "RGB30"|"RGB20SX"|"Miniloong")
+            export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH"
+            ;;
     esac
 
     if [ "$PLATFORM" = "Pixel2" ]; then
