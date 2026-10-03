@@ -8,7 +8,9 @@
 BASE_HOME="${1:-$HOME}"
 ASOUND_CONF="$BASE_HOME/.asoundrc"
 
-BTCTL_TIMEOUT="timeout 2"
+# A device whose userland has no timeout sets BTCTL_TIMEOUT in its
+# device_functions file.
+BTCTL_TIMEOUT="${BTCTL_TIMEOUT:-timeout 2}"
 
 get_connected_audio_bt_mac() {
     # Save 2s from the timeout

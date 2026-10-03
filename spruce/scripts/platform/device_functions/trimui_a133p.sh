@@ -8,6 +8,11 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh"
 
+# The stock BusyBox (1.27.2) has no timeout applet, so asound-setup.sh's
+# "timeout 2 bluetoothctl ..." failed and never routed audio to a connected
+# Bluetooth headset. spruce's own BusyBox has one.
+BTCTL_TIMEOUT="/mnt/SDCARD/spruce/bin64/busybox timeout 2"
+
 
 ###############################################################################
 
