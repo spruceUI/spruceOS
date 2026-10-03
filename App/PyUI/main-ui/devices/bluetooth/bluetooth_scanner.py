@@ -183,19 +183,21 @@ class BluetoothScanner:
 
     def connect(self, device):
         """(ok, failed step, output)."""
+        # A device paired (or connected) earlier, e.g. before a reboot, answers
+        # AlreadyExists (AlreadyConnected) - that is the state we want, so go on.
         steps = [
-            ("pair",    ["bluetoothctl", "pair", device.address],    "Pairing successful"),
-            ("trust",   ["bluetoothctl", "trust", device.address],   "trust succeeded"),
-            ("connect", ["bluetoothctl", "connect", device.address], "Connection successful"),
+            ("pair",    ["bluetoothctl", "pair", device.address],    ("Pairing successful", "org.bluez.Error.AlreadyExists")),
+            ("trust",   ["bluetoothctl", "trust", device.address],   ("trust succeeded",)),
+            ("connect", ["bluetoothctl", "connect", device.address], ("Connection successful", "org.bluez.Error.AlreadyConnected")),
         ]
 
-        for name, cmd, success_token in steps:
+        for name, cmd, success_tokens in steps:
             self.log.info(f"Bluetooth connect step: {name}")
 
             output = ProcessRunner.run_cmd("BluetoothMenu", cmd)
             self.log.info(f"{name} output: {output}")
 
-            if not output or success_token.lower() not in output.lower():
+            if not output or not any(token.lower() in output.lower() for token in success_tokens):
                 self.log.info(f"{name} FAILED for {device.address}")
                 return False, name, output
 
