@@ -6,6 +6,7 @@ from pathlib import Path
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.key_watcher import KeyWatcher
 from controller.key_watcher_controller import KeyWatcherController
+from devices.device_common import DeviceCommon
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.magicx.magicx_key_mapping_provider import MagicXKeyMappingProvider
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
@@ -201,11 +202,16 @@ class MagicXA133PDevice(TrimUIDevice):
     def might_require_surface_format_conversion(self):
         return True
 
+    # Bluetooth goes through bluetoothCmd like the Smart Pro S: the shell says
+    # which board has a radio, so the boards without one get no Bluetooth entry.
     def enable_bluetooth(self):
-        if not self.is_bluetooth_enabled():
-            subprocess.Popen(['./bluetoothd', "-f", "/etc/bluetooth/main.conf"],
-                             cwd='/usr/bin', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
+        DeviceCommon.enable_bluetooth(self)
+
+    def disable_bluetooth(self):
+        DeviceCommon.disable_bluetooth(self)
+
+    def get_bluetooth_scanner(self):
+        return DeviceCommon.get_bluetooth_scanner(self)
 
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up(self.volume_event_path, 115)
