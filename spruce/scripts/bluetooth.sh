@@ -9,7 +9,7 @@
 #   apply     make the radio match the saved .bluetooth setting
 #   boot      apply once WiFi has connected (WiFi first on shared radios)
 #   suspend   disconnect everything, without changing the setting (poweroff)
-#   status    key=value lines: radio, setting, state, connected, connected_icon
+#   status    key=value lines: radio, setting, state, connected, connected_icon, audio
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
@@ -66,12 +66,10 @@ reconnect_trusted() {
     done
 }
 
+# BlueZ's Connected, which asound-setup.sh routes on, not the radio link: the
+# link comes up seconds earlier.
 connections() {
-    if command -v hcitool >/dev/null 2>&1; then
-        hcitool con 2>/dev/null | awk '/ACL/ { print $3 }'
-    else
-        list_devices | awk -F'\t' '$3 == 1 { print $1 }'
-    fi
+    list_devices | awk -F'\t' '$3 == 1 { print $1 }'
 }
 
 # PyUI reads $HOME/.asoundrc and reopens its output when the flag appears.
@@ -177,8 +175,10 @@ show_status() {
             icons="${icons:+$icons,}${_icon:-unknown}"
         done
     fi
-    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\nconnected_icon=%s\n' \
-        "$radio" "$(bt_setting)" "$state" "$connected" "$icons"
+    audio=0
+    [ "$state" = on ] && bt_audio_ready && audio=1
+    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\nconnected_icon=%s\naudio=%s\n' \
+        "$radio" "$(bt_setting)" "$state" "$connected" "$icons" "$audio"
 }
 
 bluez_error() {
@@ -276,7 +276,11 @@ wait_for_wifi() {
 
 case "$1" in
     apply)   apply_setting ;;
-    boot)    device_bluetooth_supported && wait_for_wifi; apply_setting ;;
+    boot)
+        # Before PyUI starts: it reads .asoundrc once.
+        /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME" >/dev/null 2>&1
+        device_bluetooth_supported && wait_for_wifi
+        apply_setting ;;
     suspend) disconnect_all ;;
     status)  show_status ;;
     scan)    scan_devices ;;

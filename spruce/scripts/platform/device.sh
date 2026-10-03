@@ -489,6 +489,36 @@ device_on_bt_audio_route() {
     :
 }
 
+# The connected audio device's MAC, if any.
+bt_connected_audio_mac() {
+    pidof bluetoothd >/dev/null 2>&1 || return 1
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    for _mac in $($_bt_to bluetoothctl devices 2>/dev/null | awk '{print $2}'); do
+        _info="$($_bt_to bluetoothctl info "$_mac" 2>/dev/null)" || continue
+        echo "$_info" | grep -q "Connected: yes" || continue
+        if echo "$_info" | grep "Name" | cut -d ' ' -f2- | grep -iqE "headset|speaker|audio|earbud|headphone"; then
+            echo "$_mac"
+            return 0
+        fi
+        case "$(echo "$_info" | grep "Icon" | awk '{print $2}')" in
+            audio-headset|audio-card|audio-headphones) echo "$_mac"; return 0 ;;
+        esac
+    done
+    return 1
+}
+
+# bluealsa holds an A2DP stream: the headset can be played to now.
+bt_audio_ready() {
+    ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
+}
+
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
+# headset, or nothing for the default output.
+bt_audio_device() {
+    bt_audio_ready || return 0
+    _mac="$(bt_connected_audio_mac)" && echo "bluealsa:DEV=$_mac,PROFILE=a2dp"
+}
+
 
 device_get_hw_epoch() {
     # hwclock output like: Sat Jan 10 14:23:54 2026  0.000000 seconds

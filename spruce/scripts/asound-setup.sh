@@ -26,41 +26,35 @@ if [ -n "$BT_PCM_RATE" ]; then
 "
 fi
 
-get_connected_audio_bt_mac() {
-    # Save 2s from the timeout
-    if ! pgrep bluetoothd > /dev/null; then
-        return 1
-    fi
-
-    for mac in $($BTCTL_TIMEOUT bluetoothctl devices 2>/dev/null | awk '{print $2}'); do
-        info="$($BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null)" || continue
-
-        echo "$info" | grep -q "Connected: yes" || continue
-
-        name=$(echo "$info" | grep "Name" | cut -d ' ' -f2-)
-        icon=$(echo "$info" | grep "Icon" | awk '{print $2}')
-
-        if echo "$name" | grep -iqE "headset|speaker|audio|earbud|headphone"; then
-            echo "$mac"
-            return 0
-        fi
-
-        if [ "$icon" = "audio-headset" ] || \
-           [ "$icon" = "audio-card" ] || \
-           [ "$icon" = "audio-headphones" ]; then
-            echo "$mac"
-            return 0
-        fi
-    done
-    return 1
-}
-
-
-mac=$(get_connected_audio_bt_mac)
+mac=$(bt_connected_audio_mac)
 
 mkdir -p "$(dirname "$ASOUND_CONF")"
 
-if [ -n "$mac" ]; then
+# A device setting ASOUND_SPRUCE_PCMS writes its speaker as pcm.spruce_speaker.
+# Both names are then always defined, so a running PyUI, which read this file
+# once at start, can switch between them (AUDIODEV) as the headset comes and goes.
+if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
+    device_write_default_asound_rc
+    cat >> "$ASOUND_CONF" <<EOF
+pcm.spruce_bt {
+    type plug
+    slave.pcm {
+        type bluealsa
+        device "00:00:00:00:00:00"
+        profile "a2dp"
+        delay 64
+    }
+${BT_PCM_FIXED}}
+pcm.!default {
+    type plug
+    slave.pcm "$([ -n "$mac" ] && echo spruce_bt || echo spruce_speaker)"
+}
+EOF
+    if [ -n "$mac" ]; then
+        command -v device_bt_audio_connected >/dev/null 2>&1 && device_bt_audio_connected
+    fi
+    device_on_bt_audio_route $mac
+elif [ -n "$mac" ]; then
     cat > "$ASOUND_CONF" <<EOF
 pcm.!default {
     type plug

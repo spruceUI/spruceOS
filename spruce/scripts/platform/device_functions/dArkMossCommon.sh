@@ -417,6 +417,16 @@ device_bluetooth_down() {
 # asound-setup.sh); 48 kHz is what it picks at connect and what games use.
 BT_PCM_RATE=48000
 
+# For PyUI: both names are in every .asoundrc asound-setup.sh writes here.
+bt_audio_device() {
+    grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
+    if bt_audio_ready && bt_connected_audio_mac >/dev/null; then
+        echo spruce_bt
+    else
+        echo spruce_speaker
+    fi
+}
+
 # Soft volume, so the level holds on headsets that ignore the remote one.
 darkmoss_bt_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
@@ -459,10 +469,12 @@ brightness_up() {
 # The base's ALSA config is a per-user ~/.asoundrc and /etc/asound.conf is
 # empty, so RetroArch (HOME=/mnt/SDCARD/RetroArch) would fall through to raw
 # hw:0,0 and lose dmix and the softvol "Master" set_volume drives. This is the
-# base's own file verbatim.
+# base's own file, its default renamed spruce_speaker (asound-setup.sh adds the
+# default and spruce_bt).
+ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     cat > "$ASOUND_CONF" <<ASOUND
-pcm.!default {
+pcm.spruce_speaker {
     type        plug
     slave.pcm   "softvol"
 }
