@@ -512,9 +512,19 @@ bt_audio_ready() {
     ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
 }
 
-# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
-# headset, or nothing for the default output.
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh). With
+# ASOUND_SPRUCE_PCMS one of the two names every .asoundrc defines here (see
+# asound-setup.sh), otherwise the headset or nothing for the default output.
 bt_audio_device() {
+    if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
+        grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
+        if bt_audio_ready && bt_connected_audio_mac >/dev/null; then
+            echo spruce_bt
+        else
+            echo spruce_speaker
+        fi
+        return 0
+    fi
     bt_audio_ready || return 0
     _mac="$(bt_connected_audio_mac)" && echo "bluealsa:DEV=$_mac,PROFILE=a2dp"
 }

@@ -417,16 +417,6 @@ device_bluetooth_down() {
 # asound-setup.sh); 48 kHz is what it picks at connect and what games use.
 BT_PCM_RATE=48000
 
-# For PyUI: both names are in every .asoundrc asound-setup.sh writes here.
-bt_audio_device() {
-    grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
-    if bt_audio_ready && bt_connected_audio_mac >/dev/null; then
-        echo spruce_bt
-    else
-        echo spruce_speaker
-    fi
-}
-
 # Soft volume, so the level holds on headsets that ignore the remote one.
 darkmoss_bt_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
