@@ -264,6 +264,7 @@ class DeviceCommon(AbstractDevice):
     _bt_apply_lock = threading.Lock()
     _bt_apply_running = False
     _bt_apply_again = False
+    _bt_route_key = None
 
     def _apply_bluetooth(self):
         with self._bt_apply_lock:
@@ -277,6 +278,7 @@ class DeviceCommon(AbstractDevice):
         while True:
             self._bluetooth_cmd("apply", timeout=30)
             self._bluetooth_status.force_refresh()
+            self.refresh_audio_route()
             with self._bt_apply_lock:
                 if not self._bt_apply_again:
                     self._bt_apply_running = False
@@ -296,6 +298,12 @@ class DeviceCommon(AbstractDevice):
         status = self._bluetooth_status()
         if status.get("radio") != "1":
             return None
+        # Headsets also connect and drop on their own (boot reconnect, power off),
+        # and the audio stream comes up a moment after the connection.
+        route_key = (status.get("connected"), status.get("audio"))
+        if route_key != self._bt_route_key:
+            self._bt_route_key = route_key
+            self.refresh_audio_route()
         icons = [i for i in status.get("connected_icon", "").split(",") if i]
         if not icons:
             return None
@@ -786,6 +794,42 @@ class DeviceCommon(AbstractDevice):
 
     def get_audio_system(self):
         return AudioPlayerNone()
+
+    _audio_route_lock = threading.Lock()
+
+    def refresh_audio_route(self):
+        threading.Thread(target=self._refresh_audio_route, name="AudioRoute", daemon=True).start()
+
+    def _refresh_audio_route(self):
+        with self._audio_route_lock:
+            self._refresh_audio_route_locked()
+
+    def _refresh_audio_route_locked(self):
+        # The command prints the ALSA device to play through - a connected
+        # Bluetooth headset - or an empty last line for the default output.
+        cmd = PyUiConfig.get_bt_audio_device_cmd()
+        if not cmd:
+            return
+        try:
+            result = subprocess.run([cmd], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    text=True, timeout=30)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Audio route check failed: {e}")
+            return
+        if result.returncode != 0:
+            return
+        lines = result.stdout.splitlines()
+        device = lines[-1].strip() if lines else ""
+        if device == os.environ.get("AUDIODEV", ""):
+            return
+        if device:
+            os.environ["AUDIODEV"] = device
+        else:
+            os.environ.pop("AUDIODEV", None)
+        PyUiLogger.get_logger().info(f"Audio output now {device or 'the default device'}")
+        self.get_audio_system().audio_reopen()
+        from themes.theme import Theme
+        Theme.bgm_setting_changed()
 
     def get_extra_settings_options(self):
         return []

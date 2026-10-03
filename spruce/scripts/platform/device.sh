@@ -405,10 +405,16 @@ device_bluetooth_down() {
 }
 
 # bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
+# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
+# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
+# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
+# anywhere and leave the switch alone. Each call is bounded: a bluealsa that has
+# stopped answering must not hang the volume keys or the connection watcher.
 bt_headset_volume() {
     pidof bluealsa >/dev/null 2>&1 || return 0
-    amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP\)',0$/\1/p" | while read -r _ctl; do
-        amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    $_bt_to amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
+        $_bt_to amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
     done
 }
 
@@ -474,6 +480,53 @@ device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently
     log_message "Missing device_write_default_asound_rc function" -v
+}
+
+device_on_bt_audio_route() {
+    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
+    # at it, and with no argument when audio stays on the device - for firmware
+    # whose own volume path has to be told where the audio went. Default: nothing.
+    :
+}
+
+# The connected audio device's MAC, if any.
+bt_connected_audio_mac() {
+    pidof bluetoothd >/dev/null 2>&1 || return 1
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    for _mac in $($_bt_to bluetoothctl devices 2>/dev/null | awk '{print $2}'); do
+        _info="$($_bt_to bluetoothctl info "$_mac" 2>/dev/null)" || continue
+        echo "$_info" | grep -q "Connected: yes" || continue
+        if echo "$_info" | grep "Name" | cut -d ' ' -f2- | grep -iqE "headset|speaker|audio|earbud|headphone"; then
+            echo "$_mac"
+            return 0
+        fi
+        case "$(echo "$_info" | grep "Icon" | awk '{print $2}')" in
+            audio-headset|audio-card|audio-headphones) echo "$_mac"; return 0 ;;
+        esac
+    done
+    return 1
+}
+
+# bluealsa holds an A2DP stream: the headset can be played to now.
+bt_audio_ready() {
+    ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
+}
+
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh). With
+# ASOUND_SPRUCE_PCMS one of the two names every .asoundrc defines here (see
+# asound-setup.sh), otherwise the headset or nothing for the default output.
+bt_audio_device() {
+    if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
+        grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
+        if bt_audio_ready && bt_connected_audio_mac >/dev/null; then
+            echo spruce_bt
+        else
+            echo spruce_speaker
+        fi
+        return 0
+    fi
+    bt_audio_ready || return 0
+    _mac="$(bt_connected_audio_mac)" && echo "bluealsa:DEV=$_mac,PROFILE=a2dp"
 }
 
 

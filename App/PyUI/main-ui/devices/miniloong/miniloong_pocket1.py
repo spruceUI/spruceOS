@@ -296,20 +296,6 @@ class MiniloongPocket1(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    # ---- bluetooth: not wired ----
-
-    def is_bluetooth_enabled(self):
-        return False
-
-    def disable_bluetooth(self):
-        pass
-
-    def enable_bluetooth(self):
-        pass
-
-    def get_bluetooth_scanner(self):
-        return None
-
     # ---- launching / paths ----
 
     def run_cmd(self, args, dir=None, is_power_cmd=False):

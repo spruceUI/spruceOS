@@ -26,7 +26,7 @@ device_init() {
     setup_mainui_alias
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
-    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh apply &
+    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     darkmoss_debug_dump
     clear_stale_pmic_power_en &
 }
@@ -385,13 +385,37 @@ set_volume() {
 
 # dArkMoss ships both services disabled; bluetooth.sh starts them from the
 # saved setting, at boot and when it changes.
+#
+# bluealsad gets --keep-alive: when PyUI hands the audio to a game and back
+# there are a few seconds with no client. With it the Bluetooth transport is
+# kept for the next client instead of being released, so a switch sends the
+# headset nothing (no suspend and restart, and the game's first sound is not
+# cut). A runtime drop-in keeps the unit's own command line.
+BLUEALSA_KEEP_ALIVE=10
 device_bluetooth_up() {
+    _dropin=/run/systemd/system/bluealsa.service.d/spruce-keep-alive.conf
+    if [ ! -f "$_dropin" ]; then
+        _cmd=$(systemctl show -p ExecStart --value bluealsa 2>/dev/null | sed -n 's/.*argv\[\]=\([^;]*\);.*/\1/p' | head -n 1)
+        case "$_cmd" in
+            ""|*--keep-alive*) ;;
+            *)
+                mkdir -p "${_dropin%/*}"
+                printf '[Service]\nExecStart=\nExecStart=%s --keep-alive=%s\n' "${_cmd% }" "$BLUEALSA_KEEP_ALIVE" > "$_dropin"
+                systemctl daemon-reload
+                systemctl is-active --quiet bluealsa && systemctl restart bluealsa
+                ;;
+        esac
+    fi
     systemctl start bluetooth bluealsa
 }
 
 device_bluetooth_down() {
     systemctl stop bluealsa bluetooth
 }
+
+# bluealsad 5's ALSA plugin would switch the codec to each client's rate (see
+# asound-setup.sh); 48 kHz is what it picks at connect and what games use.
+BT_PCM_RATE=48000
 
 # Soft volume, so the level holds on headsets that ignore the remote one.
 darkmoss_bt_volume() {
@@ -435,10 +459,12 @@ brightness_up() {
 # The base's ALSA config is a per-user ~/.asoundrc and /etc/asound.conf is
 # empty, so RetroArch (HOME=/mnt/SDCARD/RetroArch) would fall through to raw
 # hw:0,0 and lose dmix and the softvol "Master" set_volume drives. This is the
-# base's own file verbatim.
+# base's own file, its default renamed spruce_speaker (asound-setup.sh adds the
+# default and spruce_bt).
+ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     cat > "$ASOUND_CONF" <<ASOUND
-pcm.!default {
+pcm.spruce_speaker {
     type        plug
     slave.pcm   "softvol"
 }

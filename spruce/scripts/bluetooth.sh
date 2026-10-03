@@ -7,12 +7,14 @@
 #
 # Usage: bluetooth.sh <command> [address]
 #   apply     make the radio match the saved .bluetooth setting
+#   boot      apply once WiFi has connected (WiFi first on shared radios)
 #   suspend   disconnect everything, without changing the setting (poweroff)
-#   status    key=value lines: radio, setting, state, connected, connected_icon
+#   status    key=value lines: radio, setting, state, connected, connected_icon, audio
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
 #   forget    remove <address>
+#   disconnect  disconnect <address>, keeping the pairing; prints "ok" or "failed disconnect <reason>"
 #
 # scan and devices print one device per line, tab separated:
 #   address    paired 0/1    connected 0/1    name
@@ -29,10 +31,15 @@ bt_running() {
     pidof bluetoothd >/dev/null 2>&1
 }
 
+# Devices the user disconnected since the radio came on. reconnect_trusted
+# leaves them alone until they are connected again or the radio restarts.
+USER_DISCONNECTED=/tmp/bluetooth_user_disconnected
+
 # Headsets that stayed on while the radio was down will not call back on
 # their own, and right after boot the first attempt can come too early.
 reconnect_pending() {
     timeout 5 bluetoothctl devices 2>/dev/null | while read -r _ mac _; do
+        grep -qix "$mac" "$USER_DISCONNECTED" 2>/dev/null && continue
         case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
             *"Paired: yes"*"Trusted: yes"*"Connected: no"*) echo "$mac" ;;
         esac
@@ -43,7 +50,10 @@ reconnect_trusted() {
     _try=1
     while [ "$_try" -le 6 ]; do
         _pending="$(reconnect_pending)"
-        [ -n "$_pending" ] || return 0
+        # Straight after a bluetoothd (re)start the device list can still be empty.
+        if [ -z "$_pending" ] && [ -n "$(timeout 5 bluetoothctl devices 2>/dev/null)" ]; then
+            return 0
+        fi
         for mac in $_pending; do
             out="$(timeout 15 bluetoothctl connect "$mac" 2>&1)"
             case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
@@ -56,12 +66,10 @@ reconnect_trusted() {
     done
 }
 
+# BlueZ's Connected, which asound-setup.sh routes on, not the radio link: the
+# link comes up seconds earlier.
 connections() {
-    if command -v hcitool >/dev/null 2>&1; then
-        hcitool con 2>/dev/null | awk '/ACL/ { print $3 }'
-    else
-        list_devices | awk -F'\t' '$3 == 1 { print $1 }'
-    fi
+    list_devices | awk -F'\t' '$3 == 1 { print $1 }'
 }
 
 # PyUI reads $HOME/.asoundrc and reopens its output when the flag appears.
@@ -106,14 +114,18 @@ disconnect_all() {
 apply_setting() {
     device_bluetooth_supported || return 0
     if [ "$(bt_setting)" = "1" ]; then
+        rm -f "$USER_DISCONNECTED"
         device_bluetooth_up
         timeout 10 bluetoothctl power on >/dev/null 2>&1
         timeout 10 bluetoothctl pairable on >/dev/null 2>&1
         log_message "bluetooth.sh: on" >/dev/null
         stop_watch
-        watch_connections >/dev/null 2>&1 &
+        # A subshell that drops its descriptors: "func >/dev/null &" keeps the
+        # caller's stdout and stderr open as saved descriptors, so a caller
+        # that reads them (PyUI) would wait for the watcher, which never ends.
+        ( exec </dev/null >/dev/null 2>&1; watch_connections ) &
         echo $! > "$WATCH_PID"
-        reconnect_trusted >/dev/null 2>&1 &
+        ( exec </dev/null >/dev/null 2>&1; reconnect_trusted ) &
     else
         stop_watch
         disconnect_all
@@ -163,8 +175,10 @@ show_status() {
             icons="${icons:+$icons,}${_icon:-unknown}"
         done
     fi
-    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\nconnected_icon=%s\n' \
-        "$radio" "$(bt_setting)" "$state" "$connected" "$icons"
+    audio=0
+    [ "$state" = on ] && bt_audio_ready && audio=1
+    printf 'radio=%s\nsetting=%s\nstate=%s\nconnected=%s\nconnected_icon=%s\naudio=%s\n' \
+        "$radio" "$(bt_setting)" "$state" "$connected" "$icons" "$audio"
 }
 
 bluez_error() {
@@ -192,6 +206,10 @@ pair_device() {
     if ! bt_running; then
         echo "failed pair bluetooth is off"
         return
+    fi
+    if [ -f "$USER_DISCONNECTED" ]; then
+        grep -vix "$mac" "$USER_DISCONNECTED" > "$USER_DISCONNECTED.tmp" 2>/dev/null
+        mv "$USER_DISCONNECTED.tmp" "$USER_DISCONNECTED"
     fi
 
     case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
@@ -225,13 +243,50 @@ forget_device() {
     timeout 10 bluetoothctl remove "$1" >/dev/null 2>&1
 }
 
+disconnect_device() {
+    if [ -z "$1" ] || ! bt_running; then
+        echo "failed disconnect bluetooth is off"
+        return
+    fi
+    # Hold it first, so reconnect_trusted cannot bring it straight back.
+    echo "$1" >> "$USER_DISCONNECTED"
+    out="$(timeout 10 bluetoothctl disconnect "$1" 2>&1)"
+    case "$out" in
+        # BlueZ 5.82 says "Disconnection successful"; older ones the other.
+        *"Successful disconnected"*|*"Disconnection successful"*) ;;
+        *) pair_failed disconnect "$out"; return ;;
+    esac
+    route_audio >/dev/null 2>&1
+    echo "ok"
+}
+
+# WiFi goes first: on combo chips Bluetooth traffic can keep it from joining.
+# Give up after a minute so Bluetooth still comes on without a network.
+wait_for_wifi() {
+    _n=0
+    while [ "$_n" -lt 60 ]; do
+        case "$(/mnt/SDCARD/spruce/scripts/wifi.sh status 2>/dev/null | sed -n 's/^link=//p')" in
+            connecting) ;;
+            *) return 0 ;;
+        esac
+        sleep 1
+        _n=$((_n + 1))
+    done
+}
+
 case "$1" in
     apply)   apply_setting ;;
+    boot)
+        # Before PyUI starts: it reads .asoundrc once.
+        /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME" >/dev/null 2>&1
+        device_bluetooth_supported && wait_for_wifi
+        apply_setting ;;
     suspend) disconnect_all ;;
     status)  show_status ;;
     scan)    scan_devices ;;
     devices) list_devices ;;
     pair)    pair_device "$2" ;;
     forget)  forget_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|suspend|status|scan|devices|pair <address>|forget <address>" >&2; exit 2 ;;
+    disconnect) disconnect_device "$2" ;;
+    *)       echo "usage: bluetooth.sh apply|boot|suspend|status|scan|devices|pair <address>|forget <address>|disconnect <address>" >&2; exit 2 ;;
 esac

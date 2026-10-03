@@ -420,7 +420,7 @@ device_init() {
     init_gpio_Flip
 
     insmod /lib/modules/rtk_btusb.ko
-    /mnt/SDCARD/spruce/scripts/bluetooth.sh apply &
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     /usr/miyoo/bin/btmanager &
     /usr/miyoo/bin/hardwareservice &
     /usr/miyoo/bin/miyoo_inputd &
@@ -548,6 +548,8 @@ device_system_handles_sdcard_unmount() {
     return 1 # Flip leaves dirty bit set?
 }
 
+# The speaker is pcm.spruce_speaker; asound-setup.sh adds the default.
+ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     hp_multiplier="$(get_config_value '.menuOptions."Audio Settings".headphoneMultiplier.selected' "1.0")"
     use_hp_scaling=0
@@ -574,7 +576,7 @@ pcm.atten {
     ttable.1.1 $hp_multiplier
 }
 
-pcm.!default {
+pcm.spruce_speaker {
     type plug
     slave.pcm "atten"
 }
@@ -586,7 +588,7 @@ ctl.!default {
 EOF
     else
         cat > "$ASOUND_CONF" <<EOF
-pcm.!default {
+pcm.spruce_speaker {
     type plug
     slave.pcm "dmix"
 }

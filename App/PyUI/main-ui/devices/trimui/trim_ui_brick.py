@@ -129,14 +129,6 @@ class TrimUIBrick(TrimUIDevice):
         return True # RA save state images don't seem to load w/o conversion?
     
         
-    def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/bin',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
-
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up(TrimUIDevice.pad_event_path(),115)
 

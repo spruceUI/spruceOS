@@ -511,7 +511,7 @@ stage_ra_autoconfig() {
 
 device_init() {
     anbernic_xx_common_init
-    /mnt/SDCARD/spruce/scripts/bluetooth.sh apply </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot </dev/null >/dev/null 2>&1 &
 }
 
 # Nothing to swap in or out around a port on this line: the SDL2 a port needs is
