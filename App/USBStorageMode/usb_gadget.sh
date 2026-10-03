@@ -48,11 +48,37 @@ usb_gadget_platform_setup() {
             USB_UDC_CONTROLLER="4100000.udc-controller"
             USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
             ;;
+        "RGB30" | "RGB20SX" | "Miniloong")
+            STORAGE_DEVICE="$SD_DEV"
+            MOUNT_POINT="/mnt/SDCARD"
+            USB_GADGET_PATH="/sys/kernel/config/usb_gadget/spruce"
+            USB_UDC_CONTROLLER="fcc00000.dwc3"
+            USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
+            ;;
         *)
             return 1
             ;;
     esac
     return 0
+}
+
+# dArkMoss devices do not all charge from the data port, so ask its PHY.
+usb_host_connected() {
+    case "$PLATFORM" in
+        "RGB30" | "RGB20SX" | "Miniloong")
+            for _e in /sys/class/extcon/extcon*; do
+                [ "$(cat "$_e/name" 2>/dev/null)" = "fe8a0000.usb2-phy" ] || continue
+                grep -qx "USB=1" "$_e/state" 2>/dev/null
+                return
+            done
+            return 1
+            ;;
+    esac
+    if command -v device_get_charging_status >/dev/null 2>&1; then
+        [ "$(device_get_charging_status)" != "Discharging" ]
+    else
+        [ "$(cat "$BATTERY/status" 2>/dev/null)" != "Discharging" ]
+    fi
 }
 
 safe_unmount_all() {
@@ -103,6 +129,13 @@ usb_gadget_release() {
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             sleep 2
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
+            ;;
+        "RGB30" | "RGB20SX" | "Miniloong")
+            echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+            echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
+            rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
+            rmdir "$USB_CONFIG_PATH" "$USB_GADGET_PATH/functions/mass_storage.0" \
+                "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH" 2>/dev/null
             ;;
     esac
     sync
@@ -212,6 +245,18 @@ usb_export_gadget() {
             sleep 1
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
             ;;
+        "RGB30" | "RGB20SX" | "Miniloong")
+            mkdir -p "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH"
+            echo "0x1d6b" > "$USB_GADGET_PATH/idVendor"
+            echo "0x0104" > "$USB_GADGET_PATH/idProduct"
+            echo "spruce" > "$USB_GADGET_PATH/strings/0x409/manufacturer"
+            echo "$PLATFORM" > "$USB_GADGET_PATH/strings/0x409/product"
+            echo "1234567890" > "$USB_GADGET_PATH/strings/0x409/serialnumber"
+            echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
+            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file"
+            [ -L "$USB_CONFIG_PATH/mass_storage.0" ] || ln -s "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/"
+            echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
+            ;;
     esac
 }
 
@@ -250,7 +295,7 @@ usb_session_wait_for_exit() {
     shutdown_ui_getevent_start
     _why=""
     while [ -z "$_why" ]; do
-        if [ "$(cat "$BATTERY/status" 2>/dev/null)" = "Discharging" ]; then
+        if ! usb_host_connected; then
             _why="cable disconnected"
         elif shutdown_ui_key_seen A; then
             _why="A pressed"

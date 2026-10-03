@@ -97,7 +97,8 @@ shutdown_ui_display() {
 }
 
 shutdown_ui_display_kill() {
-    [ -n "$SHUTDOWN_UI_DISPLAY_PID" ] && kill "$SHUTDOWN_UI_DISPLAY_PID" 2>/dev/null
+    # display_text.elf catches SIGTERM and keeps running.
+    [ -n "$SHUTDOWN_UI_DISPLAY_PID" ] && kill -9 "$SHUTDOWN_UI_DISPLAY_PID" 2>/dev/null
     SHUTDOWN_UI_DISPLAY_PID=""
 }
 
