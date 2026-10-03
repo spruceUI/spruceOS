@@ -26,7 +26,7 @@ device_init() {
     setup_mainui_alias
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
-    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh apply &
+    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     darkmoss_debug_dump
     clear_stale_pmic_power_en &
 }

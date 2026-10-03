@@ -275,7 +275,7 @@ device_init() {
         modprobe aic8800_fdrv.ko
         modprobe aic8800_btlpm.ko
 
-        /mnt/SDCARD/spruce/scripts/bluetooth.sh apply
+        /mnt/SDCARD/spruce/scripts/bluetooth.sh boot
     ) &
 
 

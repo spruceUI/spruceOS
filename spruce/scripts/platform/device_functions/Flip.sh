@@ -420,7 +420,7 @@ device_init() {
     init_gpio_Flip
 
     insmod /lib/modules/rtk_btusb.ko
-    /mnt/SDCARD/spruce/scripts/bluetooth.sh apply &
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     /usr/miyoo/bin/btmanager &
     /usr/miyoo/bin/hardwareservice &
     /usr/miyoo/bin/miyoo_inputd &

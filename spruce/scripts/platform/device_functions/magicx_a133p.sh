@@ -208,7 +208,7 @@ device_init() {
     ) &
     # Bluetooth to the saved setting; a board without a radio returns at once.
     # Double-forked: runtime.sh waits for device_init's children.
-    ( ( /mnt/SDCARD/spruce/scripts/bluetooth.sh apply ) & ) </dev/null >/dev/null 2>&1
+    ( ( /mnt/SDCARD/spruce/scripts/bluetooth.sh boot ) & ) </dev/null >/dev/null 2>&1
     magicx_init_audio
     stage_ra_autoconfig
 

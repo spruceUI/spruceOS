@@ -84,6 +84,28 @@ bt_audio_device() {
     [ -z "$pcm" ] || echo "$pcm"
 }
 
+device_bluetooth_supported() {
+    return 0
+}
+
+# The firmware attaches hci0 at boot and starts bluetoothd; only fill in what
+# is missing, never restart it.
+device_bluetooth_up() {
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && /etc/bluetooth/bluetoothd start ) </dev/null >/dev/null 2>&1
+        sleep 1
+    fi
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
+    fi
+    hciconfig hci0 up
+}
+
+device_bluetooth_down() {
+    killall bluetoothd 2>/dev/null
+    hciconfig hci0 down 2>/dev/null
+}
+
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick
@@ -154,9 +176,13 @@ device_init_a133p() {
     (
         syslogd -S
         hwclock -s -u
+        # The XR829 carries WiFi and Bluetooth, and a headset reaching the radio
+        # the firmware left up kept WiFi from associating: down until boot below.
+        hciconfig hci0 down
         # Restart, not start: the stock runtrimui.sh already started it with the
         # stock main.conf, before runtime_mounts_a133p bound ours over it.
         /etc/bluetooth/bluetoothd restart
+        /mnt/SDCARD/spruce/scripts/bluetooth.sh boot
     ) &
     amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"

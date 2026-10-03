@@ -7,6 +7,7 @@
 #
 # Usage: bluetooth.sh <command> [address]
 #   apply     make the radio match the saved .bluetooth setting
+#   boot      apply once WiFi has connected (WiFi first on shared radios)
 #   suspend   disconnect everything, without changing the setting (poweroff)
 #   status    key=value lines: radio, setting, state, connected, connected_icon
 #   scan      look for devices for a few seconds, then list them
@@ -49,7 +50,10 @@ reconnect_trusted() {
     _try=1
     while [ "$_try" -le 6 ]; do
         _pending="$(reconnect_pending)"
-        [ -n "$_pending" ] || return 0
+        # Straight after a bluetoothd (re)start the device list can still be empty.
+        if [ -z "$_pending" ] && [ -n "$(timeout 5 bluetoothctl devices 2>/dev/null)" ]; then
+            return 0
+        fi
         for mac in $_pending; do
             out="$(timeout 15 bluetoothctl connect "$mac" 2>&1)"
             case "$(timeout 5 bluetoothctl info "$mac" 2>/dev/null)" in
@@ -256,8 +260,23 @@ disconnect_device() {
     echo "ok"
 }
 
+# WiFi goes first: on combo chips Bluetooth traffic can keep it from joining.
+# Give up after a minute so Bluetooth still comes on without a network.
+wait_for_wifi() {
+    _n=0
+    while [ "$_n" -lt 60 ]; do
+        case "$(/mnt/SDCARD/spruce/scripts/wifi.sh status 2>/dev/null | sed -n 's/^link=//p')" in
+            connecting) ;;
+            *) return 0 ;;
+        esac
+        sleep 1
+        _n=$((_n + 1))
+    done
+}
+
 case "$1" in
     apply)   apply_setting ;;
+    boot)    device_bluetooth_supported && wait_for_wifi; apply_setting ;;
     suspend) disconnect_all ;;
     status)  show_status ;;
     scan)    scan_devices ;;
@@ -265,5 +284,5 @@ case "$1" in
     pair)    pair_device "$2" ;;
     forget)  forget_device "$2" ;;
     disconnect) disconnect_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|suspend|status|scan|devices|pair <address>|forget <address>|disconnect <address>" >&2; exit 2 ;;
+    *)       echo "usage: bluetooth.sh apply|boot|suspend|status|scan|devices|pair <address>|forget <address>|disconnect <address>" >&2; exit 2 ;;
 esac
