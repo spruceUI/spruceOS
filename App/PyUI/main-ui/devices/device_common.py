@@ -289,17 +289,19 @@ class DeviceCommon(AbstractDevice):
         return dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
 
     def get_bluetooth_status(self):
-        """For the top bar: None while off, else "audio" or "gamepad" when only
-        that kind is connected, otherwise "on"."""
+        """For the top bar: None unless something is connected, then "audio" or
+        "gamepad" when only that kind is, otherwise "on"."""
         if not self.is_bluetooth_enabled():
             return None
         status = self._bluetooth_status()
         if status.get("radio") != "1":
             return None
         icons = [i for i in status.get("connected_icon", "").split(",") if i]
-        if icons and all(i.startswith("audio") for i in icons):
+        if not icons:
+            return None
+        if all(i.startswith("audio") for i in icons):
             return "audio"
-        if icons and all(i == "input-gaming" for i in icons):
+        if all(i == "input-gaming" for i in icons):
             return "gamepad"
         return "on"
 
