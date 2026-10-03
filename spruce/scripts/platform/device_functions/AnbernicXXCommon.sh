@@ -1185,37 +1185,32 @@ device_bluetooth_supported() {
     return 0
 }
 
-# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second. BaseOS
-# leaves D-Bus and every Bluetooth daemon to the frontend.
-device_bluetooth_up() {
+# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second: with
+# no wlan0 the chip is not powered, and the radio cannot come up.
+device_bluetooth_radio_up() {
     _n=0
     while [ ! -d /sys/class/net/wlan0 ] && [ "$_n" -lt 30 ]; do
         sleep 1
         _n=$((_n + 1))
     done
     [ -d /sys/class/net/wlan0 ] || return 1
-    pidof dbus-daemon >/dev/null 2>&1 || setsid dbus-daemon --system --fork </dev/null >/dev/null 2>&1
     rfkill unblock bluetooth
-    if [ ! -d /sys/class/bluetooth/hci0 ]; then
-        ( cd / && exec setsid rtk_hciattach -n -s 115200 ttyS1 rtk_h5 ) </dev/null >/dev/null 2>&1 &
-        _n=0
-        while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 50 ]; do
-            sleep 0.1
-            _n=$((_n + 1))
-        done
-    fi
-    if ! pidof bluetoothd >/dev/null 2>&1; then
-        ( cd / && exec setsid /usr/libexec/bluetooth/bluetoothd -n ) </dev/null >/dev/null 2>&1 &
-        sleep 1
-    fi
-    if ! pidof bluealsa >/dev/null 2>&1; then
-        ( cd / && exec setsid bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
-    fi
+    [ -d /sys/class/bluetooth/hci0 ] || bt_spawn rtk_hciattach -n -s 115200 ttyS1 rtk_h5
 }
 
-device_bluetooth_down() {
-    killall bluealsa bluetoothd rtk_hciattach 2>/dev/null
+device_bluetooth_radio_down() {
+    killall rtk_hciattach 2>/dev/null
     rfkill block bluetooth
+}
+
+# BaseOS leaves D-Bus and every Bluetooth daemon to the frontend. A dbus-daemon
+# that died leaves its pid file behind, and a new one refuses to start over it.
+device_bluetoothd_start() {
+    if ! pidof dbus-daemon >/dev/null 2>&1; then
+        rm -f /run/dbus/pid /var/run/dbus/pid
+        setsid dbus-daemon --system --fork
+    fi
+    bt_spawn /usr/libexec/bluetooth/bluetoothd -n
 }
 
 
