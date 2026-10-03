@@ -8,9 +8,8 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh"
 
-# The stock BusyBox (1.27.2) has no timeout applet, so asound-setup.sh's
-# "timeout 2 bluetoothctl ..." failed and never routed audio to a connected
-# Bluetooth headset. spruce's own BusyBox has one.
+# The stock BusyBox 1.27.2 has no timeout applet, so bounded bluetoothctl calls never
+# ran and audio never reached a headset; spruce's own BusyBox has one.
 BTCTL_TIMEOUT="/mnt/SDCARD/spruce/bin64/busybox timeout 2"
 
 
@@ -57,9 +56,8 @@ device_on_bt_audio_route() {
     printf '%s' "$control" > /tmp/bt_alsa_volume_dev
 }
 
-# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
-# first headset bluealsa holds an A2DP transport for, or nothing for the
-# speaker. Points the volume keys at it the way asound-setup.sh does for games.
+# PyUI's device (get-bt-audio-device.sh): the first headset bluealsa holds an A2DP
+# transport for, else nothing; it also points the volume keys at it.
 bt_audio_device() {
     pcm=""
     # PyUI asks right after killing bluetoothd or disconnecting the headset, and

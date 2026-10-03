@@ -8,13 +8,9 @@
 BASE_HOME="${1:-$HOME}"
 ASOUND_CONF="$BASE_HOME/.asoundrc"
 
-# From bluez-alsa 4.3 the ALSA plugin switches the headset's codec to each
-# client's sample rate, which restarts the A2DP stream, and headsets announce
-# that as a disconnect: PyUI opens at 44.1 kHz and games at 48 kHz, so every
-# switch between them did it. A device with such a bluealsa sets BT_PCM_RATE
-# in its device_functions file; the headset PCM then keeps that rate and plug
-# resamples. Older plugins accept only the stream's current rate, so leave it
-# unset there.
+# bluez-alsa 4.3+ restarts the A2DP stream at each client's rate, which headsets
+# announce as a disconnect: such a board sets BT_PCM_RATE so plug resamples instead.
+# Older plugins accept only the stream's own rate, so leave it unset there.
 BT_PCM_FIXED=""
 if [ -n "$BT_PCM_RATE" ]; then
     BT_PCM_FIXED="    slave.rate $BT_PCM_RATE
@@ -26,9 +22,8 @@ mac=$(bt_connected_audio_mac)
 
 mkdir -p "$(dirname "$ASOUND_CONF")"
 
-# A device setting ASOUND_SPRUCE_PCMS writes its speaker as pcm.spruce_speaker.
-# Both names are then always defined, so a running PyUI, which read this file
-# once at start, can switch between them (AUDIODEV) as the headset comes and goes.
+# With ASOUND_SPRUCE_PCMS, spruce_speaker and spruce_bt are always both defined, so
+# a PyUI that read this file once can switch between them through AUDIODEV.
 if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
     device_write_default_asound_rc
     cat >> "$ASOUND_CONF" <<EOF

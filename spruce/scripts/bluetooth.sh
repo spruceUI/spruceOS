@@ -78,9 +78,8 @@ route_audio() {
     touch /tmp/audio_reinit_needed
 }
 
-# Headsets connect and drop on their own, so the routing follows the links
-# rather than the commands. A change is acted on once it has held for one
-# poll, as the audio profile comes up a moment after the link.
+# Routing follows the links, not the commands: a change is acted on once it has held
+# for one poll, as the audio profile comes up just after the link.
 WATCH_PID=/tmp/bluetooth_watch.pid
 
 watch_connections() {

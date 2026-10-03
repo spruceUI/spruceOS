@@ -383,14 +383,8 @@ set_volume() {
     fi
 }
 
-# dArkMoss ships both services disabled; bluetooth.sh starts them from the
-# saved setting, at boot and when it changes.
-#
-# bluealsad gets --keep-alive: when PyUI hands the audio to a game and back
-# there are a few seconds with no client. With it the Bluetooth transport is
-# kept for the next client instead of being released, so a switch sends the
-# headset nothing (no suspend and restart, and the game's first sound is not
-# cut). A runtime drop-in keeps the unit's own command line.
+# systemd owns both daemons (shipped disabled); a runtime drop-in adds --keep-alive,
+# so the gap between PyUI and a game keeps the headset's stream running.
 BLUEALSA_KEEP_ALIVE=10
 device_bluetooth_up() {
     _dropin=/run/systemd/system/bluealsa.service.d/spruce-keep-alive.conf
@@ -452,11 +446,9 @@ brightness_up() {
     set_backlight $(( $(get_backlight_level) + 1 ))
 }
 
-# The base's ALSA config is a per-user ~/.asoundrc and /etc/asound.conf is
-# empty, so RetroArch (HOME=/mnt/SDCARD/RetroArch) would fall through to raw
-# hw:0,0 and lose dmix and the softvol "Master" set_volume drives. This is the
-# base's own file, its default renamed spruce_speaker (asound-setup.sh adds the
-# default and spruce_bt).
+# The base keeps its ALSA config in ~/.asoundrc (/etc/asound.conf is empty), so a
+# program with another HOME would get raw hw:0,0. This is that file, its default
+# renamed spruce_speaker; asound-setup.sh adds spruce_bt and the default.
 ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     cat > "$ASOUND_CONF" <<ASOUND

@@ -569,9 +569,8 @@ device_write_default_asound_rc() {
 }
 
 device_on_bt_audio_route() {
-    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
-    # at it, and with no argument when audio stays on the device - for firmware
-    # whose own volume path has to be told where the audio went. Default: nothing.
+    # asound-setup.sh passes the headset's MAC after routing to it, or nothing for the
+    # device's own output, for firmware whose volume path must know. Default: nothing.
     :
 }
 
@@ -598,9 +597,8 @@ bt_audio_ready() {
     ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
 }
 
-# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh). With
-# ASOUND_SPRUCE_PCMS one of the two names every .asoundrc defines here (see
-# asound-setup.sh), otherwise the headset or nothing for the default output.
+# The ALSA device PyUI plays through (get-bt-audio-device.sh): spruce_bt or
+# spruce_speaker with ASOUND_SPRUCE_PCMS, else the headset or nothing.
 bt_audio_device() {
     if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
         grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
