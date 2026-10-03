@@ -147,11 +147,10 @@ stop_stock_wpa_supplicant_a133p() {
                     kill -9 "$_pid" 2>/dev/null
                     /etc/init.d/wpa_supplicant stop >/dev/null 2>&1
                     log_message "Stopped the stock wpa_supplicant ($_pid) so spruce's is the only one"
-                    # Ours does not recover from having shared wlan0, so restart it.
-                    if pgrep -f "wpa_supplicant.*-c $WPA_SUPPLICANT_FILE" >/dev/null; then
-                        log_message "spruce's wpa_supplicant was already running; restarting WiFi so it starts clean"
-                        wifi_request restart
-                    fi
+                    # The stock stop runs "killall wpa_supplicant" and downs wlan0,
+                    # taking ours with it. restart is a no-op while WiFi is off.
+                    log_message "Restarting spruce's WiFi after the stock stop"
+                    wifi_request restart
                 done
                 usleep 500000
                 _i=$((_i + 1))
@@ -176,8 +175,7 @@ device_init_a133p() {
     (
         syslogd -S
         hwclock -s -u
-        # The XR829 carries WiFi and Bluetooth, and a headset reaching the radio
-        # the firmware left up kept WiFi from associating: down until boot below.
+        # The firmware left the radio up; WiFi goes first (bluetooth.sh boot).
         hciconfig hci0 down
         # Restart, not start: the stock runtrimui.sh already started it with the
         # stock main.conf, before runtime_mounts_a133p bound ours over it.
