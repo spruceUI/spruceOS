@@ -488,7 +488,13 @@ setup_for_retroarch() {
         yabasanshiro) export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64" ;;
     esac
 
-    export CORE_DIR="$RA_DIR/.retroarch/cores64"
+    case "$RA_BIN" in
+        ra32.*)
+            export CORE_DIR="$RA_DIR/.retroarch/cores"
+            export GLIBC_TUNABLES=glibc.rtld.execstack=2
+            ;;
+        *)      export CORE_DIR="$RA_DIR/.retroarch/cores64" ;;
+    esac
 
     if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
         export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
