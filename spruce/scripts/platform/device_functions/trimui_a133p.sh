@@ -80,6 +80,9 @@ runtime_mounts_a133p() {
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    # Bound from /tmp so the mount does not hold the card. See bluetooth-main.conf.
+    { cp "${SPRUCE_ETC_DIR}/bluetooth-main.conf" /tmp/bluetooth-main.conf &&
+        mount -o bind /tmp/bluetooth-main.conf /etc/bluetooth/main.conf; } &
     /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
@@ -132,7 +135,9 @@ device_init_a133p() {
     (
         syslogd -S
         hwclock -s -u
-        /etc/bluetooth/bluetoothd start
+        # Restart, not start: the stock runtrimui.sh already started it with the
+        # stock main.conf, before runtime_mounts_a133p bound ours over it.
+        /etc/bluetooth/bluetoothd restart
     ) &
     amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
