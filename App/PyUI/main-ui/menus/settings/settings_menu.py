@@ -350,7 +350,6 @@ class SettingsMenu(ABC):
 
     def get_selected_index(self, title, options):
         selected = Selection(None, None, 0)
-        self.should_scan_for_bluetooth = True
         option_list = []
         for index, opt in enumerate(options):
             option_list.append(

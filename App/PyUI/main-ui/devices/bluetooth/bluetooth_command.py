@@ -1,6 +1,12 @@
 import threading
+from dataclasses import dataclass
 
-from devices.bluetooth.bluetooth_scanner import BluetoothDevice
+
+@dataclass
+class BluetoothDevice:
+    address: str
+    name: str
+    paired: bool = False
 
 
 class BluetoothCommand:

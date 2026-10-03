@@ -309,9 +309,6 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
     fi
 
-    #BT is broken so don't bother with it
-    #/mnt/SDCARD/spruce/scripts/bluetooth_watchdog.sh &
-    
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
