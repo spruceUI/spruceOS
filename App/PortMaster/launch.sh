@@ -19,7 +19,7 @@ fi
 
 . /mnt/SDCARD/spruce/portmaster/portmaster.txt
 
-# Unpack a self-update's pylibs.zip before patching config.py below.
+# Unpack a self-update's pylibs.zip.
 if [ -f "$PM_DIR/pylibs.zip" ]; then
     log_message "PortMaster: unpacking pylibs.zip left by a self-update"
     rm -rf "$PM_DIR/pylibs" "$PM_DIR/exlibs"
@@ -29,43 +29,13 @@ if [ -f "$PM_DIR/pylibs.zip" ]; then
         && rm -f "$PM_DIR/pylibs.zip"
 fi
 
-# config.py's spruce paths (from upstream #237) never matched spruce; patch in place.
-sed -i \
-    -e 's|/mnt/sdcard/spruce|/mnt/SDCARD/spruce|' \
-    -e 's|/mnt/sdcard/Persistent/portmaster|/mnt/SDCARD/Persistent/portmaster|' \
-    -e 's|/mnt/SDCARD/Roms/\.portmaster|/mnt/SDCARD/Persistent/portmaster|' \
-    -e 's|/mnt/SDCARD/Roms/PORTS64|/mnt/SDCARD/Roms/ports|' \
-    -e 's|/mnt/SDCARD/Roms/PORTS\([^0-9A-Za-z_]\)|/mnt/SDCARD/Roms/ports\1|g' \
-    "$PM_DIR/pylibs/harbourmaster/config.py"
-
-# hardware.py names the firmware from /usr/trimui, /usr/miyoo and friends and has
-# no spruce test, so PlatformSpruce is never the platform harbour.py picks.
-sed -i \
-    -e "s|info.setdefault('name', 'Unknown')|info['name'] = 'spruce' if Path('/mnt/SDCARD/spruce').is_dir() else info.get('name', 'Unknown')|" \
-    "$PM_DIR/pylibs/harbourmaster/hardware.py"
-
-# hardware.py has no Miniloong Pocket 1; without these it reports "default".
-if ! grep -q 'miniloong-pocket1' "$PM_DIR/pylibs/harbourmaster/hardware.py"; then
-    sed -i \
-        -e "/^        ('powkiddy rgb30',/a\        ('miniloong pocket*',  'miniloong-pocket1')," \
-        -e '/^    "Powkiddy RGB30":/a\    "MINILOONG Pocket1": {"device": "miniloong-pocket1", "manufacturer": "Miniloong", "cfw": ["dArkMoss"]},' \
-        -e '/^    "rgb30":  /a\    "miniloong-pocket1": {"resolution": ( 960,  720), "analogsticks": 1, "cpu": "rk3566", "capabilities": ["power"], "ram": 1024},' \
-        "$PM_DIR/pylibs/harbourmaster/hardware.py"
-fi
-
-# Every device hands pugwash a positional pad, so it needs the same A/B
-# correction as the other platforms to land on spruce's Nintendo labels.
-sed -i \
-    -e '/^class PlatformSpruce/,/^class /{s|^    WANT_XBOX_FIX = False|    WANT_XBOX_FIX = True|}' \
-    "$PM_DIR/pylibs/harbourmaster/platform.py"
-
 # A self-update extracts over the bundle without deleting spruce/, so test the
 # files it does replace.
 if grep -q 'CFW_NAME="spruce"' "$PM_DIR/device_info.txt" 2>/dev/null \
     && grep -q "PlatformSpruce" "$PM_DIR/pylibs/harbourmaster/platform.py" 2>/dev/null; then
     LAUNCHER="$PM_DIR/PortMaster.sh"
     # The update that brought PlatformSpruce ran the old platform's post-install,
-    # and before the hardware.py patch above the trimui/miyoo platform owned these.
+    # so the trimui/miyoo copies of these may still be in place.
     cp "$PM_DIR/spruce/PortMaster.txt" "$LAUNCHER" && chmod +x "$LAUNCHER"
     cp "$PM_DIR/spruce/control.txt" "$PM_DIR/control.txt"
 else
