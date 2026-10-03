@@ -45,24 +45,16 @@ set_volume() {
 
 }
 
-# hardwareservice owns the volume keys and, on each change, also runs
-# 'amixer -D bluealsa sset "<control>" vol*127/20' - but only while
-# /tmp/bt_alsa_volume_dev names the headset's mixer control. The stock keymon
-# wrote that file; spruce does not run keymon, so the keys never reached a
-# Bluetooth headset.
+# hardwareservice applies the volume keys to the control named in
+# /tmp/bt_alsa_volume_dev; the stock keymon wrote it, and spruce does not run keymon.
 device_on_bt_audio_route() {
     if [ -z "$1" ]; then
         rm -f /tmp/bt_alsa_volume_dev
         return 0
     fi
-    control=$($BTCTL_TIMEOUT amixer -D bluealsa scontents 2>/dev/null |
-        sed -n "s/^Simple mixer control '\(.* - A2DP\)',[0-9]*$/\1/p" | head -n 1)
+    control=$(bt_headset_volume_controls | head -n 1)
     [ -n "$control" ] || return 0
     printf '%s' "$control" > /tmp/bt_alsa_volume_dev
-    # Start the headset at spruce's level rather than bluealsa's 100%.
-    vol=$(get_volume_level)
-    case "$vol" in ''|*[!0-9]*) return 0 ;; esac
-    $BTCTL_TIMEOUT amixer -q -D "bluealsa:DEV=$1" sset A2DP $((vol * 127 / 20)) 2>/dev/null
 }
 
 # The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the

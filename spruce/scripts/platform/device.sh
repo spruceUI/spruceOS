@@ -488,17 +488,19 @@ bt_stop_bluealsa() {
     return 0
 }
 
-# bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
-# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
-# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
-# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
-# anywhere and leave the switch alone. Each call is bounded: a bluealsa that has
-# stopped answering must not hang the volume keys or the connection watcher.
+# The headsets' A2DP volume controls. ALSA cuts names at 43 characters
+# ("<name> - A2DP Playback Volum"), so match A2DP anywhere and skip the switch.
+bt_headset_volume_controls() {
+    ${BTCTL_TIMEOUT:-timeout 2} amixer -D bluealsa scontrols 2>/dev/null |
+        sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc'
+}
+
+# The 0-20 level on each headset, bounded so a hung bluealsa cannot block the keys;
+# a board with another volume path overrides it.
 bt_headset_volume() {
     pidof bluealsa >/dev/null 2>&1 || return 0
-    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
-    $_bt_to amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
-        $_bt_to amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    bt_headset_volume_controls | while read -r _ctl; do
+        ${BTCTL_TIMEOUT:-timeout 2} amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
     done
 }
 
