@@ -20,6 +20,19 @@ are_headphones_plugged_in() {
     return 1
 }
 
+# The DC port reports as usb, not ac; the data port does not charge.
+device_get_charging_status() {
+    if [ "$(cat /sys/class/power_supply/usb/online 2>/dev/null)" = "1" ]; then
+        if [ "$(cat "$BATTERY/capacity" 2>/dev/null)" = "100" ]; then
+            echo "Full"
+        else
+            echo "Charging"
+        fi
+    else
+        echo "Discharging"
+    fi
+}
+
 set_event_arg_for_idlemon() {
     EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
