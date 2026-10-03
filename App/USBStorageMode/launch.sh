@@ -83,7 +83,11 @@ killall -q idle_watchdog.sh 2>/dev/null
 # needs into /tmp and hand over to the shutdown, which unmounts cleanly,
 # exports, waits, and reboots.
 if usb_session_stage; then
-    log_and_display_message "Preparing the SD card for USB..."
+    # The session screen does not draw on the H700 devices, so say the final word now.
+    case "$PLATFORM" in
+        "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*) log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device." ;;
+        *)           log_and_display_message "Preparing the SD card for USB..." ;;
+    esac
     sleep 1
     stop_pyui_message_writer
     sync

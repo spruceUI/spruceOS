@@ -48,6 +48,13 @@ usb_gadget_platform_setup() {
             USB_UDC_CONTROLLER="4100000.udc-controller"
             USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
             ;;
+        "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*)
+            STORAGE_DEVICE="$SD_DEV"
+            MOUNT_POINT="$SD_MOUNTPOINT"
+            USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
+            USB_UDC_CONTROLLER="5100000.udc-controller"
+            USB_CONFIG_PATH="$USB_GADGET_PATH/configs/c.1"
+            ;;
         "RGB30" | "RGB20SX" | "Miniloong")
             STORAGE_DEVICE="$SD_DEV"
             MOUNT_POINT="/mnt/SDCARD"
@@ -123,7 +130,7 @@ usb_gadget_release() {
             echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
             ;;
-        "SmartProS")
+        "SmartProS" | "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*)
             echo "" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file" 2>/dev/null
             sleep 1
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
@@ -233,7 +240,7 @@ usb_export_gadget() {
             ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
             echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
             ;;
-            "SmartProS")
+            "SmartProS" | "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*)
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0"
             echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
