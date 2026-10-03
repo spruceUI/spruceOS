@@ -47,12 +47,15 @@ stdout. Exit status is 0 unless the command name is unknown.
   forget <address>
       Remove a paired device. Output: none.
 
+  disconnect <address>
+      Disconnect a device and keep its pairing, then reroute audio. One line
+      of output: "ok", or "failed disconnect <reason>".
+
 Where PyUI uses each
 --------------------
   Settings row shown            status (radio), read once
   Settings row on/off           the saved setting
   Bluetooth toggle              apply
   Bluetooth menu device list    scan, and devices after a pairing
-  Bluetooth menu, A on a row    pair
-
-forget is not called by PyUI yet.
+  Bluetooth menu, A on a row    pair, or disconnect when the row is connected
+  Bluetooth menu, X on a row    forget

@@ -32,13 +32,12 @@ class BluetoothMenu:
             Controller.new_bt_device_paired()
 
     def is_connected(self, device) -> bool:
-        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "info", device.address])
-        return "Connected: yes" in (output or "")
+        return self.bluetooth_scanner.is_connected(device)
 
     def disconnect_device(self, device):
-        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "disconnect", device.address])
+        ok, output = self.bluetooth_scanner.disconnect(device)
         PyUiLogger.get_logger().info(f"disconnect output: {output}")
-        if "Successful disconnected" in (output or ""):
+        if ok:
             Display.display_message(
                 Language.label("bluetoothDisconnected", "Bluetooth device {name} disconnected").replace("{name}", device.name),
                 duration_ms=3000,
@@ -53,9 +52,9 @@ class BluetoothMenu:
         Device.get_device().refresh_audio_route()
 
     def forget_device(self, device):
-        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "remove", device.address])
-        PyUiLogger.get_logger().info(f"remove output: {output}")
-        if "Device has been removed" in (output or ""):
+        ok, output = self.bluetooth_scanner.forget(device)
+        PyUiLogger.get_logger().info(f"forget output: {output}")
+        if ok:
             Display.display_message(
                 Language.label("bluetoothForgotten", "Bluetooth device {name} forgotten").replace("{name}", device.name),
                 duration_ms=3000,

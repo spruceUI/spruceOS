@@ -202,6 +202,20 @@ class BluetoothScanner:
                 return False, name, output
 
         return True, None, None
+
+    def is_connected(self, device) -> bool:
+        output = self._run_cmd(["bluetoothctl", "info", device.address])
+        return "Connected: yes" in (output or "")
+
+    def disconnect(self, device):
+        """(ok, output)."""
+        output = self._run_cmd(["bluetoothctl", "disconnect", device.address]) or ""
+        return "Successful disconnected" in output, output
+
+    def forget(self, device):
+        """(ok, output)."""
+        output = self._run_cmd(["bluetoothctl", "remove", device.address]) or ""
+        return "Device has been removed" in output, output
     
     def _run_cmd(self, cmd, log_stdout=True):
         return ProcessRunner.run_cmd("BluetoothScanner", cmd, log_stdout=log_stdout)

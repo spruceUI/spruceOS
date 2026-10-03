@@ -13,6 +13,7 @@
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
 #   forget    remove <address>
+#   disconnect  disconnect <address>, keeping the pairing; prints "ok" or "failed disconnect <reason>"
 #
 # scan and devices print one device per line, tab separated:
 #   address    paired 0/1    connected 0/1    name
@@ -225,6 +226,20 @@ forget_device() {
     timeout 10 bluetoothctl remove "$1" >/dev/null 2>&1
 }
 
+disconnect_device() {
+    if [ -z "$1" ] || ! bt_running; then
+        echo "failed disconnect bluetooth is off"
+        return
+    fi
+    out="$(timeout 10 bluetoothctl disconnect "$1" 2>&1)"
+    case "$out" in
+        *"Successful disconnected"*) ;;
+        *) pair_failed disconnect "$out"; return ;;
+    esac
+    route_audio >/dev/null 2>&1
+    echo "ok"
+}
+
 case "$1" in
     apply)   apply_setting ;;
     suspend) disconnect_all ;;
@@ -233,5 +248,6 @@ case "$1" in
     devices) list_devices ;;
     pair)    pair_device "$2" ;;
     forget)  forget_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|suspend|status|scan|devices|pair <address>|forget <address>" >&2; exit 2 ;;
+    disconnect) disconnect_device "$2" ;;
+    *)       echo "usage: bluetooth.sh apply|suspend|status|scan|devices|pair <address>|forget <address>|disconnect <address>" >&2; exit 2 ;;
 esac
