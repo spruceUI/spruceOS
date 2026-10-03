@@ -70,5 +70,35 @@
     "gridMultiRowImageYOffset": 12,
     "gridBgOffsetToImageOffset": true,
     "textAndImageListViewMode": "TEXT_BELOW_IMAGE",
-    "imgPercentTopBottomView": 35
+    "imgPercentTopBottomView": 35,
+    "scrollRomSelectionText": false,
+    "screensaver": {
+        "bgColor": "#282828",
+        "screensaverTimeoutSec": 60,
+        "widgets": [
+            {
+                "type": "clock",
+                "x": 0.5,
+                "y": 0.37,
+                "fontSize": 82,
+                "color": "#FFFFFF",
+                "enabled": true,
+                "font": "nunwen.ttf"
+            },
+            {
+                "type": "date",
+                "x": 0.5,
+                "y": 0.55,
+                "fontSize": 24,
+                "color": "#EBDBB2"
+            },
+            {
+                "type": "battery",
+                "x": 0.5,
+                "y": 0.7,
+                "fontSize": 20,
+                "color": "#88CC88"
+            }
+        ]
+    }
 }
