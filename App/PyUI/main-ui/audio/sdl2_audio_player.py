@@ -1,4 +1,3 @@
-import ctypes
 from pathlib import Path
 import os
 import subprocess
@@ -292,13 +291,9 @@ class Sdl2AudioPlayer:
                 sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_AUDIO)
             except Exception:
                 pass
-            # ALSA keeps the config it read at first open; drop it so a
-            # changed ~/.asoundrc (Bluetooth headset routing) is read again.
-            try:
-                ctypes.CDLL("libasound.so.2").snd_config_update_free_global()
-            except Exception:
-                pass
+
             ok = worker_init()
+
             if ok:
                 PyUiLogger.get_logger().info("SDL2 audio reinit succeeded.")
                 # Re-preload previously cached WAVs
