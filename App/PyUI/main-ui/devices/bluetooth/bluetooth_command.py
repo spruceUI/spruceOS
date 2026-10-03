@@ -64,6 +64,9 @@ class BluetoothCommand:
         return answer == "ok", answer
 
     def _scan_loop(self, stop_event):
+        # A scan pass takes several seconds; list the devices BlueZ knows
+        # already (paired ones above all) before the first pass ends.
+        self.refresh_devices()
         while not stop_event.is_set():
             self._store(self._run("scan", timeout=30))
             stop_event.wait(1)
