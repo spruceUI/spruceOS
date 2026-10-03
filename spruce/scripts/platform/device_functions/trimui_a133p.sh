@@ -65,6 +65,15 @@ device_on_bt_audio_route() {
     $BTCTL_TIMEOUT amixer -q -D "bluealsa:DEV=$1" sset A2DP $((vol * 127 / 20)) 2>/dev/null
 }
 
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
+# first headset bluealsa holds an A2DP transport for, or nothing for the
+# speaker. Points the volume keys at it the way asound-setup.sh does for games.
+bt_audio_device() {
+    pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
+    device_on_bt_audio_route "$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')"
+    [ -z "$pcm" ] || echo "$pcm"
+}
+
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick

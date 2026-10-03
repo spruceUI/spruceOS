@@ -49,6 +49,7 @@ class BluetoothMenu:
             duration_ms=5000,
         )
         self.bluetooth_scanner.refresh_devices()
+        Device.get_device().refresh_audio_route()
         return True
 
 
