@@ -84,26 +84,10 @@ bt_audio_device() {
     [ -z "$pcm" ] || echo "$pcm"
 }
 
+# The firmware attaches hci0 and runs bluetoothd, so the default bring-up is all
+# it needs: it fills in what is missing and never restarts bluetoothd.
 device_bluetooth_supported() {
     return 0
-}
-
-# The firmware attaches hci0 at boot and starts bluetoothd; only fill in what
-# is missing, never restart it.
-device_bluetooth_up() {
-    if ! pidof bluetoothd >/dev/null 2>&1; then
-        ( cd / && /etc/bluetooth/bluetoothd start ) </dev/null >/dev/null 2>&1
-        sleep 1
-    fi
-    if ! pidof bluealsa >/dev/null 2>&1; then
-        ( cd / && exec bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
-    fi
-    hciconfig hci0 up
-}
-
-device_bluetooth_down() {
-    killall bluetoothd 2>/dev/null
-    hciconfig hci0 down 2>/dev/null
 }
 
 prepare_for_pyui_launch(){
