@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher_controller import HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
@@ -128,6 +129,7 @@ class Rgb30(DeviceCommon):
 
     def __init__(self, device_name):
         self.device_name = device_name
+        self.audio_player = AudioPlayerDelegateSdl2()
         self.load_rgb30_system_json()
         self.panel_calibration = DarkmossPanelCalibration(self.system_config)
         self.button_remapper = ButtonRemapper(self.system_config)
@@ -436,6 +438,9 @@ class Rgb30(DeviceCommon):
 
     def perform_startup_tasks(self):
         pass
+
+    def get_audio_system(self):
+        return self.audio_player
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"
