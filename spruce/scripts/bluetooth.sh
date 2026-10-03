@@ -110,6 +110,7 @@ apply_setting() {
     else
         stop_watch
         device_bluetooth_down
+        route_audio >/dev/null 2>&1
         log_message "bluetooth.sh: off" >/dev/null
     fi
 }
