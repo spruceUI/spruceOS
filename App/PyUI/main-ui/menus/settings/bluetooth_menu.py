@@ -25,8 +25,50 @@ class BluetoothMenu:
             Device.get_device().enable_bluetooth()
 
     def toggle_pairing_device(self, device):
-        self.connect_device(device)
-        Controller.new_bt_device_paired()
+        if self.is_connected(device):
+            self.disconnect_device(device)
+        else:
+            self.connect_device(device)
+            Controller.new_bt_device_paired()
+
+    def is_connected(self, device) -> bool:
+        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "info", device.address])
+        return "Connected: yes" in (output or "")
+
+    def disconnect_device(self, device):
+        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "disconnect", device.address])
+        PyUiLogger.get_logger().info(f"disconnect output: {output}")
+        if "Successful disconnected" in (output or ""):
+            Display.display_message(
+                Language.label("bluetoothDisconnected", "Bluetooth device {name} disconnected").replace("{name}", device.name),
+                duration_ms=3000,
+            )
+        else:
+            Display.display_message(
+                Language.label("bluetoothDisconnectFailed", "Bluetooth device {name} failed to disconnect. {output}")
+                .replace("{name}", device.name)
+                .replace("{output}", output or ""),
+                duration_ms=5000,
+            )
+        Device.get_device().refresh_audio_route()
+
+    def forget_device(self, device):
+        output = ProcessRunner.run_cmd("BluetoothMenu", ["bluetoothctl", "remove", device.address])
+        PyUiLogger.get_logger().info(f"remove output: {output}")
+        if "Device has been removed" in (output or ""):
+            Display.display_message(
+                Language.label("bluetoothForgotten", "Bluetooth device {name} forgotten").replace("{name}", device.name),
+                duration_ms=3000,
+            )
+        else:
+            Display.display_message(
+                Language.label("bluetoothForgetFailed", "Bluetooth device {name} could not be forgotten. {output}")
+                .replace("{name}", device.name)
+                .replace("{output}", output or ""),
+                duration_ms=5000,
+            )
+        self.bluetooth_scanner.refresh_devices()
+        Device.get_device().refresh_audio_route()
 
 
     def connect_device(self, device) -> bool:
@@ -109,6 +151,9 @@ class BluetoothMenu:
                         or ControllerInput.DPAD_LEFT == selected.get_input() 
                         or ControllerInput.DPAD_RIGHT == selected.get_input()):
                         selected.get_selection().value()
+                    elif(ControllerInput.X == selected.get_input() and 0 < selected.get_index() <= len(devices)):
+                        # Row 0 is the status entry; the device rows follow in scan order.
+                        self.forget_device(devices[selected.get_index() - 1])
                 elif(ControllerInput.B == selected.get_input()):
                     selected = None
 
