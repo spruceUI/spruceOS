@@ -23,7 +23,7 @@ bail() {
 }
 
 INSTALLED="$(darkmoss_installed_version)"
-log_message "darkmossUpdate.sh: installed ${INSTALLED:-unknown}, spruce wants ${TARGET_DARKMOSS_VERSION:-unset}"
+log_message "darkmossUpdate.sh: installed ${INSTALLED:-unknown}"
 
 log_and_display_message "dArkMoss ${INSTALLED:-(unknown version)} is installed. Checking for a newer one. Press A to continue."
 acknowledge
