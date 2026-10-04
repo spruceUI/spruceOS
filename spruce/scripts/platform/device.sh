@@ -395,32 +395,118 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
-# Bluetooth, driven by bluetooth.sh. A device with a usable radio answers 0
-# from device_bluetooth_supported and starts and stops its daemons in the two
-# hooks; pairing and scanning are bluetoothctl everywhere.
+# Bluetooth, driven by bluetooth.sh. A board with a radio answers 0 here and overrides
+# only the hooks its hardware needs; dArkMoss (systemd) overrides up/down whole.
 device_bluetooth_supported() {
     return 1
 }
 
-device_bluetooth_up() {
+# Attach the controller so hci0 appears; non-zero when it cannot come up.
+device_bluetooth_radio_up() {
     :
+}
+
+device_bluetooth_radio_down() {
+    hciconfig hci0 down 2>/dev/null
+}
+
+device_bluetoothd_start() {
+    /etc/bluetooth/bluetoothd start
+}
+
+device_bluetoothd_stop() {
+    killall bluetoothd 2>/dev/null
+}
+
+# BT_HCI_WAIT (seconds, 5) and BT_BLUEALSA_ARGS (-p a2dp-source) tune the sequence.
+device_bluetooth_up() {
+    device_bluetooth_radio_up || return 1
+    bt_wait_hci || return 1
+    hciconfig hci0 up 2>/dev/null
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && device_bluetoothd_start ) </dev/null >/dev/null 2>&1
+        _n=0
+        while ! pidof bluetoothd >/dev/null 2>&1 && [ "$_n" -lt 5 ]; do
+            sleep 1
+            _n=$((_n + 1))
+        done
+        pidof bluetoothd >/dev/null 2>&1 || return 1
+        sleep 1    # let it claim org.bluez: bluez-alsa 1.3.1 registers only at start
+    fi
+    bt_start_bluealsa
 }
 
 device_bluetooth_down() {
-    :
+    bt_stop_bluealsa
+    device_bluetoothd_stop
+    device_bluetooth_radio_down
 }
 
-# bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
-# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
-# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
-# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
-# anywhere and leave the switch alone. Each call is bounded: a bluealsa that has
-# stopped answering must not hang the volume keys or the connection watcher.
+# Start a daemon away from its caller: no inherited descriptors (PyUI waits
+# on its pipes), no working directory on the card (unmount), its own session.
+bt_spawn() {
+    if command -v setsid >/dev/null 2>&1; then
+        ( cd / && exec setsid "$@" ) </dev/null >/dev/null 2>&1 &
+    else
+        ( cd / && exec "$@" ) </dev/null >/dev/null 2>&1 &
+    fi
+}
+
+# Wait up to $1 seconds (BT_HCI_WAIT, 5) for the controller to appear as hci0.
+# Some BusyBox builds have no fractional sleep.
+bt_wait_hci() {
+    _n=$(( ${1:-${BT_HCI_WAIT:-5}} * 10 ))
+    while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -gt 0 ]; do
+        if sleep 0.1 2>/dev/null; then
+            _n=$((_n - 1))
+        else
+            sleep 1
+            _n=$((_n - 10))
+        fi
+    done
+    [ -d /sys/class/bluetooth/hci0 ]
+}
+
+# Power-cycle the rfkill switch $1 (its state file) of a chip on a UART.
+bt_rfkill_pulse() {
+    echo 0 > "$1"
+    sleep 1
+    echo 1 > "$1"
+    sleep 1
+}
+
+bt_start_bluealsa() {
+    pidof bluealsa >/dev/null 2>&1 && return 0
+    # shellcheck disable=SC2086 # the options split on purpose
+    bt_spawn bluealsa ${BT_BLUEALSA_ARGS:--p a2dp-source}
+}
+
+# A wedged bluealsa (bluez-alsa 1.3.1, seen on the Zero 40) ignores SIGTERM:
+# the stuck thread is its main loop.
+bt_stop_bluealsa() {
+    killall bluealsa 2>/dev/null || return 0
+    _n=0
+    while pidof bluealsa >/dev/null 2>&1 && [ "$_n" -lt 2 ]; do
+        sleep 1
+        _n=$((_n + 1))
+    done
+    killall -9 bluealsa 2>/dev/null
+    return 0
+}
+
+# The headsets' A2DP volume controls. ALSA cuts names at 43 characters
+# ("<name> - A2DP Playback Volum"), so match A2DP anywhere and skip the switch.
+bt_headset_volume_controls() {
+    ${BTCTL_TIMEOUT:-timeout 2} amixer -D bluealsa scontrols 2>/dev/null |
+        sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc'
+}
+
+# The 0-20 level on each headset, bounded so a hung bluealsa cannot block the keys;
+# a board with another volume path overrides it.
 bt_headset_volume() {
     pidof bluealsa >/dev/null 2>&1 || return 0
-    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
-    $_bt_to amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
-        $_bt_to amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    bt_headset_volume_controls | while read -r _ctl; do
+        ${BTCTL_TIMEOUT:-timeout 2} amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
     done
 }
 
@@ -489,9 +575,8 @@ device_write_default_asound_rc() {
 }
 
 device_on_bt_audio_route() {
-    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
-    # at it, and with no argument when audio stays on the device - for firmware
-    # whose own volume path has to be told where the audio went. Default: nothing.
+    # asound-setup.sh passes the headset's MAC after routing to it, or nothing for the
+    # device's own output, for firmware whose volume path must know. Default: nothing.
     :
 }
 
@@ -518,9 +603,8 @@ bt_audio_ready() {
     ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
 }
 
-# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh). With
-# ASOUND_SPRUCE_PCMS one of the two names every .asoundrc defines here (see
-# asound-setup.sh), otherwise the headset or nothing for the default output.
+# The ALSA device PyUI plays through (get-bt-audio-device.sh): spruce_bt or
+# spruce_speaker with ASOUND_SPRUCE_PCMS, else the headset or nothing.
 bt_audio_device() {
     if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
         grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0

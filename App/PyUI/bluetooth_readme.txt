@@ -46,7 +46,8 @@ stdout. Exit status is 0 unless the command name is unknown.
       step is pair or connect.
 
   forget <address>
-      Remove a paired device. Output: none.
+      Remove a paired device, then reroute audio. One line of output: "ok",
+      or "failed forget <reason>".
 
   disconnect <address>
       Disconnect a device and keep its pairing, then reroute audio. One line
