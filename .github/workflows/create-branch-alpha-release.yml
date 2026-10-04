@@ -1,9 +1,7 @@
-name: Build branch release
+name: Create branch alpha release
 
 # Builds the ref it is dispatched with and publishes it as a pre-release in
 # spruceOSNightlies. No OTA package, no feed update: devices never see it.
-# The file keeps its old name so `gh workflow run build-pico8-shim.yml --ref
-# <branch>` resolves against main.
 
 on:
   workflow_dispatch:

@@ -29,8 +29,7 @@
  * the call. Nothing else is touched, and if a future SDL2 does have sensors the
  * shim simply stops mattering - PICO-8 still never uses them.
  *
- * Built for aarch64 by .github/workflows/build-pico8-shim.yml; the source lives
- * here so the binary in lib-h700 is auditable rather than mysterious.
+ * The source lives here so the binary in lib-h700 is auditable rather than mysterious.
  */
 
 #define _GNU_SOURCE
