@@ -17,6 +17,8 @@ device_init() {
 device_bluetooth_supported() {
 	return 1
 }
+# No headset to switch to, so the stock default stays the only output.
+ASOUND_SPRUCE_PCMS=
 
 # Radio availability on this model is two facts. A module that refused to
 # load (WIFI_UNAVAILABLE_FLAG) is sticky for the session. An adapter that was

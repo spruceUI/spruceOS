@@ -1213,6 +1213,16 @@ device_bluetoothd_start() {
     bt_spawn /usr/libexec/bluetooth/bluetoothd -n
 }
 
+# Named outputs, so PyUI can return to the speaker. The stock default is an unnamed
+# hooks block that differs per model, so spruce_speaker is that block, renamed.
+ASOUND_SPRUCE_PCMS=1
+device_write_default_asound_rc() {
+    awk '/^pcm\.!default[ \t]*\{/ { on = 1; sub(/^pcm\.!default/, "pcm.spruce_speaker") }
+        on { print; d += gsub(/\{/, "{") - gsub(/\}/, "}"); if (!d) exit }' /etc/asound.conf > "$ASOUND_CONF"
+    grep -q '^pcm\.spruce_speaker' "$ASOUND_CONF" ||
+        printf 'pcm.spruce_speaker {\n    type plug\n    slave.pcm "hw:audiocodec"\n}\n' > "$ASOUND_CONF"
+}
+
 
 # Stickless Anbernic XX units: have the stock kernel report the d-pad as the
 # left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
