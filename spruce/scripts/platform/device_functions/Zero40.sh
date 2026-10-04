@@ -33,10 +33,6 @@ device_bluetoothd_stop() {
     killall bluetoothd 2>/dev/null
 }
 
-# Without --a2dp-volume, bluez-alsa 1.3.1 applies the headset's own volume again in
-# software (about -32 dB at half volume); with it the level is the headset's.
-BT_BLUEALSA_ARGS="-p a2dp-source --a2dp-volume"
-
 # 1.3.1 can wedge (a drain waits forever under its lock) and then answers neither
 # BlueZ nor amixer: a headset coming up restarts it. 4.x cannot wedge that way.
 device_bt_audio_connected() {
