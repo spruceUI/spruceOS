@@ -39,11 +39,14 @@ run_drastic64() {
 	stash_arch_64_states
 }
 
+# $1: the folder with the board family's libadvdrastic.so (default: lib64_A133P_trngaje,
+# the TrimUI boards' build). Its libjson-c.so.4 comes from lib64_A133P_trngaje either way.
 run_drastic_trngaje_a133p() {
+	advdrastic_dir="${1:-$HOME/lib64_A133P_trngaje}"
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH:$HOME/lib64"
 	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
-	LD_PRELOAD=$HOME/lib64_A133P_trngaje/libadvdrastic.so ./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
+	LD_PRELOAD=$advdrastic_dir/libadvdrastic.so ./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -274,7 +277,9 @@ run_drastic_magicx_a133p() {
 		export SDL_AUDIODRIVER=dsp
 		run_drastic64
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
-		run_drastic_trngaje_a133p
+		# trngaje's newer build (touchscreen through udev); it needs libudev.so.1, which
+		# the TrimUI boards have not been checked for, so they keep lib64_A133P_trngaje's.
+		run_drastic_trngaje_a133p "$HOME/lib64_MagicX_trngaje"
 	else
 		display_core_unrecognized_for_platform_message
 	fi
