@@ -47,3 +47,20 @@ device_bt_audio_connected() {
     fi
     bt_headset_volume "$(get_volume_level)"
 }
+
+# Named outputs as on TrimUI, so PyUI can return to the speaker. bluez-alsa 3.1 brought
+# both spruce_bt's any-device address and the CLI, which marks a base with it (not 1.3.1).
+[ -x /usr/bin/bluealsa-cli ] && ASOUND_SPRUCE_PCMS=1
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOT
+pcm.spruce_speaker {
+    type asym
+    playback.pcm "Playback"
+    capture.pcm "CaptureAc107"
+}
+ctl.!default {
+    type hw
+    card audiocodec
+}
+EOT
+}
