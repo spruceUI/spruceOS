@@ -1,0 +1,15 @@
+{
+  "name": "red",
+  "colors": {
+    "dim_bg":        "#140000D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#E5484D2E",
+    "accent":        "#E5484DD9",
+    "title_line":    "#6B4A4A66",
+    "text":          "#E8D5D5FF",
+    "text_selected": "#FFF0F0FF",
+    "text_title":    "#E5484DFF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#E8D5D5FF"
+  }
+}

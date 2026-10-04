@@ -112,12 +112,14 @@ device_enter_sleep() {
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     [ -e "$WAKE_ALARM_PATH" ] && touch "$WAKE_ALARM_ARMED_FLAG"
+    xx_rgb_off
     trigger_device_sleep
 }
 
 device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
     rm -f "$WAKE_ALARM_ARMED_FLAG"
+    xx_rgb_restore
 }
 
 # Decide by the alarm, not the clock (the two RTCs drift): an armed alarm that has
@@ -154,23 +156,12 @@ send_virtual_key_L3() {
 
 # An unreadable or unparseable version means "do not nag".
 check_if_fw_needs_update() {
-    _baseos_have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null)"
-    if [ -z "$_baseos_have" ] || [ -z "$TARGET_BASEOS_VERSION" ]; then
-        echo "false"
-        return
-    fi
-    case "$_baseos_have" in
+    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    case "$_have" in
         ''|*[!0-9.]*) echo "false"; return ;;
     esac
-
-    _have_n="$(printf '%s' "$_baseos_have" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
-    _want_n="$(printf '%s' "$TARGET_BASEOS_VERSION" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
-
-    if [ "$_have_n" -lt "$_want_n" ] 2>/dev/null; then
-        echo "true"
-    else
-        echo "false"
-    fi
+    _want="$(github_latest_version pvaibhav/BaseOS)" || _want="$TARGET_BASEOS_VERSION"
+    version_older_than "$_have" "$_want" && echo "true" || echo "false"
 }
 
 has_lid() {
@@ -182,6 +173,221 @@ has_lid() {
     esac
 }
 
+# Ring LEDs on the RG40XX H/V and CubeXX: an MCU on /dev/ttyS5, 115200 8N1, not
+# sysfs. Every packet ends in a checksum of the bytes before it. Mode 1 is
+# static and carries 8 RGB triplets for the right ring then 8 for the left;
+# modes 2-4 breathe and carry 16 triplets of one colour; modes 5-6 are the
+# MCU's rainbows and carry <mode> <brightness> 1 1 <speed>. Protocol from muOS,
+# which uses mode 1 only - the rest are confirmed working on a CubeXX.
+XX_RGB_SERIAL="/dev/ttyS5"
+XX_RGB_MCU_PWR="/sys/class/power_supply/axp2202-battery/mcu_pwr"
+XX_RGB_STATE="/tmp/xx_rgb_state"
+
+case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)" in
+    rg40xx*|rgcubexx) XX_RGB_MODEL=1 ;;
+    *)                XX_RGB_MODEL=0 ;;
+esac
+
+has_rgb_leds() {
+    [ "$XX_RGB_MODEL" = "1" ] && [ -c "$XX_RGB_SERIAL" ]
+}
+
+# Nothing to clear if we never lit them this boot - the MCU comes up unpowered.
+xx_rgb_already_dark() {
+    [ -r "$XX_RGB_STATE" ] || return 0
+    xx_rgb_load_state
+    [ "$_mode" = "1" ] && [ "$_left" = "000000" ] && [ "$_right" = "000000" ]
+}
+
+xx_rgb_open() {
+    if [ -w "$XX_RGB_MCU_PWR" ] && [ "$(cat "$XX_RGB_MCU_PWR" 2>/dev/null)" != "1" ]; then
+        # printf, not echo: the driver parses each write on its own, and echo's
+        # newline arrives as a second one that reads as 0 and powers it back off.
+        printf 1 > "$XX_RGB_MCU_PWR"
+        sleep 1
+    fi
+    stty -F "$XX_RGB_SERIAL" 115200 cs8 -parenb -cstopb -opost -isig -icanon -echo 2>/dev/null
+}
+
+xx_rgb_valid_hex() {
+    case "$1" in
+        [0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+xx_rgb_split() {
+    _hex="$1"
+    xx_rgb_valid_hex "$_hex" || _hex="FFFFFF"
+    _rest="${_hex#??}"
+    echo "$((0x${_hex%????})) $((0x${_rest%??})) $((0x${_rest#??}))"
+}
+
+xx_rgb_load_state() {
+    _left=000000
+    _right=000000
+    _mode=1
+    _dur=1000
+    [ -r "$XX_RGB_STATE" ] && read -r _left _right _mode _dur < "$XX_RGB_STATE"
+    xx_rgb_valid_hex "$_left" || _left=000000
+    xx_rgb_valid_hex "$_right" || _right=000000
+    case "$_mode" in [1-6]) : ;; *) _mode=1 ;; esac
+    case "$_dur" in ''|*[!0-9]*) _dur=1000 ;; esac
+}
+
+# Shares the TrimUI's 5-80 setting, spread over the MCU's 0-255.
+xx_rgb_brightness() {
+    _scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    case "$_scale" in
+        ''|*[!0-9]*) _scale=15 ;;
+    esac
+    [ "$_scale" -gt 80 ] && _scale=80
+    echo $(( _scale * 255 / 80 ))
+}
+
+xx_rgb_send() {
+    _sum=0
+    for _byte in "$@"; do
+        _sum=$(( (_sum + _byte) & 255 ))
+    done
+    xx_rgb_open
+    printf '%b' "$(printf '\\x%02X' "$@" "$_sum")" > "$XX_RGB_SERIAL"
+}
+
+xx_rgb_static() {
+    _bri="$1"
+    set -- $(xx_rgb_split "$2") $(xx_rgb_split "$3")
+    _lr="$1" _lg="$2" _lb="$3" _rr="$4" _rg="$5" _rb="$6"
+
+    set -- 1 "$_bri"
+    _i=0
+    while [ "$_i" -lt 8 ]; do
+        set -- "$@" "$_rr" "$_rg" "$_rb"
+        _i=$((_i + 1))
+    done
+    _i=0
+    while [ "$_i" -lt 8 ]; do
+        set -- "$@" "$_lr" "$_lg" "$_lb"
+        _i=$((_i + 1))
+    done
+    xx_rgb_send "$@"
+}
+
+xx_rgb_breath() {
+    _bmode="$1"
+    _bri="$2"
+    set -- $(xx_rgb_split "$3")
+    _r="$1" _g="$2" _b="$3"
+
+    set -- "$_bmode" "$_bri"
+    _i=0
+    while [ "$_i" -lt 16 ]; do
+        set -- "$@" "$_r" "$_g" "$_b"
+        _i=$((_i + 1))
+    done
+    xx_rgb_send "$@"
+}
+
+xx_rgb_rainbow() {
+    xx_rgb_send "$1" "$2" 1 1 "$3"
+}
+
+# rise, sniff and blink have no MCU equivalent and land on static.
+xx_rgb_mode() {
+    case "$1" in
+        2|breath*)
+            if   [ "$2" -le 2000 ]; then echo 2
+            elif [ "$2" -le 3500 ]; then echo 3
+            else                        echo 4
+            fi ;;
+        rainbow) echo 5 ;;
+        *multi*) echo 6 ;;
+        *)       echo 1 ;;
+    esac
+}
+
+# Duration to the rainbow speed byte; a higher byte cycles faster.
+xx_rgb_speed() {
+    _d="$1"
+    [ "$_d" -lt 1000 ] && _d=1000
+    [ "$_d" -gt 5000 ] && _d=5000
+    echo $(( 255 - (_d - 1000) * 245 / 4000 ))
+}
+
+xx_rgb_apply() {
+    _bri="$(xx_rgb_brightness)"
+    case "$3" in
+        2|3|4) xx_rgb_breath "$3" "$_bri" "$1" ;;
+        5|6)   xx_rgb_rainbow "$3" "$_bri" "$(xx_rgb_speed "$4")" ;;
+        *)     xx_rgb_static "$_bri" "$1" "$2" ;;
+    esac
+}
+
+# Zones l and r are the two rings; m, 1 and 2 have no hardware here.
+rgb_led() {
+    has_rgb_leds || return 0
+
+    rgb_leds_enabled || return 0
+    flag_check "leds_forced_off" && return 0
+
+    _zones="${1:-lr}"
+    # One packet carries both rings, so a call naming one resends the other.
+    xx_rgb_load_state
+
+    _dur="${4:-1000}"
+    case "$_dur" in
+        ''|*[!0-9]*) _dur=1000 ;;
+    esac
+
+    case "$2" in
+        0|off|disable) _colour=000000; _mode=1 ;;
+        *)             _colour="${3:-FFFFFF}"; _mode="$(xx_rgb_mode "$2" "$_dur")" ;;
+    esac
+
+    case "$_zones" in *l*) _left="$_colour" ;; esac
+    case "$_zones" in *r*) _right="$_colour" ;; esac
+
+    echo "$_left $_right $_mode $_dur" > "$XX_RGB_STATE"
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
+}
+
+enable_or_disable_rgb() {
+    has_rgb_leds || return 0
+
+    if ! rgb_leds_enabled; then
+        xx_rgb_already_dark && return 0
+        echo "000000 000000 1 1000" > "$XX_RGB_STATE"
+        xx_rgb_static 0 000000 000000
+    fi
+}
+
+toggle_led() {
+    has_rgb_leds || return 0
+
+    if flag_check "leds_forced_off"; then
+        flag_remove "leds_forced_off"
+        set_rgb_in_menu
+    else
+        rgb_led lr off
+        flag_add "leds_forced_off" --tmp
+    fi
+}
+
+xx_rgb_off() {
+    has_rgb_leds || return 0
+    xx_rgb_already_dark && return 0
+    xx_rgb_static 0 000000 000000
+}
+
+xx_rgb_restore() {
+    has_rgb_leds || return 0
+    flag_check "leds_forced_off" && return 0
+    rgb_leds_enabled || return 0
+
+    xx_rgb_load_state
+    xx_rgb_apply "$_left" "$_right" "$_mode" "$_dur"
+}
+
 launch_startup_watchdogs(){
     # Same reason as launch_common_startup_watchdogs_v2: this runs per start of
     # the frontend, not per boot, so clear out a previous run's watchdogs before
@@ -190,10 +396,10 @@ launch_startup_watchdogs(){
     for _wd in \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh \
-        /mnt/SDCARD/spruce/scripts/low_power_warning.sh \
-        /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh \
-        /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh
+        /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/lid_watchdog.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -201,15 +407,15 @@ launch_startup_watchdogs(){
 
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog_v2.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh &
     # The override replaces launch_common_startup_watchdogs_v2 wholesale, and
-    # that launcher is low_power_warning.sh's only start site: without this
+    # that launcher is battery_level_watchdog.sh's only start site: without this
     # line the XX line had no low-battery warning and no forced shutdown.
-    /bin/bash /mnt/SDCARD/spruce/scripts/low_power_warning.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
 
     if has_lid >/dev/null; then
-        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog_v2.sh &
+        /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
     fi
 }
 
@@ -294,6 +500,7 @@ stage_ra_autoconfig() {
 
 device_init() {
     anbernic_xx_common_init
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot </dev/null >/dev/null 2>&1 &
 }
 
 # Nothing to swap in or out around a port on this line: the SDL2 a port needs is
@@ -305,7 +512,7 @@ device_prepare_for_ports_run() {
 }
 
 device_cleanup_after_ports_run() {
-    log_message "device_cleanup_after_ports_run unneeded" -v
+    treat_dpad_as_dpad
 }
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
@@ -496,6 +703,7 @@ set_volume() {
     system_volume=$(( (new_vol * 31 + 10) / 20 ))
 
     amixer -q set 'lineout volume' "$system_volume"
+    bt_headset_volume "$new_vol"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -563,6 +771,18 @@ brightness_up() {
     set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
 }
 
+turn_off_screen() {
+    "$DEVICE_PYTHON3_PATH" -c "
+import os, fcntl, struct
+
+fd = os.open('/dev/disp', os.O_RDWR)
+
+try:
+    fcntl.ioctl(fd, 0x102, struct.pack('QQQQ', 0, 0, 0, 0))
+finally:
+    os.close(fd)
+"
+}
 
 send_menu_button_to_retroarch() {
     # Every RetroArch binary this device can launch has to be listed here or the
@@ -947,4 +1167,74 @@ device_ensure_wifi_interface() {
 # that stops the wedge being created, rather than recovering from it after.
 device_prepare_for_poweroff() {
     device_wifi_power_off
+    xx_rgb_off
+}
+
+device_bluetooth_supported() {
+    return 0
+}
+
+# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second. BaseOS
+# leaves D-Bus and every Bluetooth daemon to the frontend.
+device_bluetooth_up() {
+    _n=0
+    while [ ! -d /sys/class/net/wlan0 ] && [ "$_n" -lt 30 ]; do
+        sleep 1
+        _n=$((_n + 1))
+    done
+    [ -d /sys/class/net/wlan0 ] || return 1
+    pidof dbus-daemon >/dev/null 2>&1 || setsid dbus-daemon --system --fork </dev/null >/dev/null 2>&1
+    rfkill unblock bluetooth
+    if [ ! -d /sys/class/bluetooth/hci0 ]; then
+        ( cd / && exec setsid rtk_hciattach -n -s 115200 ttyS1 rtk_h5 ) </dev/null >/dev/null 2>&1 &
+        _n=0
+        while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 50 ]; do
+            sleep 0.1
+            _n=$((_n + 1))
+        done
+    fi
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && exec setsid /usr/libexec/bluetooth/bluetoothd -n ) </dev/null >/dev/null 2>&1 &
+        sleep 1
+    fi
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec setsid bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
+    fi
+}
+
+device_bluetooth_down() {
+    killall bluealsa bluetoothd rtk_hciattach 2>/dev/null
+    rfkill block bluetooth
+}
+
+
+# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
+# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
+# The driver refuses a trailing newline, so no echo here.
+XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
+_xx_dpad_swap() {
+
+	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
+	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
+	printf '%s' "$1" > "$XX_DPAD_SWAP"
+	log_message "xx d-pad as stick: $1"
+}
+
+# MENU+SELECT in game flips it, for games that only listen to the stick.
+swap_dpad_analog_toggle() {
+	[ "$XX_PAD_LAYOUT" = "nostick" ] || return 0
+	flag_check "in_menu" && return 0
+	case "$(cat "$XX_DPAD_SWAP" 2>/dev/null)" in
+		2) _xx_dpad_swap 0 ;;
+		*) _xx_dpad_swap 2 ;;
+	esac
+	vibrate &
+}
+
+treat_dpad_as_analog() {
+	_xx_dpad_swap 2
+}
+
+treat_dpad_as_dpad() {
+	_xx_dpad_swap 0
 }

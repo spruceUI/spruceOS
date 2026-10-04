@@ -1,0 +1,15 @@
+{
+  "name": "blue",
+  "colors": {
+    "dim_bg":        "#000814D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#4A90D92E",
+    "accent":        "#4A90D9D9",
+    "title_line":    "#4A5C6B66",
+    "text":          "#D5E2EDFF",
+    "text_selected": "#F0F7FFFF",
+    "text_title":    "#4A90D9FF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#D5E2EDFF"
+  }
+}

@@ -6,6 +6,7 @@ from menus.settings.theme.theme_settings_fonts import ThemeSettingsFonts
 from menus.settings.theme.theme_settings_game_select_menu import ThemeSettingsGameSelectMenu
 from menus.settings.theme.theme_settings_grid_view import ThemeSettingsGridView
 from menus.settings.theme.theme_settings_main_menu import ThemeSettingsMainMenu
+from menus.settings.theme.theme_settings_misc import ThemeSettingsMisc
 from menus.settings.theme.theme_settings_system_select_menu import ThemeSettingsSystemSelectMenu
 from menus.settings.theme.theme_settings_top_bar import ThemeSettingsTopAndBottomBar
 from views.grid_or_list_entry import GridOrListEntry
@@ -35,6 +36,10 @@ class ThemeSettingsMenu():
     def launch_font_menu_theme_options(self, input):
         if (input == ControllerInput.A):
             ThemeSettingsFonts().show_theme_options_menu()
+
+    def launch_misc_menu_theme_options(self, input):
+        if (input == ControllerInput.A):
+            ThemeSettingsMisc().show_theme_options_menu()
 
     def launch_grid_view_menu_theme_options(self, input):
         if (input == ControllerInput.A):
@@ -97,6 +102,18 @@ class ThemeSettingsMenu():
                 description=None,
                 icon=None,
                 value=self.launch_font_menu_theme_options
+            )
+        )
+
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.misc(),
+                value_text="",
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.launch_misc_menu_theme_options
             )
         )
 

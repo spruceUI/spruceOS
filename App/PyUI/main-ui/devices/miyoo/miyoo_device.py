@@ -6,7 +6,6 @@ from devices.device_common import DeviceCommon
 from devices.miyoo.trim_ui_joystick import TrimUIJoystick
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
@@ -138,37 +137,6 @@ class MiyooDevice(DeviceCommon):
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
 
-
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        try:
-            with open("/proc/net/wireless", "r") as f:
-                output = f.read().strip().splitlines()
-
-            if len(output) >= 3:
-                # The 3rd line contains the actual wireless stats
-                data_line = output[2]
-                parts = data_line.split()
-                
-                # According to the standard format:
-                # parts[2] = link quality (float ending in '.')
-                # parts[3] = signal level
-                # parts[4] = noise level
-                link_quality = int(float(parts[2].strip('.')))
-                signal_level = int(float(parts[3].strip('.')))
-                noise_level = int(float(parts[4].strip('.')))
-
-                return WiFiConnectionQualityInfo(
-                    noise_level=noise_level,
-                    signal_level=signal_level,
-                    link_quality=link_quality
-                )
-            else:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-        
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
@@ -182,32 +150,6 @@ class MiyooDevice(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        try:
-            # Run 'ps' to check for bluetoothd process
-            result = self.get_running_processes()
-            # Check if bluetoothd is in the process list
-            return 'bluetoothd' in result.stdout
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
-            return False
-    
-    
-    def disable_bluetooth(self):
-        PyUiLogger.get_logger().info(f"Disabling Bluetooth")
-        ProcessRunner.run(["killall","-15","bluetoothd"])
-        time.sleep(0.1)  
-        ProcessRunner.run(["killall","-9","bluetoothd"])
-        self.system_config.set_bluetooth(0)
-
-    def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/libexec/bluetooth/',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
-            
     def perform_startup_tasks(self):
         pass
 

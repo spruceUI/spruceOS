@@ -1,7 +1,7 @@
 {
   "label": "FBNEO",
-  "icon": "arcade.png",
-  "iconsel": "arcade_sel.png",
+  "icon": "fbneo.png",
+  "iconsel": "fbneo_sel.png",
   "themecolor": "EC7063",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "zip",

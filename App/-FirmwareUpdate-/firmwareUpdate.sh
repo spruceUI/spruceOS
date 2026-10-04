@@ -5,7 +5,7 @@
 
 # Disable idle/shutdown timer during firmware update
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
@@ -23,6 +23,9 @@ case "$PLATFORM" in
 	Anbernic*)
 		# BaseOS updates itself from a .bosupd file at the root of the card.
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
+		;;
+	"RGB30"|"RGB20SX"|"Miniloong")
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
@@ -66,7 +69,7 @@ confirm_update() {
 		"Flip")
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
-		"Brick"|"SmartPro"*)
+		"Brick"|"BrickPro"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
 	esac

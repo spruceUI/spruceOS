@@ -10,6 +10,7 @@ get_core_folder() {
         "81_libretro.so") echo "81" ;;
         "a5200_libretro.so") echo "a5200" ;;
         "ardens_libretro.so") echo "Ardens" ;;
+        "arduous_libretro.so") echo "Arduous" ;;
         "atari800_libretro.so") echo "Atari800" ;;
         "bk_libretro.so") echo "bk" ;;
         "bluemsx_libretro.so") echo "blueMSX" ;;

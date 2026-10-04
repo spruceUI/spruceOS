@@ -153,6 +153,22 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      - name: Set the release channel default
+        run: |
+          CFG=Saves/spruce/spruce-config.json
+          python3 - "$CFG" "Stable" <<'PY'
+          import json, sys
+          path, channel = sys.argv[1], sys.argv[2]
+          with open(path) as f:
+              data = json.load(f)
+          opt = data["menuOptions"]["Network Settings"]["releaseChannel"]
+          assert channel in opt["options"], channel
+          opt["selected"] = channel
+          with open(path, "w") as f:
+              json.dump(data, f, indent=4)
+          print(f"releaseChannel = {channel}")
+          PY
+
       - name: Generate OTA diff manifest
         id: ota_diff
         run: |
@@ -459,11 +475,14 @@ jobs:
             | Miyoo Mini Plus       | Stable |
             | Miyoo Mini v1-4       | Stable |
             | Anbernic RGXX+ series | Stable |
-            | Powkiddy RGB30        | In Development, testers wanted! |
+            | Powkiddy RGB30        | Stable |
+            | Powkiddy RGB20SX      | Stable |
+            | Miniloong Pocket 1    | Stable |
+            | MagicX Zero 28 / Zero 40 / XU20 | In Development, testers wanted! |
 
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
-            > **Powkiddy RGB30:** this device needs dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             >**BaseOS and DarkMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
 
@@ -487,7 +506,7 @@ jobs:
             - Try the all-in-one installer app for a super easy installation!
             - No need to download a release or format your card manually!
             - Compatible versions for Windows, Mac and Linux!
-            - Lets you install Stable, Nightlies, Sprig (mini flip only) and Twig (GKD Pixel 2 only) all in one click!
+            - Lets you install Stable, Nightlies and Twig (GKD Pixel 2 only) all in one click!
 
             | Platform | Download |
             |----------|----------|

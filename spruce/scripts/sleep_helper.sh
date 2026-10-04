@@ -215,7 +215,7 @@ trigger_sleep() {
 
 # Disable idle/shutdown timer during sleep
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 trigger_sleep
 
@@ -236,5 +236,5 @@ stop_power_reader
 sleep 2 #don't allow resleeping for a few seconds
 rmdir /tmp/sleep_helper_started 2>/dev/null
 
-# Restart idle timer if needed (idlemon_mm checks for it)
-/mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh &
+# Restart idle timer if needed (idle_watchdog checks for it)
+/mnt/SDCARD/spruce/scripts/idle_watchdog.sh &

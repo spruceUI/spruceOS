@@ -191,21 +191,13 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
+# Miniloong Pocket 1 (Rockchip RK3566, under dArkMoss)
 ############################################################
     "Miniloong" )
-        # Same aarch64 payload as the Flip (spruce/flip): our own KMSDRM SDL2
-        # and the Mali-G52 blob the firmware ships. Stock Weston is stopped by
-        # device_init when MINILOONG_STOP_WESTON=1 (the default), otherwise
-        # the Wayland driver is selected here.
+        # Same base and payload as the RGB30 below; see that block.
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
-        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib:/lib"
-        if [ "${MINILOONG_STOP_WESTON:-1}" = "1" ]; then
-            export SDL_VIDEODRIVER=kmsdrm
-        else
-            export SDL_VIDEODRIVER=wayland
-            export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/var/run}"
-        fi
+        export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib/aarch64-linux-gnu"
+        export SDL_VIDEODRIVER=kmsdrm
         export SDL_AUDIODRIVER=alsa
 
         log_message "Starting PyUI on $PLATFORM"
@@ -217,7 +209,10 @@ case "$PLATFORM" in
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
     ;;
 
-    "RGB30" )
+############################################################
+# Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
+############################################################
+    "RGB30" | "RGB20SX" )
         # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
         # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
         # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
@@ -253,7 +248,7 @@ case "$PLATFORM" in
         log_message "Starting PyUI on $PLATFORM"
         /mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-            -device RGB30 \
+            -device "$PLATFORM" \
             -logDir /mnt/SDCARD/Saves/spruce \
             -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"
@@ -345,7 +340,7 @@ case "$PLATFORM" in
     "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
-        export PYSDL2_DLL_PATH="/usr/magicx/lib"
+        export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         if [ "$PLATFORM" = "Zero40" ]; then
             DEVICE="MAGICX_ZERO40"
         elif [ "$PLATFORM" = "XU20" ]; then

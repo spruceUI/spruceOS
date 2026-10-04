@@ -152,6 +152,11 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
 THANK YOU TO THE AMAZING RETRO HANDHELD COMMUNITY!!
 
 
+## AI Disclosure
+
+Some of our contributors use AI to help code, as is the industry standard. The spruceUI organizations’s policy on AI use is that we will always judge potential contributions based on the code’s quality rather than who wrote it, or how.
+
+
 ## SUPPORTED GAME SYSTEMS
 
 [Click here for a table of supported systems and file extensions.](https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#rom-folder-chart)

@@ -186,7 +186,7 @@ monitor_start_button() {
     echo "$GE_PID" > /tmp/syncthing_getevent.pid
 
     while true; do
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "SyncthingCheck: START button pressed - cancelling sync"
@@ -347,7 +347,6 @@ set_api_key() {
     fi
 
     API_KEY=$(sed -n 's:.*<apikey>\(.*\)</apikey>.*:\1:p' "$CONFIG_XML")
-    log_message "SyncthingCheck: API key: $API_KEY"
 
     if [ -z "$API_KEY" ]; then
         log_message "SyncthingCheck: Error: No API key found in config.xml" >&2

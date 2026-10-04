@@ -184,6 +184,7 @@ class Sdl2AudioPlayer:
         Commands come in through _cmd_q. Worker maintains its own maps.
         """
         chunk_map = {}  # path -> Mix_Chunk pointer
+        wanted_chunks = set()  # every path asked for, loaded or not
         music_map = {}  # path -> Mix_Music pointer
         loop_channel = None
         loop_music_path = None
@@ -269,7 +270,7 @@ class Sdl2AudioPlayer:
             loop_music_path = None
             loop_chunk_path = None
             # Save paths so we can re-preload after reinit
-            old_chunk_paths = list(chunk_map.keys())
+            old_chunk_paths = list(wanted_chunks | set(chunk_map.keys()))
             for p, cptr in list(chunk_map.items()):
                 try:
                     sdlmixer.Mix_FreeChunk(cptr)
@@ -290,7 +291,9 @@ class Sdl2AudioPlayer:
                 sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_AUDIO)
             except Exception:
                 pass
+
             ok = worker_init()
+
             if ok:
                 PyUiLogger.get_logger().info("SDL2 audio reinit succeeded.")
                 # Re-preload previously cached WAVs
@@ -359,6 +362,7 @@ class Sdl2AudioPlayer:
                     reply_ok(cmd.resp_q, True)
                 elif name == "preload_wav":
                     path = cmd.args[0]
+                    wanted_chunks.add(path)
                     if path in chunk_map:
                         reply_ok(cmd.resp_q, True)
                         continue

@@ -104,9 +104,10 @@ home_key_up () {
 # That cancel is what lets the Menu + Vol brightness chord coexist with the
 # hold-home actions, so on these devices the chord doesn't work at all
 # without this. Mirrors the same conditional EVENT_PATH_VOLUME handling
-# buttons_watchdog.sh already does.
+# buttons_watchdog.sh already does, including skipping it when it is the same node
+# (MagicX): named twice, getevent reports every event twice.
 HOMEBTN_EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
-[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && HOMEBTN_EVENTS="$HOMEBTN_EVENTS $EVENT_PATH_VOLUME"
+[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && [ "$EVENT_PATH_VOLUME" != "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && HOMEBTN_EVENTS="$HOMEBTN_EVENTS $EVENT_PATH_VOLUME"
 
 getevent -pid $$ $HOMEBTN_EVENTS | while read line; do
     log_message "homebutton_watchdog.sh: $line" -v
@@ -122,8 +123,13 @@ getevent -pid $$ $HOMEBTN_EVENTS | while read line; do
                 home_key_up
             ;;
 
+        *"key $B_SELECT 1"*)
+            [ -e /tmp/menubtn ] && swap_dpad_analog_toggle
+            cancel_menu_hold
+            resume_drastic
+            ;;
+
         *"key $B_START 1"*  | \
-        *"key $B_SELECT 1"* | \
         *"key $B_R1"*      | \
         *"key $B_R2"*      | \
         *"key $B_L1"*      | \

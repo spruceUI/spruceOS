@@ -25,7 +25,7 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30"
+        "DARKMOSS"
       ],
       "options": [
         "PCSX-ReARMed-standalone",
@@ -36,7 +36,7 @@
       "overrides": {}
     },
     "Emulator_A30": {
-      "display": "Retroarch Core",
+      "display": "Emulator",
       "devices": [
         "MIYOO_A30"
       ],
@@ -52,7 +52,8 @@
       "display": "RA Build",
       "devices": [
         "MIYOO_FLIP",
-        "ANBERNIC_RGXX"
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
       ],
       "options": [
         "64-bit",

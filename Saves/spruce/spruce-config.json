@@ -180,7 +180,9 @@
                     "Game Switcher",
                     "Splore",
                     "NDS firmware",
+                    "DSi firmware",
                     "PPSSPP",
+                    "Songo#5",
                     "Apotris (GBA)",
                     "Mega Mode"
                 ],
@@ -320,10 +322,23 @@
                 ],
                 "selected": "Both"
             },
+            "powerButtonHoldTime": {
+                "display": "Power button hold time",
+                "description": "for quick shutdown (seconds)",
+                "options": [
+                    "0.2",
+                    "0.5",
+                    "1",
+                    "1.5",
+                    "2",
+                    "3"
+                ],
+                "selected": "1"
+            },
             "homeAction": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_SMART_PRO_S", "MAGICX_XU20"],
                 "display": "Home button action",
-                "description": "What the top Home button does",
+                "description": "What the Home button does",
                 "options": [
                     "Game Switcher",
                     "Emulator menu",
@@ -344,6 +359,17 @@
                 ],
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
                 "selected": "L3"
+            },
+            "volumeButtons": {
+                "devices": ["RGB30", "RGB20SX"],
+                "display": "Volume buttons",
+                "description": "Swap up and down if your rocker is fitted the other way",
+                "options": [
+                    "Standard",
+                    "Swapped"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
+                "selected": "Standard"
             },
             "fnF1Action": {
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
@@ -431,6 +457,19 @@
                 ],
                 "selected": "True"
             },
+            "raIgmColorway": {
+                "display": "RA: in-game menu colors",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
+                "options": [
+                    "spruce",
+                    "mono",
+                    "red",
+                    "blue",
+                    "green",
+                    "purple"
+                ],
+                "selected": "spruce"
+            },
             "keepSavesBetweenCores": {
                 "display": "Transfer saves between cores",
                 "options": [
@@ -485,7 +524,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
@@ -556,8 +595,8 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
             "enableWaitingToConnect": {
-                "display": "Wait for connection before launching game",
-                "descritpion": "when Syncthing or RAC are enabled",
+                "display": "Wait for WiFi at game launch",
+                "description": "When cheevos or Syncthing need it",
                 "options": [
                     "True",
                     "False"
@@ -575,14 +614,6 @@
             },
             "otaUpdateType": {
                 "display": "OTA: update type",
-                "devices":["MIYOO_FLIP", "MIYOO_MINI",
-                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
-                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
-                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
-                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
-                           "ANBERNIC_RGXX640480", "RGB30"],
                 "description": "incremental is faster; full can fix broken installs",
                 "options": [
                     "Incremental",
@@ -590,22 +621,14 @@
                 ],
                 "selected": "Incremental"
             },
-            "otaChannel": {
+            "releaseChannel": {
                 "display": "OTA: release channel",
-                "devices":["MIYOO_FLIP", "MIYOO_MINI",
-                           "MIYOO_MINI_V4", "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP", "TRIMUI_BRICK",
-                           "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO",
-                           "TRIMUI_SMART_PRO_S", "MIYOO_A30",
-                           "ANBERNIC_RGXX720480", "ANBERNIC_RG28XX",
-                           "MINILOONG_POCKET1", "ANBERNIC_RGCUBEXX",
-                           "ANBERNIC_RGXX640480", "RGB30"],
-                "description": "developer mode only",
+                "description": "Nightly builds are untested and may break things",
                 "options": [
                     "Nightly",
                     "Stable"
                 ],
-                "selected": "Nightly"
+                "selected": "Stable"
             }
         },
         "Proxy Settings": {
@@ -651,19 +674,21 @@
             }
         },
         "RGB LED Settings": {
-            "disableLEDs": {
-                "display": "Disable RGB LEDs in all contexts",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
-                "description": "reload UI to apply",
+            "enableLEDs": {
+                "display": "RGB LEDs",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
+                "description": "applies immediately",
                 "options": [
-                    "True",
-                    "False"
+                    "On",
+                    "Off"
                 ],
-                "selected": "True"
+                "selected": "Off"
             },
             "LEDmaxScale": {
                 "display": "RGB LED brightness",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "if enabled; non-linear",
                 "options": [
                     "5",
@@ -685,7 +710,8 @@
             },
             "defaultLEDcolor": {
                 "display": "Default LED color",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "in menu, etc.",
                 "options": [
                     "Red",
@@ -705,23 +731,27 @@
             },
             "defaultLEDeffect": {
                 "display": "Default LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "in menu, etc.",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MINILOONG_POCKET1"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "static"
             },
             "defaultLEDduration": {
                 "display": "Default LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "in menu, etc.",
                 "options": [
                     "1000",
@@ -733,16 +763,20 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "2000"
             },
             "enableEmuSpecificLEDbehavior": {
                 "display": "Use separate LED control during emulation",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "follows defaults if set to False",
                 "options": [
                     "True",
@@ -752,7 +786,7 @@
             },
             "emuLEDcolor": {
                 "display": "In-game LED color",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "during emulation",
                 "options": [
                     "System-specific",
@@ -773,23 +807,25 @@
             },
             "emuLEDeffect": {
                 "display": "In-game LED behavior",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "during emulation",
                 "options": [
                     "off",
-                    "rise",
+                    {"label": "rise", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "breathe",
-                    "sniff",
+                    {"label": "sniff", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
                     "static",
-                    "blink 1",
-                    "blink 2",
-                    "blink 3"
+                    {"label": "blink 1", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MINILOONG_POCKET1"]},
+                    {"label": "blink 2", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "blink 3", "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"]},
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"]},
+                    {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "breathe"
             },
             "emuLEDduration": {
                 "display": "In-game LED cycle duration (ms)",
-                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
+                "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
                 "description": "during emulation",
                 "options": [
                     "1000",
@@ -801,9 +837,13 @@
                     "2500",
                     "2750",
                     "3000",
+                    "3250",
                     "3500",
+                    "3750",
                     "4000",
+                    "4250",
                     "4500",
+                    "4750",
                     "5000"
                 ],
                 "selected": "4000"
@@ -815,7 +855,7 @@
                 "options": [
                     "Manual",
                     "Disabled",
-                    "Softcore",
+                    "Casual",
                     "Hardcore"
                 ],
                 "selected": "Manual"
@@ -829,6 +869,26 @@
                 "display": "Password",
                 "type": "freeText",
                 "selected": ""
+            },
+            "enableOfflineProxy": {
+                "display": "Offline Achievements",
+                "description": "Earn Casual Cheevos Offline",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
+            },
+            "raproxyUsageStats": {
+                "display": "Share RAOfflineProxy statistics",
+                "description": "Sends app version, device, cache counts and a hashed user ID daily",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/raproxyUsageStats.sh"
             }
         },
         "Audio Settings": {

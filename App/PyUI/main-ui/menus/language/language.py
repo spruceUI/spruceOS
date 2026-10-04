@@ -556,12 +556,20 @@ class Language:
         return cls._data.get("animationSpeed","Animation Speed")
 
     @classmethod
+    def image_list_view_mode(cls):
+        return cls._data.get("imageListViewMode","Image List Mode")
+
+    @classmethod
+    def image_list_view_mode(cls):
+        return cls._data.get("imageListViewMode","Image List Mode")
+
+    @classmethod
     def input_rate_limit_ms(cls):
         return cls._data.get("inputRateLimitMs","Input Rate Limiting (ms)")
 
     @classmethod
-    def stock_os_menu(cls):
-        return cls._data.get("stockOsMenu","Stock OS Menu")
+    def image_top_bottom_percent(cls):
+        return cls._data.get("imageTopBottomPercent","Image % of Screen")
 
     @classmethod
     def optimize_boxart(cls):
@@ -708,6 +716,10 @@ class Language:
         return cls._data.get("imgMode","Img Mode")
 
     @classmethod
+    def scroll_game_selection(cls):
+        return cls._data.get("scrollGameSelection","Scroll Game Selection")
+
+    @classmethod
     def rows(cls):
         return cls._data.get("Rows","Rows")
 
@@ -824,6 +836,10 @@ class Language:
         return cls._data.get("Fonts","Fonts")
 
     @classmethod
+    def misc(cls):
+        return cls._data.get("Miscellaneous","Miscellaneous")
+
+    @classmethod
     def grid_view_theme_options(cls):
         return cls._data.get("gridViewThemeOptions","Grid View Theme Options")
 
@@ -838,4 +854,8 @@ class Language:
     @classmethod
     def aboutThisDevice(cls):
         return cls._data.get("aboutThisDevice","About this Device")
+
+    @classmethod
+    def useTextForLineHeight(cls):
+        return cls._data.get("useTextForLineHeight","Use Text For Line Height")
 

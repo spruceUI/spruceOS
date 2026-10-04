@@ -27,7 +27,9 @@ backup_theme_configs() {
     local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
     mkdir -p "$backup_root"
 
-    for config in /mnt/SDCARD/Themes/*/config*json; do
+    for config in /mnt/SDCARD/Themes/*/config*json /mnt/SDCARD/Themes/*/igm.json; do
+        # an unmatched glob expands to the pattern itself
+        [ -f "$config" ] || continue
         theme_dir="$(dirname "$config")"
         theme_name="$(basename "$theme_dir")"
 
@@ -44,14 +46,14 @@ log_message "----------Running Backup script----------"
 
 # Disable idle/shutdown timer during backup
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Backing up your spruce configs and files! Please wait.........." 75
 
 # twinkle them lights
-rgb_led lrm12 breathe FFFF00 2100 "-1" mmc0
+rgb_led lrm12b breathe FFFF00 2100 "-1" mmc0
 
 # Create Saves/spruce directory and 'backups' subdirectory if they don't exist
 mkdir -p "$BACKUP_DIR/backups"
@@ -112,6 +114,7 @@ folders="
 /mnt/SDCARD/Emu/NDS/resources/settings_MiyooMini.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Pixel2.json
 /mnt/SDCARD/Emu/SATURN/.yabasanshiro
+/mnt/SDCARD/RetroArch/igm.json
 /mnt/SDCARD/RetroArch/.retroarch/config
 /mnt/SDCARD/RetroArch/.retroarch/overlay
 /mnt/SDCARD/RetroArch/.retroarch/shaders

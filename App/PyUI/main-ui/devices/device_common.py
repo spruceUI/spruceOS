@@ -1,19 +1,21 @@
 
 
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from pathlib import Path
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
+from devices.bluetooth.bluetooth_command import BluetoothCommand
 from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_scanner import WiFiScanner
+from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
+from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
@@ -225,42 +227,211 @@ class DeviceCommon(AbstractDevice):
     def get_display_volume(self):
         return self.get_volume()
             
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
+    # ---- Bluetooth --------------------------------------------------------
+    # As with WiFi: the shell owns the radio and its daemons, PyUI saves the
+    # on/off setting and calls bluetoothCmd for the rest. See
+    # App/PyUI/bluetooth_readme.txt for the command contract.
+
+    def _bluetooth_cmd(self, *args, timeout=20):
+        cmd = PyUiConfig.get_bluetooth_cmd()
+        if not cmd or not os.path.exists(cmd):
+            return None
+        try:
+            result = subprocess.run([cmd, *args], capture_output=True, text=True,
+                                    stdin=subprocess.DEVNULL, timeout=timeout)
+            if result.returncode != 0:
+                PyUiLogger.get_logger().error(f"bluetooth {args[0]} exited {result.returncode}")
+                return None
+            return result.stdout
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"bluetooth {args[0]} failed: {e}")
+            return None
+
+    def is_bluetooth_enabled(self):
+        return self.system_config.is_bluetooth_enabled()
+
+    def enable_bluetooth(self):
+        self.system_config.set_bluetooth(1)
+        self._apply_bluetooth()
+
+    def disable_bluetooth(self):
+        self.system_config.set_bluetooth(0)
+        self._apply_bluetooth()
+
+    # apply brings the radio up or down, which takes seconds; keep it off the
+    # UI thread. A toggle made while one is running gets one more apply, which
+    # reads the saved setting, so the last toggle wins.
+    _bt_apply_lock = threading.Lock()
+    _bt_apply_running = False
+    _bt_apply_again = False
+    _bt_route_key = None
+
+    def _apply_bluetooth(self):
+        with self._bt_apply_lock:
+            if self._bt_apply_running:
+                self._bt_apply_again = True
+                return
+            self._bt_apply_running = True
+        threading.Thread(target=self._bluetooth_apply_worker, daemon=True).start()
+
+    def _bluetooth_apply_worker(self):
+        while True:
+            self._bluetooth_cmd("apply", timeout=30)
+            self._bluetooth_status.force_refresh()
+            self.refresh_audio_route()
+            with self._bt_apply_lock:
+                if not self._bt_apply_again:
+                    self._bt_apply_running = False
+                    return
+                self._bt_apply_again = False
+
+    @throttle.limit_refresh(10, background=True)
+    def _bluetooth_status(self):
+        out = self._bluetooth_cmd("status", timeout=15) or ""
+        return dict(line.split("=", 1) for line in out.splitlines() if "=" in line)
+
+    def get_bluetooth_status(self):
+        """For the top bar: None unless something is connected, then "audio" or
+        "gamepad" when only that kind is, otherwise "on"."""
+        if not self.is_bluetooth_enabled():
+            return None
+        status = self._bluetooth_status()
+        if status.get("radio") != "1":
+            return None
+        # Headsets also connect and drop on their own (boot reconnect, power off),
+        # and the audio stream comes up a moment after the connection.
+        route_key = (status.get("connected"), status.get("audio"))
+        if route_key != self._bt_route_key:
+            self._bt_route_key = route_key
+            self.refresh_audio_route()
+        icons = [i for i in status.get("connected_icon", "").split(",") if i]
+        if not icons:
+            return None
+        if all(i.startswith("audio") for i in icons):
+            return "audio"
+        if all(i == "input-gaming" for i in icons):
+            return "gamepad"
+        return "on"
+
+    def get_bluetooth_scanner(self):
+        if not hasattr(self, "_bluetooth_scanner"):
+            status = (self._bluetooth_cmd("status") or "").splitlines()
+            self._bluetooth_scanner = BluetoothCommand(self._bluetooth_cmd) if "radio=1" in status else None
+        return self._bluetooth_scanner
+
+    # ---- WiFi -------------------------------------------------------------
+    # The shell owns the radio and reports on it; PyUI only saves the on/off
+    # setting and shows what `wifiCmd status` says. See App/PyUI/wifi_readme.txt
+    # for the command contract. With no wifiCmd configured, the reads fall back
+    # to the interface and /proc so hosts without spruce's script still work.
+
+    def _wifi_cmd(self, *args, stdin_text=None, timeout=10):
+        """Run the configured WiFi command. Returns stdout, or None when there
+        is no command or it failed."""
+        cmd = PyUiConfig.get_wifi_cmd()
+        if not cmd or not os.path.exists(cmd):
+            return None
+        try:
+            run_args = dict(capture_output=True, text=True, timeout=timeout)
+            if stdin_text is None:
+                run_args["stdin"] = subprocess.DEVNULL
+            else:
+                run_args["input"] = stdin_text
+            result = subprocess.run([cmd, *args], **run_args)
+            if result.returncode != 0:
+                PyUiLogger.get_logger().error(f"wifi {args[0]} exited {result.returncode}")
+                return None
+            return result.stdout
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"wifi {args[0]} failed: {e}")
+            return None
+
+    # background: the top bar asks for this every frame, and `wifiCmd status` takes
+    # ~0.2 s on an A133P. Read on the UI thread, that stalled one frame per refresh
+    # (every second while a change settles), and Controller.get_input drops a key
+    # pressed during a frame longer than 0.2 s: typing a WiFi password lost keys.
+    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until", background=True)
+    def _wifi_status(self):
+        """`wifiCmd status` as a dict of its key=value lines."""
+        out = self._wifi_cmd("status", timeout=15)
+        if out is None:
+            return self._wifi_status_fallback()
+        status = {}
+        for line in out.splitlines():
+            if "=" in line:
+                key, value = line.split("=", 1)
+                status[key.strip()] = value.strip()
+        return status
+
+    def _wifi_status_fallback(self):
+        """No WiFi command on this host: read the interface directly."""
+        status = {"radio": "1", "saved": "1"}
+        if not self.is_wifi_enabled():
+            status["link"] = "off"
+            return status
+        ip = ""
+        try:
+            result = subprocess.run(["ip", "-4", "addr", "show", "wlan0"], capture_output=True, text=True, timeout=5)
+            for line in result.stdout.splitlines():
+                line = line.strip()
+                if line.startswith("inet "):
+                    ip = line.split()[1].split("/")[0]
+                    break
+        except Exception:
+            status["link"] = "error"
+            return status
+        if not ip:
+            status["link"] = "connecting"
+            return status
+        status["link"] = "connected"
+        status["ip"] = ip
+        try:
+            with open("/proc/net/wireless") as f:
+                for line in f:
+                    parts = line.split()
+                    if parts and parts[0] == "wlan0:":
+                        status["signal"] = str(int(float(parts[3].rstrip("."))))
+        except Exception:
+            pass
+        return status
+
+    def _wifi_signal_dbm(self):
+        try:
+            return int(self._wifi_status().get("signal", ""))
+        except ValueError:
+            return None
+
     def get_wifi_status(self):
         if not self.is_wifi_enabled():
             return WifiStatus.OFF
-
-        if self.get_ip_addr_text() in [
-            Language.label("wifiStatusOff", "Off"),
-            Language.label("wifiStatusError", "Error"),
-            Language.label("wifiStatusConnecting", "Connecting"),
-            Language.label("wifiStatusNoNetwork", "No network selected"),
-        ]:
+        if self._wifi_status().get("link") != "connected":
             return WifiStatus.OFF
 
-        info = self.get_wifi_connection_quality_info()
-
-        # RSSI in dBm (negative values)
-        rssi = info.signal_level
-
-        # Missing / invalid RSSI
-        if rssi is None or rssi <= -200:
-            return WifiStatus.OFF
-
-        # Keep network state synced
-        self.get_ip_addr_text()
-
-        # RSSI-based classification
+        rssi = self._wifi_signal_dbm()
+        if rssi is None:
+            # Joined with an address but no strength reading: usable, unknown.
+            return WifiStatus.OKAY
         if rssi >= -50:
-            return WifiStatus.GREAT      # Excellent
+            return WifiStatus.GREAT
         elif rssi >= -67:
-            return WifiStatus.GOOD       # Strong / stable
+            return WifiStatus.GOOD
         elif rssi >= -75:
-            return WifiStatus.OKAY       # Usable
+            return WifiStatus.OKAY
         else:
-            return WifiStatus.BAD        # Weak / unreliable
+            return WifiStatus.BAD
 
-        
+    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
+        rssi = self._wifi_signal_dbm()
+        if rssi is None or self._wifi_status().get("link") != "connected":
+            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
+        if rssi <= -100:
+            link_quality = 0
+        elif rssi >= -50:
+            link_quality = 70
+        else:
+            link_quality = int((rssi + 100) * 1.4)
+        return WiFiConnectionQualityInfo(noise_level=0, signal_level=rssi, link_quality=link_quality)
+
     def get_running_processes(self):
         #bypass ProcessRunner.run_and_print() as it makes the log too big
         return subprocess.run(['ps', '-f'], capture_output=True, text=True)
@@ -282,23 +453,10 @@ class DeviceCommon(AbstractDevice):
             DeviceCommon.WPA_SUPPLICANT_CONF
         )
 
-    # Every radio change goes through spruce's `wifi` command, which runs them one
-    # at a time; PyUI only saves the setting and hands over.
-    WIFI_COMMAND = "wifi"
-
     def _run_wifi_script(self, *args, stdin_text=None):
-        if shutil.which(self.WIFI_COMMAND) is None:
-            return
-        try:
-            # Returns at once: wifi does the work in a detached copy of itself
-            run_args = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=10)
-            if stdin_text is None:
-                run_args["stdin"] = subprocess.DEVNULL
-            else:
-                run_args["input"] = stdin_text.encode()
-            subprocess.run([self.WIFI_COMMAND, *args], **run_args)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"wifi {args[0]} failed: {e}")
+        # Radio changes return at once: the command does the work in a
+        # detached copy of itself. Output is not needed.
+        self._wifi_cmd(*args, stdin_text=stdin_text)
 
     def _save_wifi_setting(self, value):
         self.system_config.reload_config()
@@ -316,37 +474,76 @@ class DeviceCommon(AbstractDevice):
     def wifi_connect(self, ssid: str, password):
         """Apply a network selection. password is None for an open network.
 
-        The network goes to wifi.sh on stdin, never on a command line; how the
-        shell carries it to its worker is the shell's business.
+        The network goes to the WiFi command on stdin, never on a command line.
         """
         self._run_wifi_script("connect", stdin_text=f"{ssid}\n{password or ''}\n")
 
-    # Deadline (time.time()) until which the WiFi status caches refresh every
-    # second instead of every 10-15 s; see utils/throttle.limit_refresh.
+    # Deadline (time.time()) until which the WiFi status cache refreshes every
+    # second instead of every 10 s; see utils/throttle.limit_refresh.
     _wifi_settle_until = 0.0
 
     def note_wifi_change(self, settle_seconds=60):
         """The user just toggled WiFi or picked a network: drop the throttled
-        status caches now and keep them fast while the join settles, so the
+        status cache now and keep it fast while the join settles, so the
         Settings row and the top-bar icon follow the link within a second."""
         self._wifi_settle_until = time.time() + settle_seconds
-        for name in ("get_wifi_status", "get_ip_addr_text", "_get_ip_addr_text", "get_wifi_connection_quality_info"):
-            for cls in type(self).__mro__:
-                fn = cls.__dict__.get(name)
-                force = getattr(fn, "force_refresh", None)
-                if force:
-                    force()
+        for cls in type(self).__mro__:
+            fn = cls.__dict__.get("_wifi_status")
+            force = getattr(fn, "force_refresh", None)
+            if force:
+                force()
 
     def wifi_has_saved_network(self):
-        """True when the device's wpa_supplicant.conf holds at least one network block.
-
-        A read error answers True: never claim "no network" on a guess.
-        """
-        try:
-            with open(self.get_wpa_supplicant_conf_path()) as f:
-                return any(line.strip().startswith("network=") for line in f)
-        except Exception:
+        """True when at least one network is saved. Unknown answers True: never
+        claim "no network" on a guess."""
+        saved = self._wifi_status().get("saved")
+        if saved is None:
             return True
+        try:
+            return int(saved) > 0
+        except ValueError:
+            return True
+
+    def get_wifi_saved_networks(self):
+        """Saved network names, in the order the WiFi command lists them."""
+        out = self._wifi_cmd("saved")
+        if out is None:
+            return []
+        return [line for line in out.splitlines() if line]
+
+    def wifi_scan(self):
+        """One `wifiCmd scan`: the networks visible right now. Blocks for a few
+        seconds, so WiFiScanner calls it from its worker thread."""
+        out = self._wifi_cmd("scan", timeout=30)
+        networks = []
+        if out is None:
+            return networks
+        for line in out.splitlines():
+            parts = line.split("\t")
+            if len(parts) < 5:
+                continue
+            ssid, signal, freq, secured, bssid = parts[:5]
+            try:
+                networks.append(WiFiNetwork(
+                    bssid=bssid,
+                    frequency=int(freq),
+                    signal_level=int(signal),
+                    flags="WPA" if secured == "1" else "",
+                    ssid=ssid,
+                ))
+            except ValueError:
+                continue
+        return networks
+
+    def wifi_connected_network(self):
+        """(ssid, frequency MHz) of the joined network, or (None, None)."""
+        status = self._wifi_status()
+        ssid = status.get("ssid") or None
+        try:
+            freq = int(status.get("freq", ""))
+        except ValueError:
+            freq = None
+        return ssid, freq
 
     def wifi_pending_text(self):
         """Status for a radio that is on but has no address.
@@ -360,33 +557,24 @@ class DeviceCommon(AbstractDevice):
             return Language.label("wifiStatusNoNetwork", "No network selected")
         return Language.label("wifiStatusConnecting", "Connecting")
 
-    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
     def get_ip_addr_text(self):
-        import subprocess
-
         if not self.is_wifi_enabled():
             return Language.label("wifiStatusOff", "Off")
-
-        try:
-            # Query interface address
-            result = subprocess.run(
-                ["ip", "-4", "addr", "show", "wlan0"],
-                capture_output=True,
-                text=True
-            )
-
-            output = result.stdout
-
-            # Look for "inet x.x.x.x"
-            for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("inet "):
-                    return line.split()[1].split("/")[0]
-
-            return self.wifi_pending_text()
-
-        except Exception:
-            return Language.label("wifiStatusError", "Error")    
+        status = self._wifi_status()
+        link = status.get("link", "")
+        if link == "connected":
+            return status.get("ip") or Language.label("wifiStatusConnecting", "Connecting")
+        if link == "no_radio":
+            return Language.label("wifiStatusUnsupported", "Unsupported")
+        if link == "off":
+            return Language.label("wifiStatusOff", "Off")
+        if link == "error":
+            return Language.label("wifiStatusError", "Error")
+        if link == "no_network":
+            return Language.label("wifiStatusNoNetwork", "No network selected")
+        if link == "connecting":
+            return Language.label("wifiStatusConnecting", "Connecting")
+        return self.wifi_pending_text()
 
     def exit_pyui(self):
         Display.deinit_display()
@@ -607,6 +795,42 @@ class DeviceCommon(AbstractDevice):
     def get_audio_system(self):
         return AudioPlayerNone()
 
+    _audio_route_lock = threading.Lock()
+
+    def refresh_audio_route(self):
+        threading.Thread(target=self._refresh_audio_route, name="AudioRoute", daemon=True).start()
+
+    def _refresh_audio_route(self):
+        with self._audio_route_lock:
+            self._refresh_audio_route_locked()
+
+    def _refresh_audio_route_locked(self):
+        # The command prints the ALSA device to play through - a connected
+        # Bluetooth headset - or an empty last line for the default output.
+        cmd = PyUiConfig.get_bt_audio_device_cmd()
+        if not cmd:
+            return
+        try:
+            result = subprocess.run([cmd], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                    text=True, timeout=30)
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Audio route check failed: {e}")
+            return
+        if result.returncode != 0:
+            return
+        lines = result.stdout.splitlines()
+        device = lines[-1].strip() if lines else ""
+        if device == os.environ.get("AUDIODEV", ""):
+            return
+        if device:
+            os.environ["AUDIODEV"] = device
+        else:
+            os.environ.pop("AUDIODEV", None)
+        PyUiLogger.get_logger().info(f"Audio output now {device or 'the default device'}")
+        self.get_audio_system().audio_reopen()
+        from themes.theme import Theme
+        Theme.bgm_setting_changed()
+
     def get_extra_settings_options(self):
         return []
     
@@ -710,7 +934,7 @@ class DeviceCommon(AbstractDevice):
         return WifiMenu()
 
     def get_new_wifi_scanner(self):
-        return WiFiScanner()
+        return WiFiScanner(self.wifi_scan, self.wifi_connected_network)
 
     def post_present_operations(self):
         # Uneeded for most devices

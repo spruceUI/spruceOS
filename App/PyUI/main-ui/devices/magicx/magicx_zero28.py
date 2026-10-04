@@ -27,4 +27,4 @@ class MagicXZero28(MagicXA133PDevice):
         return self._env_int("DISPLAY_HEIGHT", 480)
 
     def screen_rotation(self):
-        return self._env_int("DISPLAY_ROTATION", 90)
+        return self._env_int("DISPLAY_ROTATION", 0)

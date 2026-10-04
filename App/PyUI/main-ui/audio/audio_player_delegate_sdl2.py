@@ -1,4 +1,6 @@
 
+from pathlib import Path
+import time
 from audio.sdl2_audio_player import Sdl2AudioPlayer
 
 
@@ -24,3 +26,13 @@ class AudioPlayerDelegateSdl2:
 
     def load_wav(self,file_path: str):
         Sdl2AudioPlayer.load_wav(file_path)
+
+    def audio_reopen(self):
+        # The worker reinitialises on this flag: it reopens the output, picking
+        # up AUDIODEV, and reloads the menu sounds. A cleanup would drop them.
+        flag = Path("/tmp/audio_reinit_needed")
+        flag.touch()
+        for _ in range(30):
+            if not flag.exists():
+                break
+            time.sleep(0.1)

@@ -12,7 +12,6 @@
 # Provides:
 #   run_dsperate
 
-. /mnt/SDCARD/spruce/scripts/emu/lib/rac_functions.sh
 
 DSPERATE_BIOS_DIR=/mnt/SDCARD/BIOS/nds
 export DS_CHEEVOS_CFW_CONFIG="/mnt/SDCARD/Saves/spruce/cheevos.cfg"
@@ -20,7 +19,7 @@ export EMU_DIR="/mnt/SDCARD/Emu/NDS" # override this so NDSi can refer back to N
 
 dsperate_bios_missing() {
 	_missing=""
-	for _f in bios9.bin bios7.bin firmware.bin; do
+	for _f in $1; do
 		[ -f "$DSPERATE_BIOS_DIR/$_f" ] || _missing="$_missing $_f"
 	done
 	echo "$_missing"
@@ -29,8 +28,24 @@ dsperate_bios_missing() {
 display_dsperate_bios_message() {
 	start_pyui_message_writer
 	log_and_display_message "DSperate needs a DS BIOS dump.\nMissing from BIOS/nds:$1\nDumps are not included."
-	sleep 6
+	sleep 8
 	stop_pyui_message_writer
+}
+
+# Prints a RetroAchievements session token for the account, or nothing.
+rac_login_token() {
+	_u="$(printf '%s' "$1" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
+	_p="$(printf '%s' "$2" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
+	_url="https://retroachievements.org/dorequest.php?r=login&u=$_u&p=$_p"
+	if command -v curl >/dev/null 2>&1; then
+		_resp="$(curl -sS -f --connect-timeout 15 -A spruceOS "$_url" 2>/dev/null)"
+		case "$?" in
+			35|51|58|59|60|77) _resp="$(curl -k -sS -f --connect-timeout 15 -A spruceOS "$_url" 2>/dev/null)" ;;
+		esac
+	else
+		_resp="$(wget -q --no-check-certificate -U spruceOS -O - "$_url" 2>/dev/null)"
+	fi
+	printf '%s' "$_resp" | sed -n 's/.*"Token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
 }
 
 seed_dsperate_config() {
@@ -41,7 +56,7 @@ seed_dsperate_config() {
 			 /mnt/SDCARD/Saves/states/dsperate \
 			 /mnt/SDCARD/Saves/dsperate/games
 
-	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini games/BootMenu.ini games/BootMenuDSi.ini; do
+	for _cfg in a30.ini rgb30.ini no-sticks.ini one-stick.ini two-sticks.ini tate.ini zero40.ini games/BootMenu.ini games/BootMenuDSi.ini; do
 		if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
 			cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
 			log_message "DSperate: seeded $_cfg"
@@ -55,7 +70,7 @@ prepare_dsperate_cheevos() {
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	case "$rac_mode" in
-		Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0; } ;;
+		Casual|Softcore|Hardcore) [ -n "$rac_user" ] || { rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0; } ;;
 		Disabled) rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0 ;;
 		*) return 0 ;;
 	esac
@@ -142,13 +157,16 @@ run_dsperate() {
 	export XDG_CONFIG_HOME="/mnt/SDCARD/Saves"
 
 	if [ "$GAME" = "BootMenu.nds" ]; then
-		_missing="$(dsperate_bios_missing)"
-		if [ -n "$_missing" ]; then
-			log_message "DSperate: missing BIOS:$_missing"
-			mkdir -p "$DSPERATE_BIOS_DIR"
-			display_dsperate_bios_message "$_missing"
-			return 1
-		fi
+		_missing="$(dsperate_bios_missing "bios9.bin bios7.bin firmware.bin")"
+	elif [ "$GAME" = "BootMenuDSi.nds" ]; then
+		_missing="$(dsperate_bios_missing "bios9.bin bios7.bin biosdsi9.bin biosdsi7.bin dsifirmware.bin nand.bin")"
+	fi
+
+	if [ -n "$_missing" ]; then
+		log_message "DSperate: missing BIOS:$_missing"
+		mkdir -p "$DSPERATE_BIOS_DIR"
+		display_dsperate_bios_message "$_missing"
+		return 1
 	fi
 
 	seed_dsperate_config
@@ -191,6 +209,12 @@ run_dsperate() {
 		"Extra Chunky") set -- "$@" --chunky --chunky-cell 8 ;;
 	esac
 
+	# Allow user-provided usrcheat.dat in the BIOS/nds folder. If not provided,
+	# fall back to the spruce default one defined in the .ini.
+	if [ -f "$DSPERATE_BIOS_DIR"/usrcheat.dat ]; then 
+		set -- "$@" --cheats "$DSPERATE_BIOS_DIR"/usrcheat.dat
+	fi
+
 	# The game switcher's thumbnail, written by DSperate itself with the auto
 	# state (emu.autosave_png). The device's take_screenshot runs first in
 	# the hold-Home path and this overwrites it a moment later, which is the
@@ -207,8 +231,8 @@ run_dsperate() {
 		export DS_ROTATE=270
 		export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 		./dsperate.a30 "$@" --config "/mnt/SDCARD/Saves/dsperate/a30.ini" > "$(emu_log_file)" 2>&1
-	else
 
+	else
 		case "$DEVICE_NUM_ANALOG_STICKS" in
 			"0") _config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
@@ -219,7 +243,12 @@ run_dsperate() {
 			*)
 				if [ "$PLATFORM" = "RGB30" ]; then
 					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
-					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini" 
+					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini"
+
+				elif [ "$PLATFORM" = "Zero40" ]; then
+					# Z40 gets its own config to accommodate its unique touchscreen
+					_config_path="/mnt/SDCARD/Saves/dsperate/zero40.ini"
+
 				else
 					_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
 				fi 

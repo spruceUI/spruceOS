@@ -11,7 +11,6 @@ from controller.key_watcher import KeyWatcher
 import os
 from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
-from devices.bluetooth.bluetooth_scanner import BluetoothScanner
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -21,7 +20,6 @@ from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from menus.games.utils.rom_info import RomInfo
 import sdl2
@@ -123,39 +121,6 @@ class MiyooFlip(MiyooDevice):
         self._set_brightness_to_config()
         self._set_hue_to_config()
         self.init_gpio()
-        self.init_bluetooth()
-
-    def init_bluetooth(self):
-        if(self.system_config.is_bluetooth_enabled()):
-            try:
-                subprocess.Popen(["insmod","/lib/modules/rtk_btusb.ko"],
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL)
-            except Exception as e:
-                PyUiLogger.get_logger().error(f"Error running insmod {e}")
-
-            #Is this needed? Temporarily disable
-            if(False):
-                if(not self.is_btmanager_runing()):
-                    try:
-                        subprocess.Popen(["/usr/miyoo/bin/btmanager"],
-                                        stdout=subprocess.DEVNULL,
-                                        stderr=subprocess.DEVNULL)
-                    except Exception as e:
-                        PyUiLogger.get_logger().error(f"Error running insmod {e}")
-        else:
-            self.disable_bluetooth()
-
-    def is_btmanager_runing(self):
-        try:
-            # Run 'ps' to check for bluetoothd process
-            result = self.get_running_processes()
-            # Check if bluetoothd is in the process list
-            return 'btmanager' in result.stdout
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"Error checking bluetoothd status: {e}")
-            return False
-
 
     def init_gpio(self):
         try:
@@ -270,10 +235,6 @@ class MiyooFlip(MiyooDevice):
             return int(f.read().strip()) 
         return 0
     
-    def get_bluetooth_scanner(self):
-        return BluetoothScanner()
-    
-
     def reboot_cmd(self):
         return "reboot"
 
@@ -376,36 +337,6 @@ class MiyooFlip(MiyooDevice):
             core = game_system_config.get_effective_menu_selection("Emulator_64", rom_file_path)
         return core
     
-    @throttle.limit_refresh(15, fast_seconds=1, fast_while="_wifi_settle_until")
-    def get_wifi_status(self):
-        if(self.is_wifi_enabled()):
-            if(self.get_ip_addr_text() in ["Off","Error","Connecting","No network selected"]):
-                return WifiStatus.OFF
-            wifi_connection_quality_info = self.get_wifi_connection_quality_info()
-            # Composite score out of 100 based on weighted contribution
-            # Adjust weights as needed based on empirical testing
-            if(wifi_connection_quality_info.signal_level <= -200 or (wifi_connection_quality_info.link_quality == 0.0 and wifi_connection_quality_info.signal_level == 0.0)):
-                return WifiStatus.OFF
-            else:
-                score = (
-                    (wifi_connection_quality_info.link_quality / 70.0) * 0.5 +          # 50% weight
-                    (wifi_connection_quality_info.signal_level / 70.0) * 0.3 +        # 30% weight
-                    ((70 - wifi_connection_quality_info.noise_level) / 70.0) * 0.2    # 20% weight (less noise is better)
-                ) * 100
-
-            # Ensure signal and settings stay in sync
-            self.get_ip_addr_text()
-            
-            if score >= 80:
-                return WifiStatus.GREAT
-            elif score >= 60:
-                return WifiStatus.GOOD
-            elif score >= 40:
-                return WifiStatus.OKAY
-            else:
-                return WifiStatus.BAD
-        else:            
-            return WifiStatus.OFF
 
     @throttle.limit_refresh(1)
     def post_present_operations(self):

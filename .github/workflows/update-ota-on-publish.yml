@@ -99,16 +99,7 @@ jobs:
             --repo spruceUI/spruceOS \
             -p "spruceV${VERSION}.7z"
 
-          if [ "$HAS_PREVIOUS_RELEASE" = "true" ] && [ "$PREVIOUS_VERSION" = "4.4.1" ]; then
-
-            # 4.4.1's updater.py refuses incremental queues without developer
-            # mode. With no 4.4.1 diff in the feed, its downloader falls back
-            # to the full archive. Remove once 4.4.1 is no longer the
-            # previous release.
-            echo "Skipping the stable incremental archive from 4.4.1."
-            echo "HAS_DIFF=false" >> "$GITHUB_ENV"
-
-          elif [ "$HAS_PREVIOUS_RELEASE" = "true" ]; then
+          if [ "$HAS_PREVIOUS_RELEASE" = "true" ]; then
 
             # The stable release workflow names the incremental archive after
             # the previous release TAG (which carries the v prefix):

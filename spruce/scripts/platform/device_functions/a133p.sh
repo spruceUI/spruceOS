@@ -318,6 +318,35 @@ brightness_up() {
     set_backlight $((backlight + 1))
 }
 
+turn_off_screen() {
+    "$DEVICE_PYTHON3_PATH" - <<EOF
+import os, fcntl, ctypes, sys, traceback
+
+try:
+    DISP_LCD_SET_BRIGHTNESS = 0x102
+    val = 0
+
+    print(f"[PY] Brightness value: {val}", file=sys.stderr)
+
+    if not os.path.exists("/dev/disp"):
+        print("[PY][ERR] /dev/disp does not exist", file=sys.stderr)
+        sys.exit(1)
+
+    fd = os.open("/dev/disp", os.O_RDWR)
+
+    param = (ctypes.c_ulong * 4)(0, val, 0, 0)
+
+    fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
+
+    os.close(fd)
+
+except Exception as e:
+    print("[PY][EXCEPTION]", e, file=sys.stderr)
+    traceback.print_exc()
+EOF
+}
+
+
 # --- WiFi radio -------------------------------------------------------------
 # The A133P line's onboard radio is the XR829 (xradio_wlan owns wlan0, loaded
 # by the stock init). A supported USB dongle on the USB-C port takes over

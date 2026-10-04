@@ -217,6 +217,14 @@ class PyUiConfig:
     @classmethod
     def get_activity_log_path(cls):
         return cls.get("activityLogPath",None)
+
+    @classmethod
+    def get_cheevos_remove_cmd(cls):
+        return cls.get("cheevosRemoveCmd",None)
+
+    @classmethod
+    def get_cheevos_cache_path(cls):
+        return cls.get("cheevosCachePath",None)
     
     @classmethod
     def get_about_entries(cls):
@@ -245,4 +253,24 @@ class PyUiConfig:
     @classmethod
     def get_cpu_mode_cmd(cls):
         return cls.get("cpuModeCmd",None)
+
+    @classmethod
+    def get_backlight_cmd(cls):
+        return cls.get("backlightCmd",None)
+
+    @classmethod
+    def get_bt_audio_device_cmd(cls):
+        return cls.get("btAudioDeviceCmd",None)
+
+    @classmethod
+    def get_wifi_cmd(cls):
+        return cls.get("wifiCmd",None)
+
+    @classmethod
+    def get_bluetooth_cmd(cls):
+        return cls.get("bluetoothCmd",None)
+
+    @classmethod
+    def get_cache_cheevos_cmd(cls):
+        return cls.get("cacheCheevosCmd",None)
 

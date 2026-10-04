@@ -76,7 +76,10 @@ restore_theme_configs() {
         dest_dir="/mnt/SDCARD/Themes/$base_theme"
 
         if [ -d "$dest_dir" ]; then
-            cp -f "$theme_name"/config*json "$dest_dir"/
+            for f in "$theme_name"/config*json "$theme_name"/igm.json; do
+                [ -f "$f" ] || continue
+                cp -f "$f" "$dest_dir"/
+            done
             log_message "Restored configs for theme $base_theme"
         else
             log_message "Skipping restore for missing theme: $base_theme"
@@ -90,14 +93,14 @@ log_message "----------Starting Restore script----------"
 
 # Disable idle/shutdown timer during restore
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 start_pyui_message_writer
 
 display_image_and_text "$ICON_PATH" 25 25 "Restoring from your most recent backup..." 75
 
 # twinkle them lights
-rgb_led lrm12 breathe 00FF00 1900 "-1" mmc0
+rgb_led lrm12b breathe 00FF00 1900 "-1" mmc0
 
 log_message "Looking for backup files..."
 
@@ -188,7 +191,7 @@ log_message "Restoring theme customizations"
 restore_theme_configs
 
 log_message "Applying idlemon setting"
-sh /mnt/SDCARD/spruce/scripts/applySetting/idlemon_mm.sh
+sh /mnt/SDCARD/spruce/scripts/idle_watchdog.sh
 
 log_message "----------Restore and Upgrade completed----------"
 

@@ -1,7 +1,7 @@
 {
   "label": "Fake08",
-  "icon": "pico.png",
-  "iconsel": "pico_sel.png",
+  "icon": "fake08.png",
+  "iconsel": "fake08_sel.png",
   "themecolor": "00FF88",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "p8|png",

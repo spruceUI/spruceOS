@@ -96,7 +96,7 @@ display() {
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
@@ -185,7 +185,7 @@ get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
 }
 
-# May low_power_warning.sh force a shutdown when the gauge reads 1 % or less?
+# May battery_level_watchdog.sh force a shutdown when the gauge reads 1 % or less?
 # Default yes; a platform whose gauge is not trusted overrides this.
 device_low_battery_shutdown_ok() {
     return 0
@@ -389,6 +389,39 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
+# Bluetooth, driven by bluetooth.sh. A device with a usable radio answers 0
+# from device_bluetooth_supported and starts and stops its daemons in the two
+# hooks; pairing and scanning are bluetoothctl everywhere.
+device_bluetooth_supported() {
+    return 1
+}
+
+device_bluetooth_up() {
+    :
+}
+
+device_bluetooth_down() {
+    :
+}
+
+# bluealsa's ALSA mixer, 0-127, on each connected headset; takes the 0-20 level.
+# The control is "<name> - A2DP", but bluez-alsa 4.0 names the elements
+# "<name> - A2DP Playback Volume/Switch" and ALSA cuts names at 43 characters,
+# so a long headset name comes out as "... - A2DP Playback Volum": match A2DP
+# anywhere and leave the switch alone. Each call is bounded: a bluealsa that has
+# stopped answering must not hang the volume keys or the connection watcher.
+bt_headset_volume() {
+    pidof bluealsa >/dev/null 2>&1 || return 0
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    $_bt_to amixer -D bluealsa scontrols 2>/dev/null | sed -n "s/^Simple mixer control '\(.*A2DP.*\)',0$/\1/p" | grep -v ' Switc' | while read -r _ctl; do
+        $_bt_to amixer -D bluealsa sset "$_ctl" "$(( $1 * 127 / 20 ))" >/dev/null 2>&1
+    done
+}
+
+device_bt_audio_connected() {
+    bt_headset_volume "$(get_volume_level)"
+}
+
 # Whether wifi_watchdog.sh restarts a link that has no address. Off where the OS owns the radio.
 device_wifi_watchdog_enabled() {
     ! device_manages_own_wifi
@@ -424,9 +457,8 @@ device_power_transition_bypasses_init() {
     #
     # Whether `poweroff`/`reboot` can be trusted to do anything on this device.
     # The busybox applets only signal PID 1 and return; if init is blocked for
-    # the whole Spruce session (the Miniloong's rcS is held by the boot
-    # supervisor, S49spruce -> session.sh -> runtime.sh) those signals are never
-    # serviced and the device just sits there with its card unmounted. A device
+    # the whole Spruce session those signals are never serviced and the device
+    # just sits there with its card unmounted. A device
     # answering true tells stage 2 to skip the plain applets and the 10 s waits
     # on them, take the filesystems down the REISUB way (sysrq s/u/s) and call
     # the forced form straight away, which is reboot(2) and needs no init.
@@ -448,6 +480,53 @@ device_write_default_asound_rc() {
     # Do these need to be unique per device? Don't have a way 
     # to test currently
     log_message "Missing device_write_default_asound_rc function" -v
+}
+
+device_on_bt_audio_route() {
+    # asound-setup.sh calls this with the headset's MAC once it has pointed ALSA
+    # at it, and with no argument when audio stays on the device - for firmware
+    # whose own volume path has to be told where the audio went. Default: nothing.
+    :
+}
+
+# The connected audio device's MAC, if any.
+bt_connected_audio_mac() {
+    pidof bluetoothd >/dev/null 2>&1 || return 1
+    _bt_to="${BTCTL_TIMEOUT:-timeout 2}"
+    for _mac in $($_bt_to bluetoothctl devices 2>/dev/null | awk '{print $2}'); do
+        _info="$($_bt_to bluetoothctl info "$_mac" 2>/dev/null)" || continue
+        echo "$_info" | grep -q "Connected: yes" || continue
+        if echo "$_info" | grep "Name" | cut -d ' ' -f2- | grep -iqE "headset|speaker|audio|earbud|headphone"; then
+            echo "$_mac"
+            return 0
+        fi
+        case "$(echo "$_info" | grep "Icon" | awk '{print $2}')" in
+            audio-headset|audio-card|audio-headphones) echo "$_mac"; return 0 ;;
+        esac
+    done
+    return 1
+}
+
+# bluealsa holds an A2DP stream: the headset can be played to now.
+bt_audio_ready() {
+    ${BTCTL_TIMEOUT:-timeout 2} bluealsa-aplay -L 2>/dev/null | grep -q '^bluealsa:.*PROFILE=a2dp'
+}
+
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh). With
+# ASOUND_SPRUCE_PCMS one of the two names every .asoundrc defines here (see
+# asound-setup.sh), otherwise the headset or nothing for the default output.
+bt_audio_device() {
+    if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
+        grep -q "^pcm.spruce_bt" "$HOME/.asoundrc" 2>/dev/null || return 0
+        if bt_audio_ready && bt_connected_audio_mac >/dev/null; then
+            echo spruce_bt
+        else
+            echo spruce_speaker
+        fi
+        return 0
+    fi
+    bt_audio_ready || return 0
+    _mac="$(bt_connected_audio_mac)" && echo "bluealsa:DEV=$_mac,PROFILE=a2dp"
 }
 
 
@@ -538,4 +617,16 @@ device_boot_pre_session() {
 # devices whose stub blocks the stock init script leave this empty.
 device_stock_ui_command() {
     printf ''
+}
+
+treat_dpad_as_analog() {
+     log_message "Missing treat_dpad_as_analog function, assuming it does not the capability" -v
+}
+
+treat_dpad_as_dpad() { 
+     log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
+}
+
+swap_dpad_analog_toggle() { 
+    log_message "Missing swap_dpad_analog_toggle function, assuming it does not the capability" -v
 }

@@ -10,21 +10,16 @@
 --- Sun -----------------------------------------------------------------------
 
 - Mini splore update from tenlevels
-- Installer update, add version of release to UI
-- Towards end of release cycle:
-    - update script to handle RA config changes, etc. (use my changes, don't just make stuff up again plz Claude)
-    - also handle migration of any user-backed up stuff that used to be in Emu/.emu_setup which no longer exists
-- update vTree to latest
+- Expose H700 led settings
+- PCSX Standalone on Miyoo Mini - we ship this and have scripting for it, but it doesn't work. Mini Flip - segfaults. Mini Plus - borks the screen.
     
 --- Ry ------------------------------------------------------------------------
 
 - RA cfg overhaul for older devices on newer RA builds - missing some entries
-- reset config tasks for more standalone emulators
-- spruce settings should allow Menu button as hotkey enabler in RA on XX
-- some hotkeys missing or wrong in RA on XX
 - fake08 patches from TL
 - XX - polish shutdown paths - LEDs on, screen dim/off
 - XX - bootlogo app needs polish - add "bootlogo applied successfully" message
+-- need to update App/BootLogo/install_logo.sh to use PyUI display instead of legacy display(), as that one is not enabled on XX.
 - attach check_and_connect_wifi() to dsperate exec paths when appropriate;
 
 

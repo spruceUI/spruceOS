@@ -7,6 +7,7 @@ import time
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
@@ -15,8 +16,6 @@ from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
-from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
@@ -27,7 +26,7 @@ from utils.logger import PyUiLogger
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
+from controller.key_watcher_controller import AxisKeyMappingProvider, HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
@@ -48,9 +47,16 @@ from devices.device_common import DeviceCommon
 # platform cfgs on the shell side.
 ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
 
+# Only the three models with RGB rings around the sticks. Kept in step with
+# device_names() in helperFunctions.sh.
+ANBERNIC_XX_RGB = "ANBERNIC_RGXX_RGB"
+ANBERNIC_XX_RGB_TARGETS = ("rg40xx", "rgcubexx")
+
 
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
+        self.audio_player = AudioPlayerDelegateSdl2()
+        self.has_rgb_rings = self._read_rgb_rings()
         # device_name is set by the subclass before it calls up here. This used
         # to assign a model name unconditionally, which ran *after* the subclass
         # and so made every XX model report itself as that one model - no config
@@ -249,20 +255,11 @@ class AnbernicXXCommon(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        return False # TODO
-    
-    def disable_bluetooth(self):
-        pass
-
-    def enable_bluetooth(self):
-        pass
-            
     def perform_startup_tasks(self):
         pass
 
-    def get_bluetooth_scanner(self):
-        return None
+    def get_audio_system(self):
+        return self.audio_player
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"
@@ -394,15 +391,24 @@ class AnbernicXXCommon(DeviceCommon):
         key_mappings[KeyEvent(1, 316, 0)] = [InputResult(ControllerInput.R3, KeyState.RELEASE)]  
         key_mappings[KeyEvent(1, 316, 1)] = [InputResult(ControllerInput.R3, KeyState.PRESS)]
 
-        key_mappings[KeyEvent(3, 17, 4294967295)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
+        key_mappings[KeyEvent(3, 17, -1)] = [InputResult(ControllerInput.DPAD_UP, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 17, 1)] = [InputResult(ControllerInput.DPAD_DOWN, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 17, 0)] = [InputResult(ControllerInput.DPAD_UP, KeyState.RELEASE), InputResult(ControllerInput.DPAD_DOWN, KeyState.RELEASE)]
-        key_mappings[KeyEvent(3, 16, 4294967295)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
+        key_mappings[KeyEvent(3, 16, -1)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 16, 1)] = [InputResult(ControllerInput.DPAD_RIGHT, KeyState.PRESS)]
         key_mappings[KeyEvent(3, 16, 0)] = [InputResult(ControllerInput.DPAD_LEFT, KeyState.RELEASE), InputResult(ControllerInput.DPAD_RIGHT, KeyState.RELEASE)]
 
-        
-        return KeyWatcherController(event_path="/dev/input/event1", mapping_provider=DictKeyMappingProvider(key_mappings))
+
+        # Sticks on ABS 2-5, +-4096. Stickless models never send them.
+        stick_axes = {
+            2: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            3: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+            4: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            5: VerticalStickAxis(ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
+        }
+        return KeyWatcherController(event_path="/dev/input/event1",
+                                    mapping_provider=AxisKeyMappingProvider(key_mappings, stick_axes, 2048),
+                                    event_format='llHHi')
 
 
     def are_headphones_plugged_in(self):
@@ -453,110 +459,25 @@ class AnbernicXXCommon(DeviceCommon):
     def get_device_names(self):
         # Model name first so anything reading the first entry still gets the
         # specific device; the family token is what configs are written against.
-        return [self.device_name, ANBERNIC_XX_FAMILY]
+        names = [self.device_name, ANBERNIC_XX_FAMILY]
+        if self.has_rgb_rings:
+            names.append(ANBERNIC_XX_RGB)
+        return names
+
+    @staticmethod
+    def _read_rgb_rings():
+        try:
+            with open("/etc/baseos-release") as f:
+                for line in f:
+                    if line.startswith("BASEOS_TARGET="):
+                        target = line.split("=", 1)[1].strip().strip('"')
+                        return target.startswith(ANBERNIC_XX_RGB_TARGETS)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"Could not read BaseOS target : {e}")
+        return False
 
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)
 
-    @throttle.limit_refresh(5, fast_seconds=1, fast_while="_wifi_settle_until")
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        if(not self.is_wifi_enabled()):
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-        # Signal comes from wpa_cli, not `iw`. BaseOS ships neither `iw` nor
-        # /proc/net/wireless - the two sources every other device uses - so this
-        # threw "[Errno 2] No such file or directory: 'iw'" on every poll and
-        # returned zeroes, meaning the signal indicator has never worked on any
-        # XX device. wpa_supplicant is already running and wpa_cli is already a
-        # dependency of the scanner, so signal_poll costs nothing new. It reports:
-        #     RSSI=-43
-        #     LINKSPEED=434
-        #     NOISE=9999
-        #     FREQUENCY=5220
-        # NOISE is 9999 when the driver does not report it, which is the case
-        # here, so it is treated as unavailable rather than passed through.
-        try:
-            result = ProcessRunner.run(
-                ["wpa_cli", "-i", "wlan0", "signal_poll"],
-                timeout=3,
-                print=False,
-            )
-            output = result.stdout or ""
-
-            if result.returncode != 0 or "FAIL" in output:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-            signal_level = 0
-            noise_level = 0
-            have_signal = False
-            for line in output.splitlines():
-                line = line.strip()
-                if line.startswith("RSSI="):
-                    try:
-                        signal_level = int(line.split("=", 1)[1])
-                        have_signal = True
-                    except ValueError:
-                        pass
-                elif line.startswith("NOISE="):
-                    try:
-                        noise = int(line.split("=", 1)[1])
-                    except ValueError:
-                        noise = 9999
-                    # 9999 is wpa_supplicant's "not reported" sentinel.
-                    if noise != 9999:
-                        noise_level = noise
-
-            # No usable RSSI means unknown, not excellent. Falling through with
-            # signal_level still 0 would map to the top of the scale below, so a
-            # reading we could not parse would show as a full-strength signal.
-            if not have_signal:
-                return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-            # Same dBm -> 0..70 mapping the other devices use, so the status bar
-            # thresholds behave identically across the fleet.
-            if signal_level <= -100:
-                link_quality = 0
-            elif signal_level >= -50:
-                link_quality = 70
-            else:
-                link_quality = int((signal_level + 100) * 1.4)
-
-            return WiFiConnectionQualityInfo(
-                noise_level=noise_level,
-                signal_level=signal_level,
-                link_quality=link_quality
-            )
-
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"An error occurred {e}")
-            return WiFiConnectionQualityInfo(noise_level=0, signal_level=-200, link_quality=0)
-
-    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
-    def _get_ip_addr_text(self):
-        import socket
-        import fcntl
-        import struct
-
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            iface = b"wlan0"  # interface name must be bytes
-            ip = fcntl.ioctl(
-                sock.fileno(),
-                0x8915,  # SIOCGIFADDR
-                struct.pack('256s', iface[:15])
-            )[20:24]
-            return socket.inet_ntoa(ip)
-        except OSError:
-            # No address yet: "Connecting" if a network is saved, otherwise
-            # "No network selected" so the fix (open the list) is obvious.
-            return self.wifi_pending_text()
-        except Exception:
-            return "Error"
-        
-    def get_ip_addr_text(self):
-        if not self.is_wifi_enabled():
-            return "Off"
-        return self._get_ip_addr_text()
-             
     def uses_deinit_v2(self):
         return True

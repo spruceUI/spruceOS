@@ -26,4 +26,5 @@ class ThemeSettingsFonts(ThemeSettingsMenuCommon):
                         set_value_func=lambda size, font_purpose=purpose :  Theme.set_font_size(font_purpose,size)
                     )
                 )
+
         return option_list

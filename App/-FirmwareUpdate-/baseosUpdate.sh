@@ -42,7 +42,7 @@ INSTALLED="$(baseos_field BASEOS_VERSION)"
 TARGET="$(baseos_field BASEOS_TARGET)"
 [ -n "$TARGET" ] || bail "Could not tell which BaseOS build this device runs, so there is nothing safe to download.\n\n$MANUAL_HELP"
 
-log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET, spruce wants ${TARGET_BASEOS_VERSION:-unset}"
+log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET"
 
 log_and_display_message "BaseOS $INSTALLED is installed. Checking for a newer one. Press A to continue."
 acknowledge
@@ -71,7 +71,7 @@ if [ -n "$INSTALLED" ]; then
     _have="$(version_num "$INSTALLED")"
     _latest="$(version_num "$LATEST")"
     if [ -n "$_have" ] && [ -n "$_latest" ] && [ "$_have" -ge "$_latest" ] 2>/dev/null; then
-        log_and_display_message "Your installed BaseOS $INSTALLED is already the version that spruceUI expects. Press A to close."
+        log_and_display_message "Your installed BaseOS $INSTALLED is already the latest version. Press A to close."
         acknowledge
         exit 0
     fi
@@ -87,7 +87,7 @@ if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status
     bail "Please charge your device to at least 15%, or plug it in, then try again."
 fi
 
-log_and_display_message "BaseOS $LATEST is available (you have $INSTALLED).\n\nIt downloads now and installs on the next start. Press A to continue, B to cancel."
+log_and_display_message "BaseOS $LATEST is available (you have $INSTALLED).\n\nPress A to download and install it now, or B to cancel."
 confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
 
 if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then

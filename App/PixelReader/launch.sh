@@ -2,12 +2,17 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+LOG_PATH="/mnt/SDCARD/Saves/spruce/PixelReader-${PLATFORM}.log"
+
+
 if [ "$PLATFORM" = "A30" ]; then
-	export LD_LIBRARY_PATH=$(dirname "$0")/libs32:/mnt/SDCARD/spruce/bin:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH="$(dirname "$0")/libs32:/mnt/SDCARD/spruce/bin:$LD_LIBRARY_PATH"
 	export SDL_VIDEODRIVER=dummy
+
 elif [ "$PLATFORM" = "Pixel2" ]; then
-	export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/bin64:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/bin64:$LD_LIBRARY_PATH"
 	/mnt/SDCARD/spruce/bin64/gptokeyb -k "reader" -c "./readerPixel2.gptk" &
+
 else
 	export LD_LIBRARY_PATH=$(dirname "$0")/libs:/mnt/SDCARD/spruce/bin64:$LD_LIBRARY_PATH
 	# reader links libSDL_ttf-2.0 and libSDL_image-1.2 - SDL 1.2 era - but libs/
@@ -40,6 +45,9 @@ else
 			# positional. The label-named map would put every binding in the
 			# .gptk on the wrong physical key.
 			export_sdl_gamecontroller_map positional
+			;;
+		"RGB30"|"RGB20SX"|"Miniloong")
+			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
 			;;
 	esac
 	/mnt/SDCARD/spruce/bin64/gptokeyb -k "reader" -c "./reader.gptk" &
@@ -80,7 +88,8 @@ case "$PLATFORM" in
 esac
 
 if [ "$PLATFORM" = "A30" ]; then
-	./reader32 2>log.txt
+	./reader32 2>"$LOG_PATH"
+
 else
 	# reader gets its own SDL2, and only reader. Its libSDL-1.2 is sdl12-compat,
 	# so everything - drawing and keys - goes through SDL2 underneath. The
@@ -103,10 +112,10 @@ else
 	# command rather than exported.
 	case "$PLATFORM" in
 		"Anbernic"*)
-			LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./reader 2>log.txt
+			LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./reader 2>"$LOG_PATH"
 			;;
 		*)
-			./reader 2>log.txt
+			./reader 2>"$LOG_PATH"
 			;;
 	esac
 	kill -9 $(pidof gptokeyb)

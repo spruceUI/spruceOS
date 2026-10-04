@@ -11,7 +11,7 @@
 # Controls RGB LEDs on TrimUI Brick / Smart Pro.
 #
 # PARAMETERS:
-#   <zones>        A string containing any combination of: l r m 1 2
+#   <zones>        A string containing any combination of: l r m 1 2 b
 #                  (order does not matter)
 #                  Zones resolve to:
 #                     l  → left LED
@@ -19,7 +19,8 @@
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                     b  → rear LEDs (BrickPro)
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
@@ -55,22 +56,26 @@
 led_color_hex() {
     name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
     case "$name" in
-        Red)     echo "FF0000" ;;
-        Green)   echo "00FF00" ;;
-        Blue)    echo "0000FF" ;;
-        Yellow)  echo "FFFF00" ;;
-        Cyan)    echo "00FFFF" ;;
-        Magenta) echo "FF00FF" ;;
-        Orange)  echo "FF8800" ;;
-        *)       echo "FFFFFF" ;;
+        "Red")          hex=FF0000 ;;
+        "Pink")         hex=FF3333 ;;
+        "Fuchsia")      hex=FF0022 ;;
+        "Purple")       hex=FF00FF ;;
+        "Dark Purple")  hex=2200CC ;;
+        "Blue")         hex=0000FF ;;
+        "Cyan")         hex=00FFFF ;;
+        "Teal")         hex=00FF22 ;;
+        "Green")        hex=00FF00 ;;
+        "Yellow")       hex=FFFF00 ;;
+        "Orange")       hex=FF1100 ;;
+        *)              hex=FFFFFF ;;
     esac
+    echo "$hex"
 }
 
 rgb_led_trimui() {
 
     # early out if disabled
-	disable="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-	[ "$disable" = "True" ] && return 0
+	rgb_leds_enabled || return 0
 
 	# ...and if the switch or an Fn key has turned the LEDs off. That action
 	# writes black directly, which lasts only until something else writes a
@@ -79,27 +84,35 @@ rgb_led_trimui() {
 	# through here, so without this the LEDs came back on the moment you left a
 	# game and stayed on until the switch was cycled.
 	#
-	# Deliberately not the disableLEDs setting itself: that is the user's own
+	# Deliberately not the enableLEDs setting itself: that is the user's own
 	# "off in all contexts" preference, and a physical switch should not
 	# silently rewrite it. /tmp, so it clears on reboot - which matches the
 	# action, since scene.sh only runs on an actual flip and nothing re-applies
 	# the switch position at boot.
 	flag_check "leds_forced_off" && return 0
 
-    # get and set peak rgb brightness
-    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "False")"
-    echo "$max_scale" > "/sys/class/led_anim/max_scale"
+    LED_DIR=/sys/class/led_anim
+
+    # Get and set peak rgb brightness for each zone that exposes the setting.
+    # This comes straight from spruce-config.json, NOT from the function call.
+    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    for _scale_zone in max_scale max_scale_lr max_scale_f1f2 max_scale_rear; do
+        if [ -e "$LED_DIR"/"$_scale_zone" ]; then
+            chmod a+rw "$LED_DIR"/"$_scale_zone"
+            echo "$max_scale" > "$LED_DIR"/"$_scale_zone"
+        fi
+    done
 
     # parse led zones to affect from first argument
     if [ -n "$1" ]; then
         zones=""
-        for z in l r m 1 2; do
+        for z in l r m 1 2 b; do
             case "$1" in
                 *"$z"*) zones="$zones $z";;
             esac
         done
     else
-        zones="l r m 1 2"
+        zones="l r m 1 2 b"
     fi
 
     # translate 1 → f1 and 2 → f2
@@ -108,6 +121,7 @@ rgb_led_trimui() {
         case "$z" in
             1) new_zones="$new_zones f1" ;;
             2) new_zones="$new_zones f2" ;;
+            b) new_zones="$new_zones rear" ;;
             *) new_zones="$new_zones $z" ;;
         esac
     done
@@ -143,8 +157,7 @@ rgb_led_trimui() {
 
 enable_or_disable_rgb_trimui() {
     enable_file="/sys/class/led_anim/enable"
-    disable_rgb="$(get_config_value '.menuOptions."RGB LED Settings".disableLEDs.selected' "False")"
-    if [ "$disable_rgb" = "True" ]; then
+    if ! rgb_leds_enabled; then
         chmod 777 "$enable_file" 2>/dev/null
         echo 0 > "$enable_file" 2>/dev/null
         chmod 000 "$enable_file" 2>/dev/null

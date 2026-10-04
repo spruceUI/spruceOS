@@ -84,6 +84,13 @@ class Theme():
         cls.button_press_sounds_changed()
         cls.bgm_setting_changed()
 
+    @classmethod
+    def scale_with_height_multiplier(cls, val):
+        return int(cls.height_multiplier * val)
+    
+    @classmethod
+    def scale_with_width_multiplier(cls, val):
+        return int(cls.width_multiplier * val)       
 
     @classmethod
     def bgm_setting_changed(cls):
@@ -231,6 +238,22 @@ class Theme():
         return cls._resolve_file(cls._skin_folder, parts, cache_missing)
 
     @classmethod
+    def _stock_asset(cls, name):
+        key = ("__stock__", name, cls._skin_folder)
+        if key in cls._asset_cache:
+            return cls._asset_cache[key]
+
+        stock = os.path.join(PyUiConfig.get("themeDir"), PyUiConfig.get("theme"))
+        for folder in (cls._skin_folder, "skin"):
+            path = os.path.join(stock, folder, name)
+            if os.path.exists(path):
+                cls._asset_cache[key] = path
+                return path
+
+        cls._asset_cache[key] = None
+        return None
+
+    @classmethod
     def _bg(cls, *parts, cache_missing=True):
         return cls._resolve_file(cls._bg_folder, parts, cache_missing)
 
@@ -323,6 +346,10 @@ class Theme():
     
     @classmethod
     def favorite_icon(cls): return cls._asset("ic-favorite-mark.qoi")
+
+    @classmethod
+    def cheevos_icon(cls):
+        return cls._asset("ic-cheevos-mark.qoi") or cls._stock_asset("ic-cheevos-mark.png")
     
     @classmethod
     def get_list_large_selected_bg(cls): return cls._asset("bg-list-l.qoi")
@@ -439,6 +466,13 @@ class Theme():
             return cls._asset("icon-wifi-signal-04.qoi")
         else:
             return cls._asset("icon-wifi-locked.qoi")
+
+    @classmethod
+    def get_bluetooth_icon(cls, status):
+        names = {"audio": "icon-bluetooth-headphone.qoi",
+                 "gamepad": "icon-bluetooth-gamepad.qoi",
+                 "on": "icon-bluetooth-default.qoi"}
+        return cls._asset(names[status]) if status in names else None
 
     @classmethod
     def get_volume_indicator(cls, volume):
@@ -624,17 +658,13 @@ class Theme():
                 case FontPurpose.LIST_TOTAL:
                     cls._data["indexTotalSize"] = size
                 case FontPurpose.SHADOWED:
-                    cls._data["indexSelectedFontSize"] = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontSize"] = size 
                 case FontPurpose.SHADOWED_BACKDROP:
-                    cls._data["indexTotalSize"] = size
-                case FontPurpose.SHADOWED:
-                    cls._data["shadowed"]["shadowedFontSize"] = size
-                case FontPurpose.SHADOWED_BACKDROP:
-                    cls._data["shadowed"]["shadowedFontBackdropSize"]  = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontBackdropSize"] = size 
                 case FontPurpose.SHADOWED_SMALL:
-                    cls._data["shadowed"]["shadowedFontSmallSize"] = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontSmallSize"] = size 
                 case FontPurpose.SHADOWED_BACKDROP_SMALL:
-                    cls._data["shadowed"]["shadowedFontBackdropSmallSize"]  = size
+                    cls._data.setdefault("shadowed", {})["shadowedFontBackdropSmallSize"] = size 
                 case _:
                     PyUiLogger.get_logger().error(
                         f"set_font_size: Unknown font purpose {font_purpose}")
@@ -763,7 +793,10 @@ class Theme():
 
     @classmethod
     def get_descriptive_list_text_offset_y(cls):
-        return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
+        if(Theme.get_use_text_for_line_height()):
+            return cls._data.get("descriptiveListTextOffsetY", int(5*cls._default_multiplier))
+        else:
+            return cls._data.get("descriptiveListTextOffsetY", int(15*cls._default_multiplier))
 
     @classmethod
     def get_descriptive_list_text_from_icon_offset(cls):
@@ -1088,8 +1121,18 @@ class Theme():
         return cls._data.get("textAndImageListViewMode", "TEXT_LEFT_IMAGE_RIGHT")
 
     @classmethod
+    def set_text_and_image_list_view_mode(cls, value):
+        cls._data["textAndImageListViewMode"] = value
+        cls.save_changes()
+
+    @classmethod
     def scroll_rom_selection_text(cls):
         return cls._data.get("scrollRomSelectionText", True)
+
+    @classmethod
+    def set_scroll_rom_selection_text(cls, value):
+        cls._data["scrollRomSelectionText"] = value
+        cls.save_changes()
 
     @classmethod
     def show_index_text(cls):
@@ -1343,6 +1386,25 @@ class Theme():
     @classmethod
     def set_list_game_select_img_height(cls, value):
         cls._data["listGameSelectImgHeight"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_img_height_for_top_bottom_view(cls):
+        from display.display import Display
+        return cls._data.get("listGameSelectImgHeightTopBottomView", int(Display.get_usable_screen_height() * Theme.get_img_percent_top_bottom_view()/100))
+    
+    @classmethod
+    def set_img_height_for_top_bottom_view(cls, value):
+        cls._data["imgPercentTopBottomView"] = value
+        cls.save_changes()
+
+    @classmethod
+    def get_img_percent_top_bottom_view(cls):
+        return cls._data.get("imgPercentTopBottomView", 60)
+    
+    @classmethod
+    def set_img_percent_top_bottom_view(cls, value):
+        cls._data["imgPercentTopBottomView"] = value
         cls.save_changes()
 
     @classmethod
@@ -1755,3 +1817,12 @@ class Theme():
     @classmethod
     def get_screensaver_dim_backlight(cls):
         return cls._data.get("screensaver", {}).get("dimBacklight", True)
+
+    @classmethod
+    def get_use_text_for_line_height(cls):
+        return cls._data.get("useTextForLineHeight", True)
+
+    @classmethod
+    def set_use_text_for_line_height(cls, value):
+        cls._data["useTextForLineHeight"] = value
+        cls.save_changes()

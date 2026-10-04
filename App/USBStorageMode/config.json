@@ -11,7 +11,9 @@
     "MIYOO_A30",
     "MIYOO_FLIP",
     "GKD_PIXEL2",
-    "MAGICX_A133P"
+    "MAGICX_A133P",
+    "DARKMOSS",
+    "ANBERNIC_RGXX"
   ],
   "hideInSimpleMode": true
 }

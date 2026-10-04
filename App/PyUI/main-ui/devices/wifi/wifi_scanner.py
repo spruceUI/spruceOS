@@ -1,13 +1,8 @@
 import re
-import subprocess
-import time
 import threading
 from dataclasses import dataclass
-from typing import List, Set
+from typing import Callable, List, Set, Tuple
 
-from devices.device import Device
-from devices.utils.process_runner import ProcessRunner
-from display.display import Display
 from utils.logger import PyUiLogger
 
 
@@ -24,26 +19,32 @@ class WiFiNetwork:
 
 
 class WiFiScanner:
-    def __init__(self, interface="wlan0", delay=2, busy_delay=8):
-        self.interface = interface
-        self.delay = delay
-        # Used instead of `delay` when wpa_supplicant refuses a scan because it
-        # is busy associating. See _scan_once_internal.
-        self.busy_delay = busy_delay
+    """Keeps a growing list of visible networks for the WiFi menu.
 
-        # Thread state
+    The device supplies two callables: scan_fn returns the networks visible
+    right now (one `wifiCmd scan`, which blocks for a few seconds), and
+    connected_fn returns (ssid, frequency) of the joined network. A worker
+    thread calls scan_fn every `delay` seconds and merges what it finds, so
+    the menu's scan_networks() never blocks.
+    """
+
+    def __init__(
+        self,
+        scan_fn: Callable[[], List[WiFiNetwork]],
+        connected_fn: Callable[[], Tuple[str | None, int | None]],
+        delay=2,
+    ):
+        self._scan_fn = scan_fn
+        self._connected_fn = connected_fn
+        self.delay = delay
+
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
 
-        # Shared scan results
         self._lock = threading.Lock()
         self._known_ssids: Set[str] = set()
         self._known_bssids: Set[str] = set()
         self._networks: List[WiFiNetwork] = []
-
-    # ----------------------------
-    # Worker thread
-    # ----------------------------
 
     def _scan_worker(self):
         log = PyUiLogger.get_logger()
@@ -55,81 +56,26 @@ class WiFiScanner:
             except Exception:
                 log.exception("WiFi scan worker error")
 
-            # Cooperative sleep so stop() reacts immediately
             self._stop_event.wait(self.delay)
 
         log.info("WiFi scan thread stopped")
 
     def _scan_once_internal(self):
-        """
-        Runs inside worker thread only.
-        """
-        log = PyUiLogger.get_logger()
-
-        result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
-        if "Failed to connect to" in (result.stderr or ""):
-            # No supplicant to ask yet; wifi.sh may still be bringing the radio up
-            log.error("wpa_supplicant is not answering, retrying")
-            self._stop_event.wait(15)
-            result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan"])
-
-        # wpa_supplicant answers FAIL-BUSY while it is associating, and asking
-        # again every couple of seconds is actively harmful: each scan takes the
-        # radio off-channel to sweep, starving the association it refused us for.
-        # That is how one saved network that is slow to join turns into a network
-        # list that never fills - it looks like scanning is broken when it is
-        # really the join being interrupted. Back off and let it finish.
-        #
-        # Its own association scans still populate scan_results, so keep reading
-        # those: the list fills from wpa_supplicant's work instead of ours.
-        busy = "FAIL-BUSY" in ((result.stdout or "") + (result.stderr or ""))
-        if busy:
-            log.info(
-                "wpa_supplicant is busy associating; backing off for "
-                f"{self.busy_delay}s and using its own scan results"
-            )
-
-        # Let wpa_supplicant populate results. Waiting on the stop event rather
-        # than sleeping keeps stop() responsive.
-        self._stop_event.wait(self.busy_delay if busy else self.delay)
+        found = self._scan_fn()
         if self._stop_event.is_set():
             return
 
-        result = ProcessRunner.run(["wpa_cli", "-i", self.interface, "scan_results"])
-        lines = result.stdout.strip().splitlines()
-
-        new_networks: List[WiFiNetwork] = []
-
-        for line in lines[1:]:  # Skip header
-            parts = line.strip().split("\t")
-            if len(parts) < 5:
-                continue
-
-            bssid, freq, signal, flags, ssid = parts[:5]
-            ssid = self._decode_ssid(ssid)
-
-            try:
-                network = WiFiNetwork(
-                    bssid=bssid,
-                    frequency=int(freq),
-                    signal_level=int(signal),
-                    flags=flags,
-                    ssid=ssid,
-                )
-            except ValueError:
-                continue
-
-            new_networks.append(network)
-
-        # Merge uniquely seen networks
         with self._lock:
-            for net in new_networks:
+            for net in found:
+                net.ssid = self._decode_ssid(net.ssid)
                 if net.bssid not in self._known_bssids:
                     self._known_bssids.add(net.bssid)
                     self._known_ssids.add(net.ssid)
                     self._networks.append(net)
 
-    def _decode_ssid(self, ssid: str) -> str:
+    @staticmethod
+    def _decode_ssid(ssid: str) -> str:
+        # wpa_supplicant escapes non-printable bytes in an SSID as \xHH.
         try:
             return re.sub(
                 r'(\\x[0-9a-fA-F]{2})+',
@@ -142,21 +88,12 @@ class WiFiScanner:
             PyUiLogger.get_logger().warning(f"Failed to decode escaped SSID: {ssid}")
             return ssid
 
-    # ----------------------------
-    # Public API
-    # ----------------------------
-
     def scan_networks(self) -> List[WiFiNetwork]:
-        """
-        Non-blocking.
-        Starts the worker thread if not already running and
-        returns currently known networks immediately.
-        """
+        """Non-blocking: starts the worker if needed and returns what is known."""
         if not self._thread or not self._thread.is_alive():
             self._start_thread()
 
         with self._lock:
-            # Return a snapshot copy
             return list(self._networks)
 
     def _start_thread(self):
@@ -170,11 +107,8 @@ class WiFiScanner:
         self._thread.start()
 
     def stop(self):
-        """
-        Stops the worker thread and clears scanned networks.
-        """
-        log = PyUiLogger.get_logger()
-        log.info("Stopping WiFi scan thread")
+        """Stops the worker thread and clears scanned networks."""
+        PyUiLogger.get_logger().info("Stopping WiFi scan thread")
         self._stop_event.set()
 
         if self._thread and self._thread.is_alive():
@@ -187,28 +121,12 @@ class WiFiScanner:
             self._known_bssids.clear()
             self._networks.clear()
 
-    # ----------------------------
-    # Other helpers (unchanged)
-    # ----------------------------
-
     def get_connected_ssid(self):
-        ssid = None
-        freq = None
         try:
-            # 3s, not 0.5s. wpa_cli normally answers in under a millisecond, but
-            # while wpa_supplicant is scanning or associating it can take longer -
-            # exactly when the UI most wants to say what is going on. The old
-            # budget turned that into "Failed to get Wi-Fi details" and a blank
-            # status. Interface pinned to match the scan calls.
-            result = ProcessRunner.run(
-                ["wpa_cli", "-i", self.interface, "status"], timeout=3
-            )
-            for line in result.stdout.splitlines():
-                if line.startswith("ssid="):
-                    ssid = self._decode_ssid(line.split("=", 1)[1])
-                elif line.startswith("freq="):
-                    freq = int(line.split("=", 1)[1])
+            ssid, freq = self._connected_fn()
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to get Wi-Fi details: {e}")
-
+            return None, None
+        if ssid:
+            ssid = self._decode_ssid(ssid)
         return ssid, freq

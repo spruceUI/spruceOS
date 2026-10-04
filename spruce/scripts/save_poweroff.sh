@@ -13,7 +13,7 @@ EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
 ra64.h700 ra32.h700 \
 retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast2024 yabasanshiro yabasanshiro.trimui dsperate dsperate.a30 \
-mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM"
+mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN"
 
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
@@ -137,7 +137,7 @@ close_gracefully_ppsspp() {
     log_message "Warning: sendevent failed during PPSSPP autosave"
     sleep 1
     killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
-    killall -q -15 PPSSPPSDL_$PLATFORM 2>/dev/null
+    killall -q -15 PPSSPPSDL_$PLATFORM $PSP_BIN 2>/dev/null
 }
 
 close_gracefully_drastic_steward() {
@@ -217,7 +217,7 @@ stop_problematic_scripts() {
     sleep 0.5
 
     # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
-    pgrep -f "lid_watchdog_v2.sh" | xargs -r kill
+    pgrep -f "lid_watchdog.sh" | xargs -r kill
 
     # kill enforceSmartCPU first so no CPU setting is changed during shutdown
     killall -q -15 enforceSmartCPU.sh
@@ -225,8 +225,8 @@ stop_problematic_scripts() {
     # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
     killall -q -9 homebutton_watchdog.sh
     killall -q -9 buttons_watchdog.sh
-    killall -q -9 idlemon_mm.sh
-    killall -q -9 low_power_warning.sh
+    killall -q -9 idle_watchdog.sh
+    killall -q -9 battery_level_watchdog.sh
     killall -q -9 theme_watchdog.sh
     killall -q -9 volume_sync_watchdog.sh
     killall -q -9 inotifywait
@@ -457,9 +457,11 @@ fi
 # stops, which is exactly how the RGB30 lockup first presented. These are three
 # writes on a path that ends in a poweroff; they cost nothing.
 log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
+battery_snapshot poweroff
 stage_shutdown_stage_2
 
 blink_led_if_applicable
+/mnt/SDCARD/spruce/scripts/bluetooth.sh suspend
 device_prepare_for_poweroff
 log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"

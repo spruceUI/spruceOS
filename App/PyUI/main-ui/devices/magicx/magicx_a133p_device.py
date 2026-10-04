@@ -1,5 +1,3 @@
-import ctypes
-import fcntl
 import os
 import subprocess
 import threading
@@ -16,6 +14,7 @@ from devices.utils.file_watcher import FileWatcher
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class MagicXA133PDevice(TrimUIDevice):
@@ -74,23 +73,18 @@ class MagicXA133PDevice(TrimUIDevice):
         self.touch_watcher = TouchWatcher(self.touch_event_path, self)
         threading.Thread(target=self.touch_watcher.poll, daemon=True).start()
 
-    # The XU20's and Zero 40's panels dim as the backlight PWM duty rises (their
-    # trees drive the PWM with inverted polarity; the kernel side is left as is),
-    # so on those boards the level the user picks is mirrored before it reaches
-    # the display driver. The Zero 28's panel is not.
-    BACKLIGHT_REVERSED = False
-
+    # The level -> raw curve and, on the XU20 and the Zero 40, the inverted backlight PWM
+    # live behind py-ui-config's backlightCmd; PyUI hands it the level and nothing else.
+    # Panel only: PyUI saves the level itself, and the screensaver's dim must not be saved.
     def _set_lumination_to_config(self):
-        if not self.BACKLIGHT_REVERSED:
-            return super()._set_lumination_to_config()
-        val = 256 - self.map_backlight_from_10_to_full_255(self.system_config.backlight)
+        level = int(self.system_config.backlight)
+        backlight_cmd = PyUiConfig.get_backlight_cmd()
+        if not backlight_cmd or not os.path.exists(backlight_cmd):
+            return
         try:
-            DISP_LCD_SET_BRIGHTNESS = 0x102
-            fd = os.open("/dev/disp", os.O_RDWR)
-            if fd > 0:
-                param = (ctypes.c_ulong * 4)(0, val, 0, 0)
-                fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
-                os.close(fd)
+            subprocess.run([backlight_cmd, str(level)],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=10, check=False)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error setting brightness: {e}")
 
@@ -156,13 +150,20 @@ class MagicXA133PDevice(TrimUIDevice):
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
         # Mirrors device_get_battery_percent in magicx_a133p.sh: a 0-1 % gauge
-        # reading with a healthy voltage is replaced by a voltage estimate.
+        # reading with a healthy voltage is replaced by a voltage estimate -
+        # never on the charger, whose charge voltage reads as 40 % on a flat cell.
         try:
             with open("/sys/class/power_supply/axp2202-battery/capacity", "r") as f:
                 cap = int(f.read().strip())
         except Exception:
             return 0
         if cap <= 1:
+            try:
+                with open("/sys/class/power_supply/axp2202-usb/online", "r") as f:
+                    if f.read().strip() == "1":
+                        return cap
+            except Exception:
+                pass
             try:
                 with open("/sys/class/power_supply/axp2202-battery/voltage_now", "r") as f:
                     v = int(f.read().strip())
@@ -199,12 +200,6 @@ class MagicXA133PDevice(TrimUIDevice):
 
     def might_require_surface_format_conversion(self):
         return True
-
-    def enable_bluetooth(self):
-        if not self.is_bluetooth_enabled():
-            subprocess.Popen(['./bluetoothd', "-f", "/etc/bluetooth/main.conf"],
-                             cwd='/usr/bin', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
 
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up(self.volume_event_path, 115)

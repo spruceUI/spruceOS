@@ -42,7 +42,7 @@ script_for_action() {
         "Quiet Mode")      echo "scene-quiet.sh" ;;
         "Silent Mode")     echo "scene-silent.sh" ;;
         "WiFi off")        echo "scene-wifi.sh" ;;
-        "Joystick Toggle") echo "scene-joystick.sh" ;;
+        "Joystick Toggle") [ "$PLATFORM" = "Brick" ] && echo "scene-joystick.sh" ;;
         *)                 echo "" ;;
     esac
 }

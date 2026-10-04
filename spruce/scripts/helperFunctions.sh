@@ -50,21 +50,21 @@ case $INFO in
     *TG4040*) export PLATFORM="BrickPro" ;;
     *0xd05*)                                    # RK3566
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # The kernel names the board in the device tree.
-            DT_MODEL=$(tr -d '\0' < /sys/firmware/devicetree/base/model 2>/dev/null)
-            case "$DT_MODEL" in
-                *RGB30*) export PLATFORM="RGB30" ;;
-                *) export PLATFORM="RGB30" ;;
-            esac
-        elif [ -x /loong/loong_daemon ]; then
-            # Miniloong Pocket 1. Same SoC, same Cortex-A55 part id and even the
-            # same hostname (rk3566-buildroot) as the Flip, so the cpuinfo table
-            # cannot tell them apart. The vendor's stock launcher daemon is the
-            # reliable discriminator: it is present only on the loong firmware
-            # and Spruce is about to replace its boot path anyway. The device
-            # tree model string ("MIYOO RK3566 355 V10 Board" on the Flip) can
-            # corroborate once captured on a board, but the daemon is the key.
-            export PLATFORM="Miniloong"
+            # dArkMoss stamps the spruce platform name into os-release
+            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+            # only HW_DEVICE.
+            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+            if [ -z "$PLATFORM" ]; then
+                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                    *Miniloong*) PLATFORM="Miniloong" ;;
+                    *)           PLATFORM="RGB30" ;;
+                esac
+            fi
+            # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
+            if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
+                PLATFORM="RGB20SX"
+            fi
+            export PLATFORM
         else
             export PLATFORM="Flip"
         fi
@@ -94,6 +94,9 @@ fi
 . /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
+# Stock busybox on some devices has no timeout applet; spruce's does.
+command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
+
 # Every name this device answers to in an Emu config.json "devices" list, most
 # specific first. Mirrors PyUI's Device.get_device_names(): almost every device
 # answers to one name, and the Anbernic XX line also answers to a family token
@@ -113,8 +116,9 @@ device_names() {
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
         Flip)             echo "MIYOO_FLIP" ;;
         Pixel2)           echo "GKD_PIXEL2" ;;
-        RGB30)            echo "RGB30" ;;
-        Miniloong)        echo "MINILOONG_POCKET1" ;;
+        RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
+        RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
+        Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
@@ -127,6 +131,40 @@ device_names() {
         AnbernicRG28XX)   echo "ANBERNIC_RG28XX";     echo "ANBERNIC_RGXX" ;;
         AnbernicRGCubeXX) echo "ANBERNIC_RGCUBEXX";   echo "ANBERNIC_RGXX" ;;
     esac
+
+    # Ring LEDs: two of the three models share a platform with models that have
+    # none, so no platform token can stand in for this. Set in AnbernicXXCommon.sh.
+    if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
+        echo "ANBERNIC_RGXX_RGB"
+    fi
+}
+
+# The live RetroArch config, seeded from the .bak when absent. The configs moved
+# out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
+ensure_ra_config_path() {
+    _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
+    _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+    if [ ! -f "$_rac_live" ] && [ -f "$_rac_bak" ]; then
+        mkdir -p /mnt/SDCARD/Saves/ra-configs
+        cp "$_rac_bak" "$_rac_live"
+    fi
+    echo "$_rac_live"
+    unset _rac_live _rac_bak
+}
+
+# last_key_line FILE KEY...: the latest line of a getevent capture that is one of KEY
+# (each a "<type> <code>" pair as in B_A, or a Miyoo Mini key name). Not the capture's
+# last line: a pad may send a second code for one press (MagicX simplepad "code2": A is
+# 305 then 353, XU20 B is 304 then 158), and that rider would hide the key pressed.
+last_key_line() {
+    _klf=$1
+    shift
+    for _k in "$@"; do
+        shift
+        [ -n "$_k" ] && set -- "$@" -e "key $_k "
+    done
+    [ $# -gt 0 ] || return 0
+    grep -F "$@" "$_klf" 2>/dev/null | tail -n 1
 }
 
 # Call this just by having "acknowledge" in your script
@@ -139,7 +177,7 @@ acknowledge() {
     GE_PID=$!
 
     while true; do
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START_2" "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_START_2"* | *"key $B_A"* | *"key $B_B"*)
                     log_message "last_line: $line" -v
@@ -179,7 +217,7 @@ confirm() {
     RET_VAL=2
     while [ "$RET_VAL" -eq 2 ]; do
         # 1. Check for User Input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_A" "$B_B"); then
             case "$line" in
                 *"key $B_A"*) 
                     RET_VAL=0 
@@ -490,6 +528,27 @@ get_version() {
     fi
 }
 
+# Latest release of a GitHub repo as x.y.z, or nothing when offline. Tries
+# for about a minute so a boot-time caller can wait for WiFi to come up.
+github_latest_version() {
+    wifi_available_on_device || return 1
+    [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" = "1" ] || return 1
+    for _try in 1 2 3; do
+        _tag="$(curl -sf -m 20 "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name // empty' | sed 's/^[vV]//')"
+        case "$_tag" in
+            [0-9]*.[0-9]*.[0-9]*) echo "$_tag"; return 0 ;;
+        esac
+        [ "$_try" -lt 3 ] && sleep 20
+    done
+    return 1
+}
+
+# True when x.y.z $1 is older than $2.
+version_older_than() {
+    [ "$(printf '%s' "$1" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" -lt \
+      "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
+}
+
 get_version_complex() {
     base_version=$(get_version)
 
@@ -567,6 +626,22 @@ log_precise() {
     uptime_part=$(cut -d ' ' -f 1 /proc/uptime)
     timestamp="${date_part}.${uptime_part#*.}"
     printf '%s %s\n' "$timestamp" "$message" >>"$log_file"
+}
+
+# battery_snapshot EVENT: one line per power-off and per boot in Saves/spruce/battery-history.log
+# (epoch, event, percent, gauge raw percent, mV), so drain while the device was off can be read as
+# the difference between a "poweroff" line and the next "boot" line. Kept to the last 200 lines.
+battery_snapshot() {
+    _bs_log=/mnt/SDCARD/Saves/spruce/battery-history.log
+    _bs_raw=$(cat "$BATTERY/capacity" 2>/dev/null)
+    _bs_uv=$(cat "$BATTERY/voltage_now" 2>/dev/null)
+    case "$_bs_uv" in ''|*[!0-9]*) _bs_mv=- ;; *) [ "$_bs_uv" -gt 100000 ] && _bs_mv=$((_bs_uv / 1000)) || _bs_mv=$_bs_uv ;; esac
+    printf '%s %s %s%% raw=%s%% %smV\n' "$(date +%s)" "$1" "$(device_get_battery_percent 2>/dev/null)" \
+        "${_bs_raw:--}" "$_bs_mv" >> "$_bs_log" 2>/dev/null
+    if [ "$(wc -l < "$_bs_log" 2>/dev/null || echo 0)" -gt 200 ]; then
+        tail -n 200 "$_bs_log" > "$_bs_log.tmp" 2>/dev/null && mv "$_bs_log.tmp" "$_bs_log"
+    fi
+    unset _bs_log _bs_raw _bs_uv _bs_mv
 }
 
 low_battery_check() {
@@ -1013,6 +1088,10 @@ map_color_name_to_hex() {
     echo "$hex"
 }
 
+rgb_leds_enabled() {
+    [ "$(get_config_value '.menuOptions."RGB LED Settings".enableLEDs.selected' "Off")" = "On" ]
+}
+
 set_rgb_in_menu() {
     # get relevant variables from spruce-config.json
     color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
@@ -1022,7 +1101,7 @@ set_rgb_in_menu() {
     # map color names to hex values
     color_hex="$(map_color_name_to_hex "$color_name")"
 
-    rgb_led "lrm12" "$effect" "$color_hex" "$duration" "-1"
+    rgb_led "lrm12b" "$effect" "$color_hex" "$duration" "-1"
 
 }
 
@@ -1194,16 +1273,6 @@ export_sdl_gamecontroller_map() {
     esac
 
     export SDL_GAMECONTROLLERCONFIG
-}
-
-
-# Stickless Anbernic XX units: have the stock kernel report the d-pad as the
-# left stick (2) or put it back (0). No-op elsewhere. muOS flips the same knob.
-_xx_dpad_swap() {
-	XX_DPAD_SWAP="/sys/class/power_supply/axp2202-battery/nds_pwrkey"
-	case "$PLATFORM" in "Anbernic"*) ;; *) return 0 ;; esac
-	[ "$XX_PAD_LAYOUT" = "nostick" ] && [ -w "$XX_DPAD_SWAP" ] || return 0
-	echo "$1" > "$XX_DPAD_SWAP"
 }
 
 ##### WIFI HANDLING #####
@@ -1495,7 +1564,12 @@ wpa_conf_ensure() {
 # Replace any saved block for SSID $1 with a new one; $2 is the password, empty
 # for an open network. The password only ever goes through printf, a shell
 # builtin, so it never shows up in a process list or the log.
-wpa_add_network() {
+#
+# wpa_conf_save_network only edits the card's conf, which is what makes a
+# password travel with the card. Devices whose own OS runs the radio (dArkMoss)
+# call it alone; the rest go through wpa_add_network, which also points the
+# running supplicant at the new block.
+wpa_conf_save_network() {
     [ -n "$WPA_SUPPLICANT_FILE" ] && [ -n "$1" ] || return 1
     wpa_conf_ensure
     _wpa_tmp="$WPA_SUPPLICANT_FILE.tmp"
@@ -1526,8 +1600,29 @@ wpa_add_network() {
         printf '}\n'
     } >> "$_wpa_tmp"
     mv -f "$_wpa_tmp" "$WPA_SUPPLICANT_FILE" || { rm -f "$_wpa_tmp"; return 1; }
+    return 0
+}
+
+wpa_add_network() {
+    wpa_conf_save_network "$1" "$2" || return 1
     wpa_cli -i wlan0 reconfigure >/dev/null 2>&1
     return 0
+}
+
+# Print the card's saved networks as "ssid<TAB>password" lines, password empty
+# for an open network, quotes stripped. For hosts that keep their own store and
+# need to be told what the card knows.
+wpa_conf_list_networks() {
+    [ -n "$WPA_SUPPLICANT_FILE" ] && [ -f "$WPA_SUPPLICANT_FILE" ] || return 0
+    awk '
+        function unquote(v) { sub(/^"/, "", v); sub(/"$/, "", v); return v }
+        { line = $0; gsub(/^[ \t\r]+|[ \t\r]+$/, "", line) }
+        substr(line, 1, 8) == "network=" { inblock = 1; ssid = ""; psk = ""; next }
+        !inblock { next }
+        substr(line, 1, 5) == "ssid=" { ssid = unquote(substr(line, 6)) }
+        substr(line, 1, 4) == "psk=" { psk = unquote(substr(line, 5)) }
+        line == "}" { inblock = 0; if (ssid != "") printf "%s\t%s\n", ssid, psk }
+    ' "$WPA_SUPPLICANT_FILE"
 }
 
 wpa_forget_all_networks() {
@@ -1535,17 +1630,18 @@ wpa_forget_all_networks() {
 update_config=1"
 
     if command -v nmcli >/dev/null 2>&1 && { device_manages_own_wifi || [ -z "$WPA_SUPPLICANT_FILE" ]; }; then
-        # NetworkManager keeps its own profiles. Match on TYPE: an inactive profile has no DEVICE.
+        # NetworkManager keeps its own profiles. Match on TYPE: an inactive
+        # profile has no DEVICE. The card's conf is cleared below as well, or
+        # the next boot would import every network straight back.
         nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r uuid type; do
             [ "$type" = "802-11-wireless" ] && nmcli connection delete uuid "$uuid" >/dev/null 2>&1
         done
-        return 0
+    elif [ -n "$WPA_SUPPLICANT_FILE" ]; then
+        killall wpa_supplicant 2>/dev/null
+        device_stop_dhcp_client
+        sleep 1
     fi
     [ -n "$WPA_SUPPLICANT_FILE" ] || return 0
-
-    killall wpa_supplicant 2>/dev/null
-    device_stop_dhcp_client
-    sleep 1
 
     printf '%s\n' "$_wpa_header" > "$WPA_SUPPLICANT_FILE"
 
@@ -1621,6 +1717,11 @@ check_and_connect_wifi() {
         return 1
     fi
 
+    if network_is_connected true; then
+        log_message "Active network connection verified"
+        return 0
+    fi
+
     waiting_enabled="$(get_config_value '.menuOptions."Network Settings".enableWaitingToConnect.selected' "True")"
     if [ "$waiting_enabled" = "False" ]; then
         log_message "User opted out of waiting to connect, via spruce network settings."
@@ -1629,12 +1730,6 @@ check_and_connect_wifi() {
 
     timeout=60
     start_time=$(date +%s)
-
-    # Initial connection check
-    if network_is_connected true; then
-        log_message "Active network connection verified"
-        return 0
-    fi
 
     # Check if device has wifi available
     if ! device_wifi_is_available; then
@@ -1656,7 +1751,7 @@ check_and_connect_wifi() {
 
     while true; do
         # 1. Check for user input
-        if line=$(tail -n 1 /tmp/ge_out 2>/dev/null); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"

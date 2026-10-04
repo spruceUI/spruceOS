@@ -44,7 +44,7 @@ run_openbor() {
 
 	elif [ "$PLATFORM" = "A30" ]; then
 
-		export LD_LIBRARY_PATH=lib:/usr/miyoo/lib:/usr/lib
+		export LD_LIBRARY_PATH="$EMU_DIR"/lib:/usr/miyoo/lib:/usr/lib
 		killall -q -USR2 joystickinput
 		if [ "$GAME" = "Final Fight LNS.pak" ]; then
 			$EMU_DIR/OpenBOR_mod "$ROM_FILE" > $(emu_log_file) 2>&1

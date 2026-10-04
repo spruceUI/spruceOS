@@ -5,12 +5,14 @@
   "description": "Screenshots viewer",
   "devices": [
     "TRIMUI_BRICK",
+    "TRIMUI_BRICK_PRO",
     "TRIMUI_SMART_PRO",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "MAGICX_A133P"
+    "MAGICX_A133P",
+    "DARKMOSS"
   ],
   "hideInSimpleMode": false
 }

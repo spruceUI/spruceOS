@@ -4,6 +4,7 @@
 
 IMAGE_PATH="/mnt/SDCARD/spruce/imgs/update.png"
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
+CONFIG_FILE="/mnt/SDCARD/App/-OTA/config.json"
 
 OTA_URL="https://spruceui.github.io/OTA/spruce"
 OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
@@ -212,7 +213,7 @@ start_pyui_message_writer
 display_image_and_text "$IMAGE_PATH" 35 25 "Checking for updates..." 75
 
 # twinkle them lights
-rgb_led lrm12 blink2 0000FF 1500 "-1" mmc0
+rgb_led lrm12b blink2 0000FF 1500 "-1" mmc0
 
 # Fix the wifi first if using an A30 with outdated firmware
 if [ "$PLATFORM" = "A30" ]; then
@@ -288,27 +289,17 @@ OTA_UPDATE_TYPE="$(get_config_value '.menuOptions."Network Settings".otaUpdateTy
 # nightly version is always offered again (see nightly_is_newer_than_advertised).
 SKIP_VERSION_CHECK="$(get_config_value '.menuOptions."Network Settings".otaSkipVersionCheck.selected' "False")"
 
-# Determine desired release channel. Developer/tester devices follow the
-# nightly channel unless "OTA: release channel" is set to Stable; that choice
-# exists so the stable->stable incremental path can be exercised while
-# incremental updates are gated behind developer mode. Everybody else always
-# follows the stable channel.
-#
 # A nightly device knows its version from the root marker
 # (/mnt/SDCARD/<base>-<date>), its build from commits_nightly.txt and its
 # stable base from NIGHTLY_BASE_FILE. Nightly-to-nightly updates only need
 # the base: every nightly diff is generated from the current stable release
 # and covers every path touched since it, so it applies on top of any
 # nightly with the same recorded base.
-OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")"
-TARGET_CHANNEL="stable"
-
-if flag_check "developer_mode" || flag_check "tester_mode"; then
-    if [ "$OTA_CHANNEL" = "Stable" ]; then
-        TARGET_CHANNEL="stable"
-    else
-        TARGET_CHANNEL="nightly"
-    fi
+OTA_CHANNEL="$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")"
+if [ "$OTA_CHANNEL" = "Nightly" ]; then
+    TARGET_CHANNEL="nightly"
+else
+    TARGET_CHANNEL="stable"
 fi
 
 log_message "OTA: Current version: $CURRENT_VERSION"
@@ -675,7 +666,15 @@ display_image_and_text "$IMAGE_PATH" 35 25 "Download successful! Press A to inst
 
 if confirm 30 0; then
     log_message "OTA: Update confirmed"
+
+    # Reset label on OTA app so it doesn't appear there's immediately an update after updating
+    if grep -q '"label"' "$CONFIG_FILE"; then
+        jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
+            "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+    fi
+
     "$(get_python_path)" /mnt/SDCARD/App/-Updater/updater.py
+
 else
     log_message "OTA: Update declined"
     exit 0

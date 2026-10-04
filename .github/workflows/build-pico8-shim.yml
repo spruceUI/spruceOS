@@ -1,64 +1,163 @@
-name: Build PICO-8 SDL sensor shim
+name: Build branch release
 
-# Builds Emu/PICO8/src/sdl_sensor_shim.c for aarch64 and uploads it as an
-# artifact. Manual only - the source changes about never, and the result is
-# committed to Emu/PICO8/lib-h700/ rather than fetched at runtime.
-#
-# It exists so the shipped .so is reproducible from the source next to it,
-# instead of being a binary someone has to take on trust.
+# Builds the ref it is dispatched with and publishes it as a pre-release in
+# spruceOSNightlies. No OTA package, no feed update: devices never see it.
+# The file keeps its old name so `gh workflow run build-pico8-shim.yml --ref
+# <branch>` resolves against main.
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  create-7z:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Install clang and lld
+      - name: Install 7zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang lld llvm
+          sudo apt-get install -y p7zip-full
 
-      - name: Build
-        # Same recipe the committed binary was built with. clang cross-compiles
-        # to aarch64 without a separate toolchain, and -nostdlib leaves dlsym
-        # undefined so it resolves from the process at load time - which is what
-        # an LD_PRELOAD shim wants anyway. The result has no NEEDED entries and
-        # no glibc version requirements, so there is nothing in it to go stale.
+      - name: Get version and tag
+        id: get_version
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          mkdir -p out
-          clang --target=aarch64-linux-gnu -fuse-ld=lld -shared -fPIC -nostdlib -O2 \
-            -o out/libsdl_sensor_shim.so \
-            Emu/PICO8/src/sdl_sensor_shim.c
-          llvm-strip out/libsdl_sensor_shim.so
+          BASE="$(< spruce/spruce)"
+          BRANCH="$(printf '%s' "$GITHUB_REF_NAME" | tr -c 'A-Za-z0-9._\n' '-')"
+          VERSION="${BASE}-${BRANCH}-$(date '+%Y%m%d')"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Verify
-        run: |
-          echo "=== file ==="
-          file out/libsdl_sensor_shim.so
-          echo "=== dynamic symbols ==="
-          llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so
-          echo "=== NEEDED (expected: none) ==="
-          llvm-readelf -d out/libsdl_sensor_shim.so | grep NEEDED || echo "  none"
-          # A shim that does not export these cannot work, and the failure would
-          # look like "PICO-8 still crashes" rather than a build error, so fail
-          # here instead.
-          for sym in SDL_Init SDL_InitSubSystem; do
-            llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so \
-              | awk -v s="$sym" '$7!="UND" && $4=="FUNC" && $8==s {found=1} END{exit !found}' \
-              || { echo "FATAL: $sym not exported"; exit 1; }
+          TAG="v${VERSION}"
+          n=1
+          while gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${TAG}" >/dev/null 2>&1; do
+            n=$((n + 1))
+            TAG="v${VERSION}.${n}"
           done
-          # dlsym must stay undefined - if it got linked in statically the
-          # RTLD_NEXT lookup would not reach the real SDL2.
-          llvm-readelf --dyn-syms -W out/libsdl_sensor_shim.so \
-            | awk '$7=="UND" && $8=="dlsym" {found=1} END{exit !found}' \
-            || { echo "FATAL: dlsym is not an undefined symbol"; exit 1; }
-          echo "all checks passed"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+          {
+            echo "Last commit: $(git rev-parse HEAD)"
+            echo "Branch: $GITHUB_REF_NAME"
+            echo ""
+            echo "Commits not in Development:"
+            git log origin/Development..HEAD --pretty=format:'- %s (%an)'
+          } > commits_nightly.txt
+
+          {
+            echo "commits<<EOF"
+            git log origin/Development..HEAD --pretty=format:'- %s (%an)' | head -n 50
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Write version marker
+        run: |
+          : > "${{ steps.get_version.outputs.version }}"
+
+      - name: Recombine large files
+        run: |
+          if ls spruce/flip/miyoo355_rootfs_32.img_part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/miyoo355_rootfs_32.img
+            cat spruce/flip/miyoo355_rootfs_32.img_part* > spruce/flip/miyoo355_rootfs_32.img
+            rm -f spruce/flip/miyoo355_rootfs_32.img_part*
+          fi
+
+          if ls spruce/flip/muOS-pixie-reduced.sqsh-part* 1>/dev/null 2>&1; then
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh
+            cat spruce/flip/muOS-pixie-reduced.sqsh-part* > spruce/flip/muOS-pixie-reduced.sqsh
+            rm -f spruce/flip/muOS-pixie-reduced.sqsh-part*
+          fi
+
+          if ls RetroArch/.retroarch/cores64/scummvm_libretro.so.part* 1>/dev/null 2>&1; then
+            cat RetroArch/.retroarch/cores64/scummvm_libretro.so.part* > RetroArch/.retroarch/cores64/scummvm_libretro.so
+            rm -f RetroArch/.retroarch/cores64/scummvm_libretro.so.part*
+          fi
+
+      - name: Pull selected PyUI Themes
+        run: |
+          mkdir -p Themes
+          RELEASE_URL="https://github.com/spruceUI/PyUI-Themes/releases/download/1"
+
+          wget -q --no-check-certificate -O "Themes/ALEKFULL_NX_ES.7z" "${RELEASE_URL}/ALEKFULL_NX_ES.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_OUTLINE.7z" "${RELEASE_URL}/ART_BOOK_OUTLINE.7z" || true
+          wget -q --no-check-certificate -O "Themes/ART_BOOK_NEXT.7z" "${RELEASE_URL}/ART_BOOK_NEXT.7z" || true
+          wget -q --no-check-certificate -O "Themes/Avocado.7z" "${RELEASE_URL}/Avocado.7z" || true
+          wget -q --no-check-certificate -O "Themes/Cosy by KyleBing.7z" "${RELEASE_URL}/Cosy_by_KyleBing.7z" || true
+          wget -q --no-check-certificate -O "Themes/Grape.7z" "${RELEASE_URL}/Grape.7z" || true
+          wget -q --no-check-certificate -O "Themes/GREEN.7z" "${RELEASE_URL}/GREEN.7z" || true
+          wget -q --no-check-certificate -O "Themes/HeyDW's Blue.7z" "${RELEASE_URL}/HeyDWs_Blue.7z" || true
+          wget -q --no-check-certificate -O "Themes/M.7z" "${RELEASE_URL}/M.7z" || true
+          wget -q --no-check-certificate -O "Themes/MINIMAL.7z" "${RELEASE_URL}/MINIMAL.7z" || true
+          wget -q --no-check-certificate -O "Themes/MinUInspired (logos).7z" "${RELEASE_URL}/MinUInspired_(logos).7z" || true
+          wget -q --no-check-certificate -O "Themes/OTB.7z" "${RELEASE_URL}/OTB.7z" || true
+          wget -q --no-check-certificate -O "Themes/Pico-8.7z" "${RELEASE_URL}/Pico-8.7z" || true
+          wget -q --no-check-certificate -O "Themes/SLABS.7z" "${RELEASE_URL}/SLABS.7z" || true
+          wget -q --no-check-certificate -O "Themes/SPRUCE (simple).7z" "${RELEASE_URL}/SPRUCE_(simple).7z" || true
+
+          find Themes -name "*.7z" -empty -delete
+          ls -lh Themes
+
+      - name: Archive Licenses folder
+        run: |
+          7z a -t7z -mx=9 Licenses.7z Licenses/
+          rm -rf Licenses/
+
+      - name: Create 7z archive
+        run: |
+          7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update .system \
+            -xr!.git \
+            -xr!.github \
+            -x!.gitignore \
+            -x!.gitattributes \
+            -x!create_spruce_release.bat \
+            -x!create_spruce_release.sh \
+            -x!commits_nightly.txt \
+            -x!To-Do.txt
+
+          7z u "spruceV${{ steps.get_version.outputs.version }}.7z" commits_nightly.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         with:
-          name: libsdl_sensor_shim
-          path: out/libsdl_sensor_shim.so
-          if-no-files-found: error
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: Branch build ${{ github.ref_name }} (${{ steps.get_version.outputs.version }})
+          body: |
+            Test build of branch `${{ github.ref_name }}` at `${{ steps.get_version.outputs.sha }}`.
+            Not an OTA candidate.
+
+            ${{ steps.get_version.outputs.commits }}
+          repository: spruceUI/spruceOSNightlies
+          token: ${{ secrets.PAT_TOKEN }}
+          draft: false
+          prerelease: true
+
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          TAG: ${{ steps.get_version.outputs.tag }}
+          FILE: spruceV${{ steps.get_version.outputs.version }}.7z
+        run: |
+          for attempt in 1 2 3; do
+            echo "Uploading $FILE, attempt ${attempt}..."
+            if timeout 900 gh release upload "$TAG" "$FILE" \
+                --repo spruceUI/spruceOSNightlies --clobber; then
+              break
+            fi
+            [ "$attempt" = 3 ] && { echo "::error::giving up on $FILE"; exit 1; }
+            sleep 30
+          done
+
+          state="$(gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${TAG}" \
+            --jq ".assets[] | select(.name == \"${FILE}\") | .state")"
+          if [ "$state" != "uploaded" ]; then
+            echo "::error::${FILE} is not uploaded on ${TAG} (state='${state:-missing}')"
+            exit 1
+          fi
+          echo "https://github.com/spruceUI/spruceOSNightlies/releases/tag/${TAG}" >> "$GITHUB_STEP_SUMMARY"

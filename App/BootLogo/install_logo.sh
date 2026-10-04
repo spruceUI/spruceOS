@@ -48,7 +48,7 @@ ORIG_LOGO_PATH="$LOGO_PATH"
 # there (a stock CubeXX has a 720x720 panel but a 640x480 bootlogo.bmp), and the
 # ffprobe below is a 32-bit binary that cannot run under BaseOS.
 case "$PLATFORM" in
-    Anbernic*|Pixel2) SKIP_GENERIC_CONVERT=1 ;;
+    Anbernic*|Pixel2|Miniloong) SKIP_GENERIC_CONVERT=1 ;;
     *)                SKIP_GENERIC_CONVERT=0 ;;
 esac
 
@@ -372,6 +372,73 @@ case "$PLATFORM" in
         umount "$BOOT_PATH" 2>/dev/null
         rmdir "$BOOT_PATH" 2>/dev/null
         rm -f "$TEMP_BMP"
+        ;;
+    "Miniloong")
+        # U-Boot draws logo.bmp then logo_kernel.bmp out of the resource
+        # partition, a 4MB RSCE image that also holds the U-Boot dtb and the
+        # off-charging battery bitmaps. The panel is portrait, so the art is
+        # composed landscape and turned last, the RG28XX way. 8-bit like the
+        # stock file: two 24-bit logos alone would overflow the partition.
+        RES_DEV="/dev/disk/by-partlabel/resource"
+        [ -b "$RES_DEV" ] || RES_DEV="$(findmnt -no SOURCE / 2>/dev/null | sed 's/p[0-9]*$/p2/')"
+        WORK="/tmp/bootres"
+        BACKUP="/mnt/SDCARD/App/BootLogo/resource-backup.img"
+        if [ ! -b "$RES_DEV" ]; then
+            log_message "Error: resource partition not found."
+            display --icon "$ERROR_IMAGE_PATH" -t "Boot partition not found. Cancelling boot logo swap." -d 1
+            exit 1
+        fi
+        RES_SIZE="$(blockdev --getsize64 "$RES_DEV" 2>/dev/null || echo 4194304)"
+        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        rm -rf "$WORK"
+        mkdir -p "$WORK/unpacked"
+        cp -r payload/* /tmp
+        if ! ffmpeg -y -i "$ORIG_LOGO_PATH" -filter_complex "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black,transpose=2,split[a][b];[a]palettegen=max_colors=256[p];[b][p]paletteuse=dither=none" -pix_fmt pal8 "$WORK/logo.bmp" > /dev/null 2>&1; then
+            log_message "Error: could not convert the image to a portrait 8-bit BMP."
+            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            rm -rf "$WORK"
+            exit 1
+        fi
+        log_message "Reading resource partition $RES_DEV..."
+        if ! dd if="$RES_DEV" of="$WORK/resource.img" bs=512 2>/dev/null; then
+            log_message "Error: could not read $RES_DEV."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't read boot partition. Cancelling boot logo swap." -d 1
+            rm -rf "$WORK"
+            exit 1
+        fi
+        [ -f "$BACKUP" ] || cp "$WORK/resource.img" "$BACKUP"
+        cd "$WORK/unpacked" || exit 1
+        rsce_tool -u ../resource.img > /dev/null 2>&1
+        if [ ! -f logo.bmp ] || [ ! -f logo_kernel.bmp ]; then
+            log_message "Error: resource image did not unpack to the expected files."
+            display --icon "$ERROR_IMAGE_PATH" -t "Unexpected boot partition layout. Cancelling boot logo swap." -d 1
+            rm -rf "$WORK"
+            exit 1
+        fi
+        cp -f ../logo.bmp logo.bmp
+        cp -f ../logo.bmp logo_kernel.bmp
+        set --
+        for file in *; do
+            set -- "$@" -p "$file"
+        done
+        rsce_tool "$@" > /dev/null 2>&1
+        NEW_SIZE="$(wc -c < boot-second 2>/dev/null || echo 0)"
+        if [ "$NEW_SIZE" -le 0 ] || [ "$NEW_SIZE" -gt "$RES_SIZE" ]; then
+            log_message "Error: repacked resource image is $NEW_SIZE bytes, partition is $RES_SIZE."
+            display --icon "$ERROR_IMAGE_PATH" -t "New boot image does not fit. Cancelling boot logo swap." -d 1
+            rm -rf "$WORK"
+            exit 1
+        fi
+        log_message "Writing resource partition..."
+        if ! dd if=boot-second of="$RES_DEV" bs=512 conv=fsync 2>/dev/null; then
+            log_message "Error: could not write $RES_DEV."
+            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot partition. Cancelling boot logo swap." -d 1
+            rm -rf "$WORK"
+            exit 1
+        fi
+        sync
+        cd "$DIR" || exit 1
+        rm -rf "$WORK" /tmp/bin
         ;;
     "Pixel2")
         display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."

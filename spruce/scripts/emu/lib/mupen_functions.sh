@@ -175,6 +175,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 	export M64P_AUTOLOAD=1
 	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
+	mkdir -p /mnt/SDCARD/Saves/screenshots/mupen64plus
 
 	rm -f /tmp/mupen_restart
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
@@ -216,9 +217,9 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 		# Stickless XX: the N64 stick is axes 0/1, which have no stick behind
 		# them there, so let the d-pad drive them for the run.
-		_xx_dpad_swap 2
+		treat_dpad_as_analog
 		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
-		_xx_dpad_swap 0
+		treat_dpad_as_dpad
 
 		case "$PLATFORM" in
 			"A30") kill -9 $(pidof a30_input_shim) 2>/dev/null ;;

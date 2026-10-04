@@ -39,9 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		# The XU20 is deliberately absent: its motor is driven by the vendor's
-		# sunxi-vibrator off a regulator, not a GPIO, so there is no sysfs value here.
-		"SmartPro"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"Flip")
+		"SmartPro"|"Brick"|"BrickPro"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
@@ -49,14 +47,12 @@ setup_rumble_env() {
 
 prepare_ra_config() {
 
-	_live_cfg_dir="/mnt/SDCARD/Saves/ra-configs/"
-	_bak_cfg="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
-	export PLATFORM_CFG="${_live_cfg_dir}/retroarch-${PLATFORM}.cfg"
+	export PLATFORM_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
 
-	if [ ! -f "$PLATFORM_CFG" ] && [ -f "$_bak_cfg" ]; then
+	if [ ! -f "$PLATFORM_CFG" ]; then
 		log_message "No retroarch-${PLATFORM}.cfg found."
-		mkdir -p "$_live_cfg_dir"
-		cp "$_bak_cfg" "$PLATFORM_CFG" && log_message "$PLATFORM_CFG seeded from .bak file."
+		ensure_ra_config_path >/dev/null
+		[ -f "$PLATFORM_CFG" ] && log_message "$PLATFORM_CFG seeded from .bak file."
 	fi
 
 	# Set up RetroAchievements based on spruceUI config
@@ -74,7 +70,7 @@ prepare_ra_config() {
 				rm -f "$TMP_CFG"
 			fi
 			;;
-		"Softcore")
+		"Casual"|"Softcore")
 			TMP_CFG="$(mktemp)"
 			if sed \
 				-e "s|^cheevos_enable.*|cheevos_enable = \"true\"|" \
@@ -101,6 +97,19 @@ prepare_ra_config() {
 			fi
 			;;
 	esac
+
+	# The proxy cannot validate a hardcore run. Enabling it already drops the
+	# mode to Casual (networkServiceToggle.sh); this covers Hardcore chosen after.
+	if [ "$rac_mode" = "Hardcore" ] &&
+		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
+		log_message "Offline proxy on; casual for this launch"
+		TMP_CFG="$(mktemp)"
+		if sed -e "s|^cheevos_hardcore_mode_enable.*|cheevos_hardcore_mode_enable = \"false\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+		else
+			rm -f "$TMP_CFG"
+		fi
+	fi
 
 	# Set auto save state based on spruceUI config
 	auto_save="$(get_config_value '.menuOptions."Emulator Settings".raAutoSave.selected' "Custom")"
@@ -221,6 +230,20 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
+	# Hand the IGM the active theme dir so a theme can ship its own igm.json.
+	# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
+	# configs store a full path, so accept either. Leaving the variable unset
+	# is fine - the binary falls through to the colourway it was given.
+	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
+	case "$_theme" in
+		/*)      _theme_dir="${_theme%/}" ;;
+		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
+		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
+	esac
+	if [ -d "$_theme_dir" ]; then
+		export SPRUCE_THEME_DIR="$_theme_dir"
+	fi
+
 	setup_for_retroarch
 	cd "$RA_DIR"
 
@@ -247,7 +270,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
@@ -460,7 +483,7 @@ backup_rac_creds_to_spruce_cfg() {
 	# if spruce setting for RAC mode is auto or disabled, do nothing.
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	case "$rac_mode" in
-		"Softcore"|"Hardcore") ;;
+		"Casual"|"Softcore"|"Hardcore") ;;
 		*) return ;;
 	esac
 

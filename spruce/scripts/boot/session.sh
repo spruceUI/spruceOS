@@ -1,12 +1,10 @@
 #!/bin/sh
 # Spruce boot session supervisor.
 #
-# Runs runtime.sh on behalf of the rootfs stub (the Flip's runmiyoo.sh, the
-# Miniloong's S50spruce) and turns "runtime.sh died" from a black screen into
-# a decision: try again, or hand the device to the vendor UI. Everything here
-# lives on the card so it ships with releases; the stub in the rootfs stays
-# small and stays put. Design: ~/ai/CFW/Miniloong/research/
-# rk3566-boot-bootstrap-phase1-20260828.md (section 3.2).
+# Runs runtime.sh on behalf of the rootfs stub (the Flip's runmiyoo.sh) and
+# turns "runtime.sh died" from a black screen into a decision: try again, or
+# hand the device to the vendor UI. Everything here lives on the card so it
+# ships with releases; the stub in the rootfs stays small and stays put.
 #
 # Contract with the stub, expressed only through the exit status:
 #   0  clean exit (a shutdown is in progress, or runtime returned during one)
@@ -51,16 +49,14 @@ now() {
     date '+%s' 2>/dev/null || echo 0
 }
 
-# The Miniloong stock firmware mounts the SD card noexec, so executing runtime.sh
-# (and RetroArch, python, .so off the card) fails with rc=126 and the session
-# crash-loops. Flip the payload mount (and its two possible source slots) to exec.
-# Cheap and idempotent; a no-op on devices whose card is already exec.
+# A card mounted noexec makes runtime.sh (and RetroArch, python, .so off the
+# card) fail with rc=126 and the session crash-loop. Cheap and idempotent; a
+# no-op on devices whose card is already exec.
 remount_sd_exec() {
-    for _t in "$SD" /mnt/sdcard /media/sdcard1; do
-        [ -d "$_t" ] || continue
-        mount -o remount,exec,nosuid "$_t" 2>/dev/null || \
-            mount -o remount,rw,exec,nosuid "$_t" 2>/dev/null || true
-    done
+    if [ -d "$SD" ]; then
+        mount -o remount,exec,nosuid "$SD" 2>/dev/null || \
+            mount -o remount,rw,exec,nosuid "$SD" 2>/dev/null || true
+    fi
     _opts="$(awk -v m="$SD" '$2==m{print $4; exit}' /proc/mounts 2>/dev/null)"
     log "remounted payload exec ($SD -> ${_opts:-?})"
 }

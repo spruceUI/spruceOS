@@ -45,7 +45,7 @@ class TrimUIBrickPro(TrimUIDevice):
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
                 "/mnt/SDCARD/Saves/trim-ui-brick-pro-system.json", self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
             from controller.controller import Controller
-            self.volume_key_watcher = KeyWatcher("/dev/input/event3")
+            self.volume_key_watcher = KeyWatcher(TrimUIDevice.pad_event_path())
             Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
             volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
             volume_key_polling_thread.start()
@@ -111,7 +111,7 @@ class TrimUIBrickPro(TrimUIDevice):
 
 
     def get_controller_interface(self):
-        return KeyWatcherController(event_path="/dev/input/event3", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
+        return KeyWatcherController(event_path=TrimUIDevice.pad_event_path(), mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
 
     def supports_analog_calibration(self):
         return True
@@ -132,16 +132,8 @@ class TrimUIBrickPro(TrimUIDevice):
         return True # RA save state images don't seem to load w/o conversion?
     
         
-    def enable_bluetooth(self):
-        if(not self.is_bluetooth_enabled()):
-            subprocess.Popen(['./bluetoothd',"-f","/etc/bluetooth/main.conf"],
-                            cwd='/usr/bin',
-                            stdout=subprocess.DEVNULL,
-                            stderr=subprocess.DEVNULL)
-        self.system_config.set_bluetooth(1)
-
     def volume_up(self):
-        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event3",115)
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up(TrimUIDevice.pad_event_path(),115)
 
     def volume_down(self):
-        StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event3",114)
+        StdInBasedSendEventBinaryHelper.send_key_down_and_up(TrimUIDevice.pad_event_path(),114)

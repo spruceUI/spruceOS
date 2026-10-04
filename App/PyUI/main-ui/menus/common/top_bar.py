@@ -67,6 +67,12 @@ class TopBar:
             wifi_icon = Theme.get_wifi_icon(wifi_status)
             w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
             x_offset = x_offset - w - img_padding
+
+        #Bluetooth
+        bt_icon = Theme.get_bluetooth_icon(Device.get_device().get_bluetooth_status())
+        if(bt_icon is not None):
+            w, h = Display.render_image(bt_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+            x_offset = x_offset - w - img_padding
  
         #Volume
         if(time.time() - self.volume_changed_time < 3 and Device.get_device().supports_volume()):
@@ -99,6 +105,12 @@ class TopBar:
             self.top_bar_w = max(self.top_bar_w, wifi_w)
             self.top_bar_h = max(self.top_bar_h, wifi_h)
 
+        bt_icon = Theme.get_bluetooth_icon(Device.get_device().get_bluetooth_status())
+        if(bt_icon is not None):
+            bt_w, bt_h = Display.get_image_dimensions(bt_icon)
+            self.top_bar_w = max(self.top_bar_w, bt_w)
+            self.top_bar_h = max(self.top_bar_h, bt_h)
+
         battery_w, battery_h = Display.get_image_dimensions(battery_icon)
         self.top_bar_w = max(self.top_bar_w, battery_w)
         self.top_bar_h = max(self.top_bar_h, battery_h)
@@ -123,6 +135,10 @@ class TopBar:
             if(wifi_icon is not None):
                 #Wifi
                 w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
+                x_offset = x_offset - w - padding
+            if(bt_icon is not None):
+                #Bluetooth
+                w, h = Display.render_image(bt_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
                 #Volume
             if(time.time() - self.volume_changed_time < 3):

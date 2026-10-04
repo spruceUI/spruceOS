@@ -8,6 +8,11 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh"
 
+# The stock BusyBox (1.27.2) has no timeout applet, so asound-setup.sh's
+# "timeout 2 bluetoothctl ..." failed and never routed audio to a connected
+# Bluetooth headset. spruce's own BusyBox has one.
+BTCTL_TIMEOUT="/mnt/SDCARD/spruce/bin64/busybox timeout 2"
+
 
 ###############################################################################
 
@@ -40,6 +45,67 @@ set_volume() {
 
 }
 
+# hardwareservice owns the volume keys and, on each change, also runs
+# 'amixer -D bluealsa sset "<control>" vol*127/20' - but only while
+# /tmp/bt_alsa_volume_dev names the headset's mixer control. The stock keymon
+# wrote that file; spruce does not run keymon, so the keys never reached a
+# Bluetooth headset.
+device_on_bt_audio_route() {
+    if [ -z "$1" ]; then
+        rm -f /tmp/bt_alsa_volume_dev
+        return 0
+    fi
+    control=$($BTCTL_TIMEOUT amixer -D bluealsa scontents 2>/dev/null |
+        sed -n "s/^Simple mixer control '\(.* - A2DP\)',[0-9]*$/\1/p" | head -n 1)
+    [ -n "$control" ] || return 0
+    printf '%s' "$control" > /tmp/bt_alsa_volume_dev
+    # Start the headset at spruce's level rather than bluealsa's 100%.
+    vol=$(get_volume_level)
+    case "$vol" in ''|*[!0-9]*) return 0 ;; esac
+    $BTCTL_TIMEOUT amixer -q -D "bluealsa:DEV=$1" sset A2DP $((vol * 127 / 20)) 2>/dev/null
+}
+
+# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
+# first headset bluealsa holds an A2DP transport for, or nothing for the
+# speaker. Points the volume keys at it the way asound-setup.sh does for games.
+bt_audio_device() {
+    pcm=""
+    # PyUI asks right after killing bluetoothd or disconnecting the headset, and
+    # bluealsa can still list the transport for a moment: check both directly.
+    if pidof bluetoothd >/dev/null 2>&1; then
+        pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
+    fi
+    mac=$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')
+    if [ -n "$mac" ] && ! $BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
+        pcm=""
+        mac=""
+    fi
+    device_on_bt_audio_route "$mac"
+    [ -z "$pcm" ] || echo "$pcm"
+}
+
+device_bluetooth_supported() {
+    return 0
+}
+
+# The firmware attaches hci0 at boot and starts bluetoothd; only fill in what
+# is missing, never restart it.
+device_bluetooth_up() {
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && /etc/bluetooth/bluetoothd start ) </dev/null >/dev/null 2>&1
+        sleep 1
+    fi
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
+    fi
+    hciconfig hci0 up
+}
+
+device_bluetooth_down() {
+    killall bluetoothd 2>/dev/null
+    hciconfig hci0 down 2>/dev/null
+}
+
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick
@@ -55,13 +121,50 @@ runtime_mounts_a133p() {
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
+    # Bound from /tmp so the mount does not hold the card. See bluetooth-main.conf.
+    { cp "${SPRUCE_ETC_DIR}/bluetooth-main.conf" /tmp/bluetooth-main.conf &&
+        mount -o bind /tmp/bluetooth-main.conf /etc/bluetooth/main.conf; } &
     /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+# Stock runs its own wpa_supplicant (procd S96), which procd spawns just after
+# enable_wifi has looked for one - so both end up on wlan0, deauthenticating each
+# other for ~80 s. Import its networks, stop the service, then watch for 30 s
+# because at device_init time procd has not registered it yet. Runtime only: the
+# service stays enabled. Double-forked - runtime.sh waits for device_init's children.
+stop_stock_wpa_supplicant_a133p() {
+    [ -x /etc/init.d/wpa_supplicant ] || return 0
+    import_wpa_networks_from /etc/wifi/wpa_supplicant.conf
+    /etc/init.d/wpa_supplicant stop >/dev/null 2>&1
+    (
+        (
+            _i=0
+            while [ "$_i" -lt 60 ]; do
+                for _pid in $(pgrep -f "wpa_supplicant.*-c/etc/wifi/"); do
+                    kill -9 "$_pid" 2>/dev/null
+                    /etc/init.d/wpa_supplicant stop >/dev/null 2>&1
+                    log_message "Stopped the stock wpa_supplicant ($_pid) so spruce's is the only one"
+                    # The stock stop runs "killall wpa_supplicant" and downs wlan0,
+                    # taking ours with it. restart is a no-op while WiFi is off.
+                    log_message "Restarting spruce's WiFi after the stock stop"
+                    wifi_request restart
+                done
+                usleep 500000
+                _i=$((_i + 1))
+            done
+        ) &
+    ) </dev/null >/dev/null 2>&1
+}
+
 device_init_a133p() {
+    # Stock is "8 7 1 7": a long burst on ttyS0 at 115200 holds CPU0 long enough for
+    # an i2c transfer to time out, and the stock handler panics on the late IRQ.
+    # dmesg and pstore still record every level.
+    echo "3 4 1 7" > /proc/sys/kernel/printk
+    stop_stock_wpa_supplicant_a133p
     runtime_mounts_a133p
 
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
@@ -72,7 +175,12 @@ device_init_a133p() {
     (
         syslogd -S
         hwclock -s -u
-        /etc/bluetooth/bluetoothd start
+        # The firmware left the radio up; WiFi goes first (bluetooth.sh boot).
+        hciconfig hci0 down
+        # Restart, not start: the stock runtrimui.sh already started it with the
+        # stock main.conf, before runtime_mounts_a133p bound ours over it.
+        /etc/bluetooth/bluetoothd restart
+        /mnt/SDCARD/spruce/scripts/bluetooth.sh boot
     ) &
     amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"

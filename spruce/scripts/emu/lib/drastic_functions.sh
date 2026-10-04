@@ -95,7 +95,7 @@ run_drastic_A30() {
 	killall -q -STOP joystickinput
 	ln -s /dev/ttyS2 /dev/ttyS0
 	
-	export LD_LIBRARY_PATH=libs:/usr/miyoo/lib:/usr/lib
+	export LD_LIBRARY_PATH="$EMU_DIR"/libs:"$EMU_DIR"/lib32-common:/usr/miyoo/lib:/usr/lib
 	export SDL_VIDEODRIVER=mmiyoo
 	export SDL_AUDIODRIVER=mmiyoo
 	export EGL_VIDEODRIVER=mmiyoo
@@ -134,7 +134,7 @@ run_drastic_Flip(){
 run_drastic_steward_Flip() {
 	ready_arch_32_states
 	export SDL_VIDEODRIVER=NDS
-	export LD_LIBRARY_PATH="$HOME/lib32_Flip:/usr/lib32:$LD_LIBRARY_PATH"
+	export LD_LIBRARY_PATH="$HOME/lib32_Flip:$EMU_DIR/lib32-common:/usr/lib32:$LD_LIBRARY_PATH"
 	./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_32_states
 }
@@ -168,7 +168,7 @@ run_drastic_MiyooMini() {
 	nds_emu_dir=/mnt/SDCARD/Emu/NDS
 	export HOME=$nds_emu_dir
 	export PATH=$nds_emu_dir:$PATH
-	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:"$EMU_DIR"/lib32-common:$LD_LIBRARY_PATH
 	export SDL_VIDEODRIVER=mmiyoo
 	export SDL_AUDIODRIVER=mmiyoo
 	export EGL_VIDEODRIVER=mmiyoo
@@ -237,7 +237,7 @@ run_drastic_steward_Brick() {
 	sleep 1
 	export SDL_VIDEODRIVER=NDS
 	ready_arch_32_states
-	./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick ./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
+	./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick:lib32-common ./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_32_states
 	sync
 	kill_runner

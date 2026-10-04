@@ -49,5 +49,34 @@
     "fullScreenGridGameMenuResizeType": "FIT",
     "mainMenuTitle": "",
     "displayVolumeNumbers": true,
-    "gameSelectionViewType": "TEXT_AND_IMAGE"
+    "gameSelectionViewType": "TEXT_AND_IMAGE",
+    "screensaver": {
+        "bgColor": "#282828",
+        "screensaverTimeoutSec": 60,
+        "widgets": [
+            {
+                "type": "clock",
+                "x": 0.5,
+                "y": 0.37,
+                "fontSize": 82,
+                "color": "#FFFFFF",
+                "enabled": true,
+                "font": "nunwen.ttf"
+            },
+            {
+                "type": "date",
+                "x": 0.5,
+                "y": 0.55,
+                "fontSize": 24,
+                "color": "#EBDBB2"
+            },
+            {
+                "type": "battery",
+                "x": 0.5,
+                "y": 0.7,
+                "fontSize": 20,
+                "color": "#88CC88"
+            }
+        ]
+    }
 }

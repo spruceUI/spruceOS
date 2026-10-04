@@ -80,7 +80,7 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30",
+        "DARKMOSS",
         "ANBERNIC_RGXX"
       ],
       "options": [
@@ -101,7 +101,7 @@
         "TRIMUI_SMART_PRO_S",
         "ANBERNIC_RGXX",
         "GKD_PIXEL2",
-        "RGB30",
+        "DARKMOSS",
         "MIYOO_A30",
         "MAGICX_A133P"
       ],

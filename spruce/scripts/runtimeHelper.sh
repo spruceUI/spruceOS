@@ -4,6 +4,7 @@
 . /mnt/SDCARD/spruce/scripts/firstbootLaneCommon.sh
 . /mnt/SDCARD/spruce/scripts/network/sambaFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
 run_sd_card_fix_if_triggered() {
     needs_fix=false
@@ -157,15 +158,10 @@ check_for_update() {
     NIGHTLY_VERSION=$(sed -n 's/NIGHTLY_VERSION=//p' "$TMP_DIR/spruce" | tr -d '\n\r')
     NIGHTLY_COMMIT=$(sed -n 's/^NIGHTLY_COMMIT=//p' "$TMP_DIR/spruce" | tr -d '\n\r' | tr 'A-F' 'a-f')
 
-    # Set target version based on developer/tester mode
     TARGET_VERSION="$RELEASE_VERSION"
 
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
-        # Same rule as downloader.sh: "OTA: release channel" = Stable keeps a
-        # developer/tester device on stable releases.
-        if [ "$(get_config_value '.menuOptions."Network Settings".otaChannel.selected' "Nightly")" != "Stable" ]; then
-            TARGET_VERSION="$NIGHTLY_VERSION"
-        fi
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
+        TARGET_VERSION="$NIGHTLY_VERSION"
     fi
 
     # Compare versions
@@ -616,8 +612,15 @@ set_up_boot_action() {
                 log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
                 echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
                 ;;
+            "DSi firmware")
+                log_message "Attempting to boot into Nintendo DSi firmware via DSperate BootMenuDSi.nds"
+                echo "\"/mnt/SDCARD/Emu/NDSI/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds\"" > /tmp/cmd_to_run.sh
+                ;;
             "PPSSPP")
                 echo "\"/mnt/SDCARD/App/PPSSPP/launch.sh\"" > /tmp/cmd_to_run.sh
+                ;;
+            "Songo#5")
+                echo "\"/mnt/SDCARD/App/Songo#5/launch.sh\"" > /tmp/cmd_to_run.sh
                 ;;
             "Apotris"*)
                 log_message "Sun mode engaged."

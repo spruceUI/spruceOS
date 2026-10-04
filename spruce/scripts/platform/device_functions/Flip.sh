@@ -45,7 +45,7 @@ vibrate() {
 #                     m  → middle LED
 #                     1  → front LED f1
 #                     2  → front LED f2
-#                  Example: "lrm12", "m1", "r2", "l"
+#                  Example: "lrm12b", "m1", "r2", "l"
 #
 #   <effect>       One of the following keywords or numeric equivalents:
 #                     0 | off | disable      → off
@@ -146,6 +146,7 @@ set_volume() {
             flip_apply_route_and_gain 2 "$VOLUME_RAW"
         fi
     fi
+    bt_headset_volume "$VOLUME_LV"
 
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
     if [ "$SAVE_TO_CONFIG" = true ]; then
@@ -362,9 +363,12 @@ runtime_mounts_Flip() {
 		cp /mnt/SDCARD/spruce/flip/miyoo_system.json /mnt/SDCARD/Saves/userdata-flip/system.json
 	fi
 
+    # Pairings can't live on the card (FAT has no colons in names), so keep
+    # the internal ext4 copy reachable under the card's /userdata.
     log_message "Mounting surrogate /userdata and /userdata/bluetooth folders"
+    mkdir -p /userdata/bluetooth /run/bluetooth_fix
+    mount --bind /userdata/bluetooth /run/bluetooth_fix
     mount --bind /mnt/sdcard/Saves/userdata-flip/ /userdata
-    mkdir -p /run/bluetooth_fix
     mount --bind /run/bluetooth_fix /userdata/bluetooth
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
@@ -416,6 +420,7 @@ device_init() {
     init_gpio_Flip
 
     insmod /lib/modules/rtk_btusb.ko
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     /usr/miyoo/bin/btmanager &
     /usr/miyoo/bin/hardwareservice &
     /usr/miyoo/bin/miyoo_inputd &
@@ -543,6 +548,8 @@ device_system_handles_sdcard_unmount() {
     return 1 # Flip leaves dirty bit set?
 }
 
+# The speaker is pcm.spruce_speaker; asound-setup.sh adds the default.
+ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     hp_multiplier="$(get_config_value '.menuOptions."Audio Settings".headphoneMultiplier.selected' "1.0")"
     use_hp_scaling=0
@@ -569,7 +576,7 @@ pcm.atten {
     ttable.1.1 $hp_multiplier
 }
 
-pcm.!default {
+pcm.spruce_speaker {
     type plug
     slave.pcm "atten"
 }
@@ -581,7 +588,7 @@ ctl.!default {
 EOF
     else
         cat > "$ASOUND_CONF" <<EOF
-pcm.!default {
+pcm.spruce_speaker {
     type plug
     slave.pcm "dmix"
 }
@@ -603,6 +610,32 @@ device_stock_ui_command() {
 
 # Strict unmount: btmanager, hardwareservice, miyoo_inputd and gpiowait hold
 # the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
+device_bluetooth_supported() {
+    return 0
+}
+
+device_bluetooth_up() {
+    _n=0
+    while [ ! -d /sys/class/bluetooth/hci0 ] && [ "$_n" -lt 50 ]; do
+        sleep 0.1
+        _n=$((_n + 1))
+    done
+    hciconfig hci0 up
+    if ! pidof bluetoothd >/dev/null 2>&1; then
+        ( cd / && /etc/init.d/S40bluetooth start ) >/dev/null 2>&1
+        sleep 1
+    fi
+    if ! pidof bluealsa >/dev/null 2>&1; then
+        ( cd / && exec bluealsa -p a2dp-source ) >/dev/null 2>&1 &
+    fi
+}
+
+device_bluetooth_down() {
+    killall bluealsa 2>/dev/null
+    /etc/init.d/S40bluetooth stop >/dev/null 2>&1 || killall bluetoothd 2>/dev/null
+    hciconfig hci0 down 2>/dev/null
+}
+
 device_needs_strict_unmount() {
     return 0
 }

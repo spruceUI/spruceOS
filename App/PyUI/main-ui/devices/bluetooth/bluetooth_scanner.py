@@ -180,6 +180,43 @@ class BluetoothScanner:
         """Clears the device list to force re-scan."""
         with self._lock:
             self._devices.clear()
+
+    def connect(self, device):
+        """(ok, failed step, output)."""
+        # A device paired (or connected) earlier, e.g. before a reboot, answers
+        # AlreadyExists (AlreadyConnected) - that is the state we want, so go on.
+        steps = [
+            ("pair",    ["bluetoothctl", "pair", device.address],    ("Pairing successful", "org.bluez.Error.AlreadyExists")),
+            ("trust",   ["bluetoothctl", "trust", device.address],   ("trust succeeded",)),
+            ("connect", ["bluetoothctl", "connect", device.address], ("Connection successful", "org.bluez.Error.AlreadyConnected")),
+        ]
+
+        for name, cmd, success_tokens in steps:
+            self.log.info(f"Bluetooth connect step: {name}")
+
+            output = ProcessRunner.run_cmd("BluetoothMenu", cmd)
+            self.log.info(f"{name} output: {output}")
+
+            if not output or not any(token.lower() in output.lower() for token in success_tokens):
+                self.log.info(f"{name} FAILED for {device.address}")
+                return False, name, output
+
+        return True, None, None
+
+    def is_connected(self, device) -> bool:
+        output = self._run_cmd(["bluetoothctl", "info", device.address])
+        return "Connected: yes" in (output or "")
+
+    def disconnect(self, device):
+        """(ok, output)."""
+        output = self._run_cmd(["bluetoothctl", "disconnect", device.address]) or ""
+        # BlueZ 5.82 says "Disconnection successful"; older ones the other.
+        return ("Successful disconnected" in output or "Disconnection successful" in output), output
+
+    def forget(self, device):
+        """(ok, output)."""
+        output = self._run_cmd(["bluetoothctl", "remove", device.address]) or ""
+        return "Device has been removed" in output, output
     
     def _run_cmd(self, cmd, log_stdout=True):
         return ProcessRunner.run_cmd("BluetoothScanner", cmd, log_stdout=log_stdout)

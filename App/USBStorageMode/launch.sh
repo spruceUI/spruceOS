@@ -42,7 +42,7 @@ log_and_display_message "Loading..."
 sleep 0.5
 
 # 1. Wait for USB cable connection, using the reliable charging status check
-while [ "$(device_get_charging_status)" = "Discharging" ]; do
+while ! usb_host_connected; do
     log_and_display_message "Please connect the USB cable to your computer. Press A to check again, or B to cancel."
     if confirm; then
         # Loop will re-check charging status
@@ -68,7 +68,7 @@ else
 fi
 
 # 3. Double-check connection and start
-if [ "$(device_get_charging_status)" = "Discharging" ]; then
+if ! usb_host_connected; then
     log_and_display_message "USB Cable Disconnected."
     sleep 2
     exit 0
@@ -76,24 +76,24 @@ fi
 
 # Disable idle/shutdown timer while in USB mode (device reboots on exit, so no need to restart)
 killall -q idlemon 2>/dev/null
-killall -q idlemon_mm.sh 2>/dev/null
+killall -q idle_watchdog.sh 2>/dev/null
 
 # 4. Export. The PC must not be handed a filesystem the kernel still has
-# mounted (SPR-MED-198), so wherever spruce owns the card the export is a
-# card-less session: stage what it needs into /tmp and hand over to the
-# shutdown, which unmounts cleanly, exports, waits, and reboots. Only where
-# the system owns the card (device_system_handles_sdcard_unmount) is the
-# mounted export kept.
-if ! device_system_handles_sdcard_unmount; then
-    if usb_session_stage; then
-        log_and_display_message "Preparing the SD card for USB..."
-        sleep 1
-        stop_pyui_message_writer
-        sync
-        exec "$SAVE_POWEROFF" --usb-storage-export
-    fi
-    log_message "USB Storage Mode: session staging failed, falling back to the mounted export"
+# mounted (SPR-MED-198), so the export is a card-less session: stage what it
+# needs into /tmp and hand over to the shutdown, which unmounts cleanly,
+# exports, waits, and reboots.
+if usb_session_stage; then
+    # The session screen does not draw on the H700 devices, so say the final word now.
+    case "$PLATFORM" in
+        "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*) log_and_display_message "USB Mode Active.\nPress A to exit and reboot your device." ;;
+        *)           log_and_display_message "Preparing the SD card for USB..." ;;
+    esac
+    sleep 1
+    stop_pyui_message_writer
+    sync
+    exec "$SAVE_POWEROFF" --usb-storage-export
 fi
+log_message "USB Storage Mode: session staging failed, falling back to the mounted export"
 
 log_and_display_message "Connecting USB Mass Storage Mode..."
 configure_usb_gadget
@@ -101,7 +101,7 @@ log_and_display_message "" # Clear the "Connecting" message
 
 # 4b. Legacy loop (mounted export)
 while true; do
-    if [ "$(device_get_charging_status)" = "Discharging" ]; then
+    if ! usb_host_connected; then
         log_and_display_message "USB Cable Disconnected."
         exit_usb_storage_mode "cable disconnected"
     fi

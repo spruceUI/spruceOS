@@ -25,7 +25,7 @@
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
-        "RGB30"
+        "DARKMOSS"
       ],
       "options": [
         "yabasanshiro-standalone-hle",
@@ -106,7 +106,7 @@
     "MIYOO_FLIP",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "RGB30",
+    "DARKMOSS",
     "MAGICX_A133P"
   ],
   "alternativeFolderNames": [

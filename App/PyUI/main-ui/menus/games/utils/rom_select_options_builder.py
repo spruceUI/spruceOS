@@ -12,6 +12,7 @@ from games.utils.box_art_resizer import BoxArtResizer
 from games.utils.game_system import GameSystem
 from games.utils.rom_utils import RomUtils
 from menus.games.muos_game_system_config import MuosGameSystemConfig
+from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.miyoo_game_list import MiyooGameList
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
@@ -331,7 +332,9 @@ class RomSelectOptionsBuilder:
         return favorite_paths
 
     def _get_favorite_icon(self, rom_info: RomInfo) -> str:
-        if FavoritesManager.is_favorite(rom_info):
+        if CheevosCacheManager.is_cached(rom_info):
+            return Theme.cheevos_icon()
+        elif FavoritesManager.is_favorite(rom_info):
             return Theme.favorite_icon()
         else:
             return None

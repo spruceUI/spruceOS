@@ -157,6 +157,13 @@ new_execution_loop() {
 setup_for_retroarch(){
     export CORE_DIR="/mnt/SDCARD/RetroArch/.retroarch/cores"
 
+    # Without audioserver, RA's oss driver drops all audio during fast-forward.
+    # The boot-time start fails on some units, and DraStic/PICO-8 kill it.
+    if ! pidof audioserver >/dev/null; then
+        LD_PRELOAD= audioserver >/dev/null 2>&1 &
+        sleep 0.5
+    fi
+
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
 	else

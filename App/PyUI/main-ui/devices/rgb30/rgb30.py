@@ -1,4 +1,3 @@
-import fcntl
 import json
 import os
 import subprocess
@@ -7,17 +6,16 @@ from pathlib import Path
 import sys
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
+from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
-from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import KeyWatcherController
+from controller.key_watcher_controller import HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
+from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.process_runner import ProcessRunner
-from devices.wifi.nmcli_wifi_scanner import NmcliWifiScanner
-from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
@@ -29,20 +27,18 @@ from utils.py_ui_config import PyUiConfig
 
 
 class Rgb30KeyMappingProvider:
-    """Buttons from a plain dict, plus the left analog stick as d-pad input.
+    """Buttons from a plain dict, plus both analog sticks as d-pad input.
 
     The pad reports its axes on a -1800..1800 range, not the +-32767 SDL scale
     the TrimUI provider assumes, so the deadzone is sized for this device -
     measured with evtest on hardware, which also gives fuzz 16 / flat 16 and a
     rest value of exactly 0 on all four axes.
-
-    Only the left stick is mapped. The right stick is live (ABS_RX/ABS_RY) but
-    nothing in the UI consumes RIGHT_STICK_*, so mapping it would just queue
-    inputs no view acts on.
     """
 
     ABS_X = 0
     ABS_Y = 1
+    ABS_RX = 3
+    ABS_RY = 4
     EV_KEY = 1
     EV_ABS = 3
     DEADZONE = 900
@@ -62,11 +58,11 @@ class Rgb30KeyMappingProvider:
 
     def __init__(self, key_mappings):
         self.key_mappings = key_mappings
-        self.axis_inputs = {
-            self.ABS_X: (ControllerInput.LEFT_STICK_LEFT,
-                         ControllerInput.LEFT_STICK_RIGHT),
-            self.ABS_Y: (ControllerInput.LEFT_STICK_UP,
-                         ControllerInput.LEFT_STICK_DOWN),
+        self.stick_axes = {
+            self.ABS_X: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            self.ABS_Y: VerticalStickAxis(ControllerInput.LEFT_STICK_UP, ControllerInput.LEFT_STICK_DOWN),
+            self.ABS_RX: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            self.ABS_RY: VerticalStickAxis(ControllerInput.RIGHT_STICK_UP, ControllerInput.RIGHT_STICK_DOWN),
         }
         # Which input each click reported when it went down, so its release
         # always matches - the setting can change between the two.
@@ -77,9 +73,14 @@ class Rgb30KeyMappingProvider:
         # init, so a cached value would need a PyUI restart to take effect.
         # CfwSystemConfig serves this from its in-memory copy, and a stick click
         # is not a hot path. Anything but R3, including a missing option on an
-        # older config, leaves the L3 default.
+        # older config, leaves the L3 default. A device the option does not
+        # list has a real menu key, so neither click is the menu.
+        from devices.device import Device
         from utils.cfw_system_config import CfwSystemConfig
-        if "R3" == CfwSystemConfig.get_selected_value("Button Settings", "menuButton"):
+        option = CfwSystemConfig.get_menu_option("Button Settings", "menuButton") or {}
+        if not Device.supports_device(option.get("devices")):
+            return None
+        if "R3" == option.get("selected"):
             return self.BTN_THUMBR
         return self.BTN_THUMBL
 
@@ -104,22 +105,10 @@ class Rgb30KeyMappingProvider:
         if key_event.event_type != self.EV_ABS:
             return self.key_mappings.get(key_event)
 
-        directions = self.axis_inputs.get(key_event.code)
-        if directions is None:
+        axis = self.stick_axes.get(key_event.code)
+        if axis is None:
             return None
-        negative, positive = directions
-
-        # Release the opposite direction on every press: a fast flick can cross
-        # the whole axis between two reported samples and never land inside the
-        # deadzone, which would otherwise leave the old direction held forever.
-        if key_event.value < -self.DEADZONE:
-            return [InputResult(positive, KeyState.RELEASE),
-                    InputResult(negative, KeyState.PRESS)]
-        elif key_event.value > self.DEADZONE:
-            return [InputResult(negative, KeyState.RELEASE),
-                    InputResult(positive, KeyState.PRESS)]
-        return [InputResult(negative, KeyState.RELEASE),
-                InputResult(positive, KeyState.RELEASE)]
+        return axis.get_mapped_events(key_event.value, self.DEADZONE)
 
 
 class Rgb30(DeviceCommon):
@@ -134,14 +123,15 @@ class Rgb30(DeviceCommon):
     # The pad's stable by-path node - singleadc-joypad, with no distro prefix,
     # confirmed on hardware.
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
-
-    KEY_VOLUMEDOWN = 114
-    KEY_VOLUMEUP = 115
-    EVIOCGRAB = 0x40044590
+    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
+    SYSTEM_JSON_DEFAULT = "rgb30-system.json"
+    MENU_KEY = None
 
     def __init__(self, device_name):
         self.device_name = device_name
+        self.audio_player = AudioPlayerDelegateSdl2()
         self.load_rgb30_system_json()
+        self.panel_calibration = DarkmossPanelCalibration(self.system_config)
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         DeviceCommon.__init__(self)
@@ -157,56 +147,21 @@ class Rgb30(DeviceCommon):
 
     # ---- RGB30-specific ----
 
-    def _resolve_volume_node(self):
-        # The volume rocker is on gpio-keys, a separate evdev node from the
-        # joypad. It is NOT adc-keys, which declares a phantom volume capability
-        # that never fires. Match by device name so a node-number shuffle does
-        # not matter.
-        try:
-            with open("/proc/bus/input/devices") as f:
-                blocks = f.read().split("\n\n")
-            for blk in blocks:
-                if 'Name="gpio-keys"' in blk:
-                    for tok in blk.split():
-                        if tok.startswith("event"):
-                            return "/dev/input/" + tok
-        except OSError:
-            pass
-        return "/dev/input/event2"
-
     def _start_volume_watcher(self):
-        # PyUI reads the volume node itself so the menu shows the volume widget
-        # and the 0-20 number updates - the main controller only watches the
-        # joypad. Same mechanism the Miyoo Flip uses (a KeyWatcher plus a poll
-        # thread), and map_key turns 114/115 into VOLUME_DOWN/UP -> special_input
-        # -> change_volume -> Display.volume_changed.
-        #
-        # Grab the node exclusively (EVIOCGRAB) so while PyUI runs it owns the
-        # volume keys and the shell buttons_watchdog does not double-count them.
-        # When a game launches PyUI exits, the grab is released, and the shell
-        # handles volume in-game.
-        node = self._resolve_volume_node()
-        try:
-            self.volume_key_watcher = KeyWatcher(node)
-            if getattr(self.volume_key_watcher, "fd", None) is not None:
-                try:
-                    fcntl.ioctl(self.volume_key_watcher.fd, self.EVIOCGRAB, 1)
-                except OSError as e:
-                    PyUiLogger.get_logger().warning(f"RGB30: could not grab {node}: {e}")
-                from controller.controller import Controller
-                Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-                t = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-                t.start()
-                PyUiLogger.get_logger().info(f"RGB30: volume watcher on {node}")
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"RGB30: volume watcher failed: {e}")
+        # The shell owns the volume keys (it runs in-game, PyUI does not). PyUI
+        # only reflects the change by watching the config the shell writes, like
+        # the Anbernic XX.
+        from devices.utils.file_watcher import FileWatcher
+        self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
+            self.SYSTEM_JSON, self.on_system_config_changed,
+            interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
-    def map_key(self, key_code):
-        if key_code == self.KEY_VOLUMEUP:
-            return ControllerInput.VOLUME_UP
-        elif key_code == self.KEY_VOLUMEDOWN:
-            return ControllerInput.VOLUME_DOWN
-        return None
+    def on_system_config_changed(self):
+        old_volume = self.system_config.get_volume()
+        self.system_config.reload_config()
+        new_volume = self.system_config.get_volume()
+        if old_volume != new_volume:
+            Display.volume_changed(new_volume)
 
     def _set_volume(self, volume):
         # The generic volume path only changes the config number; nothing sets
@@ -227,9 +182,8 @@ class Rgb30(DeviceCommon):
         base_dir = os.path.abspath(sys.path[0])
         self.script_dir = os.path.join(base_dir, "devices", "rgb30")
         self.parent_dir = os.path.dirname(base_dir)
-        source = os.path.join(self.script_dir, "rgb30-system.json")
-        system_json_path = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
-        self._load_system_config(system_json_path, Path(source))
+        source = os.path.join(self.script_dir, self.SYSTEM_JSON_DEFAULT)
+        self._load_system_config(self.SYSTEM_JSON, Path(source))
 
     def _resolve_joypad(self):
         if os.path.exists(self.JOYPAD_NODE):
@@ -264,6 +218,8 @@ class Rgb30(DeviceCommon):
 
         bind(315, ControllerInput.START)
         bind(314, ControllerInput.SELECT)
+        if self.MENU_KEY is not None:
+            bind(self.MENU_KEY, ControllerInput.MENU)
 
         # 317/318 are BTN_THUMBL/BTN_THUMBR. The device has no dedicated menu
         # button, so one stick click has to be it - a deliberate trade of L3 or
@@ -311,16 +267,11 @@ class Rgb30(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    def get_new_wifi_scanner(self):
-        return NmcliWifiScanner()
-
-    def get_wpa_supplicant_conf_path(self):
-        # Not used - wifi_connect is overridden - but return a harmless path
-        # rather than None so nothing downstream has to guard for it.
-        return "/tmp/wpa_supplicant.conf"
-
     def get_device_name(self):
         return self.device_name
+
+    def get_device_names(self):
+        return [self.device_name, "DARKMOSS"]
 
     def screen_width(self):
         return 720
@@ -362,6 +313,9 @@ class Rgb30(DeviceCommon):
     def sleep(self):
         pass
 
+    def get_fw_version(self):
+        return darkmoss_fw_version() or "Unknown"
+
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
@@ -380,20 +334,43 @@ class Rgb30(DeviceCommon):
     #def reboot(self):
     #    ProcessRunner.run(["/opt/muos/script/system/halt.sh", "reboot"])
 
-    def _set_brightness_to_config(self):
-        pass
+    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
+    BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
 
     def _set_lumination_to_config(self):
-        pass
+        level = max(0, min(10, int(self.system_config.backlight)))
+        try:
+            with open("/sys/class/backlight/backlight/brightness", "w") as f:
+                f.write(str(self.BACKLIGHT_TABLE[level]))
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
+
+    def _set_brightness_to_config(self):
+        self.panel_calibration.apply("brightness")
 
     def _set_contrast_to_config(self):
-        pass
+        self.panel_calibration.apply("contrast")
 
-    def _set_saturation_to_config(self): 
-        pass
+    def _set_saturation_to_config(self):
+        self.panel_calibration.apply("saturation")
 
     def _set_hue_to_config(self):
-        pass
+        self.panel_calibration.apply("hue")
+
+    def supports_brightness_calibration(self):
+        return self.panel_calibration.supports("brightness")
+
+    def supports_contrast_calibration(self):
+        return self.panel_calibration.supports("contrast")
+
+    def supports_saturation_calibration(self):
+        return self.panel_calibration.supports("saturation")
+
+    def supports_hue_calibration(self):
+        return self.panel_calibration.supports("hue")
+
+    def startup_init(self, include_wifi=True):
+        self.panel_calibration.apply_all()
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -450,33 +427,6 @@ class Rgb30(DeviceCommon):
             elif(ControllerInput.VOLUME_DOWN == controller_input):
                 self.change_volume(-5)
 
-    def get_wifi_connection_quality_info(self) -> WiFiConnectionQualityInfo:
-        # Read RSSI straight from the kernel. Instant and, crucially, no scan:
-        # "nmcli device wifi" periodically triggers a rescan that blocks for
-        # seconds and freezes the whole UI on this device. /proc/net/wireless
-        # column 3 is the live signal level in dBm.
-        try:
-            with open("/proc/net/wireless") as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith("wlan0:"):
-                        rssi = int(float(line.split()[3].rstrip(".")))
-                        quality = max(0, min(100, 2 * (rssi + 100)))
-                        return WiFiConnectionQualityInfo(
-                            noise_level=0,
-                            signal_level=rssi,
-                            link_quality=quality,
-                        )
-        except Exception as e:
-            PyUiLogger.get_logger().error(
-                f"wifi quality read from /proc/net/wireless failed: {e}"
-            )
-
-        # -200 is what device_common reads as "no signal".
-        return WiFiConnectionQualityInfo(
-            noise_level=0, signal_level=-200, link_quality=0
-        )
-
     def get_app_finder(self):
         return MiyooAppFinder()
 
@@ -486,20 +436,11 @@ class Rgb30(DeviceCommon):
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
-    def is_bluetooth_enabled(self):
-        return False #Let it be handled in muOS proper, too lazy to implement
-
-    def disable_bluetooth(self):
-        pass
-
-    def enable_bluetooth(self):
-        pass
-
     def perform_startup_tasks(self):
         pass
 
-    def get_bluetooth_scanner(self):
-        return None
+    def get_audio_system(self):
+        return self.audio_player
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"
@@ -577,18 +518,6 @@ class Rgb30(DeviceCommon):
         # which was invisible until take_screenshot() started producing files
         # on this device at all.
         return self.get_game_system_utils().get_save_state_image(rom_info)
-
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False
 
     def keep_running_on_error(self):
         return False

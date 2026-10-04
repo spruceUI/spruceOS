@@ -152,6 +152,13 @@ kill_vtree() {
     killall -q -9 vtree.a30 vtree.mini vtree.aarch64
 }
 
+kill_grout() {
+    log_message "button_actions.sh: Killing Grout!"
+    killall -q -15 grout32 grout64
+    sleep 2
+    killall -q -9 grout32 grout64
+}
+
 kill_emulator() {
     if pgrep -f "./drastic(32|64)?" >/dev/null; then
         kill_drastic
@@ -169,8 +176,10 @@ kill_emulator() {
         kill_dsperate
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu
-    elif pgrep -f "vtree" >/dev/null; then
+    elif pgrep -f "vtree.a30|vtree.mini|vtree.aarch64" >/dev/null; then
         kill_vtree
+    elif pgrep -f "grout32|grout64" >/dev/null; then
+        kill_grout
     else
         kill_ra_and_standard_emulators
     fi

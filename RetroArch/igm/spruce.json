@@ -1,0 +1,61 @@
+{
+  "name": "spruce",
+
+  "colors": {
+    "dim_bg":        "#000000D9",
+    "panel_bg":      "#00000000",
+    "selection":     "#C9A2272E",
+    "accent":        "#C9A227D9",
+    "title_line":    "#665C5466",
+    "text":          "#BDAD91FF",
+    "text_selected": "#D5C4A1FF",
+    "text_title":    "#689D6AFF",
+    "text_shadow":   "#000000C0",
+    "battery":       "#BDAD91FF"
+  },
+
+  "layout": {
+    "margin_pct":          2.0,
+    "panel_w_pct":         38.0,
+    "item_h_pct":          8.0,
+    "title_h_pct":         8.0,
+    "panel_x_pct":         null,
+    "panel_y_pct":         null,
+    "separator_inset_pct": 10.0,
+    "separator_h_px":      1,
+    "arrow_inset_pct":     10.0,
+    "accent_w_pct":        1.25,
+    "accent_bar":          true,
+    "text_baseline":       0.68,
+    "title_baseline":      0.68,
+    "shadow":              true,
+    "shadow_offset_px":    2,
+    "scale":               1.0,
+    "battery":             true,
+    "preview":             true
+  },
+
+  "font": {
+    "path":           "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
+    "size_pct":         5.0,
+    "size_small_pct":   3.5714286,
+    "battery_size_pct": 3.5714286
+  },
+
+  "text": {
+    "title":       "spruceOS Menu",
+    "auto":        "Auto",
+    "slot":        "Slot",
+    "arrow_left":  "<",
+    "arrow_right": ">"
+  },
+
+  "labels": {
+    "resume":    "Resume",
+    "save":      "Save",
+    "load":      "Load",
+    "reset":     "Reset",
+    "retroarch": "RetroArch Menu",
+    "exit":      "Exit Game"
+  }
+}

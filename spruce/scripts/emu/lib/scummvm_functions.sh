@@ -62,7 +62,7 @@ _set_scummvm_platform() {
 	esac
 
 	# Copy default config if user config doesn't exist yet (for all platforms)
-	for target in a30 anbernic brick flip mini pixel2 tsp tsps; do
+	for target in a30 anbernic brick brickpro flip mini pixel2 tsp tsps; do
 		T_PATH="/mnt/SDCARD/Saves/.config/scummvm-$target/scummvm.ini"
 		S_PATH="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$target/scummvm.ini"
 
@@ -78,7 +78,7 @@ _set_scummvm_platform() {
 	fi
 }
 
-# Stickless XX units: _xx_dpad_swap (helperFunctions.sh) makes the d-pad the
+# Stickless XX units: treat_dpad_as_analog (helperFunctions.sh) makes the d-pad the
 # stick while ScummVM runs, since its virtual mouse is left-stick only. Only
 # around the run: _set_scummvm_platform is also called by sync_game_id.
 run_scummvm_menu() {
@@ -92,9 +92,9 @@ run_scummvm_menu() {
 
 	export CURL_CA_BUNDLE="$EMU_DIR/cacert.pem"
 	export SSL_CERT_FILE="$EMU_DIR/cacert.pem"
-	_xx_dpad_swap 2
+	treat_dpad_as_analog
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" > "$SCUMMVM_LOG" 2>&1
-	_xx_dpad_swap 0
+	treat_dpad_as_dpad
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
@@ -127,9 +127,9 @@ run_scummvm() {
 	if [ -f "$SAVE_DIR/$game_id.s00" ]; then
 		SAVE_SLOT_ARG="--save-slot=0"
 	fi
-	_xx_dpad_swap 2
+	treat_dpad_as_analog
 	"$SCUMMVM_BIN" --config="$SCUMMVM_CONFIG" $SAVE_SLOT_ARG --path="$DATA_PATH" "$game_id" > "$SCUMMVM_LOG" 2>&1
-	_xx_dpad_swap 0
+	treat_dpad_as_dpad
 	[ "$SCUMMVM_BRICK_JOYSTICK" = "1" ] && rm -f /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick
 }
 
@@ -200,7 +200,7 @@ sync_game_id() {
 	
 	local NEW_GAME_DATA=$(awk 'BEGIN {RS="["; FS="\n"} NR>1 { if ($0 ~ /gameid=/ && $0 ~ /path=/) printf "[%s", $0 }' "$SCUMMVM_CONFIG")
 	
-	for target in a30 anbernic brick flip mini pixel2 tsp tsps; do
+	for target in a30 anbernic brick brickpro flip mini pixel2 tsp tsps; do
 		local T_INI="/mnt/SDCARD/Saves/.config/scummvm-$target/scummvm.ini"
 		
 		if [ -f "$T_INI" ] && [ "$T_INI" != "$SCUMMVM_CONFIG" ]; then

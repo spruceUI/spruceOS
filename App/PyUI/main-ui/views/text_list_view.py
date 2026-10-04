@@ -43,7 +43,14 @@ class TextListView(NonDescriptiveListView):
 
             if actual_index == self.selected:
                 if(self.selected_bg is not None):
-                    Display.render_image(self.selected_bg,self.view_x, y_value)
+                    Display.render_image(
+                        self.selected_bg,
+                        self.view_x,
+                        y_value,
+                        RenderMode.TOP_LEFT_ALIGNED,
+                        crop_h=self.line_height
+                    )
+
                 color = Theme.text_color_selected(FontPurpose.LIST)
 
                 scroll_amt = self.scroll_text_amount

@@ -4,7 +4,9 @@ from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
+from display.font_purpose import FontPurpose
 from themes.theme import Theme
+from utils.logger import PyUiLogger
 from views.selection import Selection
 from views.text_utils import TextUtils
 from views.view import View
@@ -185,3 +187,28 @@ class ListView(View):
                                     text_available_width=text_available_width)
         else:
             return text
+
+    def _calculate_line_height(self, include_description_line):
+        padding = int(10 * Device.get_device().screen_height() / 480)
+        text_line_height = Display.get_line_height(FontPurpose.LIST)
+        text_line_height += padding
+        icon_line_height = 0
+        if(self.use_icons_to_calculate_line_height):
+            for gridOrListEntry in self.options:
+                if(gridOrListEntry.get_icon() is not None):
+                    icon_w, icon_h = Display.get_image_dimensions(gridOrListEntry.get_icon())
+                    icon_line_height = max(icon_line_height, icon_h)
+        if(include_description_line):
+            for gridOrListEntry in self.options:
+                if(gridOrListEntry.get_description() is not None):
+                    _, title_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, gridOrListEntry.get_primary_text())
+                    _, description_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, gridOrListEntry.get_description())
+                    text_line_height = max(text_line_height, Theme.get_descriptive_list_text_offset_y() + title_h + description_h + padding)
+
+        if(self.selected_bg is not None):
+            bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
+
+        if(Theme.get_use_text_for_line_height()):
+            return max(text_line_height, icon_line_height)
+        else:
+            return max(icon_line_height, bg_height)
