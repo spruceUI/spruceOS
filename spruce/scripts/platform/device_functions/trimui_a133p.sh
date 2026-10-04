@@ -56,22 +56,21 @@ device_on_bt_audio_route() {
     printf '%s' "$control" > /tmp/bt_alsa_volume_dev
 }
 
-# PyUI's device (get-bt-audio-device.sh): the first headset bluealsa holds an A2DP
-# transport for, else nothing; it also points the volume keys at it.
-bt_audio_device() {
-    pcm=""
-    # PyUI asks right after killing bluetoothd or disconnecting the headset, and
-    # bluealsa can still list the transport for a moment: check both directly.
-    if pidof bluetoothd >/dev/null 2>&1; then
-        pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
-    fi
-    mac=$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')
-    if [ -n "$mac" ] && ! $BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
-        pcm=""
-        mac=""
-    fi
-    device_on_bt_audio_route "$mac"
-    [ -z "$pcm" ] || echo "$pcm"
+# The speaker is the stock default under its own names, so hardwareservice keeps
+# driving its "Soft Volume Master"; asound-setup.sh adds spruce_bt and the default.
+ASOUND_SPRUCE_PCMS=1
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.spruce_speaker {
+    type asym
+    playback.pcm "Playback"
+    capture.pcm "Capture"
+}
+ctl.!default {
+    type hw
+    card audiocodec
+}
+EOF
 }
 
 # The firmware attaches hci0 and runs bluetoothd, so the default bring-up is all
