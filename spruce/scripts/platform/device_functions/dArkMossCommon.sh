@@ -417,7 +417,10 @@ bt_headset_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
     _v=$(( $1 * 127 / 20 ))
     for _pcm in $(${BTCTL_TIMEOUT:-timeout 2} bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
-        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
+        # bluealsad 5.0 starts each headset on its own volume, and turning SoftVolume on
+        # resets the level to full: only switch it when off, or every press bursts.
+        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" 2>/dev/null | grep -q true ||
+            ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
         ${BTCTL_TIMEOUT:-timeout 2} bluealsactl volume "$_pcm" "$_v" "$_v" >/dev/null 2>&1
     done
 }
