@@ -130,11 +130,8 @@ runtime_mounts_a133p() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
-# The stock service stopped wlan0 during DHCP startup on a Brick Pro: udhcpc
-# -b stayed in the foreground for over eight minutes, holding the WiFi lock
-# and blocking the queued restart. Acquire the lease outside that lock; -f
-# keeps one process for device_stop_dhcp_client to stop. A separate session
-# lets it survive the ADB/SSH command that requested WiFi exiting.
+# DHCP must not hold the WiFi lock while waiting for a lease.
+# Use a separate session to survive launcher exit.
 device_start_dhcp_client() {
     pgrep -f "udhcpc.*wlan0" >/dev/null && return 0
     setsid udhcpc -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
