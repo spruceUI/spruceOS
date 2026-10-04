@@ -6,6 +6,7 @@ import subprocess
 import sys
 from typing import List
 
+from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 
 from display.display import Display
@@ -62,6 +63,8 @@ class OptionSelectUI:
             elif execute_immediately:
                 Display.display_message(f"Executing: {val}")
                 subprocess.run(val, shell=True)
+                Controller.clear_input_queue()
+                Display.reinitialize()
                 Display.display_message(f"Finished Running {val}", duration_ms=2000)
             else:
                 OptionSelectUI._write_result_to_file(val)
@@ -80,10 +83,10 @@ class OptionSelectUI:
                 if is_root:
                     if isinstance(val, str):
                         # leaf node
-                        option_value = lambda _ignored_controller_input=None, v=val: run_action(v)
+                        option_value = lambda controller_input=None, v=val: run_action(v) if controller_input == ControllerInput.A else None
                     else:
                         # submenu node
-                        option_value = lambda _ignored_controller_input=None, v=val, k=key: OptionSelectUI.navigate_menu(
+                        option_value = lambda controller_input=None, v=val, k=key: None if controller_input != ControllerInput.A else OptionSelectUI.navigate_menu(
                             menu_dict=v,
                             title=k,
                             folder=folder,
@@ -174,6 +177,8 @@ class OptionSelectUI:
                     elif execute_immediately:
                         Display.display_message(f"Executing: {val}")
                         subprocess.run(val, shell=True)
+                        Controller.clear_input_queue()
+                        Display.reinitialize()
                         Display.display_message(f"Finished Running {val}", duration_ms=1000)
                     else:
                         OptionSelectUI._write_result_to_file(val)
