@@ -23,7 +23,8 @@ mac=$(bt_connected_audio_mac)
 mkdir -p "$(dirname "$ASOUND_CONF")"
 
 # With ASOUND_SPRUCE_PCMS, spruce_speaker and spruce_bt are always both defined, so
-# a PyUI that read this file once can switch between them through AUDIODEV.
+# a PyUI that read this file once can switch between them through AUDIODEV. The default
+# just names one: each has its own plug, and a plug over it aborts alsa-lib 1.2.6.
 if [ "$ASOUND_SPRUCE_PCMS" = 1 ]; then
     device_write_default_asound_rc
     cat >> "$ASOUND_CONF" <<EOF
@@ -36,10 +37,7 @@ pcm.spruce_bt {
         delay 64
     }
 ${BT_PCM_FIXED}}
-pcm.!default {
-    type plug
-    slave.pcm "$([ -n "$mac" ] && echo spruce_bt || echo spruce_speaker)"
-}
+pcm.!default "$([ -n "$mac" ] && echo spruce_bt || echo spruce_speaker)"
 EOF
     [ -n "$mac" ] && device_bt_audio_connected
     device_on_bt_audio_route $mac
