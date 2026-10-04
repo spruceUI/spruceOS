@@ -1,0 +1,18 @@
+TrimUI LED apps
+
+LedControl
+https://github.com/ro8inmorgan/LedControl
+Copyright (c) 2024 ro8inmorgan
+MIT License
+
+TrimuiLEDController
+https://github.com/pierceTee/TrimuiLEDController
+pierceTee
+No license given
+
+---
+
+spruce's per-zone LED color and brightness settings for the TrimUI Brick and
+Brick Pro were inspired by these two apps, which showed it could be done.
+spruce ships no code from either. Its LED settings are its own, built on
+TrimUI's /sys/class/led_anim driver and a zone map measured on the devices.
