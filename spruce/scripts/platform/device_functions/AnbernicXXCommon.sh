@@ -154,9 +154,14 @@ send_virtual_key_L3() {
 }
 
 
-# baseosUpdate.sh checks the latest BaseOS release itself.
+# An unreadable or unparseable version means "do not nag".
 check_if_fw_needs_update() {
-    echo "true"
+    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    case "$_have" in
+        ''|*[!0-9.]*) echo "false"; return ;;
+    esac
+    _want="$(github_latest_version pvaibhav/BaseOS)" || _want="$TARGET_BASEOS_VERSION"
+    version_older_than "$_have" "$_want" && echo "true" || echo "false"
 }
 
 has_lid() {

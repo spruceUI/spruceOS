@@ -217,9 +217,14 @@ darkmoss_installed_version() {
     sed -n 's/^OS_VERSION="\{0,1\}[vV]\{0,1\}\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null
 }
 
-# darkmossUpdate.sh checks the latest dArkMoss release itself.
 check_if_fw_needs_update() {
-    echo "true"
+    _have="$(darkmoss_installed_version)"
+    if [ -z "$_have" ]; then
+        echo "true"
+        return
+    fi
+    _want="$(github_latest_version spruceUI/dArkMoss)" || _want="$TARGET_DARKMOSS_VERSION"
+    version_older_than "$_have" "$_want" && echo "true" || echo "false"
 }
 
   ###################

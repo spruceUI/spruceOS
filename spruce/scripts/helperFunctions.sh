@@ -528,6 +528,27 @@ get_version() {
     fi
 }
 
+# Latest release of a GitHub repo as x.y.z, or nothing when offline. Tries
+# for about a minute so a boot-time caller can wait for WiFi to come up.
+github_latest_version() {
+    wifi_available_on_device || return 1
+    [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" = "1" ] || return 1
+    for _try in 1 2 3; do
+        _tag="$(curl -sf -m 20 "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name // empty' | sed 's/^[vV]//')"
+        case "$_tag" in
+            [0-9]*.[0-9]*.[0-9]*) echo "$_tag"; return 0 ;;
+        esac
+        [ "$_try" -lt 3 ] && sleep 20
+    done
+    return 1
+}
+
+# True when x.y.z $1 is older than $2.
+version_older_than() {
+    [ "$(printf '%s' "$1" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" -lt \
+      "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
+}
+
 get_version_complex() {
     base_version=$(get_version)
 
