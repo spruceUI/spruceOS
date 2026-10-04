@@ -1092,6 +1092,15 @@ rgb_leds_enabled() {
     [ "$(get_config_value '.menuOptions."RGB LED Settings".enableLEDs.selected' "Off")" = "On" ]
 }
 
+# led_zone_settings with each setting's selected value: "<zone or node> <value>".
+led_zone_config() {
+    _settings="$(led_zone_settings)"
+    [ -n "$_settings" ] || return 0
+    echo "$_settings" | jq -Rr --slurpfile c "/mnt/SDCARD/Saves/spruce/spruce-config.json" '
+        split(" ") as [$k, $t]
+        | "\($t) \($c[0].menuOptions."RGB LED Settings"[$k].selected // "Default")"'
+}
+
 set_rgb_in_menu() {
     # get relevant variables from spruce-config.json
     color_name="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "Green")"
@@ -1101,8 +1110,23 @@ set_rgb_in_menu() {
     # map color names to hex values
     color_hex="$(map_color_name_to_hex "$color_name")"
 
-    rgb_led "lrm12b" "$effect" "$color_hex" "$duration" "-1"
+    zone_colors="$(led_zone_config | grep -v '^max_scale')"
+    if [ -z "$zone_colors" ]; then
+        rgb_led "lrm12b" "$effect" "$color_hex" "$duration" "-1"
+        return
+    fi
 
+    default_zones="$(echo "$zone_colors" | awk '$2 == "Default" { printf "%s", $1 }')"
+    [ -n "$default_zones" ] && rgb_led "$default_zones" "$effect" "$color_hex" "$duration" "-1"
+
+    echo "$zone_colors" | while read -r zone color; do
+        case "$color" in
+            "Default") continue ;;
+            "Off") hex=000000 ;;
+            *) hex="$(map_color_name_to_hex "$color")" ;;
+        esac
+        rgb_led "$zone" "$effect" "$hex" "$duration" "-1"
+    done
 }
 
 set_network_proxy() {

@@ -134,6 +134,12 @@ enable_or_disable_rgb() {
     log_message "Missing enable_or_disable_rgb function"
 }
 
+# One line per per-zone LED setting: config key, then the rgb_led zone it
+# colors or the max_scale node it sets. Empty without per-zone LED settings.
+led_zone_settings() {
+    :
+}
+
 # Toggle the RGB LEDs between the configured colour and off. Device-specific
 # (the LED sysfs paths differ per device), so implemented in the device file.
 toggle_led() {

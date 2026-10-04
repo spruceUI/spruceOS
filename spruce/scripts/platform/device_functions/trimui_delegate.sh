@@ -96,10 +96,17 @@ rgb_led_trimui() {
     # Get and set peak rgb brightness for each zone that exposes the setting.
     # This comes straight from spruce-config.json, NOT from the function call.
     max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    _zone_config="$(led_zone_config)"
     for _scale_zone in max_scale max_scale_lr max_scale_f1f2 max_scale_rear; do
         if [ -e "$LED_DIR"/"$_scale_zone" ]; then
+            _scale="$max_scale"
+            _group_scale="$(echo "$_zone_config" | awk -v n="$_scale_zone" '$1 == n { print $2 }')"
+            case "$_group_scale" in
+                "" | "Default") ;;
+                *) _scale="$_group_scale" ;;
+            esac
             chmod a+rw "$LED_DIR"/"$_scale_zone"
-            echo "$max_scale" > "$LED_DIR"/"$_scale_zone"
+            echo "$_scale" > "$LED_DIR"/"$_scale_zone"
         fi
     done
 

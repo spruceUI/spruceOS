@@ -53,15 +53,13 @@ case "$1" in
         ;;
     0)  # switch off -> LEDs on (configured colour)
         flag_remove "leds_forced_off"
-        if are_emu_specific_leds_enabled && is_emu_running; then
-            color="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDcolor.selected' "White")"
-            effect="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDeffect.selected' "breathe")"
-            duration="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDduration.selected' "4000")"
-        else
-            color="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")"
-            effect="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDeffect.selected' "static")"
-            duration="$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDduration.selected' "2000")"
+        if ! are_emu_specific_leds_enabled || ! is_emu_running; then
+            set_rgb_in_menu
+            exit 0
         fi
+        color="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDcolor.selected' "White")"
+        effect="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDeffect.selected' "breathe")"
+        duration="$(get_config_value '.menuOptions."RGB LED Settings".emuLEDduration.selected' "4000")"
         if [ "$color" = "System-specific" ]; then
             hex="$(get_emu_color)"
         else
