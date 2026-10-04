@@ -468,9 +468,8 @@ jobs:
       - name: Create 7z archive
         run: |
           # Dot-directories must be named explicitly - the shell's * does not
-          # match them. .system carries the BaseOS hand-off shim, and without it
-          # a fresh install leaves an Anbernic XX on "ADD FRONTEND TO SD CARD".
-          7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update .system \
+          # match them.
+          7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
             -xr!.git \
             -xr!.github \
             -x!.gitignore \
