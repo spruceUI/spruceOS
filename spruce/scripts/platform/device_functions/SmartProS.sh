@@ -512,6 +512,23 @@ device_bluetooth_radio_down() {
     echo 0 > /sys/class/rfkill/rfkill0/state
 }
 
+# Named outputs as on TrimUI, so PyUI can return to the speaker: spruce_speaker is the
+# stock asym by name, keeping its "Soft Volume Master" and dmix.
+ASOUND_SPRUCE_PCMS=1
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.spruce_speaker {
+    type asym
+    playback.pcm "Playback"
+    capture.pcm "CaptureMIC"
+}
+ctl.!default {
+    type hw
+    card audiocodec
+}
+EOF
+}
+
 # Strict unmount by default (SPR-MED-199). Measured 2026-09-06: the original
 # single umount fails here on the fan script's python (exe on the card) and on
 # hciattach/bluetoothd (cwd on the card), holders the fd-only sweep never
