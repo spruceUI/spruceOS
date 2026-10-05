@@ -368,7 +368,7 @@ set_volume() {
     [ "$VOLUME_PCT" -lt 0 ] && VOLUME_PCT=0
 
     amixer -q sset -M 'Master' "${VOLUME_PCT}%" 2>/dev/null
-    darkmoss_bt_volume "$VOLUME_PCT"
+    bt_headset_volume "$(( VOLUME_PCT / 5 ))"
     apply_playback_path
     log_message "$PLATFORM: volume ${VOLUME_LV}/20 (${VOLUME_PCT}%)"
 
@@ -377,14 +377,8 @@ set_volume() {
     fi
 }
 
-# dArkMoss ships both services disabled; bluetooth.sh starts them from the
-# saved setting, at boot and when it changes.
-#
-# bluealsad gets --keep-alive: when PyUI hands the audio to a game and back
-# there are a few seconds with no client. With it the Bluetooth transport is
-# kept for the next client instead of being released, so a switch sends the
-# headset nothing (no suspend and restart, and the game's first sound is not
-# cut). A runtime drop-in keeps the unit's own command line.
+# systemd owns both daemons (shipped disabled); a runtime drop-in adds --keep-alive,
+# so the gap between PyUI and a game keeps the headset's stream running.
 BLUEALSA_KEEP_ALIVE=10
 device_bluetooth_up() {
     _dropin=/run/systemd/system/bluealsa.service.d/spruce-keep-alive.conf
@@ -411,19 +405,18 @@ device_bluetooth_down() {
 # asound-setup.sh); 48 kHz is what it picks at connect and what games use.
 BT_PCM_RATE=48000
 
-# Soft volume, so the level holds on headsets that ignore the remote one.
-darkmoss_bt_volume() {
+# bluealsad 5 has bluealsactl: soft volume, so the level holds on headsets that
+# ignore the remote one. Same 0-20 level as device.sh's default.
+bt_headset_volume() {
     pgrep -x bluealsad >/dev/null 2>&1 || return 0
-    for _pcm in $(bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
-        bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
-        bluealsactl volume "$_pcm" "$(( $1 * 127 / 100 ))" "$(( $1 * 127 / 100 ))" >/dev/null 2>&1
+    _v=$(( $1 * 127 / 20 ))
+    for _pcm in $(${BTCTL_TIMEOUT:-timeout 2} bluealsactl --quiet list-pcms 2>/dev/null | grep '/a2dpsrc/sink$'); do
+        # bluealsad 5.0 starts each headset on its own volume, and turning SoftVolume on
+        # resets the level to full: only switch it when off, or every press bursts.
+        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" 2>/dev/null | grep -q true ||
+            ${BTCTL_TIMEOUT:-timeout 2} bluealsactl soft-volume "$_pcm" y >/dev/null 2>&1
+        ${BTCTL_TIMEOUT:-timeout 2} bluealsactl volume "$_pcm" "$_v" "$_v" >/dev/null 2>&1
     done
-}
-
-# Called once audio is routed to a headset or one has just been connected.
-device_bt_audio_connected() {
-    _lv="$(get_volume_level)"
-    darkmoss_bt_volume "$(( _lv * 5 ))"
 }
 
 get_backlight_level() {
@@ -450,11 +443,9 @@ brightness_up() {
     set_backlight $(( $(get_backlight_level) + 1 ))
 }
 
-# The base's ALSA config is a per-user ~/.asoundrc and /etc/asound.conf is
-# empty, so RetroArch (HOME=/mnt/SDCARD/RetroArch) would fall through to raw
-# hw:0,0 and lose dmix and the softvol "Master" set_volume drives. This is the
-# base's own file, its default renamed spruce_speaker (asound-setup.sh adds the
-# default and spruce_bt).
+# The base keeps its ALSA config in ~/.asoundrc (/etc/asound.conf is empty), so a
+# program with another HOME would get raw hw:0,0. This is that file, its default
+# renamed spruce_speaker; asound-setup.sh adds spruce_bt and the default.
 ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
     cat > "$ASOUND_CONF" <<ASOUND

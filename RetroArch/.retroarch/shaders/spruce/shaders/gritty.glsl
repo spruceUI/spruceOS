@@ -110,5 +110,6 @@ vec2 pos = vec2(vTexCoord.x,quil);
 vec3 res = COMPAT_TEXTURE(Source,pos).rgb;
 
 FragColor.rgb = res;
+FragColor.a = 1.0;
 }
 #endif

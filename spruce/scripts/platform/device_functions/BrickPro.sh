@@ -12,6 +12,19 @@ get_config_path() {
     echo "/mnt/SDCARD/Saves/trim-ui-brick-pro-system.json"
 }
 
+led_zone_settings() {
+    echo "topBarLEDcolor m"
+    echo "leftFnLEDcolor 1"
+    echo "rightFnLEDcolor 2"
+    echo "shoulderLEDcolor b"
+    echo "leftStickLEDcolor l"
+    echo "rightStickLEDcolor r"
+    echo "topBarLEDbrightness max_scale"
+    echo "fnLEDbrightness max_scale_f1f2"
+    echo "shoulderLEDbrightness max_scale_rear"
+    echo "stickLEDbrightness max_scale_lr"
+}
+
 init_gpio_a133p() {
     #PD11 pull high for VCC-5v
     echo 107 > /sys/class/gpio/export

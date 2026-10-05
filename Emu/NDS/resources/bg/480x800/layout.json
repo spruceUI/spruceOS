@@ -1,0 +1,38 @@
+{
+"name":"zero40",
+"number":14,
+"layout":[
+{
+    "index":1,
+    "name":"vertical",
+
+    "screen0_x":0,
+    "screen0_y":0,
+    "screen0_w":480,
+    "screen0_h":360,
+
+    "screen1_x":0,
+    "screen1_y":440,
+    "screen1_w":480,
+    "screen1_h":360
+},
+
+{
+    "index":2,
+    "name":"vertical2",
+
+    "screen0_x":-16,
+    "screen0_y":0,
+    "screen0_w":512,
+    "screen0_h":384,
+
+    "screen1_x":-16,
+    "screen1_y":416,
+    "screen1_w":512,
+    "screen1_h":384
+}
+
+]
+
+}
+

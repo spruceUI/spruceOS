@@ -228,9 +228,7 @@ class DeviceCommon(AbstractDevice):
         return self.get_volume()
             
     # ---- Bluetooth --------------------------------------------------------
-    # As with WiFi: the shell owns the radio and its daemons, PyUI saves the
-    # on/off setting and calls bluetoothCmd for the rest. See
-    # App/PyUI/bluetooth_readme.txt for the command contract.
+    # The shell owns the radio; PyUI saves the setting and calls bluetoothCmd.
 
     def _bluetooth_cmd(self, *args, timeout=20):
         cmd = PyUiConfig.get_bluetooth_cmd()

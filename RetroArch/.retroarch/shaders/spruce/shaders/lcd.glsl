@@ -100,6 +100,7 @@ void main()
 	float pos = mod(gl_FragCoord.x,2.0);
 	if (pos <1.0) res *= 0.5; else res *= 1.0;
 	// final sum and weight normalization
-   FragColor.rgb = res; 
+   FragColor.rgb = res;
+   FragColor.a = 1.0;
 } 
 #endif

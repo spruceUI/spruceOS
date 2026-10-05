@@ -8,9 +8,8 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/a133p.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/trimui_delegate.sh"
 
-# The stock BusyBox (1.27.2) has no timeout applet, so asound-setup.sh's
-# "timeout 2 bluetoothctl ..." failed and never routed audio to a connected
-# Bluetooth headset. spruce's own BusyBox has one.
+# The stock BusyBox 1.27.2 has no timeout applet, so bounded bluetoothctl calls never
+# ran and audio never reached a headset; spruce's own BusyBox has one.
 BTCTL_TIMEOUT="/mnt/SDCARD/spruce/bin64/busybox timeout 2"
 
 
@@ -45,65 +44,39 @@ set_volume() {
 
 }
 
-# hardwareservice owns the volume keys and, on each change, also runs
-# 'amixer -D bluealsa sset "<control>" vol*127/20' - but only while
-# /tmp/bt_alsa_volume_dev names the headset's mixer control. The stock keymon
-# wrote that file; spruce does not run keymon, so the keys never reached a
-# Bluetooth headset.
+# hardwareservice applies the volume keys to the control named in
+# /tmp/bt_alsa_volume_dev; the stock keymon wrote it, and spruce does not run keymon.
 device_on_bt_audio_route() {
     if [ -z "$1" ]; then
         rm -f /tmp/bt_alsa_volume_dev
         return 0
     fi
-    control=$($BTCTL_TIMEOUT amixer -D bluealsa scontents 2>/dev/null |
-        sed -n "s/^Simple mixer control '\(.* - A2DP\)',[0-9]*$/\1/p" | head -n 1)
+    control=$(bt_headset_volume_controls | head -n 1)
     [ -n "$control" ] || return 0
     printf '%s' "$control" > /tmp/bt_alsa_volume_dev
-    # Start the headset at spruce's level rather than bluealsa's 100%.
-    vol=$(get_volume_level)
-    case "$vol" in ''|*[!0-9]*) return 0 ;; esac
-    $BTCTL_TIMEOUT amixer -q -D "bluealsa:DEV=$1" sset A2DP $((vol * 127 / 20)) 2>/dev/null
 }
 
-# The ALSA device PyUI plays through (App/PyUI/get-bt-audio-device.sh): the
-# first headset bluealsa holds an A2DP transport for, or nothing for the
-# speaker. Points the volume keys at it the way asound-setup.sh does for games.
-bt_audio_device() {
-    pcm=""
-    # PyUI asks right after killing bluetoothd or disconnecting the headset, and
-    # bluealsa can still list the transport for a moment: check both directly.
-    if pidof bluetoothd >/dev/null 2>&1; then
-        pcm=$($BTCTL_TIMEOUT bluealsa-aplay -L 2>/dev/null | grep '^bluealsa:.*PROFILE=a2dp' | head -n 1)
-    fi
-    mac=$(echo "$pcm" | sed -n 's/.*DEV=\([0-9A-Fa-f:]*\).*/\1/p')
-    if [ -n "$mac" ] && ! $BTCTL_TIMEOUT bluetoothctl info "$mac" 2>/dev/null | grep -q "Connected: yes"; then
-        pcm=""
-        mac=""
-    fi
-    device_on_bt_audio_route "$mac"
-    [ -z "$pcm" ] || echo "$pcm"
+# The speaker is the stock default under its own names, so hardwareservice keeps
+# driving its "Soft Volume Master"; asound-setup.sh adds spruce_bt and the default.
+ASOUND_SPRUCE_PCMS=1
+device_write_default_asound_rc() {
+    cat > "$ASOUND_CONF" <<EOF
+pcm.spruce_speaker {
+    type asym
+    playback.pcm "Playback"
+    capture.pcm "Capture"
+}
+ctl.!default {
+    type hw
+    card audiocodec
+}
+EOF
 }
 
+# The firmware attaches hci0 and runs bluetoothd, so the default bring-up is all
+# it needs: it fills in what is missing and never restarts bluetoothd.
 device_bluetooth_supported() {
     return 0
-}
-
-# The firmware attaches hci0 at boot and starts bluetoothd; only fill in what
-# is missing, never restart it.
-device_bluetooth_up() {
-    if ! pidof bluetoothd >/dev/null 2>&1; then
-        ( cd / && /etc/bluetooth/bluetoothd start ) </dev/null >/dev/null 2>&1
-        sleep 1
-    fi
-    if ! pidof bluealsa >/dev/null 2>&1; then
-        ( cd / && exec bluealsa -p a2dp-source ) </dev/null >/dev/null 2>&1 &
-    fi
-    hciconfig hci0 up
-}
-
-device_bluetooth_down() {
-    killall bluetoothd 2>/dev/null
-    hciconfig hci0 down 2>/dev/null
 }
 
 prepare_for_pyui_launch(){

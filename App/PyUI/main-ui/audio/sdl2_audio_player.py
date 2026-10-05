@@ -197,6 +197,11 @@ class Sdl2AudioPlayer:
                 except Exception:
                     pass
 
+        def mixer_open():
+            # After a failed reopen SDL_mixer has freed its channels but still counts
+            # them, so a channel call would crash until audio opens again.
+            return sdlmixer.Mix_QuerySpec(None, None, None) != 0
+
         # Helper wrappers (worker-only)
         def worker_init():
             try:
@@ -350,6 +355,9 @@ class Sdl2AudioPlayer:
 
             try:
                 name = cmd.name
+                if name not in ("init", "preload_wav", "cleanup") and not mixer_open():
+                    reply_ok(cmd.resp_q, False)
+                    continue
                 if name == "init":
                     reply_ok(cmd.resp_q, init_ok)
                 elif name == "set_volume":
@@ -458,14 +466,14 @@ class Sdl2AudioPlayer:
                     stop_loop_internal()
                     reply_ok(cmd.resp_q, True)
                 elif name == "cleanup":
-                    # stop loops
-                    stop_loop_internal()
-                    # halt everything and wait a bit
-                    try:
-                        sdlmixer.Mix_HaltChannel(-1)
-                        sdlmixer.Mix_HaltMusic()
-                    except Exception as e:
-                        PyUiLogger.get_logger().warning(f"cleanup: halt exception: {e}")
+                    # stop loops and halt everything (only an open mixer), then wait a bit
+                    if mixer_open():
+                        stop_loop_internal()
+                        try:
+                            sdlmixer.Mix_HaltChannel(-1)
+                            sdlmixer.Mix_HaltMusic()
+                        except Exception as e:
+                            PyUiLogger.get_logger().warning(f"cleanup: halt exception: {e}")
                     sdl2.SDL_Delay(80)
                     # free all chunks and musics safely
                     for p, cptr in list(chunk_map.items()):

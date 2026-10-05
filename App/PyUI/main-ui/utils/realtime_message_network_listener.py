@@ -11,6 +11,58 @@ from display.render_mode import RenderMode
 from menus.common.top_bar import TopBar
 from option_select_ui import OptionSelectUI
 from utils.logger import PyUiLogger
+from utils.progress_bar_geometry import progress_bar_geometry
+
+
+# Segmented progress-bar fallback colors (white fill / grey track).
+# _bar_colors() tries the active Theme first and falls back to these.
+_PROGRESS_BAR_FILL_FALLBACK = (255, 255, 255)
+_PROGRESS_BAR_TRACK_FALLBACK = (128, 128, 128)
+
+# Track cells are the fill color dimmed by this factor: same hue as the
+# theme, always distinguishable from the fill.
+_TRACK_DIM_FACTOR = 0.35
+
+
+def _dim_track(color):
+    """Dim a fill color into its track color (pure, no Theme needed)."""
+    return tuple(
+        max(0, min(255, int(round(c * _TRACK_DIM_FACTOR)))) for c in color
+    )
+
+
+def _normalize_color(value):
+    """Coerce a Theme color to a 3-tuple of ints; raise if unparsable."""
+    seq = tuple(value)
+    if len(seq) != 3:
+        raise ValueError(f"expected 3 components, got {value!r}")
+    color = (int(seq[0]), int(seq[1]), int(seq[2]))
+    if any(not 0 <= c <= 255 for c in color):
+        raise ValueError(f"components out of range: {value!r}")
+    return color
+
+
+def _bar_colors():
+    """Return (fill, track) colors for the segmented progress bar.
+
+    Fill comes from the theme's LIST selected (emphasis) color; track is
+    the fill dimmed to 35% so the two states stay distinguishable on any
+    theme. (The theme's own LIST text color can't serve as track: list
+    selection is shown via a background image, so selected and normal
+    text are often both white.) ANY failure (Theme unavailable /
+    uninitialized, unparsable value) falls back to white fill / grey
+    track.
+
+    Theme is imported lazily so this module still imports without a
+    display/theme initialized.
+    """
+    try:
+        from themes.theme import Theme
+
+        fill = _normalize_color(Theme.text_color_selected(FontPurpose.LIST))
+        return (fill, _dim_track(fill))
+    except Exception:
+        return (_PROGRESS_BAR_FILL_FALLBACK, _PROGRESS_BAR_TRACK_FALLBACK)
 
 
 class RealtimeMessageNetworkListener:
@@ -114,13 +166,49 @@ class RealtimeMessageNetworkListener:
         except queue.Empty:
             pass
 
-    def _progress_bar(self, percent):
-        """Returns an ASCII progress bar rounded to nearest 5%."""
-        rounded = round(percent / 5) * 5
-        total_segments = 20
-        filled = rounded // 5
-        bar = "█" * filled + "·" * (total_segments - filled)
-        return f"[{bar}] {percent}%"
+    @staticmethod
+    def _parse_percentage(raw):
+        """Best-effort int percent; never raises (geometry clamps the range)."""
+        try:
+            return int(float(raw))
+        except (ValueError, TypeError):
+            return 0
+
+    @staticmethod
+    def _render_percentage_bar(percentage):
+        """Draw the segmented box bar plus a separate percent text line."""
+        device = Device.get_device()
+        screen_w = device.screen_width()
+        screen_h = device.screen_height()
+        bar_y = int(screen_h * 0.6)
+        try:
+            geo = progress_bar_geometry(
+                screen_w=screen_w,
+                percent=percentage,
+                cell_px=Display.get_line_height(FontPurpose.LIST),
+            )
+        except ValueError:
+            # e.g. LIST line height wider than the bar on tiny screens
+            geo = progress_bar_geometry(screen_w=screen_w, percent=percentage)
+        fill, track = _bar_colors()
+        cell = int(round(geo.cell_size))
+        for i in range(geo.cells):
+            x = int(round(geo.x + i * (geo.cell_size + geo.gap)))
+            Display.render_box(fill if i < geo.lit_cells else track, x, bar_y, cell, cell)
+        # Percent sits on the same row, right of the bar: the bar has a
+        # fixed geometry so nothing shifts as the number grows. Left edge
+        # one margin past the bar end, vertically centered on the bar.
+        bar_end = int(round(geo.x + geo.bar_width))
+        pct_x = bar_end + max(4, int(screen_w * 0.01))
+        pct_y = bar_y + cell // 2
+        Display.render_text(
+            f"{percentage}%",
+            pct_x,
+            pct_y,
+            fill,
+            FontPurpose.LIST,
+            RenderMode.MIDDLE_LEFT_ALIGNED,
+        )
 
     def _handle_ui_message(self, raw_message: str):
         """Handle a JSON-formatted UI command."""
@@ -185,17 +273,14 @@ class RealtimeMessageNetworkListener:
             elif cmd == "TEXT_WITH_PERCENTAGE_BAR":
                 if args:
                     text = args[0]
-                    percentage = int(args[1])
+                    percentage = self._parse_percentage(args[1])
                     self.logger.info(f"Rendering text: {text} w/ percentage bar: {percentage}%")
                     Display.clear("")
                     Display.write_message_multiline(
                         Display.split_message(text, FontPurpose.LIST, clip_to_device_width=True), 
                         Device.get_device().screen_height()*0.35
                     )
-                    Display.write_message_multiline(
-                        [self._progress_bar(percentage)], 
-                        (Device.get_device().screen_height()*0.6)
-                    )                    
+                    self._render_percentage_bar(percentage)
                     if(len(args) > 2):
                         Display.write_message_multiline(
                             Display.split_message(args[2], FontPurpose.LIST, clip_to_device_width=True), 

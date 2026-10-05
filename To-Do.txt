@@ -10,8 +10,9 @@
 --- Sun -----------------------------------------------------------------------
 
 - Mini splore update from tenlevels
-- Expose H700 led settings
 - PCSX Standalone on Miyoo Mini - we ship this and have scripting for it, but it doesn't work. Mini Flip - segfaults. Mini Plus - borks the screen.
+- RA spruce menu: add customization options for hiding Retroarch as an option, add FF speed etc etc. Probably add this to the igm.cfg?
+- Bug Reporter... has bugs..... tsps specifically reported
     
 --- Ry ------------------------------------------------------------------------
 

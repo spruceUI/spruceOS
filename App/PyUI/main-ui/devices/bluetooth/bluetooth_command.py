@@ -1,6 +1,12 @@
 import threading
+from dataclasses import dataclass
 
-from devices.bluetooth.bluetooth_scanner import BluetoothDevice
+
+@dataclass
+class BluetoothDevice:
+    address: str
+    name: str
+    paired: bool = False
 
 
 class BluetoothCommand:
@@ -54,10 +60,13 @@ class BluetoothCommand:
 
     def forget(self, device):
         """(ok, output)."""
-        answer = self._run("forget", device.address, timeout=30)
-        return answer is not None, ""
+        answer = (self._run("forget", device.address, timeout=30) or "").strip()
+        return answer == "ok", answer
 
     def _scan_loop(self, stop_event):
+        # A scan pass takes several seconds; list the devices BlueZ knows
+        # already (paired ones above all) before the first pass ends.
+        self.refresh_devices()
         while not stop_event.is_set():
             self._store(self._run("scan", timeout=30))
             stop_event.wait(1)
