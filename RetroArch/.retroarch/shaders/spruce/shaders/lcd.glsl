@@ -1,5 +1,5 @@
 /*
-	Fragment shader based on "Improved texture interpolation" by Iñigo Quílez
+	Fragment shader based on "Improved texture interpolation" by Iï¿½igo Quï¿½lez
 	Original description: http://www.iquilezles.org/www/articles/texture/texture.htm
 */
 
@@ -100,6 +100,7 @@ void main()
 	float pos = mod(gl_FragCoord.x,2.0);
 	if (pos <1.0) res *= 0.5; else res *= 1.0;
 	// final sum and weight normalization
-   FragColor.rgb = res; 
+   FragColor.rgb = res;
+   FragColor.a = 1.0;
 } 
 #endif

@@ -115,6 +115,6 @@ if (OutputSize.x < OutputSize.y) scanner = gl_FragCoord.x;
 float spos = mod(scanner,2.0);
 if (spos < 1.0) res *= 0.6; 
 
-FragColor.rgb = res;
+FragColor = vec4(res, 1.0);
 }
 #endif
