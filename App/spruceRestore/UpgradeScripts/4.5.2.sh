@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TARGET_VERSION="4.5.1"
+TARGET_VERSION="4.5.2"
 
 HELPER_FUNCTIONS="/mnt/SDCARD/spruce/scripts/helperFunctions.sh"
 if [ -f "$HELPER_FUNCTIONS" ]; then
