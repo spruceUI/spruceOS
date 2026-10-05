@@ -116,6 +116,10 @@ unmount_all() {
 }
 
 attempt_to_close_emu_gracefully() {
+    # Sleep SIGSTOPs emulators on some devices, and a stopped process ignores TERM.
+    for process in $EMU_PROCESSES; do
+        killall -q -18 "$process" 2>/dev/null
+    done
     if pgrep -f "PPSSPPSDL" >/dev/null; then
         close_gracefully_ppsspp
     elif pgrep -f "drastic32" >/dev/null; then
