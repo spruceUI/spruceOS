@@ -7,17 +7,12 @@
 # user is sitting in Settings. Turning "Sync Time via Network" on there should
 # take effect there and then rather than at the next game exit, so the menu
 # launches this detached.
-#
-# sync_system_time does all the deciding: it honours the toggle, returns
-# immediately when the clock is already sane, and logs what it did. This is
-# only a way in from outside the shell.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
 
-sync_system_time
-# This is the user asking, from Time Settings, so detect again even if it
-# already ran this boot.
-rm -f "$TZ_AUTO_DONE_FLAG"
-sync_timezone_from_network
+# This is the user asking, from Time Settings, so run both even if they already
+# ran this boot.
+sync_system_time --again
+sync_timezone_from_network --again
 exit 0

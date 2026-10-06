@@ -132,6 +132,21 @@ stop_stock_wpa_supplicant_a133p() {
     ) </dev/null >/dev/null 2>&1
 }
 
+# Stock keeps its own saved networks in /etc/wifi/wpa_supplicant.conf and
+# stop_stock_wpa_supplicant_a133p imports them every boot, so clearing only
+# spruce's lists let "Forget all WiFi networks" undo itself on the next boot.
+# Drop the network blocks there too; the rest of the file is left alone.
+device_wifi_forget_all() {
+    wpa_forget_all_networks
+    _stock_conf=/etc/wifi/wpa_supplicant.conf
+    grep -q 'network={' "$_stock_conf" 2>/dev/null || return 0
+    awk '/^[[:space:]]*network=\{/ { skip = 1 } !skip { print } skip && /^[[:space:]]*\}/ { skip = 0 }' \
+        "$_stock_conf" > "$_stock_conf.tmp" &&
+        mv "$_stock_conf.tmp" "$_stock_conf" &&
+        log_message "Wifi: cleared saved networks from $_stock_conf"
+    rm -f "$_stock_conf.tmp"
+}
+
 device_init_a133p() {
     # Stock is "8 7 1 7": a long burst on ttyS0 at 115200 holds CPU0 long enough for
     # an i2c transfer to time out, and the stock handler panics on the late IRQ.

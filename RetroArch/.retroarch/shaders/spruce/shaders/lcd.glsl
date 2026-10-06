@@ -1,5 +1,5 @@
 /*
-	Fragment shader based on "Improved texture interpolation" by Iï¿½igo Quï¿½lez
+	Fragment shader based on "Improved texture interpolation" by Iñigo Quílez
 	Original description: http://www.iquilezles.org/www/articles/texture/texture.htm
 */
 
