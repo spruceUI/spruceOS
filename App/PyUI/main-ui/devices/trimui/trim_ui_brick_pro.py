@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
+from devices.trimui.brick_pro_speaker_amp import BrickProSpeakerAmpGate
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -30,7 +31,7 @@ class TrimUIBrickPro(TrimUIDevice):
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        self.audio_player = AudioPlayerDelegateSdl2()
+        self.audio_player = BrickProSpeakerAmpGate(start_gate=main_ui_mode)
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
         self._load_system_config("/mnt/SDCARD/Saves/trim-ui-brick-pro-system.json", source)
