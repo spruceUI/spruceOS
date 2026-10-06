@@ -310,7 +310,7 @@
     "optimizeBoxartPrompt2": "Ảnh gốc sẽ được chuyển đổi, hãy sao lưu trước!",
     "optimizeBoxartPrompt3": "A = Có, B = Không, X/Y = Không hỏi lại",
     "optimizeBoxartPrompt4": "Bạn có thể làm thủ công tại:",
-    "optimizeBoxartPrompt5": "Cài đặt -> Cài đặt bổ sung -> Tối ưu ảnh bìa",
+    "optimizeBoxartPrompt5": "Cài đặt -> Tasks -> Tối ưu ảnh bìa",
     "selectAnOption": "Chọn {name}",
     "gameConfigurationTitle": "Cấu hình {system}",
     "bluetoothConnectFailed": "Thiết bị Bluetooth {name} kết nối thất bại ở bước: {step}. {output}",

@@ -318,7 +318,7 @@
     "optimizeBoxartPrompt2": "Originals will be converted, be sure to backup!",
     "optimizeBoxartPrompt3": "A = Yes, B = No, X/Y = Never Prompt",
     "optimizeBoxartPrompt4": "You can manually do this in:",
-    "optimizeBoxartPrompt5": "Settings -> Extra Settings -> Optimize BoxArt",
+    "optimizeBoxartPrompt5": "Settings -> Tasks -> Optimize Boxart",
     "selectAnOption": "Select a {name}",
     "gameConfigurationTitle": "{system} Configuration",
     "bluetoothConnectFailed": "Bluetooth device {name} failed to connect at step: {step}. {output}",
