@@ -147,6 +147,21 @@ device_wifi_forget_all() {
     rm -f "$_stock_conf.tmp"
 }
 
+# The Brick Pro's stock fstab mounts the card "rw,sync" (the Smart Pro's says
+# "async"), so every write waits for the card: 100 MB took 51 s instead of 7 s,
+# and first-boot setup, saves and logs all crawl. Remount async, as the Smart
+# Pro runs. save_poweroff.sh still syncs and remounts read-only before power
+# off, and the kernel syncs before suspend. No-op when already async.
+remount_sd_async_a133p() {
+    _sd_opts=$(awk '$2 == "/mnt/SDCARD" { print $4; exit }' /proc/mounts)
+    case ",$_sd_opts," in
+        *,sync,*)
+            mount -o remount,async /mnt/SDCARD &&
+                log_message "Remounted /mnt/SDCARD async (stock mounts it sync)"
+            ;;
+    esac
+}
+
 device_init_a133p() {
     # Stock is "8 7 1 7": a long burst on ttyS0 at 115200 holds CPU0 long enough for
     # an i2c transfer to time out, and the stock handler panics on the late IRQ.
@@ -154,6 +169,7 @@ device_init_a133p() {
     echo "3 4 1 7" > /proc/sys/kernel/printk
     stop_stock_wpa_supplicant_a133p
     runtime_mounts_a133p
+    remount_sd_async_a133p
 
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
