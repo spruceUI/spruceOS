@@ -37,6 +37,13 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
             if self._amp_on == on:
                 return
             try:
+                if not on and self._amp_on is None:
+                    # State unknown (startup, or a volume key): the amp can be
+                    # powered while the control already reads "off", and the
+                    # driver ignores a write that doesn't change the value. Go
+                    # through "on" so the "off" is a real change.
+                    subprocess.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on"],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
                 subprocess.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on" if on else "off"],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
                 self._amp_on = on
@@ -74,9 +81,9 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
         self._schedule_off(seconds)
 
     def amp_changed_elsewhere(self):
-        """A volume key was pressed. The firmware switches the amp back on by
-        itself when the volume changes, behind this gate's back, so forget the
-        remembered state and switch it off again shortly."""
+        """A volume key was pressed. Changing the volume powers the amp back on
+        without the control changing, so forget the remembered state and
+        switch it off again shortly (see _set_amp)."""
         with self._amp_lock:
             self._amp_on = None
         self._schedule_off(OFF_AFTER_SOUND_SECONDS)
