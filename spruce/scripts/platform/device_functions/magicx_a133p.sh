@@ -537,3 +537,33 @@ magicx_seed_system_json() {
     cp /mnt/SDCARD/App/PyUI/main-ui/devices/magicx/magicx-system.json "$json" 2>/dev/null \
         && log_message "MagicX: seeded $json from the bundled default"
 }
+
+# oakMOSS writes its release tag to /usr/magicx/version (v0.5.0-beta.1, with a
+# git describe suffix on untagged builds). Images without it, or without the
+# second slot, cannot take an update and need one full flash.
+oakmoss_installed_version() {
+    sed -n 's/^[vV]\{0,1\}\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\(-[a-z]\{1,\}\.[0-9]\{1,\}\)\{0,1\}\).*/\1/p' \
+        /usr/magicx/version 2>/dev/null
+}
+
+oakmoss_can_update() {
+    [ -n "$(oakmoss_installed_version)" ] && [ -e /dev/by-name/boot_b ] && [ -e /dev/by-name/rootfs_b ]
+}
+
+# 0.4.2-beta.1 -> 0004002001, 0.4.2 -> 0004002999: a release sorts after its betas.
+oakmoss_version_key() {
+    printf '%s' "$1" | awk -F'[.-]' '{ printf "%d%03d%03d%03d", $1, $2, $3, ($4 == "" ? 999 : $5) }'
+}
+
+oakmoss_version_older_than() {
+    [ "$(oakmoss_version_key "$1")" -lt "$(oakmoss_version_key "$2")" ] 2>/dev/null
+}
+
+check_if_fw_needs_update() {
+    if ! oakmoss_can_update; then
+        echo "false"
+        return
+    fi
+    _want="$(github_latest_version spruceUI/oakMOSS)" || { echo "false"; return; }
+    oakmoss_version_older_than "$(oakmoss_installed_version)" "$_want" && echo "true" || echo "false"
+}
