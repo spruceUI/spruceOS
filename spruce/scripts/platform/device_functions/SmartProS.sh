@@ -426,8 +426,21 @@ device_delay_then_check_trimui_blobs() {
 
 }
 
+# fw 1.0.2+ pwm-fan silently drops cur_state writes above user_max_state, and
+# hardwareservice can lower that cap from stock settings: keep the fan range whole.
+release_trimui_fan_cap() {
+    max_state="$(cat /sys/class/thermal/cooling_device0/max_state 2>/dev/null)"
+    [ -n "$max_state" ] || return 0
+    for cap in /sys/devices/platform/soc@3000000/soc@3000000:pwm_fan/hwmon/hwmon*/user_max_state; do
+        if [ -w "$cap" ]; then echo "$max_state" > "$cap"; fi
+    done
+}
+
 device_run_tsps_blobs() {
     run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
+    release_trimui_fan_cap
+    # again once a freshly started hardwareservice has applied its settings
+    ( sleep 3; release_trimui_fan_cap ) &
 }
 
 device_prepare_for_poweroff() {
