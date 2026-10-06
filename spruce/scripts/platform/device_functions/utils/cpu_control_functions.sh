@@ -161,8 +161,8 @@ set_smart() {
         fi
 
         if [ -d "$GPU_GOVENOR_DIR" ]; then
-            echo "$GPU_SMART_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
             echo "$GPU_SMART_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
+            echo "$GPU_SMART_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
 
         lock_governor 2>/dev/null
@@ -191,8 +191,8 @@ set_performance() {
         fi
 
         if [ -d "$GPU_GOVENOR_DIR" ]; then
-            echo "$GPU_PERFORMANCE_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
             echo "$GPU_PERFORMANCE_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
+            echo "$GPU_PERFORMANCE_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
 
         lock_governor 2>/dev/null
@@ -221,8 +221,8 @@ set_overclock() {
         fi
 
         if [ -d "$GPU_GOVENOR_DIR" ]; then
-            echo "$GPU_OVERCLOCK_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
             echo "$GPU_OVERCLOCK_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
+            echo "$GPU_OVERCLOCK_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
 
         lock_governor 2>/dev/null
