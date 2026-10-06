@@ -7,12 +7,13 @@ from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from utils.logger import PyUiLogger
 
 # Brick Pro: the speaker amp ('HpSpeaker Switch') stays on at idle and
-# amplifies board noise into an audible hiss (spruceOS#1616). Every switch of
-# the amp makes a small pop, on and off, so it is not switched per sound: it
-# comes on right before any menu sound and goes off only after this long
-# without one, while no game is running and no menu music is looping.
-IDLE_OFF_SECONDS = 15
-POLL_SECONDS = 1.0
+# amplifies board noise into an audible hiss (spruceOS#1616). It comes on
+# right before every menu sound and goes off shortly after the last one, so
+# the menu is silent between sounds. Every switch makes a small pop (on and
+# off); fast navigation keeps the amp on, so pops only come at the start and
+# end of a burst. Event-driven: nothing runs while the menu is quiet.
+OFF_AFTER_SOUND_SECONDS = 0.5   # covers the 71 ms click plus output latency
+GAME_RECHECK_SECONDS = 2.0      # only while a game runs with PyUI still alive
 AMP_CONTROL = "name=HpSpeaker Switch"
 
 
@@ -21,16 +22,18 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
 
     def __init__(self, start_gate=True):
         super().__init__()
-        self._lock = threading.Lock()
+        self._amp_lock = threading.Lock()
         self._amp_on = None          # unknown until first set
         self._looping = False
-        self._last_sound = time.monotonic()
+        self._cond = threading.Condition()
+        self._off_at = None          # monotonic time to switch off; None = nothing pending
         if start_gate:
             atexit.register(self._set_amp, True)  # never leave games silent
-            threading.Thread(target=self._idle_loop, daemon=True).start()
+            threading.Thread(target=self._off_worker, daemon=True).start()
+            self._schedule_off(OFF_AFTER_SOUND_SECONDS)  # quiet from startup
 
     def _set_amp(self, on):
-        with self._lock:
+        with self._amp_lock:
             if self._amp_on == on:
                 return
             try:
@@ -41,30 +44,38 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Speaker amp switch failed: {e}")
 
+    def _schedule_off(self, delay):
+        with self._cond:
+            self._off_at = time.monotonic() + delay
+            self._cond.notify()
+
+    def _off_worker(self):
+        from controller.controller import Controller
+        with self._cond:
+            while True:
+                if self._off_at is None:
+                    self._cond.wait()                    # quiet: sleep until a sound
+                    continue
+                remaining = self._off_at - time.monotonic()
+                if remaining > 0:
+                    self._cond.wait(remaining)           # a newer sound moves _off_at
+                    continue
+                if Controller._game_running or self._looping:
+                    self._off_at = time.monotonic() + GAME_RECHECK_SECONDS
+                    continue
+                self._off_at = None
+                self._set_amp(False)
+
     def hold_amp_on(self, seconds=10):
         """Amp on now and for at least `seconds`: for handing the speaker to a
         game or app. PyUI usually exits right after (os._exit skips atexit),
         so this must not depend on how PyUI ends."""
-        self._last_sound = time.monotonic() + seconds
         self._set_amp(True)
+        self._schedule_off(seconds)
 
     def _sound_starting(self):
-        self._last_sound = time.monotonic()
         self._set_amp(True)
-
-    def _idle_loop(self):
-        from controller.controller import Controller
-        was_in_game = False
-        while True:
-            time.sleep(POLL_SECONDS)
-            in_game = Controller._game_running
-            if was_in_game and not in_game:
-                self._last_sound = time.monotonic()  # back in the menu: idle timer restarts
-            was_in_game = in_game
-            if in_game or self._looping:
-                self._set_amp(True)
-            elif time.monotonic() - self._last_sound >= IDLE_OFF_SECONDS:
-                self._set_amp(False)
+        self._schedule_off(OFF_AFTER_SOUND_SECONDS)
 
     def audio_play_wav(self, file_path: str):
         self._sound_starting()
@@ -83,4 +94,4 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
     def audio_stop_loop(self):
         super().audio_stop_loop()
         self._looping = False
-        self._last_sound = time.monotonic()
+        self._schedule_off(OFF_AFTER_SOUND_SECONDS)
