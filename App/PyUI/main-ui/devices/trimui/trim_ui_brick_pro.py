@@ -57,6 +57,20 @@ class TrimUIBrickPro(TrimUIDevice):
         super().__init__()
             
 
+    # Games and apps run after PyUI hands off (and usually exits), so the
+    # speaker amp gate must leave the amp on before every hand-off.
+    def run_game(self, rom_info):
+        self.audio_player.hold_amp_on()
+        return super().run_game(rom_info)
+
+    def run_app(self, folder, launch):
+        self.audio_player.hold_amp_on()
+        return super().run_app(folder, launch)
+
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        self.audio_player.hold_amp_on()
+        return super().run_cmd(args, dir, is_power_cmd)
+
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
         self._set_contrast_to_config()

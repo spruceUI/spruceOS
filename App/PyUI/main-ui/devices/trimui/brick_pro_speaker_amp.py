@@ -41,6 +41,13 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Speaker amp switch failed: {e}")
 
+    def hold_amp_on(self, seconds=10):
+        """Amp on now and for at least `seconds`: for handing the speaker to a
+        game or app. PyUI usually exits right after (os._exit skips atexit),
+        so this must not depend on how PyUI ends."""
+        self._last_sound = time.monotonic() + seconds
+        self._set_amp(True)
+
     def _sound_starting(self):
         self._last_sound = time.monotonic()
         self._set_amp(True)
