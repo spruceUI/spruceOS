@@ -73,6 +73,14 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
         self._set_amp(True)
         self._schedule_off(seconds)
 
+    def amp_changed_elsewhere(self):
+        """A volume key was pressed. The firmware switches the amp back on by
+        itself when the volume changes, behind this gate's back, so forget the
+        remembered state and switch it off again shortly."""
+        with self._amp_lock:
+            self._amp_on = None
+        self._schedule_off(OFF_AFTER_SOUND_SECONDS)
+
     def _sound_starting(self):
         self._set_amp(True)
         self._schedule_off(OFF_AFTER_SOUND_SECONDS)

@@ -71,6 +71,13 @@ class TrimUIBrickPro(TrimUIDevice):
         self.audio_player.hold_amp_on()
         return super().run_cmd(args, dir, is_power_cmd)
 
+    # Volume keys reach the firmware, which turns the speaker amp back on.
+    def map_key(self, key_code):
+        controller_input = super().map_key(key_code)
+        if controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN):
+            self.audio_player.amp_changed_elsewhere()
+        return controller_input
+
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
         self._set_contrast_to_config()
