@@ -7,9 +7,11 @@ CUR_TTY=/dev/null
 
 export controlfolder="/mnt/SDCARD/Persistent/portmaster/PortMaster"
 
-# Ports use $directory/ports/<game>; PORTS_DIR comes from spruce's launcher.
+# Ports use "/$directory/ports/<game>"; PORTS_DIR comes from spruce's launcher.
+# No leading slash, as upstream: busybox mount takes "//mnt/..." for a CIFS
+# share, which broke Stardew Valley's savedata bind ("bad address 'mnt'").
 directory="$(dirname "${PORTS_DIR:-/mnt/SDCARD/Roms/ports}")"
-export directory="${directory%/}/"
+export directory="${directory#/}"
 
 export PM_PYTHON="/mnt/SDCARD/Persistent/portmaster/bin/python3"
 export PATH="/mnt/SDCARD/Persistent/portmaster/bin:$PATH"
