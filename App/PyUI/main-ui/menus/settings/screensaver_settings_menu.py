@@ -16,6 +16,10 @@ COLOR_PALETTE = [
     "#FF9F1C", "#FF4040", "#AAAAAA", "#000000",
 ]
 
+LAYOUT_KEYS = ("x", "y", "fontSize")
+ANALOG_LAYOUT_Y = {"clock": 0.4, "date": 0.82, "battery": 0.9}
+ANALOG_RADIUS = 0.3
+
 
 class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
@@ -60,6 +64,50 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
         if input in (ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT):
             current = Theme._data.get("screensaver", {}).get("dimBacklight", True)
             self._set_screensaver_prop("dimBacklight", not current)
+
+    def toggle_clock_style(self, input):
+        if input not in (ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT):
+            return
+        old_style = self._get_clock_style()
+        new_style = "digital" if old_style == "analog" else "analog"
+        ss = Theme._data.get("screensaver", {})
+        widgets = Theme.get_screensaver_widgets()
+
+        # Each style keeps its own layout, so switching back restores the old one.
+        layouts = ss.get("clockLayouts", {})
+        layouts[old_style] = [{k: w[k] for k in LAYOUT_KEYS if k in w} for w in widgets]
+        saved = layouts.get(new_style)
+        if saved and len(saved) == len(widgets):
+            for widget, layout in zip(widgets, saved):
+                widget.update(layout)
+        elif new_style == "analog":
+            self._apply_analog_layout(widgets)
+
+        for widget in widgets:
+            if widget.get("type") == "clock":
+                widget["style"] = new_style
+        ss["clockLayouts"] = layouts
+        ss["widgets"] = widgets
+        Theme._data["screensaver"] = ss
+        Theme.save_changes()
+
+    def _apply_analog_layout(self, widgets):
+        from devices.device import Device
+        device = Device.get_device()
+        radius = min(device.screen_width(), device.screen_height()) * ANALOG_RADIUS
+        for widget in widgets:
+            wtype = widget.get("type")
+            if wtype in ANALOG_LAYOUT_Y:
+                widget["x"] = 0.5
+                widget["y"] = ANALOG_LAYOUT_Y[wtype]
+            if wtype == "clock":
+                widget["fontSize"] = max(10, int(radius / Theme._default_multiplier))
+
+    def _get_clock_style(self):
+        for widget in Theme.get_screensaver_widgets():
+            if widget.get("type") == "clock":
+                return widget.get("style", "digital")
+        return "digital"
 
     def change_overlay_opacity(self, input):
         current = Theme._data.get("screensaver", {}).get("overlayOpacity", 0.3)
@@ -503,6 +551,19 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
                 description=Language.get("screensaverBgColorDesc", "Solid background color when no image is selected"),
                 icon=None,
                 value=self.change_bg_color
+            )
+        )
+
+        analog = self._get_clock_style() == "analog"
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.get("screensaverClockStyle", "Clock style"),
+                value_text="<    " + (Language.get("screensaverClockAnalog", "Analog") if analog else Language.get("screensaverClockDigital", "Digital")) + "    >",
+                image_path=None,
+                image_path_selected=None,
+                description=Language.get("screensaverClockStyleDesc", "Show the time as digits or as a clock face with hands"),
+                icon=None,
+                value=self.toggle_clock_style
             )
         )
 
