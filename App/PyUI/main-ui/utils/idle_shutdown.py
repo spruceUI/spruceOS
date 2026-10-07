@@ -15,7 +15,7 @@ def _long_task(cmd, action, name):
         subprocess.run(["sh", cmd, action, name], timeout=10,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError) as e:
-        PyUiLogger.get_logger().error(f"long_task.sh {action} failed: {e}")
+        PyUiLogger.get_logger().error(f"longTaskCmd {action} failed: {e}")
 
 
 def pauses_idle_shutdown(func):
