@@ -440,5 +440,8 @@
     "noValidRoms": "No valid ROMs available to launch.",
     "selectOptionPrompt": "Select a {name}",
     "patchingThemeAssets": "Patching theme to faster assets",
-    "noCoreFound": "No core found"
+    "noCoreFound": "No core found",
+    "keyboardSpace": "space",
+    "keyboardSpaceShort": "spc",
+    "keyboardHint": "L1 shift · R1 caps · B delete · START done"
 }

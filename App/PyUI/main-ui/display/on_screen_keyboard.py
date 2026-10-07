@@ -4,6 +4,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
+from menus.language.language import Language
 from themes.theme import Theme
 
 
@@ -36,9 +37,9 @@ class OnScreenKeyboard:
         key_w = Device.get_device().screen_width() // 16 #13 keys, set to 16 for spacing
         key_w_offset = Device.get_device().screen_width() // 13
         key_h = key_w
-        space_label = "space"
+        space_label = Language.label("keyboardSpace", "space")
         if Display.get_text_dimensions(FontPurpose.ON_SCREEN_KEYBOARD, space_label)[0] > key_w * 0.9:
-            space_label = "spc"
+            space_label = Language.label("keyboardSpaceShort", "spc")
 
         while running:
             Display.clear("Keyboard")
@@ -112,7 +113,7 @@ class OnScreenKeyboard:
                                             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED)
                 next_y += key_h
 
-            Display.render_text(text="L1 shift · R1 caps · B delete · START done",
+            Display.render_text(text=Language.label("keyboardHint", "L1 shift · R1 caps · B delete · START done"),
                                 x = Device.get_device().screen_width() // 2,
                                 y = next_y + key_h // 4,
                                 purpose = FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION,
