@@ -22,6 +22,7 @@ log_message "Lid watchdog started, monitoring lid state"
 # open->closed edge never came round again until the lid was physically
 # cycled. Cleared when the lid actually opens.
 close_handled=0
+[ "$(device_lid_open)" = "0" ] && close_handled=1
 
 launch_sleep_helper_once() {
     if [ -e /tmp/sleep_helper_started ]; then
