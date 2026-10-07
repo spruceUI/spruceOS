@@ -60,8 +60,12 @@ device_enter_sleep() {
     trigger_device_sleep
 }
 
+device_resume_backlight() {
+    :
+}
 
 device_exit_sleep(){
+    device_resume_backlight
     clear_wake_alarm $WAKE_ALARM_PATH
     # A dongle that was the radio gets a bounded wait to re-enumerate: the host
     # controller is back before the device is.
