@@ -21,17 +21,17 @@ morse_code_sos() {
     for symbol in "$@"; do
         case $symbol in
         ".")
-            [ "$LED_PATH" != "not applicable" ] && echo 1 >${LED_PATH}/brightness
+            work_led_on
             [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dot_duration
             ;;
         "-")
-            [ "$LED_PATH" != "not applicable" ] && echo 1 >${LED_PATH}/brightness
+            work_led_on
             [ "$do_vibrate" = "true" ] && vibrate 100 &
             sleep $dash_duration
             ;;
         esac
-        [ "$LED_PATH" != "not applicable" ] && echo 0 >${LED_PATH}/brightness
+        work_led_off
         # No need to set vibrate to off as we passed duration to vibrate function
         sleep $intra_char_gap
     done
@@ -154,14 +154,12 @@ while true; do
         done
     else
         flag_remove "low_battery"
-        if [ "$LED_PATH" != "not applicable" ]; then
-            if [ "$LED_MODE" = "Always on" ]; then
-                echo 1 >${LED_PATH}/brightness
-            elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
-                echo 1 >${LED_PATH}/brightness
-            else # if [ "$LED_MODE" = "Always Off" ]; then
-                echo 0 >${LED_PATH}/brightness
-            fi
+        if [ "$LED_MODE" = "Always on" ]; then
+            work_led_on
+        elif [ "$LED_MODE" = "On in menu only" ] && flag_check "in_menu"; then
+            work_led_on
+        else # if [ "$LED_MODE" = "Always Off" ]; then
+            work_led_off
         fi
     fi
 

@@ -27,7 +27,7 @@
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_FLIP", "MIYOO_MINI_PLUS", "MIYOO_MINI_V4", "MAGICX_XU20", "MAGICX_ZERO28", "MAGICX_ZERO40"],
                 "description": "for non-red status LED",
                 "options": [
                     "Always off",
