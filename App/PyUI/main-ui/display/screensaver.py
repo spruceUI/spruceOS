@@ -1,3 +1,4 @@
+import math
 import time
 import datetime
 import os
@@ -512,9 +513,12 @@ class ScreenSaver:
         scaled_size = max(12, int(font_size * multiplier))
 
         if wtype == "clock":
-            now = datetime.datetime.now()
-            text = now.strftime("%H:%M")
-            cls._draw_text(text, x, y, color, scaled_size, Display, center=True, widget=widget)
+            if widget.get("style") == "analog":
+                cls._draw_analog_clock(x, y, scaled_size, color, Display)
+            else:
+                from menus.common.top_bar import TopBar
+                text = TopBar.get_current_time_hhmm()
+                cls._draw_text(text, x, y, color, scaled_size, Display, center=True, widget=widget)
 
         elif wtype == "date":
             now = datetime.datetime.now()
@@ -563,6 +567,85 @@ class ScreenSaver:
             text = widget.get("value", "")
             if text:
                 cls._draw_text(text, x, y, color, scaled_size, Display, center=True, widget=widget)
+
+    @classmethod
+    def _draw_analog_clock(cls, cx, cy, radius, color, Display):
+        # No second hand: the screensaver redraws once a minute.
+        renderer = Display.renderer.sdlrenderer
+        sdl2.SDL_SetRenderDrawColor(renderer, color[0], color[1], color[2], 255)
+
+        cls._fill_ring(cx, cy, radius, radius * 0.95, renderer)
+        for tick in range(60):
+            angle = tick * 6
+            if tick % 5 == 0:
+                cls._fill_hand(cx, cy, angle, radius * 0.78, radius * 0.9, radius * 0.06, radius * 0.06, renderer)
+            else:
+                cls._fill_hand(cx, cy, angle, radius * 0.85, radius * 0.9, radius * 0.02, radius * 0.02, renderer)
+
+        now = datetime.datetime.now()
+        hour_angle = (now.hour % 12 + now.minute / 60) * 30
+        minute_angle = now.minute * 6
+        cls._fill_hand(cx, cy, hour_angle, 0, radius * 0.5, radius * 0.08, radius * 0.04, renderer)
+        cls._fill_hand(cx, cy, minute_angle, 0, radius * 0.75, radius * 0.06, radius * 0.025, renderer)
+        cls._fill_ring(cx, cy, radius * 0.08, 0, renderer)
+
+    @classmethod
+    def _fill_hand(cls, cx, cy, angle_deg, start, end, start_width, end_width, renderer):
+        """A tapered bar from start to end along angle_deg, clockwise from 12."""
+        angle = math.radians(angle_deg)
+        dx, dy = math.sin(angle), -math.cos(angle)
+        px, py = -dy, dx
+        sx, sy = cx + dx * start, cy + dy * start
+        ex, ey = cx + dx * end, cy + dy * end
+        sw, ew = start_width / 2, end_width / 2
+        cls._fill_convex_polygon([
+            (sx + px * sw, sy + py * sw),
+            (ex + px * ew, ey + py * ew),
+            (ex - px * ew, ey - py * ew),
+            (sx - px * sw, sy - py * sw),
+        ], renderer)
+
+    @classmethod
+    def _fill_convex_polygon(cls, points, renderer):
+        top = int(math.floor(min(p[1] for p in points)))
+        bottom = int(math.ceil(max(p[1] for p in points)))
+        rects = []
+        for row in range(top, bottom):
+            sample = row + 0.5
+            xs = []
+            for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1]):
+                if (y1 <= sample < y2) or (y2 <= sample < y1):
+                    xs.append(x1 + (sample - y1) * (x2 - x1) / (y2 - y1))
+            if len(xs) >= 2:
+                left = int(round(min(xs)))
+                rects.append(sdl2.SDL_Rect(left, row, max(1, int(round(max(xs))) - left), 1))
+        cls._fill_rects(rects, renderer)
+
+    @classmethod
+    def _fill_ring(cls, cx, cy, outer, inner, renderer):
+        """A disc when inner is 0."""
+        rects = []
+        for row in range(int(math.floor(cy - outer)), int(math.ceil(cy + outer))):
+            dy = row + 0.5 - cy
+            if abs(dy) >= outer:
+                continue
+            half_outer = math.sqrt(outer * outer - dy * dy)
+            left = int(round(cx - half_outer))
+            right = int(round(cx + half_outer))
+            if abs(dy) < inner:
+                half_inner = math.sqrt(inner * inner - dy * dy)
+                inner_left = int(round(cx - half_inner))
+                inner_right = int(round(cx + half_inner))
+                rects.append(sdl2.SDL_Rect(left, row, max(1, inner_left - left), 1))
+                rects.append(sdl2.SDL_Rect(inner_right, row, max(1, right - inner_right), 1))
+            else:
+                rects.append(sdl2.SDL_Rect(left, row, max(1, right - left), 1))
+        cls._fill_rects(rects, renderer)
+
+    @classmethod
+    def _fill_rects(cls, rects, renderer):
+        if rects:
+            sdl2.SDL_RenderFillRects(renderer, (sdl2.SDL_Rect * len(rects))(*rects), len(rects))
 
     @classmethod
     def _draw_battery_bar(cls, percent, x, y, color, screen_w, screen_h, Display):
