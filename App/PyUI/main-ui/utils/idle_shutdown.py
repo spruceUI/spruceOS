@@ -3,18 +3,19 @@ import os
 import subprocess
 
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
-# spruce's hook for long jobs: "start" holds off the idle shutdown, "end"
-# releases it and restarts the idle timer (see the script for details).
-LONG_TASK = "/mnt/SDCARD/spruce/scripts/long_task.sh"
+# The CFW's hook for long jobs (longTaskCmd in py-ui-config.json; spruce's is
+# long_task.sh): "start" holds off the idle shutdown, "end" releases it and
+# restarts the idle timer.
 
 
-def _long_task(action, name):
+def _long_task(cmd, action, name):
     try:
-        subprocess.run(["sh", LONG_TASK, action, name], timeout=10,
+        subprocess.run(["sh", cmd, action, name], timeout=10,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     except (OSError, subprocess.SubprocessError) as e:
-        PyUiLogger.get_logger().error(f"long_task.sh {action} failed: {e}")
+        PyUiLogger.get_logger().error(f"longTaskCmd {action} failed: {e}")
 
 
 def pauses_idle_shutdown(func):
@@ -26,11 +27,12 @@ def pauses_idle_shutdown(func):
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        if not os.path.isfile(LONG_TASK):  # not on spruce: nothing to hold
+        cmd = PyUiConfig.get_long_task_cmd()
+        if not cmd or not os.path.isfile(cmd):  # no hook configured: nothing to hold
             return func(*args, **kwargs)
-        _long_task("start", func.__qualname__)
+        _long_task(cmd, "start", func.__qualname__)
         try:
             return func(*args, **kwargs)
         finally:
-            _long_task("end", func.__qualname__)
+            _long_task(cmd, "end", func.__qualname__)
     return wrapper

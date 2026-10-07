@@ -16,6 +16,7 @@
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
     "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
+    "longTaskCmd":"/mnt/SDCARD/spruce/scripts/long_task.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",

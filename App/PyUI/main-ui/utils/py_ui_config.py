@@ -239,6 +239,10 @@ class PyUiConfig:
         return cls.get("rebootCmd",None)
 
     @classmethod
+    def get_long_task_cmd(cls):
+        return cls.get("longTaskCmd",None)
+
+    @classmethod
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
 
