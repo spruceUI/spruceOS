@@ -1,9 +1,9 @@
 import atexit
-import subprocess
 import threading
 import time
 
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
+from devices.utils.process_runner import ProcessRunner
 from utils.logger import PyUiLogger
 
 # Brick Pro: the speaker amp ('HpSpeaker Switch') stays on at idle and
@@ -42,12 +42,10 @@ class BrickProSpeakerAmpGate(AudioPlayerDelegateSdl2):
                     # powered while the control already reads "off", and the
                     # driver ignores a write that doesn't change the value. Go
                     # through "on" so the "off" is a real change.
-                    subprocess.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on"],
-                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
-                subprocess.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on" if on else "off"],
-                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
+                    ProcessRunner.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on"], timeout=2)
+                ProcessRunner.run(["amixer", "-q", "-c", "0", "cset", AMP_CONTROL, "on" if on else "off"], timeout=2)
                 self._amp_on = on
-                PyUiLogger.get_logger().info(f"Speaker amp {'on' if on else 'off'}")
+                PyUiLogger.get_logger().debug(f"Speaker amp {'on' if on else 'off'}")
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Speaker amp switch failed: {e}")
 
