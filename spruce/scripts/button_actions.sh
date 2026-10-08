@@ -2,7 +2,7 @@
 
 # Shared button-action dispatch.
 #
-# Both the Menu button (homebutton_watchdog.sh) and, on devices that have one,
+# Both the Menu button (menubutton_watchdog.sh) and, on devices that have one,
 # the top Home button (buttons_watchdog.sh -> device_home_button_pressed) run a
 # user-chosen action. Those two watchdogs are separate processes, so the action
 # logic lives here and both source this file, rather than each carrying its own
@@ -197,7 +197,7 @@ update_gameswitcher_json() {
     # TODO move to device so we don't make this a giant list of regexs
     # sed, not ${var//a/b}: that is a bashism, and on the RGB30 /bin/sh is dash,
     # where it is a fatal "Bad substitution". This function runs inside the
-    # ( ... ) & subshell in homebutton_watchdog.sh, so the abort was silent and
+    # ( ... ) & subshell in menubutton_watchdog.sh, so the abort was silent and
     # took kill_emulator - the very next line of prepare_game_switcher - with
     # it. Symptom: hold-home logged "Performing hold-home action: Game Switcher"
     # and the game just kept running, for every emulator on that device.

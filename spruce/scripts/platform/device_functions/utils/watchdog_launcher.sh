@@ -70,7 +70,7 @@ launch_common_startup_watchdogs_v2() {
     # is in the list unconditionally: if the last run started it and this one has
     # no lid, it still has to go.
     for _wd in \
-        /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
@@ -82,14 +82,14 @@ launch_common_startup_watchdogs_v2() {
     done
     unset _wd
 
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
 
     SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
-    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n menubutton_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n idle_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n battery_level_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n power_button_watchdog.sh &

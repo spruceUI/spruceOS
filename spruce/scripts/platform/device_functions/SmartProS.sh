@@ -459,7 +459,7 @@ device_home_button_pressed() {
     perform_action "$action"
 
     # perform_action leaves game-state cleanup to the caller (as the hold-home
-    # path in homebutton_watchdog.sh does). Clear it only for actions that
+    # path in menubutton_watchdog.sh does). Clear it only for actions that
     # actually end the game; menu/LED/screenshot leave the game running.
     case "$action" in
         "Game Switcher"|"Exit game")

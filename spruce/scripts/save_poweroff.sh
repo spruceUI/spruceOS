@@ -227,7 +227,7 @@ stop_problematic_scripts() {
     killall -q -15 enforceSmartCPU.sh
 
     # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
-    killall -q -9 homebutton_watchdog.sh
+    killall -q -9 menubutton_watchdog.sh
     killall -q -9 buttons_watchdog.sh
     killall -q -9 idle_watchdog.sh
     killall -q -9 battery_level_watchdog.sh

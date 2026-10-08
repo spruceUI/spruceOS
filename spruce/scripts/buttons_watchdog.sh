@@ -116,11 +116,11 @@ start_lr_brightness_active() {
 }
 
 # While MENU is held, vol_up/vol_down step brightness instead of volume.
-# /tmp/menubtn is the held-state flag homebutton_watchdog.sh sets; that script is
+# /tmp/menubtn is the held-state flag menubutton_watchdog.sh sets; that script is
 # a separate process, so this is the only way for this one to know MENU is down.
 # Nothing else needs to be disabled to make room for this chord: a volume key
 # pressed while MENU is held already runs cancel_menu_hold in
-# homebutton_watchdog.sh, which kills the pending hold-home timer and suppresses
+# menubutton_watchdog.sh, which kills the pending hold-home timer and suppresses
 # the tap-home action, so the chord costs none of the other MENU actions.
 menu_vol_brightness_active() {
     [ -e /tmp/menubtn ] || return 1

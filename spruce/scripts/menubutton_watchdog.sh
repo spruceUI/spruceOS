@@ -1,14 +1,9 @@
 #!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
-# Shared button-action dispatch (perform_action, kill_emulator,
-# prepare_game_switcher, pause_drastic/resume_drastic, ...). Also sourced by
-# buttons_watchdog.sh for the top Home button on devices that have one.
 . /mnt/SDCARD/spruce/scripts/button_actions.sh
 
-log_message "homebutton_watchdog.sh: Started up."
-
-RETROARCH_CFG="/mnt/SDCARD/RetroArch/retroarch.cfg"
+log_message "menubutton_watchdog.sh: Started up."
 
 cancel_menu_hold() {
     # If the menu button is currently held, cancel both tap and hold
@@ -23,8 +18,7 @@ cancel_menu_hold() {
 }
 
 
-
-home_key_down () {
+menu_button_down () {
 
     if [ ! -e /tmp/menubtn ]; then
         pause_drastic
@@ -46,7 +40,7 @@ home_key_down () {
                     vibrate &
                 fi
                 HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
-                log_message "homebutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
+                log_message "menubutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
                 perform_action "$HOLD_HOME"
 
                 # Only clean up game state when the action actually killed the game.
@@ -62,7 +56,7 @@ home_key_down () {
     fi
 }
 
-home_key_up () {
+menu_button_up () {
     log_message "Menu button released at $(date +%s)"  
     if [ -e /tmp/menubtn ]; then
         rm -f /tmp/menubtn
@@ -82,7 +76,7 @@ home_key_up () {
 
         if [ "$was_cancelled" = false ]; then
             TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
-            log_message "homebutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
+            log_message "menubutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
             perform_action "$TAP_HOME"
         fi
 
@@ -106,21 +100,21 @@ home_key_up () {
 # without this. Mirrors the same conditional EVENT_PATH_VOLUME handling
 # buttons_watchdog.sh already does, including skipping it when it is the same node
 # (MagicX): named twice, getevent reports every event twice.
-HOMEBTN_EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
-[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && [ "$EVENT_PATH_VOLUME" != "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && HOMEBTN_EVENTS="$HOMEBTN_EVENTS $EVENT_PATH_VOLUME"
+MENU_BTN_EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
+[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && [ "$EVENT_PATH_VOLUME" != "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && MENU_BTN_EVENTS="$MENU_BTN_EVENTS $EVENT_PATH_VOLUME"
 
-getevent -pid $$ $HOMEBTN_EVENTS | while read line; do
-    log_message "homebutton_watchdog.sh: $line" -v
+getevent -pid $$ $MENU_BTN_EVENTS | while read line; do
+    log_message "menubutton_watchdog.sh: $line" -v
 
     case $line in
         # Home key down
         *"key $B_MENU 1"*)
-                home_key_down
+                menu_button_down
             ;;
 
         # Home key up
         *"key $B_MENU 0"*)
-                home_key_up
+                menu_button_up
             ;;
 
         *"key $B_SELECT 1"*)

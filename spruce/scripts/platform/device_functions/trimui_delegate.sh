@@ -315,15 +315,15 @@ restart_trimui_inputd() {
     run_trimui_blobs "trimui_inputd"
     sleep 1
 
-    for wd in /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh; do
+    for wd in /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh; do
         stop_running_watchdog "$wd"
     done
     sleep 1
-    /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh </dev/null >/dev/null 2>&1 &
     /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh </dev/null >/dev/null 2>&1 &
 
     SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
-    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n menubutton_watchdog.sh &
     pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
 }
 

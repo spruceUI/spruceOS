@@ -395,7 +395,7 @@ launch_startup_watchdogs(){
     # utils/watchdog_launcher.sh, sourced at the top of this file.
     for _wd in \
         /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
@@ -406,7 +406,7 @@ launch_startup_watchdogs(){
     unset _wd
 
     /bin/bash /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh &
-    /bin/bash /mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh &
+    /bin/bash /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh &
     # The override replaces launch_common_startup_watchdogs_v2 wholesale, and
     # that launcher is battery_level_watchdog.sh's only start site: without this
