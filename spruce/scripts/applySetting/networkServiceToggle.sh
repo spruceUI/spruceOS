@@ -1,6 +1,6 @@
 #!/bin/sh
 # Apply a service toggle (Enable Samba / Enable SSH / Enable WiFi File
-# Transfer / Enable Syncthing / Offline Achievements) immediately, instead of
+# Transfer / Enable Syncthing / RAOfflineProxy) immediately, instead of
 # waiting for networkservices.sh's own connect loop to notice on its next
 # wake, or for a reboot.
 #
