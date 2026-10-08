@@ -10,6 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/rk817_pmic.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
@@ -415,6 +416,7 @@ device_init() {
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
     init_gpio_Flip
+    clear_stale_pmic_power_en &
 
     insmod /lib/modules/rtk_btusb.ko
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
