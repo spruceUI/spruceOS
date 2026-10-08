@@ -270,7 +270,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
