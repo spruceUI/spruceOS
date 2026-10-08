@@ -212,7 +212,7 @@ case "$PLATFORM" in
 ############################################################
 # Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
 ############################################################
-    "RGB30" | "RGB20SX" )
+    "RGB30" | "RGB20SX" | "A10Mini" )
         # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
         # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
         # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
@@ -248,7 +248,7 @@ case "$PLATFORM" in
         log_message "Starting PyUI on $PLATFORM"
         /mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
-            -device "$PLATFORM" \
+            -device "$(device_names | head -n 1)" \
             -logDir /mnt/SDCARD/Saves/spruce \
             -pyUiConfig /mnt/SDCARD/App/PyUI/py-ui-config.json \
             -cfwConfig /mnt/SDCARD/Saves/spruce/spruce-config.json  "$@"

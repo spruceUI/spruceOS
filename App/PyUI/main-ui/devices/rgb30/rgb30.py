@@ -125,7 +125,10 @@ class Rgb30(DeviceCommon):
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
     SYSTEM_JSON_DEFAULT = "rgb30-system.json"
+    SYSTEM_JSON_DIR = "rgb30"
     MENU_KEY = None
+    SELECT_KEY = 314
+    START_KEY = 315
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -180,7 +183,7 @@ class Rgb30(DeviceCommon):
 
     def load_rgb30_system_json(self):
         base_dir = os.path.abspath(sys.path[0])
-        self.script_dir = os.path.join(base_dir, "devices", "rgb30")
+        self.script_dir = os.path.join(base_dir, "devices", self.SYSTEM_JSON_DIR)
         self.parent_dir = os.path.dirname(base_dir)
         source = os.path.join(self.script_dir, self.SYSTEM_JSON_DEFAULT)
         self._load_system_config(self.SYSTEM_JSON, Path(source))
@@ -216,8 +219,8 @@ class Rgb30(DeviceCommon):
         bind(312, ControllerInput.L2)
         bind(313, ControllerInput.R2)
 
-        bind(315, ControllerInput.START)
-        bind(314, ControllerInput.SELECT)
+        bind(self.START_KEY, ControllerInput.START)
+        bind(self.SELECT_KEY, ControllerInput.SELECT)
         if self.MENU_KEY is not None:
             bind(self.MENU_KEY, ControllerInput.MENU)
 
