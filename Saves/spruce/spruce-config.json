@@ -1151,7 +1151,7 @@
                 "selected": ""
             },
             "enableOfflineProxy": {
-                "display": "Offline Achievements",
+                "display": "RAOfflineProxy",
                 "description": "Earn Casual Cheevos Offline",
                 "options": [
                     "True",

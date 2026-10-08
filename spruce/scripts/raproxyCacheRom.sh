@@ -8,7 +8,7 @@ ROM="$1"
 [ -f "$ROM" ] || { echo "No such ROM"; exit 1; }
 
 if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" != "True" ]; then
-	echo "Offline Achievements is off"
+	echo "RAOfflineProxy is off"
 	exit 1
 fi
 
