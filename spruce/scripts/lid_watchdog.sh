@@ -29,9 +29,8 @@ launch_sleep_helper_once() {
         return 0
     fi
     /mnt/SDCARD/spruce/scripts/sleep_helper.sh
-    while [ "$(device_lid_open)" = "0" ]; do
-        sleep 0.5
-    done
+    # The helper returns only after the lid opened, so a lid shut by now is a new close.
+    close_handled=0
 }
 
 while true; do
