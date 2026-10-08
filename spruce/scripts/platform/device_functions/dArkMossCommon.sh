@@ -532,7 +532,15 @@ setup_for_retroarch() {
             export CORE_DIR="$RA_DIR/.retroarch/cores"
             export GLIBC_TUNABLES=glibc.rtld.execstack=2
             ;;
-        *)      export CORE_DIR="$RA_DIR/.retroarch/cores64" ;;
+        *)
+            export CORE_DIR="$RA_DIR/.retroarch/cores64"
+            # A platform whose base SDL draws RetroArch wrong names another.
+            # FAT has no symlinks, so the soname link lives in /tmp.
+            if [ -n "$RA_SDL2_LIB" ] && mkdir -p /tmp/ra_sdl2 &&
+                ln -sf "$RA_SDL2_LIB" /tmp/ra_sdl2/libSDL2-2.0.so.0; then
+                export LD_LIBRARY_PATH="/tmp/ra_sdl2:$LD_LIBRARY_PATH"
+            fi
+            ;;
     esac
 
     if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
