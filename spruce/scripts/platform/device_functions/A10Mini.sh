@@ -10,6 +10,12 @@ apply_playback_path() {
     :
 }
 
+# idlemon's default node is event3, which is the volume keys here. The js node,
+# because emulators write rumble to the event node.
+set_event_arg_for_idlemon() {
+    EVENT_ARG="-e $(readlink -f /dev/input/by-path/platform-odroidgo3-joypad-joystick)"
+}
+
 device_get_charging_status() {
     if grep -qs "^1$" /sys/class/power_supply/ac/online /sys/class/power_supply/usb/online; then
         if [ "$(cat "$BATTERY/capacity" 2>/dev/null)" = "100" ]; then
