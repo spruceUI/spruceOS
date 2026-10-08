@@ -18,8 +18,6 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
-    # case, not [[ ]]: this file is #!/bin/sh and on the RGB30 that is dash,
-    # where [[ is "not found".
     case "$CMD" in
     *"/Roms/ports/"*)
         rm -f /tmp/menubtn
@@ -270,7 +268,8 @@ prepare_game_switcher() {
         # check command is emulator
         # exit if not emulator is in command
         if echo "$CMD" | grep -q -v -E "$EMU_PATTERN"; then
-            log_message "button_actions.sh: Not in game, bypassing game switcher."
+            log_message "button_actions.sh: Not in game, bypassing game switcher, but still killing emulators/apps."
+            kill_emulator
             return 0
         fi
 
