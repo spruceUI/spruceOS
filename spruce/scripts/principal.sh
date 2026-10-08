@@ -19,7 +19,7 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-while [ 1 ]; do
+while true; do
     log_message "Starting new loop of principal.sh"
 
     # A long task that crashed before "long_task.sh end" must not keep blocking
