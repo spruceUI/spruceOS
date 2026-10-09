@@ -41,7 +41,7 @@ done
 ##### FUNCTION DEFINITIONS ####################
 
 blink_led_if_applicable() {
-    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
+    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger 2>/dev/null
 }
 
 # This script's own pid plus every process it is running inside of, up to init.

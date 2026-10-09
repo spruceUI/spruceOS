@@ -8,3 +8,17 @@
 # (ArkOS wiki) and the singleadc-joypad driver already claims the PWM and
 # advertises FF_RUMBLE, so the common evdev rumble works on a modded unit and
 # costs a stock one nothing.
+
+
+rgb_led() {
+    [ -n "$6" ] && echo "$6" > "$LED_PATH/trigger"
+    return 0
+}
+
+work_led_off() {
+    echo 0 >${LED_PATH}/brightness
+}
+
+work_led_on() {
+    echo 1 >${LED_PATH}/brightness
+}

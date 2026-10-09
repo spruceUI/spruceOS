@@ -15,7 +15,7 @@ WIKI_ICON="/mnt/SDCARD/spruce/imgs/book.png"
 HAPPY_ICON="/mnt/SDCARD/spruce/imgs/smile.png"
 SPRUCE_ICON="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
-[ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger
+[ "$LED_PATH" != "not applicable" ] && echo mmc0 > "$LED_PATH"/trigger 2>/dev/null
 
 export HOME="/mnt/SDCARD"
 
