@@ -20,3 +20,16 @@ class A10Mini(Rgb30):
 
     def screen_height(self):
         return 480
+
+    # The 4.4 kernel lists the panel colour properties but rejects every set.
+    def supports_brightness_calibration(self):
+        return False
+
+    def supports_contrast_calibration(self):
+        return False
+
+    def supports_saturation_calibration(self):
+        return False
+
+    def supports_hue_calibration(self):
+        return False
