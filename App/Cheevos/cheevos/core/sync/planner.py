@@ -23,7 +23,6 @@ from cheevos.core.models import GameProgress
 DAY = 24 * 60 * 60
 DEFAULT_STALE_AFTER = 30 * DAY
 DEFAULT_STALE_BUDGET = 20
-RECENT_UNLOCK_COUNT = 100  # Recent unlocks shows this many; their games are always cached
 
 
 @dataclass(frozen=True, slots=True)
@@ -198,30 +197,6 @@ def working_set(
         for game in games
         if game.game_id in on_device or activity(game) >= recent_since
     }
-
-
-def unlock_candidates(games: Sequence[GameProgress], cached: Collection[int]) -> list[GameProgress]:
-    """List uncached games that may hold some of the newest unlocks, newest unlock first.
-
-    The sync fetches them in this order until the newest :data:`RECENT_UNLOCK_COUNT` unlocks
-    are all cached: a game whose last unlock is older than the last of those can't add one.
-
-    Args:
-        games: The library.
-        cached: Game IDs whose details are cached.
-
-    Returns:
-        Games with unlocks and no cached details, by last unlock, newest first.
-    """
-    candidates = [
-        game
-        for game in games
-        if game.game_id not in cached
-        and game.max_possible > 0
-        and game.earned > 0
-        and game.last_unlock_at is not None
-    ]
-    return sorted(candidates, key=lambda game: -(game.last_unlock_at or 0))
 
 
 def badge_game_ids(

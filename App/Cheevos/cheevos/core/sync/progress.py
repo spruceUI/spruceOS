@@ -18,6 +18,7 @@ class Phase(Enum):
     PROFILE = "profile"
     LIBRARY = "library"
     AWARDS = "awards"
+    RECENT = "recent"
     DETAILS = "details"
     MEDIA = "media"
     DONE = "done"
@@ -109,16 +110,6 @@ class ProgressTracker:
                 self._status, phase=phase, done=0, total=total, current="", eta_seconds=None
             )
 
-    def add_total(self, count: int) -> None:
-        """Plan more items in the current phase (found while it runs).
-
-        Args:
-            count: Items to add.
-        """
-        with self._lock:
-            status = self._status
-            self._status = dataclasses.replace(status, total=status.total + count)
-
     def working_on(self, current: str) -> None:
         """Report the item being fetched.
 
@@ -128,19 +119,20 @@ class ProgressTracker:
         with self._lock:
             self._status = dataclasses.replace(self._status, current=current)
 
-    def advance(self, *, detail: bool = False, media: bool = False) -> None:
+    def advance(self, *, detail: bool = False, media: bool = False, count: int = 1) -> None:
         """Count one finished item and update the ETA from the phase's average pace.
 
         Args:
             detail: The item was a game detail request.
             media: The item was an image download.
+            count: Number of items finished (e.g. distinct unlocks in a history window).
         """
         with self._lock:
             status = self._status
-            done = status.done + 1
+            done = status.done + count
             elapsed = self._clock() - self._phase_started
             remaining = max(status.total - done, 0)
-            eta = elapsed / done * remaining if status.total else None
+            eta = elapsed / done * remaining if status.total and done else None
             self._status = dataclasses.replace(
                 status,
                 done=done,

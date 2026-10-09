@@ -19,15 +19,18 @@ from cheevos.core.errors import (
     RequestCancelledError,
 )
 from cheevos.core.models import (
+    RECENT_UNLOCK_COUNT,
     Award,
     AwardCounts,
     GameDetail,
     GameProgress,
+    RecentUnlock,
     Unlock,
     UserProfile,
 )
 from cheevos.core.ra_client import parse
 from cheevos.core.ra_client.pacer import API_INTERVAL, LONG_PAUSE, MEDIA_INTERVAL, Pacer
+from cheevos.core.ra_client.recent import INITIAL_WINDOW, UnlockPage, fetch_recent_unlocks
 from cheevos.core.ra_client.redact import install_redaction
 from cheevos.core.ra_client.transport import API_HOST, MEDIA_HOST, Response, Transport
 
@@ -245,6 +248,33 @@ class RaClient:
                 break
             since = page[-1].unlocked_at
         return unlocks
+
+    def recent_unlocks(
+        self,
+        start: int,
+        end: int,
+        *,
+        count: int = RECENT_UNLOCK_COUNT,
+        on_progress: Callable[[int], None] | None = None,
+        known_unlocks: int | None = None,
+    ) -> list[RecentUnlock]:
+        """Fetch the newest unlock definitions using RA-provided history bounds."""
+
+        def page(first: int, last: int) -> UnlockPage:
+            """Read one inclusive window and check the raw row count before filtering."""
+            data = self._api("API_GetAchievementsEarnedBetween", f=first, t=last)
+            entries = parse.parse_recent_unlocks(data)
+            return entries, len(data) >= UNLOCK_PAGE
+
+        # Even older responses with both modes fit below the cap for these small accounts.
+        width = (
+            end - start + 1
+            if known_unlocks is not None and known_unlocks * 2 < UNLOCK_PAGE
+            else INITIAL_WINDOW
+        )
+        return fetch_recent_unlocks(
+            page, start=start, end=end, count=count, on_progress=on_progress, initial_window=width
+        )
 
     def first_unlock(self, since: int, end: int, *, hardcore: bool = True) -> int | None:
         """Find the user's first unlock (``API_GetAchievementsEarnedBetween``).

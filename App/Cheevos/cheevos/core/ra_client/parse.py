@@ -21,6 +21,7 @@ from cheevos.core.models import (
     AwardKind,
     GameDetail,
     GameProgress,
+    RecentUnlock,
     Unlock,
     UserProfile,
 )
@@ -400,3 +401,37 @@ def parse_unlocks(data: object) -> list[Unlock]:
             )
         )
     return unlocks
+
+
+def parse_recent_unlocks(data: object) -> list[RecentUnlock]:
+    """Parse date-range unlock rows with the definitions needed for an offline feed."""
+    if not isinstance(data, list):
+        raise ApiPayloadError("recent unlocks: expected a list")
+    entries = []
+    for raw in data:
+        row = _object(raw, "recent unlock")
+        achievement_id, game_id = _int(row.get("AchievementID")), _int(row.get("GameID"))
+        date = row.get("Date")
+        if (
+            achievement_id <= 0
+            or achievement_id == WARNING_ACHIEVEMENT_ID
+            or game_id <= 0
+            or parse_time(date) is None
+        ):
+            continue
+        hardcore = _int(row.get("HardcoreMode")) == 1
+        definition = {
+            **row,
+            "ID": achievement_id,
+            "DateEarned": None if hardcore else date,
+            "DateEarnedHardcore": date if hardcore else None,
+        }
+        entries.append(
+            RecentUnlock(
+                _achievement(game_id, definition),
+                _str(row.get("GameTitle")),
+                _str(row.get("GameIcon")),
+                _str(row.get("ConsoleName")),
+            )
+        )
+    return entries

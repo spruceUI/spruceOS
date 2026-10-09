@@ -15,6 +15,7 @@ from urllib.parse import parse_qsl, urlsplit
 
 from cheevos.core.clock import ServerClock, network_clock
 from cheevos.core.errors import NetworkError
+from cheevos.core.ra_client.parse import parse_time
 
 logger = logging.getLogger(__name__)
 
@@ -333,10 +334,19 @@ class FixtureTransport:
             match = candidates[0]
         if match is None:
             return Response(status=404, body=b'{"message":"Not recorded"}')
+        body = match.file.read_bytes()
+        if method == "API_GetAchievementsEarnedBetween":
+            first, last = int(params["f"]), int(params["t"])
+            rows = [
+                row
+                for row in json.loads(body)
+                if first <= (parse_time(row.get("Date")) or 0) <= last
+            ]
+            body = json.dumps(rows[:500]).encode()
         return Response(
             status=200,
             headers={"content-type": "application/json"},
-            body=match.file.read_bytes(),
+            body=body,
         )
 
     def _media_response(self, path: str) -> Response:

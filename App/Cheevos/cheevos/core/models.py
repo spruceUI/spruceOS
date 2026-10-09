@@ -9,6 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+RECENT_UNLOCK_COUNT = 100
+
 # RA's "unsupported emulator/core" warning pseudo-achievement. It is not a real achievement:
 # RetroArch still saves an unlock screenshot for it, and RAOfflineProxy strips it.
 WARNING_ACHIEVEMENT_ID = 101000001
@@ -271,6 +273,23 @@ class LocalGame:
     rom_path: str
     system: str
     source: str
+
+
+@dataclass(frozen=True, slots=True)
+class RecentUnlock:
+    """Keep a feed entry independently of its game's complete achievement set.
+
+    Attributes:
+        achievement: Definition and the mode/date of this unlock; rarity is unknown.
+        game_title: Game title supplied by the unlock endpoint.
+        game_icon: Game icon path on the media host.
+        console_name: The game's console.
+    """
+
+    achievement: Achievement
+    game_title: str
+    game_icon: str
+    console_name: str
 
 
 @dataclass(frozen=True, slots=True)

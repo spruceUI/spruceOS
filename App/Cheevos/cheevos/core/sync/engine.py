@@ -1,8 +1,8 @@
 """The sync engine: fetch from RA into the caches, incrementally and resumably.
 
 Phases: preflight (network, rate limit) → profile → library (completion progress +
-recently played) → awards → details (the working set's new games, changed and stale cached
-games, and the games behind the newest unlocks; one commit per game) → media (avatar, game
+recently played) → awards → recent unlocks → details (the working set's new games, changed
+and stale cached games; one commit per game) → media (avatar, game
 icons, badges for the configured scope). See .agents/sync-and-storage.md.
 
 An interrupted sync needs no explicit resume state: games whose details were not fetched keep
@@ -24,18 +24,17 @@ from cheevos.core.errors import (
     RateLimitedError,
     RequestCancelledError,
 )
-from cheevos.core.models import GameProgress
+from cheevos.core.models import RECENT_UNLOCK_COUNT, GameProgress
 from cheevos.core.ra_client.client import RaClient
 from cheevos.core.settings import BadgeScope
 from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache, avatar_key, badge_key, icon_key
+from cheevos.core.storage.recent_feed import RecentFeed, RecentFeedCache, library_fingerprint
 from cheevos.core.sync.planner import (
     DAY,
-    RECENT_UNLOCK_COUNT,
     badge_game_ids,
     merge_library,
     plan_detail_fetches,
-    unlock_candidates,
     working_set,
 )
 from cheevos.core.sync.progress import Failure, Phase, ProgressTracker, SyncStatus
@@ -149,6 +148,7 @@ class SyncEngine:
             self._sync_profile()
             games = self._sync_library()
             self._sync_awards()  # one request: the awards wall is complete before the details
+            self._sync_recent(games)
             self._sync_details(games, options)
             self._sync_media(games, options)
         except (SyncCancelledError, RequestCancelledError):
@@ -248,11 +248,46 @@ class SyncEngine:
         self._deps.data.upsert_games(games)
         return games
 
+    def _sync_recent(self, games: list[GameProgress]) -> None:
+        """Cache recent unlock definitions independently, using RA's own history dates."""
+        self._check_cancel()
+        self._tracker.phase(Phase.RECENT)
+        cache = RecentFeedCache(self._deps.data)
+        fingerprint = library_fingerprint(games)
+        previous, now = cache.load(), int(self._clock())
+        if (
+            previous is not None
+            and previous.fingerprint == fingerprint
+            and 0 <= now - previous.synced_at < 30 * DAY
+        ):
+            return
+        # These bounds come from RA, even if the device still reads 1970 or a future year.
+        end = max((game.last_unlock_at or 0 for game in games), default=0)
+        profile = self._deps.data.load_profile()
+        start = max(profile.member_since or 0, 0) if profile else 0
+        entries = (
+            self._deps.client.recent_unlocks(
+                start,
+                end,
+                count=RECENT_UNLOCK_COUNT,
+                on_progress=self._recent_found,
+                known_unlocks=sum(game.earned for game in games),
+            )
+            if end
+            else []
+        )
+        self._check_cancel()
+        cache.save(RecentFeed(tuple(entries), fingerprint, int(self._clock())))
+
+    def _recent_found(self, count: int) -> None:
+        """Report completed feed entries without a denominator for unknown history coverage."""
+        self._tracker.advance(count=count - self._tracker.snapshot().done)
+
     def _sync_details(self, games: list[GameProgress], options: SyncOptions) -> None:
         """Fetch details for the planned games, committing one game at a time.
 
         Without an unfinished "Download every game", new games are fetched only for the working
-        set, then for the games holding the newest unlocks (so Recent unlocks is complete).
+        set. The recent feed never requires their complete achievement sets.
 
         Args:
             games: Merged library.
@@ -285,27 +320,6 @@ class SyncEngine:
         )
         for game_id in plan.ordered:
             self._fetch_detail(by_id[game_id])
-        if wanted is not None:
-            self._cover_recent_unlocks(games)
-
-    def _cover_recent_unlocks(self, games: list[GameProgress]) -> None:
-        """Fetch uncached games, newest unlock first, until the newest unlocks are all cached.
-
-        Args:
-            games: Merged library.
-        """
-        states = self._deps.data.detail_states()
-        cached = {game_id for game_id, (_, synced_at) in states.items() if synced_at is not None}
-        fetched = 0
-        for game in unlock_candidates(games, cached):
-            cutoff = self._deps.data.nth_newest_unlock(RECENT_UNLOCK_COUNT)
-            if cutoff is not None and (game.last_unlock_at or 0) <= cutoff:
-                break
-            self._tracker.add_total(1)
-            self._fetch_detail(game)
-            fetched += 1
-        if fetched:
-            logger.info("Fetched %d more games for recent unlocks", fetched)
 
     def _fetch_detail(self, game: GameProgress) -> None:
         """Fetch and store one game's details.
@@ -388,6 +402,14 @@ class SyncEngine:
                 suffix = "_lock" if locked else ""
                 path = f"/Badge/{achievement.badge_name}{suffix}.png"
                 yield badge_key(achievement.badge_name, locked=locked), path
+        feed = RecentFeedCache(self._deps.data).load()
+        if feed is not None and options.badge_scope is not BadgeScope.NONE:
+            for entry in feed.entries:
+                achievement = entry.achievement
+                yield (
+                    badge_key(achievement.badge_name, locked=False),
+                    f"/Badge/{achievement.badge_name}.png",
+                )
 
     def _badge_games(self, games: list[GameProgress], options: SyncOptions) -> list[int]:
         """Select the games whose badges belong in the cache for the configured scope.

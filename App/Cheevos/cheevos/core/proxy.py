@@ -26,11 +26,12 @@ REQUIRED_COLUMNS: dict[str, frozenset[str]] = {
 }
 PENDING_STATUS = "pending"
 PATCH_PREFIX = "patch:"
+ACHIEVEMENTSETS_PREFIX = "achievementsets:"
 
 
 @dataclass(frozen=True, slots=True)
 class _PatchInfo:
-    """What the proxy's cached patch data tells us about one achievement.
+    """What the proxy's cached game responses tell us about one achievement.
 
     Attributes:
         game_id: RA game ID.
@@ -60,12 +61,13 @@ def _patch_game_id(cache_key: str) -> int | None:
     return int(value) if value.isdecimal() else None  # isdigit() takes "²", which int() refuses
 
 
-def _patch_entries(game_id: int, body: str) -> dict[int, _PatchInfo]:
-    """Index the achievements of one cached ``r=patch`` response.
+def _patch_entries(game_id: int, body: str, achievement_ids: set[int]) -> dict[int, _PatchInfo]:
+    """Extract only wanted achievements from one cached ``r=patch`` response.
 
     Args:
         game_id: Game ID from the cache key.
         body: The cached response body.
+        achievement_ids: Queued achievement IDs still missing metadata.
 
     Returns:
         Achievement ID to patch info; empty for unparsable bodies.
@@ -76,24 +78,77 @@ def _patch_entries(game_id: int, body: str) -> dict[int, _PatchInfo]:
         return {}
     if not isinstance(patch, dict):
         return {}
-    title = patch.get("Title") or f"Game {game_id}"
-    achievements = patch.get("Achievements")
-    if isinstance(achievements, dict):  # the proxy accepts both shapes
-        achievements = list(achievements.values())
-    if not isinstance(achievements, list):
+    return _achievement_entries(
+        game_id, patch.get("Title"), patch.get("Achievements"), achievement_ids
+    )
+
+
+def _achievement_entries(
+    game_id: int, title: object, achievements: object, achievement_ids: set[int]
+) -> dict[int, _PatchInfo]:
+    """Extract wanted metadata from an achievement list or dictionary without copying it."""
+    if not isinstance(achievements, (dict, list)):
         return {}
+    candidates: Iterable[object] = (
+        achievements.values() if isinstance(achievements, dict) else achievements
+    )  # the proxy accepts both shapes
     entries: dict[int, _PatchInfo] = {}
-    for achievement in achievements:
+    for achievement in candidates:
         achievement_id = achievement.get("ID") if isinstance(achievement, dict) else None
-        if not isinstance(achievement_id, int):
+        if not isinstance(achievement_id, int) or achievement_id not in achievement_ids:
             continue
         points = achievement.get("Points")
         entries[achievement_id] = _PatchInfo(
             game_id=game_id,
-            game_title=str(title),
+            game_title=str(title or f"Game {game_id}"),
             achievement_title=str(achievement.get("Title") or f"Achievement {achievement_id}"),
             points=points if isinstance(points, int) else None,
         )
+    return entries
+
+
+def _positive_game_id(value: object) -> int | None:
+    """Accept a positive integer game ID, excluding JSON booleans."""
+    return value if isinstance(value, int) and not isinstance(value, bool) and value > 0 else None
+
+
+def _achievementsets_entries(body: str, achievement_ids: set[int]) -> dict[int, _PatchInfo]:
+    """Extract wanted metadata from a direct or nested ``r=achievementsets`` response.
+
+    Nested sets inherit the response's game ID unless they provide their own (a subset).
+    As in the proxy parser, a direct achievement collection takes priority over nested sets.
+    """
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(payload, dict):
+        return {}
+    game_id = _positive_game_id(payload.get("GameId"))
+    if game_id is None:
+        return {}
+    title = payload.get("Title")
+    direct = payload.get("Achievements")
+    if isinstance(direct, (dict, list)):
+        return _achievement_entries(game_id, title, direct, achievement_ids)
+    sets = payload.get("Sets")
+    if not isinstance(sets, list):
+        return {}
+    remaining = achievement_ids.copy()
+    entries: dict[int, _PatchInfo] = {}
+    for achievement_set in sets:
+        if not isinstance(achievement_set, dict):
+            continue
+        set_game_id = _positive_game_id(achievement_set.get("GameId", game_id))
+        if set_game_id is None:
+            continue
+        found = _achievement_entries(
+            set_game_id, title, achievement_set.get("Achievements"), remaining
+        )
+        entries.update(found)
+        remaining.difference_update(found)
+        if not remaining:
+            break
     return entries
 
 
@@ -169,7 +224,7 @@ class ProxyReader:
         """Return unlocks queued for submission, oldest first.
 
         Args:
-            username: RA username, used to prefer this account's cached patch data.
+            username: RA username, used to prefer this account's cached metadata.
 
         Returns:
             Pending awards; empty when the proxy has no database or it can't be read.
@@ -195,7 +250,7 @@ class ProxyReader:
             connection.close()
 
     def _read_pending(self, connection: sqlite3.Connection, username: str) -> list[PendingAward]:
-        """Query pending awards and decorate them with cached patch data.
+        """Query pending awards and decorate them with cached game metadata.
 
         Args:
             connection: Read-only connection.
@@ -217,7 +272,7 @@ class ProxyReader:
         ]
         if not pending:
             return []
-        patches = self._patch_index(connection, username)
+        patches = self._patch_index(connection, username, {aid for aid, _ in pending})
         return [self._award(aid, queued, patches.get(aid)) for aid, queued in pending]
 
     def _schema_ok(self, connection: sqlite3.Connection) -> bool:
@@ -241,40 +296,63 @@ class ProxyReader:
         return True
 
     @staticmethod
-    def _patch_index(connection: sqlite3.Connection, username: str) -> dict[int, _PatchInfo]:
-        """Index cached patch data by achievement, preferring this account's entries.
+    def _patch_index(
+        connection: sqlite3.Connection, username: str, achievement_ids: set[int]
+    ) -> dict[int, _PatchInfo]:
+        """Resolve queued IDs from streamed patches, then achievementsets as a fallback.
 
-        Patch data is the same for every account, so other accounts' entries fill gaps.
+        For each format, read this account first, then fill gaps from other accounts. Keep one
+        response body at a time and stop when every queued ID is resolved (.agents/integration.md).
+        Use only the original cache columns, without JSON SQL functions or schema changes.
 
         Args:
             connection: Read-only connection.
             username: RA username.
+            achievement_ids: Queued achievement IDs needing metadata.
 
         Returns:
             Achievement ID to patch info.
         """
-        rows: Iterable[tuple[str, str]] = connection.execute(
-            "SELECT cacheKey, responseBody FROM api_cache WHERE cacheKey LIKE 'patch:%'"
-        ).fetchall()
+        remaining = achievement_ids.copy()
+        index: dict[int, _PatchInfo] = {}
+        if not remaining:
+            return index
         suffix = ":" + username.strip().lower()
-        own: dict[int, _PatchInfo] = {}
-        other: dict[int, _PatchInfo] = {}
-        for cache_key, body in rows:
-            game_id = _patch_game_id(cache_key)
-            if game_id is None or not isinstance(body, str):
-                continue
-            target = own if cache_key.endswith(suffix) else other
-            target.update(_patch_entries(game_id, body))
-        return {**other, **own}
+        for prefix in (PATCH_PREFIX, ACHIEVEMENTSETS_PREFIX):
+            for own_account in (True, False):
+                # GLOB can use the cacheKey index without sorting or buffering response bodies.
+                rows = connection.execute(
+                    "SELECT cacheKey, responseBody FROM api_cache WHERE cacheKey GLOB ? "
+                    "AND (substr(cacheKey, -?) = ?) = ?",
+                    (prefix + "*", len(suffix), suffix, own_account),
+                )
+                try:
+                    for cache_key, body in rows:
+                        if not isinstance(body, str):
+                            continue
+                        if prefix == PATCH_PREFIX:
+                            game_id = _patch_game_id(cache_key)
+                            if game_id is None:
+                                continue
+                            entries = _patch_entries(game_id, body, remaining)
+                        else:
+                            entries = _achievementsets_entries(body, remaining)
+                        index.update(entries)
+                        remaining.difference_update(entries)
+                        if not remaining:
+                            return index
+                finally:
+                    rows.close()
+        return index
 
     @staticmethod
     def _award(achievement_id: int, queued_at: object, info: _PatchInfo | None) -> PendingAward:
-        """Build a pending award from a queue row and optional patch info.
+        """Build a pending award from a queue row and optional cached metadata.
 
         Args:
             achievement_id: RA achievement ID.
             queued_at: ``queuedAt`` column (milliseconds).
-            info: Cached patch data for the achievement, if any.
+            info: Cached game metadata for the achievement, if any.
 
         Returns:
             The pending award.

@@ -29,6 +29,7 @@ from cheevos.core.models import (
     UserProfile,
 )
 from cheevos.core.storage.db import open_cache, reset_cache, select_among
+from cheevos.core.storage.recent_feed import RecentFeedCache
 from cheevos.core.storage.schema import (
     ACHIEVEMENT_COLUMNS,
     ACTIVITY_ORDER,
@@ -326,6 +327,10 @@ class DataCache:
         Returns:
             Achievements unlocked in any mode, newest first.
         """
+        feed = RecentFeedCache(self).load()
+        if feed is not None:
+            return [entry.achievement for entry in feed.entries[: max(limit, 0)]]
+        # Keep old caches usable offline until the first independent feed is downloaded.
         rows = self._db.execute(
             f"SELECT {ACHIEVEMENT_COLUMNS} FROM achievements "  # noqa: S608
             "WHERE unlocked_at IS NOT NULL ORDER BY unlocked_at DESC, achievement_id DESC "
@@ -333,22 +338,6 @@ class DataCache:
             (limit,),
         ).fetchall()
         return [achievement_from_row(row) for row in rows]
-
-    def nth_newest_unlock(self, n: int) -> int | None:
-        """Return when the ``n``-th newest cached unlock happened (any mode).
-
-        Args:
-            n: Rank, 1 for the newest.
-
-        Returns:
-            The time, or ``None`` when fewer than ``n`` unlocks are cached.
-        """
-        row = self._db.execute(
-            "SELECT unlocked_at FROM achievements WHERE unlocked_at IS NOT NULL "
-            "ORDER BY unlocked_at DESC LIMIT 1 OFFSET ?",
-            (max(n - 1, 0),),
-        ).fetchone()
-        return None if row is None else row[0]
 
     # --- awards -----------------------------------------------------------------------------
 
@@ -414,9 +403,12 @@ class DataCache:
         Returns:
             The unlocked ones.
         """
+        ids = set(achievement_ids)
         query = "SELECT achievement_id FROM achievements WHERE unlocked_at IS NOT NULL AND"
-        rows = select_among(self._db, query, achievement_ids, column="achievement_id")
-        return {row[0] for row in rows}
+        rows = select_among(self._db, query, ids, column="achievement_id")
+        feed = RecentFeedCache(self).load()
+        recent = {entry.achievement.achievement_id for entry in feed.entries} if feed else set()
+        return {row[0] for row in rows} | (ids & recent)
 
     def achievement_games(self, achievement_ids: Iterable[int]) -> dict[int, int]:
         """Return the game of each of these achievements, for those in synced games.
@@ -427,9 +419,20 @@ class DataCache:
         Returns:
             Achievement ID to game ID.
         """
+        ids = set(achievement_ids)
         query = "SELECT achievement_id, game_id FROM achievements WHERE"
-        rows = select_among(self._db, query, achievement_ids, column="achievement_id")
-        return {row[0]: row[1] for row in rows}
+        rows = select_among(self._db, query, ids, column="achievement_id")
+        feed = RecentFeedCache(self).load()
+        games = (
+            {
+                entry.achievement.achievement_id: entry.achievement.game_id
+                for entry in feed.entries
+                if entry.achievement.achievement_id in ids
+            }
+            if feed
+            else {}
+        )
+        return {**games, **{row[0]: row[1] for row in rows}}
 
     # --- player statistics ------------------------------------------------------------------
 
