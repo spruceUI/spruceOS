@@ -68,10 +68,14 @@ raproxy_apply() {
 	fi
 }
 
-# "<title> (N unlocks) ##GAMEID:<id>" per cached game.
-raproxy_cached_games() {
+raproxy_cached_games_json() {
 	ra_proxy_is_installed || return 1
-	_ra_proxy_run cached-games 2>/dev/null
+	_ra_proxy_run cached-games --json 2>/dev/null
+}
+
+raproxy_rom_is_cached() {
+	_dir="$(dirname "$1")"
+	raproxy_cached_games_json | jq -e --arg k "/${_dir##*/}/${1##*/}" 'any(.[]; .rom_path == $k)' >/dev/null 2>&1
 }
 
 raproxy_remove_cached_game() {
@@ -79,13 +83,7 @@ raproxy_remove_cached_game() {
 	_ra_proxy_run remove-cached-game --game-id "$1" 2>&1
 }
 
-raproxy_reconcile() {
-	ra_proxy_is_installed || return 1
-	(
-		cd "$RA_PROXY_DIR" || exit 1
-		. "$RA_PROXY_COMMON"
-		prepare_env
-		resolve_python_bin || exit 1
-		"$RESOLVED_PYTHON_BIN" /mnt/SDCARD/spruce/scripts/raproxyReconcile.py "$@"
-	)
+raproxy_cli() {
+	ra_proxy_is_installed || { echo "RAOfflineProxy is not installed"; return 1; }
+	_ra_proxy_run "$@"
 }

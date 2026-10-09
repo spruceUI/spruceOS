@@ -220,7 +220,6 @@ esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh) || true
 sync
-reconcile_cheevos_after_game
 
 wifi_request apply
 

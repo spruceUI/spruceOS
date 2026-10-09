@@ -149,7 +149,7 @@ def initialize_device(device, main_ui_mode):
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
-    CheevosCacheManager.initialize(PyUiConfig.get_cheevos_cache_path())
+    CheevosCacheManager.initialize()
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())

@@ -223,8 +223,8 @@ class PyUiConfig:
         return cls.get("cheevosRemoveCmd",None)
 
     @classmethod
-    def get_cheevos_cache_path(cls):
-        return cls.get("cheevosCachePath",None)
+    def get_raproxy_cli_cmd(cls):
+        return cls.get("raproxyCliCmd",None)
     
     @classmethod
     def get_about_entries(cls):

@@ -83,9 +83,9 @@ class GameSelectMenuPopup:
                 [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
             lines = (result.stdout or result.stderr).strip().splitlines()
-            message, game_id = CheevosCacheManager.parse_result(lines)
+            message = lines[-1] if lines else "No response"
             if result.returncode == 0:
-                CheevosCacheManager.add_cached(rom_info, game_id)
+                CheevosCacheManager.refresh()
         except Exception as e:
             PyUiLogger.get_logger().error(f"cache-rom failed: {e}")
             message = "Failed"
