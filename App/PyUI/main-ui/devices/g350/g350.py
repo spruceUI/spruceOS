@@ -12,11 +12,6 @@ class G350(Rgb30):
     START_KEY = 705
     MENU_KEY = 708    # F5
 
-    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/G350.cfg.
-    BACKLIGHT_TABLE = (5, 6, 10, 16, 32, 48, 64, 96, 128, 191, 255)
-    # No softvol on the rk3326 base: the rk817 codec's own volume control.
-    VOLUME_CONTROL = "Playback"
-
     def screen_width(self):
         return 640
 

@@ -263,6 +263,10 @@ class PyUiConfig:
         return cls.get("backlightCmd",None)
 
     @classmethod
+    def get_volume_cmd(cls):
+        return cls.get("volumeCmd",None)
+
+    @classmethod
     def get_bt_audio_device_cmd(cls):
         return cls.get("btAudioDeviceCmd",None)
 

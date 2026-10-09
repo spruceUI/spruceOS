@@ -167,18 +167,17 @@ class Rgb30(DeviceCommon):
             Display.volume_changed(new_volume)
 
     def _set_volume(self, volume):
-        # The generic volume path only changes the config number; nothing sets
-        # the mixer, so the menu widget moved but the audio did not - and a game
-        # then played at whatever Master happened to be. Drive the
-        # Master control here. change_volume passes 0-100 (config vol*5), which
-        # maps straight to a Master percentage; -M applies it on the mixer's
-        # perceived-loudness scale (Master is 0-65536 raw).
-        pct = max(0, min(100, int(volume)))
-        try:
-            subprocess.run(["amixer", "-M", "-q", "sset", self.VOLUME_CONTROL, f"{pct}%"],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except Exception as e:
-            PyUiLogger.get_logger().error(f"RGB30: _set_volume failed: {e}")
+        # change_volume passes 0-100 (config vol*5); the mixer control and its curve live
+        # behind py-ui-config's volumeCmd, which takes the 0-20 level PyUI has saved.
+        level = max(0, min(20, int(volume) // 5))
+        volume_cmd = PyUiConfig.get_volume_cmd()
+        if volume_cmd and os.path.exists(volume_cmd):
+            try:
+                subprocess.run([volume_cmd, str(level)],
+                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                               timeout=10, check=False)
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"RGB30: volume command failed: {e}")
         return volume
 
     def load_rgb30_system_json(self):
@@ -336,18 +335,19 @@ class Rgb30(DeviceCommon):
     #def reboot(self):
     #    ProcessRunner.run(["/opt/muos/script/system/halt.sh", "reboot"])
 
-    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
-    BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
-    # The mixer control _set_volume drives: the softvol the rk3566 base defines.
-    VOLUME_CONTROL = "Master"
-
+    # The level -> raw curve lives behind py-ui-config's backlightCmd; PyUI hands it the
+    # level only. Panel only: PyUI saves the level, and the screensaver dim must not be saved.
     def _set_lumination_to_config(self):
         level = max(0, min(10, int(self.system_config.backlight)))
+        backlight_cmd = PyUiConfig.get_backlight_cmd()
+        if not backlight_cmd or not os.path.exists(backlight_cmd):
+            return
         try:
-            with open("/sys/class/backlight/backlight/brightness", "w") as f:
-                f.write(str(self.BACKLIGHT_TABLE[level]))
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
+            subprocess.run([backlight_cmd, str(level)],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=10, check=False)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"RGB30: backlight command failed: {e}")
 
     def _set_brightness_to_config(self):
         self.panel_calibration.apply("brightness")
