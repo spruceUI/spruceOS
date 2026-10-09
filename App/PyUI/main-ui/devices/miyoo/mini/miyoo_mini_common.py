@@ -833,7 +833,7 @@ class MiyooMiniCommon(MiyooDevice):
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
-        preload_path = "/mnt/SDCARD/miyoo/app/../lib/libpadsp.so"
+        preload_path = "/mnt/SDCARD/miyoo/lib/libpadsp.so"
         if os.path.exists(preload_path):
             run_prefix = f"LD_PRELOAD={preload_path} "
         else:
