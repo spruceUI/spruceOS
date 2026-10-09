@@ -292,14 +292,13 @@ class Rgb30(DeviceCommon):
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        # MinUI reads the charger rather than the battery's own status node.
         try:
-            with open("/sys/class/power_supply/ac/online", "r") as f:
-                online = int(f.read().strip())
-        except (OSError, ValueError):
+            with open("/sys/class/power_supply/battery/status", "r") as f:
+                status = f.read().strip()
+        except OSError:
             return ChargeStatus.DISCONNECTED
 
-        return ChargeStatus.CHARGING if online else ChargeStatus.DISCONNECTED
+        return ChargeStatus.CHARGING if status == "Charging" else ChargeStatus.DISCONNECTED
 
     def is_hdmi_connected(self):
         try:

@@ -189,17 +189,8 @@ device_get_battery_percent() {
     cat "$BATTERY/capacity" 2>/dev/null || echo 0
 }
 
-# Read the charger, not battery/status, which is unreliable on these RK boards.
 device_get_charging_status() {
-    if [ "$(cat /sys/class/power_supply/ac/online 2>/dev/null)" = "1" ]; then
-        if [ "$(cat "$BATTERY/capacity" 2>/dev/null)" = "100" ]; then
-            echo "Full"
-        else
-            echo "Charging"
-        fi
-    else
-        echo "Discharging"
-    fi
+    cat "/sys/class/power_supply/battery/status"
 }
 
 device_headphones_connected() {
