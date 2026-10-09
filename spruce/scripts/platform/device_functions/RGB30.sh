@@ -22,3 +22,17 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+vibrate() {
+    rgb30_blink_led &
+    darkmoss_vibrate "$@"
+}
+
+rgb30_blink_led() {
+    for _i in 0 1 2 ; do
+        work_led_on
+        sleep 0.08
+        work_led_off
+        sleep 0.08
+    done
+}
