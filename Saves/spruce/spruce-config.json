@@ -1150,6 +1150,13 @@
                 "type": "freeText",
                 "selected": ""
             },
+            "webApiKey": {
+                "display": "Web API Key",
+                "description": "For the Cheevos app: retroachievements.org > Settings > Keys",
+                "type": "freeText",
+                "selected": "",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
+            },
             "enableOfflineProxy": {
                 "display": "RAOfflineProxy",
                 "description": "Earn Casual Cheevos Offline",
