@@ -133,6 +133,9 @@ def initialize_device(device, main_ui_mode):
     elif "A10MINI" == device:
         from devices.a10mini.a10mini import A10Mini
         Device.init(A10Mini(device))
+    elif "MAGICX_XU_MINI_M" == device:
+        from devices.xumini.xumini import XuMiniM
+        Device.init(XuMiniM(device))
     elif "G350" == device:
         from devices.g350.g350 import G350
         Device.init(G350(device))
