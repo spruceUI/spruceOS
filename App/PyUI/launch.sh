@@ -212,7 +212,7 @@ case "$PLATFORM" in
 ############################################################
 # Powkiddy RGB30 (Rockchip RK3566, under dArkMoss)
 ############################################################
-    "RGB30" | "RGB20SX" | "A10Mini" )
+    "RGB30" | "RGB20SX" | "A10Mini" | "G350" )
         # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
         # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
         # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
