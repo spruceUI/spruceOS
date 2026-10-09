@@ -171,6 +171,7 @@ fix_sleep_sound_bug() {
 SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
 
 reapply_volume_on_jack_edge() {
+    sleep 0.3    # the jack contacts bounce for a few ms: read them once settled
     waited=0
     while [ -e "$SLEEP_HELPER_MARKER" ]; do
         if [ "$waited" -ge 30 ]; then
@@ -336,6 +337,11 @@ init_gpio_Flip() {
         sleep 0.1
     fi
     echo in > /sys/class/gpio/gpio150/direction
+    # gpiowait (mixer_watchdog.sh) sleeps in poll() on the value file, and the
+    # kernel only wakes it on an edge the GPIO is set to report. Nothing set
+    # this since PyUI replaced the stock MainUI, which used to, so plugging or
+    # unplugging the headphones in a game never switched the output (#809).
+    echo both > /sys/class/gpio/gpio150/edge
 }
 
 runtime_mounts_Flip() {
