@@ -162,6 +162,10 @@ def start_background_threads():
     background_thread = threading.Thread(target=background_startup)
     background_thread.start()
 
+    # Follows the USB audio route for as long as the menu runs
+    audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
+    audio_route_thread.start()
+
 def verify_config_exists(config_path):
     # Determine the directory where this script resides
     script_dir = Path(__file__).resolve().parent
