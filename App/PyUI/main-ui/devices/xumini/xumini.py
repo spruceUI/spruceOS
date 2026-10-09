@@ -15,8 +15,9 @@ class XuMiniM(Rgb30):
     SYSTEM_JSON_DIR = "xumini"
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
 
-    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/XUMiniM.cfg.
-    BACKLIGHT_TABLE = (3, 4, 6, 10, 20, 30, 40, 60, 80, 120, 160)
+    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/XUMiniM.cfg;
+    # this backlight's max_brightness is 100, not the A10Mini's 255.
+    BACKLIGHT_TABLE = (3, 4, 6, 10, 20, 30, 40, 60, 80, 90, 100)
 
     def screen_width(self):
         return 640
