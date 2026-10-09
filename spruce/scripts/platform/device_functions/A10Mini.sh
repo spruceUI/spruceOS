@@ -50,3 +50,29 @@ set_default_ra_hotkeys() {
         "input_state_slot_increase_btn = \"nul\"" \
         "input_toggle_slowmotion_btn = \"nul\""
 }
+
+# No sticks: dArkMoss's joypad driver can report the d-pad as the left stick.
+DPAD_ANALOG="/sys/devices/platform/odroidgo3-joypad/dpad_analog"
+_a10_dpad_analog() {
+    [ -w "$DPAD_ANALOG" ] || return 0
+    printf '%s' "$1" > "$DPAD_ANALOG"
+    log_message "A10 Mini d-pad as stick: $1"
+}
+
+# MENU+SELECT in game flips it, for games that only listen to the stick.
+swap_dpad_analog_toggle() {
+    flag_check "in_menu" && return 0
+    case "$(cat "$DPAD_ANALOG" 2>/dev/null)" in
+        1) _a10_dpad_analog 0 ;;
+        *) _a10_dpad_analog 1 ;;
+    esac
+    vibrate &
+}
+
+treat_dpad_as_analog() {
+    _a10_dpad_analog 1
+}
+
+treat_dpad_as_dpad() {
+    _a10_dpad_analog 0
+}
