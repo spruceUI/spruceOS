@@ -20,7 +20,7 @@ if [ -f "$HOME/config.ini" ]; then
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
 
     # handle swapped X/Y on RGB30. Can this be handled more gracefully by editing a gamecontrollerdb.txt?
-    if [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ]; then
+    if [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ] || [ "$PLATFORM" = "A10Mini" ]; then
         sed -i -e 's/^OskKeyBksp=x/OskKeyBksp=y/' \
                -e 's/^OskKeyShift=y/OskKeyShift=x/' \
                -e 's/^KeyMenu=y/KeyMenu=x/' "$HOME/config.ini"
@@ -33,7 +33,7 @@ fi
 
 # GLES window on the Mali blob. The Miniloong Pocket 1 has the same GLES-only
 # Mali-G52 as the RGB30, so it needs the same context or vtree fails to open one.
-{ [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ] || [ "$PLATFORM" = "Miniloong" ]; } && export VTREE_GLES=1
+{ [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ] || [ "$PLATFORM" = "Miniloong" ] || [ "$PLATFORM" = "A10Mini" ]; } && export VTREE_GLES=1
 
 
 case "$PLATFORM" in
@@ -43,7 +43,7 @@ case "$PLATFORM" in
         ./vtree.a30 --rotate=3 >"$LOG_PATH" 2>&1
         killall -q -USR2 joystickinput
         ;;
-    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"RGB20SX"|"Zero"*|"XU20")
+    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"RGB20SX"|"A10Mini"|"Zero"*|"XU20")
         ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
     "MiyooMini")

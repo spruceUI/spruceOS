@@ -69,7 +69,13 @@ case $INFO in
             export PLATFORM="Flip"
         fi
         ;;
-    *0xd04*) export PLATFORM="Pixel2" ;;        # RK3326
+    *0xd04*)                                    # RK3326
+        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+            export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+        else
+            export PLATFORM="Pixel2"
+        fi
+        ;;
     *0xd03*)                                    # H700
         export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
@@ -119,6 +125,7 @@ device_names() {
         RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
+        A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;

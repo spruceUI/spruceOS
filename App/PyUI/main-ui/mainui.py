@@ -130,6 +130,9 @@ def initialize_device(device, main_ui_mode):
     elif "RGB20SX" == device:
         from devices.rgb30.rgb20sx import Rgb20sx
         Device.init(Rgb20sx(device))
+    elif "A10MINI" == device:
+        from devices.a10mini.a10mini import A10Mini
+        Device.init(A10Mini(device))
     elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
         from devices.magicx.magicx_zero28 import MagicXZero28
         Device.init(MagicXZero28(device, main_ui_mode))

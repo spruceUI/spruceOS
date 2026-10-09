@@ -10,11 +10,11 @@ case "$PLATFORM" in
     Flip|SmartProS)          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;
     Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
     Anbernic*)               export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
-    RGB30|Miniloong)         export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
+    RGB30|Miniloong|A10Mini) export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
 esac
 
 case "$PLATFORM" in
-    RGB30|Miniloong) ;;
+    RGB30|Miniloong|A10Mini) ;;
     *) export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
 esac
 
@@ -26,7 +26,7 @@ case "$PLATFORM" in
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
         export_sdl_gamecontroller_map positional
         ;;
-    RGB30|Miniloong)
+    RGB30|Miniloong|A10Mini)
         export_sdl_gamecontroller_map positional
         ;;
 esac
