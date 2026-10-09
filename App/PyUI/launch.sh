@@ -279,6 +279,10 @@ case "$PLATFORM" in
         export SDL_AUDIODRIVER=mmiyoo
         export EGL_VIDEODRIVER=mmiyoo
         export SDL_MMIYOO_DOUBLE_BUFFER=1
+        # Menu sounds go to audioserver through /dev/dsp (audio_player_oss.py).
+        # Its boot-time start fails on some units, so make sure it is up.
+        pidof audioserver >/dev/null || { audioserver >/dev/null 2>&1 & sleep 0.5; }
+        export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
 
         if [ $skip_freemma -eq 0 ]; then
             freemma

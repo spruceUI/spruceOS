@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import threading
 import os
+from audio.audio_player_oss import AudioPlayerOss
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from display.display import Display
 from utils.logger import PyUiLogger
@@ -103,6 +104,8 @@ class MiyooMiniCommon(MiyooDevice):
 
     def __init__(self, device_name, main_ui_mode, miyoo_mini_specific_model_variables: MiyooMiniSpecificModelVariables):
 
+        # launch.sh preloads libpadsp for PyUI's own sounds; children must not inherit it.
+        os.environ.pop("LD_PRELOAD", None)
         self.device_name = device_name
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
@@ -929,6 +932,11 @@ class MiyooMiniCommon(MiyooDevice):
 
     def get_guaranteed_safe_max_text_char_count(self):
         return 35
+
+    def get_audio_system(self):
+        if not hasattr(self, "audio_player"):
+            self.audio_player = AudioPlayerOss()
+        return self.audio_player
 
     def supports_volume(self):
         return self.miyoo_mini_specific_model_variables.supports_volume
