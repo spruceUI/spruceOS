@@ -1,7 +1,7 @@
 #!/bin/sh
 
 APP_DIR=/mnt/SDCARD/App/RAOfflineProxy
-APP_VERSION=v2.0.0-alpha1
+APP_VERSION=v2.1.0-alpha1-nightly.46
 APP_DATA_DIR="$APP_DIR/data"
 APP_PACKAGE_DIR="$APP_DIR/app"
 case "$(uname -m)" in

@@ -5,6 +5,7 @@ import time
 from dataclasses import dataclass
 
 from . import cache_keys
+from .rom_cache import achievement_id_pattern, likely_first_prefixes
 from .storage import PENDING_AWARD_STATUS_DELETED, PENDING_AWARD_STATUS_PENDING, Storage
 from .utils import extract_form_param
 
@@ -35,15 +36,16 @@ class PendingAwardEntry:
 
 
 def list_pending_awards(storage: Storage) -> list[PendingAwardEntry]:
-    patch_index = build_patch_index(storage)
+    pending_awards = [
+        award
+        for award in storage.get_pending_awards()
+        if award.get("status", PENDING_AWARD_STATUS_PENDING) == PENDING_AWARD_STATUS_PENDING
+    ]
+    patch_index = build_patch_index(
+        storage, {int(award.get("achievementId", 0)) for award in pending_awards}
+    )
     entries: list[PendingAwardEntry] = []
-    for award in storage.get_pending_awards():
-        if (
-            award.get("status", PENDING_AWARD_STATUS_PENDING)
-            != PENDING_AWARD_STATUS_PENDING
-        ):
-            continue
-
+    for award in pending_awards:
         achievement_id = int(award.get("achievementId", 0))
         patch_info = patch_index.get(achievement_id, {})
         entries.append(
@@ -70,71 +72,82 @@ def delete_pending_award(storage: Storage, achievement_id: int) -> None:
         return
 
 
-def build_patch_index(storage: Storage) -> dict[int, dict]:
+def build_patch_index(storage: Storage, achievement_ids: set[int]) -> dict[int, dict]:
     index: dict[int, dict] = {}
+    wanted = {achievement_id for achievement_id in achievement_ids if achievement_id > 0}
+    if not wanted:
+        return index
+    mentions_wanted = achievement_id_pattern(wanted)
 
-    for entry in storage.get_all_cache_by_prefix(cache_keys.PREFIX_PATCH):
-        game_id = cache_keys.parse_game_id_from_patch_key(entry["cacheKey"])
-        if game_id is None:
-            continue
-        try:
-            payload = json.loads(entry["responseBody"])
-        except Exception:
-            continue
-
-        patch_data = payload.get("PatchData") or {}
-        game_title = patch_data.get("Title") or f"Game {game_id}"
-        for achievement in patch_data.get("Achievements", []):
-            achievement_id = achievement.get("ID")
-            if not isinstance(achievement_id, int):
+    for prefix in likely_first_prefixes(storage):
+        for entry in storage.iter_cache_by_prefix(prefix):
+            if not mentions_wanted.search(entry["responseBody"]):
                 continue
-            index[achievement_id] = {
-                "game_id": game_id,
-                "game_title": game_title,
-                "achievement_title": achievement.get("Title")
-                or f"Achievement {achievement_id}",
-                "points": achievement.get("Points"),
-            }
-
-    for entry in storage.get_all_cache_by_prefix(cache_keys.PREFIX_ACHIEVEMENTSETS):
-        try:
-            payload = json.loads(entry["responseBody"])
-        except Exception:
-            continue
-
-        game_id = payload.get("GameId")
-        if not isinstance(game_id, int) or game_id <= 0:
-            continue
-
-        game_title = payload.get("Title") or f"Game {game_id}"
-        direct = payload.get("Achievements")
-        if isinstance(direct, dict):
-            achievement_iter = direct.values()
-        elif isinstance(direct, list):
-            achievement_iter = direct
-        else:
-            achievement_iter = (
-                a
-                for s in (payload.get("Sets") or [])
-                if isinstance(s, dict)
-                for a in (s.get("Achievements") or [])
-                if isinstance(a, dict)
-            )
-        for achievement in achievement_iter:
-            if not isinstance(achievement, dict):
-                continue
-            achievement_id = achievement.get("ID")
-            if not isinstance(achievement_id, int):
-                continue
-            index.setdefault(
-                achievement_id,
-                {
-                    "game_id": game_id,
-                    "game_title": game_title,
-                    "achievement_title": achievement.get("Title")
-                    or f"Achievement {achievement_id}",
-                    "points": achievement.get("Points"),
-                },
-            )
+            if prefix == cache_keys.PREFIX_ACHIEVEMENTSETS:
+                titled = achievementsets_titled_achievements(entry)
+            else:
+                titled = patch_titled_achievements(entry)
+            for game_id, game_title, achievement in titled:
+                achievement_id = achievement.get("ID")
+                if achievement_id not in wanted:
+                    continue
+                index.setdefault(
+                    achievement_id,
+                    {
+                        "game_id": game_id,
+                        "game_title": game_title,
+                        "achievement_title": achievement.get("Title")
+                        or f"Achievement {achievement_id}",
+                        "points": achievement.get("Points"),
+                    },
+                )
+            if wanted.issubset(index):
+                return index
 
     return index
+
+
+def patch_titled_achievements(entry: dict) -> list[tuple[int, str, dict]]:
+    game_id = cache_keys.parse_game_id_from_patch_key(entry["cacheKey"])
+    if game_id is None:
+        return []
+    try:
+        patch_data = json.loads(entry["responseBody"]).get("PatchData") or {}
+    except Exception:
+        return []
+    game_title = patch_data.get("Title") or f"Game {game_id}"
+    return [
+        (game_id, game_title, achievement)
+        for achievement in patch_data.get("Achievements", [])
+        if isinstance(achievement, dict)
+    ]
+
+
+def achievementsets_titled_achievements(entry: dict) -> list[tuple[int, str, dict]]:
+    try:
+        payload = json.loads(entry["responseBody"])
+    except Exception:
+        return []
+
+    game_id = payload.get("GameId")
+    if not isinstance(game_id, int) or game_id <= 0:
+        return []
+
+    game_title = payload.get("Title") or f"Game {game_id}"
+    direct = payload.get("Achievements")
+    if isinstance(direct, dict):
+        achievements = direct.values()
+    elif isinstance(direct, list):
+        achievements = direct
+    else:
+        achievements = (
+            achievement
+            for achievement_set in (payload.get("Sets") or [])
+            if isinstance(achievement_set, dict)
+            for achievement in (achievement_set.get("Achievements") or [])
+        )
+    return [
+        (game_id, game_title, achievement)
+        for achievement in achievements
+        if isinstance(achievement, dict)
+    ]

@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 import urllib.error
 
 from . import cache_keys
 from .config import FALLBACK_USER_AGENT, proxy_host, proxy_port, upstream_host
 from .image_cache import rewrite_image_urls, schedule_image_download
+from .last_played import played_game_ids_newest_first
 from .network import build_api_url, http_get
 from .storage import PENDING_AWARD_STATUS_PENDING, Storage
 from .utils import is_hardcore_request, parse_form_params
@@ -15,6 +17,7 @@ from .utils import is_hardcore_request, parse_form_params
 LOGGER = logging.getLogger("raofflineproxy")
 WARNING_ACHIEVEMENT_ID = 101000001
 RC_ACHIEVEMENT_FLAG_CORE = 3  # rcheevos: official/core achievements only
+LIKELY_RECENT_GAMES = 10
 
 
 class CacheGameError(RuntimeError):
@@ -137,6 +140,7 @@ def refresh_game_patch(
     storage: Storage,
     config_data: dict,
     cache_images: bool = True,
+    source_rom_path: str | None = None,
 ) -> str | None:
     url = build_api_url(
         upstream_host(config_data),
@@ -164,7 +168,11 @@ def refresh_game_patch(
     payload = filter_warning_achievement_from_patch_payload(payload)
     response_body = json.dumps(payload, separators=(",", ":"))
 
-    storage.upsert_cache(cache_keys.patch(game_id, credentials["user"]), response_body)
+    storage.upsert_cache(
+        cache_keys.patch(game_id, credentials["user"]),
+        response_body,
+        source_rom_path=source_rom_path,
+    )
 
     if cache_images:
         proxy_base_url = f"http://{proxy_host(config_data)}:{proxy_port(config_data)}"
@@ -280,17 +288,34 @@ def merged_unlock_ids(storage: Storage, game_id: int, user: str) -> list[int]:
         except Exception:
             cached_unlock_ids = []
 
-    achievement_game_ids = build_achievement_game_ids(
-        storage.get_all_cache_by_prefix(cache_keys.PREFIX_PATCH),
-        storage.get_all_cache_by_prefix(cache_keys.PREFIX_ACHIEVEMENTSETS),
-    )
+    pending_awards = storage.get_pending_awards()
     return merge_start_session_unlock_ids(
         cached_unlock_ids=cached_unlock_ids,
-        pending_awards=storage.get_pending_awards(),
-        achievement_game_ids=achievement_game_ids,
+        pending_awards=pending_awards,
+        achievement_game_ids=find_achievement_game_ids(
+            storage, pending_unlock_achievement_ids(pending_awards, user), likely_game_id=game_id
+        ),
         game_id=game_id,
         user=user,
     )
+
+
+def pending_unlock_achievement_ids(pending_awards: list[dict], user: str | None = None) -> set[int]:
+    return {
+        int(award.get("achievementId", 0) or 0)
+        for award in pending_awards
+        if is_pending_softcore_unlock(award, user)
+    }
+
+
+def is_pending_softcore_unlock(award: dict, user: str | None = None) -> bool:
+    if award.get("status", PENDING_AWARD_STATUS_PENDING) != PENDING_AWARD_STATUS_PENDING:
+        return False
+    if int(award.get("achievementId", 0) or 0) <= 0:
+        return False
+    if is_hardcore_request(award.get("queryString", ""), award.get("requestBody", "")):
+        return False
+    return user is None or pending_award_user(award) == user
 
 
 def merge_start_session_unlock_ids(
@@ -311,22 +336,11 @@ def merge_start_session_unlock_ids(
         seen_ids.add(achievement_id)
 
     for award in pending_awards:
-        if (
-            award.get("status", PENDING_AWARD_STATUS_PENDING)
-            != PENDING_AWARD_STATUS_PENDING
-        ):
+        if not is_pending_softcore_unlock(award, user):
             continue
 
         achievement_id = int(award.get("achievementId", 0) or 0)
-        if achievement_id <= 0 or achievement_id in seen_ids:
-            continue
-
-        if is_hardcore_request(
-            award.get("queryString", ""), award.get("requestBody", "")
-        ):
-            continue
-
-        if pending_award_user(award) != user:
+        if achievement_id in seen_ids:
             continue
 
         if achievement_game_ids.get(achievement_id) != game_id:
@@ -338,13 +352,17 @@ def merge_start_session_unlock_ids(
     return merged_ids
 
 
-def _iter_achievementsets_achievements(payload: dict):
+def _iter_achievementsets_achievements(payload: dict, default_game_id: int):
     direct = payload.get("Achievements")
     if isinstance(direct, dict):
-        yield from (a for a in direct.values() if isinstance(a, dict))
+        for achievement in direct.values():
+            if isinstance(achievement, dict):
+                yield default_game_id, achievement
         return
     if isinstance(direct, list):
-        yield from (a for a in direct if isinstance(a, dict))
+        for achievement in direct:
+            if isinstance(achievement, dict):
+                yield default_game_id, achievement
         return
     sets = payload.get("Sets")
     if not isinstance(sets, list):
@@ -353,8 +371,14 @@ def _iter_achievementsets_achievements(payload: dict):
         if not isinstance(achievement_set, dict):
             continue
         achievements = achievement_set.get("Achievements")
-        if isinstance(achievements, list):
-            yield from (a for a in achievements if isinstance(a, dict))
+        if not isinstance(achievements, list):
+            continue
+        set_game_id = achievement_set.get("GameId")
+        if not isinstance(set_game_id, int) or set_game_id <= 0:
+            set_game_id = default_game_id
+        for achievement in achievements:
+            if isinstance(achievement, dict):
+                yield set_game_id, achievement
 
 
 def build_achievement_game_ids(
@@ -393,12 +417,54 @@ def build_achievement_game_ids(
         if not isinstance(game_id, int) or game_id <= 0:
             continue
 
-        for achievement in _iter_achievementsets_achievements(payload):
+        for achievement_game_id, achievement in _iter_achievementsets_achievements(
+            payload, game_id
+        ):
             achievement_id = achievement.get("ID")
             if isinstance(achievement_id, int) and achievement_id > 0:
-                achievement_game_ids.setdefault(achievement_id, game_id)
+                achievement_game_ids.setdefault(achievement_id, achievement_game_id)
 
     return achievement_game_ids
+
+
+def find_achievement_game_ids(
+    storage: Storage, achievement_ids, likely_game_id: int | None = None
+) -> dict[int, int]:
+    """Maps only the given achievements and stops once all are found, parsing only bodies that
+    mention one of them: the full map reads and parses every cached game. Pending awards almost
+    always belong to the game being played or one played recently, so their patches are checked
+    before the whole library, which on an SD card takes half a minute for 1000 games."""
+    wanted = {achievement_id for achievement_id in achievement_ids if achievement_id > 0}
+    found: dict[int, int] = {}
+    if not wanted:
+        return found
+
+    mentions_wanted = achievement_id_pattern(wanted)
+    for prefix in likely_first_prefixes(storage, likely_game_id):
+        for entry in storage.iter_cache_by_prefix(prefix):
+            if not mentions_wanted.search(entry["responseBody"]):
+                continue
+            if prefix == cache_keys.PREFIX_ACHIEVEMENTSETS:
+                entry_game_ids = build_achievement_game_ids([], [entry])
+            else:
+                entry_game_ids = build_achievement_game_ids([entry])
+            for achievement_id in wanted.intersection(entry_game_ids):
+                found.setdefault(achievement_id, entry_game_ids[achievement_id])
+            if len(found) == len(wanted):
+                return found
+    return found
+
+
+def likely_first_prefixes(storage: Storage, likely_game_id: int | None = None) -> list[str]:
+    likely_game_ids = [likely_game_id] if likely_game_id is not None else []
+    likely_game_ids += played_game_ids_newest_first(storage)[:LIKELY_RECENT_GAMES]
+    prefixes = [cache_keys.patch_prefix(game_id) for game_id in dict.fromkeys(likely_game_ids)]
+    return prefixes + [cache_keys.PREFIX_PATCH, cache_keys.PREFIX_ACHIEVEMENTSETS]
+
+
+def achievement_id_pattern(achievement_ids) -> re.Pattern:
+    alternatives = "|".join(str(achievement_id) for achievement_id in sorted(achievement_ids))
+    return re.compile(rf'"ID"\s*:\s*(?:{alternatives})(?![0-9])')
 
 
 def pending_award_user(award: dict) -> str | None:
@@ -437,7 +503,10 @@ def cache_game(
     storage: Storage,
     config_data: dict,
     cache_images: bool = True,
+    source_rom_path: str | None = None,
 ) -> None:
+    """source_rom_path is stored with the game data in the same write: setting it afterwards
+    meant reading and rewriting the whole stored game just to change one field."""
     patch_body = refresh_game_patch(
         game_id,
         credentials,
@@ -445,6 +514,7 @@ def cache_game(
         storage,
         config_data,
         cache_images=cache_images,
+        source_rom_path=source_rom_path,
     )
     if patch_body is None:
         raise CacheGameError("patch failed")

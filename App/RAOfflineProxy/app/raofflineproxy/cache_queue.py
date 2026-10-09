@@ -151,7 +151,7 @@ def count(storage: Storage) -> int:
 def queued_rom_paths(storage: Storage, normalize) -> set[str]:
     return {
         normalize(entry["sourceRomPath"])
-        for entry in storage.get_all_cache_by_prefix(cache_keys.PREFIX_CACHE_QUEUE)
+        for entry in storage.cache_summaries_by_prefix(cache_keys.PREFIX_CACHE_QUEUE)
         if isinstance(entry.get("sourceRomPath"), str) and entry["sourceRomPath"].strip()
     }
 
