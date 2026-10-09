@@ -793,6 +793,29 @@ class DeviceCommon(AbstractDevice):
     def get_audio_system(self):
         return AudioPlayerNone()
 
+    @staticmethod
+    def input_event_path(name, default):
+        """The input node of the device registered as `name`, or `default`.
+
+        Virtual pads made by a vendor input daemon register after the kernel's
+        devices, so a USB device with a HID interface present at boot (a headset
+        remote, a DAC's buttons) can take the node number the pad usually has.
+        """
+        try:
+            with open("/proc/bus/input/devices") as f:
+                blocks = f.read().split("\n\n")
+        except OSError:
+            return default
+        for block in blocks:
+            if f'N: Name="{name}"' not in block:
+                continue
+            for line in block.splitlines():
+                if line.startswith("H: Handlers="):
+                    for handler in line.split("=", 1)[1].split():
+                        if handler.startswith("event"):
+                            return "/dev/input/" + handler
+        return default
+
     _audio_route_lock = threading.Lock()
 
     def refresh_audio_route(self):

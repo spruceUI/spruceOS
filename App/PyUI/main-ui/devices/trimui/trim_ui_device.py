@@ -34,20 +34,7 @@ class TrimUIDevice(DeviceCommon):
         at boot registers first and takes event3, and the pad lands on event4.
         Reading event3 then reads the DAC, and no button works.
         """
-        try:
-            with open("/proc/bus/input/devices") as f:
-                blocks = f.read().split("\n\n")
-        except OSError:
-            return default
-        for block in blocks:
-            if 'N: Name="TRIMUI Player1"' not in block:
-                continue
-            for line in block.splitlines():
-                if line.startswith("H: Handlers="):
-                    for handler in line.split("=", 1)[1].split():
-                        if handler.startswith("event"):
-                            return "/dev/input/" + handler
-        return default
+        return DeviceCommon.input_event_path("TRIMUI Player1", default)
     
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)

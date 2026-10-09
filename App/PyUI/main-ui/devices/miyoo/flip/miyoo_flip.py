@@ -105,7 +105,9 @@ class MiyooFlip(MiyooDevice):
         return "poweroff"
 
     def get_controller_interface(self):
-        return KeyWatcherController(event_path="/dev/input/event5", mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
+        # The pad is miyoo_inputd's "MIYOO Player1"; see Flip.cfg.
+        pad = self.input_event_path("MIYOO Player1", "/dev/input/event5")
+        return KeyWatcherController(event_path=pad, mapping_provider=MiyooTrimKeyMappingProvider(), event_format='llHHi')
         
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()

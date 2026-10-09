@@ -442,7 +442,7 @@ device_init() {
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event5"
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 set_default_ra_hotkeys() {
