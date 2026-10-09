@@ -1,4 +1,4 @@
-"""Images the bridge generates at runtime (button glyphs, swatches, dots), and pixel helpers.
+"""Images the bridge generates at runtime (button glyphs, swatches), and pixel helpers.
 
 They go to a scratch directory (RAM-backed on devices) and are drawn with PyUI's
 ``Display.render_image`` like any theme asset. That matters for translucency: the Miyoo
@@ -16,7 +16,6 @@ import zlib
 from pathlib import Path
 
 _SWATCH_SIZE = (256, 16)  # wide, so PyUI's ZOOM crop never rounds a source side to 0 px
-_SAMPLES = 4  # supersampling per axis for anti-aliased edges
 _AVERAGE_STRIDE = 7  # sample at least every 7th pixel when averaging an image (prime: no aliasing)
 _AVERAGE_SAMPLES = 4096  # enough for an average; a 640x480 background took 0.4 s on a Mini
 
@@ -138,51 +137,6 @@ def inside_rounded(px: float, py: float, width: float, height: float, radius: fl
     cx = min(max(px, radius), width - radius)
     cy = min(max(py, radius), height - radius)
     return (px - cx) ** 2 + (py - cy) ** 2 <= radius**2
-
-
-def disc_pixels(color: RGB, size: int, ring: float = 0) -> bytes:
-    """Draw an anti-aliased filled circle, or a ring.
-
-    Args:
-        color: RGB colour.
-        size: Diameter in pixels.
-        ring: Ring thickness (0: filled).
-
-    Returns:
-        RGBA bytes, ``size`` x ``size``.
-    """
-    radius = size / 2
-    inner = radius - ring
-    step = 1 / _SAMPLES
-    out = bytearray()
-    for y in range(size):
-        for x in range(size):
-            hits = 0
-            for sy in range(_SAMPLES):
-                for sx in range(_SAMPLES):
-                    px, py = x + (sx + 0.5) * step - radius, y + (sy + 0.5) * step - radius
-                    distance = px * px + py * py
-                    hits += distance <= radius * radius and (not ring or distance >= inner * inner)
-            out += bytes((*color, round(255 * hits / _SAMPLES**2)))
-    return bytes(out)
-
-
-def disc(color: RGB, size: int, ring: float = 0) -> Path:
-    """Return a circle image (award indicators).
-
-    Args:
-        color: RGB colour.
-        size: Diameter in pixels.
-        ring: Ring thickness (0: filled).
-
-    Returns:
-        The image.
-    """
-    name = "disc-{:02x}{:02x}{:02x}-{}-{}.png".format(*color, size, ring)
-    path = scratch() / name
-    if path.exists():
-        return path
-    return write(name, size, size, disc_pixels(color, size, ring))
 
 
 def surface_rgba(surface: object) -> tuple[int, int, bytes]:

@@ -5,8 +5,8 @@ progress grey, side by side. An award gets a small dot: gold for the mastery fam
 the beaten family, filled for hardcore and hollow for casual. The percentage takes the award's
 colour. On light backgrounds RA switches to a darker gold, and so do we, judging by the row's
 background. When a theme's background fights these colours (a yellow theme), everything falls
-back to the theme's text colour in three strengths. Hollow vs filled dots still tell casual from
-hardcore then.
+back to the theme's text colour in three strengths. Award indicators use contrasting black
+or white then, so their static assets remain readable; hollow vs filled still tells the modes.
 
 Pure: no PyUI or SDL, so it is unit-tested on its own.
 """
@@ -85,31 +85,37 @@ class Palette:
         casual: Casual-only segment.
         track: The rest of the bar.
         markers: Award indicator per award.
+        background: Row colour used to cover the bar strip inside hollow indicators.
     """
 
     hardcore: Paint
     casual: Paint
     track: Paint
     markers: Mapping[AwardKind, Marker]
+    background: RGB
 
 
-def _fallback(text: RGB) -> Palette:
+def _fallback(background: RGB, text: RGB) -> Palette:
     """Build the theme-text palette for backgrounds that fight RA's colours.
 
     Args:
+        background: The row's background colour.
         text: The row's text colour.
 
     Returns:
         The palette.
     """
     hardcore, casual, track = FALLBACK_ALPHAS
+    neutral = BLACK if luma(text) < LIGHT else WHITE
     markers = {
-        AwardKind.MASTERED: Marker(text, filled=True),
-        AwardKind.COMPLETED: Marker(text, filled=False),
-        AwardKind.BEATEN_HARDCORE: Marker(text, filled=True),
-        AwardKind.BEATEN_SOFTCORE: Marker(text, filled=False),
+        AwardKind.MASTERED: Marker(neutral, filled=True),
+        AwardKind.COMPLETED: Marker(neutral, filled=False),
+        AwardKind.BEATEN_HARDCORE: Marker(neutral, filled=True),
+        AwardKind.BEATEN_SOFTCORE: Marker(neutral, filled=False),
     }
-    return Palette(Paint(text, hardcore), Paint(text, casual), Paint(text, track), markers)
+    return Palette(
+        Paint(text, hardcore), Paint(text, casual), Paint(text, track), markers, background
+    )
 
 
 def palette(background: RGB, text: RGB) -> Palette:
@@ -127,7 +133,7 @@ def palette(background: RGB, text: RGB) -> Palette:
     hardcore = DARK_GOLD if light else HARDCORE_GOLD
     casual = NEUTRAL_500 if light else ZINC_400
     if min(abs(luma(hardcore) - shade), abs(luma(casual) - shade)) < MIN_CONTRAST:
-        return _fallback(text)
+        return _fallback(background, text)
     track = Paint(BLACK, TRACK_ALPHA_LIGHT) if light else Paint(WHITE, TRACK_ALPHA_DARK)
     markers = {
         AwardKind.MASTERED: Marker(DARK_GOLD if light else GOLD, filled=True),
@@ -135,4 +141,4 @@ def palette(background: RGB, text: RGB) -> Palette:
         AwardKind.BEATEN_HARDCORE: Marker(ZINC_600 if light else ZINC_300, filled=True),
         AwardKind.BEATEN_SOFTCORE: Marker(ZINC_500 if light else ZINC_400, filled=False),
     }
-    return Palette(Paint(hardcore), Paint(casual), track, markers)
+    return Palette(Paint(hardcore), Paint(casual), track, markers, background)

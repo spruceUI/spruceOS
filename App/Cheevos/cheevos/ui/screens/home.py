@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from cheevos.core.storage.recent_feed import RecentFeedCache
 from cheevos.core.sync.progress import Phase
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
@@ -79,7 +80,11 @@ class Home:
             text = strings.NOTHING_UNLOCKED
         else:
             game = self._ctx.data.game(latest[0].game_id)
-            text = f"{latest[0].title} · {game.title}" if game else latest[0].title
+            title = game.title if game else ""
+            feed = RecentFeedCache(self._ctx.data).load()
+            if feed and feed.entries:
+                title = feed.entries[0].game_title
+            text = f"{latest[0].title} · {title}" if title else latest[0].title
         return MenuItem(strings.RECENT, text, self._ctx.icon("clock"), key="recent")
 
     def _awards_row(self) -> MenuItem:

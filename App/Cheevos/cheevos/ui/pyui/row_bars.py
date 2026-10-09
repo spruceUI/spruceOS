@@ -6,30 +6,29 @@ value, an empty description), then the bars go into the description slots, using
 geometry PyUI uses (``DescriptiveListView._render``).
 
 A bar follows RetroAchievements' web client (colours in :mod:`bar_colors`): a gold hardcore
-segment, a grey casual-only segment, then an award dot and the percentage. All bars in a list
-share one length, so they line up.
+segment and a grey casual-only segment, with an award circle over its right endpoint and the
+percentage after it. All bars in a list share one length, so they line up.
 """
 
 from __future__ import annotations
 
 import logging
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
 from cheevos.core.models import AwardKind
-from cheevos.ui.pyui import generated
-from cheevos.ui.pyui.bar_colors import RGB, Marker, Paint, Palette, palette
+from cheevos.ui.pyui import award_images, generated
+from cheevos.ui.pyui.bar_colors import RGB, Paint, Palette, palette
 from cheevos.ui.pyui.text import Text, text_width
 
 logger = logging.getLogger(__name__)
 
 _ICON_SHARE = 0.125  # PyUI's icon column: 1/8 of the selected-row background's width
-_GAP = 10  # between the bar, the award dot and the value text
-_DOT_GAP = 4  # between the award dot and the percentage
-_BAR_SHARE = 0.4  # bar height per description line height
-_DOT_SHARE = 0.45  # award dot diameter per description line height
-_RING_SHARE = 0.2  # hollow dot ring thickness per diameter
+_GAP = 10  # minimum space before the percentage and value text
+_BAR_SHARE = 0.28  # bar height per description line height
+_AWARD_SHARE = 0.95  # attached circle diameter per description line height
 
 
 @dataclass(frozen=True, slots=True)
@@ -40,7 +39,7 @@ class Progress:
         done: Hardcore share, 0-1 (gold).
         extra: Casual-only share drawn after it, 0-1 (grey).
         label: Text after the bar, e.g. "47%".
-        award: The game's highest award, shown as a dot before the label.
+        award: The game's highest award, shown over the bar's right endpoint.
     """
 
     done: float
@@ -56,18 +55,20 @@ class _Layout:
     Attributes:
         bar_x: Bar left edge.
         bar_width: Bar length.
-        dot_x: Award dot left edge.
-        label_x: Percentage left edge.
-        dot: Award dot diameter.
+        award_x: Award circle centre (the bar's right endpoint).
+        label_right: Percentage right edge.
+        award_size: Award circle diameter.
         palettes: Colours for ordinary rows and for the selected row.
+        images: Static award PNG paths for each palette.
     """
 
     bar_x: int
     bar_width: int
-    dot_x: int
-    label_x: int
-    dot: int
+    award_x: int
+    label_right: int
+    award_size: int
     palettes: tuple[Palette, Palette]
+    images: tuple[dict[AwardKind, str], dict[AwardKind, str]]
 
 
 def attach(view: Any) -> None:  # noqa: ANN401 — PyUI view
@@ -146,18 +147,6 @@ def top_bar_palette() -> Palette:
     return palette(bar, _rgb(Theme.text_color(FontPurpose.TOP_BAR_TEXT)))
 
 
-def dot_size(line: int) -> int:
-    """Return the award dot's diameter next to text of this height.
-
-    Args:
-        line: Text height in pixels.
-
-    Returns:
-        Diameter in pixels.
-    """
-    return max(round(line * _DOT_SHARE), 6)
-
-
 def _palettes(view: Any) -> tuple[Palette, Palette]:  # noqa: ANN401 — PyUI view
     """Pick bar colours for ordinary rows and the selected row from their backgrounds.
 
@@ -180,7 +169,7 @@ def _palettes(view: Any) -> tuple[Palette, Palette]:  # noqa: ANN401 — PyUI vi
 
 
 def _layout(view: Any, entries: Sequence[Any]) -> _Layout:  # noqa: ANN401 — PyUI view
-    """Lay out bar, dot and percentage so that they line up across the whole list.
+    """Lay out the bar, attached award and percentage across the whole list.
 
     Args:
         view: The list view.
@@ -206,12 +195,14 @@ def _layout(view: Any, entries: Sequence[Any]) -> _Layout:  # noqa: ANN401 — P
     labels = {progress.label for progress in shown}  # a few distinct percentages
     label = max((text_width(text, Text.BODY) for text in labels), default=0)
     line = int(Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, "A")[1])
-    dot = dot_size(line) if any(p.award for p in shown) else 0
-    tail = (dot + _DOT_GAP if dot else 0) + label
-    bar_width = max(right - bar_x - (tail + _GAP if tail else 0), 0)
-    dot_x = bar_x + bar_width + _GAP
-    label_x = dot_x + (dot + _DOT_GAP if dot else 0)
-    return _Layout(bar_x, bar_width, dot_x, label_x, dot, _palettes(view))
+    size = max(round(line * _AWARD_SHARE), 12)
+    gap = max(round(size * 0.4), _GAP)
+    # Reserve the same half-circle on every row, including games without an award.
+    tail = math.ceil(size / 2) + gap + label
+    bar_width = max(right - bar_x - tail, 0)
+    palettes = _palettes(view)
+    images = (award_images.images(palettes[0]), award_images.images(palettes[1]))
+    return _Layout(bar_x, bar_width, bar_x + bar_width, right, size, palettes, images)
 
 
 def _fill(paint: Paint, rect: tuple[int, int, int, int]) -> None:
@@ -230,23 +221,6 @@ def _fill(paint: Paint, rect: tuple[int, int, int, int]) -> None:
         return
     path = str(generated.swatch(paint.color, paint.alpha, tall=height > width))
     Display.render_image(path, x, y, RenderMode.TOP_LEFT_ALIGNED, width, height, ResizeType.ZOOM)
-
-
-def draw_dot(marker: Marker, size: int, x: int, mid: int) -> None:
-    """Draw an award dot, vertically centred on ``mid``.
-
-    Args:
-        marker: Colour and fill.
-        size: Diameter.
-        x: Left edge.
-        mid: Vertical centre.
-    """
-    from display.display import Display
-    from display.render_mode import RenderMode
-
-    ring = 0 if marker.filled else max(round(size * _RING_SHARE), 1)
-    path = str(generated.disc(marker.color, size, ring))
-    Display.render_image(path, x, mid, RenderMode.MIDDLE_LEFT_ALIGNED)
 
 
 def _draw(view: Any, cache: dict[int, _Layout]) -> None:  # noqa: ANN401 — PyUI view
@@ -273,7 +247,7 @@ def _draw(view: Any, cache: dict[int, _Layout]) -> None:  # noqa: ANN401 — PyU
     title_height = int(Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, "A")[1])
     font = FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION
     line = int(Display.get_text_dimensions(font, "A")[1])
-    bar_height = max(int(line * _BAR_SHARE), 4)
+    bar_height = max(round(line * _BAR_SHARE), 5)
     offset = int(Theme.get_descriptive_list_text_offset_y()) + title_height + line // 2
     for row, entry in enumerate(visible):
         progress = _progress(entry)
@@ -291,9 +265,19 @@ def _draw(view: Any, cache: dict[int, _Layout]) -> None:  # noqa: ANN401 — PyU
         _fill(colors.casual, (layout.bar_x + solid, y, reach - solid, bar_height))
         _fill(colors.hardcore, (layout.bar_x, y, solid, bar_height))
         marker = colors.markers.get(progress.award) if progress.award else None
-        if marker is not None and layout.dot:
-            draw_dot(marker, layout.dot, layout.dot_x, mid)
+        if marker is not None and progress.award is not None:
+            if not marker.filled:
+                # Clear only the strip inside the ring. Its opaque rim covers the strip's
+                # left edge; all other transparent pixels still show the original theme.
+                inner = math.ceil(layout.award_size * 0.4)
+                _fill(Paint(colors.background), (layout.award_x - inner, y, inner, bar_height))
+            path = layout.images[1 if selected else 0][progress.award]
+            size = award_images.canvas_size(progress.award, layout.award_size)
+            Display.render_image(
+                path, layout.award_x, mid, RenderMode.MIDDLE_CENTER_ALIGNED, size, size
+            )
         if progress.label:
             color = marker.color if marker is not None else text
             mode = RenderMode.MIDDLE_LEFT_ALIGNED
-            Display.render_text(progress.label, layout.label_x, mid, color, font, mode)
+            x = layout.label_right - text_width(progress.label, Text.BODY)
+            Display.render_text(progress.label, x, mid, color, font, mode)

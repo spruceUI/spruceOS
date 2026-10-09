@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from cheevos.core.models import Achievement, PendingAward
-from cheevos.core.sync.planner import RECENT_UNLOCK_COUNT
+from cheevos.core.models import RECENT_UNLOCK_COUNT, Achievement, PendingAward
+from cheevos.core.storage.recent_feed import RecentFeedCache
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
 from cheevos.ui.pyui.views import MenuItem, choose
-from cheevos.ui.screens.achievement import show_achievement
+from cheevos.ui.screens.achievement import enrich_achievement, show_achievement
 from cheevos.ui.screens.common import message
 from cheevos.ui.screens.rows import achievement_row
 
@@ -19,13 +19,16 @@ def show_recent(ctx: AppContext) -> None:
         ctx: App context.
     """
     pending = ctx.pending_awards()
-    unlocks = ctx.data.recent_unlocks(RECENT_UNLOCK_COUNT)  # the sync keeps their games cached
+    unlocks = ctx.data.recent_unlocks(RECENT_UNLOCK_COUNT)
     entries: list[tuple[Achievement, PendingAward | None]] = _pending_entries(ctx, pending)
     entries += [(a, None) for a in unlocks]
     if not entries:
         message(strings.RECENT, [strings.NOTHING_UNLOCKED])
         return
     titles = ctx.data.game_titles(achievement.game_id for achievement, _ in entries)
+    feed = RecentFeedCache(ctx.data).load()
+    if feed is not None:
+        titles.update({entry.achievement.game_id: entry.game_title for entry in feed.entries})
     selected = 0
     while True:
         items = [_recent_row(ctx, a, p, titles) for a, p in entries]
@@ -50,7 +53,10 @@ def _pending_entries(
         ``(achievement, pending entry)`` pairs, newest queued first.
     """
     entries = []
+    synced = ctx.data.unlocked_among(pending)
     for award in sorted(pending.values(), key=lambda p: -(p.queued_at or 0)):
+        if award.achievement_id in synced:
+            continue
         detail = ctx.data.game_detail(award.game_id) if award.game_id else None
         match = next(
             (
@@ -100,11 +106,13 @@ def _open_achievement(
         game_title: Game title.
     """
     detail = ctx.data.game_detail(achievement.game_id)
+    if detail is not None:
+        achievement = enrich_achievement(achievement, detail)
     show_achievement(
         ctx,
         achievement,
         game_title=game_title,
-        players=detail.num_distinct_players if detail else 0,
-        players_hardcore=detail.num_players_hardcore if detail else 0,
+        players=detail.num_distinct_players if detail else None,
+        players_hardcore=detail.num_players_hardcore if detail else None,
         pending=pending,
     )

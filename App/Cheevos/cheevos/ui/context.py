@@ -147,7 +147,7 @@ class AppContext:
         """Return unlocks waiting in RAOfflineProxy's queue, by achievement ID.
 
         Each unlock's game comes from the synced achievement lists, or else from the proxy's
-        cached ``patch`` data, which RetroArch 1.22 no longer requests (.agents/integration.md).
+        cached ``patch`` or ``achievementsets`` data (.agents/integration.md).
         """
         if not self.proxy_active():
             return {}
