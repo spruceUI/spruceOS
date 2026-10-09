@@ -18,6 +18,8 @@ class XuMiniM(Rgb30):
     # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/XUMiniM.cfg;
     # this backlight's max_brightness is 100, not the A10Mini's 255.
     BACKLIGHT_TABLE = (3, 4, 6, 10, 20, 30, 40, 60, 80, 90, 100)
+    # No softvol on the rk3326 base: the rk817 codec's own volume control.
+    VOLUME_CONTROL = "Playback"
 
     def screen_width(self):
         return 640

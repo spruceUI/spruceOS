@@ -175,7 +175,7 @@ class Rgb30(DeviceCommon):
         # perceived-loudness scale (Master is 0-65536 raw).
         pct = max(0, min(100, int(volume)))
         try:
-            subprocess.run(["amixer", "-M", "-q", "sset", "Master", f"{pct}%"],
+            subprocess.run(["amixer", "-M", "-q", "sset", self.VOLUME_CONTROL, f"{pct}%"],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             PyUiLogger.get_logger().error(f"RGB30: _set_volume failed: {e}")
@@ -338,6 +338,8 @@ class Rgb30(DeviceCommon):
 
     # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
     BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
+    # The mixer control _set_volume drives: the softvol the rk3566 base defines.
+    VOLUME_CONTROL = "Master"
 
     def _set_lumination_to_config(self):
         level = max(0, min(10, int(self.system_config.backlight)))

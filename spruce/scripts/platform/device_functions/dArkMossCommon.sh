@@ -25,6 +25,9 @@ device_init() {
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
     resolve_key_event_node
     setup_mainui_alias
+    # A fresh card has no system json until PyUI makes one from the default; seed it
+    # first, so the boot backlight is the level PyUI and the hotkeys then read.
+    [ -f "$SYSTEM_JSON" ] || { [ -f "$SYSTEM_JSON_DEFAULT" ] && cp "$SYSTEM_JSON_DEFAULT" "$SYSTEM_JSON"; }
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
@@ -346,7 +349,7 @@ volume_down() {
 }
 
 get_current_volume() {
-    amixer get 'Master' 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
+    amixer -M get "${VOLUME_CONTROL:-Master}" 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
 }
 
 # Level before path: switching output with the old level applied is what
@@ -359,7 +362,7 @@ set_volume() {
     [ "$VOLUME_PCT" -gt 100 ] && VOLUME_PCT=100
     [ "$VOLUME_PCT" -lt 0 ] && VOLUME_PCT=0
 
-    amixer -q sset -M 'Master' "${VOLUME_PCT}%" 2>/dev/null
+    amixer -q sset -M "${VOLUME_CONTROL:-Master}" "${VOLUME_PCT}%" 2>/dev/null
     bt_headset_volume "$(( VOLUME_PCT / 5 ))"
     apply_playback_path
     log_message "$PLATFORM: volume ${VOLUME_LV}/20 (${VOLUME_PCT}%)"
