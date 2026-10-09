@@ -126,6 +126,7 @@ device_names() {
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
+        XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
