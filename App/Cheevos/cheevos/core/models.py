@@ -264,7 +264,7 @@ class LocalGame:
         game_id: RA game ID.
         rom_path: Absolute ROM path on the device.
         system: Spruce system name (``""`` if unknown).
-        source: Where the match came from, e.g. ``"pyui-cheevos-cache"``.
+        source: Where the match came from, e.g. ``"raofflineproxy"``.
     """
 
     game_id: int

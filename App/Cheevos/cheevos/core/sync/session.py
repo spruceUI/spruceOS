@@ -125,6 +125,6 @@ def open_sync_deps(
         client=client,
         data=data,
         media=media,
-        on_device=lambda: on_device_game_ids(paths, proxy),
+        on_device=lambda: on_device_game_ids(proxy),
         close=close,
     )

@@ -131,4 +131,15 @@ if [ "$STATUS" -ne 0 ]; then
     { echo "--- launch.sh: exit status $STATUS, stderr:"; cat "$STDERR_LOG"; } >>"$LOG" 2>/dev/null
     show_message "Cheevos couldn't start. Details: Saves/spruce/cheevos-$PLATFORM.log"
 fi
+
+SPRUCE_CONFIG=/mnt/SDCARD/Saves/spruce/spruce-config.json
+KEY_PATH='.menuOptions."RetroAchievements Settings".webApiKey.selected'
+if jq -e "$KEY_PATH | strings" "$SPRUCE_CONFIG" >/dev/null 2>&1; then
+    key="$(tr -d ' \t\r' 2>/dev/null </mnt/SDCARD/Saves/cheevos/apikey.txt | grep -m1 .)"
+    if [ "$key" != "$(jq -r "$KEY_PATH" "$SPRUCE_CONFIG")" ]; then
+        jq --arg k "$key" "$KEY_PATH = \$k" "$SPRUCE_CONFIG" >"$SPRUCE_CONFIG.tmp" &&
+            [ -s "$SPRUCE_CONFIG.tmp" ] && mv "$SPRUCE_CONFIG.tmp" "$SPRUCE_CONFIG"
+        rm -f "$SPRUCE_CONFIG.tmp"
+    fi
+fi
 exit "$STATUS"

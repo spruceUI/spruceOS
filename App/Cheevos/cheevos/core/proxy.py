@@ -136,7 +136,7 @@ class ProxyReader:
         return self._paths.proxy_data_dir.parent.is_dir()
 
     def enabled(self) -> bool:
-        """Report whether "Offline Achievements" is switched on in Spruce's settings."""
+        """Report whether RAOfflineProxy is switched on in Spruce's settings."""
         return read_spruce_ra_setting(self._paths, "enableOfflineProxy") == "True"
 
     def online(self) -> bool | None:

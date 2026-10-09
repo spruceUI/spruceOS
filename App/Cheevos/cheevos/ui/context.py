@@ -118,7 +118,7 @@ class AppContext:
     def on_device_ids(self) -> set[int]:
         """Return RA game IDs with a ROM on this SD card (computed once per app run)."""
         if self._on_device is None:
-            self._on_device = on_device_game_ids(self.paths, self.proxy)
+            self._on_device = on_device_game_ids(self.proxy)
         return self._on_device
 
     def proxy_active(self) -> bool:

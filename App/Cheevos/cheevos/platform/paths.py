@@ -123,8 +123,3 @@ class Paths:
     def proxy_data_dir(self) -> Path:
         """RAOfflineProxy's data directory (read-only for us)."""
         return self.sdcard / "App" / "RAOfflineProxy" / "data"
-
-    @property
-    def pyui_cheevos_cache(self) -> Path:
-        """PyUI's list of ROMs the proxy cached, with their RA game IDs."""
-        return self.sdcard / "Saves" / "pyui-cheevos-cache.json"
