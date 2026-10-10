@@ -1140,7 +1140,7 @@
             },
             "webApiKey": {
                 "display": "Web API Key",
-                "description": "For the Cheevos app: retroachievements.org > Settings > Keys",
+                "description": "For the Cheevos app: retroachievements.org > Settings > Applications",
                 "type": "freeText",
                 "selected": "",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
