@@ -3,6 +3,8 @@ try:
 except Exception:
     _sdlttf = None
 
+from display.font_fallback import Run, split_fallback_runs
+
 
 # Upper bound for each per-font glyph probe cache. Eviction is a plain
 # clear: probe results cost one SDL call per codepoint to rebuild, so a
@@ -83,8 +85,18 @@ class LoadedFont:
         cache[cp] = value
         return value
 
-    def _has_usable_fallback(self):
+    def has_fallback(self):
         return self.fallback_font is not None and self.fallback_font != self.font
+
+    def handle_for(self, use_fallback):
+        """Font handle that renders a run: fallback when asked and usable."""
+        if use_fallback and self.has_fallback():
+            return self.fallback_font
+        return self.font
+
+    def split(self, text):
+        """Split text into runs served by primary vs fallback (see Run)."""
+        return split_fallback_runs(text, self.has_glyph)
 
     def _probe_cached(self, cache, handle, cp, fallback_available):
         if cp not in cache:
@@ -97,12 +109,12 @@ class LoadedFont:
     def has_glyph(self, codepoint):
         cp = self._to_codepoint(codepoint)
         return self._probe_cached(self._glyph_cache, self.font, cp,
-                                 self._has_usable_fallback())
+                                 self.has_fallback())
 
     def fallback_has_glyph(self, codepoint):
         cp = self._to_codepoint(codepoint)
         return self._probe_cached(self._fallback_glyph_cache,
-                                 self.fallback_font, cp, False)
+                                 self.fallback_font, cp, True)
 
     def cache_key(self, purpose):
         """Text-texture cache identity: purpose + the font pair paths."""

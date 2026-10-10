@@ -3,7 +3,7 @@ import os
 import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.font_fallback import split_fallback_runs
+from display.font_fallback import Run
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
 from display.resize_type import ResizeType
@@ -50,7 +50,7 @@ class ImageTextureCache:
 @dataclass(frozen=True)
 class TextTextureKey:
     texture_id : str
-    font : object
+    font_key : object
     color : tuple
 
 @dataclass
@@ -64,11 +64,11 @@ class TextTextureCache:
     def __init__(self):
         self.cache = {} 
 
-    def get_texture(self, texture_id, font, color) -> CachedTextTexture:
-        return self.cache.get(TextTextureKey(texture_id, font, color))
+    def get_texture(self, texture_id, font_key, color) -> CachedTextTexture:
+        return self.cache.get(TextTextureKey(texture_id, font_key, color))
 
-    def add_texture(self, texture_id, font, color, surface, texture):
-        self.cache[TextTextureKey(texture_id, font, color)] = CachedTextTexture(texture, surface.contents.w, surface.contents.h)
+    def add_texture(self, texture_id, font_key, color, surface, texture):
+        self.cache[TextTextureKey(texture_id, font_key, color)] = CachedTextTexture(texture, surface.contents.w, surface.contents.h)
         return True
     
     def clear_cache(self):
@@ -345,11 +345,9 @@ class Display:
     @classmethod
     def deinit_fonts(cls):
         for loaded_font in cls.fonts.values():
-            primary = getattr(loaded_font, "font", None)
-            fallback = getattr(loaded_font, "fallback_font", None)
-            cls._close_font(primary)
-            if fallback is not None and fallback != primary:
-                cls._close_font(fallback)
+            cls._close_font(loaded_font.font)
+            if loaded_font.has_fallback():
+                cls._close_font(loaded_font.fallback_font)
         cls.fonts.clear()
 
     @classmethod
@@ -698,31 +696,39 @@ class Display:
 
 
     @classmethod
-    def _cache_font_key(cls, purpose, loaded_font):
-        # Text cache key must distinguish the fallback pair so a theme
-        # switch (or fallback change) never collides with a stale entry.
-        cache_key = getattr(loaded_font, "cache_key", None)
-        if callable(cache_key):
-            return loaded_font.cache_key(purpose)
-        return (purpose,
-                getattr(loaded_font, "font_path", None),
-                getattr(loaded_font, "fallback_path", None))
+    def _render_text_surface(cls, loaded_font, text, sdl_color):
+        """Render text to a single SDL surface, caller owns (must free).
 
-    @staticmethod
-    def _handle_for_run(loaded_font, use_fallback):
-        """Resolve which font handle renders a run.
-
-        Single place for the primary/fallback switch used by both the
-        render path (_render_text_surface) and the measure path
-        (get_text_dimensions).
+        Fast path: every char in primary (or no fallback loaded) renders
+        with exactly one TTF_RenderUTF8_Blended call as before. Otherwise
+        each same-font run renders with its own font handle and the runs
+        are joined horizontally. Returns None on failure.
         """
-        primary = getattr(loaded_font, "font", None)
-        if use_fallback:
-            fallback = getattr(loaded_font, "fallback_font", None)
-            if fallback is not None:
-                return fallback
-        return primary
-
+        runs = loaded_font.split(text)
+        if not runs:
+            runs = [Run(False, text)]
+        if len(runs) == 1 and not runs[0].is_fallback:
+            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
+        if len(runs) == 1:
+            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.handle_for(True), text.encode('utf-8'), sdl_color)
+        run_surfaces = []
+        try:
+            for run in runs:
+                handle = loaded_font.handle_for(run.is_fallback)
+                surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(
+                    handle, run.segment.encode('utf-8'), sdl_color)
+                if not surface:
+                    return None
+                run_surfaces.append((handle, surface))
+            joined = cls._join_run_surfaces(run_surfaces)
+            run_surfaces = []
+            return joined
+        finally:
+            for _, surface in run_surfaces:
+                try:
+                    sdl2.SDL_FreeSurface(surface)
+                except Exception:
+                    pass
     @classmethod
     def _join_run_surfaces(cls, run_items):
         """Join per-run surfaces horizontally on a common baseline.
@@ -786,52 +792,16 @@ class Display:
                     pass
 
     @classmethod
-    def _render_text_surface(cls, loaded_font, text, sdl_color):
-        """Render text to a single SDL surface, caller owns (must free).
-
-        Fast path: every char in primary (or no fallback loaded) renders
-        with exactly one TTF_RenderUTF8_Blended call as before. Otherwise
-        each same-font run renders with its own font handle and the runs
-        are joined horizontally. Returns None on failure.
-        """
-        primary = getattr(loaded_font, "font", None)
-        fallback = getattr(loaded_font, "fallback_font", None)
-        has_glyph = getattr(loaded_font, "has_glyph", None)
-        if fallback is None or not callable(has_glyph):
-            return sdl2.sdlttf.TTF_RenderUTF8_Blended(primary, text.encode('utf-8'), sdl_color)
-        runs = split_fallback_runs(text, has_glyph)
-        if len(runs) == 1 and not runs[0][0]:
-            return sdl2.sdlttf.TTF_RenderUTF8_Blended(primary, text.encode('utf-8'), sdl_color)
-        if len(runs) == 1 and runs[0][0]:
-            return sdl2.sdlttf.TTF_RenderUTF8_Blended(fallback, text.encode('utf-8'), sdl_color)
-        run_surfaces = []
-        try:
-            for use_fallback, segment in runs:
-                handle = cls._handle_for_run(loaded_font, use_fallback)
-                surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(
-                    handle, segment.encode('utf-8'), sdl_color)
-                if not surface:
-                    return None
-                run_surfaces.append((handle, surface))
-            joined = cls._join_run_surfaces(run_surfaces)
-            run_surfaces = []
-            return joined
-        finally:
-            for _, surface in run_surfaces:
-                try:
-                    sdl2.SDL_FreeSurface(surface)
-                except Exception:
-                    pass
-
-    @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None):
         text = Display.split_message(text, purpose, clip_to_device_width=False)[0]
         if(text is None or len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
-        cache_font = cls._cache_font_key(purpose, loaded_font)
-        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, cache_font, color)
+        # Key includes the font pair paths so a theme or fallback change
+        # never hits a stale texture from the previous fonts.
+        font_key = loaded_font.cache_key(purpose)
+        cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, font_key, color)
         cached = True
         texture_w = None
         texture_h = None
@@ -881,7 +851,7 @@ class Display:
                 sdl2.SDL_FreeSurface(surface)
                 return w,h
             else:
-                cached = cls._text_texture_cache.add_texture(text, cache_font, color, surface, texture)
+                cached = cls._text_texture_cache.add_texture(text, font_key, color, surface, texture)
                 texture_w = surface.contents.w
                 texture_h = surface.contents.h
                 sdl2.SDL_FreeSurface(surface)
@@ -1338,16 +1308,11 @@ class Display:
     
     @classmethod
     def get_text_dimensions(cls, purpose, text="A"):
-        loaded_font = cls.fonts.get(purpose) if isinstance(cls.fonts, dict) else cls.fonts[purpose]
-        fallback = getattr(loaded_font, "fallback_font", None)
-        has_glyph = getattr(loaded_font, "has_glyph", None)
-        if fallback is None or not callable(has_glyph) or not text:
-            runs = [(False, text)]
-        else:
-            runs = split_fallback_runs(text, has_glyph)
-            if not runs:
-                runs = [(False, text)]
-        if len(runs) == 1 and not runs[0][0]:
+        loaded_font = cls.fonts[purpose]
+        runs = loaded_font.split(text)
+        if not runs:
+            runs = [Run(False, text)]
+        if len(runs) == 1 and not runs[0].is_fallback:
             w = sdl2.Sint32()
             h = sdl2.Sint32()
             sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
@@ -1355,11 +1320,11 @@ class Display:
         mult = Device.get_device().get_text_width_measurement_multiplier()
         total_raw = 0
         max_h = 0
-        for use_fallback, segment in runs:
-            handle = cls._handle_for_run(loaded_font, use_fallback)
+        for run in runs:
+            handle = loaded_font.handle_for(run.is_fallback)
             w = sdl2.Sint32()
             h = sdl2.Sint32()
-            sdl2.sdlttf.TTF_SizeUTF8(handle, segment.encode('utf-8'), w, h)
+            sdl2.sdlttf.TTF_SizeUTF8(handle, run.segment.encode('utf-8'), w, h)
             total_raw += w.value
             max_h = max(max_h, h.value)
         # Scale once after summing raw widths: per-run int() truncation
