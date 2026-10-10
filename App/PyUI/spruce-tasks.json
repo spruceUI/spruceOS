@@ -1,5 +1,6 @@
 {
   "Forget all WiFi networks": "/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh",
+  "Forget all Bluetooth devices": "/mnt/SDCARD/spruce/scripts/tasks/clearbluetooth.sh",
   "Emulator Reset Tasks/Reset RetroArch hotkeys": "/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh",
   "Emulator Reset Tasks/Reset RetroArch config": "/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh",
   "Emulator Reset Tasks/Reset DraStic config": "/mnt/SDCARD/spruce/scripts/tasks/resetDraStic.sh",
@@ -23,6 +24,7 @@
   "Clear all Favorites": "/mnt/SDCARD/spruce/scripts/tasks/clearFavorites.sh",
   "descriptions": {
     "Forget all WiFi networks": "disconnect and clear all saved networks",
+    "Forget all Bluetooth devices": "disconnect and unpair every device (Bluetooth must be on)",
     "Reset RetroArch hotkeys": "reapply spruce default RA hotkey layout",
     "Reset RetroArch config": "restore spruce default RA config for current device",
     "Reset DraStic config": "restore spruce default DraStic config for current device",
@@ -46,6 +48,14 @@
     "Clear all Favorites": "delete your favorited games list"
   },
   "devices": {
+    "Forget all Bluetooth devices": [
+      "MIYOO_FLIP",
+      "TRIMUI_A133P",
+      "TRIMUI_SMART_PRO_S",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
     "Emulator Reset Tasks/Reset DSperate config": [
       "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",

@@ -14,6 +14,7 @@
 #   devices   list the devices known now, without looking
 #   pair      pair, trust and connect <address>; prints "ok" or "failed <step> <reason>"
 #   forget    remove <address>; prints "ok" or "failed forget <reason>"
+#   forget-all  remove every known device; prints "ok" or "failed forget-all <reason>"
 #   disconnect  disconnect <address>, keeping the pairing; prints "ok" or "failed disconnect <reason>"
 #
 # scan and devices print one device per line, tab separated:
@@ -266,6 +267,25 @@ forget_device() {
     echo "ok"
 }
 
+forget_all() {
+    if ! bt_running; then
+        echo "failed forget-all bluetooth is off"
+        return
+    fi
+    timeout 5 bluetoothctl devices 2>/dev/null | while read -r _ mac _; do
+        timeout 10 bluetoothctl remove "$mac" >/dev/null 2>&1
+    done
+    if [ -n "$(timeout 5 bluetoothctl devices 2>/dev/null)" ]; then
+        log_message "bluetooth.sh: forget-all left devices behind" >/dev/null
+        echo "failed forget-all some devices remain"
+        return
+    fi
+    rm -f "$USER_DISCONNECTED"
+    route_audio >/dev/null 2>&1
+    log_message "bluetooth.sh: forgot all devices" >/dev/null
+    echo "ok"
+}
+
 disconnect_device() {
     if [ -z "$1" ] || ! bt_running; then
         echo "failed disconnect bluetooth is off"
@@ -310,6 +330,7 @@ case "$1" in
     devices) list_devices ;;
     pair)    pair_device "$2" ;;
     forget)  forget_device "$2" ;;
+    forget-all) forget_all ;;
     disconnect) disconnect_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|boot|suspend|status|scan|devices|pair <address>|forget <address>|disconnect <address>" >&2; exit 2 ;;
+    *)       echo "usage: bluetooth.sh apply|boot|suspend|status|scan|devices|pair <address>|forget <address>|forget-all|disconnect <address>" >&2; exit 2 ;;
 esac
