@@ -44,6 +44,8 @@ def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
             return bool(probe32(font_ptr, cp))
         except Exception:
             pass  # old lib: fall through to the 16-bit probe below
+    # Non-BMP skips the 16-bit probe and falls closed below: on old
+    # libs it always takes the fallback, which is the safe direction.
     if cp <= 0xFFFF:
         probe16 = getattr(mod, "TTF_GlyphIsProvided", None)
         if callable(probe16):
