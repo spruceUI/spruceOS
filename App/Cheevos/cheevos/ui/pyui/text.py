@@ -31,7 +31,7 @@ _ASCII_FALLBACKS = {
     "\u201c": '"',
     "\u201d": '"',
 }
-_BMP_MAX = 0xFFFF  # TTF_GlyphIsProvided (pre-2.0.18) only takes 16-bit code points
+_BMP_MAX = 0xFFFF  # Legacy SDL_ttf glyph APIs only take 16-bit code points.
 # Width estimates ignore kerning; keep a little slack so fitted text never touches neighbours.
 _FIT_MARGIN = 0.97
 # Share of the screen width the top-bar title may use if PyUI's top bar can't be measured.
@@ -85,7 +85,7 @@ def _has_glyph(purpose: str, char: str) -> bool:
         return True
     try:
         return bool(sdlttf.TTF_GlyphIsProvided32(loaded.font, ord(char)))
-    except AttributeError:  # SDL_ttf older than 2.0.18
+    except (AttributeError, RuntimeError):  # PySDL2 uses RuntimeError stubs on SDL_ttf < 2.0.18.
         return ord(char) > _BMP_MAX or bool(sdlttf.TTF_GlyphIsProvided(loaded.font, ord(char)))
 
 
@@ -208,11 +208,15 @@ def _advance(purpose: str, char: str) -> int:
     from sdl2 import sdlttf
 
     font = Display.fonts[FontPurpose[purpose]].font
+    codepoint = ord(char)
     metrics = [ctypes.c_int() for _ in range(5)]
+    pointers = [ctypes.byref(m) for m in metrics]
     try:
-        failed = sdlttf.TTF_GlyphMetrics32(font, ord(char), *(ctypes.byref(m) for m in metrics))
-    except AttributeError:  # SDL_ttf older than 2.0.18
-        failed = True
+        failed = sdlttf.TTF_GlyphMetrics32(font, codepoint, *pointers)
+    except (AttributeError, RuntimeError):  # PySDL2 uses RuntimeError stubs on SDL_ttf < 2.0.18.
+        failed = (
+            sdlttf.TTF_GlyphMetrics(font, codepoint, *pointers) if codepoint <= _BMP_MAX else True
+        )
     if not failed:
         return metrics[4].value
     return int(Display.get_text_dimensions(FontPurpose[purpose], char)[0])
