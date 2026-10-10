@@ -818,14 +818,46 @@ class DeviceCommon(AbstractDevice):
 
     _audio_route_lock = threading.Lock()
 
+    # usb_audio_watchdog.sh reroutes when a USB sound card comes or goes and
+    # records the card it routed to; get_bluetooth_status follows headsets.
+    # The record names the enumeration, so a card replugged at the same index
+    # still reopens: the old handle points at a card that is gone.
+    def watch_audio_route(self):
+        path = PyUiConfig.get_usb_audio_route_path()
+        if not path or not self._usb_audio_supported():
+            return
+        last = ""
+        while True:
+            time.sleep(1)
+            try:
+                route = Path(path).read_text()
+            except OSError:
+                route = ""
+            if route != last:
+                last = route
+                self._refresh_audio_route(reopen=True)
+
+    def _usb_audio_supported(self):
+        # The shell's device_usb_audio_supported is the one switch, as
+        # device_bluetooth_supported is for Bluetooth.
+        cmd = PyUiConfig.get_usb_audio_supported_cmd()
+        if not cmd:
+            return False
+        try:
+            return subprocess.run([cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                  timeout=30).returncode == 0
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"USB audio support check failed: {e}")
+            return False
+
     def refresh_audio_route(self):
         threading.Thread(target=self._refresh_audio_route, name="AudioRoute", daemon=True).start()
 
-    def _refresh_audio_route(self):
+    def _refresh_audio_route(self, reopen=False):
         with self._audio_route_lock:
-            self._refresh_audio_route_locked()
+            self._refresh_audio_route_locked(reopen)
 
-    def _refresh_audio_route_locked(self):
+    def _refresh_audio_route_locked(self, reopen=False):
         # The command prints the ALSA device to play through - a connected
         # Bluetooth headset - or an empty last line for the default output.
         cmd = PyUiConfig.get_bt_audio_device_cmd()
@@ -841,7 +873,7 @@ class DeviceCommon(AbstractDevice):
             return
         lines = result.stdout.splitlines()
         device = lines[-1].strip() if lines else ""
-        if device == os.environ.get("AUDIODEV", ""):
+        if device == os.environ.get("AUDIODEV", "") and not reopen:
             return
         if device:
             os.environ["AUDIODEV"] = device

@@ -399,7 +399,8 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/power_button_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh \
         /mnt/SDCARD/spruce/scripts/idle_watchdog.sh \
-        /mnt/SDCARD/spruce/scripts/lid_watchdog.sh
+        /mnt/SDCARD/spruce/scripts/lid_watchdog.sh \
+        /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh
     do
         stop_running_watchdog "$_wd"
     done
@@ -413,6 +414,9 @@ launch_startup_watchdogs(){
     # line the XX line had no low-battery warning and no forced shutdown.
     /bin/bash /mnt/SDCARD/spruce/scripts/battery_level_watchdog.sh &
     /bin/bash /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
+    if device_usb_audio_supported; then
+        /bin/bash /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
+    fi
 
     if has_lid >/dev/null; then
         /bin/bash /mnt/SDCARD/spruce/scripts/lid_watchdog.sh &
@@ -704,6 +708,7 @@ set_volume() {
 
     amixer -q set 'lineout volume' "$system_volume"
     bt_headset_volume "$new_vol"
+    usb_audio_follow_volume "$new_vol"
 
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
@@ -1200,6 +1205,12 @@ device_bluetoothd_start() {
         setsid dbus-daemon --system --fork
     fi
     bt_spawn /usr/libexec/bluetooth/bluetoothd -n
+}
+
+# The one USB-C port picks its own role on attach: never force it. set_volume
+# follows the card.
+device_usb_audio_supported() {
+    [ "$ASOUND_SPRUCE_PCMS" = 1 ]
 }
 
 # Named outputs, so PyUI can return to the speaker. The stock default is an unnamed

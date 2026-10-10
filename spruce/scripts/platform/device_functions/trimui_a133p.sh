@@ -73,6 +73,12 @@ ctl.!default {
 EOF
 }
 
+# The firmware's volume keys write /tmp/system/set_volume; volume_sync_watchdog.sh
+# applies it to the card.
+device_usb_audio_supported() {
+    [ "$ASOUND_SPRUCE_PCMS" = 1 ]
+}
+
 # The firmware attaches hci0 and runs bluetoothd, so the default bring-up is all
 # it needs: it fills in what is missing and never restarts bluetoothd.
 device_bluetooth_supported() {

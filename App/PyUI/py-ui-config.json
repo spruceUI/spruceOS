@@ -21,6 +21,8 @@
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
     "btAudioDeviceCmd":"/mnt/SDCARD/App/PyUI/get-bt-audio-device.sh",
+    "usbAudioSupportedCmd":"/mnt/SDCARD/App/PyUI/get-usb-audio-supported.sh",
+    "usbAudioRoutePath":"/tmp/usb_audio_route",
     "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
     "bluetoothCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_bluetooth",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",

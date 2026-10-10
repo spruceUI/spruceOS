@@ -267,6 +267,14 @@ class PyUiConfig:
         return cls.get("btAudioDeviceCmd",None)
 
     @classmethod
+    def get_usb_audio_supported_cmd(cls):
+        return cls.get("usbAudioSupportedCmd",None)
+
+    @classmethod
+    def get_usb_audio_route_path(cls):
+        return cls.get("usbAudioRoutePath",None)
+
+    @classmethod
     def get_wifi_cmd(cls):
         return cls.get("wifiCmd",None)
 

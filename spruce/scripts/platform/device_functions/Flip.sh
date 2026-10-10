@@ -148,6 +148,7 @@ set_volume() {
         fi
     fi
     bt_headset_volume "$VOLUME_LV"
+    usb_audio_follow_volume "$VOLUME_LV"
 
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
     if [ "$SAVE_TO_CONFIG" = true ]; then
@@ -309,6 +310,12 @@ launch_startup_watchdogs(){
     stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
     if [ -n "$WIFI_USB_MODULES_DIR" ]; then
         /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+    fi
+
+    # USB sound card hot-plug, for the devices whose volume path follows one.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh
+    if device_usb_audio_supported; then
+        /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
     fi
 
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
@@ -551,6 +558,11 @@ device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
     return 1 # Flip leaves dirty bit set?
+}
+
+# The upper USB-C port is the host port; set_volume follows the card.
+device_usb_audio_supported() {
+    [ "$ASOUND_SPRUCE_PCMS" = 1 ]
 }
 
 # The speaker is pcm.spruce_speaker; asound-setup.sh adds the default.
