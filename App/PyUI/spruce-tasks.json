@@ -44,5 +44,91 @@
     "Scan ScummVM games": "create .scummvm files for games in Roms/SCUMMVM",
     "Clear all Recents": "delete your recently played games list",
     "Clear all Favorites": "delete your favorited games list"
+  },
+  "devices": {
+    "Emulator Reset Tasks/Reset DSperate config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset PPSSPP config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset Flycast config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset mupen64plus config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset YabaSanshiro config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset AdvanceMAME config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ],
+    "Emulator Reset Tasks/Reset BigPEmu config": [
+      "TRIMUI_BRICK",
+      "TRIMUI_BRICK_PRO",
+      "TRIMUI_SMART_PRO",
+      "TRIMUI_SMART_PRO_S",
+      "MIYOO_FLIP",
+      "MIYOO_A30",
+      "GKD_PIXEL2",
+      "ANBERNIC_RGXX",
+      "MAGICX_A133P",
+      "DARKMOSS"
+    ]
   }
 }
