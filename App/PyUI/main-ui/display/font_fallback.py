@@ -9,6 +9,11 @@ class Run(NamedTuple):
     segment: str
 
 
+def is_single_primary(runs: List[Run]) -> bool:
+    """True when the whole text is one run the primary font covers."""
+    return len(runs) == 1 and not runs[0].is_fallback
+
+
 def split_fallback_runs(text: str, has_glyph: Callable[[int], bool]) -> List[Run]:
     """Split text into consecutive same-font runs.
 

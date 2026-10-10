@@ -3,7 +3,7 @@ import os
 import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.font_fallback import Run
+from display.font_fallback import Run, is_single_primary, split_fallback_runs
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
 from display.resize_type import ResizeType
@@ -707,7 +707,7 @@ class Display:
         runs = loaded_font.split(text)
         if not runs:
             runs = [Run(False, text)]
-        if len(runs) == 1 and not runs[0].is_fallback:
+        if is_single_primary(runs):
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
         if len(runs) == 1:
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.handle_for(True), text.encode('utf-8'), sdl_color)
@@ -729,6 +729,44 @@ class Display:
                     sdl2.SDL_FreeSurface(surface)
                 except Exception:
                     pass
+    @staticmethod
+    def _baseline_layout(heights, handles):
+        """Baseline offsets + joined height for one row of runs.
+
+        Shared by the render path (positions each run surface) and the
+        measure path (reports the same height that will be rendered), so
+        wrapping and clipping agree with the pixels. Top-aligned when
+        ascent info is unavailable.
+        """
+        ascents = []
+        for handle in handles:
+            try:
+                ascents.append(int(sdl2.sdlttf.TTF_FontAscent(handle)))
+            except Exception:
+                ascents.append(None)
+        if all(a is not None for a in ascents):
+            top = max(ascents)
+            y_offsets = [top - a for a in ascents]
+        else:
+            y_offsets = [0] * len(heights)
+        # Fit every run at its baseline offset, not just the tallest run,
+        # or fallback descenders get clipped.
+        joined_h = max(y_off + h for y_off, h in zip(y_offsets, heights))
+        return y_offsets, joined_h
+
+    @staticmethod
+    def _blit_surface(src, src_rect, dst, dst_rect):
+        """Blit with SDL_UpperBlit fallback for old bindings. Never raises."""
+        blit = getattr(sdl2, "SDL_BlitSurface", None)
+        if blit is None:
+            blit = getattr(sdl2, "SDL_UpperBlit", None)
+        if blit is None:
+            return -1
+        try:
+            return blit(src, src_rect, dst, dst_rect)
+        except Exception:
+            return -1
+
     @classmethod
     def _join_run_surfaces(cls, run_items):
         """Join per-run surfaces horizontally on a common baseline.
@@ -744,21 +782,8 @@ class Display:
             total_w = sum(widths)
             if total_w <= 0 or not heights or max(heights) <= 0:
                 return None
-            ascents = []
-            for handle, _ in run_items:
-                try:
-                    ascents.append(int(sdl2.sdlttf.TTF_FontAscent(handle)))
-                except Exception:
-                    ascents.append(None)
-            if all(a is not None for a in ascents):
-                top = max(ascents)
-                y_offsets = [top - a for a in ascents]
-            else:
-                # Ascent unavailable: top-align every run (offset 0).
-                y_offsets = [0] * len(surfaces)
-            # Joined height must fit every run at its baseline offset, not
-            # just the tallest run, or fallback descenders get clipped.
-            joined_h = max(y_off + h for y_off, h in zip(y_offsets, heights))
+            y_offsets, joined_h = cls._baseline_layout(
+                heights, [handle for handle, _ in run_items])
             joined = sdl2.SDL_CreateRGBSurface(
                 0, total_w, joined_h, 32,
                 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
@@ -768,17 +793,11 @@ class Display:
                 sdl2.SDL_FillRect(joined, None, 0)
             except Exception:
                 pass
-            blit = getattr(sdl2, "SDL_BlitSurface", None)
-            if blit is None:
-                blit = getattr(sdl2, "SDL_UpperBlit", None)
             x = 0
             for (_, surface), y_off in zip(run_items, y_offsets):
                 src_rect = sdl2.SDL_Rect(0, 0, surface.contents.w, surface.contents.h)
                 dst_rect = sdl2.SDL_Rect(x, y_off, surface.contents.w, surface.contents.h)
-                try:
-                    ok = blit(surface, src_rect, joined, dst_rect) if blit else -1
-                except Exception:
-                    ok = -1
+                ok = cls._blit_surface(surface, src_rect, joined, dst_rect)
                 x += surface.contents.w
                 if ok not in (0, None):
                     sdl2.SDL_FreeSurface(joined)
@@ -1312,23 +1331,26 @@ class Display:
         runs = loaded_font.split(text)
         if not runs:
             runs = [Run(False, text)]
-        if len(runs) == 1 and not runs[0].is_fallback:
+        if is_single_primary(runs):
             w = sdl2.Sint32()
             h = sdl2.Sint32()
             sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
             return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
         mult = Device.get_device().get_text_width_measurement_multiplier()
         total_raw = 0
-        max_h = 0
+        heights = []
+        handles = []
         for run in runs:
             handle = loaded_font.handle_for(run.is_fallback)
             w = sdl2.Sint32()
             h = sdl2.Sint32()
             sdl2.sdlttf.TTF_SizeUTF8(handle, run.segment.encode('utf-8'), w, h)
             total_raw += w.value
-            max_h = max(max_h, h.value)
-        # Scale once after summing raw widths: per-run int() truncation
-        # would otherwise drift by up to one pixel per run boundary.
+            heights.append(h.value)
+            handles.append(handle)
+        # Same baseline math as the render path so wrapping and clipping
+        # agree with the pixels; scale once to avoid per-run truncation.
+        _, max_h = cls._baseline_layout(heights, handles)
         return int(total_raw * mult), max_h
     
 
