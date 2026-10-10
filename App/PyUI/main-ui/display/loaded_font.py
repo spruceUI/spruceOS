@@ -70,7 +70,6 @@ class LoadedFont:
         self.fallback_path = fallback_path
         self._sdlttf = sdlttf if sdlttf is not None else _sdlttf
         self._glyph_cache = {}
-        self._fallback_glyph_cache = {}
 
     @staticmethod
     def _to_codepoint(value):
@@ -98,23 +97,14 @@ class LoadedFont:
         """Split text into runs served by primary vs fallback (see Run)."""
         return split_fallback_runs(text, self.has_glyph)
 
-    def _probe_cached(self, cache, handle, cp, fallback_available):
-        if cp not in cache:
-            self._store_bounded(
-                cache, cp,
-                _probe_glyph(handle, cp, self._sdlttf,
-                             fallback_available=fallback_available))
-        return cache[cp]
-
     def has_glyph(self, codepoint):
         cp = self._to_codepoint(codepoint)
-        return self._probe_cached(self._glyph_cache, self.font, cp,
-                                 self.has_fallback())
-
-    def fallback_has_glyph(self, codepoint):
-        cp = self._to_codepoint(codepoint)
-        return self._probe_cached(self._fallback_glyph_cache,
-                                 self.fallback_font, cp, True)
+        if cp not in self._glyph_cache:
+            self._store_bounded(
+                self._glyph_cache, cp,
+                _probe_glyph(self.font, cp, self._sdlttf,
+                             fallback_available=self.has_fallback()))
+        return self._glyph_cache[cp]
 
     def cache_key(self, purpose):
         """Text-texture cache identity: purpose + the font pair paths."""
