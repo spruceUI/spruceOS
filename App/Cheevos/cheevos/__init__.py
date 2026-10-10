@@ -1,3 +1,3 @@
 """Cheevos: an on-device RetroAchievements hub for SpruceOS."""
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
