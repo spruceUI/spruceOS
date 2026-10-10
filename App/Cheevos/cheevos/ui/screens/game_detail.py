@@ -78,6 +78,9 @@ def show_game(ctx: AppContext, game_id: int) -> None:
         detail = _load(ctx, game_id)
         if detail is None:
             return
+    if not detail.achievements:
+        message(detail.title, [strings.NO_ACHIEVEMENT_SET])
+        return
     game = ctx.data.game(game_id)
     pending = ctx.pending_awards()
     earned = sum(1 for a in detail.achievements if a.unlocked)
