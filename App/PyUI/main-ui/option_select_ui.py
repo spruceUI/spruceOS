@@ -12,6 +12,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
@@ -20,14 +21,69 @@ from views.view_type import ViewType
 class OptionSelectUI:
 
     @staticmethod
+    def _get_cfw_version():
+        """Read the installed CFW version string from the configured version file."""
+        version_file = PyUiConfig.get_cfw_version_file()
+        if not version_file:
+            return None
+
+        try:
+            with open(version_file, "r", encoding="utf-8") as f:
+                version = f.read().strip()
+
+            return version or None
+        except (OSError, ValueError):
+            return None
+
+    @staticmethod
+    def _version_tuple(version):
+        """Convert a dotted version string into a comparable numeric tuple."""
+        import re
+
+        if not version:
+            return None
+
+        parts = re.findall(r"\d+", version)
+        return tuple(map(int, parts)) if parts else None
+
+    @staticmethod
+    def _version_meets_minimum(current_version, min_version):
+        """Return whether the installed version meets a minimum version."""
+        current = OptionSelectUI._version_tuple(current_version)
+        minimum = OptionSelectUI._version_tuple(min_version)
+
+        if current is None or minimum is None:
+            return False
+
+        length = max(len(current), len(minimum))
+        current = current + (0,) * (length - len(current))
+        minimum = minimum + (0,) * (length - len(minimum))
+
+        return current >= minimum
+
+    @staticmethod
     def _filter_compatible_entries(data):
-        """Remove entries that don't support the current device."""
+        """Remove entries incompatible with the current device or CFW version."""
         device_map = data.get("devices", {})
+        min_version_map = data.get("min_cfw_version", {})
         filtered = dict(data)
 
-        for key, devices in device_map.items():
-            if key in filtered and not Device.supports_device(devices):
-                filtered.pop(key)
+        current_version = OptionSelectUI._get_cfw_version()
+
+        for key in data:
+            if key in ("descriptions", "devices", "min_cfw_version"):
+                continue
+
+            devices = device_map.get(key)
+            if devices and not Device.supports_device(devices):
+                filtered.pop(key, None)
+                continue
+
+            min_version = min_version_map.get(key)
+            if min_version and not OptionSelectUI._version_meets_minimum(
+                current_version, min_version
+            ):
+                filtered.pop(key, None)
 
         return filtered
 
@@ -42,7 +98,7 @@ class OptionSelectUI:
         root = tree()
 
         for key, value in flat_map.items():
-            if key in ("descriptions", "devices", "min_spruce_version"):
+            if key in ("descriptions", "devices", "min_cfw_version"):
                 continue
             parts = key.split("/")
             node = root

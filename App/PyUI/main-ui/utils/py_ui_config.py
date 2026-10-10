@@ -278,3 +278,6 @@ class PyUiConfig:
     def get_cache_cheevos_cmd(cls):
         return cls.get("cacheCheevosCmd",None)
 
+    @classmethod
+    def get_cfw_version_file(cls):
+        return cls.get("cfwVersionFile","0.0.0")
