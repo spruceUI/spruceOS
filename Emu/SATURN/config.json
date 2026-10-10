@@ -92,23 +92,24 @@
       "overrides": {}
     }
   },
+  "Emulator_32": {
+    "display": "Emulator",
+    "options": [
+      "yabadabadoo"
+    ],
+    "devices": [
+      "MIYOO_MINI_FAMILY",
+      "MIYOO_A30"
+    ],
+    "selected": "yabadabadoo",
+    "overrides": {}
+  },
   "sortOrder": 5500,
   "brand": "Sega",
   "type": "homeconsole",
   "releaseYear": 1994,
   "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000,
-  "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
-    "TRIMUI_SMART_PRO_S",
-    "MIYOO_FLIP",
-    "GKD_PIXEL2",
-    "ANBERNIC_RGXX",
-    "DARKMOSS",
-    "MAGICX_A133P"
-  ],
   "alternativeFolderNames": [
     "saturn",
     "segasaturn",
