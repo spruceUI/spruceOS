@@ -18,10 +18,7 @@
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -38,10 +35,7 @@
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -58,10 +52,7 @@
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -95,10 +86,7 @@
         "scummvm-standalone"
       ],
       "devices": [
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_MINI_FAMILY"
       ],
       "selected": "scummvm-standalone",
       "overrides": {}
@@ -132,10 +120,7 @@
     "MIYOO_A30",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "MIYOO_MINI",
-    "MIYOO_MINI_V4",
-    "MIYOO_MINI_PLUS",
-    "MIYOO_MINI_FLIP",
+    "MIYOO_MINI_",
     "DARKMOSS",
     "MAGICX_A133P"
   ],

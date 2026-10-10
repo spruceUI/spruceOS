@@ -54,10 +54,7 @@
       "selected": "uae4arm",
       "overrides": {},
       "devices": [
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_MINI_FAMILY"
       ]
     }
   },

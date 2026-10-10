@@ -27,7 +27,7 @@
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_FLIP", "MIYOO_MINI_PLUS", "MIYOO_MINI_V4", "MAGICX_XU20", "MAGICX_ZERO28", "MAGICX_ZERO40", "RGB30", "RGB20SX"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_XU20", "MAGICX_ZERO28", "MAGICX_ZERO40", "RGB30", "RGB20SX"],
                 "description": "for non-red status LED",
                 "options": [
                     "Always off",
@@ -72,10 +72,7 @@
                 "selected": "5m"
             },
             "disableShutdownFromSleepIfCharging": {
-                "devices":["MIYOO_MINI",
-                           "MIYOO_MINI_V4",
-                           "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP"],
+                "devices":["MIYOO_MINI_FAMILY"],
                 "display": "Shutdown after sleeping if unplugged",
                 "description": "ignore shutdown timeout if charging",
                 "options": [
@@ -154,10 +151,7 @@
         "System Settings": {
             "checkForUpdates": {
                 "devices":["MIYOO_FLIP",
-                           "MIYOO_MINI",
-                           "MIYOO_MINI_V4",
-                           "MIYOO_MINI_PLUS",
-                           "MIYOO_MINI_FLIP",
+                           "MIYOO_MINI_FAMILY",
                            "TRIMUI_BRICK",
                            "TRIMUI_BRICK_PRO",
                            "TRIMUI_SMART_PRO",
@@ -259,10 +253,7 @@
                 "selected": "Off"
             },
             "overclockSpeedMiyooMini": {
-                "devices": ["MIYOO_MINI",
-                            "MIYOO_MINI_V4",
-                            "MIYOO_MINI_PLUS",
-                            "MIYOO_MINI_FLIP"],
+                "devices": ["MIYOO_MINI_FAMILY"],
                 "display": "Overclock Speed",
                 "description": "Clockspeed to use for overclocking",
                 "options": [
