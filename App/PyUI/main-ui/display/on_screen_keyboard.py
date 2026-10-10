@@ -15,7 +15,6 @@ class OnScreenKeyboard:
             ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\"],      
             ["⇪", "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'", "←"],                 
             ["↑", " ", "z", "x", "c", "v", "b", "n", "m", ",", ".", "/","↵"], 
-            [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "] 
         ]
 
         self.shifted_keys = [
@@ -24,7 +23,6 @@ class OnScreenKeyboard:
             ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|"],
             ["⇪", "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", '"', "←"],
             ["↑"," ", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?","↵"],  
-            [" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "] 
         ]
 
     def get_input(self, title_text, starting_text=""):
@@ -38,6 +36,9 @@ class OnScreenKeyboard:
         key_w = Device.get_device().screen_width() // 16 #13 keys, set to 16 for spacing
         key_w_offset = Device.get_device().screen_width() // 13
         key_h = key_w
+        space_label = "space"
+        if Display.get_text_dimensions(FontPurpose.ON_SCREEN_KEYBOARD, space_label)[0] > key_w * 0.9:
+            space_label = "spc"
 
         while running:
             Display.clear("Keyboard")
@@ -92,25 +93,31 @@ class OnScreenKeyboard:
                         ):
                         color = Theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD)
                         selected = True
-                        Display.render_image(
-                            image_path = Theme.key_selected_bg() if selected else Theme.key_bg(),
-                            x = x,
-                            y = y, 
-                            render_mode = RenderMode.TOP_LEFT_ALIGNED, 
-                            target_width=key_w, 
-                            target_height=key_h)
-
                     else:
                         color = Theme.text_color(FontPurpose.ON_SCREEN_KEYBOARD)
 
+                    Display.render_image(
+                        image_path = Theme.key_selected_bg() if selected else Theme.key_bg(),
+                        x = x,
+                        y = y, 
+                        render_mode = RenderMode.TOP_LEFT_ALIGNED, 
+                        target_width=key_w, 
+                        target_height=key_h)
 
-                    Display.render_text(text=key,
+                    Display.render_text(text=space_label if " " == key else key,
                                             x = x + key_w //2,
                                             y = y + key_h //2, 
                                             purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                                             color=color,
                                             render_mode = RenderMode.MIDDLE_CENTER_ALIGNED)
                 next_y += key_h
+
+            Display.render_text(text="L1 shift · R1 caps · B delete · START done",
+                                x = Device.get_device().screen_width() // 2,
+                                y = next_y + key_h // 4,
+                                purpose = FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION,
+                                color=Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION),
+                                render_mode = RenderMode.TOP_CENTER_ALIGNED)
                 
             Display.present()
             if(Controller.get_input()):
