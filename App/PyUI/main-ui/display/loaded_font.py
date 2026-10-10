@@ -16,27 +16,46 @@ GLYPH_CACHE_LIMIT = 4096
 def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
     """Return True if font_ptr provides codepoint. Never raises.
 
-    Fail-closed toward the fallback: a None handle or a failed probe
-    reports missing (False) so the fallback font can rescue the glyph.
-    The only fail-open case is a completely missing SDL probe API with
-    no usable fallback, where True preserves the old single-font
-    behaviour (nothing else could render the glyph anyway).
+    Tries the 32-bit probe first, then falls through to the 16-bit
+    probe (present since SDL_ttf 2.0.12) when the 32-bit call is
+    missing or raises -- e.g. pysdl2 binds TTF_GlyphIsProvided32 but
+    the loaded lib is older than 2.0.18, which raises RuntimeError on
+    call. All PyUI UI glyphs are BMP, so the 16-bit probe covers them.
+
+    Fail-closed toward the fallback: a None handle or probes that all
+    fail report missing (False) so the fallback font can rescue the
+    glyph. The only fail-open case is a completely missing SDL probe
+    API with no usable fallback, where True preserves the old
+    single-font behaviour (nothing else could render the glyph anyway).
     """
     if font_ptr is None:
         return False
-    try:
-        mod = sdlttf if sdlttf is not None else _sdlttf
-        if mod is None:
-            return False if fallback_available else True
-        probe32 = getattr(mod, "TTF_GlyphIsProvided32", None)
-        if callable(probe32):
-            return bool(probe32(font_ptr, int(codepoint)))
-        probe16 = getattr(mod, "TTF_GlyphIsProvided", None)
-        if callable(probe16) and int(codepoint) <= 0xFFFF:
-            return bool(probe16(font_ptr, int(codepoint)))
+    mod = sdlttf if sdlttf is not None else _sdlttf
+    if mod is None:
         return False if fallback_available else True
-    except Exception:
+    cp = int(codepoint)
+    tried = False
+    probe32 = getattr(mod, "TTF_GlyphIsProvided32", None)
+    if callable(probe32):
+        tried = True
+        try:
+            return bool(probe32(font_ptr, cp))
+        except Exception:
+            pass  # old lib: fall through to the 16-bit probe below
+    if cp <= 0xFFFF:
+        probe16 = getattr(mod, "TTF_GlyphIsProvided", None)
+        if callable(probe16):
+            tried = True
+            try:
+                return bool(probe16(font_ptr, cp))
+            except Exception:
+                pass
+    if tried:
+        # A probe existed but every call failed: report missing so the
+        # fallback font gets its chance (or the primary renders anyway
+        # when there is no fallback to switch to).
         return False
+    return False if fallback_available else True
 
 
 class LoadedFont:
