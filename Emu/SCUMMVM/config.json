@@ -10,18 +10,13 @@
       "name": "Open ScummVM Menu",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/open_scummvm_menu.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -30,18 +25,13 @@
       "name": "Scan ScummVM Games",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/scan_scummvm_game.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -50,18 +40,13 @@
       "name": "Generate namelist",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -95,10 +80,7 @@
         "scummvm-standalone"
       ],
       "devices": [
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_MINI_FAMILY"
       ],
       "selected": "scummvm-standalone",
       "overrides": {}
@@ -109,9 +91,7 @@
         "scummvm-standalone"
       ],
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "GKD_PIXEL2",
@@ -124,18 +104,13 @@
     }
   },
   "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "MIYOO_A30",
     "GKD_PIXEL2",
     "ANBERNIC_RGXX",
-    "MIYOO_MINI",
-    "MIYOO_MINI_V4",
-    "MIYOO_MINI_PLUS",
-    "MIYOO_MINI_FLIP",
+    "MIYOO_MINI_",
     "DARKMOSS",
     "MAGICX_A133P"
   ],

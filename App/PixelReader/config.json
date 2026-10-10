@@ -5,9 +5,7 @@
   "description": "Read Ebooks on your device",
   "devices": [
     "MIYOO_A30",
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "GKD_PIXEL2",

@@ -976,6 +976,10 @@ class MiyooMiniCommon(MiyooDevice):
     
     def get_device_name(self):
         return self.device_name
+
+    def get_device_names(self):
+        names = [self.device_name, "MIYOO_MINI_FAMILY"]
+        return names
     
     # Timezone support is inherited from DeviceCommon. The Mini has no tz
     # database of its own and a read-only root, so it relies entirely on the

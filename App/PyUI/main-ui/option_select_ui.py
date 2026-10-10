@@ -52,8 +52,10 @@ class OptionSelectUI:
         current = OptionSelectUI._version_tuple(current_version)
         minimum = OptionSelectUI._version_tuple(min_version)
 
-        if current is None or minimum is None:
+        if current is None:
             return False
+        if minimum is None:
+            return True
 
         length = max(len(current), len(minimum))
         current = current + (0,) * (length - len(current))

@@ -66,10 +66,8 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
         "MAGICX_A133P"
       ],
