@@ -41,8 +41,7 @@
         "MAGICX_A133P"
       ],
       "options": [
-        "gametank-standalone",
-        "libgametank"
+        "gametank-standalone"
       ],
       "selected": "gametank-standalone",
       "overrides": {}
