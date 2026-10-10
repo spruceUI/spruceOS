@@ -130,6 +130,9 @@ def initialize_device(device, main_ui_mode):
     elif "RGB20SX" == device:
         from devices.rgb30.rgb20sx import Rgb20sx
         Device.init(Rgb20sx(device))
+    elif "A10MINI" == device:
+        from devices.a10mini.a10mini import A10Mini
+        Device.init(A10Mini(device))
     elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
         from devices.magicx.magicx_zero28 import MagicXZero28
         Device.init(MagicXZero28(device, main_ui_mode))
@@ -149,7 +152,7 @@ def initialize_device(device, main_ui_mode):
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
-    CheevosCacheManager.initialize(PyUiConfig.get_cheevos_cache_path())
+    CheevosCacheManager.initialize()
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
@@ -161,6 +164,10 @@ def start_background_threads():
     # Background favorites/recents init thread
     background_thread = threading.Thread(target=background_startup)
     background_thread.start()
+
+    # Follows the USB audio route for as long as the menu runs
+    audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
+    audio_route_thread.start()
 
 def verify_config_exists(config_path):
     # Determine the directory where this script resides

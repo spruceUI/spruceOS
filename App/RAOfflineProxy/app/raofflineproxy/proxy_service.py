@@ -13,7 +13,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlsplit
 
-from . import cache_budget, cache_keys, cache_queue, log_uploader, rate_limit, storage_corruption, usage_report, usage_stats
+from . import cache_budget, cache_keys, cache_queue, log_uploader, rate_limit, storage_corruption, usage_report, usage_stats, watch_folders
 from .auth import resolve_credentials
 from .boot import adopt_listen_socket
 from .award_signing import sign_award
@@ -46,12 +46,12 @@ from .network import (
     response_content_type,
 )
 from .rom_cache import (
-    build_achievement_game_ids,
     build_unlocks_array,
     cache_session,
     cache_unlocks,
     filter_warning_achievement_ids,
     filter_warning_achievements_for_action,
+    find_achievement_game_ids,
     merged_unlock_ids,
     refresh_game_patch,
 )
@@ -476,11 +476,9 @@ class ProxyRuntimeServer(ThreadingTCPServer):
         if achievement_id <= 0:
             return None
 
-        achievement_game_ids = build_achievement_game_ids(
-            self.storage.get_all_cache_by_prefix(cache_keys.PREFIX_PATCH),
-            self.storage.get_all_cache_by_prefix(cache_keys.PREFIX_ACHIEVEMENTSETS),
+        resolved_game_id = find_achievement_game_ids(self.storage, {achievement_id}).get(
+            achievement_id
         )
-        resolved_game_id = achievement_game_ids.get(achievement_id)
         if resolved_game_id is None:
             return None
         return str(resolved_game_id)
@@ -638,12 +636,7 @@ class ProxyRuntimeServer(ThreadingTCPServer):
             LOGGER.warning(
                 "Offline gameid cache miss requestedKey=%s sampleKeys=%s",
                 key,
-                [
-                    entry["cacheKey"]
-                    for entry in self.storage.get_all_cache_by_prefix(
-                        cache_keys.PREFIX_GAMEID
-                    )[:10]
-                ],
+                self.storage.cache_keys_by_prefix(cache_keys.PREFIX_GAMEID)[:10],
             )
             return game_id_cache_miss()
 
@@ -899,8 +892,7 @@ class ProxyRuntimeServer(ThreadingTCPServer):
         if achievement_id <= 0 or not user:
             return False
 
-        achievement_game_ids = self.build_cached_achievement_game_ids()
-        game_id = achievement_game_ids.get(achievement_id)
+        game_id = find_achievement_game_ids(self.storage, {achievement_id}).get(achievement_id)
         if game_id is None:
             return False
 
@@ -919,12 +911,6 @@ class ProxyRuntimeServer(ThreadingTCPServer):
 
         return achievement_id in filter_warning_achievement_ids(
             [item for item in unlock_ids if isinstance(item, int)]
-        )
-
-    def build_cached_achievement_game_ids(self) -> dict[int, int]:
-        return build_achievement_game_ids(
-            self.storage.get_all_cache_by_prefix(cache_keys.PREFIX_PATCH),
-            self.storage.get_all_cache_by_prefix(cache_keys.PREFIX_ACHIEVEMENTSETS),
         )
 
     def fetch_cached_score(self, path: str, raw_body: str) -> int:
@@ -1064,17 +1050,15 @@ class PeriodicRefresh(threading.Thread):
                 continue
             if not self.wait_until_idle():
                 continue
-            patch_entries = self.server.storage.get_all_cache_by_prefix(
-                cache_keys.PREFIX_PATCH
-            )
+            patch_keys = self.server.storage.cache_keys_by_prefix(cache_keys.PREFIX_PATCH)
             recently_played = load_recently_played_game_ids(
                 self.server.storage, current_millis() - REFRESH_PLAYED_WINDOW_MS
             )
-            due_game_ids = due_refresh_game_ids(patch_entries, recently_played)
+            due_game_ids = due_refresh_game_ids(patch_keys, recently_played)
             LOGGER.info(
                 "Periodic refresh: %d of %d cached game(s) played in the last %d day(s)",
                 len(due_game_ids),
-                len(patch_entries),
+                len(patch_keys),
                 REFRESH_PLAYED_WINDOW_DAYS,
             )
             with rate_limit.background():
@@ -1208,10 +1192,74 @@ class CacheQueueWorker(threading.Thread):
         return result
 
 
-def due_refresh_game_ids(patch_entries: list[dict], recently_played: set[int]) -> list[int]:
+class FolderWatcher(threading.Thread):
+    """Once per budget window, hashes and queues the files in watched folders that it has not
+    handled before; CacheQueueWorker then caches them within the budget. It polls for the
+    same reason CacheQueueWorker does: a handheld's suspend stops the clock Event.wait uses.
+    The folder list is read from the config on every round, so the CLI can change it while
+    the service runs."""
+
+    def __init__(
+        self, server: ProxyRuntimeServer, poll_seconds: float = CACHE_QUEUE_POLL_SECONDS
+    ):
+        super().__init__(daemon=True)
+        self.server = server
+        self.poll_seconds = poll_seconds
+        self.stop_event = threading.Event()
+
+    def stop(self) -> None:
+        self.stop_event.set()
+
+    def run(self) -> None:
+        while not self.stop_event.wait(self.poll_seconds):
+            try:
+                self.process_once()
+            except Exception:
+                LOGGER.exception("Watched folder round failed")
+
+    def is_idle(self) -> bool:
+        return self.server.activity.idle_delay_seconds() <= 0
+
+    def can_work(self) -> bool:
+        return not cache_queue.bulk_run_active() and self.is_idle()
+
+    def should_stop(self) -> bool:
+        # Not can_work(): the scan holds the bulk-run lock itself, so checking it mid-run
+        # would make every pass abort itself.
+        return self.stop_event.is_set() or not self.is_idle()
+
+    def process_once(self) -> list[watch_folders.FolderScan]:
+        watched = watch_folders.configured_watched_folders()
+        if not watched:
+            return []
+        storage = self.server.storage
+        folders = watch_folders.due_folders(storage, watched, current_millis())
+        if not folders or not self.can_work():
+            return []
+        if resolve_credentials(storage, self.server.config_data, self_user_agent()) is None:
+            return []
+        scans: list[watch_folders.FolderScan] = []
+        for folder in folders:
+            if self.stop_event.is_set() or not self.can_work():
+                break
+            scan = watch_folders.scan_folder(
+                storage, self.server.config_data, folder, should_abort=self.should_stop
+            )
+            LOGGER.info(
+                "Watched folder %s: %d file(s), %d new, %d queued",
+                folder,
+                scan.files,
+                scan.new,
+                scan.queued,
+            )
+            scans.append(scan)
+        return scans
+
+
+def due_refresh_game_ids(patch_keys: list[str], recently_played: set[int]) -> list[int]:
     due: list[int] = []
-    for entry in patch_entries:
-        game_id = cache_keys.parse_game_id_from_patch_key(entry["cacheKey"])
+    for patch_key in patch_keys:
+        game_id = cache_keys.parse_game_id_from_patch_key(patch_key)
         if game_id is not None and game_id in recently_played and game_id not in due:
             due.append(game_id)
     return due
@@ -1247,10 +1295,12 @@ def run_proxy_service(
         proxy_host(config_data),
         proxy_port(config_data),
     )
+    LOGGER.info("Storage backend: %s", storage.backend)
     ensure_ra_proxy_chained(config_data)
     connectivity_monitor = ConnectivityMonitor(server)
     periodic_refresh = PeriodicRefresh(server)
     cache_queue_worker = CacheQueueWorker(server)
+    folder_watcher = FolderWatcher(server)
     usage_reporter = UsageReporter(server)
 
     try:
@@ -1270,6 +1320,7 @@ def run_proxy_service(
         connectivity_monitor.start()
         periodic_refresh.start()
         cache_queue_worker.start()
+        folder_watcher.start()
         usage_reporter.start()
 
         if stop_event is None:
@@ -1284,6 +1335,7 @@ def run_proxy_service(
         connectivity_monitor.stop()
         periodic_refresh.stop()
         cache_queue_worker.stop()
+        folder_watcher.stop()
         usage_reporter.stop()
         usage_stats.flush()
         stop_ra_proxy_chain()

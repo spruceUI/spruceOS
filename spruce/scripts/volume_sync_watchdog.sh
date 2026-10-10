@@ -35,6 +35,9 @@
 # sound. When a non-zero volume arrives while Silent Mode's marker is present we
 # clear the mute (and the marker) so volume-up restores audio without touching
 # the switch.
+#
+# The writers drive only the built-in codec, so a USB card that audio is routed
+# to (asound-setup.sh) has no other owner: the level is applied to it here too.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -103,6 +106,7 @@ sync_value() {
     if [ "$new_vol" != "$(get_volume_level)" ]; then
         sed -i "s/\"vol\":[[:space:]]*[0-9]*/\"vol\": $new_vol/" "$SYSTEM_JSON" 2>/dev/null
     fi
+    usb_audio_follow_volume "$new_vol"
     unmute_if_raised "$new_vol"
 }
 

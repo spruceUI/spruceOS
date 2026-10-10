@@ -3,7 +3,7 @@
 # device whose menu button is a user choice, because it has no dedicated one and
 # has to spend a stick click on it.
 #
-# RGB30.cfg turns the setting into B_MENU/B_L3/B_R3, but homebutton_watchdog.sh
+# RGB30.cfg turns the setting into B_MENU/B_L3/B_R3, but menubutton_watchdog.sh
 # reads B_MENU once: it sources the .cfg at startup and then sits in a getevent
 # loop for the rest of the session. So changing the setting reached PyUI right
 # away - it resolves the click per press - while the in-game menu button stayed
@@ -14,14 +14,14 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-log_message "menuButton.sh: menu button is now ${1:-unset}, restarting homebutton_watchdog.sh"
+log_message "menuButton.sh: menu button is now ${1:-unset}, restarting menubutton_watchdog.sh"
 
 # Backgrounded as a whole: PyUI runs changeCmd synchronously on the UI thread,
 # so anything slow here shows up as the settings menu locking up. stdio goes to
 # /dev/null so the restarted watchdog does not inherit and hold open whatever
 # pipe the caller had - PyUI's, or an ssh session's when testing by hand.
 (
-    WATCHDOG="/mnt/SDCARD/spruce/scripts/homebutton_watchdog.sh"
+    WATCHDOG="/mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh"
 
     # Shared with the boot launcher (utils/watchdog_launcher.sh, reachable here
     # because helperFunctions.sh sources the platform's device_functions file).
@@ -35,5 +35,5 @@ log_message "menuButton.sh: menu button is now ${1:-unset}, restarting homebutto
     # Same pin the boot launcher applies, so the restarted watchdog does not
     # drift onto a different core than it had.
     SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
-    pin_cpu "$SYSTEM_CPU" -n homebutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n menubutton_watchdog.sh &
 ) </dev/null >/dev/null 2>&1 &

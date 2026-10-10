@@ -61,9 +61,7 @@
   "default_emulator": "DSperate",
   "scaling_min_freq": 816000,
   "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
     "MIYOO_FLIP",

@@ -182,7 +182,8 @@ wifi_scan_networks() {
         *FAIL-BUSY*|*"Failed to connect"*) ;;
         *) sleep 2 ;;
     esac
-    wpa_cli -i "$WIFI_IFACE" scan_results 2>/dev/null | awk -F'\t' '
+    wpa_cli -i "$WIFI_IFACE" scan_results 2>/dev/null | awk '
+        BEGIN { FS = "\t" }
         NR > 1 && NF >= 5 && $5 != "" {
             sec = ($4 ~ /WPA|WEP/) ? 1 : 0
             printf "%s\t%d\t%d\t%d\t%s\n", $5, $3, $2, sec, $1

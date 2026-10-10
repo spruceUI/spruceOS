@@ -5,7 +5,7 @@ import logging
 import time
 from dataclasses import dataclass
 
-from . import cache_keys, usage_stats
+from . import usage_stats
 from .auth import resolve_credentials
 from .award_signing import public_key_base64, sign_award, verify_award
 from .config import FALLBACK_USER_AGENT, MAX_PROXY_PORT, upstream_host
@@ -13,9 +13,9 @@ from .network import build_api_url, http_post
 from .rom_cache import (
     CacheGameAuthError,
     CacheGameError,
-    build_achievement_game_ids,
     cache_session,
     cache_unlocks,
+    find_achievement_game_ids,
     refresh_game_patch,
 )
 from .storage import (
@@ -187,9 +187,9 @@ def refresh_and_load_achievement_ids(
     config_data: dict,
     awards: list[dict],
 ) -> tuple[set[int], list[int], dict[int, int]] | None:
-    patch_entries = storage.get_all_cache_by_prefix(cache_keys.PREFIX_PATCH)
-    achievementsets_entries = storage.get_all_cache_by_prefix(cache_keys.PREFIX_ACHIEVEMENTSETS)
-    achievement_game_ids = build_achievement_game_ids(patch_entries, achievementsets_entries)
+    achievement_game_ids = find_achievement_game_ids(
+        storage, {int(award["achievementId"]) for award in awards}
+    )
 
     award_game_ids: dict[int, int] = {}
     game_ids: list[int] = []

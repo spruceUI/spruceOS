@@ -1,0 +1,4 @@
+shaders = 1
+
+shader0 = "shaders/lcd-perfect.glsl"
+filter_linear0 = true

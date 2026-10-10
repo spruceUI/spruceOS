@@ -171,10 +171,14 @@ def run_folder_cache(
     )
 
 
-def estimate_queue_for_paths(storage: Storage, paths: list[Path]) -> cache_queue.QueueEstimate:
-    known_paths = load_cached_rom_paths(storage) | cache_queue.queued_rom_paths(
+def known_rom_paths(storage: Storage) -> set[str]:
+    return load_cached_rom_paths(storage) | cache_queue.queued_rom_paths(
         storage, normalize_cached_rom_path
     )
+
+
+def estimate_queue_for_paths(storage: Storage, paths: list[Path]) -> cache_queue.QueueEstimate:
+    known_paths = known_rom_paths(storage)
     return cache_queue.estimate_queue(
         candidates=len(paths),
         already_known=sum(1 for path in paths if normalize_cached_rom_path(path) in known_paths),

@@ -53,8 +53,10 @@ shutdown_ui_stage() {
     # The TrimUI pad is a virtual node made by trimui_inputd. Where spruce runs a
     # patched copy from the card, the strict unmount kills it and the node goes
     # with it, so the session restarts the stock rootfs copy (SmartPro/S, BrickPro).
+    # The Flip's miyoo_inputd runs through the /usr overlay that the unmount takes down.
     _pad_daemon=""
     [ -n "$TRIMUI_INPUTD_PATCHED" ] && [ -x /usr/trimui/bin/trimui_inputd ] && _pad_daemon=/usr/trimui/bin/trimui_inputd
+    [ "$PLATFORM" = "Flip" ] && _pad_daemon=/usr/miyoo/bin/miyoo_inputd
     {
         echo "PLATFORM='$PLATFORM'"
         echo "SD_DEV='$SD_DEV'"

@@ -135,6 +135,15 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"GAMETANK")
+		if [ "$CORE" = "gametank-standalone" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/gametank_functions.sh
+			run_gametank_standalone
+		else
+			run_retroarch
+		fi
+		;;
+
 	"JAGUAR")
 		if [ "$CORE" = "bigpemu-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/bigpemu_functions.sh
@@ -220,7 +229,6 @@ esac
 
 kill -9 $(pgrep -f enforceSmartCPU.sh) || true
 sync
-reconcile_cheevos_after_game
 
 wifi_request apply
 

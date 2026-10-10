@@ -19,8 +19,12 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-while [ 1 ]; do
+while true; do
     log_message "Starting new loop of principal.sh"
+
+    # A long task that crashed before "long_task.sh end" must not keep blocking
+    # the idle shutdown.
+    flag_remove "long_task"
 
     # Exit-to-stock: the boot session supervisor reads this flag after runtime
     # returns and hands the boot to the vendor UI. Without a supervisor above

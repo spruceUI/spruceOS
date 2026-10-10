@@ -39,6 +39,19 @@ init_gpio_a133p() {
     echo -n in > /sys/class/gpio/gpio243/direction
 }
 
+# Backlight 0 (raw 1) keeps a lit panel on but cannot light it after resume.
+device_resume_backlight() {
+    [ "$(jq -r '.backlight' "$SYSTEM_JSON")" = 0 ] || return 0
+    "$DEVICE_PYTHON3_PATH" - <<'EOF'
+import ctypes, fcntl, os, time
+fd = os.open("/dev/disp", os.O_RDWR)
+fcntl.ioctl(fd, 0x102, (ctypes.c_ulong * 4)(0, 25, 0, 0))
+time.sleep(0.1)
+fcntl.ioctl(fd, 0x102, (ctypes.c_ulong * 4)(0, 1, 0, 0))
+os.close(fd)
+EOF
+}
+
 device_init() {
     device_init_a133p
 

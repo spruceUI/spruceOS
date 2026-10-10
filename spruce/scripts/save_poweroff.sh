@@ -41,7 +41,7 @@ done
 ##### FUNCTION DEFINITIONS ####################
 
 blink_led_if_applicable() {
-    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger
+    [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger 2>/dev/null
 }
 
 # This script's own pid plus every process it is running inside of, up to init.
@@ -227,7 +227,7 @@ stop_problematic_scripts() {
     killall -q -15 enforceSmartCPU.sh
 
     # explicitly kill other watchdogs, etc. that might be keeping the SD card from unmounting.
-    killall -q -9 homebutton_watchdog.sh
+    killall -q -9 menubutton_watchdog.sh
     killall -q -9 buttons_watchdog.sh
     killall -q -9 idle_watchdog.sh
     killall -q -9 battery_level_watchdog.sh
@@ -464,7 +464,7 @@ log_message "save_poweroff.sh: starting (arg=${1:-none}, platform=$PLATFORM)"
 battery_snapshot poweroff
 stage_shutdown_stage_2
 
-blink_led_if_applicable
+[ "$USB_STORAGE_EXPORT" = 1 ] || blink_led_if_applicable
 /mnt/SDCARD/spruce/scripts/bluetooth.sh suspend
 device_prepare_for_poweroff
 log_message "save_poweroff.sh: device prepared, closing apps"

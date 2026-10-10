@@ -83,9 +83,7 @@
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "MAGICX_A133P"
       ],
       "selected": "yabasanshiro_a133p_libretro",

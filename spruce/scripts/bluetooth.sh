@@ -69,7 +69,7 @@ reconnect_trusted() {
 # BlueZ's Connected, which asound-setup.sh routes on, not the radio link: the
 # link comes up seconds earlier.
 connections() {
-    list_devices | awk -F'\t' '$3 == 1 { print $1 }'
+    list_devices | awk 'BEGIN { FS = "\t" } $3 == 1 { print $1 }'
 }
 
 # PyUI reads $HOME/.asoundrc and reopens its output when the flag appears.
@@ -173,7 +173,7 @@ show_status() {
     icons=""
     if bt_running; then
         state=on
-        _connected="$(list_devices | awk -F'\t' '$3 == 1')"
+        _connected="$(list_devices | awk 'BEGIN { FS = "\t" } $3 == 1')"
         connected="$(printf '%s\n' "$_connected" | head -n 1 | cut -f4)"
         for _mac in $(printf '%s\n' "$_connected" | cut -f1); do
             _icon="$(timeout 5 bluetoothctl info "$_mac" 2>/dev/null | sed -n 's/^[[:space:]]*Icon: //p' | head -n 1)"

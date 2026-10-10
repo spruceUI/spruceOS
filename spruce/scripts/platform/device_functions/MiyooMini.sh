@@ -458,3 +458,11 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 1
 }
+
+work_led_off() {
+    echo 0 >${LED_PATH}/brightness
+}
+
+work_led_on() {
+    echo 1 >${LED_PATH}/brightness
+}

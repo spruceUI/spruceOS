@@ -218,7 +218,7 @@ class RomSelectOptionsBuilder:
                             Language.label("optimizeBoxartPrompt3", "A = Yes, B = No, X/Y = Never Prompt"),
                             "",
                             Language.label("optimizeBoxartPrompt4", "You can manually do this in:"),
-                            Language.label("optimizeBoxartPrompt5", "Settings -> Extra Settings -> Optimize BoxArt"),
+                            Language.label("optimizeBoxartPrompt5", "Settings -> Tasks -> Optimize Boxart"),
                         ], 0)
                         input = Controller.wait_for_input([ControllerInput.A,ControllerInput.B,ControllerInput.X,ControllerInput.Y])
                         

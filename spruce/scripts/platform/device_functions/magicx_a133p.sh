@@ -537,3 +537,11 @@ magicx_seed_system_json() {
     cp /mnt/SDCARD/App/PyUI/main-ui/devices/magicx/magicx-system.json "$json" 2>/dev/null \
         && log_message "MagicX: seeded $json from the bundled default"
 }
+
+work_led_off() {
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/magicx/led.sh off
+}
+
+work_led_on() {
+    /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/magicx/led.sh on
+}

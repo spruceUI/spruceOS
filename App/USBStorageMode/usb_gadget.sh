@@ -22,8 +22,14 @@ usb_gadget_platform_setup() {
             LUN_PATH="$USB_GADGET_PATH/lun0"
             LUN_FILE="$LUN_PATH/file"
             ;;
-        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20")
+        "Brick" | "SmartPro" | "BrickPro")
             STORAGE_DEVICE="/dev/mmcblk1p1"
+            MOUNT_POINT="/mnt/SDCARD"
+            USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
+            ;;
+        "Zero28" | "Zero40" | "XU20")
+            # oakMOSS: the card at /mnt/SDCARD, SD2 or SD1's SPRUCEOS partition (the cfg's SD_DEV)
+            STORAGE_DEVICE="$SD_DEV"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
             ;;

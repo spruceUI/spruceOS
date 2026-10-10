@@ -15,6 +15,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/rk817_pmic.sh"
 
 DARKMOSS_DEBUG_LOG="/mnt/SDCARD/Saves/spruce/darkmoss_debug.log"
 
@@ -26,7 +27,7 @@ device_init() {
     setup_mainui_alias
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
-    device_bluetooth_supported && /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
     darkmoss_debug_dump
     clear_stale_pmic_power_en &
 }
@@ -188,17 +189,8 @@ device_get_battery_percent() {
     cat "$BATTERY/capacity" 2>/dev/null || echo 0
 }
 
-# Read the charger, not battery/status, which is unreliable on these RK boards.
 device_get_charging_status() {
-    if [ "$(cat /sys/class/power_supply/ac/online 2>/dev/null)" = "1" ]; then
-        if [ "$(cat "$BATTERY/capacity" 2>/dev/null)" = "100" ]; then
-            echo "Full"
-        else
-            echo "Charging"
-        fi
-    else
-        echo "Discharging"
-    fi
+    cat "/sys/class/power_supply/battery/status"
 }
 
 device_headphones_connected() {
@@ -726,22 +718,6 @@ migrate_platform_files() {
             cp -a "$_src" "$_dst" && log_message "$PLATFORM: carried over $_src"
         fi
     done
-}
-
-# Mainline (ROCKNIX) leaves fuel gauge data in RK817 0x99/0xa4; the BSP kernel
-# restores regulator enables from them at poweroff, which reboots the device.
-clear_stale_pmic_power_en() {
-    "$DEVICE_PYTHON3_PATH" - <<'EOF' | while read -r line; do log_message "$line"; done
-import fcntl, os
-fd = os.open("/dev/i2c-0", os.O_RDWR)
-fcntl.ioctl(fd, 0x0706, 0x20)
-for reg in (0x99, 0xa4):
-    os.write(fd, bytes([reg]))
-    value = os.read(fd, 1)[0]
-    if value:
-        os.write(fd, bytes([reg, 0]))
-        print(f"RK817: cleared stale 0x{reg:02x} (was 0x{value:02x})")
-EOF
 }
 
 # A snapshot of the machine on every boot, for reading off the card.

@@ -10,6 +10,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/rk817_pmic.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
@@ -147,6 +148,7 @@ set_volume() {
         fi
     fi
     bt_headset_volume "$VOLUME_LV"
+    usb_audio_follow_volume "$VOLUME_LV"
 
     # Call save_volume_to_config_file only if SAVE_TO_CONFIG is true
     if [ "$SAVE_TO_CONFIG" = true ]; then
@@ -170,6 +172,7 @@ fix_sleep_sound_bug() {
 SLEEP_HELPER_MARKER="${SLEEP_HELPER_MARKER:-/tmp/sleep_helper_started}"
 
 reapply_volume_on_jack_edge() {
+    sleep 0.3    # the jack contacts bounce for a few ms: read them once settled
     waited=0
     while [ -e "$SLEEP_HELPER_MARKER" ]; do
         if [ "$waited" -ge 30 ]; then
@@ -309,6 +312,12 @@ launch_startup_watchdogs(){
         /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
     fi
 
+    # USB sound card hot-plug, for the devices whose volume path follows one.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh
+    if device_usb_audio_supported; then
+        /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
+    fi
+
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
@@ -335,6 +344,11 @@ init_gpio_Flip() {
         sleep 0.1
     fi
     echo in > /sys/class/gpio/gpio150/direction
+    # gpiowait (mixer_watchdog.sh) sleeps in poll() on the value file, and the
+    # kernel only wakes it on an edge the GPIO is set to report. Nothing set
+    # this since PyUI replaced the stock MainUI, which used to, so plugging or
+    # unplugging the headphones in a game never switched the output (#809).
+    echo both > /sys/class/gpio/gpio150/edge
 }
 
 runtime_mounts_Flip() {
@@ -415,6 +429,7 @@ device_init() {
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
     init_gpio_Flip
+    clear_stale_pmic_power_en &
 
     insmod /lib/modules/rtk_btusb.ko
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
@@ -440,7 +455,7 @@ device_init() {
 }
 
 set_event_arg_for_idlemon() {
-    EVENT_ARG="-e /dev/input/event5"
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
 set_default_ra_hotkeys() {
@@ -545,6 +560,11 @@ device_system_handles_sdcard_unmount() {
     return 1 # Flip leaves dirty bit set?
 }
 
+# The upper USB-C port is the host port; set_volume follows the card.
+device_usb_audio_supported() {
+    [ "$ASOUND_SPRUCE_PCMS" = 1 ]
+}
+
 # The speaker is pcm.spruce_speaker; asound-setup.sh adds the default.
 ASOUND_SPRUCE_PCMS=1
 device_write_default_asound_rc() {
@@ -623,4 +643,12 @@ device_bluetoothd_stop() {
 # the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
 device_needs_strict_unmount() {
     return 0
+}
+
+work_led_off() {
+    echo 0 >${LED_PATH}/brightness
+}
+
+work_led_on() {
+    echo 1 >${LED_PATH}/brightness
 }

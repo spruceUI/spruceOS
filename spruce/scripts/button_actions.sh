@@ -2,7 +2,7 @@
 
 # Shared button-action dispatch.
 #
-# Both the Menu button (homebutton_watchdog.sh) and, on devices that have one,
+# Both the Menu button (menubutton_watchdog.sh) and, on devices that have one,
 # the top Home button (buttons_watchdog.sh -> device_home_button_pressed) run a
 # user-chosen action. Those two watchdogs are separate processes, so the action
 # logic lives here and both source this file, rather than each carrying its own
@@ -18,8 +18,6 @@ EMU_PATTERN="/(mnt/SDCARD|media/sdcard[0,1])/Emu"
 
 kill_port(){
     CMD=$(cat /tmp/cmd_to_run.sh)
-    # case, not [[ ]]: this file is #!/bin/sh and on the RGB30 that is dash,
-    # where [[ is "not found".
     case "$CMD" in
     *"/Roms/ports/"*)
         rm -f /tmp/menubtn
@@ -122,7 +120,7 @@ kill_pcsx() {
 
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
-    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui
+    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui GameTankEmulator
 }
 
 kill_dsperate() {
@@ -199,7 +197,7 @@ update_gameswitcher_json() {
     # TODO move to device so we don't make this a giant list of regexs
     # sed, not ${var//a/b}: that is a bashism, and on the RGB30 /bin/sh is dash,
     # where it is a fatal "Bad substitution". This function runs inside the
-    # ( ... ) & subshell in homebutton_watchdog.sh, so the abort was silent and
+    # ( ... ) & subshell in menubutton_watchdog.sh, so the abort was silent and
     # took kill_emulator - the very next line of prepare_game_switcher - with
     # it. Symptom: hold-home logged "Performing hold-home action: Game Switcher"
     # and the game just kept running, for every emulator on that device.
@@ -270,7 +268,8 @@ prepare_game_switcher() {
         # check command is emulator
         # exit if not emulator is in command
         if echo "$CMD" | grep -q -v -E "$EMU_PATTERN"; then
-            log_message "button_actions.sh: Not in game, bypassing game switcher."
+            log_message "button_actions.sh: Not in game, bypassing game switcher, but still killing emulators/apps."
+            kill_emulator
             return 0
         fi
 

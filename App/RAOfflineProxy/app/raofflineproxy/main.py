@@ -68,17 +68,20 @@ from .rom_browser import (
     add_rom_to_cache,
     cached_unlock_count,
     cached_unlock_counts,
+    cached_rom_paths_by_game,
     cached_unlock_titles,
     clear_cached_games,
     describe_browser_entries,
     describe_browser_entries_fast,
     list_cached_games,
+    list_scannable_files_recursive,
     remove_cached_game,
 )
 from .smart_cache import (
     ROM_RESULT_FAIL,
     ROM_RESULT_OK,
     ROM_RESULT_QUEUED,
+    estimate_queue_for_paths,
     run_cache_paths,
     run_folder_cache,
     run_smart_cache,
@@ -86,6 +89,13 @@ from .smart_cache import (
     smart_cache_paths,
 )
 from .storage import Storage
+from .watch_folders import (
+    last_scans,
+    normalize_folder,
+    unwatch_folder,
+    watch_folder,
+    watched_folders,
+)
 from .state import load_online_state, load_patch_state, save_patch_state, save_online_state
 from .ui import write_status_image, write_text_image
 from .update import (
@@ -247,6 +257,17 @@ def safe_stop_proxy(config_data: dict, cfg_path: str | None) -> list[str]:
     return [service_line, *_revert_proxy_config(config_data, cfg_path)]
 
 
+def estimate_payload(estimate) -> dict:
+    return {
+        "candidates": estimate.candidates,
+        "cached_now": estimate.cached_now,
+        "newly_queued": estimate.newly_queued,
+        "queued_after": estimate.queued_after,
+        "eta_minutes": estimate.eta_minutes,
+        "needs_confirmation": estimate.needs_confirmation,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="RAOfflineProxy Linux client")
     parser.add_argument(
@@ -280,6 +301,10 @@ def main() -> None:
             "cache-roms",
             "export-cached-ids",
             "cache-folder-listing",
+            "estimate-cache",
+            "watch-folder",
+            "unwatch-folder",
+            "watched-folders",
             "smart-cache-status",
             "run-smart-cache",
             "update-status",
@@ -488,12 +513,14 @@ def main() -> None:
                 unlock_counts = cached_unlock_counts(storage) if games else {}
 
                 if args.as_json:
+                    rom_paths = cached_rom_paths_by_game(storage) if games else {}
                     print(json.dumps(
                         [
                             {
                                 "game_id": game.game_id,
                                 "title": game.title,
                                 "unlocks": unlock_counts.get(game.game_id),
+                                "rom_path": rom_paths.get(game.game_id),
                             }
                             for game in games
                         ],
@@ -753,6 +780,85 @@ def main() -> None:
                 raise RuntimeError(result.message)
 
             print(result.message)
+            return
+
+        if args.command == "estimate-cache":
+            if not args.path:
+                raise ValueError("estimate-cache requires --path")
+
+            folder = Path(args.path).expanduser()
+            if not folder.is_dir():
+                raise ValueError(f"Invalid browser directory: {folder}")
+
+            storage = Storage()
+            try:
+                estimate = estimate_queue_for_paths(storage, list_scannable_files_recursive(folder))
+            finally:
+                storage.close()
+
+            payload = estimate_payload(estimate)
+            if args.as_json:
+                print(json.dumps(payload, separators=(",", ":")))
+            else:
+                print(" ".join(f"{key}={json.dumps(value)}" for key, value in payload.items()))
+            return
+
+        if args.command == "watch-folder":
+            if not args.path:
+                raise ValueError("watch-folder requires --path")
+
+            folder = Path(args.path).expanduser()
+            if not folder.is_dir():
+                raise ValueError(f"Invalid browser directory: {folder}")
+
+            added = watch_folder(config_data, folder)
+            path = normalize_folder(folder)
+            if args.as_json:
+                print(json.dumps({"path": path, "watched": True, "added": added}, separators=(",", ":")))
+            else:
+                print(f"Watching {path}" if added else f"Already watching {path}")
+            return
+
+        if args.command == "unwatch-folder":
+            if not args.path:
+                raise ValueError("unwatch-folder requires --path")
+
+            storage = Storage()
+            try:
+                removed = unwatch_folder(config_data, storage, args.path)
+            finally:
+                storage.close()
+
+            path = normalize_folder(args.path)
+            if args.as_json:
+                print(json.dumps({"path": path, "watched": False, "removed": removed}, separators=(",", ":")))
+            else:
+                print(f"Stopped watching {path}" if removed else f"Not watched: {path}")
+            return
+
+        if args.command == "watched-folders":
+            storage = Storage()
+            try:
+                scans = last_scans(storage)
+            finally:
+                storage.close()
+
+            folders = watched_folders(config_data)
+            if args.as_json:
+                print(json.dumps(
+                    [
+                        {
+                            "path": folder,
+                            "exists": os.path.isdir(folder),
+                            "last_scan_at": scans.get(folder),
+                        }
+                        for folder in folders
+                    ],
+                    separators=(",", ":"),
+                ))
+            else:
+                for folder in folders:
+                    print(folder)
             return
 
         if args.command == "cache-folder-listing":

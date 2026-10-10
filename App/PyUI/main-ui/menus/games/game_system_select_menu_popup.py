@@ -2,6 +2,7 @@
 
 import os
 from controller.controller_inputs import ControllerInput
+from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.game_system import GameSystem
 from menus.app.app_menu import AppMenu
@@ -10,6 +11,7 @@ from menus.games.favorites_menu import FavoritesMenu
 from menus.games.recents_menu import RecentsMenu
 from menus.games.search_games_for_system_menu import SearchGamesForSystemMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
+from menus.games.utils import raproxy_cli
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
@@ -73,6 +75,21 @@ class GameSystemSelectMenuPopup:
                 rom_image_list.append((name_without_ext, img_path))
             
             BoxArtScraper().download_boxart_batch(game_system.system_name, rom_image_list)
+
+    def system_kept_offline(self, game_system : GameSystem):
+        return all(raproxy_cli.is_watched(path) for path in game_system.folder_paths)
+
+    def toggle_system_offline(self, input_value, game_system : GameSystem):
+        if ControllerInput.A != input_value:
+            return
+        title = Language.label("keepSystemOffline", "Keep system offline")
+        if self.system_kept_offline(game_system):
+            for path in game_system.folder_paths:
+                raproxy_cli.unwatch_folder(path)
+        else:
+            for path in game_system.folder_paths:
+                if not raproxy_cli.is_watched(path):
+                    raproxy_cli.watch_folder(path, title)
 
     def run_popup_menu_selection(self, game_system : GameSystem):
         popup_options = []
@@ -154,6 +171,17 @@ class GameSystemSelectMenuPopup:
             icon=Theme.settings(),
             value=lambda input_value, game_system=game_system : self.download_boxart(input_value, game_system)
         ))
+
+        if raproxy_cli.enabled() and not raproxy_cli.is_watched(Device.get_device().get_roms_dir()):
+            state = Language.menu_option_value("True" if self.system_kept_offline(game_system) else "False")
+            popup_options.append(GridOrListEntry(
+                primary_text=Language.label("keepSystemOfflineState", "Keep offline: {state}").replace("{state}", state),
+                image_path=Theme.settings(),
+                image_path_selected=Theme.settings_selected(),
+                description="",
+                icon=Theme.settings(),
+                value=lambda input_value, game_system=game_system : self.toggle_system_offline(input_value, game_system)
+            ))
 
         
 

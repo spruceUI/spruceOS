@@ -162,7 +162,8 @@ class TopBar:
                                 RenderMode.MIDDLE_CENTER_ALIGNED)
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
-    def get_current_time_hhmm(self):
+    @staticmethod
+    def get_current_time_hhmm():
         local_time = datetime.fromtimestamp(time.time())  # Uses system clock & local TZ
         if(PyUiConfig.use_24_hour_clock()):
             return local_time.strftime("%H:%M")

@@ -194,7 +194,7 @@ tmp_stop_frontend_service() {
 tmp_kill_boot_scripts() {
     echo "Attempting to kill any boot scripts."
     for script in runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
-        runmagicx.sh updater homebutton_watchdog.sh buttons_watchdog.sh idlemon \
+        runmagicx.sh updater menubutton_watchdog.sh buttons_watchdog.sh idlemon \
         idle_watchdog.sh battery_level_watchdog.sh theme_watchdog.sh volume_sync_watchdog.sh \
         inotifywait inotifywatch getevent sendevent ; do
         if killall -9 "$script" ; then

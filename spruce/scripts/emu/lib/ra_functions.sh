@@ -270,7 +270,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac
@@ -286,12 +286,13 @@ run_retroarch() {
 			;;
 	esac
 
+	ra_preload="$(vk_display_preload)"
 	if [ "$VERBOSE_EMU" = "1" ]; then
-		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
+		log_message "Running CMD: HOME=\"$RA_DIR/\" LD_PRELOAD=\"$ra_preload\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L \"$CORE_PATH\" \"$ROM_FILE\""
+		HOME="$RA_DIR/" LD_PRELOAD="$ra_preload" "$RA_DIR/$RA_BIN" $RA_PARAMS --log-file /mnt/SDCARD/Saves/spruce/retroarch.log -L "$CORE_PATH" "$ROM_FILE"
 	else
-		log_message "Running CMD: HOME=\"$RA_DIR/\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
-		HOME="$RA_DIR/" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
+		log_message "Running CMD: HOME=\"$RA_DIR/\" LD_PRELOAD=\"$ra_preload\" \"$RA_DIR/$RA_BIN\" $RA_PARAMS -L \"$CORE_PATH\" \"$ROM_FILE\""
+		HOME="$RA_DIR/" LD_PRELOAD="$ra_preload" "$RA_DIR/$RA_BIN" $RA_PARAMS -L "$CORE_PATH" "$ROM_FILE"
 	fi
 	backup_rac_creds_to_spruce_cfg
 	ra_close_setup_saves_and_states_for_core_differences

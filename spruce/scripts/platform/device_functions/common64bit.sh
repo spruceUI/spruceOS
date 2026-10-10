@@ -44,3 +44,11 @@ get_ssh_service_name() {
 turn_off_screen() {
     log_message "turn_off_screen() not implemented for $PLATFORM ." -v
 }
+
+work_led_off() {
+    log_message "work_led_off() not implemented for $PLATFORM ." -v
+}
+
+work_led_on() {
+    log_message "work_led_on() not implemented for $PLATFORM ." -v
+}

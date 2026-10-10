@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import threading
 import os
+from audio.audio_player_oss import AudioPlayerOss
 from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
 from display.display import Display
 from utils.logger import PyUiLogger
@@ -103,6 +104,8 @@ class MiyooMiniCommon(MiyooDevice):
 
     def __init__(self, device_name, main_ui_mode, miyoo_mini_specific_model_variables: MiyooMiniSpecificModelVariables):
 
+        # launch.sh preloads libpadsp for PyUI's own sounds; children must not inherit it.
+        os.environ.pop("LD_PRELOAD", None)
         self.device_name = device_name
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
@@ -113,6 +116,9 @@ class MiyooMiniCommon(MiyooDevice):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.mainui_volume = None
+            self.keymon_volume = self._attach_keymon_volume() if device_name.endswith("MIYOO_MINI_FLIP") else None
+            if self.keymon_volume is not None:
+                threading.Thread(target=self._watch_keymon_volume, daemon=True).start()
             # keymon owns the volume keys and writes /appconfigs/system.json on every
             # press; this watcher is how the PyUI indicator learns the new level.
             # /appconfigs is jffs2 with ONE-SECOND mtime granularity, so presses
@@ -129,7 +135,34 @@ class MiyooMiniCommon(MiyooDevice):
         super().__init__()
 
 
+    # The Flip's keymon keeps the volume (0-20) in its shared memory and never
+    # updates "vol" in /appconfigs/system.json.
+    KEYMON_SHM_KEY = 0x4e4f4d4b
+    KEYMON_SHM_VOLUME_INDEX = 6
+    keymon_volume = None
+
+    def _attach_keymon_volume(self):
+        libc = ctypes.CDLL(None)
+        libc.shmat.restype = ctypes.c_void_p
+        shm_id = libc.shmget(self.KEYMON_SHM_KEY, 0, 0)
+        if shm_id < 0:
+            PyUiLogger.get_logger().warning("keymon shared memory not found")
+            return None
+        addr = libc.shmat(shm_id, None, 0o10000)
+        if addr is None or addr == ctypes.c_void_p(-1).value:
+            return None
+        return (ctypes.c_int * (self.KEYMON_SHM_VOLUME_INDEX + 1)).from_address(addr)
+
+    def _watch_keymon_volume(self):
+        while True:
+            self.on_mainui_config_change()
+            time.sleep(0.1)
+
     def on_mainui_config_change(self):
+        if self.keymon_volume is not None:
+            self._set_mainui_volume(self.keymon_volume[self.KEYMON_SHM_VOLUME_INDEX])
+            return
+
         path = "/appconfigs/system.json"
         if not os.path.exists(path):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
@@ -168,6 +201,9 @@ class MiyooMiniCommon(MiyooDevice):
         if volume is None:
             return
 
+        self._set_mainui_volume(volume)
+
+    def _set_mainui_volume(self, volume):
         old_volume = self.mainui_volume
         self.mainui_volume = volume
 
@@ -833,7 +869,7 @@ class MiyooMiniCommon(MiyooDevice):
             PyUiLogger.get_logger().exception(f"Failed to set volume via input events: {e}")
 
     def run_game(self, rom_info: RomInfo) -> subprocess.Popen:
-        preload_path = "/mnt/SDCARD/miyoo/app/../lib/libpadsp.so"
+        preload_path = "/mnt/SDCARD/miyoo/lib/libpadsp.so"
         if os.path.exists(preload_path):
             run_prefix = f"LD_PRELOAD={preload_path} "
         else:
@@ -897,6 +933,11 @@ class MiyooMiniCommon(MiyooDevice):
     def get_guaranteed_safe_max_text_char_count(self):
         return 35
 
+    def get_audio_system(self):
+        if not hasattr(self, "audio_player"):
+            self.audio_player = AudioPlayerOss()
+        return self.audio_player
+
     def supports_volume(self):
         return self.miyoo_mini_specific_model_variables.supports_volume
 
@@ -935,6 +976,10 @@ class MiyooMiniCommon(MiyooDevice):
     
     def get_device_name(self):
         return self.device_name
+
+    def get_device_names(self):
+        names = [self.device_name, "MIYOO_MINI_FAMILY"]
+        return names
     
     # Timezone support is inherited from DeviceCommon. The Mini has no tz
     # database of its own and a read-only root, so it relies entirely on the

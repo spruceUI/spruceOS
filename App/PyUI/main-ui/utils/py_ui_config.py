@@ -223,8 +223,8 @@ class PyUiConfig:
         return cls.get("cheevosRemoveCmd",None)
 
     @classmethod
-    def get_cheevos_cache_path(cls):
-        return cls.get("cheevosCachePath",None)
+    def get_raproxy_cli_cmd(cls):
+        return cls.get("raproxyCliCmd",None)
     
     @classmethod
     def get_about_entries(cls):
@@ -237,6 +237,10 @@ class PyUiConfig:
     @classmethod
     def get_reboot_cmd(cls):
         return cls.get("rebootCmd",None)
+
+    @classmethod
+    def get_long_task_cmd(cls):
+        return cls.get("longTaskCmd",None)
 
     @classmethod
     def mimic_miyoo_mainui_mode(cls):
@@ -263,6 +267,14 @@ class PyUiConfig:
         return cls.get("btAudioDeviceCmd",None)
 
     @classmethod
+    def get_usb_audio_supported_cmd(cls):
+        return cls.get("usbAudioSupportedCmd",None)
+
+    @classmethod
+    def get_usb_audio_route_path(cls):
+        return cls.get("usbAudioRoutePath",None)
+
+    @classmethod
     def get_wifi_cmd(cls):
         return cls.get("wifiCmd",None)
 
@@ -274,3 +286,6 @@ class PyUiConfig:
     def get_cache_cheevos_cmd(cls):
         return cls.get("cacheCheevosCmd",None)
 
+    @classmethod
+    def get_cfw_version_file(cls):
+        return cls.get("cfwVersionFile","0.0.0")

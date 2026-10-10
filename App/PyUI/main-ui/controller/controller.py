@@ -35,6 +35,9 @@ class Controller:
     _screensaver_active = False
     _screensaver_ignore_input_until = 0
     _game_running = False
+    # Long jobs with no button presses (box art optimizing/downloading) keep the
+    # screensaver off while they run: see hold_screensaver().
+    _screensaver_holds = 0
     # Logical-space point of the last TOUCH_TAP, set by the touch watcher
     touch_point = None
 
@@ -272,7 +275,7 @@ class Controller:
             remaining_time = timeout - elapsed
             remaining_time = max(remaining_time, 0.001)
             screensaver_timeout = Theme.get_screensaver_timeout_sec()
-            if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
+            if not called_from_check_for_hotkey and Controller._screensaver_allowed() and screensaver_timeout > 0:
                 idle_remaining = screensaver_timeout - (time.monotonic() - Controller.screensaver_input_tracking_time)
                 remaining_time = min(remaining_time, max(idle_remaining, 0.001))
             while True:
@@ -310,7 +313,7 @@ class Controller:
                         break  # Valid non-hotkey input
                 elapsed = time.monotonic() - start_time
                 remaining_time = timeout - elapsed
-                if not called_from_check_for_hotkey and not Controller._game_running and screensaver_timeout > 0:
+                if not called_from_check_for_hotkey and Controller._screensaver_allowed() and screensaver_timeout > 0:
                     idle_remaining = screensaver_timeout - (time.monotonic() - Controller.last_input_time)
                     remaining_time = min(remaining_time, idle_remaining)
                 if remaining_time <= 0:
@@ -352,8 +355,29 @@ class Controller:
         return Controller.last_controller_input is not None and not was_hotkey
 
     @staticmethod
+    def _screensaver_allowed():
+        return not Controller._game_running and Controller._screensaver_holds == 0
+
+    @staticmethod
+    def hold_screensaver(hold):
+        """Keep the screensaver off during a long job that runs with no button presses.
+
+        Otherwise the job's B-to-abort monitor thread, which polls get_input(),
+        starts it mid-job: the CPU drops to powersave, the backlight dims and the
+        first button press (B to abort) only wakes the screen. Holds nest; when the
+        last one is released the idle timer starts over, so the screen gets a full
+        idle period after the job.
+        """
+        if hold:
+            Controller._screensaver_holds += 1
+        else:
+            Controller._screensaver_holds = max(0, Controller._screensaver_holds - 1)
+            if Controller._screensaver_holds == 0:
+                Controller.screensaver_input_tracking_time = time.monotonic()
+
+    @staticmethod
     def _try_start_screensaver(Display):
-        if Controller._game_running:
+        if not Controller._screensaver_allowed():
             return False
 
         screensaver_timeout = Theme.get_screensaver_timeout_sec()

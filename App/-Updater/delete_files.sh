@@ -40,6 +40,7 @@ APP_DELETE_LIST="
 -FirmwareUpdate-
 -OTA
 -Updater
+Cheevos
 Credits
 FileManagement
 fn_editor

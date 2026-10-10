@@ -132,7 +132,11 @@ class TrimUISmartPro(TrimUIDevice):
 
     def get_device_name(self):
         return self.device_name
-        
+
+    def get_device_names(self):
+        names = [self.device_name, "TRIMUI_A133P"]
+        return names
+    
     def set_theme(self, theme_path: str):
         MiyooTrimCommon.set_theme(TrimUISmartPro.TRIMUI_STOCK_CONFIG_LOCATION, theme_path)
 

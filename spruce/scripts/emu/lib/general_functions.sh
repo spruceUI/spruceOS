@@ -17,6 +17,7 @@
 #   set_cpu_mode
 #   pin_to_dedicated_cores
 #   emu_log_file
+#   vk_display_preload
 
 
 # Returns the log file path for standalone emulators.
@@ -26,6 +27,16 @@ emu_log_file() {
 		echo "${LOG_DIR}/${CORE}-${PLATFORM}.log"
 	else
 		echo "/dev/null"
+	fi
+}
+
+# LD_PRELOAD for an emulator that can present through Vulkan: the platform cfg's VK_DISPLAY_PRELOAD fix,
+# when set and present, ahead of anything already preloaded. Prefix it to the emulator's command only.
+vk_display_preload() {
+	if [ -n "$VK_DISPLAY_PRELOAD" ] && [ -f "$VK_DISPLAY_PRELOAD" ]; then
+		echo "$VK_DISPLAY_PRELOAD${LD_PRELOAD:+:$LD_PRELOAD}"
+	else
+		echo "$LD_PRELOAD"
 	fi
 }
 

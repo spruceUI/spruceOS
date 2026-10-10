@@ -1,0 +1,6 @@
+{
+    "label": "Cheevos",
+    "icon": "cheevos.png",
+    "launch": "launch.sh",
+    "description": "RetroAchievements hub"
+}

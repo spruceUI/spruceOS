@@ -15,6 +15,7 @@ from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
 from utils.cached_exists import CachedExists
+from utils.idle_shutdown import pauses_idle_shutdown
 from utils.logger import PyUiLogger
 import re
 from typing import Optional
@@ -602,6 +603,7 @@ class BoxArtScraper:
                 self.log_message(f"BoxartScraper: failed {fallback_url}.")
         return success
 
+    @pauses_idle_shutdown
     def download_boxart_batch(
         self,
         sys_name: str,
@@ -742,6 +744,7 @@ class BoxArtScraper:
                 return False
         return True
             
+    @pauses_idle_shutdown
     def scrape_boxart(self, max_workers=8):
         self.log_and_display_message(
             Language.label("scrapingBoxartPatient", "Scraping box art. Please be patient, especially with large libraries!")

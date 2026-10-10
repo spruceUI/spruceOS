@@ -8,6 +8,12 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 process_name=$1
 
+# A long job (long_task.sh start) is running: skip; idlemon fires again later.
+if flag_check "long_task"; then
+    log_message "Idle action for $process_name skipped: a long task is running"
+    exit 0
+fi
+
 # Handle different process names....
 case "$process_name" in
 

@@ -41,8 +41,21 @@ def recently_played_game_ids(entries: list[dict], since: int) -> set[int]:
 
 def load_recently_played_game_ids(storage: Storage, since: int) -> set[int]:
     return recently_played_game_ids(
-        storage.get_all_cache_by_prefix(cache_keys.PREFIX_LAST_PLAYED), since
+        storage.cache_summaries_by_prefix(cache_keys.PREFIX_LAST_PLAYED), since
     )
+
+
+def played_game_ids_newest_first(storage: Storage) -> list[int]:
+    entries = sorted(
+        storage.cache_summaries_by_prefix(cache_keys.PREFIX_LAST_PLAYED),
+        key=lambda entry: entry.get("cachedAt", 0),
+        reverse=True,
+    )
+    game_ids = (
+        cache_keys.parse_game_id_from_last_played_key(entry.get("cacheKey") or "")
+        for entry in entries
+    )
+    return [game_id for game_id in game_ids if game_id is not None]
 
 
 def reset_last_played_throttle_for_tests() -> None:

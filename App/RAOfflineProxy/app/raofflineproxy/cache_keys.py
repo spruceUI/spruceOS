@@ -3,6 +3,7 @@ from __future__ import annotations
 USER_AGENT = "ua::last"
 AUTH_INVALID_TOKEN = "auth::invalid_token"
 CACHE_BUDGET = "cachebudget"
+WATCH_SCANS = "watchscans"
 
 PREFIX_LOGIN = "login2::"
 PREFIX_PATCH = "patch:"
@@ -12,6 +13,7 @@ PREFIX_GAMEID = "gameid:"
 PREFIX_ACHIEVEMENTSETS = "achievementsets:"
 PREFIX_LAST_PLAYED = "lastplayed:"
 PREFIX_CACHE_QUEUE = "cachequeue:"
+PREFIX_WATCH_SEEN = "watchseen:"
 
 
 def login(user: str) -> str:
@@ -44,6 +46,10 @@ def last_played(game_id_value: int | str) -> str:
 
 def cache_queue(hash_value: str) -> str:
     return f"cachequeue:{normalize_hash(hash_value)}"
+
+
+def watch_seen(path: str) -> str:
+    return f"{PREFIX_WATCH_SEEN}{path}"
 
 
 def achievementsets(scope: int | str, user: str) -> str:
