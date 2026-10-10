@@ -574,6 +574,66 @@ class Theme():
         return os.path.join(base_dir, "themes", "font.ttf")
 
     @classmethod
+    def get_fallback_font_path(cls, _stock_candidates=None, _old_fallback=None):
+        """3-step user-layer fallback chain (no theme config read).
+
+        1. $PYUI_FALLBACK_FONT when pointing to an existing file.
+        2. Stock SPRUCE/nunwen.ttf (first existing candidate).
+        3. Old theme-dir fallback (Theme.get_fallback_font()).
+        Never raises for missing files; logs which branch is used.
+        Test hooks _stock_candidates/_old_fallback override discovery.
+        """
+        old_fallback = _old_fallback if _old_fallback is not None else cls.get_fallback_font()
+
+        def _log_branch(msg):
+            try:
+                logger = PyUiLogger.get_logger()
+                if logger is not None:
+                    logger.info(msg)
+            except Exception:
+                pass
+
+        env_path = os.environ.get("PYUI_FALLBACK_FONT", "")
+        if env_path and os.path.exists(env_path):
+            _log_branch(f"Fallback font branch: env override {env_path}")
+            return env_path
+
+        for candidate in _stock_candidates if _stock_candidates is not None else cls._stock_fallback_candidates():
+            if candidate and os.path.exists(candidate):
+                _log_branch(f"Fallback font branch: stock {candidate}")
+                return candidate
+
+        _log_branch(f"Fallback font branch: old fallback {old_fallback}")
+        return old_fallback
+
+    @classmethod
+    def _stock_fallback_candidates(cls):
+        candidates = [
+            "/mnt/SDCARD/SPRUCE/nunwen.ttf",
+            "/mnt/SDCARD/spruce/SPRUCE/nunwen.ttf",
+            "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
+            "/mnt/SDCARD/spruce/Themes/SPRUCE/nunwen.ttf",
+        ]
+        try:
+            here = Path(__file__).resolve()
+            for parent in [here.parent] + list(here.parents):
+                dev_path = str(parent / "Themes" / "SPRUCE" / "nunwen.ttf")
+                if dev_path not in candidates:
+                    candidates.append(dev_path)
+            try:
+                base_dir = os.path.abspath(sys.path[0])
+                base = Path(base_dir)
+                for parent in [base] + list(base.parents):
+                    dev_path = str(parent / "Themes" / "SPRUCE" / "nunwen.ttf")
+                    if dev_path not in candidates:
+                        candidates.append(dev_path)
+            except Exception:
+                pass
+        except Exception:
+            pass
+        return candidates
+
+    @classmethod
     def get_font_size(cls, font_purpose : FontPurpose):
         try:
             match font_purpose:

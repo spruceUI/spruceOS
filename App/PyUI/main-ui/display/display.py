@@ -336,7 +336,18 @@ class Display:
     @classmethod
     def deinit_fonts(cls):
         for loaded_font in cls.fonts.values():
-            sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
+            primary = getattr(loaded_font, "font", None)
+            fallback = getattr(loaded_font, "fallback_font", None)
+            try:
+                if primary is not None:
+                    sdl2.sdlttf.TTF_CloseFont(primary)
+            except Exception:
+                pass
+            try:
+                if fallback is not None and fallback != primary:
+                    sdl2.sdlttf.TTF_CloseFont(fallback)
+            except Exception:
+                pass
         cls.fonts.clear()
 
     @classmethod
@@ -413,6 +424,23 @@ class Display:
                 f"Could not load font {font_path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}"
             )
 
+        fallback_path = Theme.get_fallback_font_path()
+        fallback_font = None
+        if fallback_path and fallback_path != font_path:
+            fallback_font = sdl2.sdlttf.TTF_OpenFont(fallback_path.encode("utf-8"), font_size)
+            if not fallback_font:
+                PyUiLogger.get_logger().warning(
+                    f"Could not load fallback font {fallback_path}, continuing without per-glyph fallback"
+                )
+                fallback_path = None
+        elif fallback_path == font_path:
+            # Same file: reuse handle, no second open needed.
+            fallback_font = font
+
+        PyUiLogger.get_logger().info(
+            f"Font pair for {font_purpose}: primary={font_path} fallback={fallback_path} size={font_size}"
+        )
+
         line_height = sdl2.sdlttf.TTF_FontHeight(font)
         surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(font, "A".encode('utf-8'), sdl2.SDL_Color(0, 0, 0))
         if not surface:
@@ -420,7 +448,10 @@ class Display:
         else:
             sdl2.SDL_FreeSurface(surface)
 
-        return LoadedFont(font, line_height, font_path)
+        return LoadedFont(font, line_height, font_path,
+                          fallback_font=fallback_font,
+                          fallback_path=fallback_path,
+                          sdlttf=sdl2.sdlttf)
 
     @classmethod
     def lock_current_image(cls):
