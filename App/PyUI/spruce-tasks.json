@@ -47,9 +47,7 @@
   },
   "devices": {
     "Emulator Reset Tasks/Reset DSperate config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -59,9 +57,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset PPSSPP config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -71,9 +67,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset Flycast config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -83,9 +77,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset mupen64plus config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -95,9 +87,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset YabaSanshiro config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -107,9 +97,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset AdvanceMAME config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",
@@ -119,9 +107,7 @@
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset BigPEmu config": [
-      "TRIMUI_BRICK",
-      "TRIMUI_BRICK_PRO",
-      "TRIMUI_SMART_PRO",
+      "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "MIYOO_FLIP",
       "MIYOO_A30",

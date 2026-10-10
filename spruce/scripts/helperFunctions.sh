@@ -116,9 +116,9 @@ command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
-        Brick)            echo "TRIMUI_BRICK" ;;
-        BrickPro)         echo "TRIMUI_BRICK_PRO" ;;
-        SmartPro)         echo "TRIMUI_SMART_PRO" ;;
+        Brick)            echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
+        BrickPro)         echo "TRIMUI_BRICK_PRO"; echo "TRIMUI_A133P" ;;
+        SmartPro)         echo "TRIMUI_SMART_PRO"; echo "TRIMUI_A133P" ;;
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
         Flip)             echo "MIYOO_FLIP" ;;
         Pixel2)           echo "GKD_PIXEL2" ;;
@@ -129,7 +129,7 @@ device_names() {
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
-        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
+        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

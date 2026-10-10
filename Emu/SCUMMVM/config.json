@@ -10,9 +10,7 @@
       "name": "Open ScummVM Menu",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/open_scummvm_menu.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
@@ -27,9 +25,7 @@
       "name": "Scan ScummVM Games",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/scan_scummvm_game.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
@@ -44,9 +40,7 @@
       "name": "Generate namelist",
       "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
@@ -97,9 +91,7 @@
         "scummvm-standalone"
       ],
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "GKD_PIXEL2",
@@ -112,9 +104,7 @@
     }
   },
   "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "MIYOO_A30",
