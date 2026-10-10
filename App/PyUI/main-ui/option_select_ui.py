@@ -9,6 +9,7 @@ from typing import List
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 
+from devices.device import Device
 from display.display import Display
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -17,6 +18,18 @@ from views.view_creator import ViewCreator
 from views.view_type import ViewType
 
 class OptionSelectUI:
+
+    @staticmethod
+    def _filter_compatible_entries(data):
+        """Remove entries that don't support the current device."""
+        device_map = data.get("devices", {})
+        filtered = dict(data)
+
+        for key, devices in device_map.items():
+            if key in filtered and not Device.supports_device(devices):
+                filtered.pop(key)
+
+        return filtered
 
     @staticmethod
     def _build_tree_from_flat_map(flat_map):
@@ -29,13 +42,22 @@ class OptionSelectUI:
         root = tree()
 
         for key, value in flat_map.items():
-            if key == "descriptions":
+            if key in ("descriptions", "devices", "min_spruce_version"):
                 continue
             parts = key.split("/")
             node = root
             for part in parts[:-1]:
                 node = node[part]
             node[parts[-1]] = value  # leaf = original path/string
+
+        def prune_empty_branches(node):
+            for key, value in list(node.items()):
+                if isinstance(value, dict):
+                    prune_empty_branches(value)
+                    if not value:
+                        del node[key]
+
+        prune_empty_branches(root)        
         return root
 
     @staticmethod
@@ -205,7 +227,8 @@ class OptionSelectUI:
         json_path = Path(json_path)
         with open(json_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-
+        
+        data = OptionSelectUI._filter_compatible_entries(data)
         descriptions = data.get("descriptions", {})
         root_dict = OptionSelectUI._build_tree_from_flat_map(data)
         folder = str(json_path.parent)
@@ -243,6 +266,7 @@ class OptionSelectUI:
         with open(input_json, "r", encoding="utf-8") as f:
             data = json.load(f)
 
+        data = OptionSelectUI._filter_compatible_entries(data)
         descriptions = data.get("descriptions", {})
         root_dict = OptionSelectUI._build_tree_from_flat_map(data)
         folder = str(Path(input_json).parent)
