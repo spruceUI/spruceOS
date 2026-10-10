@@ -18,11 +18,13 @@ def split_fallback_runs(text, has_glyph):
         return runs
     for ch in text:
         try:
-            missing = not has_glyph(ord(ch))
+            use_fallback = not has_glyph(ord(ch))
         except Exception:
-            missing = False
-        if runs and runs[-1][0] == missing:
-            runs[-1] = (missing, runs[-1][1] + ch)
+            # A failing probe must not silently render tofu from the
+            # primary: route the char to the fallback side instead.
+            use_fallback = True
+        if runs and runs[-1][0] == use_fallback:
+            runs[-1] = (use_fallback, runs[-1][1] + ch)
         else:
-            runs.append((missing, ch))
+            runs.append((use_fallback, ch))
     return runs

@@ -334,21 +334,22 @@ class Display:
         cls.clear_image_cache()
         cls.clear_text_cache(include_fonts)
 
+    @staticmethod
+    def _close_font(handle):
+        try:
+            if handle is not None:
+                sdl2.sdlttf.TTF_CloseFont(handle)
+        except Exception:
+            pass
+
     @classmethod
     def deinit_fonts(cls):
         for loaded_font in cls.fonts.values():
             primary = getattr(loaded_font, "font", None)
             fallback = getattr(loaded_font, "fallback_font", None)
-            try:
-                if primary is not None:
-                    sdl2.sdlttf.TTF_CloseFont(primary)
-            except Exception:
-                pass
-            try:
-                if fallback is not None and fallback != primary:
-                    sdl2.sdlttf.TTF_CloseFont(fallback)
-            except Exception:
-                pass
+            cls._close_font(primary)
+            if fallback is not None and fallback != primary:
+                cls._close_font(fallback)
         cls.fonts.clear()
 
     @classmethod
@@ -449,10 +450,51 @@ class Display:
         else:
             sdl2.SDL_FreeSurface(surface)
 
-        return LoadedFont(font, line_height, font_path,
-                          fallback_font=fallback_font,
-                          fallback_path=fallback_path,
-                          sdlttf=sdl2.sdlttf)
+        loaded = LoadedFont(font, line_height, font_path,
+                            fallback_font=fallback_font,
+                            fallback_path=fallback_path,
+                            sdlttf=sdl2.sdlttf)
+        cls._warm_glyph_cache(loaded, font_purpose)
+        return loaded
+
+    # Keyboard/function glyphs probed once per font load to warm the glyph
+    # cache and log which branch will serve them (no per-frame probe cost).
+    _WARMUP_CODEPOINTS = (0x21EA, 0x2191, 0x2190, 0x21B5, 0x2713, 0x2714)
+
+    @classmethod
+    def _warm_glyph_cache(cls, loaded_font, font_purpose):
+        """Probe the static warmup set once; log primary vs fallback branch.
+
+        Never raises: a failed probe just leaves the cache cold and the
+        per-glyph path probes lazily as before.
+        """
+        try:
+            missing = []
+            for cp in cls._WARMUP_CODEPOINTS:
+                try:
+                    if not loaded_font.has_glyph(cp):
+                        missing.append(cp)
+                except Exception:
+                    continue
+            try:
+                logger = PyUiLogger.get_logger()
+            except Exception:
+                return
+            if logger is None:
+                return
+            if missing:
+                missing_str = ",".join(f"U+{cp:04X}" for cp in missing)
+                logger.info(
+                    f"font fallback for {font_purpose}: primary missing "
+                    f"{missing_str}, fallback {loaded_font.fallback_path} will cover"
+                )
+            else:
+                logger.info(
+                    f"font fallback for {font_purpose}: primary covers "
+                    f"probed keyboard glyphs, fallback idle"
+                )
+        except Exception:
+            pass
 
     @classmethod
     def lock_current_image(cls):
@@ -659,9 +701,27 @@ class Display:
     def _cache_font_key(cls, purpose, loaded_font):
         # Text cache key must distinguish the fallback pair so a theme
         # switch (or fallback change) never collides with a stale entry.
+        cache_key = getattr(loaded_font, "cache_key", None)
+        if callable(cache_key):
+            return loaded_font.cache_key(purpose)
         return (purpose,
                 getattr(loaded_font, "font_path", None),
                 getattr(loaded_font, "fallback_path", None))
+
+    @staticmethod
+    def _handle_for_run(loaded_font, use_fallback):
+        """Resolve which font handle renders a run.
+
+        Single place for the primary/fallback switch used by both the
+        render path (_render_text_surface) and the measure path
+        (get_text_dimensions).
+        """
+        primary = getattr(loaded_font, "font", None)
+        if use_fallback:
+            fallback = getattr(loaded_font, "fallback_font", None)
+            if fallback is not None:
+                return fallback
+        return primary
 
     @classmethod
     def _join_run_surfaces(cls, run_items):
@@ -676,8 +736,7 @@ class Display:
             widths = [s.contents.w for s in surfaces]
             heights = [s.contents.h for s in surfaces]
             total_w = sum(widths)
-            max_h = max(heights) if heights else 0
-            if total_w <= 0 or max_h <= 0:
+            if total_w <= 0 or not heights or max(heights) <= 0:
                 return None
             ascents = []
             for handle, _ in run_items:
@@ -689,9 +748,13 @@ class Display:
                 top = max(ascents)
                 y_offsets = [top - a for a in ascents]
             else:
+                # Ascent unavailable: top-align every run (offset 0).
                 y_offsets = [0] * len(surfaces)
+            # Joined height must fit every run at its baseline offset, not
+            # just the tallest run, or fallback descenders get clipped.
+            joined_h = max(y_off + h for y_off, h in zip(y_offsets, heights))
             joined = sdl2.SDL_CreateRGBSurface(
-                0, total_w, max_h, 32,
+                0, total_w, joined_h, 32,
                 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000)
             if not joined:
                 return None
@@ -744,7 +807,7 @@ class Display:
         run_surfaces = []
         try:
             for use_fallback, segment in runs:
-                handle = fallback if use_fallback else primary
+                handle = cls._handle_for_run(loaded_font, use_fallback)
                 surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(
                     handle, segment.encode('utf-8'), sdl_color)
                 if not surface:
@@ -1290,16 +1353,18 @@ class Display:
             sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
             return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
         mult = Device.get_device().get_text_width_measurement_multiplier()
-        total_w = 0
+        total_raw = 0
         max_h = 0
         for use_fallback, segment in runs:
-            handle = fallback if use_fallback and fallback is not None else loaded_font.font
+            handle = cls._handle_for_run(loaded_font, use_fallback)
             w = sdl2.Sint32()
             h = sdl2.Sint32()
             sdl2.sdlttf.TTF_SizeUTF8(handle, segment.encode('utf-8'), w, h)
-            total_w += int(w.value * mult)
+            total_raw += w.value
             max_h = max(max_h, h.value)
-        return total_w, max_h
+        # Scale once after summing raw widths: per-run int() truncation
+        # would otherwise drift by up to one pixel per run boundary.
+        return int(total_raw * mult), max_h
     
 
     @classmethod
