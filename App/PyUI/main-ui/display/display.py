@@ -3,7 +3,7 @@ import os
 import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.font_fallback import Run, is_single_primary
+from display.font_fallback import Run, is_single_primary, resolve_fallback_path
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
 from display.resize_type import ResizeType
@@ -424,9 +424,13 @@ class Display:
                 f"Could not load font {font_path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}"
             )
 
-        fallback_path = Theme.get_fallback_font_path()
+        fallback_path = resolve_fallback_path()
         fallback_font = None
-        if fallback_path and fallback_path != font_path:
+        if not fallback_path:
+            PyUiLogger.get_logger().warning(
+                "No fallback font found (env + stock miss), continuing without per-glyph fallback"
+            )
+        elif fallback_path != font_path:
             fallback_font = sdl2.sdlttf.TTF_OpenFont(fallback_path.encode("utf-8"), font_size)
             if not fallback_font:
                 PyUiLogger.get_logger().warning(

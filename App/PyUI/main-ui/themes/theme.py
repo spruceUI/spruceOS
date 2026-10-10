@@ -574,49 +574,6 @@ class Theme():
         return os.path.join(base_dir, "themes", "font.ttf")
 
     @classmethod
-    def get_fallback_font_path(cls):
-        """3-step user-layer fallback chain (no theme config read).
-
-        1. $PYUI_FALLBACK_FONT when pointing to an existing file.
-        2. Stock SPRUCE/nunwen.ttf (first existing candidate).
-        3. Old theme-dir fallback (Theme.get_fallback_font()).
-        Never raises for missing files; logs which branch is used.
-        """
-        old_fallback = cls.get_fallback_font()
-
-        def _log_branch(msg):
-            try:
-                logger = PyUiLogger.get_logger()
-                if logger is not None:
-                    logger.info(msg)
-            except Exception:
-                pass
-
-        env_path = os.environ.get("PYUI_FALLBACK_FONT", "")
-        if env_path and os.path.exists(env_path):
-            _log_branch(f"Fallback font branch: env override {env_path}")
-            return env_path
-
-        for candidate in cls._stock_fallback_candidates():
-            if candidate and os.path.exists(candidate):
-                _log_branch(f"Fallback font branch: stock {candidate}")
-                return candidate
-
-        _log_branch(f"Fallback font branch: old fallback {old_fallback}")
-        return old_fallback
-
-    @classmethod
-    def _stock_fallback_candidates(cls):
-        # Device paths only: Brick always has /mnt/SDCARD. Tests patch
-        # this method instead of passing paths through the public API.
-        return [
-            "/mnt/SDCARD/SPRUCE/nunwen.ttf",
-            "/mnt/SDCARD/spruce/SPRUCE/nunwen.ttf",
-            "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
-            "/mnt/SDCARD/spruce/Themes/SPRUCE/nunwen.ttf",
-        ]
-
-    @classmethod
     def get_font_size(cls, font_purpose : FontPurpose):
         try:
             match font_purpose:
