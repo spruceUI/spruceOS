@@ -245,8 +245,8 @@ case "$PLATFORM" in
         export SDL_VIDEODRIVER=kmsdrm
         export SDL_AUDIODRIVER=alsa
         # RK3326's 4.4 kernel advertises async page flips but rejects them, and
-        # SDL uses them without vsync: no flip lands, every third frame shows.
-        case "$PLATFORM" in A10Mini|XUMiniM|G350) export SDL_RENDER_VSYNC=1 ;; esac
+        # SDL uses them without vsync: no flip lands. Mini M only, as tested.
+        case "$PLATFORM" in XUMiniM) export SDL_RENDER_VSYNC=1 ;; esac
 
         log_message "Starting PyUI on $PLATFORM"
         /mnt/SDCARD/spruce/flip/bin/MainUI \
