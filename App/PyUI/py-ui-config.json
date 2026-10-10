@@ -25,6 +25,7 @@
     "bluetoothCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_bluetooth",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
+    "cfwVersionFile": "/mnt/SDCARD/spruce/spruce",
     "aboutEntries" : [
         {
            "display":"Spruce version",

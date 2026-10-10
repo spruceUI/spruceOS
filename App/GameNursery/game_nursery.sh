@@ -10,7 +10,7 @@ killall -q idle_watchdog.sh 2>/dev/null
 
 CONFIG_DIR="/mnt/SDCARD/Saves/GameNursery"
 RELEASE_URL="https://github.com/spruceUI/Ports-and-Free-Games/releases/download/Nursery"
-CONFIG_URL="$RELEASE_URL/nursery_config"
+CONFIG_URL="$RELEASE_URL/nursery_config_v2"
 BOXART_URL="$RELEASE_URL/boxart.7z"
 SYSTEMS_URL="$RELEASE_URL/systems.json"
 CACHE_VALID_MINUTES=20
@@ -38,15 +38,15 @@ show_slideshow_if_first_run() {
 }
 
 is_cache_valid() {
-    local config_file="$CONFIG_DIR/nursery_config"
+    local config_file="$CONFIG_DIR/nursery_config_v2"
 
     if [ ! -f "$config_file" ] || [ ! -s "$config_file" ]; then
-        log_message "Game Nursery: nursery_config missing or empty."
+        log_message "Game Nursery: nursery_config_v2 missing or empty."
         return 1
     fi
 
     if ! jq empty "$config_file" >/dev/null 2>&1; then
-        log_message "Game Nursery: nursery_config is invalid JSON."
+        log_message "Game Nursery: nursery_config_v2 is invalid JSON."
         return 1
     fi
 
@@ -64,13 +64,13 @@ download_nursery_assets() {
     mkdir -p "$CONFIG_DIR"
 
     log_and_display_message "Downloading game catalog..."
-    if ! download_url_to_file "$CONFIG_URL" "$CONFIG_DIR/nursery_config"; then
+    if ! download_url_to_file "$CONFIG_URL" "$CONFIG_DIR/nursery_config_v2"; then
         log_and_display_message "Unable to download game catalog. Please try again later."
-        rm -f "$CONFIG_DIR/nursery_config" 2>/dev/null
+        rm -f "$CONFIG_DIR/nursery_config_v2" 2>/dev/null
         sleep 3
         exit 1
     fi
-    log_message "Game Nursery: nursery_config downloaded successfully"
+    log_message "Game Nursery: nursery_config_v2 downloaded successfully"
 
     log_and_display_message "Downloading system info..."
     if ! download_url_to_file "$SYSTEMS_URL" "$CONFIG_DIR/systems.json"; then
@@ -98,13 +98,13 @@ filter_config_for_platform() {
     if [ "$PLATFORM" != "A30" ]; then
         log_message "Game Nursery: Filtering out Ports (platform is $PLATFORM, not A30)"
         jq 'with_entries(select(.key | startswith("Ports/") | not))' \
-            "$CONFIG_DIR/nursery_config" > "$CONFIG_DIR/nursery_config.tmp" \
-            && mv "$CONFIG_DIR/nursery_config.tmp" "$CONFIG_DIR/nursery_config"
+            "$CONFIG_DIR/nursery_config_v2" > "$CONFIG_DIR/nursery_config_v2.tmp" \
+            && mv "$CONFIG_DIR/nursery_config_v2.tmp" "$CONFIG_DIR/nursery_config_v2"
     fi
 }
 
 apply_system_icons() {
-    jq -r 'keys[] | select(. != "descriptions") | split("/")[0]' "$CONFIG_DIR/nursery_config" | sort -u |
+    jq -r 'keys[] | select(. != "descriptions") | split("/")[0]' "$CONFIG_DIR/nursery_config_v2" | sort -u |
     while read -r group; do
         get_system_icon_from_theme "$group"
     done
@@ -176,7 +176,7 @@ fi
 RESULT_FILE="/mnt/SDCARD/App/PyUI/selection.txt"
 rm -f "$RESULT_FILE"
 
-display_option_list "$CONFIG_DIR/nursery_config"
+display_option_list "$CONFIG_DIR/nursery_config_v2"
 
 while true; do
     if [ -f "$RESULT_FILE" ]; then
@@ -192,7 +192,7 @@ while true; do
             eval "$content"
             # Remove the file after running
             rm -f "$RESULT_FILE"
-            display_option_list "$CONFIG_DIR/nursery_config"
+            display_option_list "$CONFIG_DIR/nursery_config_v2"
         fi
     fi
 
