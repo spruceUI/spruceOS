@@ -731,7 +731,7 @@
                     {"label": "blink 1", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "MINILOONG_POCKET1"]},
                     {"label": "blink 2", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S"]},
                     {"label": "blink 3", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S"]},
-                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"]}
+                    {"label": "rainbow", "devices": ["ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"]},
                     {"label": "rainbow multi", "devices": ["ANBERNIC_RGXX_RGB"]}
                 ],
                 "selected": "static"
