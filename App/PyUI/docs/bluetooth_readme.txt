@@ -49,6 +49,10 @@ stdout. Exit status is 0 unless the command name is unknown.
       Remove a paired device, then reroute audio. One line of output: "ok",
       or "failed forget <reason>".
 
+  forget-all
+      Remove every known device, then reroute audio. Needs Bluetooth on. One
+      line of output: "ok", or "failed forget-all <reason>".
+
   disconnect <address>
       Disconnect a device and keep its pairing, then reroute audio. One line
       of output: "ok", or "failed disconnect <reason>".
