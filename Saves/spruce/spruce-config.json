@@ -485,7 +485,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_A133P", "GKD_PIXEL2"],
+                "devices": ["TRIMUI_A133P", "GKD_PIXEL2", "MAGICX_A133P"],
                 "options": [
                     "Select",
                     "Start",
