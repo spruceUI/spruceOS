@@ -55,6 +55,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "km_flycast_xtreme": ["Flycast Xtreme"],
         "km_ludicrousn64_2k22_xtreme_amped": ["LudicrousN64 2K22 Xtreme Amped"],
         "km_parallel_n64_xtreme_amped_turbo": ["ParaLLEl N64 Xtreme Amped Turbo"],
+        "gloopy": ["Gloopy"],
         "libgametank": ["GameTank (Rust)"],
         "lowresnx": ["lowresnx"],
         "lutro": ["Lutro"],

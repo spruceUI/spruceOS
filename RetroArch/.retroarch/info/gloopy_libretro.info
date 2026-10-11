@@ -1,0 +1,41 @@
+# Software Information
+display_name = "Casio - Loopy (Gloopy)"
+authors = "LoopyMSE|SMG"
+supported_extensions = "bin|loopy"
+corename = "Gloopy"
+categories = "Emulator"
+license = "GPLv3"
+permissions = ""
+display_version = "1.2.0"
+
+# Hardware Information
+manufacturer = "Casio"
+systemname = "Loopy"
+systemid = "loopy"
+
+# Libretro Features
+database = "Casio - Loopy"
+supports_no_game = "false"
+savestate = "true"
+savestate_features = "deterministic"
+cheats = "false"
+input_descriptors = "true"
+memory_descriptors = "false"
+libretro_saves = "true"
+core_options = "true"
+core_options_version = "2.0"
+load_subsystem = "false"
+hw_render = "false"
+needs_fullpath = "false"
+disk_control = "false"
+is_experimental = "false"
+
+# Firmware / BIOS
+firmware_count = 2
+firmware0_desc = "loopy_bios.bin (Casio Loopy BIOS)"
+firmware0_path = "loopy_bios.bin"
+firmware0_opt = "false"
+firmware1_desc = "loopy_soundbios.bin (Casio Loopy Sound BIOS)"
+firmware1_path = "loopy_soundbios.bin"
+firmware1_opt = "true"
+notes = "(!) loopy_bios.bin (md5): required|(!) loopy_soundbios.bin (md5): optional, needed for sound emulation|Wanwan Aijou Monogatari expansion PCM audio requires .wav files in a 'pcm' directory next to the ROM.|Gloopy is a fork of LoopyMSE by PSI and kasami."

@@ -49,6 +49,7 @@ get_core_folder() {
         "km_flycast_xtreme_libretro.so") echo "Flycast Xtreme" ;;
         "km_ludicrousn64_2k22_xtreme_amped_libretro.so") echo "LudicrousN64 2K22 Xtreme Amped" ;;
         "km_parallel_n64_xtreme_amped_turbo_libretro.so") echo "ParaLLEl N64 Xtreme Amped Turbo" ;;
+        "gloopy_libretro.so") echo "Gloopy" ;;
         "libgametank_libretro.so") echo "GameTank (Rust)" ;;
         "lowresnx_libretro.so") echo "lowresnx" ;;
         "lutro_libretro.so") echo "Lutro" ;;
