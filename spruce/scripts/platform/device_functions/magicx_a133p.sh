@@ -19,6 +19,37 @@ magicx_model() {
     echo "${m:-zero28}"
 }
 
+# An oakMOSS image that carries its own library set (/usr/lib/oakmoss) gets it in the Flip libraries' place,
+# and no Flip library directory stays on either path. A base without it keeps the cfg's paths.
+MAGICX_OAKMOSS_LIBS=${MAGICX_OAKMOSS_LIBS:-/usr/lib/oakmoss}
+magicx_oakmoss_libs_paths() {
+    [ -d "$MAGICX_OAKMOSS_LIBS" ] || return 0
+    LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
+    PORTS_LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$PORTS_LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
+    export LD_LIBRARY_PATH PORTS_LD_LIBRARY_PATH
+}
+
+# magicx_oakmoss_libs_swap <path list> <set dir>: the Flip library slot (spruce/flip/lib, or the userland
+# tiers' spruce/aarch64/<NNN>/flip/lib) becomes the set's directory; every other Flip directory goes.
+magicx_oakmoss_libs_swap() {
+    _out=""
+    _rest="$1:"
+    while [ -n "$_rest" ]; do
+        _e=${_rest%%:*}
+        _rest=${_rest#*:}
+        case "$_e" in
+            /mnt/SDCARD/spruce/flip/lib | /mnt/SDCARD/spruce/flip/lib/ | \
+            /mnt/SDCARD/spruce/aarch64/*/flip/lib | /mnt/SDCARD/spruce/aarch64/*/flip/lib/) _e=$2 ;;
+            /mnt/SDCARD/spruce/flip/* | /mnt/SDCARD/spruce/*/flip/* | "") continue ;;
+        esac
+        _out=${_out:+$_out:}$_e
+    done
+    echo "$_out"
+}
+
+# Sourced right after the platform cfg (helperFunctions.sh), so every caller sees the swapped paths.
+magicx_oakmoss_libs_paths
+
 # First /dev/input/eventN whose kernel name matches one of the patterns.
 magicx_find_event_by_name() {
     for d in /sys/class/input/event*; do
@@ -196,6 +227,7 @@ device_init() {
     magicx_seed_system_json
 
     export LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
+    magicx_oakmoss_libs_paths
 
     init_gpio_a133p
     magicx_load_touch
