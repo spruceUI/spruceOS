@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
+from devices.trimui.brick_pro_speaker_amp import BrickProSpeakerAmpGate
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
@@ -30,7 +31,7 @@ class TrimUIBrickPro(TrimUIDevice):
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
-        self.audio_player = AudioPlayerDelegateSdl2()
+        self.audio_player = BrickProSpeakerAmpGate(start_gate=main_ui_mode)
         script_dir = Path(__file__).resolve().parent
         source = script_dir / 'brick-system.json'
         self._load_system_config("/mnt/SDCARD/Saves/trim-ui-brick-pro-system.json", source)
@@ -55,6 +56,27 @@ class TrimUIBrickPro(TrimUIDevice):
                 
         super().__init__()
             
+
+    # Games and apps run after PyUI hands off (and usually exits), so the
+    # speaker amp gate must leave the amp on before every hand-off.
+    def run_game(self, rom_info):
+        self.audio_player.hold_amp_on()
+        return super().run_game(rom_info)
+
+    def run_app(self, folder, launch):
+        self.audio_player.hold_amp_on()
+        return super().run_app(folder, launch)
+
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        self.audio_player.hold_amp_on()
+        return super().run_cmd(args, dir, is_power_cmd)
+
+    # Volume keys reach the firmware, which turns the speaker amp back on.
+    def map_key(self, key_code):
+        controller_input = super().map_key(key_code)
+        if controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN):
+            self.audio_player.amp_changed_elsewhere()
+        return controller_input
 
     def startup_init(self, include_wifi=True):
         self._set_lumination_to_config()
