@@ -76,25 +76,32 @@ class BoxArtResizer():
             return False
 
 
-        try:
-            # Replace 'Imgs' with 'Imgs_med' in the path
-            medium_image_path = full_path.replace("Imgs", "Imgs_med", 1)
-            if (not cls.scale_and_convert_image(large_image_path, medium_image_path, target_medium_width, target_medium_height)):
-                medium_image_path = full_path
-        except Exception as e:
-            PyUiLogger.get_logger().warning(
-                f"Issue converting for medium image {full_path} : {e}")
-            return False
+        # A size equal to the one above it would only be a copy of that image: skip it.
+        # The views fall back from Imgs_small to Imgs_med to Imgs when a file is missing.
+        # When no medium is written the large image is the one to shrink, not the
+        # original: shrinking the original again gave a copy of the large image.
+        medium_image_path = large_image_path
+        if (target_medium_width, target_medium_height) != (target_large_width, target_large_height):
+            try:
+                # Replace 'Imgs' with 'Imgs_med' in the path
+                resized_path = full_path.replace("Imgs", "Imgs_med", 1)
+                if (cls.scale_and_convert_image(large_image_path, resized_path, target_medium_width, target_medium_height)):
+                    medium_image_path = resized_path
+            except Exception as e:
+                PyUiLogger.get_logger().warning(
+                    f"Issue converting for medium image {full_path} : {e}")
+                return False
 
-        try:
-            # Replace 'Imgs' with 'Imgs_small' in the path
-            small_image_path = full_path.replace("Imgs", "Imgs_small", 1)
-            cls.scale_and_convert_image(
-                medium_image_path, small_image_path, target_small_width, target_small_height)
-        except Exception as e:
-            PyUiLogger.get_logger().warning(
-                f"Issue converting for small image {full_path} : {e}")
-            return False
+        if (target_small_width, target_small_height) != (target_medium_width, target_medium_height):
+            try:
+                # Replace 'Imgs' with 'Imgs_small' in the path
+                small_image_path = full_path.replace("Imgs", "Imgs_small", 1)
+                cls.scale_and_convert_image(
+                    medium_image_path, small_image_path, target_small_width, target_small_height)
+            except Exception as e:
+                PyUiLogger.get_logger().warning(
+                    f"Issue converting for small image {full_path} : {e}")
+                return False
 
         os.remove(full_path)
         for output_path in cls._to_delete:
@@ -113,8 +120,17 @@ class BoxArtResizer():
             idx = parts.index("Imgs")
             # Take everything up to the parent of 'Imgs'
             parent_folder = os.sep.join(parts[:idx])
+            target_medium = Device.get_device().get_boxart_medium_resize_dimensions()
+            target_small = Device.get_device().get_boxart_small_resize_dimensions()
+            target_large = Device.get_device().get_boxart_large_resize_dimensions()
 
-            for size in ["Imgs_small", "Imgs_med", "Imgs_large"]:
+            # Imgs_large is scratch space; Imgs_med and Imgs_small only when they hold a smaller size
+            sizes = ["Imgs_large"]
+            if target_medium != target_large:
+                sizes.append("Imgs_med")
+            if target_small != target_medium:
+                sizes.append("Imgs_small")
+            for size in sizes:
                 new_folder = os.path.join(parent_folder, size)
                 os.makedirs(new_folder, exist_ok=True)
         else:
@@ -125,23 +141,24 @@ class BoxArtResizer():
         parts = img_path.split(os.sep)
         if "Imgs" in parts:
             idx = parts.index("Imgs")
-            folder_path = os.sep.join(parts[:idx - 1]) if idx > 1 else os.sep
+            # The system folder holding Imgs, where create_interim_folders made them
+            cls.clear_interim_folders_in(os.sep.join(parts[:idx]))
 
-            target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
-            target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
-            target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
+    @classmethod
+    def clear_interim_folders_in(cls, folder_path):
+        target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
+        target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
+        target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
 
-            # This is always temporary
-            shutil.rmtree(os.path.join(folder_path, "Imgs_large"), ignore_errors=True)
-            # If medium and large are the same size, get rid of Imgs_med as it unused
-            if (target_large_width == target_medium_width and target_large_height == target_medium_height):
-                shutil.rmtree(os.path.join(folder_path, "Imgs_med"), ignore_errors=True)
+        # This is always temporary
+        shutil.rmtree(os.path.join(folder_path, "Imgs_large"), ignore_errors=True)
+        # If medium and large are the same size, get rid of Imgs_med as it unused
+        if (target_large_width == target_medium_width and target_large_height == target_medium_height):
+            shutil.rmtree(os.path.join(folder_path, "Imgs_med"), ignore_errors=True)
 
-            # If small and medium are the same size, get rid of Imgs_small as it unused
-            if (target_medium_width == target_small_width and target_medium_height == target_small_height):
-                shutil.rmtree(os.path.join(folder_path, "Imgs_small"), ignore_errors=True)
-
-
+        # If small and medium are the same size, get rid of Imgs_small as it unused
+        if (target_medium_width == target_small_width and target_medium_height == target_small_height):
+            shutil.rmtree(os.path.join(folder_path, "Imgs_small"), ignore_errors=True)
 
     @classmethod
     def patch_boxart_list(cls, image_list):
@@ -160,15 +177,17 @@ class BoxArtResizer():
             cls.create_interim_folders(path)
             cls.process_image(path)
             if (cls._aborted):
-                Display.display_message(f"Aborting boxart patching", 2000)
-                cls._monitoring = False
-                return
+                break
 
+        # Also after an abort: the images done so far left their copies behind
         for path in image_list:
             cls.clear_interim_folders(path)
 
         cls._monitoring = False
-        Display.display_message(f"All boxart is optimized", 2000)
+        if (cls._aborted):
+            Display.display_message(f"Aborting boxart patching", 2000)
+        else:
+            Display.display_message(f"All boxart is optimized", 2000)
 
     @classmethod
     @pauses_idle_shutdown
@@ -176,9 +195,6 @@ class BoxArtResizer():
         """Search through ROM directories and scale images inside Imgs folders."""
         Display.display_message(f"Starting boxart patching", 500)
         rom_paths = ["/mnt/SDCARD/Roms/", "/media/sdcard1/Roms/"]
-        target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
-        target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
-        target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
         cls._aborted = False
         cls._monitoring = True
         cls.scan_count = 0
@@ -206,6 +222,7 @@ class BoxArtResizer():
                             cls.scan_count = cls.scan_count + 1
                             cls._to_delete = []
                             if (cls._aborted):
+                                cls.clear_interim_folders_in(folder_path)
                                 Display.display_message(f"Aborting boxart patching", 2000)
                                 cls._monitoring = False
                                 return
@@ -213,15 +230,7 @@ class BoxArtResizer():
                             full_path = os.path.join(root, file)
                             cls.process_image(full_path)
 
-                # This is always temporary
-                shutil.rmtree(os.path.join(folder_path, "Imgs_large"), ignore_errors=True)
-                # If medium and large are the same size, get rid of Imgs_med as it unused
-                if (target_large_width == target_medium_width and target_large_height == target_medium_height):
-                    shutil.rmtree(os.path.join(folder_path, "Imgs_med"), ignore_errors=True)
-
-                # If small and medium are the same size, get rid of Imgs_small as it unused
-                if (target_medium_width == target_small_width and target_medium_height == target_small_height):
-                    shutil.rmtree(os.path.join(folder_path, "Imgs_small"), ignore_errors=True)
+                cls.clear_interim_folders_in(folder_path)
 
         cls._monitoring = False
         Display.display_message(f"All boxart is optimized", 2000)
