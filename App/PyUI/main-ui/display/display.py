@@ -430,15 +430,14 @@ class Display:
             if candidate == font_path:
                 # Same file as primary: nothing extra to open or track.
                 continue
-            else:
-                fallback_font = sdl2.sdlttf.TTF_OpenFont(candidate.encode("utf-8"), font_size)
-                if fallback_font:
-                    fallback_fonts.append(fallback_font)
-                    fallback_paths.append(candidate)
-                else:
-                    PyUiLogger.get_logger().warning(
-                        f"Could not load fallback font {candidate}, skipping it"
-                    )
+            fallback_font = sdl2.sdlttf.TTF_OpenFont(candidate.encode("utf-8"), font_size)
+            if not fallback_font:
+                PyUiLogger.get_logger().warning(
+                    f"Could not load fallback font {candidate}, skipping it"
+                )
+                continue
+            fallback_fonts.append(fallback_font)
+            fallback_paths.append(candidate)
         if not fallback_paths:
             PyUiLogger.get_logger().warning(
                 "No fallback font found (env + stock miss), continuing without per-glyph fallback"
@@ -481,15 +480,12 @@ class Display:
                 return
             if missing:
                 missing_str = ",".join(f"U+{cp:04X}" for cp in missing)
-                logger.info(
-                    f"font fallback for {font_purpose}: primary missing "
-                    f"{missing_str}, fallbacks {loaded_font.fallback_paths} will cover"
-                )
+                branch = (f"primary missing {missing_str}, fallbacks "
+                          f"{loaded_font.fallback_paths} will cover")
             else:
-                logger.info(
-                    f"font fallback for {font_purpose}: primary covers "
-                    f"probed keyboard glyphs, fallback idle"
-                )
+                branch = ("primary covers probed keyboard glyphs, "
+                          "fallbacks idle")
+            logger.info(f"font fallback for {font_purpose}: {branch}")
         except Exception:
             pass
 

@@ -4,6 +4,16 @@ import os
 from typing import Callable, List, NamedTuple
 
 
+# Device stock fallback candidates (Brick always has /mnt/SDCARD).
+# Ordered: the resolver collects every existing entry in turn.
+DEFAULT_STOCK_CANDIDATES = (
+    "/mnt/SDCARD/SPRUCE/nunwen.ttf",
+    "/mnt/SDCARD/spruce/SPRUCE/nunwen.ttf",
+    "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
+    "/mnt/SDCARD/spruce/Themes/SPRUCE/nunwen.ttf",
+)
+
+
 class Run(NamedTuple):
     """One same-font stretch of text: which font renders it + the chars.
 
@@ -49,16 +59,6 @@ def split_fallback_runs(text: str, font_for: Callable[[int], int]) -> List[Run]:
     return runs
 
 
-# Device stock fallback candidates (Brick always has /mnt/SDCARD).
-# Ordered: the resolver collects every existing entry in turn.
-DEFAULT_STOCK_CANDIDATES = (
-    "/mnt/SDCARD/SPRUCE/nunwen.ttf",
-    "/mnt/SDCARD/spruce/SPRUCE/nunwen.ttf",
-    "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
-    "/mnt/SDCARD/spruce/Themes/SPRUCE/nunwen.ttf",
-)
-
-
 def _log_fallback_branch(msg):
     try:
         from utils.logger import PyUiLogger
@@ -69,15 +69,16 @@ def _log_fallback_branch(msg):
         pass
 
 
-def resolve_fallback_paths(env_path=None, stock_candidates=None):
+def resolve_fallback_paths(env_path=None,
+                           stock_candidates=DEFAULT_STOCK_CANDIDATES):
     """Resolve the ordered render-layer fallback font paths.
 
     Theme owns the primary font only; this never reads theme config.
 
     Order: explicit env_path (else $PYUI_FALLBACK_FONT) when pointing to
     an existing file comes first, then each existing entry of
-    stock_candidates (default device paths). Missing files are skipped;
-    an empty list means single-font rendering (no per-glyph fallback).
+    stock_candidates. Missing files are skipped; an empty list means
+    single-font rendering (no per-glyph fallback).
 
     Never raises for missing files; logs only on a hit, stays silent on
     a miss so Display can warn once at the single call site.
@@ -89,8 +90,6 @@ def resolve_fallback_paths(env_path=None, stock_candidates=None):
         _log_fallback_branch(f"Fallback font branch: env override {env_path}")
         paths.append(env_path)
 
-    if stock_candidates is None:
-        stock_candidates = DEFAULT_STOCK_CANDIDATES
     for candidate in stock_candidates:
         if candidate and candidate not in paths and os.path.exists(candidate):
             _log_fallback_branch(f"Fallback font branch: stock {candidate}")
