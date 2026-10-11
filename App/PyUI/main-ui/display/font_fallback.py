@@ -4,8 +4,7 @@ import os
 from typing import Callable, List, NamedTuple
 
 
-# Device stock fallback candidates (Brick always has /mnt/SDCARD).
-# Ordered: the resolver collects every existing entry in turn.
+# Stock candidates in preference order (Brick has /mnt/SDCARD).
 DEFAULT_STOCK_CANDIDATES = (
     "/mnt/SDCARD/SPRUCE/nunwen.ttf",
     "/mnt/SDCARD/spruce/SPRUCE/nunwen.ttf",
@@ -29,17 +28,9 @@ def is_single_primary(runs: List[Run]) -> bool:
 
 
 def split_fallback_runs(text: str, font_for: Callable[[int], int]) -> List[Run]:
-    """Split text into consecutive same-font runs.
+    """Group text into consecutive same-font runs. Empty text -> [].
 
-    Args:
-        text: string to split.
-        font_for: callable taking a codepoint int, returning the index of
-            the first font providing the glyph (0 = primary, negative =
-            last font in the pair).
-
-    Returns:
-        Runs with consecutive same-font chars grouped.
-        Empty text -> [].
+    font_for maps a codepoint to a font index (negative = last font).
     """
     runs: List[Run] = []
     if not text:
@@ -48,9 +39,7 @@ def split_fallback_runs(text: str, font_for: Callable[[int], int]) -> List[Run]:
         try:
             font_index = int(font_for(ord(ch)))
         except Exception:
-            # A failing probe must not silently render tofu from the
-            # primary: route the char to the last font in the pair (the
-            # last fallback when one is loaded, else the primary).
+            # Failed probe routes to the last font, never silent tofu.
             font_index = -1
         if runs and runs[-1].font_index == font_index:
             runs[-1] = Run(font_index, runs[-1].segment + ch)
@@ -71,17 +60,9 @@ def _log_fallback_branch(msg):
 
 def resolve_fallback_paths(env_path=None,
                            stock_candidates=DEFAULT_STOCK_CANDIDATES):
-    """Resolve the ordered render-layer fallback font paths.
+    """Ordered fallback font paths: $PYUI_FALLBACK_FONT first, then stock.
 
-    Theme owns the primary font only; this never reads theme config.
-
-    Order: explicit env_path (else $PYUI_FALLBACK_FONT) when pointing to
-    an existing file comes first, then each existing entry of
-    stock_candidates. Missing files are skipped; an empty list means
-    single-font rendering (no per-glyph fallback).
-
-    Never raises for missing files; logs only on a hit, stays silent on
-    a miss so Display can warn once at the single call site.
+    Skips missing files; empty means single-font rendering. Never raises.
     """
     paths = []
     if env_path is None:

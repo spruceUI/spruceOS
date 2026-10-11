@@ -7,19 +7,12 @@ from display.font_fallback import split_fallback_runs
 
 
 def _probe_glyph(font_ptr, codepoint, fallback_available=False):
-    """Return True if font_ptr provides codepoint. Never raises.
+    """True if font_ptr provides codepoint. Never raises.
 
-    Tries the 32-bit probe first, then falls through to the 16-bit
-    probe (present since SDL_ttf 2.0.12) when the 32-bit call is
-    missing or raises -- e.g. pysdl2 binds TTF_GlyphIsProvided32 but
-    the loaded lib is older than 2.0.18, which raises RuntimeError on
-    call. All PyUI UI glyphs are BMP, so the 16-bit probe covers them.
-
-    Fail-closed toward the fallback: a None handle or probes that all
-    fail report missing (False) so the fallback font can rescue the
-    glyph. The only fail-open case is a completely missing SDL probe
-    API with no usable fallback, where True preserves the old
-    single-font behaviour (nothing else could render the glyph anyway).
+    Tries TTF_GlyphIsProvided32 first, then the 16-bit probe: Brick's
+    old SDL_ttf raises on the 32-bit call although pysdl2 binds it.
+    Fail-closed toward the fallback, except with no probe API and no
+    fallback, where True keeps the old single-font behaviour.
     """
     if font_ptr is None:
         return False
@@ -27,21 +20,18 @@ def _probe_glyph(font_ptr, codepoint, fallback_available=False):
         return False if fallback_available else True
     cp = int(codepoint)
     probe32 = getattr(_sdlttf, "TTF_GlyphIsProvided32", None)
-    # Non-BMP skips the 16-bit probe: on old libs it always takes the
-    # fallback, which is the safe direction.
+    # Non-BMP skips the 16-bit probe; fallback is the safe direction.
     probe16 = getattr(_sdlttf, "TTF_GlyphIsProvided", None) if cp <= 0xFFFF else None
     probes = [p for p in (probe32, probe16) if callable(p)]
     if not probes:
-        # No usable probe API: fail open only when nothing else could
-        # render the glyph; otherwise let the fallback try.
+        # Fail open only when no other font could render the glyph.
         return not fallback_available
     for probe in probes:
         try:
             return bool(probe(font_ptr, cp))
         except Exception:
             continue  # old lib: try the next (narrower) probe
-    # Every probe failed: report missing so the fallback font gets its
-    # chance (or the primary renders anyway when there is no fallback).
+    # All probes failed: let the fallback try (or primary renders alone).
     return False
 
 
@@ -84,11 +74,9 @@ class LoadedFont:
         return handles
 
     def handle_for(self, font_index):
-        """Font handle that renders a run. Never raises.
+        """Font handle rendering a run. Never raises.
 
-        Negative index addresses the last font in the pair (the last
-        fallback when one is loaded, else the primary handle);
-        out-of-range index falls back to the primary handle.
+        Negative means the last font; out-of-range means primary.
         """
         try:
             index = int(font_index)
@@ -106,11 +94,9 @@ class LoadedFont:
         return split_fallback_runs(text, self.font_index_for)
 
     def font_index_for(self, codepoint):
-        """Index of the first font providing codepoint. Never raises.
+        """First font index providing codepoint. Never raises.
 
-        Probes primary first, then fallbacks in order. When no font
-        provides the glyph, returns the last fallback index (fail-closed
-        toward the fallback side); with a single font, returns 0.
+        No provider: last fallback index, or 0 with a single font.
         """
         cp = self._to_codepoint(codepoint)
         if cp not in self._font_index_cache:

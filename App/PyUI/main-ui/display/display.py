@@ -663,11 +663,7 @@ class Display:
 
     @staticmethod
     def _split_runs(loaded_font, text):
-        """Same-font runs for text, or one primary run when empty/unsplit.
-
-        Shared preamble of the render and measure paths so both agree on
-        what "single primary" means.
-        """
+        """Same-font runs for text; one primary run when empty/unsplit."""
         runs = loaded_font.split(text)
         if not runs:
             runs = [Run(0, text)]
@@ -676,13 +672,10 @@ class Display:
     @classmethod
     def _render_text_surface(cls, loaded_font, text, sdl_color,
                              use_fallback_fonts_for_missing_glyphs=False):
-        """Render text to a single SDL surface, caller owns (must free).
+        """Render text to one SDL surface; caller owns it (must free).
 
-        Single-font path (flag off, or every char in primary, or no
-        fallback loaded) renders with exactly one TTF_RenderUTF8_Blended
-        call as before. Otherwise each same-font run renders with its own
-        font handle and the runs are joined horizontally. Returns None on
-        failure.
+        One TTF call for a single run, else per-run renders joined
+        horizontally. Returns None on failure.
         """
         if not use_fallback_fonts_for_missing_glyphs:
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
@@ -703,18 +696,15 @@ class Display:
             run_surfaces = []
             return joined
         finally:
-            # _join consumes its inputs on success (list reset above), so
-            # this only frees partial surfaces on the early-return path.
+            # _join freed its inputs on success (list reset); free partials only.
             for _, surface in run_surfaces:
                 sdl2.SDL_FreeSurface(surface)
     @staticmethod
     def _baseline_layout(heights, handles):
         """Baseline offsets + joined height for one row of runs.
 
-        Shared by the render path (positions each run surface) and the
-        measure path (reports the same height that will be rendered), so
-        wrapping and clipping agree with the pixels. Top-aligned when
-        ascent info is unavailable.
+        Render and measure share it so wrapping matches pixels.
+        Top-aligned when ascent info is unavailable.
         """
         ascents = []
         for handle in handles:
@@ -727,8 +717,7 @@ class Display:
             y_offsets = [top - a for a in ascents]
         else:
             y_offsets = [0] * len(heights)
-        # Fit every run at its baseline offset, not just the tallest run,
-        # or fallback descenders get clipped.
+        # Cover every run's descenders, not just the tallest.
         joined_h = max(y_off + h for y_off, h in zip(y_offsets, heights))
         return y_offsets, joined_h
 
@@ -736,8 +725,7 @@ class Display:
     def _blit_surface(src, src_rect, dst, dst_rect):
         """Blit with SDL_UpperBlit fallback for old bindings. Never raises.
 
-        Returns 0 on success, nonzero otherwise (a None result from a
-        stub binding counts as success).
+        Returns 0 on success (a None stub result counts as success).
         """
         blit = (getattr(sdl2, "SDL_BlitSurface", None)
                 or getattr(sdl2, "SDL_UpperBlit", None))
@@ -750,11 +738,9 @@ class Display:
 
     @classmethod
     def _join_run_surfaces(cls, run_items):
-        """Join per-run surfaces horizontally on a common baseline.
+        """Join run surfaces horizontally on a common baseline.
 
-        run_items: list of (font_handle, surface). Consumes (frees) every
-        input surface on both success and failure paths. Returns the joined
-        surface or None. Top-aligned when ascent info is unavailable.
+        Frees every input surface on all paths. Returns joined or None.
         """
         surfaces = [surface for _, surface in run_items]
         try:
@@ -784,8 +770,7 @@ class Display:
                 x += surface.contents.w
             return joined
         finally:
-            # Caller transfers ownership of every input surface to _join:
-            # all are freed here on both success and failure paths.
+            # _join owns every input surface from here on.
             for surface in surfaces:
                 sdl2.SDL_FreeSurface(surface)
 
@@ -798,9 +783,7 @@ class Display:
         if(text is None or len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
-        # Key includes the font pair paths plus the fallback flag so a
-        # theme/fallback change — or a different flag — never hits a stale
-        # texture rendered the other way.
+        # Paths + flag in the key so stale textures never hit.
         font_key = (loaded_font.cache_key(purpose), use_fallback_fonts_for_missing_glyphs)
         cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, font_key, color)
         cached = True
@@ -1336,8 +1319,7 @@ class Display:
             total_raw += raw_w
             heights.append(raw_h)
             handles.append(handle)
-        # Same baseline math as the render path so wrapping and clipping
-        # agree with the pixels; scale once to avoid per-run truncation.
+        # Scale once so wrapping matches rendered pixels.
         _, max_h = cls._baseline_layout(heights, handles)
         return int(total_raw * mult), max_h
     
