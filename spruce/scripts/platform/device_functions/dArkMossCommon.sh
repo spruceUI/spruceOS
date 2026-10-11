@@ -707,6 +707,7 @@ device_prepare_for_poweroff() {
 # fallback framebuffer while PyUI still holds the panel, so that status shows the moment it exits.
 darkmoss_shutdown_logo() {
     [ -n "$DARKMOSS_BOOTLOGO" ] && [ -f "$DARKMOSS_BOOTLOGO" ] || return 0
+    grep -qw darkmoss.debug /proc/cmdline 2>/dev/null && return 0  # debug boots: kernel text, no logos
     _img=/usr/share/bootlogo/logo-poweroff.bmp
     [ "$1" = "--reboot" ] && _img=/usr/share/bootlogo/logo-reboot.bmp
     [ -f "$_img" ] && /usr/bin/python3 -I "$DARKMOSS_BOOTLOGO" --image "$_img" >/dev/null 2>&1
