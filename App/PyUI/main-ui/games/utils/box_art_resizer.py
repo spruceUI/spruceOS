@@ -137,12 +137,15 @@ class BoxArtResizer():
             PyUiLogger.get_logger().warning(f"'Imgs' folder not found in path: {img_path}")
 
     @classmethod
-    def clear_interim_folders(cls, img_path):
-        parts = img_path.split(os.sep)
-        if "Imgs" in parts:
-            idx = parts.index("Imgs")
-            # The system folder holding Imgs, where create_interim_folders made them
-            cls.clear_interim_folders_in(os.sep.join(parts[:idx]))
+    def clear_interim_folders(cls, img_paths):
+        # Once per system folder holding Imgs, where create_interim_folders made them
+        folders = set()
+        for img_path in img_paths:
+            parts = img_path.split(os.sep)
+            if "Imgs" in parts:
+                folders.add(os.sep.join(parts[:parts.index("Imgs")]))
+        for folder in folders:
+            cls.clear_interim_folders_in(folder)
 
     @classmethod
     def clear_interim_folders_in(cls, folder_path):
@@ -180,8 +183,7 @@ class BoxArtResizer():
                 break
 
         # Also after an abort: the images done so far left their copies behind
-        for path in image_list:
-            cls.clear_interim_folders(path)
+        cls.clear_interim_folders(image_list)
 
         cls._monitoring = False
         if (cls._aborted):
