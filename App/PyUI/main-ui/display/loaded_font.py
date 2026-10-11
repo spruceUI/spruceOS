@@ -5,14 +5,6 @@ except Exception:
 
 from display.font_fallback import split_fallback_runs
 
-# Upper bound for each per-font glyph probe cache. Eviction is a plain
-# clear: probe results cost one SDL call per codepoint to rebuild, so a
-# full clear is cheap and keeps the render hot path branch-free.
-# Caches live on the LoadedFont object, so dropping the object on theme
-# switch (Display.deinit_fonts) drops its caches too: no leak across
-# theme switches, and a fresh LoadedFont always starts empty.
-GLYPH_CACHE_LIMIT = 4096
-
 
 def _probe_glyph(font_ptr, codepoint, fallback_available=False):
     """Return True if font_ptr provides codepoint. Never raises.
@@ -76,13 +68,6 @@ class LoadedFont:
             return ord(value[0]) if value else 0
         return int(value)
 
-    @staticmethod
-    def _store_bounded(cache, cp, value):
-        if len(cache) > GLYPH_CACHE_LIMIT:
-            cache.clear()
-        cache[cp] = value
-        return value
-
     def has_fallback(self):
         return any(h is not None and h != self.font
                    for h in self.fallback_fonts)
@@ -135,7 +120,7 @@ class LoadedFont:
                                 fallback_available=self.has_fallback()):
                     index = i
                     break
-            self._store_bounded(self._font_index_cache, cp, index)
+            self._font_index_cache[cp] = index
         return self._font_index_cache[cp]
 
     def cache_key(self, purpose):
