@@ -22,12 +22,6 @@ import traceback
 from utils.time_logger import log_timing
 
 
-# Keyboard/function glyphs probed once per font load to warm the glyph
-# cache and log which branch will serve them (no per-frame probe cost).
-# ⇪ ↑ ← ↵ ✓ ✔: the symbols PyUI needs beyond plain theme text.
-_WARMUP_CODEPOINTS = (0x21EA, 0x2191, 0x2190, 0x21B5, 0x2713, 0x2714)
-
-
 @dataclass
 class CachedImageTexture:
     def __init__(self, texture, width, height):
@@ -465,32 +459,7 @@ class Display:
                             fallback_fonts=fallback_fonts,
                             fallback_paths=fallback_paths,
                             sdlttf=sdl2.sdlttf)
-        cls._warm_glyph_cache(loaded, font_purpose)
         return loaded
-
-    @classmethod
-    def _warm_glyph_cache(cls, loaded_font, font_purpose):
-        """Probe the static warmup set once; log primary vs fallback branch.
-
-        Never raises: a failed probe just leaves the cache cold and the
-        per-glyph path probes lazily as before.
-        """
-        try:
-            missing = [cp for cp in _WARMUP_CODEPOINTS
-                       if loaded_font.font_index_for(cp) != 0]
-            logger = PyUiLogger.get_logger()
-            if logger is None:
-                return
-            if missing:
-                missing_str = ",".join(f"U+{cp:04X}" for cp in missing)
-                branch = (f"primary missing {missing_str}, fallbacks "
-                          f"{loaded_font.fallback_paths} will cover")
-            else:
-                branch = ("primary covers probed keyboard glyphs, "
-                          "fallbacks idle")
-            logger.info(f"font fallback for {font_purpose}: {branch}")
-        except Exception:
-            pass
 
     @classmethod
     def lock_current_image(cls):
