@@ -335,21 +335,6 @@ restart_trimui_inputd() {
 }
 
 
-run_trimui_osdd() {
-    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
-        cd /usr/trimui/osd || return 1
-        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
-        log_message "Attempted to start trimui_osdd"
-    else
-        log_message "trimui_osdd not found. Skipping."
-    fi
-
-    {
-        sleep 2 # ensure OSDD fully initializes before setting hotkey
-        echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
-    } &
-}
-
 current_backlight() {
     jq -r '.backlight' "$SYSTEM_JSON"
 }

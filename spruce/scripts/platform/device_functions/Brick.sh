@@ -55,24 +55,6 @@ EOF
 device_init() {
     device_init_a133p
 
-    # Show the configured switch action's name in the Fn switch popup instead
-    # of a generic ON/OFF. trimui_scened calls these popup scripts on every
-    # flip, so overlay our Brick-only versions with a bind mount.
-    FN_DIP_DIR="/usr/trimui/apps/fn_editor"
-
-    # No risk if the old version gets called once. Don't need to wait to ensure its mounted before something
-    # calls it
-    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_on_msg.sh "${FN_DIP_DIR}/show_fn_dip_on_msg.sh" &
-    mount --bind /mnt/SDCARD/spruce/brick/fn_dip/show_fn_dip_off_msg.sh "${FN_DIP_DIR}/show_fn_dip_off_msg.sh" &
-
-    # The stock OSD daemon draws TrimUI's own popups - volume, brightness, the
-    # Fn switch toast. PyUI draws its own, so running osdd just means two
-    # different-looking notifications for the same event. Off unless asked for,
-    # which is what the Smart Pro S has always done; this brings the rest of the
-    # line into line with it.
-    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
-    [ "$run_osd" = "True" ] && run_trimui_osdd
-
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash
         chmod +x /bin/bash
