@@ -1339,20 +1339,23 @@ class Display:
             cls._cached_space_dimensions = cls.get_text_dimensions(font_purpose, " ")
         return cls._cached_space_dimensions
     
+    @staticmethod
+    def _measure_single(loaded_font, text):
+        """Measure text with the primary font only (pre-fallback behaviour)."""
+        w = sdl2.Sint32()
+        h = sdl2.Sint32()
+        sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
+        mult = Device.get_device().get_text_width_measurement_multiplier()
+        return int(w.value * mult), h.value
+
     @classmethod
     def get_text_dimensions(cls, purpose, text="A", use_fallback_fonts_for_missing_glyphs=False):
         loaded_font = cls.fonts[purpose]
-        if not use_fallback_fonts_for_missing_glyphs:
-            w = sdl2.Sint32()
-            h = sdl2.Sint32()
-            sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
-            return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
-        runs = cls._split_runs(loaded_font, text)
-        if is_single_primary(runs):
-            w = sdl2.Sint32()
-            h = sdl2.Sint32()
-            sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
-            return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
+        runs = None
+        if use_fallback_fonts_for_missing_glyphs:
+            runs = cls._split_runs(loaded_font, text)
+        if runs is None or is_single_primary(runs):
+            return cls._measure_single(loaded_font, text)
         mult = Device.get_device().get_text_width_measurement_multiplier()
         total_raw = 0
         heights = []
