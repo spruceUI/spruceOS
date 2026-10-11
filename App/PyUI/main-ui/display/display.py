@@ -457,8 +457,7 @@ class Display:
 
         loaded = LoadedFont(font, line_height, font_path,
                             fallback_fonts=fallback_fonts,
-                            fallback_paths=fallback_paths,
-                            sdlttf=sdl2.sdlttf)
+                            fallback_paths=fallback_paths)
         return loaded
 
     @classmethod

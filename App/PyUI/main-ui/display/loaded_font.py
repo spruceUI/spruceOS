@@ -14,7 +14,7 @@ from display.font_fallback import split_fallback_runs
 GLYPH_CACHE_LIMIT = 4096
 
 
-def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
+def _probe_glyph(font_ptr, codepoint, fallback_available=False):
     """Return True if font_ptr provides codepoint. Never raises.
 
     Tries the 32-bit probe first, then falls through to the 16-bit
@@ -31,7 +31,7 @@ def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
     """
     if font_ptr is None:
         return False
-    mod = sdlttf if sdlttf is not None else _sdlttf
+    mod = _sdlttf
     if mod is None:
         return False if fallback_available else True
     cp = int(codepoint)
@@ -62,14 +62,13 @@ class LoadedFont:
     """
 
     def __init__(self, font, line_height, font_path,
-                 fallback_fonts=None, fallback_paths=None, sdlttf=None):
+                 fallback_fonts=None, fallback_paths=None):
         self.font = font
         self.line_height = line_height
         self.font_path = font_path
         self.fallback_fonts = list(fallback_fonts) if fallback_fonts else []
         self.fallback_paths = list(fallback_paths) if fallback_paths else []
         self.fonts = [font] + self.fallback_fonts
-        self._sdlttf = sdlttf if sdlttf is not None else _sdlttf
         self._font_index_cache = {}
 
     @staticmethod
@@ -133,7 +132,7 @@ class LoadedFont:
         if cp not in self._font_index_cache:
             index = len(self.fonts) - 1 if self.fonts else 0
             for i, handle in enumerate(self.fonts):
-                if _probe_glyph(handle, cp, self._sdlttf,
+                if _probe_glyph(handle, cp,
                                 fallback_available=self.has_fallback()):
                     index = i
                     break
