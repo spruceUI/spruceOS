@@ -475,7 +475,7 @@ class Display:
         """
         try:
             missing = [cp for cp in cls._WARMUP_CODEPOINTS
-                       if not loaded_font.has_glyph(cp)]
+                       if loaded_font.font_index_for(cp) != 0]
             logger = PyUiLogger.get_logger()
             if logger is None:
                 return
@@ -768,14 +768,17 @@ class Display:
 
     @staticmethod
     def _blit_surface(src, src_rect, dst, dst_rect):
-        """Blit with SDL_UpperBlit fallback for old bindings. Never raises."""
-        blit = getattr(sdl2, "SDL_BlitSurface", None)
-        if blit is None:
-            blit = getattr(sdl2, "SDL_UpperBlit", None)
+        """Blit with SDL_UpperBlit fallback for old bindings. Never raises.
+
+        Returns 0 on success, nonzero otherwise (a None result from a
+        stub binding counts as success).
+        """
+        blit = (getattr(sdl2, "SDL_BlitSurface", None)
+                or getattr(sdl2, "SDL_UpperBlit", None))
         if blit is None:
             return -1
         try:
-            return blit(src, src_rect, dst, dst_rect)
+            return blit(src, src_rect, dst, dst_rect) or 0
         except Exception:
             return -1
 
@@ -806,14 +809,13 @@ class Display:
             except Exception:
                 pass
             x = 0
-            for (_, surface), y_off in zip(run_items, y_offsets):
+            for surface, y_off in zip(surfaces, y_offsets):
                 src_rect = sdl2.SDL_Rect(0, 0, surface.contents.w, surface.contents.h)
                 dst_rect = sdl2.SDL_Rect(x, y_off, surface.contents.w, surface.contents.h)
-                ok = cls._blit_surface(surface, src_rect, joined, dst_rect)
-                x += surface.contents.w
-                if ok not in (0, None):
+                if cls._blit_surface(surface, src_rect, joined, dst_rect) != 0:
                     sdl2.SDL_FreeSurface(joined)
                     return None
+                x += surface.contents.w
             return joined
         finally:
             # Caller transfers ownership of every input surface to _join:

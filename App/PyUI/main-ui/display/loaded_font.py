@@ -35,30 +35,23 @@ def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
     if mod is None:
         return False if fallback_available else True
     cp = int(codepoint)
-    tried = False
     probe32 = getattr(mod, "TTF_GlyphIsProvided32", None)
-    if callable(probe32):
-        tried = True
+    # Non-BMP skips the 16-bit probe: on old libs it always takes the
+    # fallback, which is the safe direction.
+    probe16 = getattr(mod, "TTF_GlyphIsProvided", None) if cp <= 0xFFFF else None
+    probes = [p for p in (probe32, probe16) if callable(p)]
+    if not probes:
+        # No usable probe API: fail open only when nothing else could
+        # render the glyph; otherwise let the fallback try.
+        return not fallback_available
+    for probe in probes:
         try:
-            return bool(probe32(font_ptr, cp))
+            return bool(probe(font_ptr, cp))
         except Exception:
-            pass  # old lib: fall through to the 16-bit probe below
-    # Non-BMP skips the 16-bit probe and falls closed below: on old
-    # libs it always takes the fallback, which is the safe direction.
-    if cp <= 0xFFFF:
-        probe16 = getattr(mod, "TTF_GlyphIsProvided", None)
-        if callable(probe16):
-            tried = True
-            try:
-                return bool(probe16(font_ptr, cp))
-            except Exception:
-                pass
-    if tried:
-        # A probe existed but every call failed: report missing so the
-        # fallback font gets its chance (or the primary renders anyway
-        # when there is no fallback to switch to).
-        return False
-    return False if fallback_available else True
+            continue  # old lib: try the next (narrower) probe
+    # Every probe failed: report missing so the fallback font gets its
+    # chance (or the primary renders anyway when there is no fallback).
+    return False
 
 
 class LoadedFont:
@@ -77,7 +70,6 @@ class LoadedFont:
         self.fallback_paths = list(fallback_paths) if fallback_paths else []
         self.fonts = [font] + self.fallback_fonts
         self._sdlttf = sdlttf if sdlttf is not None else _sdlttf
-        self._glyph_cache = {}
         self._font_index_cache = {}
 
     @staticmethod
@@ -119,8 +111,6 @@ class LoadedFont:
             index = int(font_index)
         except Exception:
             return self.font
-        if not self.fonts:
-            return self.font
         if index < 0:
             return self.fonts[-1]
         if index >= len(self.fonts):
@@ -132,15 +122,6 @@ class LoadedFont:
         """Split text into runs served by primary vs fallbacks (see Run)."""
         return split_fallback_runs(text, self.font_index_for)
 
-    def has_glyph(self, codepoint):
-        cp = self._to_codepoint(codepoint)
-        if cp not in self._glyph_cache:
-            self._store_bounded(
-                self._glyph_cache, cp,
-                _probe_glyph(self.font, cp, self._sdlttf,
-                             fallback_available=self.has_fallback()))
-        return self._glyph_cache[cp]
-
     def font_index_for(self, codepoint):
         """Index of the first font providing codepoint. Never raises.
 
@@ -150,16 +131,14 @@ class LoadedFont:
         """
         cp = self._to_codepoint(codepoint)
         if cp not in self._font_index_cache:
-            index = self._first_provider(cp)
+            index = len(self.fonts) - 1 if self.fonts else 0
+            for i, handle in enumerate(self.fonts):
+                if _probe_glyph(handle, cp, self._sdlttf,
+                                fallback_available=self.has_fallback()):
+                    index = i
+                    break
             self._store_bounded(self._font_index_cache, cp, index)
         return self._font_index_cache[cp]
-
-    def _first_provider(self, cp):
-        for index, handle in enumerate(self.fonts):
-            if _probe_glyph(handle, cp, self._sdlttf,
-                            fallback_available=self.has_fallback()):
-                return index
-        return len(self.fonts) - 1 if self.fonts else 0
 
     def cache_key(self, purpose):
         """Text-texture cache identity: purpose + the ordered font paths."""
