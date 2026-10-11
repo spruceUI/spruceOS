@@ -498,6 +498,10 @@ set_backlight() {
     # update device system json
     tmp="${SYSTEM_JSON}.tmp.$$"
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+
+    if ! pgrep MainUI >/dev/null; then
+        /usr/trimui/osd/show_backlight_msg.sh "$val" &
+    fi
 }
 
 
