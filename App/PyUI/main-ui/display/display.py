@@ -688,9 +688,8 @@ class Display:
         if not use_fallback_fonts_for_missing_glyphs:
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
         runs = cls._split_runs(loaded_font, text)
-        if is_single_primary(runs):
-            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
         if len(runs) == 1:
+            # Covers the all-primary case too: handle_for(0) is primary.
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.handle_for(runs[0].font_index), text.encode('utf-8'), sdl_color)
         run_surfaces = []
         try:
