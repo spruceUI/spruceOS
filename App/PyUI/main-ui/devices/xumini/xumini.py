@@ -14,6 +14,7 @@ class XuMiniM(Rgb30):
     SYSTEM_JSON_DEFAULT = "xumini-system.json"
     SYSTEM_JSON_DIR = "xumini"
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
+    BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
 
     def screen_width(self):
         return 640
