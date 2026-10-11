@@ -1324,11 +1324,10 @@ class Display:
         runs = None
         if use_fallback_fonts_for_missing_glyphs:
             runs = cls._split_runs(loaded_font, text)
+        mult = Device.get_device().get_text_width_measurement_multiplier()
         if runs is None or is_single_primary(runs):
             raw_w, h = cls._measure_raw(loaded_font.font, text)
-            mult = Device.get_device().get_text_width_measurement_multiplier()
             return int(raw_w * mult), h
-        mult = Device.get_device().get_text_width_measurement_multiplier()
         total_raw = 0
         heights = []
         handles = []
