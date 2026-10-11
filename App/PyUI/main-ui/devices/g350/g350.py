@@ -11,6 +11,7 @@ class G350(Rgb30):
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1
     START_KEY = 705
     MENU_KEY = 708    # F5
+    BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
 
     def screen_width(self):
         return 640

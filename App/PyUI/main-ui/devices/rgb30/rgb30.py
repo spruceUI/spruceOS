@@ -129,6 +129,8 @@ class Rgb30(DeviceCommon):
     MENU_KEY = None
     SELECT_KEY = 314
     START_KEY = 315
+    # BatteryPlus's percent file, for devices whose dArkMoss image runs it.
+    BATTERYPLUS_PERCENT_FILE = None
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -286,6 +288,15 @@ class Rgb30(DeviceCommon):
 
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
+        # BatteryPlus's estimate when the device runs it and it is valid, else the kernel's reading.
+        if self.BATTERYPLUS_PERCENT_FILE:
+            try:
+                with open(self.BATTERYPLUS_PERCENT_FILE, "r") as f:
+                    percent = int(f.read().strip())
+                if 0 <= percent <= 100:
+                    return percent
+            except (OSError, ValueError):
+                pass
         try:
             with open("/sys/class/power_supply/battery/capacity", "r") as f:
                 return int(f.read().strip())
