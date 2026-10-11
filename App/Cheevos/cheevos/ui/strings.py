@@ -111,6 +111,7 @@ ACH_SORTS = {
 VIEWS = {"list": "List", "grid": "Grid"}
 HINT_GRID = "Grid"
 HINT_LIST = "List"
+NO_ACHIEVEMENT_SET = "This game has no achievements."
 NO_ACHIEVEMENTS = "No achievements match this filter."
 DETAIL_META = "{points} · {retro} RetroPoints"
 DETAIL_UNLOCKED = "Unlocked ({mode}) {when}"
