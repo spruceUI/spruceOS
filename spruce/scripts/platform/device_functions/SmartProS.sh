@@ -111,15 +111,17 @@ set_volume() {
     echo "$new_vol" > /tmp/system/set_volume 2>/dev/null
     bt_headset_volume "$new_vol"
 
+    # Outside the change check: volume_sync_watchdog.sh updates .vol first.
+    if ! pgrep MainUI >/dev/null; then
+        /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
+    fi
+
     if [ "$SAVE_TO_CONFIG" = true ]; then
         current_volume=$(jq -r '.vol' "$SYSTEM_JSON")
 
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
             sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
-            if ! pgrep MainUI >/dev/null; then
-                /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
-            fi
         fi
     fi
 
