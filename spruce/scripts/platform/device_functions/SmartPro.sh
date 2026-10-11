@@ -37,21 +37,8 @@ init_gpio_a133p() {
     echo -n in > /sys/class/gpio/gpio243/direction
 }
 
-get_fw_version() {
-    tr -d ' \t\n' < /etc/version 2>/dev/null
-}
-
 device_init() {
     device_init_a133p
-
-    version="$(get_fw_version)"
-    if [ "$version" != "1.1.0" ]; then
-        # Same reasoning as the Brick line - PyUI draws its own popups, so the
-        # stock ones are duplicate clutter. The firmware check above is kept:
-        # it predates this and guards something separate.
-        run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
-        [ "$run_osd" = "True" ] && run_trimui_osdd
-    fi
 
     if [ ! -x /bin/bash ]; then
         cp /mnt/SDCARD/spruce/smartpro/bin/bash /bin/bash

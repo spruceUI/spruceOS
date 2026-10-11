@@ -117,9 +117,6 @@ set_volume() {
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
             sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
-            if ! pgrep MainUI >/dev/null; then
-                /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
-            fi
         fi
     fi
 
@@ -288,9 +285,6 @@ device_init() {
     # is whatever the old fn_editor app last wrote, and it outlives the SD card.
     /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
 
-    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
-    [ "$run_osd" = "True" ] && run_trimui_osdd
-
     echo 1 > /sys/class/speaker/mute
 
     tinymix set 23 1
@@ -444,17 +438,14 @@ device_run_tsps_blobs() {
 }
 
 device_prepare_for_poweroff() {
-    touch /tmp/trimui_osd/osdd_quit
     wifi_request suspend --wait
 }
 
 device_home_button_pressed() {
     # The Smart Pro S has no Fn keys, only the top Home button (KEY_HOMEPAGE) and
-    # the switch. The stock OSD daemon (trimui_osdd) is absent on this device, so
-    # the old "touch /tmp/show_osdd" was a no-op. Instead run the action the user
-    # picked in Settings -> Button Settings -> Home button action, through the
-    # shared perform_action dispatch (button_actions.sh, sourced by
-    # buttons_watchdog.sh) that the Menu button also uses.
+    # the switch. Run the action the user picked in Settings -> Button Settings ->
+    # Home button action, through the shared perform_action dispatch
+    # (button_actions.sh, sourced by buttons_watchdog.sh) that the Menu button also uses.
     action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
     perform_action "$action"
 
