@@ -431,7 +431,7 @@ release_trimui_fan_cap() {
 }
 
 device_run_tsps_blobs() {
-    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
+    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice"
     release_trimui_fan_cap
     # again once a freshly started hardwareservice has applied its settings
     ( sleep 3; release_trimui_fan_cap ) &
