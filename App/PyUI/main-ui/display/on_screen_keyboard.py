@@ -57,7 +57,8 @@ class OnScreenKeyboard:
                     y = next_y, 
                     purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                     color=Theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
-                    render_mode = RenderMode.TOP_LEFT_ALIGNED)
+                    render_mode = RenderMode.TOP_LEFT_ALIGNED,
+                    use_fallback_fonts_for_missing_glyphs=True)
                 next_y += title_h
 
             entry_bar_w, entry_bar_h = Display.render_image(
@@ -74,7 +75,8 @@ class OnScreenKeyboard:
                     y = next_y, 
                     purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                     color=Theme.text_color_selected(FontPurpose.ON_SCREEN_KEYBOARD),
-                    render_mode = RenderMode.TOP_LEFT_ALIGNED)
+                    render_mode = RenderMode.TOP_LEFT_ALIGNED,
+                    use_fallback_fonts_for_missing_glyphs=True)
 
             keys = self.shifted_keys if self.shifted or self.caps else self.normal_keys
             x_pad = 10
@@ -109,7 +111,8 @@ class OnScreenKeyboard:
                                             y = y + key_h //2, 
                                             purpose = FontPurpose.ON_SCREEN_KEYBOARD, 
                                             color=color,
-                                            render_mode = RenderMode.MIDDLE_CENTER_ALIGNED)
+                                            render_mode = RenderMode.MIDDLE_CENTER_ALIGNED,
+                                            use_fallback_fonts_for_missing_glyphs=True)
                 next_y += key_h
                 
             Display.present()
