@@ -201,7 +201,8 @@ class ListView(View):
         if(include_description_line):
             for gridOrListEntry in self.options:
                 if(gridOrListEntry.get_description() is not None):
-                    _, title_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, gridOrListEntry.get_primary_text())
+                    _, title_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, gridOrListEntry.get_primary_text(),
+                                                           use_fallback_fonts_for_missing_glyphs=True)
                     _, description_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, gridOrListEntry.get_description())
                     text_line_height = max(text_line_height, Theme.get_descriptive_list_text_offset_y() + title_h + description_h + padding)
 

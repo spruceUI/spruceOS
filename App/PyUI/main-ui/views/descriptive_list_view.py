@@ -122,7 +122,8 @@ class DescriptiveListView(ListView):
                 title_y_offset, 
                 color, 
                 FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                render_mode=title_render_mode)
+                render_mode=title_render_mode,
+                use_fallback_fonts_for_missing_glyphs=True)
 
             if(gridOrListEntry.get_value_text() is not None):
                 value_text = gridOrListEntry.get_value_text()
@@ -142,7 +143,8 @@ class DescriptiveListView(ListView):
                 if(Theme.get_use_text_for_line_height()):
                     value_y = title_y_offset
                     value_render_mode = title_render_mode
-                    value_width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, value_text)
+                    value_width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, value_text,
+                                                               use_fallback_fonts_for_missing_glyphs=True)
                     value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset() - value_width
                 else:
                     value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset()
@@ -155,7 +157,8 @@ class DescriptiveListView(ListView):
                     value_y, 
                     color, 
                     FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                    value_render_mode)
+                    value_render_mode,
+                    use_fallback_fonts_for_missing_glyphs=True)
 
             color = Theme.text_color_selected(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION) if actual_index == self.selected else Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)
             if(gridOrListEntry.get_description() is not None):

@@ -3,8 +3,7 @@ try:
 except Exception:
     _sdlttf = None
 
-from display.font_fallback import Run, split_fallback_runs
-
+from display.font_fallback import split_fallback_runs
 
 # Upper bound for each per-font glyph probe cache. Eviction is a plain
 # clear: probe results cost one SDL call per codepoint to rebuild, so a
@@ -63,15 +62,23 @@ def _probe_glyph(font_ptr, codepoint, sdlttf=None, fallback_available=False):
 
 
 class LoadedFont:
+    """Primary font plus an ordered list of fallback fonts.
+
+    fonts[0] is always the primary handle; fonts[1:] are fallbacks in
+    preference order. Run.font_index addresses into this list.
+    """
+
     def __init__(self, font, line_height, font_path,
-                 fallback_font=None, fallback_path=None, sdlttf=None):
+                 fallback_fonts=None, fallback_paths=None, sdlttf=None):
         self.font = font
         self.line_height = line_height
         self.font_path = font_path
-        self.fallback_font = fallback_font
-        self.fallback_path = fallback_path
+        self.fallback_fonts = list(fallback_fonts) if fallback_fonts else []
+        self.fallback_paths = list(fallback_paths) if fallback_paths else []
+        self.fonts = [font] + self.fallback_fonts
         self._sdlttf = sdlttf if sdlttf is not None else _sdlttf
         self._glyph_cache = {}
+        self._font_index_cache = {}
 
     @staticmethod
     def _to_codepoint(value):
@@ -87,17 +94,43 @@ class LoadedFont:
         return value
 
     def has_fallback(self):
-        return self.fallback_font is not None and self.fallback_font != self.font
+        return any(h is not None and h != self.font
+                   for h in self.fallback_fonts)
 
-    def handle_for(self, use_fallback):
-        """Font handle that renders a run: fallback when asked and usable."""
-        if use_fallback and self.has_fallback():
-            return self.fallback_font
-        return self.font
+    def handles_to_close(self):
+        """Primary plus each distinct fallback handle, for deinit."""
+        handles = []
+        seen = set()
+        for handle in [self.font] + self.fallback_fonts:
+            if handle is None or id(handle) in seen:
+                continue
+            seen.add(id(handle))
+            handles.append(handle)
+        return handles
+
+    def handle_for(self, font_index):
+        """Font handle that renders a run. Never raises.
+
+        Negative index addresses the last font in the pair (the last
+        fallback when one is loaded, else the primary handle);
+        out-of-range index falls back to the primary handle.
+        """
+        try:
+            index = int(font_index)
+        except Exception:
+            return self.font
+        if not self.fonts:
+            return self.font
+        if index < 0:
+            return self.fonts[-1]
+        if index >= len(self.fonts):
+            return self.font
+        handle = self.fonts[index]
+        return handle if handle is not None else self.font
 
     def split(self, text):
-        """Split text into runs served by primary vs fallback (see Run)."""
-        return split_fallback_runs(text, self.has_glyph)
+        """Split text into runs served by primary vs fallbacks (see Run)."""
+        return split_fallback_runs(text, self.font_index_for)
 
     def has_glyph(self, codepoint):
         cp = self._to_codepoint(codepoint)
@@ -108,6 +141,26 @@ class LoadedFont:
                              fallback_available=self.has_fallback()))
         return self._glyph_cache[cp]
 
+    def font_index_for(self, codepoint):
+        """Index of the first font providing codepoint. Never raises.
+
+        Probes primary first, then fallbacks in order. When no font
+        provides the glyph, returns the last fallback index (fail-closed
+        toward the fallback side); with a single font, returns 0.
+        """
+        cp = self._to_codepoint(codepoint)
+        if cp not in self._font_index_cache:
+            index = self._first_provider(cp)
+            self._store_bounded(self._font_index_cache, cp, index)
+        return self._font_index_cache[cp]
+
+    def _first_provider(self, cp):
+        for index, handle in enumerate(self.fonts):
+            if _probe_glyph(handle, cp, self._sdlttf,
+                            fallback_available=self.has_fallback()):
+                return index
+        return len(self.fonts) - 1 if self.fonts else 0
+
     def cache_key(self, purpose):
-        """Text-texture cache identity: purpose + the font pair paths."""
-        return (purpose, self.font_path, self.fallback_path)
+        """Text-texture cache identity: purpose + the ordered font paths."""
+        return (purpose, self.font_path, tuple(self.fallback_paths))

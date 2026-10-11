@@ -3,7 +3,7 @@ import os
 import time
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.font_fallback import Run, is_single_primary, resolve_fallback_path
+from display.font_fallback import Run, is_single_primary, resolve_fallback_paths
 from display.loaded_font import LoadedFont
 from display.render_mode import RenderMode
 from display.resize_type import ResizeType
@@ -345,9 +345,8 @@ class Display:
     @classmethod
     def deinit_fonts(cls):
         for loaded_font in cls.fonts.values():
-            cls._close_font(loaded_font.font)
-            if loaded_font.has_fallback():
-                cls._close_font(loaded_font.fallback_font)
+            for handle in loaded_font.handles_to_close():
+                cls._close_font(handle)
         cls.fonts.clear()
 
     @classmethod
@@ -424,25 +423,29 @@ class Display:
                 f"Could not load font {font_path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}"
             )
 
-        fallback_path = resolve_fallback_path()
-        fallback_font = None
-        if not fallback_path:
+        fallback_candidates = resolve_fallback_paths()
+        fallback_fonts = []
+        fallback_paths = []
+        for candidate in fallback_candidates:
+            if candidate == font_path:
+                # Same file as primary: nothing extra to open or track.
+                continue
+            else:
+                fallback_font = sdl2.sdlttf.TTF_OpenFont(candidate.encode("utf-8"), font_size)
+                if fallback_font:
+                    fallback_fonts.append(fallback_font)
+                    fallback_paths.append(candidate)
+                else:
+                    PyUiLogger.get_logger().warning(
+                        f"Could not load fallback font {candidate}, skipping it"
+                    )
+        if not fallback_paths:
             PyUiLogger.get_logger().warning(
                 "No fallback font found (env + stock miss), continuing without per-glyph fallback"
             )
-        elif fallback_path != font_path:
-            fallback_font = sdl2.sdlttf.TTF_OpenFont(fallback_path.encode("utf-8"), font_size)
-            if not fallback_font:
-                PyUiLogger.get_logger().warning(
-                    f"Could not load fallback font {fallback_path}, continuing without per-glyph fallback"
-                )
-                fallback_path = None
-        elif fallback_path == font_path:
-            # Same file: reuse handle, no second open needed.
-            fallback_font = font
 
         PyUiLogger.get_logger().info(
-            f"Font pair for {font_purpose}: primary={font_path} fallback={fallback_path} size={font_size}"
+            f"Font pair for {font_purpose}: primary={font_path} fallbacks={fallback_paths} size={font_size}"
         )
 
         line_height = sdl2.sdlttf.TTF_FontHeight(font)
@@ -453,8 +456,8 @@ class Display:
             sdl2.SDL_FreeSurface(surface)
 
         loaded = LoadedFont(font, line_height, font_path,
-                            fallback_font=fallback_font,
-                            fallback_path=fallback_path,
+                            fallback_fonts=fallback_fonts,
+                            fallback_paths=fallback_paths,
                             sdlttf=sdl2.sdlttf)
         cls._warm_glyph_cache(loaded, font_purpose)
         return loaded
@@ -471,24 +474,16 @@ class Display:
         per-glyph path probes lazily as before.
         """
         try:
-            missing = []
-            for cp in cls._WARMUP_CODEPOINTS:
-                try:
-                    if not loaded_font.has_glyph(cp):
-                        missing.append(cp)
-                except Exception:
-                    continue
-            try:
-                logger = PyUiLogger.get_logger()
-            except Exception:
-                return
+            missing = [cp for cp in cls._WARMUP_CODEPOINTS
+                       if not loaded_font.has_glyph(cp)]
+            logger = PyUiLogger.get_logger()
             if logger is None:
                 return
             if missing:
                 missing_str = ",".join(f"U+{cp:04X}" for cp in missing)
                 logger.info(
                     f"font fallback for {font_purpose}: primary missing "
-                    f"{missing_str}, fallback {loaded_font.fallback_path} will cover"
+                    f"{missing_str}, fallbacks {loaded_font.fallback_paths} will cover"
                 )
             else:
                 logger.info(
@@ -699,26 +694,40 @@ class Display:
         return False
 
 
-    @classmethod
-    def _render_text_surface(cls, loaded_font, text, sdl_color):
-        """Render text to a single SDL surface, caller owns (must free).
+    @staticmethod
+    def _split_runs(loaded_font, text):
+        """Same-font runs for text, or one primary run when empty/unsplit.
 
-        Fast path: every char in primary (or no fallback loaded) renders
-        with exactly one TTF_RenderUTF8_Blended call as before. Otherwise
-        each same-font run renders with its own font handle and the runs
-        are joined horizontally. Returns None on failure.
+        Shared preamble of the render and measure paths so both agree on
+        what "single primary" means.
         """
         runs = loaded_font.split(text)
         if not runs:
-            runs = [Run(False, text)]
+            runs = [Run(0, text)]
+        return runs
+
+    @classmethod
+    def _render_text_surface(cls, loaded_font, text, sdl_color,
+                             use_fallback_fonts_for_missing_glyphs=False):
+        """Render text to a single SDL surface, caller owns (must free).
+
+        Single-font path (flag off, or every char in primary, or no
+        fallback loaded) renders with exactly one TTF_RenderUTF8_Blended
+        call as before. Otherwise each same-font run renders with its own
+        font handle and the runs are joined horizontally. Returns None on
+        failure.
+        """
+        if not use_fallback_fonts_for_missing_glyphs:
+            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
+        runs = cls._split_runs(loaded_font, text)
         if is_single_primary(runs):
             return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.font, text.encode('utf-8'), sdl_color)
         if len(runs) == 1:
-            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.handle_for(True), text.encode('utf-8'), sdl_color)
+            return sdl2.sdlttf.TTF_RenderUTF8_Blended(loaded_font.handle_for(runs[0].font_index), text.encode('utf-8'), sdl_color)
         run_surfaces = []
         try:
             for run in runs:
-                handle = loaded_font.handle_for(run.is_fallback)
+                handle = loaded_font.handle_for(run.font_index)
                 surface = sdl2.sdlttf.TTF_RenderUTF8_Blended(
                     handle, run.segment.encode('utf-8'), sdl_color)
                 if not surface:
@@ -728,11 +737,10 @@ class Display:
             run_surfaces = []
             return joined
         finally:
+            # _join consumes its inputs on success (list reset above), so
+            # this only frees partial surfaces on the early-return path.
             for _, surface in run_surfaces:
-                try:
-                    sdl2.SDL_FreeSurface(surface)
-                except Exception:
-                    pass
+                sdl2.SDL_FreeSurface(surface)
     @staticmethod
     def _baseline_layout(heights, handles):
         """Baseline offsets + joined height for one row of runs.
@@ -808,22 +816,24 @@ class Display:
                     return None
             return joined
         finally:
+            # Caller transfers ownership of every input surface to _join:
+            # all are freed here on both success and failure paths.
             for surface in surfaces:
-                try:
-                    sdl2.SDL_FreeSurface(surface)
-                except Exception:
-                    pass
+                sdl2.SDL_FreeSurface(surface)
 
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                    crop_w=None, crop_h=None, alpha=None):
-        text = Display.split_message(text, purpose, clip_to_device_width=False)[0]
+                    crop_w=None, crop_h=None, alpha=None,
+                    use_fallback_fonts_for_missing_glyphs=False):
+        text = Display.split_message(text, purpose, clip_to_device_width=False,
+                                     use_fallback_fonts_for_missing_glyphs=use_fallback_fonts_for_missing_glyphs)[0]
         if(text is None or len(text) == 0):
             return 0, 0
         loaded_font = cls.fonts[purpose]
-        # Key includes the font pair paths so a theme or fallback change
-        # never hits a stale texture from the previous fonts.
-        font_key = loaded_font.cache_key(purpose)
+        # Key includes the font pair paths plus the fallback flag so a
+        # theme/fallback change — or a different flag — never hits a stale
+        # texture rendered the other way.
+        font_key = (loaded_font.cache_key(purpose), use_fallback_fonts_for_missing_glyphs)
         cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, font_key, color)
         cached = True
         texture_w = None
@@ -834,11 +844,11 @@ class Display:
             texture_h = cache.height
         else:
             sdl_color = sdl2.SDL_Color(color[0], color[1], color[2])
-            surface = cls._render_text_surface(loaded_font, text, sdl_color)
+            surface = cls._render_text_surface(loaded_font, text, sdl_color, use_fallback_fonts_for_missing_glyphs)
             if not surface:
                 if not cls.log_sdl_error_and_clear_cache_text(text,purpose):
                     return 0, 0
-                surface = cls._render_text_surface(loaded_font, text, sdl_color)
+                surface = cls._render_text_surface(loaded_font, text, sdl_color, use_fallback_fonts_for_missing_glyphs)
                 if not surface:
                     PyUiLogger.get_logger().error(f"Failed to render text surface for {text}: {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
                     return 0, 0
@@ -898,8 +908,10 @@ class Display:
         return w,h
 
     @classmethod
-    def render_text_centered(cls, text, x, y, color, purpose: FontPurpose):
-        return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
+    def render_text_centered(cls, text, x, y, color, purpose: FontPurpose,
+                             use_fallback_fonts_for_missing_glyphs=False):
+        return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED,
+                               use_fallback_fonts_for_missing_glyphs=use_fallback_fonts_for_missing_glyphs)
 
     @classmethod
     def image_load(cls, image_path):
@@ -1330,11 +1342,14 @@ class Display:
         return cls._cached_space_dimensions
     
     @classmethod
-    def get_text_dimensions(cls, purpose, text="A"):
+    def get_text_dimensions(cls, purpose, text="A", use_fallback_fonts_for_missing_glyphs=False):
         loaded_font = cls.fonts[purpose]
-        runs = loaded_font.split(text)
-        if not runs:
-            runs = [Run(False, text)]
+        if not use_fallback_fonts_for_missing_glyphs:
+            w = sdl2.Sint32()
+            h = sdl2.Sint32()
+            sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
+            return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
+        runs = cls._split_runs(loaded_font, text)
         if is_single_primary(runs):
             w = sdl2.Sint32()
             h = sdl2.Sint32()
@@ -1345,7 +1360,7 @@ class Display:
         heights = []
         handles = []
         for run in runs:
-            handle = loaded_font.handle_for(run.is_fallback)
+            handle = loaded_font.handle_for(run.font_index)
             w = sdl2.Sint32()
             h = sdl2.Sint32()
             sdl2.sdlttf.TTF_SizeUTF8(handle, run.segment.encode('utf-8'), w, h)
@@ -1407,11 +1422,14 @@ class Display:
         cls.top_bar.volume_changed(vol)
 
     @classmethod
-    def is_text_too_long(cls, line: str, font_purpose, clip_to_device_width) -> bool:
+    def is_text_too_long(cls, line: str, font_purpose, clip_to_device_width,
+                         use_fallback_fonts_for_missing_glyphs=False) -> bool:
         try:
             if(Device.get_device().get_guaranteed_safe_max_text_char_count() >= len(line)):
                 return False
-            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
+            text_w, text_h = Display.get_text_dimensions(
+                font_purpose, line,
+                use_fallback_fonts_for_missing_glyphs=use_fallback_fonts_for_missing_glyphs)
             max_width = Device.get_device().max_texture_width()
             if(clip_to_device_width):
                 max_width = min(max_width, Device.get_device().screen_width())
@@ -1422,7 +1440,8 @@ class Display:
             return False
 
     @classmethod
-    def split_message(cls, message: str, font_purpose, clip_to_device_width) -> list[str]:
+    def split_message(cls, message: str, font_purpose, clip_to_device_width,
+                      use_fallback_fonts_for_missing_glyphs=False) -> list[str]:
         if not message:
             return [""]
 
@@ -1441,7 +1460,8 @@ class Display:
                 continue
 
             # If line fits as-is, keep it
-            if not cls.is_text_too_long(raw_line, font_purpose, clip_to_device_width):
+            if not cls.is_text_too_long(raw_line, font_purpose, clip_to_device_width,
+                                        use_fallback_fonts_for_missing_glyphs):
                 final_lines.append(raw_line)
                 continue
 
@@ -1453,7 +1473,8 @@ class Display:
                 tentative_line = (current_line + " " + word).strip()
 
                 # If adding this word makes the line too long, start a new one
-                if current_line and cls.is_text_too_long(tentative_line, font_purpose, clip_to_device_width):
+                if current_line and cls.is_text_too_long(tentative_line, font_purpose, clip_to_device_width,
+                                                         use_fallback_fonts_for_missing_glyphs):
                     final_lines.append(current_line)
                     current_line = word
                 else:
@@ -1467,15 +1488,18 @@ class Display:
 
 
     @classmethod
-    def display_message_multiline(cls,split_message, duration_ms=0):
+    def display_message_multiline(cls,split_message, duration_ms=0,
+                                    use_fallback_fonts_for_missing_glyphs=False):
         Display.clear("")        
-        cls.write_message_multiline(split_message, Device.get_device().screen_height()//2)
+        cls.write_message_multiline(split_message, Device.get_device().screen_height()//2,
+                                    use_fallback_fonts_for_missing_glyphs)
         Display.present()
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
 
     @classmethod
-    def write_message_multiline(cls,split_message, middle_height):
+    def write_message_multiline(cls,split_message, middle_height,
+                                use_fallback_fonts_for_missing_glyphs=False):
         text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
 
         height_per_line = text_h + int(5 * Device.get_device().screen_height()/480)
@@ -1483,7 +1507,8 @@ class Display:
 
         for i, line in enumerate(split_message):
             Display.render_text_centered(f"{line}",Device.get_device().screen_width()//2, starting_height + i * height_per_line,
-                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST,
+                                         use_fallback_fonts_for_missing_glyphs=use_fallback_fonts_for_missing_glyphs)
 
 
     @classmethod
