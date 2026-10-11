@@ -31,14 +31,13 @@ def _probe_glyph(font_ptr, codepoint, fallback_available=False):
     """
     if font_ptr is None:
         return False
-    mod = _sdlttf
-    if mod is None:
+    if _sdlttf is None:
         return False if fallback_available else True
     cp = int(codepoint)
-    probe32 = getattr(mod, "TTF_GlyphIsProvided32", None)
+    probe32 = getattr(_sdlttf, "TTF_GlyphIsProvided32", None)
     # Non-BMP skips the 16-bit probe: on old libs it always takes the
     # fallback, which is the safe direction.
-    probe16 = getattr(mod, "TTF_GlyphIsProvided", None) if cp <= 0xFFFF else None
+    probe16 = getattr(_sdlttf, "TTF_GlyphIsProvided", None) if cp <= 0xFFFF else None
     probes = [p for p in (probe32, probe16) if callable(p)]
     if not probes:
         # No usable probe API: fail open only when nothing else could
