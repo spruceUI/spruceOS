@@ -1347,13 +1347,6 @@ class Display:
         sdl2.sdlttf.TTF_SizeUTF8(handle, segment.encode('utf-8'), w, h)
         return w.value, h.value
 
-    @staticmethod
-    def _measure_single(loaded_font, text):
-        """Measure text with the primary font only (pre-fallback behaviour)."""
-        raw_w, h = Display._measure_raw(loaded_font.font, text)
-        mult = Device.get_device().get_text_width_measurement_multiplier()
-        return int(raw_w * mult), h
-
     @classmethod
     def get_text_dimensions(cls, purpose, text="A", use_fallback_fonts_for_missing_glyphs=False):
         loaded_font = cls.fonts[purpose]
@@ -1361,7 +1354,9 @@ class Display:
         if use_fallback_fonts_for_missing_glyphs:
             runs = cls._split_runs(loaded_font, text)
         if runs is None or is_single_primary(runs):
-            return cls._measure_single(loaded_font, text)
+            raw_w, h = cls._measure_raw(loaded_font.font, text)
+            mult = Device.get_device().get_text_width_measurement_multiplier()
+            return int(raw_w * mult), h
         mult = Device.get_device().get_text_width_measurement_multiplier()
         total_raw = 0
         heights = []
