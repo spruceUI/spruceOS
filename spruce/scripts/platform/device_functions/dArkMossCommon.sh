@@ -700,6 +700,17 @@ darkmoss_prepare_for_poweroff() {
 
 device_prepare_for_poweroff() {
     darkmoss_prepare_for_poweroff
+    darkmoss_shutdown_logo "$1"
+}
+
+# Where the base ships bootlogo.py (the cfg names it), put its reboot/poweroff logo on the panel's
+# fallback framebuffer while PyUI still holds the panel, so that status shows the moment it exits.
+darkmoss_shutdown_logo() {
+    [ -n "$DARKMOSS_BOOTLOGO" ] && [ -f "$DARKMOSS_BOOTLOGO" ] || return 0
+    _img=/usr/share/bootlogo/logo-poweroff.bmp
+    [ "$1" = "--reboot" ] && _img=/usr/share/bootlogo/logo-reboot.bmp
+    [ -f "$_img" ] && /usr/bin/python3 -I "$DARKMOSS_BOOTLOGO" --image "$_img" >/dev/null 2>&1
+    return 0
 }
 
   #####################
