@@ -76,25 +76,32 @@ class BoxArtResizer():
             return False
 
 
-        try:
-            # Replace 'Imgs' with 'Imgs_med' in the path
-            medium_image_path = full_path.replace("Imgs", "Imgs_med", 1)
-            if (not cls.scale_and_convert_image(large_image_path, medium_image_path, target_medium_width, target_medium_height)):
-                medium_image_path = full_path
-        except Exception as e:
-            PyUiLogger.get_logger().warning(
-                f"Issue converting for medium image {full_path} : {e}")
-            return False
+        # A size equal to the one above it would only be a copy of that image: skip it.
+        # The views fall back from Imgs_small to Imgs_med to Imgs when a file is missing.
+        # When no medium is written the large image is the one to shrink, not the
+        # original: shrinking the original again gave a copy of the large image.
+        medium_image_path = large_image_path
+        if (target_medium_width, target_medium_height) != (target_large_width, target_large_height):
+            try:
+                # Replace 'Imgs' with 'Imgs_med' in the path
+                resized_path = full_path.replace("Imgs", "Imgs_med", 1)
+                if (cls.scale_and_convert_image(large_image_path, resized_path, target_medium_width, target_medium_height)):
+                    medium_image_path = resized_path
+            except Exception as e:
+                PyUiLogger.get_logger().warning(
+                    f"Issue converting for medium image {full_path} : {e}")
+                return False
 
-        try:
-            # Replace 'Imgs' with 'Imgs_small' in the path
-            small_image_path = full_path.replace("Imgs", "Imgs_small", 1)
-            cls.scale_and_convert_image(
-                medium_image_path, small_image_path, target_small_width, target_small_height)
-        except Exception as e:
-            PyUiLogger.get_logger().warning(
-                f"Issue converting for small image {full_path} : {e}")
-            return False
+        if (target_small_width, target_small_height) != (target_medium_width, target_medium_height):
+            try:
+                # Replace 'Imgs' with 'Imgs_small' in the path
+                small_image_path = full_path.replace("Imgs", "Imgs_small", 1)
+                cls.scale_and_convert_image(
+                    medium_image_path, small_image_path, target_small_width, target_small_height)
+            except Exception as e:
+                PyUiLogger.get_logger().warning(
+                    f"Issue converting for small image {full_path} : {e}")
+                return False
 
         os.remove(full_path)
         for output_path in cls._to_delete:
@@ -113,8 +120,17 @@ class BoxArtResizer():
             idx = parts.index("Imgs")
             # Take everything up to the parent of 'Imgs'
             parent_folder = os.sep.join(parts[:idx])
+            target_medium = Device.get_device().get_boxart_medium_resize_dimensions()
+            target_small = Device.get_device().get_boxart_small_resize_dimensions()
+            target_large = Device.get_device().get_boxart_large_resize_dimensions()
 
-            for size in ["Imgs_small", "Imgs_med", "Imgs_large"]:
+            # Imgs_large is scratch space; Imgs_med and Imgs_small only when they hold a smaller size
+            sizes = ["Imgs_large"]
+            if target_medium != target_large:
+                sizes.append("Imgs_med")
+            if target_small != target_medium:
+                sizes.append("Imgs_small")
+            for size in sizes:
                 new_folder = os.path.join(parent_folder, size)
                 os.makedirs(new_folder, exist_ok=True)
         else:
