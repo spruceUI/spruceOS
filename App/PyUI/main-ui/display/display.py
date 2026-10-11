@@ -1340,13 +1340,19 @@ class Display:
         return cls._cached_space_dimensions
     
     @staticmethod
-    def _measure_single(loaded_font, text):
-        """Measure text with the primary font only (pre-fallback behaviour)."""
+    def _measure_raw(handle, segment):
+        """Single TTF_SizeUTF8 call; raw (unscaled) width/height."""
         w = sdl2.Sint32()
         h = sdl2.Sint32()
-        sdl2.sdlttf.TTF_SizeUTF8(loaded_font.font, text.encode('utf-8'), w, h)
+        sdl2.sdlttf.TTF_SizeUTF8(handle, segment.encode('utf-8'), w, h)
+        return w.value, h.value
+
+    @staticmethod
+    def _measure_single(loaded_font, text):
+        """Measure text with the primary font only (pre-fallback behaviour)."""
+        raw_w, h = Display._measure_raw(loaded_font.font, text)
         mult = Device.get_device().get_text_width_measurement_multiplier()
-        return int(w.value * mult), h.value
+        return int(raw_w * mult), h
 
     @classmethod
     def get_text_dimensions(cls, purpose, text="A", use_fallback_fonts_for_missing_glyphs=False):
@@ -1362,11 +1368,9 @@ class Display:
         handles = []
         for run in runs:
             handle = loaded_font.handle_for(run.font_index)
-            w = sdl2.Sint32()
-            h = sdl2.Sint32()
-            sdl2.sdlttf.TTF_SizeUTF8(handle, run.segment.encode('utf-8'), w, h)
-            total_raw += w.value
-            heights.append(h.value)
+            raw_w, raw_h = cls._measure_raw(handle, run.segment)
+            total_raw += raw_w
+            heights.append(raw_h)
             handles.append(handle)
         # Same baseline math as the render path so wrapping and clipping
         # agree with the pixels; scale once to avoid per-run truncation.
