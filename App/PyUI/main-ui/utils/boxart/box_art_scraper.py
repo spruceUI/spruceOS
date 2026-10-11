@@ -603,6 +603,7 @@ class BoxArtScraper:
                 self.log_message(f"BoxartScraper: failed {fallback_url}.")
         return success
 
+    @pauses_idle_shutdown
     def download_boxart_batch(
         self,
         sys_name: str,

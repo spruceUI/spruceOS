@@ -271,6 +271,13 @@ launch_trimui_startup_watchdogs() {
         pin_cpu "$SYSTEM_CPU" -n usb_wifi_watchdog.sh &
     fi
 
+    # USB sound card hot-plug, for the devices whose volume path follows one.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh
+    if device_usb_audio_supported; then
+        /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n usb_audio_watchdog.sh &
+    fi
+
     /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 

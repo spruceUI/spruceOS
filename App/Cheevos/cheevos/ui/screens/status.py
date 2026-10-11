@@ -38,11 +38,13 @@ def progress_text(status: SyncStatus) -> str:
         status: A running sync's status.
 
     Returns:
-        E.g. "Syncing 3/12 · Final Fantasy Tactics Advance".
+        E.g. "Games 3/12".
     """
     if status.phase is Phase.DETAILS and status.total:
         done = min(status.done + 1, status.total)
-        return strings.SYNC_RUNNING_ITEM.format(done=done, total=status.total, item=status.current)
+        return strings.SYNC_RUNNING_ITEM.format(done=done, total=status.total)
+    if status.phase is Phase.RECENT and status.done:
+        return strings.SYNC_RUNNING_RECENT.format(done=status.done)
     if status.phase is Phase.MEDIA and status.total:
         return strings.SYNC_RUNNING_IMAGES.format(done=status.done, total=status.total)
     return strings.SYNC_PHASES.get(status.phase.value, "")

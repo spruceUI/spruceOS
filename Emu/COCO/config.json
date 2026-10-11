@@ -25,9 +25,7 @@
     "releaseYear": 1980,
     "default_emulator": "xroar",
     "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_FLIP",
     "GKD_PIXEL2",

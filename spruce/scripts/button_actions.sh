@@ -120,7 +120,7 @@ kill_pcsx() {
 
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
-    _emus="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui"
+    _emus="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui GameTankEmulator"
     killall -q -15 $_emus
     # RetroArch only sets a flag on the first SIGTERM, so one stuck in its own
     # shutdown (a blocking RetroAchievements read after sleep/wake) never exits

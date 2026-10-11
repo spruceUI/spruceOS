@@ -59,9 +59,7 @@
       "devices": [
         "MIYOO_FLIP",
         "GKD_PIXEL2",
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MAGICX_A133P"
       ]
@@ -77,10 +75,7 @@
       "selected": "fbneo",
       "overrides": {},
       "devices": [
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_MINI_FAMILY"
       ]
     }
   },

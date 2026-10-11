@@ -147,9 +147,16 @@ class BoxArtResizer():
     def patch_boxart_list(cls, image_list):
         cls.scan_count = len(image_list)
         cls.patched_count = 0
-        threading.Thread(target=cls.monitor_for_input, daemon=True).start()
+        # Like process_rom_folders: without these the monitor thread exits at once (B can't abort)
+        # and an earlier abort would stop this run at the first image. A single image (game menu)
+        # is quick, so it is not watched and no key press can be taken from the menu.
+        cls._aborted = False
+        cls._monitoring = len(image_list) > 1
+        if cls._monitoring:
+            threading.Thread(target=cls.monitor_for_input, daemon=True).start()
 
         for path in image_list:
+            cls._to_delete = []  # per image, or every image retries deleting all previous temp files
             cls.create_interim_folders(path)
             cls.process_image(path)
             if (cls._aborted):

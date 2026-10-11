@@ -69,7 +69,13 @@ case $INFO in
             export PLATFORM="Flip"
         fi
         ;;
-    *0xd04*) export PLATFORM="Pixel2" ;;        # RK3326
+    *0xd04*)                                    # RK3326
+        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+            export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+        else
+            export PLATFORM="Pixel2"
+        fi
+        ;;
     *0xd03*)                                    # H700
         export SPRUCE_BASEOS=1
         BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
@@ -110,19 +116,20 @@ command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
-        Brick)            echo "TRIMUI_BRICK" ;;
-        BrickPro)         echo "TRIMUI_BRICK_PRO" ;;
-        SmartPro)         echo "TRIMUI_SMART_PRO" ;;
+        Brick)            echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
+        BrickPro)         echo "TRIMUI_BRICK_PRO"; echo "TRIMUI_A133P" ;;
+        SmartPro)         echo "TRIMUI_SMART_PRO"; echo "TRIMUI_A133P" ;;
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
         Flip)             echo "MIYOO_FLIP" ;;
         Pixel2)           echo "GKD_PIXEL2" ;;
         RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
+        A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
-        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ;;
+        MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480OneStick) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

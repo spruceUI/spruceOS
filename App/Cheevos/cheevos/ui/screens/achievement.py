@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
-from cheevos.core.models import Achievement, AchievementType, PendingAward
+from cheevos.core.models import Achievement, AchievementType, GameDetail, PendingAward
 from cheevos.core.settings import DescriptionHiding
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
@@ -38,13 +39,29 @@ def hides_description(
     return mode is DescriptionHiding.ALL or achievement.type in STORY_TYPES
 
 
+def enrich_achievement(achievement: Achievement, detail: GameDetail) -> Achievement:
+    """Add a game's definition and rarity without changing the feed's unlock mode or date."""
+    match = next(
+        (a for a in detail.achievements if a.achievement_id == achievement.achievement_id), None
+    )
+    return (
+        replace(
+            match,
+            earned_at=achievement.earned_at,
+            earned_hardcore_at=achievement.earned_hardcore_at,
+        )
+        if match
+        else achievement
+    )
+
+
 def show_achievement(
     ctx: AppContext,
     achievement: Achievement,
     *,
     game_title: str,
-    players: int,
-    players_hardcore: int,
+    players: int | None,
+    players_hardcore: int | None,
     pending: PendingAward | None = None,
 ) -> None:
     """Show the achievement card until B; A opens the screenshot, X reveals a hidden description.
@@ -55,13 +72,20 @@ def show_achievement(
         ctx: App context.
         achievement: The achievement.
         game_title: Game title for the top bar.
-        players: Distinct players of the game.
-        players_hardcore: Hardcore players of the game.
+        players: Distinct players of the game, or None while its details are missing.
+        players_hardcore: Hardcore players of the game, or None when unknown.
         pending: RAOfflineProxy queue entry, if the unlock is waiting to sync.
     """
     screenshot = ctx.screenshots.lookup(achievement.achievement_id)
     hide = hides_description(ctx.settings.hide_descriptions, achievement, pending=pending)
+    if players is None:
+        ctx.details.request(achievement.game_id)
     while True:
+        if players is None:
+            detail = ctx.data.game_detail(achievement.game_id)
+            if detail is not None:
+                achievement = enrich_achievement(achievement, detail)
+                players, players_hardcore = detail.num_distinct_players, detail.num_players_hardcore
         hints = [(Button.A, strings.HINT_FULL_SCREEN)] if screenshot is not None else []
         if hide:
             hints.append((Button.X, strings.HINT_REVEAL))
@@ -129,7 +153,7 @@ class _Card:
             meta += " · " + strings.TYPE_LABELS[achievement.type.value]
         self._line(meta)
 
-    def status(self, players: int, players_hardcore: int) -> None:
+    def status(self, players: int | None, players_hardcore: int | None) -> None:
         """Draw the unlock state and rarity lines.
 
         Args:
@@ -146,11 +170,18 @@ class _Card:
             self._line(strings.DETAIL_PENDING.format(when=when))
         else:
             self._line(strings.DETAIL_LOCKED)
-        hardcore = achievement.num_awarded_hardcore / players_hardcore if players_hardcore else 0
+        casual = strings.UNKNOWN if players is None else fmt.percent(rarity(achievement, players))
+        hardcore = (
+            strings.UNKNOWN
+            if players_hardcore is None
+            else fmt.percent(
+                achievement.num_awarded_hardcore / players_hardcore if players_hardcore else 0
+            )
+        )
         self._line(
             strings.DETAIL_RARITY.format(
-                casual=fmt.percent(rarity(achievement, players)),
-                hardcore=fmt.percent(hardcore),
+                casual=casual,
+                hardcore=hardcore,
             )
         )
 

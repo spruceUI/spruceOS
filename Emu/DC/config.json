@@ -64,10 +64,8 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
         "MAGICX_A133P"
       ],
@@ -101,9 +99,7 @@
   "default_emulator": "flycast",
   "scaling_min_freq": 1008000,
   "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
+    "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
     "MIYOO_A30",
     "MIYOO_FLIP",

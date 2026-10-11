@@ -12,7 +12,8 @@ SYNC = "Sync"
 SYNC_CANCEL = "Cancel"
 SYNC_RETRY = "Retry"
 ENTER_KEY = "Enter key"  # Start after RA rejected the key; A on the setup screen
-SYNC_RUNNING_ITEM = "Syncing {done}/{total} · {item}"
+SYNC_RUNNING_ITEM = "Games {done}/{total}"
+SYNC_RUNNING_RECENT = "Recent unlocks · {done} found"
 SYNC_RUNNING_IMAGES = "Downloading images {done}/{total}"
 SYNC_PHASES = {
     "preflight": "Checking connection",
@@ -20,6 +21,7 @@ SYNC_PHASES = {
     "library": "Syncing game list",
     "details": "Syncing achievements",
     "awards": "Syncing awards",
+    "recent": "Syncing recent unlocks",
     "media": "Downloading images",
 }
 SYNC_CANCELLING = "Cancelling…"
@@ -109,6 +111,7 @@ ACH_SORTS = {
 VIEWS = {"list": "List", "grid": "Grid"}
 HINT_GRID = "Grid"
 HINT_LIST = "List"
+NO_ACHIEVEMENT_SET = "This game has no achievements."
 NO_ACHIEVEMENTS = "No achievements match this filter."
 DETAIL_META = "{points} · {retro} RetroPoints"
 DETAIL_UNLOCKED = "Unlocked ({mode}) {when}"

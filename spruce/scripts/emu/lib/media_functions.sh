@@ -57,12 +57,10 @@ run_gvu() {
 		if grep -q "752x560p" /sys/class/graphics/fb0/modes 2>/dev/null; then
 			export GVU_DISPLAY_W=752
 			export GVU_DISPLAY_H=560
-			export LD_PRELOAD="/customer/lib/libpadsp.so"
-			export SDL_AUDIODRIVER=dsp
-		else
-			# V2/V3/Plus: libpadsp.so crashes on these — run silent
-			export SDL_AUDIODRIVER=dummy
 		fi
+		pidof audioserver >/dev/null || { LD_PRELOAD= audioserver >/dev/null 2>&1 & sleep 0.5; }
+		export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
+		export SDL_AUDIODRIVER=dsp
 	fi
 
 	if [ "$OPEN_GVU_BROWSER" = "true" ]; then

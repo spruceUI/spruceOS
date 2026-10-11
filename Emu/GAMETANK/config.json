@@ -14,7 +14,36 @@
         "Performance",
         "Overclock"
       ],
-      "selected": "Smart",
+      "selected": "Performance",
+      "overrides": {}
+    },
+    "Emulator_A30": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_A30"
+      ],
+      "options": [
+        "gametank-standalone",
+        "libgametank"
+      ],
+      "selected": "gametank-standalone",
+      "overrides": {}
+    },
+    "Emulator_64": {
+      "display": "Emulator",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_A133P",
+        "TRIMUI_SMART_PRO_S",
+        "GKD_PIXEL2",
+        "ANBERNIC_RGXX",
+        "DARKMOSS",
+        "MAGICX_A133P"
+      ],
+      "options": [
+        "gametank-standalone"
+      ],
+      "selected": "gametank-standalone",
       "overrides": {}
     }
   },

@@ -2,10 +2,10 @@
 
 PyUI draws one title string, centred in the top bar. A :class:`Title` keeps its tail (a game's
 "90/138") whole and shortens only the name, so the count always shows. With an award, the string
-leaves a run of spaces between the two, and a hook on the top bar's render method draws RA's
-award dot there, as the games list does (.agents/pyui.md). PyUI always gets the whole readable
-title, so when the hook draws nothing (a theme that hides the title or shows tabs instead), only
-the dot is missing.
+leaves a run of spaces between the two, and a hook on the top bar's render method draws a
+scaled bundled award PNG there (.agents/pyui.md). The gap includes its halo. PyUI always gets
+the whole readable title, so when the hook draws nothing (a theme hides the title or shows tabs),
+only the dot is missing.
 
 A dot belongs to one exact title string. The hook forgets it the first time the top bar shows
 any other title (the next screen), so no other screen gets a stale dot. Popups over the screen
@@ -21,13 +21,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from cheevos.core.models import AwardKind
-from cheevos.ui.pyui import row_bars
-from cheevos.ui.pyui.bar_colors import Marker
+from cheevos.ui.pyui import award_images, row_bars
 from cheevos.ui.pyui.text import Text, displayable, fit_text, fit_title, text_width, title_room
 
 logger = logging.getLogger(__name__)
 
 _DOT_PAD = 8  # between the award dot and the text on each side
+_DOT_SHARE = 0.45  # circle diameter per title font height
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,7 +56,8 @@ class _Dot:
         award: Which dot.
         size: Diameter.
         x: Left edge, measured on the first draw.
-        marker: Colour and fill, picked on the first draw.
+        image: Static image path, picked on the first draw.
+        canvas: Scaled image width, including the halo.
     """
 
     text: str
@@ -65,7 +66,8 @@ class _Dot:
     award: AwardKind
     size: int
     x: int | None = None
-    marker: Marker | None = None
+    image: str | None = None
+    canvas: int = 0
 
 
 _dot: _Dot | None = None
@@ -75,7 +77,7 @@ def gap_spaces(dot: int, space: int) -> int:
     """Return how many spaces leave room for the award dot and its padding.
 
     Args:
-        dot: Dot diameter.
+        dot: Image width, including any halo.
         space: Width of a space in the title font.
 
     Returns:
@@ -97,7 +99,7 @@ def compose(
     Args:
         title: Name, tail and award (the tail already drawable).
         room: Width the top bar leaves the title.
-        dot: Award dot diameter.
+        dot: Award image width, including any halo.
         measure: Text width in pixels.
         fit: Shortens text to a pixel width.
 
@@ -160,19 +162,21 @@ def _prepare(title: str | Title) -> tuple[str, _Dot | None]:
     from display.display import Display
     from display.font_purpose import FontPurpose
 
-    size = row_bars.dot_size(int(Display.get_text_dimensions(FontPurpose.TOP_BAR_TEXT, "A")[1]))
+    line = int(Display.get_text_dimensions(FontPurpose.TOP_BAR_TEXT, "A")[1])
+    size = max(round(line * _DOT_SHARE), 6)
+    canvas = award_images.canvas_size(title.award, size) if title.award is not None else size
     tail = displayable(title.tail, Text.HEADING)
     name, gap, tail = compose(
         Title(title.name, tail, title.award),
         room=title_room(),
-        dot=size,
+        dot=canvas,
         measure=lambda value: text_width(value, Text.HEADING),
         fit=lambda value, width: fit_text(value, Text.HEADING, width),
     )
     text = name + gap + tail
     if title.award is None:
         return text, None
-    return text, _Dot(text, name, tail, title.award, size)
+    return text, _Dot(text, name, tail, title.award, size, canvas=canvas)
 
 
 @contextlib.contextmanager
@@ -241,6 +245,7 @@ def _draw(bar: Any, dot: _Dot) -> None:  # noqa: ANN401 — PyUI's top bar
     from devices.device import Device
     from display.display import Display
     from display.font_purpose import FontPurpose
+    from display.render_mode import RenderMode
     from themes.theme import Theme
 
     if Theme.skip_main_menu() or not Theme.show_top_bar_text():  # tabs, or no title drawn
@@ -256,6 +261,14 @@ def _draw(bar: Any, dot: _Dot) -> None:  # noqa: ANN401 — PyUI's top bar
 
         width = int(Device.get_device().screen_width())
         dot.x = dot_x(width, measure(dot.text), measure(dot.name), measure(dot.tail), dot.size)
-        dot.marker = row_bars.top_bar_palette().markers.get(dot.award)
-    if dot.marker is not None:
-        row_bars.draw_dot(dot.marker, dot.size, dot.x, height // 2)
+        dot.image = award_images.images(row_bars.top_bar_palette()).get(dot.award)
+        dot.canvas = award_images.canvas_size(dot.award, dot.size)
+    if dot.image is not None:
+        Display.render_image(
+            dot.image,
+            dot.x + dot.size // 2,
+            height // 2,
+            RenderMode.MIDDLE_CENTER_ALIGNED,
+            dot.canvas,
+            dot.canvas,
+        )

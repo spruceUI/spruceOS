@@ -10,17 +10,12 @@
       "name": "Open GVU Browser",
       "launch": "/mnt/SDCARD/Emu/MEDIA/open_gvu_browser.sh",
       "devices": [
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "MIYOO_FLIP",
         "MIYOO_A30",
         "ANBERNIC_RGXX",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP",
+        "MIYOO_MINI_FAMILY",
         "MAGICX_A133P",
         "DARKMOSS"
       ]
@@ -31,10 +26,7 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_A30",
-        "MIYOO_MINI",
-        "MIYOO_MINI_V4",
-        "MIYOO_MINI_PLUS",
-        "MIYOO_MINI_FLIP"
+        "MIYOO_MINI_FAMILY"
       ],
       "options": [
         "gvu",
@@ -48,10 +40,8 @@
       "display": "Emulator",
       "devices": [
         "MIYOO_FLIP",
-        "TRIMUI_SMART_PRO",
+        "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_BRICK",
-        "TRIMUI_BRICK_PRO",
         "ANBERNIC_RGXX",
         "DARKMOSS",
         "MAGICX_A133P"

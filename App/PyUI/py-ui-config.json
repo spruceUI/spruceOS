@@ -21,10 +21,13 @@
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
     "btAudioDeviceCmd":"/mnt/SDCARD/App/PyUI/get-bt-audio-device.sh",
+    "usbAudioSupportedCmd":"/mnt/SDCARD/App/PyUI/get-usb-audio-supported.sh",
+    "usbAudioRoutePath":"/tmp/usb_audio_route",
     "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
     "bluetoothCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_bluetooth",
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
+    "cfwVersionFile": "/mnt/SDCARD/spruce/spruce",
     "aboutEntries" : [
         {
            "display":"Spruce version",
@@ -34,23 +37,23 @@
         {
             "display":"RetroArch version",
             "displayKey":"aboutRetroArchVersion",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-ra-version.sh"
+            "cmd":"/mnt/SDCARD/App/PyUI/about-entries/get-ra-version.sh"
         },
         {
             "display":"PPSSPP version",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-psp-version.sh",
-            "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP", "GKD_PIXEL2", "ANBERNIC_RGXX", "DARKMOSS", "MAGICX_A133P"]
+            "cmd":"/mnt/SDCARD/App/PyUI/about-entries/get-psp-version.sh",
+            "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "MIYOO_A30", "MIYOO_FLIP", "GKD_PIXEL2", "ANBERNIC_RGXX", "DARKMOSS", "MAGICX_A133P"]
         },
         {
             "display":"DSperate version",
             "displayKey":"aboutDsperateVersion",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-dsperate-version.sh",
-            "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_BRICK", "TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S", "TRIMUI_BRICK_PRO", "DARKMOSS", "ANBERNIC_RGXX", "MAGICX_A133P", "GKD_PIXEL2"]
+            "cmd":"/mnt/SDCARD/App/PyUI/about-entries/get-dsperate-version.sh",
+            "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "DARKMOSS", "ANBERNIC_RGXX", "MAGICX_A133P", "GKD_PIXEL2"]
         },
         {
             "display":"SD Card usage",
             "displayKey":"aboutSdCardUsage",
-            "cmd":"/mnt/SDCARD/App/PyUI/get-sdcard-usage.sh"
+            "cmd":"/mnt/SDCARD/App/PyUI/about-entries/get-sdcard-usage.sh"
         }
     ]
 }
