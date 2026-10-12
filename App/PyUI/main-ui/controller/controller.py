@@ -5,7 +5,6 @@ from devices.device import Device
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
-from utils.time_logger import log_timing
 
 class Controller:
     controller = None

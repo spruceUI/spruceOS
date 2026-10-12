@@ -1,9 +1,5 @@
 from pathlib import Path
-import re
-import shutil
-import subprocess
 import threading
-import time
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput

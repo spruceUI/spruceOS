@@ -1,6 +1,5 @@
 
 
-from functools import partial
 import os
 from pathlib import Path
 from typing import Callable
@@ -24,8 +23,6 @@ from utils.logger import PyUiLogger
 from utils.time_logger import log_timing
 from views.grid_or_list_entry import GridOrListEntry
 from views.rom_grid_or_list_entry import RomGridOrListEntry
-from views.util.icon_searcher import IconSearcher
-from views.util.image_searcher import ImageSearcher
 
 
 class RomSelectOptionsBuilder:

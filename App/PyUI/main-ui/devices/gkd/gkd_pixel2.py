@@ -1,6 +1,5 @@
 from pathlib import Path
 import os
-import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
@@ -14,13 +13,10 @@ from devices.gkd.connman_wifi_scanner import ConnmanWiFiScanner
 from devices.gkd.connman_wifi_menu import ConnmanWifiMenu
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
-from devices.utils.process_runner import ProcessRunner
 from menus.settings.timezone_menu import TimezoneMenu
 from utils import throttle
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
-from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 class GKDPixel2(GKDDevice):
     def __init__(self, device_name, main_ui_mode):

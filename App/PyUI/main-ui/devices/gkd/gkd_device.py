@@ -1,6 +1,4 @@
-import re
 import socket
-import subprocess
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
 from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface

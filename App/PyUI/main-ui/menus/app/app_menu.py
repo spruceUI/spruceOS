@@ -1,6 +1,5 @@
 
 
-import os
 from apps.pyui_app import PyUiAppConfig
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput

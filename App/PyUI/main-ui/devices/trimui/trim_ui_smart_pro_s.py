@@ -1,31 +1,22 @@
-import subprocess
 import json
 import os
 from pathlib import Path
 import threading
-import time
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
-from controller.controller_inputs import ControllerInput
-from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcherController
-from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
+from controller.key_watcher_controller import KeyWatcherController
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.trimui.trim_ui_device import TrimUIDevice
 from devices.miyoo_trim_mapping_provider import MiyooTrimKeyMappingProvider
 from devices.utils.file_watcher import FileWatcher
-from devices.utils.process_runner import ProcessRunner
 from display.display import Display
-from menus.language.language import Language
 from utils import throttle
 from utils.config_copier import ConfigCopier
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartProS(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"

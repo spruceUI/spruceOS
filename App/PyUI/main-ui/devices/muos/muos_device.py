@@ -8,7 +8,6 @@ from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
-from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
@@ -17,7 +16,6 @@ from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
-from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon

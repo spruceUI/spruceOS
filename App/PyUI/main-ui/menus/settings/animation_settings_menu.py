@@ -1,8 +1,6 @@
 
-from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
-from views.grid_or_list_entry import GridOrListEntry
 
 
 from menus.language.language import Language

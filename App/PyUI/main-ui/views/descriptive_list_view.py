@@ -1,4 +1,3 @@
-from email.mime import text
 import time
 from typing import List
 from devices.device import Device
