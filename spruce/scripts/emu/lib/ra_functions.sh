@@ -59,6 +59,9 @@ prepare_ra_config() {
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+	rac_user=$(printf '%s' "$rac_user" | sed 's/[\\&|]/\\&/g')
+	rac_pass=$(printf '%s' "$rac_pass" | sed 's/[\\&|]/\\&/g')
+
 	log_message "Cheevos mode is $rac_mode" -v
 	case "$rac_mode" in
 		"Disabled")
