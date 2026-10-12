@@ -334,3 +334,7 @@ class MiyooA30(MiyooDevice):
 
     def volume_down(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/event3",114)
+
+    def fix_device_font_height_calc_issues(self, height):
+        # A30 SDL lib seems to always return 1px taller than fonts really are
+        return height - 1
