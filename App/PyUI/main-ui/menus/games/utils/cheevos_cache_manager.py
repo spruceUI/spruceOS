@@ -42,3 +42,8 @@ class CheevosCacheManager:
     def get_cached(cls) -> List[CheevosCacheEntry]:
         cls._loaded.wait(30)
         return list(cls._entries)
+
+    @classmethod
+    def is_pending(cls, rom_info: RomInfo) -> List[CheevosCacheEntry]:
+        # TODO
+        return False
