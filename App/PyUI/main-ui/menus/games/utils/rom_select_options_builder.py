@@ -332,9 +332,11 @@ class RomSelectOptionsBuilder:
         return favorite_paths
 
     def _get_favorite_icon(self, rom_info: RomInfo) -> str:
-        if CheevosCacheManager.is_cached(rom_info):
+        
+        if CheevosCacheManager.is_pending(rom_info):
             return Theme.cheevos_icon()
-        elif FavoritesManager.is_favorite(rom_info):
+        
+        if FavoritesManager.is_favorite(rom_info):
             return Theme.favorite_icon()
         else:
             return None
