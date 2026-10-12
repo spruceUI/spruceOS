@@ -31,6 +31,9 @@ class DescriptiveListView(ListView):
 
 
         usable = Display.get_usable_screen_height(force_include_top_bar=True) / self.each_entry_height
+        PyUiLogger.get_logger().info(f"usable_screen_height = {Display.get_usable_screen_height(force_include_top_bar=True)}")
+        PyUiLogger.get_logger().info(f"self.each_entry_height = {self.each_entry_height}")
+        PyUiLogger.get_logger().info(f"usable = {usable}")
 
         self.max_rows = int(usable + (1 if usable % 1 >= 0.80 else 0))
 
