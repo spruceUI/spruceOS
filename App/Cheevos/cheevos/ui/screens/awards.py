@@ -14,6 +14,7 @@ from cheevos.core.models import Award, AwardKind
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui.image_frames import Frame
 from cheevos.ui.pyui.primitives import Button
 from cheevos.ui.pyui.views import ICON_TILE, Layout, MenuItem, choose
 from cheevos.ui.screens.common import message, pick
@@ -27,6 +28,11 @@ RANK = {
     AwardKind.BEATEN_SOFTCORE: 0,
 }
 MASTERY = frozenset({AwardKind.MASTERED, AwardKind.COMPLETED})
+_FRAMES = {
+    AwardKind.MASTERED: Frame.GOLD,
+    AwardKind.BEATEN_HARDCORE: Frame.SILVER,
+    AwardKind.BEATEN_SOFTCORE: Frame.SILVER_THIN,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,7 +103,7 @@ def _tiles(ctx: AppContext, awards: Sequence[Award]) -> list[MenuItem]:
             award.title,
             icon=lambda award=award: ctx.media.game_icon(award.game_id, award.image_icon),
             key=str(award.game_id),
-            frame=award.kind,
+            frame=_FRAMES.get(award.kind),
         )
         for award in awards
     ]

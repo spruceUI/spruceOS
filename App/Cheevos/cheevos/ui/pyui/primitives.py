@@ -159,7 +159,7 @@ def text(
     role: Text = Text.BODY,
     align: Align = Align.TOP_LEFT,
     *,
-    selected: bool = False,
+    accent: bool = False,
 ) -> tuple[int, int]:
     """Draw one line of text in the theme's font and colour for ``role``.
 
@@ -169,7 +169,7 @@ def text(
         y: Anchor y.
         role: Text role.
         align: Anchor of ``(x, y)``.
-        selected: Use the theme's "selected" colour.
+        accent: Use the theme's accent colour (:func:`accent_color`), e.g. for titles.
 
     Returns:
         Rendered ``(width, height)``.
@@ -178,7 +178,7 @@ def text(
     from themes.theme import Theme
 
     font = font_purpose(role)
-    color = Theme.text_color_selected(font) if selected else Theme.text_color(font)
+    color = accent_color() if accent else Theme.text_color(font)
     width, height = Display.render_text(displayable(value, role), x, y, color, font, _mode(align))
     return int(width), int(height)
 
@@ -367,16 +367,14 @@ def box(color: tuple[int, int, int], x: int, y: int, width: int, height: int) ->
 
 
 def accent_color() -> tuple[int, int, int]:
-    """Return the theme's colour for selected list text (used for highlights and bars).
+    """Return the theme's accent for titles and rules on the page (``row_bars.page_accent``).
 
     Returns:
         RGB colour.
     """
-    from display.font_purpose import FontPurpose
-    from themes.theme import Theme
+    from cheevos.ui.pyui.row_bars import page_accent
 
-    red, green, blue = tuple(Theme.text_color_selected(FontPurpose.LIST))[:3]
-    return int(red), int(green), int(blue)
+    return page_accent()
 
 
 def chart_color() -> tuple[int, int, int]:

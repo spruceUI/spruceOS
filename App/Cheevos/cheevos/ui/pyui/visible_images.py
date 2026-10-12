@@ -61,6 +61,11 @@ def image_demand() -> ImageDemand:
     return _hooks.demand
 
 
+def image_version() -> int:
+    """Return the media revision, for layouts cached until a downloaded image arrives."""
+    return _hooks.version()
+
+
 @contextlib.contextmanager
 def demanding(demand: ImageDemand) -> Iterator[None]:
     """Mark the image requests made during the block.

@@ -6,15 +6,16 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 
-from cheevos.core.models import Achievement, AchievementType, GameDetail
+from cheevos.core.models import Achievement, AchievementType, GameDetail, PendingAward
 from cheevos.core.sync.detail_fetch import FetchState, FetchStatus
 from cheevos.core.sync.progress import Failure
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui.badge_grid import Details
 from cheevos.ui.pyui.primitives import Button
 from cheevos.ui.pyui.title_bar import Title
-from cheevos.ui.pyui.views import Layout, MenuItem, choose
-from cheevos.ui.screens.achievement import show_achievement
+from cheevos.ui.pyui.views import Layout, MenuItem, PreparedView
+from cheevos.ui.screens.achievement import hides_description, show_achievement
 from cheevos.ui.screens.common import message, pick, wait_while
 from cheevos.ui.screens.rows import achievement_row, rarity
 
@@ -86,35 +87,62 @@ def show_game(ctx: AppContext, game_id: int) -> None:
     earned = sum(1 for a in detail.achievements if a.unlocked)
     count = f"{earned}/{len(detail.achievements)}"
     title = Title(detail.title, count, game.highest_award if game else None)
-    view = _View()
+    _browse(ctx, detail, title, pending)
+
+
+def _browse(ctx: AppContext, detail: GameDetail, title: Title, pending: dict) -> None:
+    """Show a game's achievements as a list or grid, and their cards, until B.
+
+    Args:
+        ctx: App context.
+        detail: The game, with achievements.
+        title: Top-bar title.
+        pending: Pending unlocks by achievement ID.
+    """
+    view = _View(
+        layout="grid" if ctx.settings.achievement_grid else "list",
+        sort=ctx.settings.achievement_sort,
+    )
     selected = 0
+    shown: list[Achievement] = []
+    prepared: PreparedView | None = None  # kept while the card is open: back to the same page
     while True:
-        shown = _sorted(
-            [a for a in detail.achievements if FILTERS[view.filter](a)],
-            view.sort,
-            detail.num_distinct_players,
-        )
-        if not shown:
-            message(detail.title, [strings.NO_ACHIEVEMENTS])
-            view = _View(layout=view.layout)
-            continue
-        items = [_row(ctx, a, detail, pending) for a in shown]
-        layout = Layout.GRID if view.layout == "grid" else Layout.LIST
+        if prepared is None:
+            shown = _sorted(
+                [a for a in detail.achievements if FILTERS[view.filter](a)],
+                view.sort,
+                detail.num_distinct_players,
+            )
+            if not shown:
+                message(detail.title, [strings.NO_ACHIEVEMENTS])
+                view = replace(view, filter="all")
+                continue
+            items = [_row(ctx, a, detail, pending) for a in shown]
+            layout = Layout.BADGES if view.layout == "grid" else Layout.LIST
+            prepared = PreparedView(title, items, selected=selected, layout=layout)
         buttons = frozenset({Button.A, Button.Y, Button.SELECT})
         toggle = strings.HINT_LIST if view.layout == "grid" else strings.HINT_GRID
         hints = [(Button.Y, strings.HINT_FILTER), (Button.SELECT, toggle)]
-        choice = choose(
-            title, items, selected=selected, buttons=buttons, layout=layout, hints=hints
-        )
+        choice = prepared.show(buttons=buttons, hints=hints)
         if choice is None:
             return
         if choice.button is Button.Y:
-            view = _options(view)
-            selected = 0
+            changed = _options(view)
+            if changed != view:
+                view, selected, prepared = changed, 0, None
+                ctx.update_settings(
+                    replace(
+                        ctx.settings,
+                        achievement_grid=view.layout == "grid",
+                        achievement_sort=view.sort,
+                    )
+                )
             continue
         selected = choice.index
         if choice.button is Button.SELECT:  # list <-> grid, like PyUI's game lists
             view = replace(view, layout="list" if view.layout == "grid" else "grid")
+            ctx.update_settings(replace(ctx.settings, achievement_grid=view.layout == "grid"))
+            prepared = None
             continue
         achievement = shown[choice.index]
         show_achievement(
@@ -177,7 +205,7 @@ def _why_not(status: FetchStatus | None, now: float) -> list[str]:
 
 
 def _row(ctx: AppContext, achievement: Achievement, detail: GameDetail, pending: dict) -> MenuItem:
-    """Build one achievement row for this game.
+    """Build one achievement row (list) or tile (badge grid) for this game.
 
     Args:
         ctx: App context.
@@ -188,12 +216,37 @@ def _row(ctx: AppContext, achievement: Achievement, detail: GameDetail, pending:
     Returns:
         The row.
     """
-    return achievement_row(
-        ctx,
-        achievement,
-        players=detail.num_distinct_players,
-        pending=pending.get(achievement.achievement_id),
-    )
+    waiting = pending.get(achievement.achievement_id)
+    row = achievement_row(ctx, achievement, players=detail.num_distinct_players, pending=waiting)
+    return replace(row, details=_details(ctx, achievement, waiting))
+
+
+def _details(ctx: AppContext, achievement: Achievement, pending: PendingAward | None) -> Details:
+    """Describe a badge under the grid: description, unlock mode and type.
+
+    The description follows the card's spoiler setting.
+
+    Args:
+        ctx: App context.
+        achievement: The achievement.
+        pending: Its RAOfflineProxy queue entry, if any.
+
+    Returns:
+        The details.
+    """
+    hidden = hides_description(ctx.settings.hide_descriptions, achievement, pending=pending)
+    if achievement.hardcore:
+        tags = [strings.MODE_HARDCORE]
+    elif achievement.unlocked:
+        tags = [strings.MODE_CASUAL]
+    elif pending is not None:
+        tags = [strings.MODE_PENDING]
+    else:
+        tags = [strings.DETAIL_LOCKED]
+    if achievement.type is not None:
+        tags.append(strings.TYPE_LABELS[achievement.type.value])
+    text = strings.HIDDEN_DESCRIPTION if hidden else achievement.description
+    return Details(text, " · ".join(tags))
 
 
 def _options(view: _View) -> _View:

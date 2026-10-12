@@ -102,7 +102,7 @@ ACH_FILTERS = {
     "key": "Progression and win",
 }
 ACH_SORTS = {
-    "order": "Default order",
+    "order": "RA display order",
     "unlocked": "Unlocked first",
     "locked": "Locked first",
     "points": "Points",
@@ -123,6 +123,7 @@ HINT_REVEAL = "Reveal"
 HINT_FULL_SCREEN = "Full screen"
 MODE_HARDCORE = "Hardcore"
 MODE_CASUAL = "Casual"
+MODE_PENDING = "Pending sync"
 
 # --- profile / awards / offline ---------------------------------------------------------------
 PROFILE = "Profile"

@@ -50,6 +50,19 @@ def luma(color: RGB) -> float:
     return 0.299 * color[0] + 0.587 * color[1] + 0.114 * color[2]
 
 
+def stands_out(color: RGB, background: RGB) -> bool:
+    """Whether a colour reads against a background (bar segments, accents on the page).
+
+    Args:
+        color: Foreground colour.
+        background: Background colour (an average, for images).
+
+    Returns:
+        ``True`` when their brightness differs enough.
+    """
+    return abs(luma(color) - luma(background)) >= MIN_CONTRAST
+
+
 @dataclass(frozen=True, slots=True)
 class Paint:
     """A fill colour with its opacity.
@@ -132,7 +145,7 @@ def palette(background: RGB, text: RGB) -> Palette:
     light = shade >= LIGHT
     hardcore = DARK_GOLD if light else HARDCORE_GOLD
     casual = NEUTRAL_500 if light else ZINC_400
-    if min(abs(luma(hardcore) - shade), abs(luma(casual) - shade)) < MIN_CONTRAST:
+    if not (stands_out(hardcore, background) and stands_out(casual, background)):
         return _fallback(background, text)
     track = Paint(BLACK, TRACK_ALPHA_LIGHT) if light else Paint(WHITE, TRACK_ALPHA_DARK)
     markers = {
