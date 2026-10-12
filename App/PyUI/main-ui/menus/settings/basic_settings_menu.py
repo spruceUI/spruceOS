@@ -13,7 +13,6 @@ from menus.settings.sound_settings import SoundSettings
 from menus.settings.tasks_menu import TasksMenu
 from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
-from menus.settings.wifi_menu import WifiMenu
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry

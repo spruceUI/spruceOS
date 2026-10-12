@@ -1,5 +1,4 @@
 from devices.anbernic.anbernic_xx_common import AnbernicXXCommon
-import os
 
 
 class Anbernic640x480(AnbernicXXCommon):

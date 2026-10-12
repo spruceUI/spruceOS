@@ -1,6 +1,5 @@
 
 from display.display import Display
-from display.font_purpose import FontPurpose
 from menus.language.language import Language
 from menus.settings.theme.theme_settings_menu_common import ThemeSettingsMenuCommon
 from themes.theme import Theme

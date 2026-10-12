@@ -1,7 +1,6 @@
 import time
 import threading
 
-from utils.logger import PyUiLogger
 
 class TrimUIJoystick:
     SYSTEM_SUSPEND_FLAG = "/tmp/system_suspend"

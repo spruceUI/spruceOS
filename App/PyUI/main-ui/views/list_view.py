@@ -47,7 +47,6 @@ class ListView(View):
     @abstractmethod
     def get_row_geometry(self):
         """(y of the first visible row, row height) in logical pixels, as _render lays the rows out."""
-        pass
 
     def get_selected_option(self):
         if 0 <= self.selected < len(self.options):

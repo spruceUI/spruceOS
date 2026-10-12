@@ -3,8 +3,6 @@ from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from menus.language.language import Language
 from themes.theme import Theme
-from utils.logger import PyUiLogger
-from utils.time_logger import log_timing
 
 
 class BottomBar:

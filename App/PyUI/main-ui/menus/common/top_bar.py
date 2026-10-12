@@ -1,12 +1,10 @@
 from datetime import datetime
 import time
-import traceback
 from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from menus.language.language import Language
 from themes.theme import Theme
-from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 

@@ -1,8 +1,6 @@
 import ctypes
 import fcntl
-import math
 from pathlib import Path
-import re
 import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -11,7 +9,6 @@ from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
-from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from menus.language.language import Language
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils

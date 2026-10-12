@@ -1,20 +1,14 @@
 
-import json
 import os
-from pathlib import Path
 import re
 import subprocess
-import time
 from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from devices.device import Device
-from devices.utils.process_runner import ProcessRunner
 from display.display import Display
-from display.font_purpose import FontPurpose
 from games.utils.game_system import GameSystem
 from menus.app.app_utils import AppUtils
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
 from menus.games.game_system_select_menu import GameSystemSelectMenu
-from menus.games.muos_game_system_config import MuosGameSystemConfig
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from themes.theme import Theme
