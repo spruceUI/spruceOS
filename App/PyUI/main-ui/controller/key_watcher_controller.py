@@ -229,6 +229,7 @@ class KeyWatcherController(ControllerInterface):
             print(f"KEY,{controller_input},{direction}")
 
     def get_input(self, timeoutInMilliseconds):
+        timeoutInMilliseconds = 0
         start_time = time.time()
         timeout = timeoutInMilliseconds / 1000.0
         do_get_input = True
@@ -246,7 +247,6 @@ class KeyWatcherController(ControllerInterface):
                     self.last_held_input = value
                     return value
 
-            time.sleep(0.005)
             do_get_input = (time.time() - start_time) < timeout
 
         self.last_held_input = None

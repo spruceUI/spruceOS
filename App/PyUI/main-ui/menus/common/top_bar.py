@@ -17,6 +17,7 @@ class TopBar:
         self.volume = 0
         self.selected_tab = "Games"
         self.top_bar_h = 0
+        self.top_bar_w = 0
 
     def render_top_bar(self, title, hide_top_bar_icons = False) :
         if(Theme.skip_main_menu()):
@@ -92,28 +93,13 @@ class TopBar:
         battery_icon = Theme.get_battery_icon(charging,battery_percent)
         #TODO Improve padding to not just be 10
         self.top_bar_w, self.top_bar_h = Display.render_image(top_bar_bg,0,0)
-        if(Theme.show_top_bar_text()):
-            text_w, text_h = Display.get_text_dimensions(FontPurpose.TOP_BAR_TEXT)
-            self.top_bar_w = max(self.top_bar_w, text_w)
-            self.top_bar_h = max(self.top_bar_h, text_h)
 
         wifi_icon = None
         if(Device.get_device().supports_wifi() and Device.get_device().is_wifi_enabled()):
             wifi_status = Device.get_device().get_wifi_status()
             wifi_icon = Theme.get_wifi_icon(wifi_status)
-            wifi_w, wifi_h = Display.get_image_dimensions(wifi_icon)
-            self.top_bar_w = max(self.top_bar_w, wifi_w)
-            self.top_bar_h = max(self.top_bar_h, wifi_h)
 
         bt_icon = Theme.get_bluetooth_icon(Device.get_device().get_bluetooth_status())
-        if(bt_icon is not None):
-            bt_w, bt_h = Display.get_image_dimensions(bt_icon)
-            self.top_bar_w = max(self.top_bar_w, bt_w)
-            self.top_bar_h = max(self.top_bar_h, bt_h)
-
-        battery_w, battery_h = Display.get_image_dimensions(battery_icon)
-        self.top_bar_w = max(self.top_bar_w, battery_w)
-        self.top_bar_h = max(self.top_bar_h, battery_h)
         
         padding = 10
         center_of_bar = self.top_bar_h //2
@@ -125,21 +111,29 @@ class TopBar:
                 #Battery Text
                 w, h = Display.render_text(str(battery_percent),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
 
             if(Theme.display_battery_icon()):
                 #Battery Icon
                 w, h = Display.render_image(
                     battery_icon ,x_offset,center_of_bar,RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
 
             if(wifi_icon is not None):
                 #Wifi
                 w, h = Display.render_image(wifi_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
             if(bt_icon is not None):
                 #Bluetooth
                 w, h = Display.render_image(bt_icon,x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
                 #Volume
             if(time.time() - self.volume_changed_time < 3):
                 if(Theme.display_volume_numbers()):
@@ -147,11 +141,15 @@ class TopBar:
                     x_offset = x_offset - w - padding
                 w,h = Display.render_image(Theme.get_volume_indicator(self.volume),x_offset,center_of_bar, RenderMode.MIDDLE_RIGHT_ALIGNED)
                 x_offset = x_offset - w - padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
 
             if(Theme.show_clock()):   
                 x_offset = Theme.get_top_bar_initial_x_offset()
                 w, h = Display.render_text(str(self.get_current_time_hhmm()),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_LEFT_ALIGNED)
                 x_offset += w +padding
+                self.top_bar_w = max(self.top_bar_w, w)
+                self.top_bar_h = max(self.top_bar_h, h)
 
         if(Theme.show_top_bar_text()):
             Display.render_text(title,
@@ -160,6 +158,8 @@ class TopBar:
                                 Theme.text_color(FontPurpose.TOP_BAR_TEXT), 
                                 FontPurpose.TOP_BAR_TEXT, 
                                 RenderMode.MIDDLE_CENTER_ALIGNED)
+            self.top_bar_w = max(self.top_bar_w, w)
+            self.top_bar_h = max(self.top_bar_h, h)
         
     #TODO make this part of a user config class w/ options for 12 or 24 hour    
     @staticmethod
