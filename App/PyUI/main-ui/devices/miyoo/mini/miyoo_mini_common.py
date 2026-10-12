@@ -1020,4 +1020,4 @@ class MiyooMiniCommon(MiyooDevice):
 
 
     def animation_divisor(self):
-        return self.get_system_config().animation_speed(2) 
+        return self.get_system_config().animation_speed(1) 
