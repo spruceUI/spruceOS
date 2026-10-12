@@ -1268,7 +1268,7 @@ class Display:
         w = sdl2.Sint32()
         h = sdl2.Sint32()
         sdl2.sdlttf.TTF_SizeUTF8(font, text.encode('utf-8'), w, h)
-        return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
+        return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), Device.get_device().fix_device_font_height_calc_issues(h.value)
 
 
     @classmethod

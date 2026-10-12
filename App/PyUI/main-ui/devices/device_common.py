@@ -1124,3 +1124,6 @@ class DeviceCommon(AbstractDevice):
 
     def get_game_images_folder_name(self):
         return "Imgs"
+
+    def fix_device_font_height_calc_issues(self, height):
+        return height
