@@ -28,6 +28,7 @@
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "cfwVersionFile": "/mnt/SDCARD/spruce/spruce",
+    "fallbackFontPath": "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
     "aboutEntries" : [
         {
            "display":"Spruce version",
