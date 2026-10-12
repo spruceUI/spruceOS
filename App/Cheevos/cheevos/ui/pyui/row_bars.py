@@ -20,7 +20,7 @@ from typing import Any
 
 from cheevos.core.models import AwardKind
 from cheevos.ui.pyui import award_images, generated
-from cheevos.ui.pyui.bar_colors import RGB, Paint, Palette, palette
+from cheevos.ui.pyui.bar_colors import RGB, Paint, Palette, palette, stands_out
 from cheevos.ui.pyui.text import Text, text_width
 
 logger = logging.getLogger(__name__)
@@ -115,19 +115,47 @@ def _rgb(color: Sequence[int]) -> RGB:
     return int(color[0]), int(color[1]), int(color[2])
 
 
+def page_color() -> RGB:
+    """Return the page background's average colour (black without a background image).
+
+    Returns:
+        RGB colour.
+    """
+    from display.display import Display
+    from themes.theme import Theme
+
+    page_image = Display.bg_path or Theme.background()
+    return generated.average_color(str(page_image)) if page_image else (0, 0, 0)
+
+
+def page_accent() -> RGB:
+    """Return the theme's accent for titles and rules on the page: its selected-text colour.
+
+    Themes choose that colour for text on their selection bar. Where it doesn't stand out from
+    the page (MINIMAL and ART_BOOK_NEXT: black, for a white bar), use their text colour.
+
+    Returns:
+        RGB colour.
+    """
+    from display.font_purpose import FontPurpose
+    from themes.theme import Theme
+
+    selected = _rgb(Theme.text_color_selected(FontPurpose.LIST))
+    if stands_out(selected, page_color()):
+        return selected
+    return _rgb(Theme.text_color(FontPurpose.LIST))
+
+
 def page_palette() -> Palette:
     """Pick RA colours for things drawn on the page background (grid tiles, ordinary rows).
 
     Returns:
         The palette.
     """
-    from display.display import Display
     from display.font_purpose import FontPurpose
     from themes.theme import Theme
 
-    page_image = Display.bg_path or Theme.background()
-    page = generated.average_color(str(page_image)) if page_image else (0, 0, 0)
-    return palette(page, _rgb(Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)))
+    return palette(page_color(), _rgb(Theme.text_color(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION)))
 
 
 def top_bar_palette() -> Palette:
@@ -136,12 +164,10 @@ def top_bar_palette() -> Palette:
     Returns:
         The palette.
     """
-    from display.display import Display
     from display.font_purpose import FontPurpose
     from themes.theme import Theme
 
-    page_image = Display.bg_path or Theme.background()
-    page = generated.average_color(str(page_image)) if page_image else (0, 0, 0)
+    page = page_color()
     bar_image = Theme.get_title_bar_bg()
     bar = generated.average_color(str(bar_image), page) if bar_image else page
     return palette(bar, _rgb(Theme.text_color(FontPurpose.TOP_BAR_TEXT)))

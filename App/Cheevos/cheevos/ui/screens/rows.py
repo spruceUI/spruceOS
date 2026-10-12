@@ -8,6 +8,7 @@ from cheevos.core.models import Achievement, GameProgress, PendingAward
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui.image_frames import Frame
 from cheevos.ui.pyui.row_bars import Progress
 from cheevos.ui.pyui.views import MenuItem
 
@@ -78,6 +79,7 @@ def achievement_row(
         lambda: ctx.media.badge(achievement, unlocked=achievement.unlocked or pending is not None),
         fmt.points(achievement.points),
         str(achievement.achievement_id),
+        frame=Frame.GOLD if achievement.hardcore else None,
     )
 
 

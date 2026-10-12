@@ -305,6 +305,7 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
         with status_bar.installed(bar.status, bar.press_start), title_bar.installed():
             Home(ctx).run()
     finally:
+        ctx.flush_settings()
         sync.cancel()
         sync.join(_SHUTDOWN_TIMEOUT)
         details.close()
