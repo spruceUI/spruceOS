@@ -14,7 +14,7 @@ class PyUiConfig:
         cls._config_path = config_path
         cls._data = initial_data or {}
         cls.load()
-        _current_dir = Path(__file__).resolve().parent
+        cls._current_dir = Path(__file__).resolve().parent
 
     @classmethod
     def save(cls):
