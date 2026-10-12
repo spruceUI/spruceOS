@@ -393,6 +393,7 @@ class Display:
 
     @classmethod
     def set_new_bg(cls, bg_path, is_custom_theme_background, retry=True):
+        start = time.perf_counter()
         if(bg_path is not None and (bg_path != cls.bg_path or cls.background_texture is None)):
             cls._unload_bg_texture()
             cls.is_custom_theme_background = is_custom_theme_background
@@ -417,6 +418,10 @@ class Display:
 
         elif(bg_path is None):
             PyUiLogger.get_logger().error(f"Background path none")
+
+        # Should this count to image rendering?
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        cls.image_render_timer+= elapsed_ms
 
     @classmethod
     def set_page_bg(cls, page_bg):
@@ -483,18 +488,17 @@ class Display:
               bottom_bar_text = None,
               render_bottom_bar_icons_and_images = True,
               force_top_and_bottom_bar = False):
-        with log_timing("Display.clear()", PyUiLogger.get_logger()):    
-            cls.top_bar_text = top_bar_text
+        cls.top_bar_text = top_bar_text
             
-            if cls.is_custom_theme_background:
-                #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
-                cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
-            elif cls.bg_canvas is not None:
-                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
-            elif cls.background_texture is not None:
-                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
-            else:
-                PyUiLogger.get_logger().warning("No background texture to render")
+        if cls.is_custom_theme_background:
+            #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
+            cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
+        elif cls.bg_canvas is not None:
+            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.bg_canvas, None, None)
+        elif cls.background_texture is not None:
+            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
+        else:
+            PyUiLogger.get_logger().warning("No background texture to render")
             
 
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
@@ -1145,8 +1149,8 @@ class Display:
             Device.get_device().post_present_operations()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
             present_elapsed_ms = (time.perf_counter() - present_start) * 1000
-            PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
-            PyUiLogger.get_logger().info(f"frametime without sdl2 {elapsed_ms - present_elapsed_ms - cls.text_render_timer - cls.image_render_timer:.1f} mS")
+            #PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
+            #PyUiLogger.get_logger().info(f"frametime without sdl2 {elapsed_ms - present_elapsed_ms - cls.text_render_timer - cls.image_render_timer:.1f} mS")
 
             cls.frame_timer = 0
             cls.text_render_timer = 0
@@ -1220,16 +1224,23 @@ class Display:
 
     @classmethod
     def get_image_dimensions(cls, img):
-        if(img is None):
+        if img is None:
             return 0, 0
-        
-        surface = Display.image_load(img)
+
+        # Reuse dimensions from the image texture cache if available
+        cached = cls._image_texture_cache.get_texture(img)
+        if cached is not None:
+            return cached.width, cached.height
+
+        # Fall back to loading the image if it isn't cached
+        surface = cls.image_load(img)
         if not surface:
             return 0, 0
+
         width, height = surface.contents.w, surface.contents.h
         sdl2.SDL_FreeSurface(surface)
-        return width, height
 
+        return width, height
 
     _cached_space_dimensions = None  # class-level cache
     @classmethod
