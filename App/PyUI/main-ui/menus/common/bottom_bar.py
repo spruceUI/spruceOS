@@ -14,22 +14,21 @@ class BottomBar:
         self.back_icon_h = 0
 
     def render_bottom_bar(self, bottom_bar_text=None,render_bottom_bar_icons_and_images=True) :
-        with log_timing("Bottom Bar Entirety", PyUiLogger.get_logger()):    
-            bottom_bar_bg = Theme.bottom_bar_bg()
-            from display.display import Display
+        bottom_bar_bg = Theme.bottom_bar_bg()
+        from display.display import Display
             
-            if(Theme.show_bottom_bar()):
+        if(Theme.show_bottom_bar()):
                 
-                self.bottom_bar_w, self.bottom_bar_h = Display.render_image(bottom_bar_bg,0,Device.get_device().screen_height(),render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
-                if(self.back_icon_h > self.bottom_bar_h):
-                    self.bottom_bar_h = self.back_icon_h 
+            self.bottom_bar_w, self.bottom_bar_h = Display.render_image(bottom_bar_bg,0,Device.get_device().screen_height(),render_mode=RenderMode.BOTTOM_LEFT_ALIGNED)
+            if(self.back_icon_h > self.bottom_bar_h):
+                self.bottom_bar_h = self.back_icon_h 
 
-                if(bottom_bar_text is not None):
-                    self.render_bottom_bar_text(bottom_bar_text)
-                elif(render_bottom_bar_icons_and_images):
-                    self.render_standard_bottom_bar()
-            else:
-                self.bottom_bar_h = 0
+            if(bottom_bar_text is not None):
+                self.render_bottom_bar_text(bottom_bar_text)
+            elif(render_bottom_bar_icons_and_images):
+                self.render_standard_bottom_bar()
+        else:
+            self.bottom_bar_h = 0
 
     def get_bottom_bar_height(self):
         return self.bottom_bar_h
