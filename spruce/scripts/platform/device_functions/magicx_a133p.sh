@@ -20,12 +20,17 @@ magicx_model() {
 }
 
 # An oakMOSS image that carries its own library set (/usr/lib/oakmoss) gets it in the Flip libraries' place,
-# and no Flip library directory stays on either path. A base without it keeps the cfg's paths.
+# and no Flip library directory stays on either path. Without it, a cfg that defaults to the set falls back
+# to its MAGICX_FLIP_LD_PATH / MAGICX_FLIP_PORTS_PATH; any other cfg keeps its paths.
 MAGICX_OAKMOSS_LIBS=${MAGICX_OAKMOSS_LIBS:-/usr/lib/oakmoss}
 magicx_oakmoss_libs_paths() {
-    [ -d "$MAGICX_OAKMOSS_LIBS" ] || return 0
-    LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
-    PORTS_LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$PORTS_LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
+    if [ -d "$MAGICX_OAKMOSS_LIBS" ]; then
+        LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
+        PORTS_LD_LIBRARY_PATH=$(magicx_oakmoss_libs_swap "$PORTS_LD_LIBRARY_PATH" "$MAGICX_OAKMOSS_LIBS")
+    else
+        LD_LIBRARY_PATH=${MAGICX_FLIP_LD_PATH:-$LD_LIBRARY_PATH}
+        PORTS_LD_LIBRARY_PATH=${MAGICX_FLIP_PORTS_PATH:-$PORTS_LD_LIBRARY_PATH}
+    fi
     export LD_LIBRARY_PATH PORTS_LD_LIBRARY_PATH
 }
 
