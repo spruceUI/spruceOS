@@ -46,12 +46,14 @@ jobs:
             echo "Branch: $GITHUB_REF_NAME"
             echo ""
             echo "Commits not in Development:"
-            git log origin/Development..HEAD --pretty=format:'- %s (%an)'
+            git log origin/Development..HEAD --pretty=tformat:'- %s (%an)'
           } > commits_nightly.txt
 
+          # tformat, not format: format adds no newline after the last commit, so EOF shared its line and
+          # the runner rejected the output ("Matching delimiter not found 'EOF'") for short commit lists.
           {
             echo "commits<<EOF"
-            git log origin/Development..HEAD --pretty=format:'- %s (%an)' | head -n 50
+            git log origin/Development..HEAD --pretty=tformat:'- %s (%an)' | head -n 50
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
