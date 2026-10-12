@@ -9,6 +9,6 @@ def log_timing(label, logger, log_enabled=True):
         try:
             yield
         finally:
-            logger.info(f"{label} completed in {time.perf_counter() - start:.3f}s")
+            logger.info(f"{label} completed in {(time.perf_counter() - start) * 1000:.1f} mS")
     else:
         yield
