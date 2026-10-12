@@ -12,6 +12,8 @@ class G350(Rgb30):
     START_KEY = 705
     MENU_KEY = 708    # F5
     BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
+    # The rk3326 base has no softvol Master and a 0-100 backlight: use the py-ui-config scripts.
+    VOLUME_BACKLIGHT_CMDS = True
 
     def screen_width(self):
         return 640

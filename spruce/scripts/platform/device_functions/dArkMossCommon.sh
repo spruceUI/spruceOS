@@ -25,9 +25,11 @@ device_init() {
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
     resolve_key_event_node
     setup_mainui_alias
-    # A fresh card has no system json until PyUI makes one from the default; seed it
-    # first, so the boot backlight is the level PyUI and the hotkeys then read.
-    [ -f "$SYSTEM_JSON" ] || { [ -f "$SYSTEM_JSON_DEFAULT" ] && cp "$SYSTEM_JSON_DEFAULT" "$SYSTEM_JSON"; }
+    # Opt-in (cfg): seed a fresh card's system json first, so the boot backlight is the level
+    # PyUI and the hotkeys then read.
+    if [ -n "$DARKMOSS_SEED_SYSTEM_JSON" ] && [ ! -f "$SYSTEM_JSON" ] && [ -f "$SYSTEM_JSON_DEFAULT" ]; then
+        cp "$SYSTEM_JSON_DEFAULT" "$SYSTEM_JSON"
+    fi
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
@@ -357,7 +359,8 @@ volume_down() {
 }
 
 get_current_volume() {
-    amixer -M get "${VOLUME_CONTROL:-Master}" 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
+    # Opt-in (cfg): read on the same mapped (-M) scale that set_volume writes.
+    amixer ${DARKMOSS_VOLUME_READ_MAPPED:+-M} get "${VOLUME_CONTROL:-Master}" 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
 }
 
 # Level before path: switching output with the old level applied is what
