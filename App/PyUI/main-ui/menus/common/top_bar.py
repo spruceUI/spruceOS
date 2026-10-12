@@ -152,7 +152,7 @@ class TopBar:
                 self.top_bar_h = max(self.top_bar_h, h)
 
         if(Theme.show_top_bar_text()):
-            Display.render_text(title,
+            w,h = Display.render_text(title,
                                 int(Device.get_device().screen_width()/2), 
                                 center_of_bar, 
                                 Theme.text_color(FontPurpose.TOP_BAR_TEXT), 
