@@ -68,6 +68,11 @@ class AppContext:
     clock: Callable[[], float] = network_clock.now
     refresh_time: Callable[[], bool] = field(default=lambda: True, repr=False)
     _on_device: set[int] | None = field(default=None, repr=False)
+    _saved_settings: Settings = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        """Remember the loaded settings so unchanged sessions need no write."""
+        self._saved_settings = self.settings
 
     def icon(self, name: str) -> Path:
         """Return a bundled outline icon.
@@ -107,13 +112,23 @@ class AppContext:
             self.sync.cancel()  # a running one would carry on with its plan
 
     def update_settings(self, settings: Settings) -> None:
-        """Replace and persist the settings.
+        """Apply settings immediately in memory; the app saves them on exit.
 
         Args:
             settings: New settings.
         """
         self.settings = settings
-        save_settings(self.paths.settings_file, settings)
+
+    def flush_settings(self) -> None:
+        """Save changed settings once, logging write failures so shutdown can continue."""
+        if self.settings == self._saved_settings:
+            return
+        try:
+            save_settings(self.paths.settings_file, self.settings)
+        except OSError:
+            logger.exception("Could not save settings")
+            return
+        self._saved_settings = self.settings
 
     def on_device_ids(self) -> set[int]:
         """Return RA game IDs with a ROM on this SD card (computed once per app run)."""

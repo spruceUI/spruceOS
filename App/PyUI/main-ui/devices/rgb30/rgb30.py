@@ -1,7 +1,5 @@
-import json
 import os
 import subprocess
-import threading
 from pathlib import Path
 import sys
 
@@ -15,7 +13,6 @@ from devices.charge.charge_status import ChargeStatus
 from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
-from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry

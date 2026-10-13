@@ -11,8 +11,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from cheevos.core.models import AwardKind
-from cheevos.ui.pyui import grid_frames, row_bars, status_bar, title_bar
+from cheevos.ui.pyui import badge_grid, grid_frames, image_frames, row_bars, status_bar, title_bar
+from cheevos.ui.pyui.badge_grid import Details
+from cheevos.ui.pyui.image_frames import Frame
 from cheevos.ui.pyui.primitives import (
     Button,
     Text,
@@ -59,7 +60,9 @@ class MenuItem:
         value: Right-aligned text, e.g. ``"2/138"`` (lists only; may be empty).
         key: Caller-defined identifier, returned unchanged on selection.
         progress: A progress bar shown instead of the description (lists only).
-        frame: An award frame around the tile's image (grids only; RA's colours).
+        frame: Outline outside the image (lists and grids; RA's colours).
+        details: Second line under a badge grid while the tile is selected (badge grids only;
+            the first is the title and ``value``).
     """
 
     title: str
@@ -68,7 +71,8 @@ class MenuItem:
     value: str = ""
     key: str = ""
     progress: Progress | None = None
-    frame: AwardKind | None = None
+    frame: Frame | None = None
+    details: Details | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +95,7 @@ class Layout(Enum):
 
     LIST = "ICON_AND_DESC"
     GRID = "GRID"
+    BADGES = "BADGES"  # compact badge grid with the selection's details (badge_grid.py)
     POPUP = "POPUP"  # small menu over the current screen (options, filters)
 
 
@@ -261,6 +266,22 @@ def grid_shape(width: int, usable_height: int, column: float, row: float) -> tup
     return max(int(columns) + tight, 1), max(int(usable_height // row), 1)
 
 
+def theme_scale() -> float:
+    """Return how much bigger the theme draws than its 640x480 design (its list rows' height).
+
+    Returns:
+        The scale (1.0 at 640x480 in SPRUCE).
+    """
+    from display.display import Display
+    from themes.theme import Theme
+
+    list_row = int(Display.get_image_dimensions(Theme.get_list_large_selected_bg())[1])
+    if list_row:
+        return list_row / _REFERENCE_ROW
+    width, height = screen_size()
+    return min(width / 640, height / 480)
+
+
 def _screen_grid(tile: int) -> tuple[int, int, int]:
     """Shape a grid for this screen and theme (see :func:`grid_shape`).
 
@@ -278,9 +299,8 @@ def _screen_grid(tile: int) -> tuple[int, int, int]:
     from display.font_purpose import FontPurpose
     from themes.theme import Theme
 
-    width, height = screen_size()
-    list_row = int(Display.get_image_dimensions(Theme.get_list_large_selected_bg())[1])
-    scale = list_row / _REFERENCE_ROW if list_row else min(width / 640, height / 480)
+    width, _height = screen_size()
+    scale = theme_scale()
     size = round(tile * scale)
     caption = int(Display.get_line_height(FontPurpose.GRID_MULTI_ROW))
     image_offset = int(Theme.get_grid_multi_row_img_y_offset(caption))
@@ -314,7 +334,8 @@ def choose(  # noqa: PLR0913 — keyword-only presentation options
         items: Rows (list) or tiles (grid), in order. Must not be empty.
         selected: Initially highlighted index.
         buttons: Buttons that confirm a choice (B always backs out).
-        layout: List with icons and descriptions, or image grid (shaped by :func:`grid_shape`).
+        layout: List with icons and descriptions, image grid (shaped by :func:`grid_shape`),
+            or compact badge grid (``badge_grid``, RA badges).
         tile: Grid image size at 640x480 (scaled like the theme). Without one, PyUI loads
             every tile's image when the grid opens to find the tallest.
         on_tick: Called on each input timeout; returned items replace the current ones.
@@ -342,7 +363,8 @@ class PreparedView:
             and its award dot).
         items: Rows (list) or tiles (grid), in order. Must not be empty.
         selected: Initially highlighted index.
-        layout: List with icons and descriptions, or image grid (shaped by :func:`grid_shape`).
+        layout: List with icons and descriptions, image grid (shaped by :func:`grid_shape`),
+            or compact badge grid (``badge_grid``, RA badges).
         tile: Grid image size at 640x480 (scaled like the theme). Without one, PyUI loads
             every tile's image when the grid opens to find the tallest.
     """
@@ -365,26 +387,31 @@ class PreparedView:
         columns, rows, size = _screen_grid(tile) if layout is Layout.GRID else (0, 0, None)
         self._columns = columns
         self._entries = _entries(items, layout, columns)
-        # PyUI asks every row for its image and measures every row's text here.
-        with demanding(ImageDemand.MEASURED), _one_sample_row():
-            self._view = ViewCreator.create_view(
-                view_type=ViewType[layout.value],
-                top_bar_text=title_bar.top_title(title),
-                options=self._entries,
-                selected_index=selected,
-                cols=columns or None,
-                rows=rows or None,
-                grid_resized_width=size,
-                grid_resized_height=size,
-            )
+        if layout is Layout.BADGES:
+            top = title_bar.top_title(title)
+            self._view = badge_grid.create(top, self._entries, selected, theme_scale())
+        else:
+            # PyUI asks every row for its image and measures every row's text here.
+            with demanding(ImageDemand.MEASURED), _one_sample_row():
+                self._view = ViewCreator.create_view(
+                    view_type=ViewType[layout.value],
+                    top_bar_text=title_bar.top_title(title),
+                    options=self._entries,
+                    selected_index=selected,
+                    cols=columns or None,
+                    rows=rows or None,
+                    grid_resized_width=size,
+                    grid_resized_height=size,
+                )
         if layout is Layout.LIST and any(item.progress is not None for item in items):
             row_bars.attach(self._view)
+        if layout is Layout.LIST:
+            image_frames.attach_list(self._view)
+        grid = layout in (Layout.GRID, Layout.BADGES)
         self._images = (
-            None
-            if layout is Layout.POPUP
-            else VisibleImages(self._view, self._entries, grid=columns > 0)
+            None if layout is Layout.POPUP else VisibleImages(self._view, self._entries, grid=grid)
         )
-        if layout is Layout.GRID and any(item.frame is not None for item in items):
+        if layout is Layout.GRID:
             grid_frames.attach(self._view)
         self._shown = False
         elapsed_ms = (time.monotonic() - started) * 1000

@@ -8,7 +8,6 @@ from devices.device import Device
 from display.display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
-from menus.common.top_bar import TopBar
 from option_select_ui import OptionSelectUI
 from utils.logger import PyUiLogger
 from utils.progress_bar_geometry import progress_bar_geometry

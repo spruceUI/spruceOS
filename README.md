@@ -165,4 +165,3 @@ Some of our contributors use AI to help code, as is the industry standard. The s
 
 [![spruce logo](https://github.com/user-attachments/assets/ee3ce8fa-87f2-455a-adf6-c071f7ce4e7a)
 ](https://discord.gg/KjR5uMQQt9)
-

@@ -9,7 +9,6 @@ from display.render_mode import RenderMode
 from display.y_render_option import YRenderOption
 from controller.controller import Controller
 from themes.theme import Theme
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View
@@ -24,9 +23,8 @@ class GridView(View):
         super().__init__()
         self.resized_width = resized_width
         self.resized_height = resized_height
-        if(self.resized_width == 0):
+        if(self.resized_width == 0 and self.resized_height == 0):
             self.resized_width = None
-        if(self.resized_height == 0):
             self.resized_height = None
         self.resize_type = resize_type
         self.top_bar_text = top_bar_text

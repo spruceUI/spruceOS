@@ -1,11 +1,10 @@
 import os
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from devices.device import Device
 from devices.miyoo.user_config import UserConfig
 from menus.games.utils.rom_info import RomInfo
 from utils.cached_exists import CachedExists
-from views.util.image_searcher import ImageSearcher
 
 T = TypeVar('T')  # Generic input type
 

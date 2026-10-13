@@ -8,7 +8,6 @@ import time
 import urllib.request
 from typing import List, Optional
 import xml.etree.ElementTree as ET
-import glob
 
 from devices.device import Device
 from display.display import Display

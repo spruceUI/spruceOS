@@ -55,14 +55,22 @@ class TextListView(NonDescriptiveListView):
 
                 scroll_amt = self.scroll_text_amount
 
-                if(self.prev_index == actual_index):
-                    scroll_amt = self.scroll_text_amount
-                    if(time.time() - self.selected_same_entry_time > 1):
-                        self.scroll_text_amount += 1
+                if self.prev_index == actual_index:
+                    now = time.perf_counter()
+                    elapsed = now - self.selected_same_entry_time
+
+                    if elapsed >= 1.0:  # Initial 1-second delay
+                        if not hasattr(self, "last_scroll_time"):
+                            self.last_scroll_time = now
+
+                        if now - self.last_scroll_time >= 0.066:
+                            self.scroll_text_amount += 1
+                            self.last_scroll_time = now
                 else:
                     self.scroll_text_amount = 0
-                    self.selected_same_entry_time = time.time()
-
+                    self.selected_same_entry_time = time.perf_counter()
+                    self.last_scroll_time = self.selected_same_entry_time
+                    
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 

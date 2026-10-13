@@ -13,7 +13,6 @@ from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
-from views.view_type import ViewType
 
 
 class GameSystemSelectMenu:

@@ -1549,6 +1549,10 @@ wifi_setting_wanted() {
     [ "$_wifi_want" = 1 ]
 }
 
+bluetooth_setting_wanted() {
+    [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]
+}
+
 # Print why a wpa_supplicant.conf is unusable, or nothing if it is fine.
 # Conservative on purpose: a false positive costs the user every saved network.
 # No quote checks - wpa_supplicant takes everything between the first and last

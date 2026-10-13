@@ -13,7 +13,6 @@ from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
 from devices.bluetooth.bluetooth_command import BluetoothCommand
 from devices.miyoo.device_user_config import DeviceUserConfig
-from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
@@ -1124,3 +1123,6 @@ class DeviceCommon(AbstractDevice):
 
     def get_game_images_folder_name(self):
         return "Imgs"
+
+    def fix_device_font_height_calc_issues(self, height):
+        return height

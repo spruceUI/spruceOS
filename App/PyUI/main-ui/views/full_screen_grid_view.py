@@ -8,8 +8,6 @@ from display.render_mode import RenderMode
 from display.resize_type import ResizeType
 from controller.controller import Controller
 from themes.theme import Theme
-from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view import View

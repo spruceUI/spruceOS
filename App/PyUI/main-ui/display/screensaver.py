@@ -8,7 +8,6 @@ import sdl2.sdlttf
 
 from devices.device import Device
 from display.font_purpose import FontPurpose
-from display.render_mode import RenderMode
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger

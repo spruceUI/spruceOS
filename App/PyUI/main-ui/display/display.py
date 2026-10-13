@@ -16,8 +16,8 @@ import sdl2.sdlttf
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
-import traceback
 
+from utils.py_ui_config import PyUiConfig
 from utils.time_logger import log_timing
 
 @dataclass
@@ -79,6 +79,7 @@ class Display:
     debug = False
     renderer = None
     fonts = {}
+    fallback_fonts = []
     bg_canvas = None
     render_canvas = None
     bg_path = ""
@@ -90,6 +91,9 @@ class Display:
     bottom_bar_text = None
     _add_index_last_args = None
     is_custom_theme_background = None
+    _glyph_cache = {}
+    _glyph_is_provided = None
+    _glyph_supports_32bit = False
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
@@ -105,6 +109,10 @@ class Display:
         "Corrupt PNG"
     ]
 
+    frame_timer = 0    
+    text_render_timer = 0
+    image_render_timer = 0
+
     @classmethod
     def init(cls):
         cls._init_display()
@@ -113,6 +121,14 @@ class Display:
             if sdl2.sdlttf.TTF_Init() == -1:
                 raise RuntimeError("Failed to initialize SDL_ttf")
             cls.init_fonts()
+
+
+        if hasattr(sdl2.sdlttf, "TTF_GlyphIsProvided32"):
+            cls._glyph_is_provided = sdl2.sdlttf.TTF_GlyphIsProvided32
+            cls._glyph_supports_32bit = True
+        else:
+            cls._glyph_is_provided = sdl2.sdlttf.TTF_GlyphIsProvided
+            cls._glyph_supports_32bit = False
 
 
         with log_timing("sdl2 create render canvas", PyUiLogger.get_logger()):    
@@ -221,6 +237,12 @@ class Display:
             for purpose in FontPurpose
         }
 
+        fallback_path = PyUiConfig.get_fallback_font()
+        
+        cls.fallback_fonts = {
+            purpose: cls._load_font(purpose, fallback_path)
+            for purpose in FontPurpose
+        }
 
     @classmethod
     def _init_display(cls):
@@ -339,6 +361,12 @@ class Display:
             sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
         cls.fonts.clear()
 
+        for loaded_font in cls.fallback_fonts.values():
+            sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
+        cls.fallback_fonts.clear()
+        
+        cls._glyph_cache.clear()
+
     @classmethod
     def reinitialize(cls, bg=None):
         cls.deinit_display()
@@ -365,6 +393,7 @@ class Display:
 
     @classmethod
     def set_new_bg(cls, bg_path, is_custom_theme_background, retry=True):
+        start = time.perf_counter()
         if(bg_path is not None and (bg_path != cls.bg_path or cls.background_texture is None)):
             cls._unload_bg_texture()
             cls.is_custom_theme_background = is_custom_theme_background
@@ -390,6 +419,10 @@ class Display:
         elif(bg_path is None):
             PyUiLogger.get_logger().error(f"Background path none")
 
+        # Should this count to image rendering?
+        elapsed_ms = (time.perf_counter() - start) * 1000
+        cls.image_render_timer+= elapsed_ms
+
     @classmethod
     def set_page_bg(cls, page_bg):
         if cls._screensaver_active:
@@ -403,11 +436,12 @@ class Display:
         cls.top_bar.set_selected_tab(tab)
 
     @classmethod
-    def _load_font(cls, font_purpose):
-        font_path = Theme.get_font(font_purpose)
+    def _load_font(cls, font_purpose, font_path = None):
+        if(font_path is None):
+            font_path = Theme.get_font(font_purpose)
         font_size = Theme.get_font_size(font_purpose)
 
-        font = sdl2.sdlttf.TTF_OpenFont(font_path.encode("utf-8"), font_size)
+        font = sdl2.sdlttf.TTF_OpenFont(str(font_path).encode("utf-8"), font_size)
         if not font:
             raise RuntimeError(
                 f"Could not load font {font_path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}"
@@ -455,7 +489,7 @@ class Display:
               render_bottom_bar_icons_and_images = True,
               force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
-        
+            
         if cls.is_custom_theme_background:
             #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
             cls.render_image(cls.bg_path, 0, 0, RenderMode.TOP_LEFT_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
@@ -465,7 +499,7 @@ class Display:
             sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.background_texture, None, None)
         else:
             PyUiLogger.get_logger().warning("No background texture to render")
-        
+            
 
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
@@ -621,15 +655,63 @@ class Display:
             return True
         
         return False
+    
+    @classmethod
+    def _font_has_glyph(cls, font, char):
+        codepoint = ord(char)
 
+        # Get a hashable key from the SDL font pointer.
+        font_address = ctypes.cast(font, ctypes.c_void_p).value
+        key = (font_address, codepoint)
+
+        cached = cls._glyph_cache.get(key)
+        if cached is not None:
+            return cached
+
+        if codepoint > 0xFFFF and not cls._glyph_supports_32bit:
+            result = False
+        else:
+            result = bool(cls._glyph_is_provided(font, codepoint))
+
+        cls._glyph_cache[key] = result
+        return result
 
     @classmethod
-    def render_text(cls, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
+    def requires_fallback_font(cls, text, purpose):
+        primary_font = cls.fonts[purpose]
+        if all(
+            cls._font_has_glyph(primary_font.font, char)
+            for char in text
+        ):
+            return False
+        else:
+            return True
+
+    @classmethod
+    def render_text(cls, text, x, y, color, purpose: FontPurpose,
+                    render_mode=RenderMode.TOP_LEFT_ALIGNED,
+                    crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=False):
+        #with log_timing("Display.render_text", PyUiLogger.get_logger()):    
+            start = time.perf_counter()
+
+            primary_font = cls.fonts[purpose]
+            # Don't allow fallback -> Just render normally
+            if(not allow_fallback_font_for_missing_glyphs or not cls.requires_fallback_font(text, purpose)):
+                w,h = cls.render_text_using_font(primary_font, text,x,y,color,purpose,render_mode,crop_w,crop_h,alpha)
+            else:
+                fallback_font = cls.fallback_fonts[purpose]
+                w,h = cls.render_text_using_font(fallback_font, text,x,y,color,purpose,render_mode,crop_w,crop_h,alpha)
+            
+            elapsed_ms = (time.perf_counter() - start) * 1000
+            cls.text_render_timer += elapsed_ms
+            return w,h
+    
+    @classmethod
+    def render_text_using_font(cls, loaded_font, text, x, y, color, purpose: FontPurpose, render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None):
         text = Display.split_message(text, purpose, clip_to_device_width=False)[0]
         if(text is None or len(text) == 0):
             return 0, 0
-        loaded_font = cls.fonts[purpose]
         cache : CachedImageTexture = cls._text_texture_cache.get_texture(text, purpose, color)
         cached = True
         texture_w = None
@@ -728,83 +810,99 @@ class Display:
                      
     @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None, crop_w=None, crop_h=None):        
-        if(image_path is None or image_path in cls._problematic_images):
-            return 0, 0
+        #with log_timing("Display.render_image", PyUiLogger.get_logger()):    
+            start = time.perf_counter()
+            if(image_path is None or image_path in cls._problematic_images):
+                return 0, 0
 
-        cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
-        cached = True
-        texture_w = None
-        texture_h = None
-        if cache:
-            texture = cache.texture
-            texture_w = cache.width
-            texture_h = cache.height
-        else:
-            surface = Display.image_load(image_path)
-            surface = cls.convert_surface_to_safe_format(surface)
-            if not surface:
-                if not cls.log_sdl_error_and_clear_cache_image(image_path):
-                    return 0,0
+            cache : CachedImageTexture = cls._image_texture_cache.get_texture(image_path)
+            cached = True
+            texture_w = None
+            texture_h = None
+            if cache:
+                texture = cache.texture
+                texture_w = cache.width
+                texture_h = cache.height
+            else:
                 surface = Display.image_load(image_path)
                 surface = cls.convert_surface_to_safe_format(surface)
                 if not surface:
-                    PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
-                    return 0, 0
+                    if not cls.log_sdl_error_and_clear_cache_image(image_path):
+                        elapsed_ms = (time.perf_counter() - start) * 1000
+                        cls.image_render_timer+= elapsed_ms
+                        return 0,0
+                    surface = Display.image_load(image_path)
+                    surface = cls.convert_surface_to_safe_format(surface)
+                    if not surface:
+                        PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
+                        elapsed_ms = (time.perf_counter() - start) * 1000
+                        cls.image_render_timer+= elapsed_ms
+                        return 0, 0
 
 
-
-            texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
-
-            surface_width = surface.contents.w
-            surface_height = surface.contents.h
-
-            if(surface_width > Device.get_device().max_texture_width() or surface_height > Device.get_device().max_texture_height()):
-                sdl2.SDL_FreeSurface(surface)
-                PyUiLogger.get_logger().warning(
-                    f"Image is too large to render ({surface_width} x {surface_height} with max of {Device.get_device().max_texture_width()} x {Device.get_device().max_texture_height()}). Skipping {image_path}\n"
-                ) 
-                cls._problematic_images.add(image_path)
-                return 0, 0
-
-
-            if not texture:
-                if not cls.log_sdl_error_and_clear_cache_image(image_path):
-                    sdl2.SDL_FreeSurface(surface)
-                    return 0,0
 
                 texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
-                if not texture:
+
+                surface_width = surface.contents.w
+                surface_height = surface.contents.h
+
+                if(surface_width > Device.get_device().max_texture_width() or surface_height > Device.get_device().max_texture_height()):
                     sdl2.SDL_FreeSurface(surface)
-                    PyUiLogger.get_logger().info(f"{image_path} : {surface_width} x {surface_height}")
-                    PyUiLogger.get_logger().error("Failed to create texture from surface")
-                    cls._text_texture_cache.clear_cache()
-                    cls._image_texture_cache.clear_cache()
+                    PyUiLogger.get_logger().warning(
+                        f"Image is too large to render ({surface_width} x {surface_height} with max of {Device.get_device().max_texture_width()} x {Device.get_device().max_texture_height()}). Skipping {image_path}\n"
+                    ) 
+                    cls._problematic_images.add(image_path)
+                    elapsed_ms = (time.perf_counter() - start) * 1000
+                    cls.image_render_timer+= elapsed_ms
                     return 0, 0
 
-            sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
-            cached = cls._image_texture_cache.add_texture(image_path,surface, texture)
-            texture_w = surface.contents.w
-            texture_h = surface.contents.h
-            sdl2.SDL_FreeSurface(surface)
 
-        final_w,final_h = cls._render_surface_texture(x=x, 
-                                           y=y, 
-                                           texture=texture, 
-                                           w=texture_w, 
-                                           h=texture_h,
-                                           render_mode=render_mode, 
-                                           scale_width=target_width, 
-                                           scale_height=target_height,
-                                           resize_type=resize_type, 
-                                           texture_id=image_path,
-                                           crop_w=crop_w, crop_h=crop_h)
-        
-        if(not cached):
-            sdl2.SDL_DestroyTexture(texture)
-            PyUiLogger.get_logger().info(f"Destroyed {image_path}. Image cache size is {cls._image_texture_cache.size()}");
+                if not texture:
+                    if not cls.log_sdl_error_and_clear_cache_image(image_path):
+                        sdl2.SDL_FreeSurface(surface)
+                        elapsed_ms = (time.perf_counter() - start) * 1000
+                        cls.image_render_timer+= elapsed_ms
+                        elapsed_ms = (time.perf_counter() - start) * 1000
+                        cls.image_render_timer+= elapsed_ms
+                        return 0,0
+
+                    texture = sdl2.SDL_CreateTextureFromSurface(cls.renderer.renderer, surface)
+                    if not texture:
+                        sdl2.SDL_FreeSurface(surface)
+                        PyUiLogger.get_logger().info(f"{image_path} : {surface_width} x {surface_height}")
+                        PyUiLogger.get_logger().error("Failed to create texture from surface")
+                        cls._text_texture_cache.clear_cache()
+                        cls._image_texture_cache.clear_cache()
+                        elapsed_ms = (time.perf_counter() - start) * 1000
+                        cls.image_render_timer+= elapsed_ms
+                        return 0, 0
+
+                sdl2.SDL_SetTextureBlendMode(texture, sdl2.SDL_BLENDMODE_BLEND)
+                cached = cls._image_texture_cache.add_texture(image_path,surface, texture)
+                texture_w = surface.contents.w
+                texture_h = surface.contents.h
+                sdl2.SDL_FreeSurface(surface)
+
+            final_w,final_h = cls._render_surface_texture(x=x, 
+                                            y=y, 
+                                            texture=texture, 
+                                            w=texture_w, 
+                                            h=texture_h,
+                                            render_mode=render_mode, 
+                                            scale_width=target_width, 
+                                            scale_height=target_height,
+                                            resize_type=resize_type, 
+                                            texture_id=image_path,
+                                            crop_w=crop_w, crop_h=crop_h)
+            
+            if(not cached):
+                sdl2.SDL_DestroyTexture(texture)
+                PyUiLogger.get_logger().info(f"Destroyed {image_path}. Image cache size is {cls._image_texture_cache.size()}");
 
 
-        return final_w,final_h
+            elapsed_ms = (time.perf_counter() - start) * 1000
+            cls.image_render_timer+= elapsed_ms
+            return final_w,final_h
 
     @classmethod
     def render_image_centered(cls, image_path: str, x: int, y: int, target_width=None, target_height=None):
@@ -920,10 +1018,10 @@ class Display:
                 break
 
             # Frame pacing
-            frame_time = sdl2.SDL_GetTicks() - frame_start
-            delay = TARGET_FRAME_MS - frame_time
-            if delay > 0:
-                sdl2.SDL_Delay(delay)
+            #frame_time = sdl2.SDL_GetTicks() - frame_start
+            #delay = TARGET_FRAME_MS - frame_time
+            #if delay > 0:
+            #    sdl2.SDL_Delay(delay)
 
         # Cleanup render target (optional, good practice)
         sdl2.SDL_DestroyTexture(render_target)
@@ -1015,37 +1113,50 @@ class Display:
         sdl2.SDL_SetRenderTarget(cls.renderer.sdlrenderer, None)
 
         return rotated_texture
-         
+
+    start = 0
     @classmethod
     def present(cls, fade=False):
-        if Theme.render_top_and_bottom_bar_last():
-            cls.top_bar.render_top_bar(cls.top_bar_text)
-            cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text)
-            if cls._add_index_last_args is not None:
-                cls.add_index_text(*cls._add_index_last_args)
-                cls._add_index_last_args = None
-            cls.bottom_bar_text = None
+            present_start = time.perf_counter()
 
-        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
+            if Theme.render_top_and_bottom_bar_last():
+                cls.top_bar.render_top_bar(cls.top_bar_text)
+                cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text)
+                if cls._add_index_last_args is not None:
+                    cls.add_index_text(*cls._add_index_last_args)
+                    cls._add_index_last_args = None
+                cls.bottom_bar_text = None
 
-        if Device.get_device().should_scale_screen():
-            scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
-            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
-            sdl2.SDL_DestroyTexture(scaled_canvas)
-        elif(0 == Device.get_device().screen_rotation()):
-            if(fade):
-                cls.fade_transition(cls.bg_canvas, cls.render_canvas)
-            else:
-                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
-        else:   
-                rotated_texture = cls.rotate_canvas()
-                if(rotated_texture is not None):
-                    sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
-                    sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
+            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
 
-        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
-        cls.renderer.present()
-        Device.get_device().post_present_operations()
+            if Device.get_device().should_scale_screen():
+                scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
+                sdl2.SDL_DestroyTexture(scaled_canvas)
+            elif(0 == Device.get_device().screen_rotation()):
+                if(fade):
+                    cls.fade_transition(cls.bg_canvas, cls.render_canvas)
+                else:
+                    sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
+            else:   
+                    rotated_texture = cls.rotate_canvas()
+                    if(rotated_texture is not None):
+                        sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
+                        sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
+
+            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls.renderer.present()
+            Device.get_device().post_present_operations()
+            elapsed_ms = (time.perf_counter() - cls.start) * 1000
+            present_elapsed_ms = (time.perf_counter() - present_start) * 1000
+            #PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
+            #PyUiLogger.get_logger().info(f"frametime without sdl2 {elapsed_ms - present_elapsed_ms - cls.text_render_timer - cls.image_render_timer:.1f} mS")
+
+            cls.frame_timer = 0
+            cls.text_render_timer = 0
+            cls.image_render_timer = 0
+
+            cls.start = time.perf_counter()
 
     @classmethod
     def blank_screen(cls):
@@ -1113,16 +1224,23 @@ class Display:
 
     @classmethod
     def get_image_dimensions(cls, img):
-        if(img is None):
+        if img is None:
             return 0, 0
-        
-        surface = Display.image_load(img)
+
+        # Reuse dimensions from the image texture cache if available
+        cached = cls._image_texture_cache.get_texture(img)
+        if cached is not None:
+            return cached.width, cached.height
+
+        # Fall back to loading the image if it isn't cached
+        surface = cls.image_load(img)
         if not surface:
             return 0, 0
+
         width, height = surface.contents.w, surface.contents.h
         sdl2.SDL_FreeSurface(surface)
-        return width, height
 
+        return width, height
 
     _cached_space_dimensions = None  # class-level cache
     @classmethod
@@ -1136,12 +1254,22 @@ class Display:
         return cls._cached_space_dimensions
     
     @classmethod
-    def get_text_dimensions(cls, purpose, text="A"):
+    def get_text_dimensions(cls, purpose, text="A", allow_fallback_font_for_missing_glyphs=False):
+        if allow_fallback_font_for_missing_glyphs and cls.requires_fallback_font(text, purpose):
+            return cls.get_text_dimensions_using_font(cls.fallback_fonts[purpose].font, text)
+        else:
+            return cls.get_text_dimensions_using_font(cls.fonts[purpose].font, text)
+
+    @classmethod
+    def get_text_dimensions_using_font(cls, font, text):
+        if isinstance(font, LoadedFont):
+            font = font.font
+
         w = sdl2.Sint32()
         h = sdl2.Sint32()
-        sdl2.sdlttf.TTF_SizeUTF8(cls.fonts[purpose].font, text.encode('utf-8'), w, h)
-        return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), h.value
-    
+        sdl2.sdlttf.TTF_SizeUTF8(font, text.encode('utf-8'), w, h)
+        return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), Device.get_device().fix_device_font_height_calc_issues(h.value)
+
 
     @classmethod
     def add_index_text(cls, index, total, force_include_index = False, letter = None):

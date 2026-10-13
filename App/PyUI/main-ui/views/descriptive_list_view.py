@@ -1,4 +1,3 @@
-from email.mime import text
 import time
 from typing import List
 from devices.device import Device
@@ -31,6 +30,9 @@ class DescriptiveListView(ListView):
 
 
         usable = Display.get_usable_screen_height(force_include_top_bar=True) / self.each_entry_height
+        PyUiLogger.get_logger().info(f"usable_screen_height = {Display.get_usable_screen_height(force_include_top_bar=True)}")
+        PyUiLogger.get_logger().info(f"self.each_entry_height = {self.each_entry_height}")
+        PyUiLogger.get_logger().info(f"usable = {usable}")
 
         self.max_rows = int(usable + (1 if usable % 1 >= 0.80 else 0))
 
@@ -67,12 +69,19 @@ class DescriptiveListView(ListView):
         row_offset_y = Display.get_top_bar_height(force_include_top_bar = True) + 5
         
         if self.last_selected != self.selected:
-            self.selected_same_entry_time = time.time()
+            self.selected_same_entry_time = time.perf_counter()
             self.scroll_value_text_amount = 0
             self.last_selected = self.selected
+            self.last_scroll_value_time = self.selected_same_entry_time
         else:
-            if(time.time() - self.selected_same_entry_time > 1):
-                self.scroll_value_text_amount += 1
+            now = time.perf_counter()
+            elapsed = now - self.selected_same_entry_time
+
+            if elapsed >= 1.0:  # Initial 1-second delay
+                if now - self.last_scroll_value_time >= 0.066:
+                    self.scroll_value_text_amount += 1
+                    self.last_scroll_value_time = now
+
 
         for visible_index, (gridOrListEntry) in enumerate(visible_options):
             actual_index = self.current_top + visible_index

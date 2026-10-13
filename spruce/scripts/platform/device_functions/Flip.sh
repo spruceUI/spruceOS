@@ -535,7 +535,9 @@ device_wifi_power_on() {
 device_wifi_power_off() {
     # A dongle's driver stays loaded with its interface down (cheap to turn
     # back on; the watchdog unloads it when the dongle is pulled). The rail is
-    # written 0 either way: with a dongle it already is.
+    # written 0 either way: with a dongle it already is. The rail also powers
+    # the chip's Bluetooth, so without a dongle it stays on while that is on.
+    bluetooth_setting_wanted && ! usb_wifi_dongle_active && return 0
     echo 0 > /sys/class/rkwifi/wifi_power
 }
 
@@ -629,6 +631,19 @@ device_stock_ui_command() {
 # script owns bluetoothd.
 device_bluetooth_supported() {
     return 0
+}
+
+BT_HCI_WAIT=10
+
+# hci0 lives on the WiFi rail: power it if WiFi left it off. A dongle keeps it off.
+device_bluetooth_radio_up() {
+    usb_wifi_dongle_active && return 1
+    [ -d /sys/class/net/wlan0 ] || device_usb_wifi_onboard_restore
+}
+
+device_bluetooth_radio_down() {
+    hciconfig hci0 down 2>/dev/null
+    wifi_setting_wanted || usb_wifi_dongle_active || echo 0 > /sys/class/rkwifi/wifi_power
 }
 
 device_bluetoothd_start() {

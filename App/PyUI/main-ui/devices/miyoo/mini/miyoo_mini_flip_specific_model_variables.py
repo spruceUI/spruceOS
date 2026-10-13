@@ -1,6 +1,5 @@
 
 
-from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.mini.axp_test_methods import AxpTestMehthods
 from devices.miyoo.mini.og_mini_methods import OgMiniMethods
 

@@ -202,7 +202,7 @@ class _Page:
             """Draw the header."""
             ui.image(ctx.media.avatar(profile), PADDING, top + PADDING // 2, size, size)
             y = top + PADDING // 2
-            ui.text(profile.username, x, y, Text.TITLE, selected=True)
+            ui.text(profile.username, x, y, Text.TITLE, accent=True)
             y += ui.line_height(Text.TITLE)
             for line in lines:
                 ui.text(ui.fit_text(line, Text.BODY, width), x, y)
@@ -232,7 +232,7 @@ class _Page:
         return Row(self._pair_height, draw)
 
     def _heading(self, title: str) -> Row:
-        """A section title in the theme's highlight colour.
+        """A section title in the theme's accent colour.
 
         Args:
             title: Section title.
@@ -243,7 +243,7 @@ class _Page:
 
         def draw(top: int) -> None:
             """Draw the heading."""
-            ui.text(title, PADDING, top + PADDING // 2, Text.TITLE, selected=True)
+            ui.text(title, PADDING, top + PADDING // 2, Text.TITLE, accent=True)
 
         return Row(ui.line_height(Text.TITLE) + PADDING, draw, heading=True)
 
@@ -427,10 +427,10 @@ class _Page:
         def draw(top: int) -> None:
             """Draw the line."""
             label = ui.fit_text(cells[0], Text.BODY, name - PADDING)
-            ui.text(label, PADDING, top, selected=header)
+            ui.text(label, PADDING, top, accent=header)
             for index, cell in enumerate(cells[1:]):
                 right = PADDING + name + number * (index + 1)
-                ui.text(cell, right, top, align=Align.TOP_RIGHT, selected=header)
+                ui.text(cell, right, top, align=Align.TOP_RIGHT, accent=header)
 
         return Row(ui.line_height(Text.BODY) + PADDING // 4, draw)
 

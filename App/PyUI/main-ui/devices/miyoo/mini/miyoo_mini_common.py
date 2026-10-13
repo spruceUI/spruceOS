@@ -2,7 +2,6 @@ import ctypes
 import re
 import tempfile
 import time
-from asyncio import sleep
 import json
 from pathlib import Path
 import subprocess
@@ -20,16 +19,13 @@ from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFli
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.games.utils.rom_info import RomInfo
 from utils import throttle
-from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.py_ui_config import PyUiConfig
-from utils.time_logger import log_timing
 
 MAX_VOLUME = 20
 MIN_RAW_VALUE = -60
@@ -380,7 +376,7 @@ class MiyooMiniCommon(MiyooDevice):
 
         except Exception:
             try:
-                import subprocess
+                pass
 
                 # Escape key for safety (basic)
                 safe_key = key.replace('"', r'\"')
@@ -1020,4 +1016,4 @@ class MiyooMiniCommon(MiyooDevice):
 
 
     def animation_divisor(self):
-        return self.get_system_config().animation_speed(2) 
+        return self.get_system_config().animation_speed(1) 
