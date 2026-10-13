@@ -1103,6 +1103,10 @@ class DeviceCommon(AbstractDevice):
     def clear_framebuffer(self):
         pass
 
+    def menu_sound_settings_changed(self):
+        """Called after the button-press-sound or background-music setting changes."""
+        pass
+
     def are_headphones_plugged_in(self):
         return False
         
