@@ -25,4 +25,4 @@ class ThemePatcher():
 
         PyUiLogger.get_logger().info(f"Using {patcher.__name__} patcher")
 
-        patcher.patch_theme(path, original_width, original_height)
+        return patcher.patch_theme(path, original_width, original_height)
