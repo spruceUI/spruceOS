@@ -1,0 +1,49 @@
+name: Bug report
+description: Something in spruce isn't working
+labels: ["bug"]
+body:
+  - type: input
+    id: report-code
+    attributes:
+      label: Bug report code
+      description: Run the Bug Report app on your device; it shows a code like SPR-XXXXXX. If the upload failed, attach bug_report.7z from your SD card below instead.
+      placeholder: SPR-XXXXXX
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options:
+        - Miyoo A30
+        - Miyoo Flip
+        - Miyoo Mini / Mini+ / Mini v4
+        - TrimUI Brick
+        - TrimUI Brick Pro
+        - TrimUI Smart Pro
+        - TrimUI Smart Pro S
+        - Anbernic RG CubeXX
+        - Anbernic RG28XX
+        - Anbernic RG35XX / RG34XX / RG40XX (other XX models)
+        - Powkiddy RGB30
+        - Powkiddy RGB20SX
+        - Miniloong Pocket 1
+        - MagicX Zero 28
+        - MagicX Zero 40
+        - MagicX XU20
+        - Other (say which below)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: spruce version
+      description: Settings → About → Spruce version
+      placeholder: e.g. 4.5.4 or 4.5.5-20261012 nightly
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Attach screenshots or bug_report.7z here if you have them.
+    validations:
+      required: true
