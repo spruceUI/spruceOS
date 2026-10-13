@@ -305,7 +305,8 @@ class Display:
         cls.bg = None
 
         sdl2.SDL_Quit()
-        os.sync()
+        if hasattr(os, "sync"):
+            os.sync()
 
     @classmethod
     def deinit_display_v2(cls):
