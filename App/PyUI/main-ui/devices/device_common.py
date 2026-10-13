@@ -7,6 +7,8 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+import sdl2
+import sdl2.ext
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
@@ -579,6 +581,11 @@ class DeviceCommon(AbstractDevice):
 
     def double_init_sdl_display(self):
         return False
+
+    def create_window(self, width, height):
+        """The window Display draws into, given the display's current size: fullscreen on
+        a handheld."""
+        return sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
 
     def supports_volume(self):
         return True
