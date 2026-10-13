@@ -574,6 +574,7 @@ s/\(added network \).*\( from the card\)/\1<redacted>\2/
 s/\(Selected \).*!$/\1<redacted>!/
 s/\(escaped SSID: \).*/\1<redacted>/
 s/\(Copying freeText '[^']*': \).*/\1<redacted>/
+s/\(onscreen_keyboard_option - INFO - Updating [^ ]* to \).*/\1<redacted>/
 s/\([?&][upt]=\)[^& "']*/\1<redacted>/g
 EOF
 
