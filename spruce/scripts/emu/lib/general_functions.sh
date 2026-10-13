@@ -220,15 +220,17 @@ set_cpu_mode() {
 }
 
 pin_to_dedicated_cores() {
-	comm="$1"
-	delay="${2:-1}"
+    comm="$1"
+    delay="${2:-1}"
 
-    # get the last two cores that are online
-    EMU_CPUS=${DEVICE_MAX_CORES_ONLINE#"${DEVICE_MAX_CORES_ONLINE%??}"}
+    # Get the last two cores that are online
+    _last2=${DEVICE_MAX_CORES_ONLINE#"${DEVICE_MAX_CORES_ONLINE%??}"}
+    _emu_cpus="${_last2%?},${_last2#?}"
+
     {
         sleep "$delay"
         pgrep "$comm" | while read -r pid; do
-            pin_cpu "$EMU_CPUS" -p "$pid"
+            pin_cpu "$_emu_cpus" -p "$pid"
         done
     } &
 }
