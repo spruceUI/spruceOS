@@ -206,6 +206,14 @@ device_get_charging_status() {
     cat "/sys/class/power_supply/battery/status"
 }
 
+# A flat battery on the charger would otherwise boot, shut down and repeat.
+device_low_battery_shutdown_ok() {
+    if grep -qs "^1$" /sys/class/power_supply/ac/online /sys/class/power_supply/usb/online; then
+        log_message "$PLATFORM battery: charger online, not forcing a shutdown"
+        return 1
+    fi
+}
+
 device_headphones_connected() {
     are_headphones_plugged_in
 }
