@@ -130,7 +130,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         self.rom_utils = RomUtils(self.roms_paths[0])
 
     def get_game_system_by_name(self, system_name) -> GameSystem:
-        game_system_config = FileBasedGameSystemConfig(system_name)
+        game_system_config = FileBasedGameSystemConfig(system_name, os.path.join(self.emu_path, system_name))
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()
