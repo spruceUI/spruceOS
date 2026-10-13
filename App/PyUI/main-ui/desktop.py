@@ -6,7 +6,10 @@ card. See App/PyUI/docs/desktop_readme.txt.
 import argparse
 import json
 import os
+import subprocess
 import sys
+import tempfile
+import time
 import warnings
 from pathlib import Path
 
@@ -17,6 +20,19 @@ SD_ROOT = "/mnt/SDCARD/"
 # Keys of py-ui-config.json that are left out on the desktop: the CFW's scripts and lists of
 # them. Every key ending in "Cmd" is dropped too.
 CFW_SCRIPT_KEYS = ("aboutEntries", "cfwTasks")
+
+# PyUI runs in a child process, which tells desktop.py how it ended by its exit status. PyUI
+# exits by itself whenever it wants to be started again - after a theme change, a theme
+# conversion, a mode change, a deleted ROM, a crash - since spruce's principal.sh always starts
+# it again: os._exit(0) or sys.exit(), status RESTART. The run ends with STOPPED (Esc, closing
+# the window, Power Off, the end of a --script) or any other status.
+RUN_PYUI = "--run-pyui"
+RESTART = 0
+STOPPED = 3
+# A restart that comes this soon after starting, with no script step played, made no progress;
+# this many in a row and desktop.py gives up rather than open the window forever.
+QUICK_EXIT_SECONDS = 2
+QUICK_EXITS_TO_STOP = 3
 
 
 def parse_arguments(argv):
@@ -132,47 +148,95 @@ def prepare_cfw_config(sdcard, data):
 
 
 def main(argv=None):
-    args, mainui_args = parse_arguments(sys.argv[1:] if argv is None else argv)
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == [RUN_PYUI]:
+        run_pyui(argv[1:])
+    args, mainui_args = parse_arguments(argv)
     env = desktop_environment(args)
-    os.environ.update(env)
     sdcard = Path(env["PYUI_DESKTOP_SDCARD"])
     data = Path(env["PYUI_DESKTOP_DATA"])
     themes = args.themes.expanduser().resolve() if args.themes else None
     if args.headless:
-        os.environ.setdefault("SDL_AUDIODRIVER", "dummy")
-    # pysdl2-dll is what a desktop should use; its notice on import is noise.
-    warnings.filterwarnings("ignore", message="Using SDL2 binaries from pysdl2-dll")
+        env["SDL_AUDIODRIVER"] = os.environ.get("SDL_AUDIODRIVER", "dummy")
 
     (data / "logs").mkdir(parents=True, exist_ok=True)
     # principal.sh logs PyUI's start here before launching it, so PyUI expects the file.
     activity_log = data / "Saves" / "spruce" / "activity.jsonl"
     activity_log.parent.mkdir(parents=True, exist_ok=True)
     activity_log.touch()
-    pyui_config = prepare_pyui_config(sdcard, data, themes)
+    pyui_args = ["-device", "DESKTOP", "-pyUiConfig", str(prepare_pyui_config(sdcard, data, themes)),
+                 "-logDir", str(data / "logs")]
     cfw_config = prepare_cfw_config(sdcard, data)
+    if cfw_config is not None:
+        pyui_args += ["-cfwConfig", str(cfw_config)]
+    # Arguments for mainui.py select its one-shot modes (a message, an option list), which
+    # are not started again.
+    sys.exit(supervise(pyui_args + mainui_args, env, restart=not mainui_args))
 
+
+def supervise(pyui_args, env, restart):
+    """Run PyUI until the run is over, starting it again whenever it exits by itself."""
+    script = env["PYUI_DESKTOP_SCRIPT"]
+    quick_exits = 0
+    with tempfile.TemporaryDirectory(prefix="pyui-desktop-") as scratch:
+        script_state = Path(scratch) / "script"
+        env = {**os.environ, **env, "PYUI_DESKTOP_SCRIPT_STATE": str(script_state)}
+        while True:
+            started = time.monotonic()
+            code = run_child(pyui_args, env)
+            if code != RESTART or not restart:
+                return 0 if code in (STOPPED, RESTART) else code
+            left = script_state.read_text(encoding="utf-8") if script_state.exists() else script
+            if script and not left and (env["PYUI_DESKTOP_HEADLESS"] or env["PYUI_DESKTOP_EXIT_AFTER_SCRIPT"]):
+                return 0
+            progressed = left != script or time.monotonic() - started > QUICK_EXIT_SECONDS
+            quick_exits = 0 if progressed else quick_exits + 1
+            if quick_exits == QUICK_EXITS_TO_STOP:
+                print(f"PyUI exited {quick_exits} times in a row as it started; giving up. "
+                      f"See {Path(env['PYUI_DESKTOP_DATA']) / 'logs' / 'pyui.log'}", file=sys.stderr)
+                return 1
+            print("PyUI exited to be started again, as spruce does; starting it", file=sys.stderr)
+            script = left
+            env["PYUI_DESKTOP_SCRIPT"] = script
+            # From now on the theme is the one picked in PyUI.
+            env.pop("PYUI_DESKTOP_THEME", None)
+
+
+def run_child(pyui_args, env):
+    child = subprocess.Popen([sys.executable, os.path.abspath(__file__), RUN_PYUI, *pyui_args], env=env)
+    try:
+        return child.wait()
+    except KeyboardInterrupt:  # Ctrl+C reaches PyUI too; let it finish
+        child.wait()
+        return 130
+
+
+def run_pyui(pyui_args):
+    """The child process: mainui.py on the DESKTOP device, configured by desktop.py's
+    PYUI_DESKTOP_* variables. Exits with RESTART, STOPPED or a failure status."""
+    # pysdl2-dll is what a desktop should use; its notice on import is noise.
+    warnings.filterwarnings("ignore", message="Using SDL2 binaries from pysdl2-dll")
+    from devices.desktop.desktop_controller_interface import DesktopQuit, ScriptFinished
     from devices.miyoo.user_config import UserConfig
     import mainui
 
     # Hard-coded to the SD card; mainui reads it before the device exists.
-    UserConfig.FILEPATH = str(data / "Saves" / "pyui-common.json")
-    sys.argv = [mainui.__file__, "-device", "DESKTOP", "-pyUiConfig", str(pyui_config),
-                "-logDir", str(data / "logs")]
-    if cfw_config is not None:
-        sys.argv += ["-cfwConfig", str(cfw_config)]
-    sys.argv += mainui_args
-    code = 0
+    UserConfig.FILEPATH = str(Path(os.environ["PYUI_DESKTOP_DATA"]) / "Saves" / "pyui-common.json")
+    sys.argv = [mainui.__file__, *pyui_args]
+    code = RESTART
     try:
         mainui.main()
-    except SystemExit as e:  # Esc, closing the window, power off, the end of a --script
-        code = e.code if isinstance(e.code, int) else (0 if e.code is None else 1)
+    except (DesktopQuit, ScriptFinished):
+        code = STOPPED
+    except SystemExit:
+        code = RESTART
     except KeyboardInterrupt:  # Ctrl+C in the terminal
         code = 130
     unplayed = _unplayed_script_steps()
-    if unplayed:
+    if code == STOPPED and unplayed:
         print(f"PyUI left the menu with {len(unplayed)} script steps not played: {unplayed}",
               file=sys.__stderr__)
-        code = code or 1
+        code = 1
     # Like mainui: don't wait for background threads.
     sys.__stdout__.flush()
     os._exit(code)

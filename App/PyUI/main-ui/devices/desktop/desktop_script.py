@@ -74,3 +74,17 @@ def parse_script(text):
             raise ScriptError(f"unknown button {token!r}; expected one of {sorted(BUTTONS)}")
         steps.append(Press(button))
     return steps
+
+
+def format_script(steps):
+    """Steps back as script text: parse_script(format_script(steps)) == steps."""
+    tokens = {button: token for token, button in BUTTONS.items()}
+    text = []
+    for step in steps:
+        if isinstance(step, Press):
+            text.append(tokens[step.button])
+        elif isinstance(step, Capture):
+            text.append(_CAPTURE_PREFIX + step.name)
+        else:
+            text.append(f"{_WAIT_PREFIX}{step.ticks}")
+    return ",".join(text)

@@ -51,6 +51,9 @@ class DesktopOptions:
     roms: Path = SPRUCE_ROOT / "Roms"
     data: Path = DEFAULT_DATA_DIR
     shots: Path = DEFAULT_DATA_DIR / "screenshots"
+    # desktop.py's: where the device keeps the steps still to play, so a script carries on
+    # when PyUI restarts.
+    script_state: Path = None
 
     @classmethod
     def from_environ(cls, environ=None):
@@ -78,4 +81,5 @@ class DesktopOptions:
             roms=_path(environ, "PYUI_DESKTOP_ROMS", sdcard / "Roms"),
             data=data,
             shots=_path(environ, "PYUI_DESKTOP_SHOTS", data / "screenshots" / f"{width}x{height}"),
+            script_state=_path(environ, "PYUI_DESKTOP_SCRIPT_STATE", None),
         )

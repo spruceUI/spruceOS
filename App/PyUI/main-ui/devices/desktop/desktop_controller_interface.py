@@ -73,14 +73,17 @@ class DesktopControllerInterface(ControllerInterface):
 
     Scripted steps come first, and live input is ignored while they last. Once the script is
     used up the run either ends (exit_when_script_ends) or carries on with live input.
+    on_script_progress gets the steps still to play each time one is used.
     """
 
-    def __init__(self, script=(), on_capture=None, exit_when_script_ends=False):
+    def __init__(self, script=(), on_capture=None, exit_when_script_ends=False,
+                 on_script_progress=None):
         self._script = deque(script)
         self._scripted = bool(self._script)
         self._polling_hotkey = False
         self._on_capture = on_capture
         self._exit_when_script_ends = exit_when_script_ends
+        self._on_script_progress = on_script_progress
         self._event = sdl2.SDL_Event()
         self._gamepad = None
         self._held_key = None
@@ -148,9 +151,11 @@ class DesktopControllerInterface(ControllerInterface):
     def _next_scripted(self, timeout):
         while self._script:
             step = self._script.popleft()
+            if isinstance(step, Wait) and step.ticks > 1:
+                self._script.appendleft(Wait(step.ticks - 1))
+            if self._on_script_progress is not None:
+                self._on_script_progress(list(self._script))
             if isinstance(step, Wait):
-                if step.ticks > 1:
-                    self._script.appendleft(Wait(step.ticks - 1))
                 # One idle tick: PyUI redraws before the next step. At least 1/12 s, as views
                 # that poll without a timeout (the main menu) would make waits instant, and
                 # past PyUI's own timeout, which it truncates to whole ms.

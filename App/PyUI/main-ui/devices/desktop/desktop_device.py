@@ -9,6 +9,7 @@ from devices.charge.charge_status import ChargeStatus
 from devices.desktop.desktop_capture import capture_frame
 from devices.desktop.desktop_controller_interface import DesktopControllerInterface, DesktopQuit
 from devices.desktop.desktop_options import DesktopOptions
+from devices.desktop.desktop_script import format_script
 from devices.device_common import DeviceCommon
 from devices.miyoo.device_user_config import DeviceUserConfig
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
@@ -134,9 +135,14 @@ class DesktopDevice(DeviceCommon):
 
     def get_controller_interface(self):
         if self.controller_interface is None:
+            on_script_progress = self._save_script_progress if self.options.script_state else None
             self.controller_interface = DesktopControllerInterface(
-                self.options.script, self.save_screenshot, self.options.exit_after_script)
+                self.options.script, self.save_screenshot, self.options.exit_after_script,
+                on_script_progress)
         return self.controller_interface
+
+    def _save_script_progress(self, steps):
+        self.options.script_state.write_text(format_script(steps), encoding="utf-8")
 
     def map_digital_input(self, sdl_input):
         return None
@@ -174,7 +180,8 @@ class DesktopDevice(DeviceCommon):
         raise DesktopQuit()
 
     def reboot(self):
-        raise DesktopQuit()
+        # desktop.py starts PyUI again, as spruce does after a reboot.
+        self.exit_pyui()
 
     def sleep(self):
         pass

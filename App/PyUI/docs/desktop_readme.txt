@@ -35,10 +35,11 @@ Folders
             Default: the SpruceOS checkout desktop.py is in.
   --roms    Read only. Default: <sdcard>/Roms (a few homebrew games). Box art
             resizing is off, since it writes next to the ROMs.
-  --themes  Default: <sdcard>/Themes; kept for later runs, like --theme. A
-            theme with no config_<W>x<H>.json for --res is converted in its
-            folder, as on a device, and PyUI exits; start it again. Keep
-            downloaded themes outside the checkout.
+  --themes  Default: <sdcard>/Themes, which has SPRUCE only; Settings > Theme
+            lists every theme in the folder. Kept for later runs, like
+            --theme. A theme with no config_<W>x<H>.json for --res is
+            converted in its folder, as on a device. Keep downloaded themes
+            outside the checkout.
   --data    Everything PyUI writes: Saves/ (configs, state, favorites,
             recents), Collections/, logs/pyui.log, screenshots/<W>x<H>/.
             Default: ~/.pyui-desktop. Delete it for a fresh card.
@@ -52,6 +53,13 @@ About entries and the CFW tasks are left out of the configs; display, volume,
 Wi-Fi and Bluetooth settings are saved and otherwise ignored; Wi-Fi is off and
 the battery shows 87%. Games and apps are not launched (the log says which
 would have been), and Power Off ends the run.
+
+PyUI exits by itself when it wants a fresh start - after a theme change, a
+theme conversion, a mode change, a deleted ROM, a crash - and spruce's
+principal.sh starts it again. desktop.py does the same, so the window closes
+and opens again; a --script carries on where it was. The run ends with Esc,
+closing the window, Power Off or the end of a --script. If PyUI keeps exiting
+as it starts, desktop.py gives up after three tries.
 
 Scripts and screenshots
 -----------------------
