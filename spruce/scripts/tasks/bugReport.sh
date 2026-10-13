@@ -633,9 +633,9 @@ upload_report() {
 if upload_report; then
     echo "$report_code" > "$code_file"
     log_message "bugReport.sh: uploaded as $report_code"
-    log_and_display_message "Bug report sent. Your code is\n\n$report_code\n\nPost this code in the spruce Discord.\nIt is also saved in bug_report_code.txt on the SD card.\n\nPress A to continue."
+    log_and_display_message "Bug report sent. Your code is\n\n$report_code\n\nPost this code in a GitHub issue or in our Discord to receive support.\nIt is also saved in bug_report_code.txt on the SD card.\n\nPress A to continue."
 else
-    log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in the spruce Discord.\n\nPress A to continue."
+    log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in a GitHub issue or in our Discord to receive support.\n\nPress A to continue."
 fi
 acknowledge
 stop_pyui_message_writer
