@@ -950,8 +950,14 @@ wait_for_wlan0() {
 }
 
 device_wifi_power_off() {
-    # Unloading the driver is what drops the rail: 8821cs calls
-    # sunxi_wlan_set_power on the way out. There is no sysfs node that does it.
+    # The rail also powers the chip's Bluetooth: kept while that is on.
+    bluetooth_setting_wanted && return 0
+    xx_wifi_module_unload
+}
+
+# Unloading the driver is what drops the rail: 8821cs calls
+# sunxi_wlan_set_power on the way out. There is no sysfs node that does it.
+xx_wifi_module_unload() {
     if lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
         rmmod "$WIFI_MODULE" 2>/dev/null
         log_message "WiFi radio powered down ($WIFI_MODULE unloaded)"
@@ -1171,7 +1177,7 @@ device_ensure_wifi_interface() {
 # not carried into the next boot in a half-initialised state. This is the half
 # that stops the wedge being created, rather than recovering from it after.
 device_prepare_for_poweroff() {
-    device_wifi_power_off
+    xx_wifi_module_unload
     xx_rgb_off
 }
 
@@ -1179,9 +1185,12 @@ device_bluetooth_supported() {
     return 0
 }
 
-# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second: with
-# no wlan0 the chip is not powered, and the radio cannot come up.
+# WiFi and Bluetooth share the RTL8821CS: with no wlan0 the chip is not
+# powered, so load its driver if WiFi left it out, and wait for wlan0.
 device_bluetooth_radio_up() {
+    if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
+        insmod "$WIFI_MODULE_PATH" 2>/dev/null || return 1
+    fi
     _n=0
     while [ ! -d /sys/class/net/wlan0 ] && [ "$_n" -lt 30 ]; do
         sleep 1
@@ -1195,6 +1204,7 @@ device_bluetooth_radio_up() {
 device_bluetooth_radio_down() {
     killall rtk_hciattach 2>/dev/null
     rfkill block bluetooth
+    wifi_setting_wanted || xx_wifi_module_unload
 }
 
 # BaseOS leaves D-Bus and every Bluetooth daemon to the frontend. A dbus-daemon
