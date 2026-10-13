@@ -6,7 +6,7 @@ corename = "Yabadabadoo"
 categories = "Emulator"
 license = "GPLv2"
 permissions = ""
-display_version = "0.1"
+display_version = "0.2"
 
 # Hardware Information
 manufacturer = "Sega"
