@@ -24,7 +24,7 @@ case "$PLATFORM" in
 		# BaseOS updates itself from a .bosupd file at the root of the card.
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 		;;
-	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini")
+	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"G350")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
 	*)

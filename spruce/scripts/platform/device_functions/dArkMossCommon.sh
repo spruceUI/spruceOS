@@ -25,6 +25,11 @@ device_init() {
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
     resolve_key_event_node
     setup_mainui_alias
+    # Opt-in (cfg): seed a fresh card's system json first, so the boot backlight is the level
+    # PyUI and the hotkeys then read.
+    if [ -n "$DARKMOSS_SEED_SYSTEM_JSON" ] && [ ! -f "$SYSTEM_JSON" ] && [ -f "$SYSTEM_JSON_DEFAULT" ]; then
+        cp "$SYSTEM_JSON_DEFAULT" "$SYSTEM_JSON"
+    fi
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
@@ -185,7 +190,15 @@ setup_mainui_alias() {
 #####   POWER   #####
   ###################
 
+# BatteryPlus's estimate when the device cfg names its file and it holds 0-100, else the kernel's.
 device_get_battery_percent() {
+    if [ -n "$BATTERYPLUS_PERCENT_FILE" ]; then
+        _bp=$(cat "$BATTERYPLUS_PERCENT_FILE" 2>/dev/null)
+        case "$_bp" in
+            ''|*[!0-9]*) ;;
+            *) [ "$_bp" -le 100 ] && { echo "$_bp"; return; } ;;
+        esac
+    fi
     cat "$BATTERY/capacity" 2>/dev/null || echo 0
 }
 
@@ -346,7 +359,8 @@ volume_down() {
 }
 
 get_current_volume() {
-    amixer get 'Master' 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
+    # Opt-in (cfg): read on the same mapped (-M) scale that set_volume writes.
+    amixer ${DARKMOSS_VOLUME_READ_MAPPED:+-M} get "${VOLUME_CONTROL:-Master}" 2>/dev/null | sed -n 's/.*\[\([0-9]\+\)%\].*/\1/p' | head -1
 }
 
 # Level before path: switching output with the old level applied is what
@@ -359,7 +373,7 @@ set_volume() {
     [ "$VOLUME_PCT" -gt 100 ] && VOLUME_PCT=100
     [ "$VOLUME_PCT" -lt 0 ] && VOLUME_PCT=0
 
-    amixer -q sset -M 'Master' "${VOLUME_PCT}%" 2>/dev/null
+    amixer -q sset -M "${VOLUME_CONTROL:-Master}" "${VOLUME_PCT}%" 2>/dev/null
     bt_headset_volume "$(( VOLUME_PCT / 5 ))"
     apply_playback_path
     log_message "$PLATFORM: volume ${VOLUME_LV}/20 (${VOLUME_PCT}%)"
@@ -415,16 +429,27 @@ get_backlight_level() {
     jq -r '.backlight // 5' "$SYSTEM_JSON" 2>/dev/null || echo 5
 }
 
-set_backlight() {
+# Panel only, for PyUI's backlightCmd: PyUI saves the level itself, and its
+# screensaver dim must not be saved.
+apply_backlight() {
     level="$1"
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
     eval "raw=\$SYSTEM_BRIGHTNESS_$level"
     echo "$raw" > "$DEVICE_BRIGHTNESS_PATH"
     echo 0 > /sys/class/backlight/backlight/bl_power 2>/dev/null
+}
+
+set_backlight() {
+    apply_backlight "$1"
     log_message "$PLATFORM: backlight ${level}/10 (raw $raw)"
     tmp="$SYSTEM_JSON.tmp.$$"
     jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+}
+
+# PyUI's volumeCmd: the 0-20 level PyUI has already saved.
+apply_volume() {
+    set_volume "$1" false
 }
 
 brightness_down() {
@@ -678,6 +703,18 @@ darkmoss_prepare_for_poweroff() {
 
 device_prepare_for_poweroff() {
     darkmoss_prepare_for_poweroff
+    darkmoss_shutdown_logo "$1"
+}
+
+# Where the base ships bootlogo.py (the cfg names it), put its reboot/poweroff logo on the panel's
+# fallback framebuffer while PyUI still holds the panel, so that status shows the moment it exits.
+darkmoss_shutdown_logo() {
+    [ -n "$DARKMOSS_BOOTLOGO" ] && [ -f "$DARKMOSS_BOOTLOGO" ] || return 0
+    grep -qw darkmoss.debug /proc/cmdline 2>/dev/null && return 0  # debug boots: kernel text, no logos
+    _img=/usr/share/bootlogo/logo-poweroff.bmp
+    [ "$1" = "--reboot" ] && _img=/usr/share/bootlogo/logo-reboot.bmp
+    [ -f "$_img" ] && /usr/bin/python3 -I "$DARKMOSS_BOOTLOGO" --image "$_img" >/dev/null 2>&1
+    return 0
 }
 
   #####################

@@ -126,6 +126,11 @@ class Rgb30(DeviceCommon):
     MENU_KEY = None
     SELECT_KEY = 314
     START_KEY = 315
+    # BatteryPlus's percent file, for devices whose dArkMoss image runs it.
+    BATTERYPLUS_PERCENT_FILE = None
+    # Opt-in: volume and backlight through py-ui-config's volumeCmd/backlightCmd scripts,
+    # for units whose base has no softvol Master or uses another backlight range.
+    VOLUME_BACKLIGHT_CMDS = False
 
     def __init__(self, device_name):
         self.device_name = device_name
@@ -164,6 +169,8 @@ class Rgb30(DeviceCommon):
             Display.volume_changed(new_volume)
 
     def _set_volume(self, volume):
+        if self.VOLUME_BACKLIGHT_CMDS:
+            return self._set_volume_via_cmd(volume)
         # The generic volume path only changes the config number; nothing sets
         # the mixer, so the menu widget moved but the audio did not - and a game
         # then played at whatever Master happened to be. Drive the
@@ -176,6 +183,19 @@ class Rgb30(DeviceCommon):
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             PyUiLogger.get_logger().error(f"RGB30: _set_volume failed: {e}")
+        return volume
+
+    def _set_volume_via_cmd(self, volume):
+        # change_volume passes 0-100 (config vol*5); volumeCmd takes the 0-20 level PyUI has saved.
+        level = max(0, min(20, int(volume) // 5))
+        volume_cmd = PyUiConfig.get_volume_cmd()
+        if volume_cmd and os.path.exists(volume_cmd):
+            try:
+                subprocess.run([volume_cmd, str(level)],
+                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                               timeout=10, check=False)
+            except Exception as e:
+                PyUiLogger.get_logger().error(f"RGB30: volume command failed: {e}")
         return volume
 
     def load_rgb30_system_json(self):
@@ -284,6 +304,15 @@ class Rgb30(DeviceCommon):
 
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
+        # BatteryPlus's estimate when the device runs it and it is valid, else the kernel's reading.
+        if self.BATTERYPLUS_PERCENT_FILE:
+            try:
+                with open(self.BATTERYPLUS_PERCENT_FILE, "r") as f:
+                    percent = int(f.read().strip())
+                if 0 <= percent <= 100:
+                    return percent
+            except (OSError, ValueError):
+                pass
         try:
             with open("/sys/class/power_supply/battery/capacity", "r") as f:
                 return int(f.read().strip())
@@ -338,11 +367,27 @@ class Rgb30(DeviceCommon):
 
     def _set_lumination_to_config(self):
         level = max(0, min(10, int(self.system_config.backlight)))
+        if self.VOLUME_BACKLIGHT_CMDS:
+            self._set_lumination_via_cmd(level)
+            return
         try:
             with open("/sys/class/backlight/backlight/brightness", "w") as f:
                 f.write(str(self.BACKLIGHT_TABLE[level]))
         except OSError as e:
             PyUiLogger.get_logger().error(f"RGB30: backlight write failed: {e}")
+
+    def _set_lumination_via_cmd(self, level):
+        # backlightCmd owns the level -> raw curve. Panel only: PyUI saves the level itself,
+        # and the screensaver dim must not be saved.
+        backlight_cmd = PyUiConfig.get_backlight_cmd()
+        if not backlight_cmd or not os.path.exists(backlight_cmd):
+            return
+        try:
+            subprocess.run([backlight_cmd, str(level)],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=10, check=False)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"RGB30: backlight command failed: {e}")
 
     def _set_brightness_to_config(self):
         self.panel_calibration.apply("brightness")

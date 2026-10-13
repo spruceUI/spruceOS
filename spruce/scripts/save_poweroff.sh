@@ -466,7 +466,7 @@ stage_shutdown_stage_2
 
 [ "$USB_STORAGE_EXPORT" = 1 ] || blink_led_if_applicable
 /mnt/SDCARD/spruce/scripts/bluetooth.sh suspend
-device_prepare_for_poweroff
+device_prepare_for_poweroff "$s2_arg"   # "--reboot" when this ends in a reboot
 log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
