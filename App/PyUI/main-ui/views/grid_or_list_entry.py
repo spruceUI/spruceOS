@@ -104,6 +104,8 @@ class GridOrListEntry:
 
         if("small" == variant_name):
             return self.get_image_path_variant(image_path,"med")
+        elif("med" == variant_name):
+            return self.get_image_path_variant(image_path,"large")
         else:
             return image_path
 
@@ -112,6 +114,9 @@ class GridOrListEntry:
 
     def get_image_path_medium(self,image_path: str):
         return self.get_image_path_variant(image_path, "med")
+
+    def get_image_path_large(self,image_path: str):
+        return self.get_image_path_variant(image_path, "large")
     
     def get_image_path_ideal(self, target_width, target_height):
         return self.get_properly_sized_image(self.get_image_path(), target_width, target_height)
@@ -137,7 +142,7 @@ class GridOrListEntry:
             return self.get_image_path_medium(image_path)
         else :
             #PyUiLogger.get_logger().info(f"Going with full size image. Target dimensions are  {target_width} x {target_height}")
-            return image_path
+            return self.get_image_path_large(image_path)
 
     def get_primary_text(self):
         return self.primary_text

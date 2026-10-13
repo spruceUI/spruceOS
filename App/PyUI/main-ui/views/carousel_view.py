@@ -552,7 +552,7 @@ class CarouselView(View):
     def animate_transition_horizontal(self):
         if(not self.skip_next_animation):
             animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
-
+            animation_frames = max(animation_frames, 6)
             if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
                 render_mode = self.get_img_render_mode()
                 #frame_duration = 1 / 60.0  # 60 FPS
