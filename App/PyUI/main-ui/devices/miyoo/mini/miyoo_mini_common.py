@@ -962,7 +962,7 @@ class MiyooMiniCommon(MiyooDevice):
         return FfmpegImageUtils()
 
     def get_boxart_small_resize_dimensions(self):
-        return 400,300
+        return 200, 200
 
     def get_boxart_medium_resize_dimensions(self):
         return 400,300

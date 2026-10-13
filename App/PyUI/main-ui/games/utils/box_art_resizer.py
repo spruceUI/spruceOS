@@ -33,9 +33,9 @@ class BoxArtResizer():
     @classmethod
     def process_image(cls, full_path):
         CachedExists.clear()
-        target_medium_width, target_medium_height = Device.get_device().get_boxart_medium_resize_dimensions()
-        target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
-        target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
+        target_small_width, target_small_height = 200, 200
+        target_medium_width, target_medium_height = 400, 300
+        target_large_width, target_large_height = 640, 480
 
         qoi_full_path = os.path.splitext(full_path)[0] + ".qoi"
         if os.path.exists(qoi_full_path):
@@ -153,8 +153,6 @@ class BoxArtResizer():
         target_small_width, target_small_height = Device.get_device().get_boxart_small_resize_dimensions()
         target_large_width, target_large_height = Device.get_device().get_boxart_large_resize_dimensions()
 
-        # This is always temporary
-        shutil.rmtree(os.path.join(folder_path, "Imgs_large"), ignore_errors=True)
         # If medium and large are the same size, get rid of Imgs_med as it unused
         if (target_large_width == target_medium_width and target_large_height == target_medium_height):
             shutil.rmtree(os.path.join(folder_path, "Imgs_med"), ignore_errors=True)

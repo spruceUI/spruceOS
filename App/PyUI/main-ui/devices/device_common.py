@@ -739,10 +739,10 @@ class DeviceCommon(AbstractDevice):
         return True
 
     def get_boxart_small_resize_dimensions(self):
-        return 640, 480
+        return 200, 200
 
     def get_boxart_medium_resize_dimensions(self):
-        return 640, 480
+        return 400, 300
 
     def get_boxart_large_resize_dimensions(self):
         return 640, 480
