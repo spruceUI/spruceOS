@@ -30,3 +30,16 @@ class XuMiniM(Rgb30):
     # 270 the Miniloong (a rotate:3 panel) uses.
     def screen_rotation(self):
         return 90
+
+    # The 4.4 kernel lists the panel colour properties but rejects every set.
+    def supports_brightness_calibration(self):
+        return False
+
+    def supports_contrast_calibration(self):
+        return False
+
+    def supports_saturation_calibration(self):
+        return False
+
+    def supports_hue_calibration(self):
+        return False
