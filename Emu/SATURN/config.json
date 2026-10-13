@@ -88,19 +88,19 @@
       ],
       "selected": "yabasanshiro_a133p_libretro",
       "overrides": {}
+    },
+    "Emulator_32": {
+      "display": "Emulator",
+      "options": [
+        "yabadabadoo"
+      ],
+      "devices": [
+        "MIYOO_MINI_FAMILY",
+        "MIYOO_A30"
+      ],
+      "selected": "yabadabadoo",
+      "overrides": {}
     }
-  },
-  "Emulator_32": {
-    "display": "Emulator",
-    "options": [
-      "yabadabadoo"
-    ],
-    "devices": [
-      "MIYOO_MINI_FAMILY",
-      "MIYOO_A30"
-    ],
-    "selected": "yabadabadoo",
-    "overrides": {}
   },
   "sortOrder": 5500,
   "brand": "Sega",
