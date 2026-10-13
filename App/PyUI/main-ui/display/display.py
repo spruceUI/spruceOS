@@ -269,7 +269,7 @@ class Display:
                 #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
 
         with log_timing("sdl2.ext.Window", PyUiLogger.get_logger()):    
-            cls.window = sdl2.ext.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
+            cls.window = Device.get_device().create_window(width, height)
             cls.window.show()
 
 
@@ -305,7 +305,8 @@ class Display:
         cls.bg = None
 
         sdl2.SDL_Quit()
-        os.sync()
+        if hasattr(os, "sync"):
+            os.sync()
 
     @classmethod
     def deinit_display_v2(cls):

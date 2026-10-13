@@ -202,10 +202,7 @@ class ListView(View):
                 if(gridOrListEntry.get_description() is not None):
                     _, title_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, gridOrListEntry.get_primary_text())
                     _, description_h = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, gridOrListEntry.get_description())
-                    PyUiLogger.get_logger().info(f"title_h = {title_h}")
-                    PyUiLogger.get_logger().info(f"description_h = {description_h}")
                     text_line_height = max(text_line_height, Theme.get_descriptive_list_text_offset_y() + title_h + description_h + padding)
-                    PyUiLogger.get_logger().info(f"text_line_height = {text_line_height}")
 
         if(self.selected_bg is not None):
             bg_w, bg_height = Display.get_image_dimensions(self.selected_bg)
