@@ -83,15 +83,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         self.theme_ever_changed = True
         theme_folders = self.get_theme_folders()
         selected_index = theme_folders.index(Device.get_device().get_system_config().get_theme())
-        if(ControllerInput.DPAD_LEFT == input):
-            selected_index-=1
-            if(selected_index < 0):
-                selected_index = len(theme_folders) -1
-        elif(ControllerInput.DPAD_RIGHT == input):
-            selected_index+=1
-            if(selected_index == len(theme_folders)):
-                selected_index = 0
-        elif(ControllerInput.X == input and not Device.get_device().get_system_config().simple_mode_enabled()):
+        if(ControllerInput.X == input and not Device.get_device().get_system_config().simple_mode_enabled()):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
             selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, Language.theme())
@@ -102,8 +94,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             Display.init_fonts()   
             Device.get_device().get_system_config().set_theme(theme_folders[selected_index])
             Device.get_device().set_theme(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]))
-            self.theme_changed = True
-            Display.restore_bg()
+            self.exit() # Restart
 
     def launch_extra_settings(self,input):
         if(ControllerInput.A == input):
@@ -201,7 +192,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
                 GridOrListEntry(
                         primary_text=Language.theme(),
-                        value_text="<    " + Device.get_device().get_system_config().get_theme() + "    >",
+                        value_text=Device.get_device().get_system_config().get_theme(),
                         image_path=None,
                         image_path_selected=None,
                         description=None,
@@ -328,6 +319,4 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 if(not Theme.skip_main_menu()):
                     selected = None
         
-        if(self.theme_ever_changed):
-            os._exit(0)
         return False #shouldnt need to do this but jic
