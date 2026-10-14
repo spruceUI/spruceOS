@@ -7,6 +7,7 @@
 # fetch it from the BaseOS releases, check it, and offer a reboot.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 SD_ROOT="/mnt/SDCARD"
@@ -71,6 +72,7 @@ if [ -n "$INSTALLED" ]; then
     _have="$(version_num "$INSTALLED")"
     _latest="$(version_num "$LATEST")"
     if [ -n "$_have" ] && [ -n "$_latest" ] && [ "$_have" -ge "$_latest" ] 2>/dev/null; then
+        hide_fw_app
         log_and_display_message "Your installed BaseOS $INSTALLED is already the latest version. Press A to close."
         acknowledge
         exit 0

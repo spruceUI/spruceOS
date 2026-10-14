@@ -8,6 +8,7 @@
 # it against the release's SHA256SUMS, runs its applier, and reboots.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
 SD_ROOT="/mnt/SDCARD"
 API="https://api.github.com/repos/spruceUI/dArkMoss/releases/latest"
@@ -49,6 +50,7 @@ if [ -n "$INSTALLED" ]; then
     _have="$(printf '%s' "$INSTALLED" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
     _latest="$(printf '%s' "$LATEST" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
     if [ "$_have" -ge "$_latest" ] 2>/dev/null; then
+        hide_fw_app
         log_and_display_message "Your installed dArkMoss $INSTALLED is already the latest release. Press A to close."
         acknowledge
         exit 0
