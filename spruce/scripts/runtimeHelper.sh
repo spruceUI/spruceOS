@@ -467,6 +467,15 @@ read_unpack_state() {
     fi
 }
 
+# Checks whether any archive is waiting to be unpacked; returns 0 if one is.
+# The lanes checked must match archiveUnpacker.sh.
+archives_queued() {
+    for _aq in /mnt/SDCARD/Themes/*.7z /mnt/SDCARD/spruce/archives/preMenu/*.7z /mnt/SDCARD/spruce/archives/preCmd/*.7z; do
+        [ -e "$_aq" ] && return 0
+    done
+    return 1
+}
+
 run_archive_unpacker_foreground() {
     SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
     SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \

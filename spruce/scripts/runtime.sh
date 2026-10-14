@@ -92,7 +92,7 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
     else
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
-else
+elif archives_queued; then
     run_unpacker_foreground "foreground run" "0"
 fi
 
