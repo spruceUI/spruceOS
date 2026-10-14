@@ -392,6 +392,7 @@
                     "Silent Mode",
                     "WiFi off",
                     { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    { "label": "Fan boost", "devices": ["TRIMUI_SMART_PRO_S"] },
                     "Nothing"
                 ],
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",

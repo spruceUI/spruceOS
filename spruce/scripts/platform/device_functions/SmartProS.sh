@@ -468,7 +468,12 @@ device_stop_thermal_process(){
 }
 
 device_run_thermal_process(){
-    /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
+    if [ "$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "")" = "Fan boost" ] \
+        && [ "$(device_get_switch_position)" = "1" ]; then
+        /mnt/SDCARD/spruce/scripts/FN_Button/scene-fan.sh 1
+    else
+        /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
+    fi
 }
 
 set_backlight() {
