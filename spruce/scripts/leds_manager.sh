@@ -112,14 +112,16 @@ leds_battery() {
 LEDS_MODE="$(get_config_value '.menuOptions."LEDs Settings".LEDsMode.selected' "Battery")"
 
 case $LEDS_MODE in
-	"Battery")
-		leds_battery
-		;;
-	"Audio")
+  "Battery")
+    leds_battery
+    ;;
+  "Audio")
     leds_audio
-		;;
+    ;;
   *)
     # Off
+    LEDS_STATE=(true true true true true)
+
     turn_off_led 0
     turn_off_led 1
     turn_off_led 2

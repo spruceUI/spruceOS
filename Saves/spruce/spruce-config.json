@@ -642,8 +642,9 @@
         "LEDs Settings": {
             "LEDsMode": {
                 "display": "LEDs mode",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
                 "devices": ["GKD_PIXEL2"],
-                "description": "reload UI to apply",
+                "description": "applies immediately",
                 "options": [
                     "Off",
                     "Battery",
