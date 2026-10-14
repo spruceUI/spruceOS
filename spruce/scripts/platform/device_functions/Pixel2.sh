@@ -158,7 +158,6 @@ launch_startup_watchdogs(){
     stop_running_watchdog /mnt/SDCARD/spruce/scripts/theme_watchdog.sh
     stop_running_watchdog /mnt/SDCARD/spruce/scripts/leds_manager.sh
     /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
     /mnt/SDCARD/spruce/scripts/leds_manager.sh &
 }
 

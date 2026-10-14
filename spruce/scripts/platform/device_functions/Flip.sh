@@ -317,8 +317,6 @@ launch_startup_watchdogs(){
     if device_usb_audio_supported; then
         /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
     fi
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # Should the above be merged into here?

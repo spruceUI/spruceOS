@@ -277,8 +277,6 @@ launch_trimui_startup_watchdogs() {
         /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
         pin_cpu "$SYSTEM_CPU" -n usb_audio_watchdog.sh &
     fi
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 launch_startup_watchdogs() {

@@ -304,8 +304,6 @@ device_init() {
 
 launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "false"
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 set_event_arg_for_idlemon() {

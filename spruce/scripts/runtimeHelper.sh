@@ -432,24 +432,6 @@ unstage_archives_wanted() {
     fi
 }
 
-UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
-
-# This works with checker to display a notification if an update is available
-# But only on next boot. So if they find the app by themselves it's fine.
-update_notification(){
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        exit 1
-    fi
-
-    if flag_check "update_available"; then
-        available_version=$(cat "$(flag_path update_available)")
-        display --icon "$UPDATE_ICON" -t "Update available!
-Version ${available_version} is ready to install
-Go to Apps and look for 'Update Available'" --okay
-        flag_remove "update_available"
-    fi
-}
-
 
 set_volume_to_config() {
     vol=$(jq -r '.vol // empty' "$SYSTEM_JSON")

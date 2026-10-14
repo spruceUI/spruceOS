@@ -100,7 +100,10 @@ if flag_check "run_upgrades"; then
     flag_remove "run_upgrades"
 fi
 
-/mnt/SDCARD/spruce/scripts/set_up_swap.sh &
+(
+    /mnt/SDCARD/spruce/scripts/set_up_swap.sh || true
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
+) &
 
 launch_startup_watchdogs
 
@@ -121,7 +124,6 @@ fi
 
 developer_mode_task &
 update_checker &
-# update_notification
 
 # Initialize CPU settings
 set_smart

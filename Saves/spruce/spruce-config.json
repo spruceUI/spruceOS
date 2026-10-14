@@ -229,7 +229,8 @@
                     "MIYOO_FLIP",
                     "GKD_PIXEL2",
                     "TRIMUI_A133P",
-                    "TRIMUI_SMART_PRO_S"
+                    "TRIMUI_SMART_PRO_S",
+                    "DARKMOSS"
                 ],
                 "display": "Enable ZRAM",
                 "description": "50% of device RAM; reboot to apply",
@@ -276,8 +277,8 @@
             },
             "customThermals": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
-                "display": "Thermal Control",
-                "description": "Customize fan profiles",
+                "display": "Fan Speed",
+                "description": "cooling fan profiles",
                 "options": [
                     "Off",
                     "Adaptive",
