@@ -57,7 +57,8 @@ case "$PLATFORM" in
 		/usr/trimui/lib/libshmvar.so \
 		/usr/trimui/lib/libtmenu.so
 		do
-			BIND_PATH="$DST_DIR/$(basename "$f")"
+			# Parameter expansion: no subshell per file.
+			BIND_PATH="$DST_DIR/${f##*/}"
 			# Ensure destination file exists
 			touch "$BIND_PATH"
 			# Bind mount the source file over it
