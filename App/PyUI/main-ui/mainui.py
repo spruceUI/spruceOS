@@ -183,6 +183,10 @@ def main():
         check_for_button_listener_mode(args)
         check_for_startup_init_only(args)
 
+        # The Roms scan is SD-bound; overlap it with the display bring-up below.
+        if main_ui_mode:
+            Device.get_device().get_game_system_utils().prefetch_active_systems()
+
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
 
