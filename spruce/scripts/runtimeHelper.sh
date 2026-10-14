@@ -6,6 +6,19 @@
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
+# Pids of device_init background jobs that must be gone before the frontend starts.
+# Only runtime.sh's shell owns them, so only it can wait on them.
+DEVICE_INIT_WAIT_PIDS=""
+
+# Waits for the device_init jobs that must finish before the frontend starts; returns 0.
+wait_device_init_jobs() {
+    for _diw_pid in $DEVICE_INIT_WAIT_PIDS; do
+        wait "$_diw_pid" 2>/dev/null
+    done
+    DEVICE_INIT_WAIT_PIDS=""
+    return 0
+}
+
 run_sd_card_fix_if_triggered() {
     needs_fix=false
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then

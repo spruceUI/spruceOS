@@ -133,6 +133,9 @@ set_smart
 # Set up the boot_to action prior to getting into the principal loop
 set_up_boot_action
 
+# Nothing from device_init may still be touching the display or the LEDs under the frontend.
+wait_device_init_jobs
+
 # start main loop
 log_message "Starting main loop"
 /mnt/SDCARD/spruce/scripts/principal.sh

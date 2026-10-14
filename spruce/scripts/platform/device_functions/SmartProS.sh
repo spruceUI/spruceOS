@@ -239,9 +239,12 @@ init_gpio_SmartProS() {
     # echo -n in > /sys/class/gpio/gpio363/direction
 
     #splash rumble
-    echo 32768 > /sys/class/motor/level 
-    sleep 0.2
-    echo 0 > /sys/class/motor/level 
+    # Not awaited: the sleep must not hold up device_init.
+    (
+        echo 32768 > /sys/class/motor/level
+        sleep 0.2
+        echo 0 > /sys/class/motor/level
+    ) &
 }
 
 runtime_mounts_SmartProS() {
@@ -249,8 +252,9 @@ runtime_mounts_SmartProS() {
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
+    # Not awaited: the SDL libraries are needed only once the frontend starts.
+    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
@@ -277,13 +281,17 @@ device_init() {
 
 
     device_run_tsps_blobs
-    device_run_thermal_process
+
+    # Not awaited: nothing before the first menu frame needs it.
+    device_run_thermal_process &
 
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
     # adopts, once, whatever action was already installed - on the Brick line that
     # is whatever the old fn_editor app last wrote, and it outlives the SD card.
-    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
+    # Its boot LED scene must land before the menu LEDs are set.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now &
+    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
 
     echo 1 > /sys/class/speaker/mute
 
