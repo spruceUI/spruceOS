@@ -1151,7 +1151,6 @@ class Display:
             sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
             cls.pace_frame()
             cls.renderer.present()
-            Device.get_device().post_present_operations()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
             present_elapsed_ms = (time.perf_counter() - present_start) * 1000
             #PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
@@ -1161,6 +1160,7 @@ class Display:
             cls.text_render_timer = 0
             cls.image_render_timer = 0
 
+            Device.get_device().post_present_operations()
             cls.start = time.perf_counter()
 
     @classmethod
@@ -1171,14 +1171,15 @@ class Display:
 
         target = cls._last_frame_time + frame_time
         remaining = (target - now) / frequency
+        target_remaining_for_high_perf_wait = 0.002
 
-        if remaining > 0.010:
-            sdl2.SDL_Delay(int((remaining - 0.010) * 1000))
+        if remaining > target_remaining_for_high_perf_wait:
+            sdl2.SDL_Delay(int((remaining - target_remaining_for_high_perf_wait) * 1000))
 
         while (now := sdl2.SDL_GetPerformanceCounter()) < target:
             pass
 
-        cls._last_frame_time = target
+        cls._last_frame_time = now
         
     @classmethod
     def blank_screen(cls):
