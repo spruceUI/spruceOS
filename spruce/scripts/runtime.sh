@@ -108,7 +108,8 @@ fi
     /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
 ) &
 
-launch_startup_watchdogs
+# Not awaited: the first menu frame does not need the watchdogs up.
+launch_startup_watchdogs &
 
 # Before the network, not after it: achievements are earned offline.
 raproxy_apply &

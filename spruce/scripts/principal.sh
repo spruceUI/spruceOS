@@ -36,8 +36,8 @@ while true; do
     set_smart
 
     stop_pyui_message_writer
-    enable_or_disable_rgb
-    set_rgb_in_menu
+    # Not awaited: the menu does not depend on the LEDs.
+    ( enable_or_disable_rgb; set_rgb_in_menu ) &
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
