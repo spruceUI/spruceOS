@@ -83,13 +83,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         self.theme_ever_changed = True
         theme_folders = self.get_theme_folders()
         selected_index = theme_folders.index(Device.get_device().get_system_config().get_theme())
+        theme_changed = False
         if(ControllerInput.X == input and not Device.get_device().get_system_config().simple_mode_enabled()):
             ThemeSettingsMenu().show_theme_options_menu()
         elif(ControllerInput.A == input):
-            selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, Language.theme())
+            new_selected_index = ThemeSelectionMenu().get_selected_option_index(theme_folders, Language.theme())
+            if(new_selected_index is not None):
+                theme_changed = selected_index != new_selected_index
+                selected_index = new_selected_index
+        else:
+            return
 
-
-        if(selected_index is not None):
+        if(theme_changed):
             Theme.set_theme_path(os.path.join(PyUiConfig.get("themeDir"), theme_folders[selected_index]), Device.get_device().screen_width(), Device.get_device().screen_height())
             Display.init_fonts()   
             Device.get_device().get_system_config().set_theme(theme_folders[selected_index])
