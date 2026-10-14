@@ -64,6 +64,7 @@ check_and_hide_update_app &
 # finished. firstboot may return success, warning, or failure; runtime chooses the closing
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_$(get_firstboot_key)"; then
+    wait_device_init_jobs   # firstboot.sh puts a PyUI on screen
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
 

@@ -478,6 +478,7 @@ run_unpacker_foreground() {
     log_prefix="$1"
     firstboot_ui="$2"
 
+    wait_device_init_jobs   # the unpack status is shown by a PyUI
     firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
     run_archive_unpacker_foreground
     firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"

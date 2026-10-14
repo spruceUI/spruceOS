@@ -265,6 +265,14 @@ device_init() {
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
 
+    echo 1 > /sys/class/drm/card0-DSI-1/rotate
+    echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+    # The first userspace modeset after boot re-runs the whole panel init;
+    # do it here, off the frontend's first frame.
+    "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1 &
+    # DRM master while it runs: no other display client may start before it exits.
+    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
+
     init_gpio_SmartProS
 
 
@@ -303,9 +311,6 @@ device_init() {
     tinymix set 29 1
     amixer set DAC 255 # reset this to max so we're not double attenuating vol with two different mixer controls
 
-    echo 1 > /sys/class/drm/card0-DSI-1/rotate
-    echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
-    
     (
         # Set volume on startup by simulating button presses
         # Alternative is shared memory to keymon
