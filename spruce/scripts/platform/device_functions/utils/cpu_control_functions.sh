@@ -33,8 +33,9 @@ lock_governor() {
 }
 
 # Usage:
-#   cores_online "0123"           -> cores 0-3
-#   cores_online "0135"     -> online cores 0,1,3,5; offline others
+#   cores_online "0123"                -> cores 0-3
+#   cores_online "0135"                -> online cores 0,1,3,5; offline others
+#   cores_online "4567" --no-offline   -> online cores 4-7; leave the others as they are
 cores_online() {
     [ -z "$1" ] && return  # skip empty call
     core_string="${1:-0123}"
@@ -51,6 +52,12 @@ cores_online() {
             (*"$cpu"*) val=1 ;;
             (*)        val=0 ;;
         esac
+
+        # Offlining is a slow hotplug; a caller may leave it to the next call.
+        [ "$val" = 0 ] && [ "$2" = "--no-offline" ] && continue
+
+        # Re-locking a core already in that state only costs forks.
+        read -r cur < "$cpu_path/online" 2>/dev/null && [ "$cur" = "$val" ] && continue
 
         # lock requested cpus online and all others offline
         chmod a+w "$cpu_path/online" 2>/dev/null
@@ -171,11 +178,12 @@ set_smart() {
     fi
 }
 
+# Optional --no-offline leaves the cores outside the performance set as they are.
 set_performance() {
     log_message "set_performance called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu" --tmp
-        cores_online "$DEVICE_MAX_CORES_ONLINE"
+        cores_online "$DEVICE_MAX_CORES_ONLINE" "$1"
 
         unlock_governor 2>/dev/null
 

@@ -205,6 +205,9 @@ def main():
     main_menu = MainMenu()
 
     start_background_threads()
+    # The CPU is held in performance mode until the menu is built.
+    # Return it to normal on a thread: offlining cores would delay the first input.
+    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
     keep_running = True
     PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):

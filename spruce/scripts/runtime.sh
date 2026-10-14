@@ -34,7 +34,8 @@ write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
 
-set_performance
+# Extra cores stay up through the boot; the first set_smart offlines them.
+set_performance --no-offline
 # Roms/PORTS -> Roms/ports on the first boot after an install/update; before device_init.
 if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
     . /mnt/SDCARD/spruce/scripts/ports_migration.sh
@@ -128,9 +129,6 @@ fi
 
 developer_mode_task &
 update_checker &
-
-# Initialize CPU settings
-set_smart
 
 # Set up the boot_to action prior to getting into the principal loop
 set_up_boot_action
