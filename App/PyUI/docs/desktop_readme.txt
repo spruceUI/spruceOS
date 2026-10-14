@@ -85,9 +85,15 @@ From another app
 ----------------
 
 Apps that bring PyUI up themselves (as App/Cheevos does on devices) get the
-desktop the same way they get a handheld: initialize_device("DESKTOP",
-main_ui_mode=False) from mainui.py. desktop.py configures the device through
-environment variables, which such an app sets instead:
+desktop the same way they get a handheld:
+
+    from devices.device_factory import initialize_device
+    initialize_device("DESKTOP", main_ui_mode=False)
+
+The factory imports only the selected device, without loading the launcher.
+mainui.initialize_device remains available for existing apps. desktop.py
+configures the device through environment variables, which such an app sets
+instead:
 
   PYUI_DESKTOP_RES                 640x480
   PYUI_DESKTOP_SCALE               window zoom, 1

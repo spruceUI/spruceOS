@@ -34,7 +34,8 @@ class DesktopOptions:
     """How the DESKTOP device runs.
 
     Read from PYUI_DESKTOP_* environment variables, so `mainui.py -device DESKTOP`, desktop.py
-    and apps that bring PyUI up themselves (initialize_device) all configure it the same way.
+    and apps that bring PyUI up themselves (devices.device_factory.initialize_device) all
+    configure it the same way.
 
     The SD card is split in two: `sdcard` is read only (App/, Emu/, Themes/ - by default the
     SpruceOS checkout this PyUI is in), `data` takes everything PyUI writes (Saves/,

@@ -8,9 +8,7 @@ from display.display import Display
 from games.utils.game_system import GameSystem
 from menus.app.app_utils import AppUtils
 from menus.games.file_based_game_system_config import FileBasedGameSystemConfig
-from menus.games.game_system_select_menu import GameSystemSelectMenu
 from menus.games.utils.rom_info import RomInfo
-from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 
@@ -185,6 +183,10 @@ class MiyooTrimCommon():
 
     @staticmethod
     def get_image_for_activity(activity):
+        # Only the activity tracker needs these; importing them loads the game menus.
+        from menus.games.game_system_select_menu import GameSystemSelectMenu
+        from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+
         # TODO this is assuming all defaults
         # We can create a mapping the first time this is called from config files
         # to account for this in the future
