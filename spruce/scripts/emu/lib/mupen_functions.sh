@@ -71,7 +71,7 @@ build_mupen_args() {
 	if [ "$PLATFORM" = "A30" ]; then
 		ARGS="--gfx $GFX_PLUGIN --resolution 480x360"
 	elif [ "$SA_PLUGIN" = "gliden64" ]; then
-		ARGS="--gfx $GFX_PLUGIN --resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} --set GLideN64[AspectRatio]=1"
+		ARGS="--gfx $GFX_PLUGIN --resolution ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT} --set Video-GLideN64[AspectRatio]=1"
 	else
 		ARGS="--gfx $GFX_PLUGIN --resolution ${G_WIDTH}x${G_HEIGHT} --set Video-Rice[ResolutionWidth]=$DISPLAY_WIDTH --set Video-Rice[ResolutionHeight]=$DISPLAY_HEIGHT"
 		if [ "$DISPLAY_WIDTH" -gt "$G_WIDTH" ]; then
