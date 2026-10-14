@@ -30,6 +30,7 @@ fi
 rotate_logs
 log_file="/mnt/SDCARD/Saves/spruce/spruce.log" # Resetting log file location
 log_message "---------Starting up---------"
+write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
 

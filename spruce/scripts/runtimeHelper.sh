@@ -24,6 +24,17 @@ run_sd_card_fix_if_triggered() {
     fi
 }
 
+# Read by PortMaster's device_info.txt. In /tmp because the card moves between devices.
+write_device_info() {
+    cat > /tmp/spruce_device_info.env <<EOF
+CFW_NAME="spruce"
+CFW_VERSION="$(get_version)"
+DEVICE_NAME="$SPRUCE_DEVICE_NAME"
+SPRUCE_PLATFORM="$PLATFORM"
+ANALOG_STICKS="$DEVICE_NUM_ANALOG_STICKS"
+EOF
+}
+
 hide_fw_app() {
     jq 'if .label then ."#label" = .label | del(.label) else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
