@@ -10,7 +10,6 @@ from menus.games.game_system_select_menu import GameSystemSelectMenu
 from menus.games.just_games_menu import JustGamesMenu
 from menus.language.language import Language
 from menus.main_menu_popup import MainMenuPopup
-from menus.settings.basic_settings_menu import BasicSettingsMenu
 from menus.games.recents_menu import RecentsMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
@@ -20,13 +19,26 @@ from views.selection import Selection
 from views.view_creator import ViewCreator
 
 
+class LazySettingsMenu:
+    """Settings menu that is created on first show and reused afterwards."""
+
+    def __init__(self):
+        self._menu = None
+
+    def show_menu(self):
+        if self._menu is None:
+            from menus.settings.basic_settings_menu import BasicSettingsMenu
+            self._menu = BasicSettingsMenu()
+        return self._menu.show_menu()
+
+
 class MainMenu:
     def __init__(self):
         self.app_menu = AppMenu()
         self.favorites_menu = FavoritesMenu()
         self.collections_menu = CollectionsMenu()
         self.recents_menu = RecentsMenu()
-        self.settings_menu = BasicSettingsMenu()
+        self.settings_menu = LazySettingsMenu()
         self.system_select_menu = GameSystemSelectMenu(self.app_menu, self.favorites_menu, self.collections_menu, self.recents_menu, self.settings_menu)
 
         self.popup_menu = MainMenuPopup()

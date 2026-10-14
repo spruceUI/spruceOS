@@ -15,7 +15,6 @@ from menus.games.utils import raproxy_cli
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
-from menus.settings.basic_settings_menu import BasicSettingsMenu
 from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.logger import PyUiLogger
@@ -40,6 +39,8 @@ class GameSystemSelectMenuPopup:
 
     def open_settings(self, input):
         if (ControllerInput.A == input):
+            # Deferred: off the startup path.
+            from menus.settings.basic_settings_menu import BasicSettingsMenu
             BasicSettingsMenu().show_menu()
 
     def open_apps(self, input):
