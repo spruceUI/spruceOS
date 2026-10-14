@@ -94,6 +94,8 @@ class Display:
     _glyph_cache = {}
     _glyph_is_provided = None
     _glyph_supports_32bit = False
+    
+    _last_frame_time = 0
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
@@ -1115,6 +1117,7 @@ class Display:
 
         return rotated_texture
 
+
     start = 0
     @classmethod
     def present(cls, fade=False):
@@ -1146,6 +1149,7 @@ class Display:
                         sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
 
             sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls.pace_frame()
             cls.renderer.present()
             Device.get_device().post_present_operations()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
@@ -1159,6 +1163,23 @@ class Display:
 
             cls.start = time.perf_counter()
 
+    @classmethod
+    def pace_frame(cls):
+        frequency = sdl2.SDL_GetPerformanceFrequency()
+        frame_time = frequency / 60
+        now = sdl2.SDL_GetPerformanceCounter()
+
+        target = cls._last_frame_time + frame_time
+        remaining = (target - now) / frequency
+
+        if remaining > 0.010:
+            sdl2.SDL_Delay(int((remaining - 0.010) * 1000))
+
+        while (now := sdl2.SDL_GetPerformanceCounter()) < target:
+            pass
+
+        cls._last_frame_time = target
+        
     @classmethod
     def blank_screen(cls):
         if cls._screensaver_active:
