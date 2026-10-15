@@ -52,6 +52,8 @@ build_mupen_args() {
 	# Read video plugin from overlay config (written to [SpruceOS] section)
 	# Values: 0=GLideN64, 1=Rice, 2=Glide64mk2
 	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
+	# Rice for the rest of this launch once GLideN64 has failed to load (run_mupen_standalone)
+	[ -n "${MUPEN_RICE_FALLBACK:-}" ] && SA_PLUGIN_NUM=1
 	case "$SA_PLUGIN_NUM" in
 		0) SA_PLUGIN="gliden64" ;;
 		2) SA_PLUGIN="glide64mk2" ;;
@@ -179,6 +181,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 	rm -f /tmp/mupen_restart
 	[ "$PLATFORM" = "Flip" ] && echo "-1" > /sys/class/miyooio_chr_dev/joy_type
+	MUPEN_RICE_FALLBACK=""
 
 	while true; do
 		build_mupen_args
@@ -219,6 +222,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 		# them there, so let the d-pad drive them for the run.
 		treat_dpad_as_analog
 		./mupen64plus "$@" "$ROM_PATH" > $(emu_log_file) 2>&1
+		mupen_rc=$?
 		treat_dpad_as_dpad
 
 		case "$PLATFORM" in
@@ -226,6 +230,14 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 			"Anbernic"*) ;;
 			*) kill -9 $(pidof gptokeyb2) ;;
 		esac
+
+		# mupen64plus exits 12 when a plugin fails to load, before any emulation: a GLideN64
+		# that cannot load here gets one relaunch with Rice (the chosen setting is kept)
+		if [ "$mupen_rc" = 12 ] && [ "$SA_PLUGIN" = "gliden64" ] && [ -z "${MUPEN_RICE_FALLBACK:-}" ]; then
+			log_message "mupen_functions.sh: GLideN64 did not load (exit 12); relaunching with Rice"
+			MUPEN_RICE_FALLBACK=1
+			continue
+		fi
 
 		# Restart loop: overlay writes /tmp/mupen_restart when user selects Restart
 		if [ -f /tmp/mupen_restart ]; then
