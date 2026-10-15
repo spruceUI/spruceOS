@@ -105,14 +105,14 @@
     "Emulator_64": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_a133p_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
         "MAGICX_A133P"
       ],
-      "selected": "yabasanshiro_a133p_libretro",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_32": {
