@@ -185,6 +185,10 @@ device_wifi_power_off() {
     rfkill block wifi
 }
 
+device_wifi_connect() {
+    nmcli -w 45 device wifi connect $1 password $2 >/dev/null 2>&1
+}
+
 sync_volume_level() {
     # SYSTEM_JSON doesn't exists yet during first boot
     if [ -f "$SYSTEM_JSON" ]; then
