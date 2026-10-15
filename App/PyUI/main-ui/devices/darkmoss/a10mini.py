@@ -1,4 +1,4 @@
-from devices.rgb30.rgb30 import Rgb30
+from devices.darkmoss.rgb30 import Rgb30
 
 
 class A10Mini(Rgb30):

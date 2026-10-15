@@ -11,9 +11,9 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller import KeyWatcherController
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
-from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
+from devices.darkmoss.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
-from devices.miniloong.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
+from devices.darkmoss.miniloong_key_mapping_provider import MiniloongKeyMappingProvider
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
 from display.display import Display

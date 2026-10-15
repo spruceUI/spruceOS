@@ -10,7 +10,7 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller import HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
-from devices.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
+from devices.darkmoss.darkmoss_common import DarkmossPanelCalibration, darkmoss_fw_version
 from devices.device_common import DeviceCommon
 from devices.miyoo_trim_common import MiyooTrimCommon
 from display.display import Display
