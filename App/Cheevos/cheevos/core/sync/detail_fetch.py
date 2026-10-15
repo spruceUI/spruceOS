@@ -29,7 +29,7 @@ from cheevos.core.errors import (
     RequestCancelledError,
 )
 from cheevos.core.models import GameDetail, GameProgress
-from cheevos.core.sync.engine import RATE_LIMIT_PAUSE, RATE_LIMITED_UNTIL_KEY
+from cheevos.core.sync.options import RATE_LIMIT_PAUSE, RATE_LIMITED_UNTIL_KEY
 from cheevos.core.sync.progress import Failure
 
 logger = logging.getLogger(__name__)

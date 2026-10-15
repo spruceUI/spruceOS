@@ -12,6 +12,7 @@ import codecs
 import json
 import logging
 import re
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +25,19 @@ logger = logging.getLogger(__name__)
 RA_SETTINGS_SECTION = "RetroAchievements Settings"
 API_KEY_LENGTH = 32
 _API_KEY = re.compile(rf"[A-Za-z0-9]{{{API_KEY_LENGTH}}}")
+
+
+@dataclass(frozen=True, slots=True)
+class Credentials:
+    """Who to sync as.
+
+    Attributes:
+        username: RA username.
+        api_key: RA Web API key.
+    """
+
+    username: str
+    api_key: str
 
 
 def read_spruce_ra_setting(paths: Paths, key: str) -> str | None:

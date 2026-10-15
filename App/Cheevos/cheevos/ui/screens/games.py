@@ -25,7 +25,7 @@ FINISHED = frozenset(AwardKind)
 # Above this many rows, preparing the list takes a noticeable moment on a Miyoo Mini
 # (about 0.3 s per 1,000 games), so show a loading frame first.
 LOADING_FRAME_ROWS = 1000
-_BUTTONS = frozenset({Button.A, Button.Y, Button.SELECT})
+_BUTTONS = frozenset({Button.A, Button.Y, Button.MENU, Button.SELECT})
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,7 +159,7 @@ def show_games(ctx: AppContext) -> None:
         choice = shown.view.show(buttons=_BUTTONS, hints=hints)
         if choice is None:
             return
-        if choice.button is Button.Y:
+        if choice.button in (Button.Y, Button.MENU):
             view = _options(view)
             selected_id = None
             continue

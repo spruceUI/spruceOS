@@ -1,9 +1,9 @@
 """The sync engine: fetch from RA into the caches, incrementally and resumably.
 
 Phases: preflight (network, rate limit) → profile → library (completion progress +
-recently played) → awards → recent unlocks → details (the working set's new games, changed
-and stale cached games; one commit per game) → media (avatar, game
-icons, badges for the configured scope). See .agents/sync-and-storage.md.
+recently played) → awards (and new events' tiers) → recent unlocks → details (the working
+set's new games, changed and stale cached games; one commit per game) → media (avatar, game
+icons, award images, badges for the configured scope). See .agents/sync-and-storage.md.
 
 An interrupted sync needs no explicit resume state: games whose details were not fetched keep
 their old fingerprint (or none), so the next plan picks up exactly the remaining ones.
@@ -16,6 +16,7 @@ import threading
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 
+from cheevos.core.awards import award_image, gallery
 from cheevos.core.clock import network_clock
 from cheevos.core.errors import (
     AuthError,
@@ -30,6 +31,14 @@ from cheevos.core.settings import BadgeScope
 from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache, avatar_key, badge_key, icon_key
 from cheevos.core.storage.recent_feed import RecentFeed, RecentFeedCache, library_fingerprint
+from cheevos.core.sync.events import sync_events
+from cheevos.core.sync.options import (
+    FULL_SINCE_KEY,
+    LAST_SYNC_KEY,
+    RATE_LIMIT_PAUSE,
+    RATE_LIMITED_UNTIL_KEY,
+    SyncOptions,
+)
 from cheevos.core.sync.planner import (
     DAY,
     badge_game_ids,
@@ -42,12 +51,6 @@ from cheevos.core.sync.progress import Failure, Phase, ProgressTracker, SyncStat
 logger = logging.getLogger(__name__)
 
 MEDIA_BATCH = 25  # images per transaction: few commits on the SD's dirsync FAT32
-LAST_SYNC_KEY = "last_sync_at"
-# Set while a full re-sync is unfinished: details fetched before it are re-fetched.
-FULL_SINCE_KEY = "full_resync_since"
-# When RA allows requests again after asking for a long pause (wall clock, epoch seconds).
-RATE_LIMITED_UNTIL_KEY = "rate_limited_until"
-RATE_LIMIT_PAUSE = 60.0  # assumed pause when RA rate-limits without saying for how long
 
 
 class SyncCancelledError(Exception):
@@ -66,22 +69,6 @@ class _FailedError(Exception):
         super().__init__(failure.value)
         self.failure = failure
         self.retry_at = retry_at
-
-
-@dataclass(frozen=True, slots=True)
-class SyncOptions:
-    """What one sync should do.
-
-    Attributes:
-        full: Start "Download every game": fetch every game's details, resuming in later
-            syncs until done.
-        badge_scope: Which games' badges to download.
-        recent_days: Activity window for the working set and the badge scope's "recent".
-    """
-
-    full: bool = False
-    badge_scope: BadgeScope = BadgeScope.ON_DEVICE_AND_RECENT
-    recent_days: int = 30
 
 
 @dataclass(slots=True)
@@ -147,7 +134,7 @@ class SyncEngine:
             self._preflight()
             self._sync_profile()
             games = self._sync_library()
-            self._sync_awards()  # one request: the awards wall is complete before the details
+            self._sync_awards()  # first: the Awards screen is complete before the details
             self._sync_recent(games)
             self._sync_details(games, options)
             self._sync_media(games, options)
@@ -344,11 +331,12 @@ class SyncEngine:
         self._tracker.advance(detail=True)
 
     def _sync_awards(self) -> None:
-        """Fetch and store mastery/beaten awards."""
+        """Fetch and store the visible awards, then the details of their events."""
         self._check_cancel()
         self._tracker.phase(Phase.AWARDS)
         counts, awards = self._deps.client.awards()
         self._deps.data.save_awards(counts, awards)
+        sync_events(self._deps.client, self._deps.data, awards, int(self._clock()), self._cancel)
 
     def _sync_media(self, games: list[GameProgress], options: SyncOptions) -> None:
         """Download missing images: avatar, game icons, and badges for the badge scope.
@@ -395,6 +383,7 @@ class SyncEngine:
         for game in games:
             if game.image_icon:
                 yield icon_key(game.game_id), game.image_icon
+        yield from self._award_images()
         for game_id in self._badge_games(games, options):
             detail = self._deps.data.game_detail(game_id)
             for achievement in detail.achievements if detail else ():
@@ -410,6 +399,20 @@ class SyncEngine:
                     badge_key(achievement.badge_name, locked=False),
                     f"/Badge/{achievement.badge_name}.png",
                 )
+
+    def _award_images(self) -> Iterator[tuple[str, str]]:
+        """List event and site award images (mastered games' icons are the library's).
+
+        Yields:
+            Cache key and path pairs.
+        """
+        events = self._deps.data.events()
+        _counts, awards = self._deps.data.awards(gallery=True)
+        for award in gallery(awards):
+            if award.game_id is None:
+                key, path = award_image(award, events.get(award.data))
+                if path:
+                    yield key, path
 
     def _badge_games(self, games: list[GameProgress], options: SyncOptions) -> list[int]:
         """Select the games whose badges belong in the cache for the configured scope.

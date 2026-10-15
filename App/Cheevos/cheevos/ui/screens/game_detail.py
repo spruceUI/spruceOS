@@ -120,13 +120,13 @@ def _browse(ctx: AppContext, detail: GameDetail, title: Title, pending: dict) ->
             items = [_row(ctx, a, detail, pending) for a in shown]
             layout = Layout.BADGES if view.layout == "grid" else Layout.LIST
             prepared = PreparedView(title, items, selected=selected, layout=layout)
-        buttons = frozenset({Button.A, Button.Y, Button.SELECT})
+        buttons = frozenset({Button.A, Button.Y, Button.MENU, Button.SELECT})
         toggle = strings.HINT_LIST if view.layout == "grid" else strings.HINT_GRID
         hints = [(Button.Y, strings.HINT_FILTER), (Button.SELECT, toggle)]
         choice = prepared.show(buttons=buttons, hints=hints)
         if choice is None:
             return
-        if choice.button is Button.Y:
+        if choice.button in (Button.Y, Button.MENU):
             changed = _options(view)
             if changed != view:
                 view, selected, prepared = changed, 0, None

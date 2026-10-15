@@ -19,29 +19,24 @@ from pathlib import Path
 
 from cheevos.core.models import (
     Achievement,
-    Award,
-    AwardCounts,
-    AwardKind,
     GameDetail,
     GameProgress,
     Unlock,
     UnlockWindow,
     UserProfile,
 )
+from cheevos.core.storage.award_store import AwardStore
 from cheevos.core.storage.db import open_cache, reset_cache, select_among
 from cheevos.core.storage.recent_feed import RecentFeedCache
 from cheevos.core.storage.schema import (
     ACHIEVEMENT_COLUMNS,
     ACTIVITY_ORDER,
-    AWARD_COLUMNS,
     DDL,
     GAME_COLUMNS,
     SCHEMA_VERSION,
     UPSERT_GAME,
     achievement_from_row,
     achievement_row,
-    award_from_row,
-    award_row,
     game_from_detail,
     game_from_row,
     game_row,
@@ -50,12 +45,11 @@ from cheevos.core.storage.schema import (
 logger = logging.getLogger(__name__)
 
 _USERNAME_KEY = "username"
-_AWARD_COUNTS_KEY = "award_counts"
 _UNLOCK_WINDOW_KEY = "unlock_window"
 FIRST_HARDCORE_UNLOCK_KEY = "first_hardcore_unlock_at"
 
 
-class DataCache:
+class DataCache(AwardStore):
     """Typed access to ``data.db`` for one RA account.
 
     Args:
@@ -338,61 +332,6 @@ class DataCache:
             (limit,),
         ).fetchall()
         return [achievement_from_row(row) for row in rows]
-
-    # --- awards -----------------------------------------------------------------------------
-
-    def save_awards(self, counts: AwardCounts, awards: list[Award]) -> None:
-        """Replace the stored awards and award counters.
-
-        Args:
-            counts: Counters from RA.
-            awards: Visible game awards from RA.
-        """
-        insert = (
-            f"INSERT OR REPLACE INTO awards ({AWARD_COLUMNS}) "  # noqa: S608
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        )
-        with self._db:
-            self._db.execute("DELETE FROM awards")
-            self._db.executemany(insert, [award_row(award) for award in awards])
-            self._db.execute(
-                "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)",
-                (_AWARD_COUNTS_KEY, json.dumps(dataclasses.asdict(counts))),
-            )
-
-    def award_counts(self) -> AwardCounts | None:
-        """Return RA's award counters, without reading the awards (home summary).
-
-        Returns:
-            The counters, or ``None`` if awards were never synced.
-        """
-        raw = self.get_meta(_AWARD_COUNTS_KEY)
-        if raw is None:
-            return None
-        try:
-            return AwardCounts(**json.loads(raw))
-        except (TypeError, ValueError):
-            logger.warning("Stored award counts are unreadable; ignoring them")
-            return None
-
-    def awards(self, kind: AwardKind | None = None) -> tuple[AwardCounts | None, list[Award]]:
-        """Return the award counters and awards, newest award first.
-
-        Args:
-            kind: Only awards of this kind. Reading 3,904 awards takes 0.27 s on a Miyoo
-                Mini+, so the profile reads only the ones its stats use.
-
-        Returns:
-            ``(counts, awards)``; counts is ``None`` if awards were never synced.
-        """
-        counts = self.award_counts()
-        where, params = ("WHERE kind = ? ", (kind.value,)) if kind else ("", ())
-        rows = self._db.execute(
-            f"SELECT {AWARD_COLUMNS} FROM awards {where}"  # noqa: S608 — only "?" marks
-            "ORDER BY COALESCE(awarded_at, 0) DESC, title COLLATE NOCASE",
-            params,
-        ).fetchall()
-        return counts, [award_from_row(row) for row in rows]
 
     def unlocked_among(self, achievement_ids: Iterable[int]) -> set[int]:
         """Return which of these achievements the cache knows as unlocked.

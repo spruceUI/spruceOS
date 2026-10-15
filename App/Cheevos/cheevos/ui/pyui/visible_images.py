@@ -61,6 +61,11 @@ def image_demand() -> ImageDemand:
     return _hooks.demand
 
 
+def new_window() -> None:
+    """Drop downloads queued for rows no longer shown (a view that tracks its own rows)."""
+    _hooks.new_window()
+
+
 def image_version() -> int:
     """Return the media revision, for layouts cached until a downloaded image arrives."""
     return _hooks.version()

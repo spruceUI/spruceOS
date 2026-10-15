@@ -20,6 +20,7 @@ from cheevos.ui.pyui.text import (
     displayable,
     fit_text,
     fit_title,
+    fit_with_tail,
     font_purpose,
     text_width,
 )
@@ -39,6 +40,7 @@ __all__ = [
     "end",
     "fit_text",
     "fit_title",
+    "fit_with_tail",
     "image",
     "line_height",
     "screen_size",

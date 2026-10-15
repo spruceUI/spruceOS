@@ -13,7 +13,7 @@ import math
 from collections.abc import Callable
 from pathlib import Path
 
-from cheevos.core.sync.engine import LAST_SYNC_KEY
+from cheevos.core.sync.options import LAST_SYNC_KEY
 from cheevos.core.sync.progress import Failure, Phase, SyncStatus
 from cheevos.ui import format as fmt
 from cheevos.ui import strings

@@ -33,6 +33,29 @@ class AwardKind(Enum):
     BEATEN_SOFTCORE = "beaten-softcore"
 
 
+class AwardType(Enum):
+    """An award's type, as ``API_GetUserAwards`` names it (``AwardType``)."""
+
+    MASTERY = "Mastery/Completion"  # AwardData: game ID; AwardDataExtra 1 = hardcore
+    GAME_BEATEN = "Game Beaten"
+    EVENT = "Event"  # AwardData: event ID; AwardDataExtra: the earned tier
+    SITE_EVENT = "Site Event"  # an event award shown with the site awards
+    PLAYTEST = "Playtest"
+    UNLOCKS_YIELD = "Achievement Unlocks Yield"  # AwardData: the tier
+    POINTS_YIELD = "Achievement Points Yield"
+    PATREON = "Patreon Supporter"  # AwardDataExtra 2: the $2 tier
+    LEGEND = "Certified Legend"
+    MEDIA = "Media Contribution"  # AwardDataExtra: the earned tier
+
+
+class AwardGroup(Enum):
+    """The profile gallery an award appears in (.agents/retroachievements.md, "Awards")."""
+
+    GAME = "game"
+    EVENT = "event"
+    SITE = "site"
+
+
 @dataclass(frozen=True, slots=True)
 class UserProfile:
     """Account summary for the dashboard.
@@ -197,32 +220,62 @@ class GameDetail:
 
 @dataclass(frozen=True, slots=True)
 class Award:
-    """A mastery/completion/beaten award shown on the awards wall.
+    """One visible award from ``API_GetUserAwards``: a game, event or site badge.
+
+    ``data`` means something else for each type (a game ID, an event ID, a site award ID or
+    a tier), so an award is identified by its type and data together (:attr:`key`), never by
+    ``data`` alone.
 
     Attributes:
-        game_id: RA game ID.
-        title: Game title.
-        console_name: Console name.
-        image_icon: Icon path on the media host.
-        kind: Award kind (mode included).
+        type: RA's award type.
+        data: ``AwardData``: game ID, event ID, site award ID or tier, by type.
+        extra: ``AwardDataExtra``: 1 = hardcore for game awards, else the earned tier.
+        title: RA's title: the game's or event's (empty for most site awards).
+        console_name: Console name (``"Events"`` for events, empty for site awards).
+        image_icon: Image path on the media host (empty for most site awards).
         awarded_at: When it was earned.
         console_id: RA console ID (0 when unknown).
         display_order: The user's own ordering on RA's site.
+        position: Index in RA's list, which is in the profile's order.
+        display_tier: The tier whose image the user chose to show, if not the earned one.
     """
 
-    game_id: int
+    type: AwardType
+    data: int
+    extra: int
     title: str
     console_name: str
     image_icon: str
-    kind: AwardKind
     awarded_at: int | None
     console_id: int = 0
     display_order: int = 0
+    position: int = 0
+    display_tier: int | None = None
+
+    @property
+    def key(self) -> str:
+        """A stable identity across types, e.g. ``"Event:196:2"`` (game and event IDs overlap)."""
+        return f"{self.type.value}:{self.data}:{self.extra}"
+
+    @property
+    def kind(self) -> AwardKind | None:
+        """The game award's kind (mode included), or ``None`` for event and site awards."""
+        hardcore = self.extra == 1
+        if self.type is AwardType.MASTERY:
+            return AwardKind.MASTERED if hardcore else AwardKind.COMPLETED
+        if self.type is AwardType.GAME_BEATEN:
+            return AwardKind.BEATEN_HARDCORE if hardcore else AwardKind.BEATEN_SOFTCORE
+        return None
+
+    @property
+    def game_id(self) -> int | None:
+        """The game a mastery or beaten award is for (``None`` for other awards)."""
+        return self.data if self.kind is not None and self.data > 0 else None
 
 
 @dataclass(frozen=True, slots=True)
 class AwardCounts:
-    """Award counters from ``API_GetUserAwards``.
+    """Award counters from ``API_GetUserAwards`` (hidden awards included).
 
     Attributes:
         mastered: Mastery awards (hardcore 100%).
@@ -235,6 +288,46 @@ class AwardCounts:
     completed: int
     beaten_hardcore: int
     beaten_softcore: int
+
+
+@dataclass(frozen=True, slots=True)
+class EventTier:
+    """One tier of an event's award (``event-awards`` in RA's v2 API).
+
+    Attributes:
+        tier: Tier index, as in the award's ``AwardDataExtra``.
+        label: RA's label, e.g. ``"Gold"`` or ``"60 points"``.
+        points: Event points needed to earn it.
+        image: Its badge's path on the media host.
+    """
+
+    tier: int
+    label: str
+    points: int
+    image: str
+
+
+@dataclass(frozen=True, slots=True)
+class EventInfo:
+    """An event's title, badge and award tiers (``events`` in RA's v2 API).
+
+    Attributes:
+        event_id: RA event ID (an event award's ``AwardData``).
+        title: Event title.
+        image: The event's own badge path on the media host.
+        tiers: Award tiers, lowest first (none for events without tiers).
+        points: What the whole event is worth (its published achievements' points), if known.
+    """
+
+    event_id: int
+    title: str
+    image: str
+    tiers: tuple[EventTier, ...] = ()
+    points: int | None = None
+
+    def tier(self, index: int) -> EventTier | None:
+        """Return the tier with this index, if the event has one."""
+        return next((tier for tier in self.tiers if tier.tier == index), None)
 
 
 @dataclass(frozen=True, slots=True)

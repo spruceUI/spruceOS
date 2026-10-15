@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import logging
 import threading
-from dataclasses import dataclass
 
-from cheevos.core.credentials import read_api_key, read_username
+from cheevos.core.credentials import Credentials, read_api_key, read_username
 from cheevos.core.errors import ConfigError
 from cheevos.core.local_games import on_device_game_ids
 from cheevos.core.proxy import ProxyReader
@@ -19,19 +18,6 @@ from cheevos.core.sync.engine import SyncDeps
 from cheevos.platform.paths import Paths
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass(frozen=True, slots=True)
-class Credentials:
-    """Who to sync as.
-
-    Attributes:
-        username: RA username.
-        api_key: RA Web API key.
-    """
-
-    username: str
-    api_key: str
 
 
 def load_credentials(paths: Paths) -> Credentials:

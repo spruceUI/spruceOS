@@ -1,15 +1,23 @@
-"""Run syncs on a worker thread while the UI keeps going (.agents/sync-and-storage.md)."""
+"""Run syncs on a worker thread while the UI keeps going (.agents/sync-and-storage.md).
+
+The engine, and the RA client it pulls in, load on the worker thread when the first sync
+starts: they aren't needed for the first frame (.agents/device.md, "Start-up").
+"""
 
 from __future__ import annotations
 
 import logging
 import threading
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from cheevos.core.clock import network_clock
 from cheevos.core.errors import CheevosError
-from cheevos.core.sync.engine import SyncDeps, SyncEngine, SyncOptions
+from cheevos.core.sync.options import SyncOptions
 from cheevos.core.sync.progress import Failure, Phase, ProgressTracker, SyncStatus
+
+if TYPE_CHECKING:
+    from cheevos.core.sync.engine import SyncDeps
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +100,8 @@ class BackgroundSync:
             logger.exception("Could not start sync")
             self._tracker.finish(Phase.FAILED, failure=Failure.ERROR, at=self._clock())
             return
+        from cheevos.core.sync.engine import SyncEngine
+
         try:
             engine = SyncEngine(
                 deps, self._tracker, self._cancel, online=self._online, clock=self._clock

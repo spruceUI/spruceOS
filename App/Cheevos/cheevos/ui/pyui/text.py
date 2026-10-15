@@ -351,6 +351,30 @@ def fit_text(value: str, role: Text, max_width: int) -> str:
     return value
 
 
+def fit_with_tail(value: str, tail: str, role: Text, max_width: int) -> str:
+    """Fit ``"value · tail"``, shortening ``value`` first so ``tail`` (a date) stays whole.
+
+    Args:
+        value: Text that may be shortened.
+        tail: Text kept whole when there is room for it (may be empty).
+        role: Text role (font).
+        max_width: Available width in pixels.
+
+    Returns:
+        The joined text, shortened if needed.
+    """
+    if not tail or not value:
+        return fit_text(value or tail, role, max_width)
+    joined = displayable(f"{value} · {tail}", role)
+    if text_width(joined, role) <= int(max_width * _FIT_MARGIN):
+        return joined
+    end = " " + displayable(f"· {tail}", role)  # displayable() strips a leading space
+    room = max_width - text_width(end, role)
+    if room < text_width(_ellipsis(role), role) * 4:
+        return fit_text(joined, role, max_width)
+    return fit_text(value, role, room) + end
+
+
 @dataclass(frozen=True, slots=True)
 class ListRoom:
     """Width a list row's text has, from the theme's layout (see :func:`list_room`).

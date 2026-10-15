@@ -33,6 +33,9 @@ case "$PLATFORM" in
         export SDL_AUDIODRIVER=mmiyoo
         export EGL_VIDEODRIVER=mmiyoo
         export SDL_MMIYOO_DOUBLE_BUFFER=1
+        # Mirror PyUI's menu audio setup: libpadsp sends /dev/dsp writes to audioserver.
+        pidof audioserver >/dev/null || { audioserver >/dev/null 2>&1 & sleep 0.5; }
+        export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
         freemma
         CHEEVOS_PYUI_DEVICE="$(get_miyoo_mini_variant)"
         ;;
