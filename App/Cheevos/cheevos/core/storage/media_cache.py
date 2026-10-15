@@ -64,6 +64,18 @@ def icon_key(game_id: int) -> str:
     return f"icon/{game_id}"
 
 
+def award_key(path: str) -> str:
+    """Return the cache key of an event or site award's image.
+
+    Args:
+        path: Its path on the media or static host, e.g. ``"/Images/122638.png"``.
+
+    Returns:
+        E.g. ``"award/Images/122638"``.
+    """
+    return "award" + path.removesuffix(".png")
+
+
 def avatar_key(username: str) -> str:
     """Return the cache key of a user avatar (usernames are case-insensitive).
 

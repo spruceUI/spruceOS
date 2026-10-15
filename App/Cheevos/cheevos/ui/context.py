@@ -9,6 +9,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from cheevos.core.clock import network_clock
+from cheevos.core.credentials import Credentials
 from cheevos.core.local_games import on_device_game_ids
 from cheevos.core.models import PendingAward, Unlock
 from cheevos.core.proxy import ProxyReader
@@ -18,8 +19,7 @@ from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache
 from cheevos.core.sync.background import BackgroundSync
 from cheevos.core.sync.detail_fetch import DetailFetcher
-from cheevos.core.sync.engine import FULL_SINCE_KEY, SyncOptions
-from cheevos.core.sync.session import Credentials
+from cheevos.core.sync.options import FULL_SINCE_KEY, SyncOptions
 from cheevos.platform.paths import Paths
 from cheevos.ui.media import MediaResolver
 

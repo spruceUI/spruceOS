@@ -86,7 +86,7 @@ def main() -> int:
         state_path=_SDCARD / "Saves" / "cheevos" / "pyui-state.json",
         cfw_config_path=_SDCARD / "Saves" / "spruce" / "spruce-config.json",
     )
-    bootstrap.bootstrap(setup, lambda: bootstrap.hardware_device(device_name))
+    bootstrap.bootstrap(setup, lambda: bootstrap.pyui_device(device_name))
     logger.info("PyUI ready after %.2fs", time.monotonic() - STARTED_AT)
 
     try:

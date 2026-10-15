@@ -16,8 +16,6 @@ from cheevos.core.models import (
     WARNING_ACHIEVEMENT_ID,
     Achievement,
     AchievementType,
-    Award,
-    AwardCounts,
     AwardKind,
     GameDetail,
     GameProgress,
@@ -25,12 +23,6 @@ from cheevos.core.models import (
     Unlock,
     UserProfile,
 )
-
-# VisibleUserAwards.AwardType -> award kind for (hardcore, casual) via AwardDataExtra.
-_AWARD_TYPES: dict[str, tuple[AwardKind, AwardKind]] = {
-    "Mastery/Completion": (AwardKind.MASTERED, AwardKind.COMPLETED),
-    "Game Beaten": (AwardKind.BEATEN_HARDCORE, AwardKind.BEATEN_SOFTCORE),
-}
 
 
 def parse_time(value: object) -> int | None:
@@ -315,58 +307,6 @@ def parse_game_detail(data: object) -> GameDetail:
         num_players_hardcore=_int(game.get("NumDistinctPlayersHardcore")),
         achievements=tuple(achievements),
     )
-
-
-def _award(row: Mapping[str, Any]) -> Award | None:
-    """Parse one ``VisibleUserAwards`` entry; only game awards are kept.
-
-    Args:
-        row: The raw entry.
-
-    Returns:
-        The award, or ``None`` for site/event awards.
-    """
-    kinds = _AWARD_TYPES.get(_str(row.get("AwardType")))
-    game_id = _int(row.get("AwardData"))
-    if kinds is None or game_id <= 0:
-        return None
-    hardcore = _int(row.get("AwardDataExtra")) == 1
-    return Award(
-        game_id=game_id,
-        title=_str(row.get("Title")),
-        console_name=_str(row.get("ConsoleName")),
-        image_icon=_str(row.get("ImageIcon")),
-        kind=kinds[0] if hardcore else kinds[1],
-        awarded_at=parse_time(row.get("AwardedAt")),
-        console_id=_int(row.get("ConsoleID")),
-        display_order=_int(row.get("DisplayOrder")),
-    )
-
-
-def parse_awards(data: object) -> tuple[AwardCounts, list[Award]]:
-    """Parse ``API_GetUserAwards``.
-
-    Args:
-        data: Decoded JSON.
-
-    Returns:
-        The counters and the visible game awards (mastery, completion, beaten).
-
-    Raises:
-        ApiPayloadError: If the payload has the wrong shape.
-    """
-    payload = _object(data, "user awards")
-    counts = AwardCounts(
-        mastered=_int(payload.get("MasteryAwardsCount")),
-        completed=_int(payload.get("CompletionAwardsCount")),
-        beaten_hardcore=_int(payload.get("BeatenHardcoreAwardsCount")),
-        beaten_softcore=_int(payload.get("BeatenSoftcoreAwardsCount")),
-    )
-    rows = payload.get("VisibleUserAwards") or []
-    if not isinstance(rows, list):
-        raise ApiPayloadError("user awards: 'VisibleUserAwards' is not a list")
-    awards = [award for row in rows if (award := _award(_object(row, "award"))) is not None]
-    return counts, awards
 
 
 def parse_unlocks(data: object) -> list[Unlock]:

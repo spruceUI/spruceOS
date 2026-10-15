@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 RECENT_DAYS_CHOICES = (7, 30, 90)
 ACHIEVEMENT_SORT_CHOICES = ("order", "unlocked", "locked", "points", "rarity")
+AWARDS_VIEW_CHOICES = ("carousel", "grid", "list")
 
 
 class DescriptionHiding(Enum):
@@ -55,6 +56,8 @@ class Settings:
             progress bars (toggled with Select).
         achievement_grid: Show every game's achievements as a badge grid instead of a list.
         achievement_sort: Sort used for every game's achievements.
+        awards_view: How the Awards screen shows its badges (one of
+            :data:`AWARDS_VIEW_CHOICES`, cycled with Select).
     """
 
     badge_scope: BadgeScope = BadgeScope.ON_DEVICE_AND_RECENT
@@ -64,6 +67,7 @@ class Settings:
     game_list_details: bool = False
     achievement_grid: bool = False
     achievement_sort: str = "order"
+    awards_view: str = "carousel"
 
 
 DEFAULTS = Settings()
@@ -120,6 +124,11 @@ def _achievement_sort(raw: object) -> str:
     )
 
 
+def _awards_view(raw: object) -> str:
+    """Parse the Awards view, defaulting missing or invalid choices to the carousel."""
+    return raw if isinstance(raw, str) and raw in AWARDS_VIEW_CHOICES else DEFAULTS.awards_view
+
+
 def _hiding(data: dict[str, Any]) -> DescriptionHiding:
     """Parse the spoiler setting, accepting the older on/off form.
 
@@ -156,6 +165,7 @@ def settings_from_dict(data: dict[str, Any]) -> Settings:
         game_list_details=_flag(data.get("game_list_details"), default=DEFAULTS.game_list_details),
         achievement_grid=_flag(data.get("achievement_grid"), default=DEFAULTS.achievement_grid),
         achievement_sort=_achievement_sort(data.get("achievement_sort")),
+        awards_view=_awards_view(data.get("awards_view")),
     )
 
 
@@ -176,6 +186,7 @@ def settings_to_dict(settings: Settings) -> dict[str, Any]:
         "game_list_details": settings.game_list_details,
         "achievement_grid": settings.achievement_grid,
         "achievement_sort": settings.achievement_sort,
+        "awards_view": settings.awards_view,
     }
 
 

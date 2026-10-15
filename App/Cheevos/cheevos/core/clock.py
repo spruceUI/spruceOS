@@ -5,7 +5,6 @@ from __future__ import annotations
 import threading
 import time
 from collections.abc import Callable
-from email.utils import parsedate_to_datetime
 
 MIN_SERVER_YEAR = 2026
 
@@ -44,6 +43,9 @@ class ServerClock:
         """Accept a valid HTTP Date; ignore missing, malformed or implausibly old values."""
         if not value:
             return
+        # On first use: email.utils takes 0.1 s to import on a Mini (.agents/device.md).
+        from email.utils import parsedate_to_datetime
+
         try:
             date = parsedate_to_datetime(value)
             if date.tzinfo is None or date.year < MIN_SERVER_YEAR:

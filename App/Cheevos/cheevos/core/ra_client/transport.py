@@ -20,7 +20,11 @@ from cheevos.core.ra_client.parse import parse_time
 logger = logging.getLogger(__name__)
 
 API_HOST = "retroachievements.org"
+API_V2_HOST = "api.retroachievements.org"  # the JSON:API (events' award tiers)
 MEDIA_HOST = "media.retroachievements.org"
+STATIC_HOST = "static.retroachievements.org"  # the site's own art (site award badges)
+# RA's fixed hosts, the only ones that may fall back to HTTP when TLS fails.
+RA_HOSTS = frozenset({API_HOST, API_V2_HOST, MEDIA_HOST, STATIC_HOST})
 DEFAULT_TIMEOUT = 15.0
 
 # A kept-alive connection the server closed between requests: reconnect and retry once.
@@ -170,7 +174,7 @@ class HttpTransport:
             try:
                 return self._retry_dropped(method, host, path, headers)
             except ssl.SSLError as exc:
-                if host not in (API_HOST, MEDIA_HOST) or host in self._plain_hosts:
+                if host not in RA_HOSTS or host in self._plain_hosts:
                     raise
                 logger.warning("TLS unavailable for %s (%s); using HTTP", host, type(exc).__name__)
                 self._discard(host)
@@ -275,8 +279,9 @@ class FixtureTransport:
     API requests match a recorded response by endpoint and parameters (credentials ignored).
     When nothing matches exactly and the endpoint was recorded only once, that response is
     served: endpoint-wide options such as page sizes then don't need to match the recording.
-    Media paths are served from ``media_dir`` laid out like the media host
-    (``<media_dir>/Badge/123.png``).
+    The v2 API's resources are recorded by path, e.g. ``"v2/events"``. Media paths are served
+    from ``media_dir`` laid out like the media host (``<media_dir>/Badge/123.png``); the static
+    host's art lives under ``<media_dir>/assets/``.
 
     Args:
         fixtures_dir: Directory with ``manifest.json`` and the recorded JSON files.
@@ -308,8 +313,8 @@ class FixtureTransport:
             The recorded response, or a 404 response.
         """
         parts = urlsplit(path)
-        if host != MEDIA_HOST and parts.path.startswith("/API/"):
-            method = parts.path.removeprefix("/API/").removesuffix(".php")
+        if host == API_V2_HOST or (host == API_HOST and parts.path.startswith("/API/")):
+            method = parts.path.removeprefix("/API/").removesuffix(".php").lstrip("/")
             params = {
                 key: value for key, value in parse_qsl(parts.query) if key not in _CREDENTIAL_PARAMS
             }
