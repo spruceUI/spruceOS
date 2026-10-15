@@ -34,7 +34,6 @@ run_drastic() {
 run_drastic64() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 	ready_arch_64_states
-	pin_to_dedicated_cores drastic64 2
 	./drastic64 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
@@ -103,7 +102,6 @@ run_drastic_A30() {
 	export SDL_AUDIODRIVER=mmiyoo
 	export EGL_VIDEODRIVER=mmiyoo
 
-	pin_to_dedicated_cores drastic32 2
 	./drastic32 "$ROM_FILE"  > $(emu_log_file) 2>&1
 
 	# remove soft link and resume joystickinput

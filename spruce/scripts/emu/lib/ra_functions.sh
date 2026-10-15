@@ -14,7 +14,6 @@
 # Requires functions:
 #   get_config_value
 #   log_message
-#   pin_to_dedicated_cores
 #
 # Provides:
 #   prepare_ra_config
@@ -255,8 +254,6 @@ run_retroarch() {
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-
-	pin_to_dedicated_cores "$RA_BIN"
 
 	ra_start_setup_saves_and_states_for_core_differences
 
