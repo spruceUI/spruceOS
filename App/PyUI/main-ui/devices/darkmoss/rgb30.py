@@ -121,7 +121,7 @@ class Rgb30(DeviceCommon):
     # confirmed on hardware.
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb30-system.json"
-    SYSTEM_JSON_DEFAULT = "rgb30-system.json"
+    SYSTEM_JSON_DEFAULT = "json/rgb30-system.json"
     SYSTEM_JSON_DIR = "rgb30"
     MENU_KEY = None
     SELECT_KEY = 314

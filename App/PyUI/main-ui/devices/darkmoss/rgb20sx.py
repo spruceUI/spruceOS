@@ -6,5 +6,5 @@ class Rgb20sx(Rgb30):
     battery, booting the RGB30 image."""
 
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb20sx-system.json"
-    SYSTEM_JSON_DEFAULT = "rgb20sx-system.json"
+    SYSTEM_JSON_DEFAULT = "json/rgb20sx-system.json"
     MENU_KEY = 316  # BTN_MODE, the FN key the RGB30 lacks

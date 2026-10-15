@@ -11,7 +11,7 @@ class XuMiniM(Rgb30):
 
     JOYPAD_NODE = "/dev/input/by-path/platform-xu10-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/xumini-system.json"
-    SYSTEM_JSON_DEFAULT = "xumini-system.json"
+    SYSTEM_JSON_DEFAULT = "json/xumini-system.json"
     SYSTEM_JSON_DIR = "xumini"
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
     BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"

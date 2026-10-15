@@ -72,7 +72,7 @@ def initialize_device(device, main_ui_mode):
         from devices.darkmoss.rgb30 import Rgb30
         Device.init(Rgb30(device))
     elif "RGB20SX" == device:
-        from devices.rgb30.rgb20sx import Rgb20sx
+        from devices.darkmoss.rgb20sx import Rgb20sx
         Device.init(Rgb20sx(device))
     elif "A10MINI" == device:
         from devices.darkmoss.a10mini import A10Mini
