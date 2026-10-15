@@ -1,11 +1,8 @@
-from asyncio import subprocess
 from pathlib import Path
-import configparser
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
-from devices.gkd.connman_wifi_scanner import WiFiNetwork
-from devices.utils.process_runner import ProcessRunner
+from devices.gkd.nm_wifi_scanner import WiFiNetwork
 from display.display import Display
 from display.on_screen_keyboard import OnScreenKeyboard
 from utils.logger import PyUiLogger
@@ -16,9 +13,19 @@ from views.view_type import ViewType
 
 from menus.language.language import Language
 
-class ConnmanWifiMenu:
+class NmWifiMenu:
     def __init__(self):
         self.on_screen_keyboard = OnScreenKeyboard()
+
+    def get_iface_name(self):
+        res = "wlan0"
+        interfaces = Path("/sys/class/net/")
+
+        for i in interfaces.iterdir():
+            if i.name.startswith("wlan"):
+                res = i.name
+
+        return res
 
     def wifi_adjust(self):
         if Device.get_device().is_wifi_enabled():
@@ -26,46 +33,7 @@ class ConnmanWifiMenu:
         else:
             Device.get_device().enable_wifi()
 
-
-    def write_connman_conf(self, network: WiFiNetwork, passwd: str):
-        config_folder = Path("/storage/.cache/connman")
-
-        # Build config options
-        config = configparser.RawConfigParser()
-        config.optionxform = lambda option: option
-
-        config.add_section("Settings")
-        config["Settings"]["AutoConnect"] = "true"
-
-        net_section = f"service_{network.id_str}"
-        config.add_section(net_section)
-        config[net_section]["Type"] = "wifi"
-        config[net_section]["Name"] = network.ssid
-        config[net_section]["Passphrase"] = passwd
-
-        filename = network.id_str.split("_")[2]
-        full_path = config_folder.joinpath(filename).with_suffix(".config")
-
-        # Write to file
-        try:
-            with open(full_path, "w") as f:
-                config.write(f)
-
-            PyUiLogger.get_logger().info(
-                f"Installed network '{network.ssid}' into {str(full_path)}"
-            )
-
-        except OSError as e:
-            PyUiLogger.get_logger().error(f"Failed writing {str(full_path)}: {e}")
-
-
-    def connman_connect(self, id_str: str):
-        try:
-            ProcessRunner.run(["connmanctl", "connect", id_str])
-            PyUiLogger.get_logger().info(f"Connected to {id_str}.")
-        except subprocess.CalledProcessError as e:
-            PyUiLogger.get_logger().error(f"Error connecting to {id_str}: {e}")
-
+        Device.get_device().note_wifi_change()
 
     #TODO add confirmation or failed popups
     def switch_network(self, net: WiFiNetwork):
@@ -73,23 +41,26 @@ class ConnmanWifiMenu:
         if(net.requires_password()):
             password = self.on_screen_keyboard.get_input(Language.label("wifiPassword", "WiFi Password"))
             if(password is not None and 8 <= len(password) <= 63):
-                self.write_connman_conf(net, password)
                 Display.display_message(
                     Language.label("updatingWifiConfig", "Updating config file for {ssid} with password {password}")
                     .replace("{ssid}", net.ssid)
                     .replace("{password}", password),
                     duration_ms=5000,
                 )
+                Device.get_device().wifi_connect(net.ssid, password)
+                Device.get_device().note_wifi_change()
             else:
                 Display.display_message(Language.label("invalidWifiPasswordLength", "Invalid WiFi password length! Must be between 8 and 63"), duration_ms=5000)
-
-        self.connman_connect(net.id_str)
+        else:
+            Device.get_device().wifi_connect(net.ssid, None)
+            Device.get_device().note_wifi_change()
 
     def _build_options(
         self,
         wifi_enabled: bool,
         networks: list[WiFiNetwork],
         connected_ssid: str | None,
+        connected_is_5ghz: bool,
     ):
         option_list = []
 
@@ -111,7 +82,7 @@ class ConnmanWifiMenu:
             if not networks:
                 option_list.append(
                     GridOrListEntry(
-                        primary_text="Scanning for networks...",
+                        primary_text=Language.label("scanningForNetworks", "Scanning for networks..."),
                         value_text=None,
                         image_path=None,
                         image_path_selected=None,
@@ -124,12 +95,19 @@ class ConnmanWifiMenu:
                 seen_names = set()
                 for net in networks:
                     name = net.ssid
+                    is_5ghz = 5000 <= net.frequency <= 6000
+
+                    if is_5ghz:
+                        name += " (5Ghz)"
 
                     if name in seen_names:
                         continue
 
                     seen_names.add(name)
-                    connected = connected_ssid == net.ssid
+                    connected = (
+                        connected_ssid == net.ssid
+                        and is_5ghz == connected_is_5ghz
+                    )
 
                     option_list.append(
                         GridOrListEntry(
@@ -149,7 +127,7 @@ class ConnmanWifiMenu:
         interfaces = Path("/sys/class/net/")
 
         for i in interfaces.iterdir():
-            if i.name in ["wlan0", "eth0"]:
+            if i.name.startswith("eth") or i.name.startswith("wlan"):
                 return True
 
         return False
@@ -167,10 +145,14 @@ class ConnmanWifiMenu:
         selected = Selection(None, None, 0)
         self.wifi_scanner = Device.get_device().get_new_wifi_scanner()
 
+        self._interface = self.get_iface_name()
+        self.wifi_scanner.interface = self._interface
+
         # Start background scanning immediately
         self.wifi_scanner.scan_networks()
 
         connected_ssid = None
+        connected_is_5ghz = False
 
         accepted_inputs = [
             ControllerInput.A,
@@ -191,20 +173,22 @@ class ConnmanWifiMenu:
                     else []
                 )
 
-                ssid = self.wifi_scanner.get_connected_ssid()
+                ssid, freq = self.wifi_scanner.get_connected_ssid()
                 connected_ssid = ssid
+                connected_is_5ghz = bool(freq and 5000 <= freq <= 6000)
 
                 # Build options (single source of truth)
                 option_list = self._build_options(
                     wifi_enabled=wifi_enabled,
                     networks=networks,
                     connected_ssid=connected_ssid,
+                    connected_is_5ghz=connected_is_5ghz,
                 )
 
                 # Render view
                 list_view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
-                    top_bar_text="WiFi Configuration",
+                    top_bar_text=Language.label("wifiConfiguration", "WiFi Configuration"),
                     options=option_list,
                     selected_index=selected.get_index(),
                 )

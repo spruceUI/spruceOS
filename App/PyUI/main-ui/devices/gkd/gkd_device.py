@@ -1,6 +1,7 @@
 import socket
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
+from menus.language.language import Language
 from controller.sdl.sdl2_controller_interface import Sdl2ControllerInterface
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
@@ -17,7 +18,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class GKDDevice(DeviceCommon):
-    
+
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
@@ -43,13 +44,13 @@ class GKDDevice(DeviceCommon):
 
     def restore_framebuffer(self):
         pass
-    
+
     def power_off_cmd(self):
         return "poweroff"
-    
+
     def reboot_cmd(self):
         return "reboot"
-        
+
     def _set_lumination_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
             f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
@@ -57,7 +58,7 @@ class GKDDevice(DeviceCommon):
     def _set_contrast_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:contrast:"+str(self.system_config.contrast * 5)])
-    
+
     def _set_saturation_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
                                      "179:saturation:"+str(self.system_config.saturation * 5)])
@@ -77,13 +78,12 @@ class GKDDevice(DeviceCommon):
         # system handles this, not sure if implementing
         pass
 
-
     def run_game(self, rom_info):
         return MiyooTrimCommon.run_game(self, rom_info)
 
     def run_cmd(self, args, dir = None, is_power_cmd = False):
         MiyooTrimCommon.run_cmd(self, args, dir, is_power_cmd)
-        
+
     def run_app(self, folder,launch):
         MiyooTrimCommon.run_app(self, folder,launch)
 
@@ -92,7 +92,7 @@ class GKDDevice(DeviceCommon):
         if(ControllerInput.UNKNOWN == mapping):
             PyUiLogger.get_logger().error(f"Unknown input {sdl_input}")
         return mapping
-    
+
     def map_key(self, key_code):
         if(116 == key_code):
             return ControllerInput.POWER_BUTTON
@@ -104,7 +104,6 @@ class GKDDevice(DeviceCommon):
             PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
             return None
 
-    
     def special_input(self, controller_input, length_in_seconds):
         if(PyUiConfig.enable_button_watchers()):
             if(ControllerInput.POWER_BUTTON == controller_input):
@@ -149,10 +148,16 @@ class GKDDevice(DeviceCommon):
     def get_wpa_supplicant_conf_path(self):
         return None
 
+    def start_wifi_services(self):
+        pass
+
+    def stop_wifi_services(self):
+        pass
+
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    @throttle.limit_refresh(10, fast_seconds=1, fast_while="_wifi_settle_until")
+    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import psutil
         if self.is_wifi_enabled():
@@ -160,10 +165,15 @@ class GKDDevice(DeviceCommon):
                 return "No USB adapter"
 
             try:
-                wlan_addrs = psutil.net_if_addrs().get("wlan0")
-                eth_addrs = psutil.net_if_addrs().get("eth0")
+                wlan_addrs = []
+                all_addrs = psutil.net_if_addrs()
 
-                wlan_addrs = wlan_addrs if wlan_addrs else []
+                for k in all_addrs.keys():
+                    if k.startswith("wlan"):
+                        wlan_addrs = all_addrs.get(k)
+                        break
+
+                eth_addrs = all_addrs.get("eth0")
                 eth_addrs = eth_addrs if eth_addrs else []
 
                 addrs = wlan_addrs + eth_addrs
@@ -171,61 +181,42 @@ class GKDDevice(DeviceCommon):
                     for addr in addrs:
                         if addr.family == socket.AF_INET:
                             return addr.address
-                    return self.wifi_pending_text()
+                    return Language.label("wifiStatusConnecting", "Connecting")
                 else:
-                    return self.wifi_pending_text()
+                    return Language.label("wifiStatusConnecting", "Connecting")
             except Exception:
-                return "Error"
+                return Language.label("wifiStatusError", "Error")
 
-        return "Off"
-
-    def disable_wifi(self):
-        self.system_config.reload_config()
-        self.system_config.set_wifi(0)
-        self.system_config.save_config()
-        ProcessRunner.run(["connmanctl", "disable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
-
-    def enable_wifi(self):
-        self.system_config.reload_config()
-        self.system_config.set_wifi(1)
-        self.system_config.save_config()
-        ProcessRunner.run(["systemctl", "restart", "connman"])
-        ProcessRunner.run(["connmanctl", "enable", "wifi"])
-        self.get_wifi_status.force_refresh()
-        self.get_ip_addr_text.force_refresh()
+        return Language.label("wifiStatusOff", "Off")
 
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        #Probably need to find the power and not just usb
-        with open("/sys/class/power_supply/usb/online", "r") as f:
-            ac_online = int(f.read().strip())
-            
-        if(ac_online):
+        with open("/sys/class/power_supply/battery/status", "r") as f:
+            status = f.read().strip()
+
+        if(status == "Charging"):
            return ChargeStatus.CHARGING
         else:
             return ChargeStatus.DISCONNECTED
-    
+
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
         with open("/sys/class/power_supply/battery/capacity", "r") as f:
-            return int(f.read().strip()) 
+            return int(f.read().strip())
         return 0
-        
+
     def get_app_finder(self):
         return MiyooAppFinder()
-    
+
     def parse_favorites(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_favorites()
-    
+
     def parse_recents(self) -> list[GameEntry]:
         return self.miyoo_games_file_parser.parse_recents()
 
     def is_bluetooth_enabled(self):
         return False
-    
-    
+
     def disable_bluetooth(self):
         pass
 
@@ -240,10 +231,10 @@ class GKDDevice(DeviceCommon):
 
     def get_favorites_path(self):
         return "/mnt/SDCARD/Saves/pyui-favorites.json"
-        
+
     def get_recents_path(self):
         return "/mnt/SDCARD/Saves/pyui-recents.json"
-            
+
     def get_apps_config_path(self):
         return "/mnt/SDCARD/Saves/pyui-apps.json"
 
@@ -270,16 +261,16 @@ class GKDDevice(DeviceCommon):
 
     def supports_wifi(self):
         return True
-    
+
     def get_game_system_utils(self):
         return self.game_utils
-    
+
     def get_roms_dir(self):
         return "/mnt/SDCARD/Roms/"
 
     def take_snapshot(self, path):
         return None
-    
+
     def supports_brightness_calibration():
         return True
 
@@ -314,4 +305,4 @@ class GKDDevice(DeviceCommon):
 
     @throttle.limit_refresh(1)
     def post_present_operations(self):
-        self.clear_display_cache_if_memory_full("MemAvailable", 100)        
+        self.clear_display_cache_if_memory_full("MemAvailable", 100)

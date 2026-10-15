@@ -1,27 +1,16 @@
-import subprocess
-import json
 import time
 import threading
-from dataclasses import dataclass
 from typing import List, Set
 
 from devices.utils.process_runner import ProcessRunner
 from utils.logger import PyUiLogger
+from devices.wifi.wifi_scanner import WiFiNetwork
 
-@dataclass
-class WiFiNetwork:
-    id_str: str
-    signal_level: int
-    security: str
-    ssid: str
-
-    def requires_password(self) -> bool:
-        return "psk" in self.security or "wep" in self.security
-
-class ConnmanWiFiScanner:
+class NmWiFiScanner:
     def __init__(self, interface="wlan0", delay=2):
         self.interface = interface
         self.delay = delay
+        self.connected_network = None
 
         # Thread state
         self._thread: threading.Thread | None = None
@@ -30,7 +19,7 @@ class ConnmanWiFiScanner:
         # Shared scan results
         self._lock = threading.Lock()
         self._known_ssids: Set[str] = set()
-        self._known_id_str: Set[str] = set()
+        self._known_bssids: Set[str] = set()
         self._networks: List[WiFiNetwork] = []
 
     # ----------------------------
@@ -48,6 +37,7 @@ class ConnmanWiFiScanner:
                 log.exception("WiFi scan worker error")
 
             # Cooperative sleep so stop() reacts immediately
+            log.info("Scanning...")
             self._stop_event.wait(self.delay)
 
         log.info("WiFi scan thread stopped")
@@ -58,41 +48,46 @@ class ConnmanWiFiScanner:
         """
         log = PyUiLogger.get_logger()
 
-        result = ProcessRunner.run(["connmanctl", "scan", "wifi"])
-        if "Scan completed" not in result.stdout:
-            log.error("connman scan failed, retrying")
+        result = ProcessRunner.run(["nmcli", "dev", "wifi", "rescan", "ifname", self.interface])
+        if "Error:" in result.stdout:
+            log.error(f"networkmanager scan failed, retrying")
             time.sleep(15)
-            ProcessRunner.run(["connmanctl", "scan", "wifi"])
+            ProcessRunner.run(["nmcli", "dev", "wifi", "rescan", "ifname", self.interface])
 
         time.sleep(self.delay)
 
-        jdata = self._get_connman_services()
+        result = ProcessRunner.run(["nmcli", "-t", "device", "wifi", "list"])
+        lines = result.stdout.replace("\\:", "-").splitlines()
+
         new_networks: List[WiFiNetwork] = []
 
-        for service in jdata:
-            if 'Name' in service[1].keys():
-                ssid = service[1]['Name']['data']
-            else:
-                continue
+        for line in lines:
+            parts = line.split(":")
 
-            id_str = service[0].split("/")[-1] # Connman uses it's own ID string
-            signal = service[1]['Strength']['data']
-            security = " ".join(service[1]['Security']['data'])
+            bssid = parts[1].replace("-", ":")
+            ssid = parts[2]
+            freq = 5100 if int(parts[4]) > 30 else 2400
+            signal = int(parts[6])
+            flags = parts[8]
 
             network = WiFiNetwork(
-                id_str=id_str,
-                signal_level=int(signal),
-                security=security,
-                ssid=ssid,
+                    bssid=bssid,
+                    frequency=freq,
+                    signal_level=signal,
+                    flags=flags,
+                    ssid=ssid,
             )
 
             new_networks.append(network)
 
+            if parts[0] == "*":
+                self.connected_network = network
+
         # Merge uniquely seen networks
         with self._lock:
             for net in new_networks:
-                if net.id_str not in self._known_id_str:
-                    self._known_id_str.add(net.id_str)
+                if net.bssid not in self._known_bssids:
+                    self._known_bssids.add(net.bssid)
                     self._known_ssids.add(net.ssid)
                     self._networks.append(net)
 
@@ -138,7 +133,7 @@ class ConnmanWiFiScanner:
 
         with self._lock:
             self._known_ssids.clear()
-            self._known_id_str.clear()
+            self._known_bssids.clear()
             self._networks.clear()
 
     # ----------------------------
@@ -146,32 +141,7 @@ class ConnmanWiFiScanner:
     # ----------------------------
 
     def get_connected_ssid(self):
-        ssid = None
-
-        jdata = self._get_connman_services()
-
-        if jdata:
-            for service in jdata:
-                if service[1]['State']['data'] == "online":
-                    ssid = service[1]['Name']['data']
-                    break
+        if self.connected_network:
+            return self.connected_network.ssid, self.connected_network.frequency
         else:
-            PyUiLogger.get_logger().error("Failed to get Wi-Fi details")
-
-        return ssid
-
-    def _get_connman_services(self):
-        res = []
-        try:
-            result = ProcessRunner.run([
-                "busctl", "-j", "--system",
-                "call", "net.connman", "/",
-                "net.connman.Manager", "GetServices"
-            ])
-
-            jdata = json.loads(result.stdout)
-            res = jdata['data'][0]
-        except (subprocess.CalledProcessError, json.JSONDecodeError) as e:
-            PyUiLogger.get_logger().error(f"Failed to get connman services: {e}")
-
-        return res
+            return None, None
