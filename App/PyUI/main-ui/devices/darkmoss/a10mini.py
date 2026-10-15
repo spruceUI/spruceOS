@@ -7,7 +7,6 @@ class A10Mini(Rgb30):
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/a10mini-system.json"
     SYSTEM_JSON_DEFAULT = "json/a10mini-system.json"
-    SYSTEM_JSON_DIR = "a10mini"
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1
     START_KEY = 705
     MENU_KEY = 708    # F5

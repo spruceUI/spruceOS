@@ -7,7 +7,6 @@ class G350(Rgb30):
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/g350-system.json"
     SYSTEM_JSON_DEFAULT = "json/g350-system.json"
-    SYSTEM_JSON_DIR = "g350"
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1
     START_KEY = 705
     MENU_KEY = 708    # F5

@@ -64,7 +64,7 @@ class MiniloongPocket1(DeviceCommon):
 
     def load_miniloong_system_json(self):
         base_dir = os.path.abspath(sys.path[0])
-        self.script_dir = os.path.join(base_dir, "devices", "miniloong")
+        self.script_dir = os.path.join(base_dir, "devices", "darkmoss")
         self.json_dir = os.path.join(self.script_dir, "json")
         source = os.path.join(self.json_dir, "miniloong-system.json")
         self._load_system_config(self.SYSTEM_JSON, Path(source))
