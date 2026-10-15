@@ -9,8 +9,7 @@ from controller.key_watcher_controller import DictKeyMappingProvider, KeyWatcher
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.gkd.gkd_device import GKDDevice
-from devices.gkd.nm_wifi_scanner import NmWiFiScanner
-from devices.gkd.nm_wifi_menu import NmWifiMenu
+from devices.gkd.usb_wifi_menu import USBWifiMenu
 from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from devices.utils.file_watcher import FileWatcher
 from menus.settings.timezone_menu import TimezoneMenu
@@ -170,10 +169,7 @@ class GKDPixel2(GKDDevice):
         return True # RA save state images don't seem to load w/o conversion?
 
     def get_wifi_menu(self):
-        return NmWifiMenu()
-
-    def get_new_wifi_scanner(self):
-        return NmWiFiScanner()
+        return USBWifiMenu()
 
     def volume_up(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up("/dev/input/by-path/platform-gpio-keys-event",115)
