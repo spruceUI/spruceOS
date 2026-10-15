@@ -5,7 +5,7 @@
 LEDS_STATE=(false false false false false)
 
 leds_audio() {
-  turn_off_led 0
+  turn_off_all_leds
 
   export HOME="/storage"
   cava -p /storage/.config/cava/config | while read value; do
@@ -53,6 +53,16 @@ turn_off_led() {
     echo 0 > /sys/class/leds/led-$1/brightness
     LEDS_STATE[$1]=false
   fi
+}
+
+turn_off_all_leds() {
+  LEDS_STATE=(true true true true true)
+
+  turn_off_led 0
+  turn_off_led 1
+  turn_off_led 2
+  turn_off_led 3
+  turn_off_led 4
 }
 
 leds_battery() {
@@ -120,12 +130,6 @@ case $LEDS_MODE in
     ;;
   *)
     # Off
-    LEDS_STATE=(true true true true true)
-
-    turn_off_led 0
-    turn_off_led 1
-    turn_off_led 2
-    turn_off_led 3
-    turn_off_led 4
+    turn_off_all_leds
     ;;
 esac
