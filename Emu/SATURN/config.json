@@ -22,6 +22,20 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
+      ],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
+      "selected": "64-bit",
+      "overrides": {}
+    },
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
@@ -96,7 +110,10 @@
       ],
       "devices": [
         "MIYOO_MINI_FAMILY",
-        "MIYOO_A30"
+        "MIYOO_A30",
+        "MIYOO_FLIP",
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
       ],
       "selected": "yabadabadoo",
       "overrides": {}
