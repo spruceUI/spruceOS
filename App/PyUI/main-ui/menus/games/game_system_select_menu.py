@@ -297,7 +297,7 @@ class GameSystemSelectMenu:
         systems_list = []
         self.add_start_of_list_extras_to_systems_list(systems_list)        
 
-        active_systems = self.game_utils.get_active_systems()
+        active_systems = self.game_utils.take_prefetched_active_systems()
 
         index = 0
         total_count = len(active_systems)

@@ -29,6 +29,7 @@ class MuosDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.muos_systems = self.load_assign_json()
+        self.game_utils = MuosGameSystemUtils(self.muos_systems)
 
     def setup_system_config(self):
         base_dir = os.path.abspath(sys.path[0])
@@ -293,7 +294,7 @@ class MuosDevice(DeviceCommon):
             return 1
         
     def get_game_system_utils(self):
-        return MuosGameSystemUtils(self.muos_systems)
+        return self.game_utils
     
     
     def load_assign_json(self, uppercase_keys: bool = True) -> dict:

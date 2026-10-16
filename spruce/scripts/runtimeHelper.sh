@@ -6,6 +6,19 @@
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
+# Pids of device_init background jobs that must be gone before the frontend starts.
+# Only runtime.sh's shell owns them, so only it can wait on them.
+DEVICE_INIT_WAIT_PIDS=""
+
+# Waits for the device_init jobs that must finish before the frontend starts; returns 0.
+wait_device_init_jobs() {
+    for _diw_pid in $DEVICE_INIT_WAIT_PIDS; do
+        wait "$_diw_pid" 2>/dev/null
+    done
+    DEVICE_INIT_WAIT_PIDS=""
+    return 0
+}
+
 run_sd_card_fix_if_triggered() {
     needs_fix=false
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
@@ -453,6 +466,15 @@ read_unpack_state() {
     fi
 }
 
+# Checks whether any archive is waiting to be unpacked; returns 0 if one is.
+# The lanes checked must match archiveUnpacker.sh.
+archives_queued() {
+    for _aq in /mnt/SDCARD/Themes/*.7z /mnt/SDCARD/spruce/archives/preMenu/*.7z /mnt/SDCARD/spruce/archives/preCmd/*.7z; do
+        [ -e "$_aq" ] && return 0
+    done
+    return 1
+}
+
 run_archive_unpacker_foreground() {
     SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
     SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
@@ -464,6 +486,7 @@ run_unpacker_foreground() {
     log_prefix="$1"
     firstboot_ui="$2"
 
+    wait_device_init_jobs   # the unpack status is shown by a PyUI
     firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
     run_archive_unpacker_foreground
     firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"

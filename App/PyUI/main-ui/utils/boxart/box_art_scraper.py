@@ -5,9 +5,7 @@ from pathlib import Path
 import subprocess
 import re
 import time
-import urllib.request
 from typing import List, Optional
-import xml.etree.ElementTree as ET
 
 from devices.device import Device
 from display.display import Display
@@ -260,6 +258,8 @@ class BoxArtScraper:
 
         # Parse XML
         try:
+            # Deferred: off the startup path.
+            import xml.etree.ElementTree as ET
             tree = ET.parse(xml_path)
             root = tree.getroot()
 
@@ -765,6 +765,8 @@ class BoxArtScraper:
     def _download_file(self, url: str, dest_path: str) -> bool:
         """Download file to destination path."""
         try:
+            # Deferred: urllib.request has a heavy import graph.
+            import urllib.request
             urllib.request.urlretrieve(url, dest_path)
             return True
         except Exception as e:
