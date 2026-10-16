@@ -520,13 +520,13 @@ jobs:
             | Miyoo Mini Flip       | Supported | No |
             | Miyoo Mini Plus       | Supported | No |
             | Miyoo Mini v1-4       | Supported | No |
-            | Anbernic H700 devices | Supported | Yes, (BaseOS)[https://github.com/pvaibhav/BaseOS/releases/latest] |
-            | Powkiddy RGB30        | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
-            | Powkiddy RGB20SX      | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
-            | Miniloong Pocket 1    | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
-            | MagicX Zero 28        | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
-            | MagicX Zero 40        | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
-            | MagicX XU20 V32       | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
+            | Anbernic H700 devices | Supported | Yes, [BaseOS](https://github.com/pvaibhav/BaseOS/releases/latest) |
+            | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
+            | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
+            | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
 
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
