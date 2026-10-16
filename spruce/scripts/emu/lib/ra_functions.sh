@@ -534,10 +534,21 @@ load_n64_controller_profile() {
 		case "$dirname" in
 			*"n64"*|*"N64"*)
 				cp -f "${SRC}/${profile_name}.rmp" "${dir}/${dirname}.rmp"
+				case "$profile_name" in Spruce-*) n64_override_deadzone "$dirname" ;; esac
 			;;
 			*) ;; # if core display name doesn't have N64 in it, do nothing.
 		esac
 	done
+}
+
+# Spruce puts C on buttons beside a real right stick: RetroArch ORs the two, so a stick resting at -1 swallows
+# them unless a deadzone zeroes it first. The core overrides ship one; a restored backup can bring back older ones.
+n64_override_deadzone() {
+	cfg="/mnt/SDCARD/RetroArch/.retroarch/config/$1/$1.cfg"
+	grep -q '^input_analog_deadzone' "$cfg" 2>/dev/null && return 0
+	mkdir -p "$(dirname "$cfg")"
+	[ -s "$cfg" ] && [ -n "$(tail -c 1 "$cfg")" ] && echo >> "$cfg"
+	echo 'input_analog_deadzone = "0.010000"' >> "$cfg"
 }
 
 save_custom_n64_controller_profile() {
