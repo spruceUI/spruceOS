@@ -19,6 +19,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "a5200": ["a5200"],
         "ardens": ["Ardens"],
         "arduous": ["Arduous"],
+        "armgba": ["armGBA"],
         "atari800": ["Atari800"],
         "bk": ["bk"],
         "bluemsx": ["blueMSX"],
