@@ -1,0 +1,13 @@
+{
+    "SATURN": {
+        "Governor": "Performance",
+        "raBuild": "64-bit",
+        "Emulator_RGB30": "yabasanshiro-standalone-hle",
+        "Emulator_Flip": "yabasanshiro_generic_libretro",
+        "Emulator_Pixel2": "yabasanshiro_libretro",
+        "Emulator_SmartProS": "yabasanshiro_generic_libretro",
+        "Emulator_Brick": "yabasanshiro_generic_libretro",
+        "Emulator_64": "yabasanshiro_generic_libretro",
+        "Emulator_32": "yabadabadoo"
+    }
+}
