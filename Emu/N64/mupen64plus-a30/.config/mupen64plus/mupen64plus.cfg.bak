@@ -191,10 +191,8 @@ MouseSensitivity = "2.00,2.00"
 AnalogDeadzone = "4096,4096"
 # An absolute value of the SDL joystick axis >= AnalogPeak will saturate the N64 controller axis value (at 80).  For X, Y axes. For each axis, this must be greater than the corresponding AnalogDeadzone value
 AnalogPeak = "32768,32768"
-# A30 mapping with input shim (R2 hold for C-buttons):
-#   N64 A = South (B label, lctrl=306), N64 B = West (Y label, lalt=308)
-#   D-pad = arrows (273-276), Analog = joystick axes
-#   R2 held: South=C-Down(j=106), East=C-Right(l=108), North=C-Left(k=107), West=C-Up(u=117)
+# Spruce N64 layout (one stick): B/Y = N64 A/B (lctrl 306, lalt 308), L2/L1/R1 = Z/L/R, d-pad = d-pad,
+# A/X/Select/R2 = C-Down/Left/Up/Right (space 32, lshift 304, rctrl 305, t 116) in place of the shim's R2 layer.
 DPad R = "key(275)"
 DPad L = "key(276)"
 DPad D = "key(274)"
@@ -203,10 +201,10 @@ Start = "key(13)"
 Z Trig = "key(101)"
 B Button = "key(308)"
 A Button = "key(306)"
-C Button R = "key(108)"
-C Button L = "key(107)"
-C Button D = "key(106)"
-C Button U = "key(117)"
+C Button R = "key(116)"
+C Button L = "key(304)"
+C Button D = "key(32)"
+C Button U = "key(305)"
 R Trig = "key(8)"
 L Trig = "key(9)"
 Mempak switch = ""
