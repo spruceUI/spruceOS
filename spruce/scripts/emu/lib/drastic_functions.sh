@@ -11,12 +11,9 @@
 # Provides:
 #   run_drastic
 
-
+# This is the only "public" function, and is the shared entry point for all devices and DraStic versions
 run_drastic() {
 	load_drastic_configs
-
-	#Why do we use grid on NDS but no other systems?
-	cp -f $nds_emu_dir/resources/overlay/grid-enabled.png $nds_emu_dir/resources/overlay/grid.png
 
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
@@ -57,33 +54,33 @@ display_core_unrecognized_for_platform_message() {
 	stop_pyui_message_writer
 }
 
-#### RGXX #####
+#### Anbernic H700 #####
 # Can we move these run_drastic's into their respective devicefunctions.sh so we dont have to remember
 # to come here to add DS support?
-run_drastic_AnbernicRGXX() {
+run_drastic_AnbernicH700() {
 	run_drastic64
 }
 
 run_drastic_AnbernicRGCubeXX() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicXX720480() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicRG28XX() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicXX640480() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicXX640480NoStick() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicXX640480OneStick() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 run_drastic_AnbernicXX720480NoStick() {
-	run_drastic_AnbernicRGXX
+	run_drastic_AnbernicH700
 }
 
 ##### A30 #####
@@ -134,16 +131,6 @@ run_drastic_trngaje_Flip() {
 	stash_arch_64_states
 }
 
-# some miyoo flip firmware versions have issues with the bind mounts needed for DraStic Steward and PM.
-# Alert users to this if they have selected Steward but can't run it.
-
-display_bad_flip_firmware_message() {
-	start_pyui_message_writer
-	log_and_display_message "There appears to be an issue with your setup.\nPlease ensure you're on the latest Miyoo Flip firmware."
-	sleep 5
-	stop_pyui_message_writer
-}
-
 
 ##### MIYOOMINI #####
 
@@ -180,31 +167,20 @@ run_drastic_MiyooMini() {
 	echo $sv > /proc/sys/vm/swappiness
 }
 
-### BRICK PRO ###
+### BRICK / BRICK PRO ###
 
-run_drastic_BrickPro(){
+run_drastic_Brick(){
     if [ "$CORE" = "DraStic-original" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
 		run_drastic64
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		run_drastic_trngaje_a133p
 	else
 		display_core_unrecognized_for_platform_message
 	fi
 }
 
-##### BRICK #####
-
-run_drastic_Brick(){
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
-	if [ "$CORE" = "DraStic-original" ]; then
-		run_drastic64
-	elif [ "$CORE" = "DraStic-trngaje" ]; then
-		run_drastic_trngaje_a133p
-	else
-		display_core_unrecognized_for_platform_message
-	fi
+run_drastic_BrickPro(){
+	run_drastic_Brick
 }
 
 
@@ -254,16 +230,14 @@ run_drastic_XU20() {
 
 ##### SMART PRO S #####
 
-# Only original version is currently available on TSPS. Hardcode this "core" selection.
 
 run_drastic_SmartProS() {
-	#export CORE="DraStic-original"
 	if [ "$CORE" = "DraStic-original" ]; then
 		run_drastic64
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
 		run_drastic_trngaje_a133p
 	else
-			display_core_unrecognized_for_platform_message
+		display_core_unrecognized_for_platform_message
 	fi
 }
 
