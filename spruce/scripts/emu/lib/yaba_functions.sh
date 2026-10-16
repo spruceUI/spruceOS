@@ -51,10 +51,10 @@ run_yabasanshiro() {
 # when the file has no ANBERNIC-keys entry: a bind changed inside the emulator
 # stays. Raw indices under the staged mali SDL2: A 3, B 4, Y 5, X 6, L1 7,
 # R1 8, SELECT 9, START 10, MENU 11, then L3 12 / L2 13 / R2 14 / R3 15 on
-# two-stick models, L2 12 / R2 13 on stickless ones. Same Saturn layout as the
-# fleet's X360 entries by position: A on the right button, B on the bottom, C
-# on L2, X on the top, Y on the left, Z on R2, L/R on the shoulders. Derived,
-# not yet run on the device.
+# two-stick models, L2 12 / R2 13 on stickless ones (measured on a CubeXX). The
+# libretro core's Saturn layout, as the fleet's X360 entries have it: A on the
+# bottom button, B on the right, X on the left, Y on the top, C/Z on L1/R1, L/R
+# on L2/R2.
 seed_xx_yaba_keymap() {
 	key="0_ANBERNIC-keys_19000000010000000100000000010000"
 	[ -f "$KEYMAP_FILE" ] || return 0
@@ -82,14 +82,14 @@ generate_xx_yaba_keymap_fallback() {
 	key="0_ANBERNIC-keys_19000000010000000100000000010000"
 	jq --arg key "$key" --argjson l2 "$l2" --argjson r2 "$r2" '
 	  .[$key] = {
-	    "a": {"id": 3, "type": "button", "value": 1},
-	    "b": {"id": 4, "type": "button", "value": 1},
-	    "c": {"id": $l2, "type": "button", "value": 1},
-	    "x": {"id": 6, "type": "button", "value": 1},
-	    "y": {"id": 5, "type": "button", "value": 1},
-	    "z": {"id": $r2, "type": "button", "value": 1},
-	    "l": {"id": 7, "type": "button", "value": 1},
-	    "r": {"id": 8, "type": "button", "value": 1},
+	    "a": {"id": 4, "type": "button", "value": 1},
+	    "b": {"id": 3, "type": "button", "value": 1},
+	    "c": {"id": 7, "type": "button", "value": 1},
+	    "x": {"id": 5, "type": "button", "value": 1},
+	    "y": {"id": 6, "type": "button", "value": 1},
+	    "z": {"id": 8, "type": "button", "value": 1},
+	    "l": {"id": $l2, "type": "button", "value": 1},
+	    "r": {"id": $r2, "type": "button", "value": 1},
 	    "select": {"id": 9, "type": "button", "value": 1},
 	    "start": {"id": 10, "type": "button", "value": 1},
 	    "up": {"id": 0, "type": "hat", "value": 1},
