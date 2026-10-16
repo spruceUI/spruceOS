@@ -28,8 +28,7 @@ class DarkmossDevice(DeviceCommon):
     """Base for every device running dArkMoss, spruce on TF2."""
 
     JOYPAD_NODE = None
-    SYSTEM_JSON = None
-    SYSTEM_JSON_DEFAULT = None
+    SYSTEM_JSON_NAME = None
     MENU_KEY = None
     SELECT_KEY = 314
     START_KEY = 315
@@ -42,7 +41,8 @@ class DarkmossDevice(DeviceCommon):
     def __init__(self, device_name):
         self.device_name = device_name
         self.audio_player = AudioPlayerDelegateSdl2()
-        self._load_system_config(self.SYSTEM_JSON, Path(__file__).resolve().parent / self.SYSTEM_JSON_DEFAULT)
+        self.system_json = os.path.join(self.get_saves_dir(), self.SYSTEM_JSON_NAME)
+        self._load_system_config(self.system_json, Path(__file__).resolve().parent / "json" / self.SYSTEM_JSON_NAME)
         self.panel_calibration = DarkmossPanelCalibration(self.system_config)
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
@@ -58,7 +58,7 @@ class DarkmossDevice(DeviceCommon):
     def _start_volume_watcher(self):
         from devices.utils.file_watcher import FileWatcher
         self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
-            self.SYSTEM_JSON, self.on_system_config_changed,
+            self.system_json, self.on_system_config_changed,
             interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
     def on_system_config_changed(self):

@@ -15,8 +15,7 @@ class MiniloongPocket1(DarkmossDevice):
     landscape and rendered at 1.5x, a real menu button, one stick."""
 
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
-    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/miniloong-system.json"
-    SYSTEM_JSON_DEFAULT = "json/miniloong-system.json"
+    SYSTEM_JSON_NAME = "miniloong-system.json"
     MENU_KEY = 316  # BTN_MODE
 
     # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/Miniloong.cfg.

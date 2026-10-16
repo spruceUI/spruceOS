@@ -5,6 +5,5 @@ class Rgb20sx(Rgb30):
     """Powkiddy RGB20SX: the RGB30 board with an RTL8723DS radio and a 5000mAh
     battery, booting the RGB30 image."""
 
-    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/rgb20sx-system.json"
-    SYSTEM_JSON_DEFAULT = "json/rgb20sx-system.json"
+    SYSTEM_JSON_NAME = "rgb20sx-system.json"
     MENU_KEY = 316  # BTN_MODE, the FN key the RGB30 lacks

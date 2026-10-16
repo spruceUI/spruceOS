@@ -10,8 +10,7 @@ class XuMiniM(DarkmossDevice):
     """
 
     JOYPAD_NODE = "/dev/input/by-path/platform-xu10-joypad-event-joystick"
-    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/xumini-system.json"
-    SYSTEM_JSON_DEFAULT = "json/xumini-system.json"
+    SYSTEM_JSON_NAME = "xumini-system.json"
     # The 4.4 kernel lists the panel colour properties but rejects every set.
     PANEL_CALIBRATION = False
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here

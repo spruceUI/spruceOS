@@ -5,8 +5,7 @@ class A10Mini(DarkmossDevice):
     """A10 Mini on dArkMoss: RK3326, 640x480, the RG351MP pad."""
 
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
-    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/a10mini-system.json"
-    SYSTEM_JSON_DEFAULT = "json/a10mini-system.json"
+    SYSTEM_JSON_NAME = "a10mini-system.json"
     # The 4.4 kernel lists the panel colour properties but rejects every set.
     PANEL_CALIBRATION = False
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1

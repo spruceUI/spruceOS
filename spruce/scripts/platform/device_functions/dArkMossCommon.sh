@@ -20,6 +20,7 @@
 DARKMOSS_DEBUG_LOG="/mnt/SDCARD/Saves/spruce/darkmoss_debug.log"
 
 device_init() {
+    migrate_system_json
     migrate_platform_files
     resolve_pad_node
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
@@ -744,6 +745,14 @@ darkmoss_drm_holders() {
     done
 }
 
+# The system json used to live in App/PyUI/config; updates leave Saves alone.
+migrate_system_json() {
+    _legacy="/mnt/SDCARD/App/PyUI/config/${SYSTEM_JSON##*/}"
+    if [ -f "$_legacy" ] && [ ! -f "$SYSTEM_JSON" ]; then
+        mv "$_legacy" "$SYSTEM_JSON" && log_message "$PLATFORM: moved $_legacy to Saves"
+    fi
+}
+
 # A device that used to run as another platform (the RGB20SX ran as RGB30)
 # keeps what it saved under the old name.
 migrate_platform_files() {
@@ -752,6 +761,7 @@ migrate_platform_files() {
     _old_lc="$(echo "$_old" | tr 'A-Z' 'a-z')"
     _ppsspp="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
     for _pair in \
+        "/mnt/SDCARD/Saves/${_old_lc}-system.json|$SYSTEM_JSON" \
         "/mnt/SDCARD/App/PyUI/config/${_old_lc}-system.json|$SYSTEM_JSON" \
         "/mnt/SDCARD/Saves/ra-configs/retroarch-$_old.cfg|/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg" \
         "$_ppsspp/ppsspp-$_old.ini|$_ppsspp/ppsspp-$PLATFORM.ini" \
