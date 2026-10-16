@@ -91,10 +91,9 @@ build_mupen_args() {
 #     in the pad table instead (the positional map still goes to SDL for
 #     anything that asks);
 #   - mupen's own input-sdl plugin matches InputAutoCfg.ini by joystick name,
-#     and the table is mupen's read-only asset, so it ships per pad layout
-#     under xx-pad/ per platform (stickless models have L2 at b12, so
-#     their "Z Trig" differs) and the platform's copy is put in place
-#     before launch;
+#     and the table is mupen's read-only asset, so it ships per platform
+#     under pad/ like every board's (apply_mupen_pad_table) and is put in
+#     place before launch;
 #   - the [CoreEvents] joypad hotkeys in the shared mupen64plus.cfg are
 #     Xbox-360-numbered (J0B8 = guide) and cannot serve this pad, so the
 #     same chords are passed as --set overrides in this pad's numbering:
@@ -103,6 +102,14 @@ build_mupen_args() {
 # The --set overrides live in run_mupen_standalone, appended to the
 # positional parameters after $ARGS is split, because "Joy Mapping Stop"
 # carries spaces and cannot travel through a word-split string.
+# The board's pad table, pad/InputAutoCfg-<PLATFORM>.ini (or the variant its cfg names in
+# MUPEN_PAD_TABLE), copied over the live InputAutoCfg.ini at each launch; 1 when it ships none.
+apply_mupen_pad_table() {
+	src="$HOME/pad/InputAutoCfg-${MUPEN_PAD_TABLE:-$PLATFORM}.ini"
+	[ -f "$src" ] || return 1
+	cp -f "$src" "$HOME/InputAutoCfg.ini"
+}
+
 apply_xx_mupen_pad() {
 	case "$PLATFORM" in
 		"Anbernic"*) ;;
@@ -123,16 +130,10 @@ apply_xx_mupen_pad() {
 	esac
 	export EMU_OVERLAY_BTNLABELS="$labels"
 
-	# InputAutoCfg.ini is a shipped default set, one file per platform;
-	# nothing is computed here, the platform's file is copied over the live
-	# table.
-	src="$HOME/xx-pad/InputAutoCfg-$PLATFORM.ini"
+	# apply_mupen_pad_table has copied the platform's table in; without one, fix up
+	# the one trigger that moves. Not reached while pad/ ships one per platform.
 	AC="$HOME/InputAutoCfg.ini"
-	if [ -f "$src" ]; then
-		cp -f "$src" "$AC"
-	elif [ -f "$AC" ]; then
-		# Fallback only: no shipped table for this platform, so fix up the
-		# one trigger that moves. Not reached while xx-pad/ ships one per platform.
+	if [ ! -f "$HOME/pad/InputAutoCfg-$PLATFORM.ini" ] && [ -f "$AC" ]; then
 		log_message "xx mupen pad: no shipped InputAutoCfg for $PLATFORM, rewriting Z Trig as a fallback"
 		case "$XX_PAD_LAYOUT" in
 			nostick) ztrig="button(12)" ;;
@@ -187,6 +188,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 		build_mupen_args
 
 		set -- $ARGS
+		apply_mupen_pad_table
 		case "$PLATFORM" in
 			"Anbernic"*)
 				apply_xx_mupen_pad
