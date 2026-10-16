@@ -13,12 +13,14 @@
 #   move_screenshots
 #   build_bios_view
 #   migrate_standalone_data
+#   install_flycast_pad_mapping
 
 # The standalone's own data dir (cards, states, console settings, NAOMI/Atomiswave saves), kept apart
 # from the libretro core's files in BIOS/dc: save paths stay separate by module.
 FLYCAST_SA_DATA="${FLYCAST_SA_DATA:-/mnt/SDCARD/Saves/saves/Flycast-standalone}"
 FLYCAST_BIOS_SRC="${FLYCAST_BIOS_SRC:-/mnt/SDCARD/BIOS/dc}"
 FLYCAST_BIOS_VIEW="${FLYCAST_BIOS_VIEW:-/tmp/flycast-bios}"
+FLYCAST_DEFAULTS="${FLYCAST_DEFAULTS:-/mnt/SDCARD/Emu/DC/default_configs}"
 
 set_ui_scale() {
 
@@ -70,6 +72,16 @@ migrate_standalone_data() {
 	rmdir "$old" 2>/dev/null || true
 }
 
+# A board's pad map (UNVERIFIED, generated from its platform cfg's SDL map for the DC controls audit): Flycast v2.7
+# drops triggers SDL maps to buttons. Copied only when absent, so a map saved in Flycast's own menu stays.
+install_flycast_pad_mapping() {
+	for f in "$FLYCAST_DEFAULTS/flycast/pads/$FLYCAST_PAD_MAP"/SDL_*.cfg; do
+		[ -f "$f" ] || continue
+		dst="${XDG_CONFIG_HOME:-/mnt/SDCARD/Emu/DC/config}/flycast/mappings/${f##*/}"
+		[ -e "$dst" ] || { mkdir -p "${dst%/*}" && cp "$f" "$dst"; }
+	done
+}
+
 run_flycast_standalone() {
 
 	set_ui_scale
@@ -95,15 +107,12 @@ run_flycast_standalone() {
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
 
-	# Flycast reads the pad through SDL_GameController when SDL knows a mapping
-	# and applies its own standard layout (DC A on SDL A, triggers on the
-	# trigger axes). The Flip and the TrimUI line get that from SDL's built-in
-	# X360 map; the H700 pad ships no map, so hand it spruce's POSITIONAL one
-	# and the same layout follows. Without it flycast sees a raw joystick,
-	# looks for mappings/SDL_ANBERNIC-keys.cfg, and finds nothing.
-	case "$PLATFORM" in
-		"Anbernic"*) export_sdl_gamecontroller_map positional ;;
-	esac
+	# The Flip and the TrimUI line use the shipped mappings/SDL_Xbox 360 Controller.cfg. A board whose platform
+	# cfg names a pad map table (FLYCAST_PAD_MAP) gets spruce's POSITIONAL SDL map and that table's mapping file.
+	if [ -n "$FLYCAST_PAD_MAP" ]; then
+		export_sdl_gamecontroller_map positional
+		install_flycast_pad_mapping
+	fi
 
 	if [ "$CORE" = "Flycast2024-standalone" ]; then
 		./flycast2024 "$ROM_FILE" > $(emu_log_file) 2>&1

@@ -22,6 +22,15 @@ DEFAULT_ARCADE_MAP="${DEFAULT_MAP%.cfg}_arcade.cfg"
 [ -e "$DEFAULT_ARCADE_MAP" ] && cp -f "$DEFAULT_ARCADE_MAP" "$LIVE_ARCADE_MAP"
 [ -e "$DEFAULT_ARCADE_MAP" ] || log_message "Reset Flycast config: $DEFAULT_ARCADE_MAP does not exist, arcade mapping not restored"
 
+# The board's pad map table (FLYCAST_PAD_MAP, from its platform cfg; UNVERIFIED generated maps, DC controls audit)
+if [ -n "$FLYCAST_PAD_MAP" ]; then
+    for DEFAULT_PAD in "$DEF/flycast/pads/$FLYCAST_PAD_MAP"/SDL_*.cfg; do
+        LIVE_PAD="${LIVE_MAP%/*}/${DEFAULT_PAD##*/}"
+        [ -e "$DEFAULT_PAD" ] && cp -f "$DEFAULT_PAD" "$LIVE_PAD"
+        [ -e "$DEFAULT_PAD" ] || log_message "Reset Flycast config: $DEF/flycast/pads/$FLYCAST_PAD_MAP does not exist, pad map not restored"
+    done
+fi
+
 # RetroArch core files: default_configs/retroarch mirrors RetroArch/.retroarch/config (the layout all series share)
 [ -d "$DEF/retroarch" ] && (cd "$DEF/retroarch" && find . -type f) | while IFS= read -r f; do
     DEFAULT_FILE="$DEF/retroarch/$f"
