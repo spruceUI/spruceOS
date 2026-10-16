@@ -37,6 +37,7 @@ run_yabasanshiro() {
 
 	[ -n "$GUID" ] && \
 	jq --arg guid "$GUID" '.player1.deviceGUID = $guid' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
+	seed_yaba_pad
 
 	if [ -f "$SATURN_BIOS" ] && [ "$CORE" = "yabasanshiro-standalone-bios" ]; then
 		"$YABASANSHIRO" -r 3 -i "$ROM_FILE" -b "$SATURN_BIOS" > $(emu_log_file) 2>&1
@@ -99,4 +100,31 @@ generate_xx_yaba_keymap_fallback() {
 	    "analogx": {"id": 0, "type": "axis", "value": 1},
 	    "analogy": {"id": 1, "type": "axis", "value": -1}
 	  } | .player1.deviceName = "ANBERNIC-keys"' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
+}
+
+# A board whose cfg names a pad table (SATURN_PAD_TABLE) ships Emu/SATURN/pad/keymap-<table>.json: player1 names that
+# pad, and its entry is added when missing or seeded from another table (MagicX numbering), so in-emulator binds stay.
+seed_yaba_pad() {
+	[ -n "$SATURN_PAD_TABLE" ] || return 0
+	src="$EMU_DIR/pad/keymap-$SATURN_PAD_TABLE.json"
+	[ -f "$src" ] && [ -f "$KEYMAP_FILE" ] || return 0
+	jq --slurpfile s "$src" '
+	  $s[0] as $seed | $seed.player1 as $p | ("0_" + $p.deviceName + "_" + $p.deviceGUID) as $k
+	  | .player1 = ((.player1 // {}) + {"DeviceID": 0, "deviceName": $p.deviceName, "deviceGUID": $p.deviceGUID})
+	  | if (.[$k].spruce_table // "") == $seed[$k].spruce_table then . else .[$k] = $seed[$k] end
+	' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
+	[ -f "$EMU_DIR/pad/es-$SATURN_PAD_TABLE.xml" ] && apply_yaba_es_entry "$EMU_DIR/pad/es-$SATURN_PAD_TABLE.xml"
+}
+
+# The menu button comes from .emulationstation/es_temporaryinput.cfg, matched by GUID then name; that pad's entry is
+# replaced with the table's at each launch, since one pad name can carry two numberings.
+apply_yaba_es_entry() {
+	cfg="$EMU_DIR/.emulationstation/es_temporaryinput.cfg"
+	name=$(sed -n 's/.*deviceName="\([^"]*\)".*/\1/p' "$1" | head -1)
+	[ -f "$cfg" ] || { mkdir -p "${cfg%/*}" && printf '<?xml version="1.0"?>\n<inputList>\n</inputList>\n' > "$cfg"; }
+	awk -v tag="deviceName=\"$name\"" -v snip="$1" '
+		/<inputConfig / && index($0, tag) { skip = 1 }
+		skip { if (/<\/inputConfig>/) skip = 0; next }
+		/<\/inputList>/ { while ((getline l < snip) > 0) print l }
+		{ print }' "$cfg" > "$cfg.tmp" && mv "$cfg.tmp" "$cfg"
 }
