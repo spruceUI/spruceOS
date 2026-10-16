@@ -1,3 +1,4 @@
+# UNVERIFIED: auto-generated Spruce N64 layout for Brick (0 stick(s)), not device-tested yet
 input_libretro_device_p1 = "1"
 input_libretro_device_p2 = "1"
 input_libretro_device_p3 = "1"
