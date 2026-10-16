@@ -7,6 +7,7 @@
 #   CORE
 #   LD_LIBRARY_PATH
 #   LOG_DIR
+#   emu_log_file
 #
 # Provides:
 #   run_drastic
@@ -32,7 +33,7 @@ run_drastic() {
 run_drastic64() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 	ready_arch_64_states
-	./drastic64 "$ROM_FILE" > $(emu_log_file) 2>&1
+	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
 
@@ -42,7 +43,6 @@ run_drastic_trngaje_a133p() {
 	advdrastic_dir="${1:-$HOME/lib64_A133P_trngaje}"
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_A133P_trngaje:$LD_LIBRARY_PATH:$HOME/lib64"
-	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
 	LD_PRELOAD=$advdrastic_dir/libadvdrastic.so ./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
@@ -126,7 +126,6 @@ run_drastic_Flip(){
 run_drastic_trngaje_Flip() {
 	ready_arch_64_states
 	export LD_LIBRARY_PATH="$HOME/lib64_Flip:$LD_LIBRARY_PATH"
-	[ ! -e ./drastic ] && cp ./drastic64 ./drastic
 	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
