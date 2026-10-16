@@ -109,6 +109,14 @@ runtime_mounts_a133p() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+# DHCP must not hold the WiFi lock while waiting for a lease.
+# Use a separate session to survive launcher exit.
+device_start_dhcp_client() {
+    pgrep -f "udhcpc.*wlan0" >/dev/null && return 0
+    setsid udhcpc -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
+    return 0
+}
+
 # Stock runs its own wpa_supplicant (procd S96), which procd spawns just after
 # enable_wifi has looked for one - so both end up on wlan0, deauthenticating each
 # other for ~80 s. Import its networks, stop the service, then watch for 30 s
