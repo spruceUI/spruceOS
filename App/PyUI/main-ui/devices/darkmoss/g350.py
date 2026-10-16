@@ -1,12 +1,14 @@
-from devices.darkmoss.rgb30 import Rgb30
+from devices.darkmoss.darkmoss_device import DarkmossDevice
 
 
-class G350(Rgb30):
+class G350(DarkmossDevice):
     """BatleXP G350 on dArkMoss: RK3326, 640x480, the RG351MP-family pad."""
 
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
     SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/g350-system.json"
     SYSTEM_JSON_DEFAULT = "json/g350-system.json"
+    # The 4.4 kernel lists the panel colour properties but rejects every set.
+    PANEL_CALIBRATION = False
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1
     START_KEY = 705
     MENU_KEY = 708    # F5
@@ -19,16 +21,3 @@ class G350(Rgb30):
 
     def screen_height(self):
         return 480
-
-    # The 4.4 kernel lists the panel colour properties but rejects every set.
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False
