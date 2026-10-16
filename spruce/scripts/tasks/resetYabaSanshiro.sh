@@ -16,7 +16,6 @@ restore() {  # restore <default> <live>
 
 log_message "Resetting YabaSanshiro config to default."
 restore "$DEF/yabasanshiro/keymapv2.json" /mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json
-restore "$DEF/yabasanshiro/yaba_input.cfg" /mnt/SDCARD/Emu/SATURN/.yabasanshiro/yaba_input.cfg
 restore "$DEF/retroarch/YabaSanshiro/YabaSanshiro.opt" /mnt/SDCARD/RetroArch/.retroarch/config/YabaSanshiro/YabaSanshiro.opt
 restore "$DEF/retroarch/YabaSanshiro/YabaSanshiro.cfg" /mnt/SDCARD/RetroArch/.retroarch/config/YabaSanshiro/YabaSanshiro.cfg
 
