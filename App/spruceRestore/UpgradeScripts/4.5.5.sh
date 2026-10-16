@@ -18,7 +18,7 @@ for _name in rgb30 rgb20sx miniloong a10mini g350 xumini; do
     [ -f "$_old" ] || continue
     mv -f "$_old" "/mnt/SDCARD/Saves/$_name-system.json" && log_message "Moved $_old to Saves"
 done
-rmdir "$OLD_CONFIG_DIR" 2>/dev/null
+rmdir "$OLD_CONFIG_DIR" 2>/dev/null || true
 
 
 # -------------------- UPGRADE COMPLETION --------------------
