@@ -40,6 +40,8 @@ if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
     . /mnt/SDCARD/spruce/scripts/ports_migration.sh
     migrate_ports_dir
 fi
+# HOME is shared by every device on the card; the device that needs one writes it in device_init.
+rm -f "$HOME/.asoundrc"
 device_init
 ensure_dev_shm
 ensure_dev_fd
