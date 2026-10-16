@@ -463,29 +463,6 @@ jobs:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: spruceOS v${{ steps.get_version.outputs.version }}
           body: |
-            | Device                | Support Status        |
-            |-----------------------|-----------------------|
-            | Miyoo Flip            | Stable |
-            | Miyoo A30             | Stable |
-            | Trimui Smart Pro      | Stable |
-            | Trimui Brick          | Stable |
-            | Trimui Smart Pro S    | Stable |
-            | Trimui Brick Pro      | Stable |
-            | Miyoo Mini Flip       | Stable |
-            | Miyoo Mini Plus       | Stable |
-            | Miyoo Mini v1-4       | Stable |
-            | Anbernic RGXX+ series | Stable |
-            | Powkiddy RGB30        | Stable |
-            | Powkiddy RGB20SX      | Stable |
-            | Miniloong Pocket 1    | Stable |
-            | MagicX Zero 28 / Zero 40 / XU20 | In Development, testers wanted! |
-
-            > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
-
-            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
-
-            >**BaseOS and DarkMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
-
             # What's New
 
             Check out the wiki for info on ROM folders and apps [Here](https://github.com/spruceUI/spruceOS/wiki)
@@ -500,13 +477,12 @@ jobs:
             ## Improvements
             -
 
-            ## Installation
+            # Installation
 
-            ## New Installer App
-            - Try the all-in-one installer app for a super easy installation!
-            - No need to download a release or format your card manually!
-            - Compatible versions for Windows, Mac and Linux!
-            - Lets you install Stable, Nightlies and Twig (GKD Pixel 2 only) all in one click!
+            ## Installer App
+            Try the all-in-one installer app for a super easy installation! No need to download a release or format your card manually. Available for Windows, Mac and Linux! You can install spruceOS Stable, spruceOS Nightlies, any necessaryTF1 images, or twigUI (a spruce experience for GKD Pixel 2 only) in just one click!
+
+            The installer app can also be used to update an existing spruceOS installation to the latest version, or even scrape boxart for your library.
 
             | Platform | Download |
             |----------|----------|
@@ -524,12 +500,41 @@ jobs:
             - Extract onto your PC using [7zip](https://www.7-zip.org/download.html)
             - Copy the entire contents to a blank FAT32 formatted SD card.
             - Seriously, use 7zip to extract onto your PC THEN copy the files. IDK why but Windows breaks stuff if you use its built in extraction tool.
+            - For 2-slot devices that require a TF1 image, download the appropriate TF1 image from the links below and flash it to a separate SD card. See the table below for which TF1 image is required for your device, if any.
 
             ## OTA Update
 
             - `spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z` contains only the files changed since the previous stable release.
             - It also contains a deletion manifest for files removed since the previous stable release.
             - This package is intended for OTA updates from `${{ steps.previous_release.outputs.tag }}` to `v${{ steps.get_version.outputs.version }}`.
+
+            # Supported Devices
+            | Device                | Support Status        | Separate TF1 Required? |
+            |-----------------------|-----------------------|------------------------|
+            | Miyoo Flip            | Supported | No |
+            | Miyoo A30             | Supported | No |
+            | Trimui Smart Pro      | Supported | No |
+            | Trimui Brick          | Supported | No |
+            | Trimui Smart Pro S    | Supported | No |
+            | Trimui Brick Pro      | Supported | No |
+            | Miyoo Mini Flip       | Supported | No |
+            | Miyoo Mini Plus       | Supported | No |
+            | Miyoo Mini v1-4       | Supported | No |
+            | Anbernic H700 devices | Supported | Yes, (BaseOS)[https://github.com/pvaibhav/BaseOS/releases/latest] |
+            | Powkiddy RGB30        | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
+            | Powkiddy RGB20SX      | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
+            | Miniloong Pocket 1    | Supported | Yes, (dArkMoss)[https://github.com/spruceUI/dArkMoss/releases/latest] |
+            | MagicX Zero 28        | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
+            | MagicX Zero 40        | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
+            | MagicX XU20 V32       | Supported | Yes, (oakMoss)[https://github.com/spruceUI/oakMoss/releases/latest] |
+
+            > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            >**BaseOS, dArkMoss, and oakMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
 
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}
