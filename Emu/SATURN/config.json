@@ -42,11 +42,11 @@
         "DARKMOSS"
       ],
       "options": [
-        "yabasanshiro-standalone-hle",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
-        "yabasanshiro_a133p_libretro"
+        "yabasanshiro-standalone-hle"
       ],
-      "selected": "yabasanshiro-standalone-hle",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_Flip": {
