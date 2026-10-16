@@ -20,7 +20,6 @@
 DARKMOSS_DEBUG_LOG="/mnt/SDCARD/Saves/spruce/darkmoss_debug.log"
 
 device_init() {
-    migrate_system_json
     migrate_platform_files
     resolve_pad_node
     log_message "$PLATFORM: TF2 is ${SD_DEV:-<unresolved>} at $SD_MOUNTPOINT"
@@ -743,14 +742,6 @@ darkmoss_drm_holders() {
                 ;;
         esac
     done
-}
-
-# The system json used to live in App/PyUI/config; updates leave Saves alone.
-migrate_system_json() {
-    _legacy="/mnt/SDCARD/App/PyUI/config/${SYSTEM_JSON##*/}"
-    if [ -f "$_legacy" ] && [ ! -f "$SYSTEM_JSON" ]; then
-        mv "$_legacy" "$SYSTEM_JSON" && log_message "$PLATFORM: moved $_legacy to Saves"
-    fi
 }
 
 # A device that used to run as another platform (the RGB20SX ran as RGB30)
