@@ -1,0 +1,85 @@
+{
+  "player1": {
+    "deviceName": "GO-Super Gamepad",
+    "deviceGUID": "1900bb3e4b4800000011000000010000"
+  },
+  "0_GO-Super Gamepad_1900bb3e4b4800000011000000010000": {
+    "a": {
+      "id": 0,
+      "type": "button",
+      "value": 1
+    },
+    "b": {
+      "id": 1,
+      "type": "button",
+      "value": 1
+    },
+    "x": {
+      "id": 3,
+      "type": "button",
+      "value": 1
+    },
+    "y": {
+      "id": 2,
+      "type": "button",
+      "value": 1
+    },
+    "c": {
+      "id": 4,
+      "type": "button",
+      "value": 1
+    },
+    "z": {
+      "id": 5,
+      "type": "button",
+      "value": 1
+    },
+    "l": {
+      "id": 6,
+      "type": "button",
+      "value": 1
+    },
+    "r": {
+      "id": 7,
+      "type": "button",
+      "value": 1
+    },
+    "start": {
+      "id": 13,
+      "type": "button",
+      "value": 1
+    },
+    "up": {
+      "id": 8,
+      "type": "button",
+      "value": 1
+    },
+    "down": {
+      "id": 9,
+      "type": "button",
+      "value": 1
+    },
+    "left": {
+      "id": 10,
+      "type": "button",
+      "value": 1
+    },
+    "right": {
+      "id": 11,
+      "type": "button",
+      "value": 1
+    },
+    "analogx": {
+      "id": 0,
+      "type": "axis",
+      "value": 1
+    },
+    "analogy": {
+      "id": 1,
+      "type": "axis",
+      "value": -1
+    },
+    "spruce_table": "G350",
+    "spruce_generated": "unverified-2026-10-16"
+  }
+}
