@@ -142,12 +142,9 @@ check_for_update() {
         sleep 20
     done
 
-    # Get current version based on mode
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
-        CURRENT_VERSION=$(get_version_complex)
-    else
-        CURRENT_VERSION=$(get_version)
-    fi
+    # Anyone can pick the nightly channel: read the installed nightly's full
+    # version from its root marker (a stable card reads its plain version).
+    CURRENT_VERSION=$(get_version_complex)
 
     read_only_check
 
@@ -209,17 +206,17 @@ check_for_update() {
         # Target version is higher, always consider it an update
         update_available=1
     elif [ "$version_higher" = "0" ] && [ "$target_base_version" = "$current_base_version" ]; then
-        # Same base version, check suffixes
-        if flag_check "developer_mode" || flag_check "tester_mode"; then
-            # For testers/developers, nightlies are updates
-            if [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
-                update_available=1
-            elif [ "$nightly_rebuilt" = "1" ]; then
-                log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
-                update_available=1
-            elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
-                log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
-            fi
+        # Same base version: the stable release of the installed nightly, a
+        # newer nightly or a rebuilt one is an update, as downloader.sh offers it.
+        if [ -z "$target_suffix" ] && [ -n "$current_date" ]; then
+            update_available=1
+        elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
+            update_available=1
+        elif [ "$nightly_rebuilt" = "1" ]; then
+            log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
+            update_available=1
+        elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
+            log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
         fi
     fi
 
@@ -257,6 +254,8 @@ check_for_update() {
             if [ "$(echo "$target_base_version $prompted_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$prompted_base_version" ]; then
                 newer_than_prompted=1
             elif [ -n "$prompted_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$prompted_date" ]; then
+                newer_than_prompted=1
+            elif [ "$target_base_version" = "$prompted_base_version" ] && [ -z "$target_suffix" ] && [ -n "$prompted_date" ]; then
                 newer_than_prompted=1
             elif [ "$nightly_rebuilt" = "1" ] && [ "$prompted_version" = "$TARGET_VERSION" ] && [ "$prompted_build" != "$target_build" ]; then
                 newer_than_prompted=1
