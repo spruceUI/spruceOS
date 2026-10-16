@@ -20,3 +20,24 @@ log_message "Resetting mupen64plus config to default."
 [ -e "$BACKUP_CFG" ] || log_message "Reset mupen64plus config: $BACKUP_CFG does not exist, nothing restored"
 [ -e "$BACKUP_AC" ] && cp -f "$BACKUP_AC" "$LIVE_AC"
 [ -e "$BACKUP_AC" ] || log_message "Reset mupen64plus config: $BACKUP_AC does not exist, pad table not restored"
+
+# A restore brings back the player's RetroArch N64 core files and menu picks, so their shipped copies live in
+# default_configs, outside the backup: retroarch/ mirrors RetroArch/.retroarch/config, picks.json the menu defaults.
+DEFAULTS="/mnt/SDCARD/Emu/N64/default_configs"
+RA_CONFIG="/mnt/SDCARD/RetroArch/.retroarch/config"
+EMU_JSON="/mnt/SDCARD/Emu/N64/config.json"
+[ -d "$DEFAULTS/retroarch" ] || log_message "Reset mupen64plus config: $DEFAULTS/retroarch does not exist, RetroArch N64 files not restored"
+[ -d "$DEFAULTS/retroarch" ] && (cd "$DEFAULTS/retroarch" && find . -type f) | while IFS= read -r f; do
+    DEFAULT_FILE="$DEFAULTS/retroarch/$f"
+    LIVE_FILE="$RA_CONFIG/$f"
+    mkdir -p "${LIVE_FILE%/*}"
+    [ -e "$DEFAULT_FILE" ] && cp -f "$DEFAULT_FILE" "$LIVE_FILE"
+done
+# A pick goes back only while its option still offers it; per-game overrides stay.
+if [ -f "$DEFAULTS/picks.json" ] && [ -f "$EMU_JSON" ]; then
+    jq --slurpfile d "$DEFAULTS/picks.json" 'reduce ($d[0].N64 // {} | to_entries[]) as $p (.;
+        if any(.menuOptions[$p.key].options[]?; . == $p.value) then .menuOptions[$p.key].selected = $p.value else . end)' \
+        "$EMU_JSON" > "$EMU_JSON.tmp" && [ -s "$EMU_JSON.tmp" ] && mv -f "$EMU_JSON.tmp" "$EMU_JSON" || rm -f "$EMU_JSON.tmp"
+else
+    log_message "Reset mupen64plus config: $DEFAULTS/picks.json or $EMU_JSON missing, menu picks not restored"
+fi
