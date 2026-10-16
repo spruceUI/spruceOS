@@ -115,8 +115,9 @@ version_num() {
         minor=0; patch=0
     else
         minor="${rest%%.*}"
-        rest="${rest#*.}"
-        if [ "$rest" = "$minor" ]; then patch=0; else patch="${rest%%.*}"; fi
+        # Test for a patch field before stripping: comparing the stripped
+        # rest with minor read 4.5.5 as 4.5.0.
+        if [ "$rest" = "$minor" ]; then patch=0; else rest="${rest#*.}"; patch="${rest%%.*}"; fi
     fi
     [ -z "$minor" ] && minor=0
     [ -z "$patch" ] && patch=0
