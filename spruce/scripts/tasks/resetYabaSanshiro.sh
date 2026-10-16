@@ -4,7 +4,7 @@
 
 # Saturn's live settings sit in trees spruceBackup carries across updates (Emu/SATURN/.yabasanshiro and
 # RetroArch/.retroarch/config), so this release's defaults ship in Emu/SATURN/default_configs, which every update
-# replaces. backup.bin (the Saturn's battery RAM) is never touched; the XX pad entry is seeded again at launch.
+# replaces. backup.bin (the Saturn's battery RAM) is never touched; each board's pad seed is applied again at launch.
 DEF=/mnt/SDCARD/Emu/SATURN/default_configs
 CFG=/mnt/SDCARD/Emu/SATURN/config.json
 
