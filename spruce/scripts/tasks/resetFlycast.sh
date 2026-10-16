@@ -16,6 +16,11 @@ log_message "Resetting Flycast config to default."
 [ -e "$DEFAULT_CFG" ] || log_message "Reset Flycast config: $DEFAULT_CFG does not exist, nothing restored"
 [ -e "$DEFAULT_MAP" ] && cp -f "$DEFAULT_MAP" "$LIVE_MAP"
 [ -e "$DEFAULT_MAP" ] || log_message "Reset Flycast config: $DEFAULT_MAP does not exist, mapping not restored"
+# NAOMI/Atomiswave use the _arcade file when it exists, else a clone of the Dreamcast one
+LIVE_ARCADE_MAP="${LIVE_MAP%.cfg}_arcade.cfg"
+DEFAULT_ARCADE_MAP="${DEFAULT_MAP%.cfg}_arcade.cfg"
+[ -e "$DEFAULT_ARCADE_MAP" ] && cp -f "$DEFAULT_ARCADE_MAP" "$LIVE_ARCADE_MAP"
+[ -e "$DEFAULT_ARCADE_MAP" ] || log_message "Reset Flycast config: $DEFAULT_ARCADE_MAP does not exist, arcade mapping not restored"
 
 # RetroArch core files: default_configs/retroarch mirrors RetroArch/.retroarch/config (the layout all series share)
 [ -d "$DEF/retroarch" ] && (cd "$DEF/retroarch" && find . -type f) | while IFS= read -r f; do
