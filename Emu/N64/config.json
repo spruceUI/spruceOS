@@ -95,11 +95,12 @@
     "controlMode": {
       "display": "RA: C-button Mode",
       "options": [
+        "Spruce (per device)",
         "Custom",
         "Classic (R2 + A, B, X, Y)",
         "Action (A, X, Select, R1)"
       ],
-      "selected": "Custom",
+      "selected": "Spruce (per device)",
       "overrides": {}
     }
   },

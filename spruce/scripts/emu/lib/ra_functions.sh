@@ -514,6 +514,7 @@ backup_rac_creds_to_spruce_cfg() {
 load_n64_controller_profile() {
 	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
 	case "$profile" in
+		*"Spruce"*) profile_name="Spruce-$PLATFORM" ;;	# the board's own layout
 		*"Classic"*) profile_name="Classic" ;;
 		*"Action"*) profile_name="Action" ;;
 		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected
@@ -522,6 +523,10 @@ load_n64_controller_profile() {
 
 	SRC="/mnt/SDCARD/Emu/N64/remaps"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+	if [ ! -f "${SRC}/${profile_name}.rmp" ]; then
+		log_message "N64 controls: no ${profile_name}.rmp, core remaps left as they are"
+		return 0
+	fi
 
 	for dir in "$DST"/*; do
 		[ ! -d "$dir" ] && continue
