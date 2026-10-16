@@ -31,6 +31,7 @@ run_drastic() {
 
 ##### SHARED #####
 
+# This is the OG, unmodified DraStic, available on all 64-bit devices.
 run_drastic64() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 	ready_arch_64_states
@@ -114,14 +115,7 @@ run_drastic_A30() {
 ##### FLIP #####
 
 run_drastic_Flip(){
-	if [ "$CORE" = "DraStic-Steward" ]; then
-		if [ -d /usr/l32 ]; then
-			run_drastic_steward_Flip
-		else
-			display_bad_flip_firmware_message
-		fi
-
-	elif [ "$CORE" = "DraStic-trngaje" ]; then
+	if [ "$CORE" = "DraStic-trngaje" ]; then
 		run_drastic_trngaje_Flip
 
 	elif [ "$CORE" = "DraStic-original" ]; then 
@@ -130,14 +124,6 @@ run_drastic_Flip(){
 	else
 		display_core_unrecognized_for_platform_message
 	fi
-}
-
-run_drastic_steward_Flip() {
-	ready_arch_32_states
-	export SDL_VIDEODRIVER=NDS
-	export LD_LIBRARY_PATH="$HOME/lib32_Flip:$EMU_DIR/lib32-common:/usr/lib32:$LD_LIBRARY_PATH"
-	./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
-	stash_arch_32_states
 }
 
 run_drastic_trngaje_Flip() {
@@ -200,8 +186,6 @@ run_drastic_BrickPro(){
     if [ "$CORE" = "DraStic-original" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
 		run_drastic64
-	elif [ "$CORE" = "DraStic-Steward" ]; then
-		run_drastic_steward_Brick
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		run_drastic_trngaje_a133p
@@ -213,43 +197,16 @@ run_drastic_BrickPro(){
 ##### BRICK #####
 
 run_drastic_Brick(){
-	if [ "$CORE" = "DraStic-Steward" ]; then
-		run_drastic_steward_Brick
-	elif [ "$CORE" = "DraStic-original" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64 
+	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
+	if [ "$CORE" = "DraStic-original" ]; then
 		run_drastic64
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 		run_drastic_trngaje_a133p
 	else
 		display_core_unrecognized_for_platform_message
 	fi
 }
 
-run_drastic_steward_Brick() {
-	#Drastic steward depends on something MainUI setups
-    /usr/trimui/bin/MainUI &
-    pid=$!
-    sleep 2
-    kill "$pid"
-
-	kill_runner
-	LD_LIBRARY_PATH=/usr/trimui/lib ./runner&
-	sleep 1
-	export SDL_VIDEODRIVER=NDS
-	ready_arch_32_states
-	./lib32_Brick/ld-linux-armhf.so.3 --library-path lib32_Brick:lib32-common ./drastic32 "$ROM_FILE" > $(emu_log_file) 2>&1
-	stash_arch_32_states
-	sync
-	kill_runner
-}
-
-kill_runner() {
-    PID="$(pidof runner)"
-    if [ "$PID" != "" ]; then
-        kill -9 $PID
-    fi
-}
 
 ##### SMART PRO #####
 
@@ -305,10 +262,9 @@ run_drastic_SmartProS() {
 		run_drastic64
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
 		run_drastic_trngaje_a133p
-        else
-                display_core_unrecognized_for_platform_message
-        fi
-
+	else
+			display_core_unrecognized_for_platform_message
+	fi
 }
 
 ##### PIXEL 2 #####

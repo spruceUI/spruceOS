@@ -31,29 +31,13 @@
       "selected": "DraStic-Steward",
       "overrides": {}
     },
-    "Emulator_Flip": {
-      "display": "Emulator",
-      "devices": [
-        "MIYOO_FLIP",
-        "TRIMUI_BRICK"
-      ],
-      "options": [
-        "DraStic-original",
-        "DraStic-Steward",
-        "DraStic-trngaje",
-        "DSperate",
-        "DSperate-Tate"
-      ],
-      "selected": "DSperate",
-      "overrides": {}
-    },
     "Emulator_SmartPro": {
       "display": "Emulator",
       "devices": [
         "TRIMUI_SMART_PRO_S",
-        "TRIMUI_SMART_PRO",
-        "TRIMUI_BRICK_PRO",
-        "MAGICX_A133P"
+        "TRIMUI_A133P",
+        "MAGICX_A133P",
+        "MIYOO_FLIP"
       ],
       "options": [
         "DraStic-original",
@@ -119,7 +103,7 @@
   "brand": "Nintendo",
   "type": "handheld",
   "releaseYear": 2004,
-  "default_emulator": "DraStic-original",
+  "default_emulator": "DSperate",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": [
     "nds",
