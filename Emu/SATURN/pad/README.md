@@ -36,11 +36,11 @@ The libretro core's Saturn layout:
 | Zero28, Zero40, XU20 (+ `-riders`) | magicx-input | GUID measured from the standalone's log (2026-10-15) |
 | Miniloong | retrogame_joypad | measured (2026-10-15) |
 | RGB30, RGB30-R3, RGB20SX | retrogame_joypad | computed: the Miniloong's pad ids |
-| A10Mini, G350 | GO-Super Gamepad | computed |
-| XUMiniM | MagicX Mini-M Controller | computed |
+| A10Mini | GO-Super Gamepad | computed |
 
 "Computed" means the cfg's SDL map GUID with SDL's name CRC (CRC-16/ARC of the evdev name) in bytes 2-3. That rule
-gives the measured GUID on every pad measured so far. The Pixel 2 has no SDL map, so it has no table.
+gives the measured GUID on every pad measured so far. The Pixel 2 has no SDL map, so it has no table. The G350
+and XU Mini M are left out on purpose (user, 2026-10-16: "Leave out everywhere", as for their 10-15 deferral).
 
 ## Regenerating
 
