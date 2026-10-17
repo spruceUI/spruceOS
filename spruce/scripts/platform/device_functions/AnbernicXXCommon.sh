@@ -473,6 +473,8 @@ anbernic_xx_common_init() {
     stage_ra_autoconfig
 
     add_spruce_system_user
+    # BaseOS 1.3.0 renamed the respawned session; older images still run nextui-session.
+    shield_baseos_session /sbin/frontend-session
     shield_baseos_session /sbin/nextui-session
 }
 

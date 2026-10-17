@@ -2,8 +2,8 @@
 
 # Stop BaseOS's respawned session from re-mounting the card during shutdown.
 #
-# BaseOS's /etc/inittab respawns its session script (/sbin/nextui-session on the
-# Anbernic XX line, /sbin/frontend-session on the Miyoo Flip), so the moment
+# BaseOS's /etc/inittab respawns its session script (/sbin/frontend-session; the
+# Anbernic XX line's BaseOS before 1.3.0 named it /sbin/nextui-session), so the moment
 # save_poweroff kills the frontend, init starts another one. That script's job
 # includes mounting the card if it finds it unmounted, and it cannot tell a
 # deliberate shutdown unmount from a yanked card.
