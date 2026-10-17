@@ -127,6 +127,7 @@ stage2_dump_holders() {
         [ -n "$_why" ] && echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why"
     done
     awk -v mp="$SD_MOUNTPOINT" '$NF ~ "^"mp"/" {print "  unix-socket " $NF}' /proc/net/unix 2>/dev/null
+    awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print "  swap " $1}' /proc/swaps 2>/dev/null
     echo "stage2: end of holders"
 }
 
@@ -241,6 +242,12 @@ sleep 0.1
 sync
 # Discover the SD card's block device from its mount entry
 SD_DEV=$(awk -v mp="$SD_MOUNTPOINT" '$2 == mp {print $1; exit}' /proc/mounts)
+
+# A swap file on the SD card holds it open for writing until swapoff.
+awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print $1}' /proc/swaps | \
+    while read -r swap; do
+    swapoff "$swap" 2>/dev/null
+done
 
 # Tear down all mounts that depend on the SD card.
 # On the Flip, this includes:
