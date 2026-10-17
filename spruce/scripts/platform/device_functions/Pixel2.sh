@@ -466,3 +466,16 @@ device_system_handles_sdcard_unmount() {
     # return non-zero = false
     return 0
 }
+
+device_needs_strict_unmount() {
+    return 1
+}
+
+device_run_reboot_cmd() {
+    systemctl reboot
+}
+
+# Through systemd like reboot, so /mnt/SDCARD is unmounted cleanly.
+run_poweroff_cmd() {
+    systemctl poweroff
+}

@@ -9,15 +9,11 @@ PM_ROOT="/mnt/SDCARD/Persistent/portmaster"
 PM_DIR="$PM_ROOT/PortMaster"
 OURS="/mnt/SDCARD/App/PortMaster"
 
-if [ "$PLATFORM" = "Pixel2" ]; then
-    # The Pixel 2 runs PortMaster's own layout untouched.
-    /usr/bin/start_portmaster.sh > /mnt/SDCARD/Saves/spruce/portmaster.log 2>&1
-    "$OURS/update_images.sh" > /mnt/SDCARD/Saves/spruce/updated_images.log 2>&1
-    rm -f /mnt/SDCARD/Roms/ports/gamelist.*
-    exit 0
-fi
-
 . /mnt/SDCARD/spruce/portmaster/portmaster.txt
+
+if [ "$PLATFORM" = "Pixel2" ]; then
+    export PYSDL2_DLL_PATH="/usr/lib"
+fi
 
 # Unpack a self-update's pylibs.zip.
 if [ -f "$PM_DIR/pylibs.zip" ]; then
