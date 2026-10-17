@@ -113,6 +113,9 @@ get_core_folder() {
         "vice_xvic_libretro.so") echo "VICE xvic" ;;
         "x1_libretro.so") echo "x1" ;;
         "yabasanshiro_libretro.so") echo "YabaSanshiro" ;;
+        "yabasanshiro_generic_libretro.so") echo "YabaSanshiro" ;;
+        "yabasanshiro_a133p_libretro.so") echo "YabaSanshiro" ;;
+        "yabasanshiro_smartpros_libretro.so") echo "YabaSanshiro" ;;
         *) echo "UNKNOWN" ;;
     esac
 }

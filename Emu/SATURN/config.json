@@ -42,17 +42,17 @@
         "DARKMOSS"
       ],
       "options": [
-        "yabasanshiro-standalone-hle",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
-        "yabasanshiro_a133p_libretro"
+        "yabasanshiro-standalone-hle"
       ],
-      "selected": "yabasanshiro-standalone-hle",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_Flip": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
@@ -60,7 +60,7 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "selected": "yabasanshiro_libretro",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_Pixel2": {
@@ -79,28 +79,40 @@
     "Emulator_SmartProS": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_smartpros_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
         "TRIMUI_SMART_PRO_S"
       ],
-      "selected": "yabasanshiro_smartpros_libretro",
+      "selected": "yabasanshiro_generic_libretro",
+      "overrides": {}
+    },
+    "Emulator_Brick": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro_generic_libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "devices": [
+        "TRIMUI_A133P"
+      ],
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_64": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_a133p_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "TRIMUI_A133P",
         "MAGICX_A133P"
       ],
-      "selected": "yabasanshiro_a133p_libretro",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_32": {
