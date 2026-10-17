@@ -115,9 +115,9 @@ stage2_dump_holders() {
     awk -v mp="$SD_MOUNTPOINT" '$2 ~ "^"mp"(/|$)" {print "  mount " $1 " on " $2}' /proc/mounts 2>/dev/null
     for _pp in /proc/[0-9]*; do
         _pid="${_pp#/proc/}"
-        [ "$_pid" = "$$" ] && continue
         _why=""
-        for _link in cwd exe; do
+        [ "$_pid" = "$$" ] && _why=" (stage2 itself)"
+        for _link in cwd exe root; do
             _t=$(readlink "$_pp/$_link" 2>/dev/null) || continue
             case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
         done
@@ -131,7 +131,13 @@ stage2_dump_holders() {
             _m=$(grep -m1 -E " ($_re) " "$_pp/maps" 2>/dev/null | awk '{print $4 "=" $NF}')
             [ -n "$_m" ] && _why="$_why dev-map=$_m"
         fi
-        [ -n "$_why" ] && echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why"
+        case "$_why" in "" | " (stage2 itself)") ;; *)
+            echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why" ;;
+        esac
+        # A killed process stuck exiting (in a driver, say) can hold the card with no readable links.
+        case "$(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)" in D|Z|X)
+            echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) exiting/blocked, wchan $(cat "$_pp/wchan" 2>/dev/null)" ;;
+        esac
     done
     awk -v mp="$SD_MOUNTPOINT" '$NF ~ "^"mp"/" {print "  unix-socket " $NF}' /proc/net/unix 2>/dev/null
     awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print "  swap " $1}' /proc/swaps 2>/dev/null
@@ -202,6 +208,16 @@ else
         *"0xd05"*)   SD_MOUNTPOINT="/mnt/sdcard" ;;
         *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
     esac
+fi
+
+# Inherited fds on the card would make this process its own holder. The loop at the
+# top skips 10 and up because the shell reads this script through one of those.
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    for _fd in /proc/$$/fd/*; do
+        _n="${_fd##*/}"
+        [ "$_n" -gt 2 ] 2>/dev/null || continue
+        case "$(readlink "$_fd" 2>/dev/null)" in "$SD_MOUNTPOINT"/*) eval "exec ${_n}>&-" 2>/dev/null ;; esac
+    done
 fi
 
 # A dynamic system shell maps the libc spruce binds over /usr/lib from a loop
@@ -290,12 +306,12 @@ stage2_kill_holders() {
 # took ~5 s a pass on the Smart Pro S, and it runs at least twice.
 stage2_holder_pids() {
     {
-        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" '
+        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/root /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" '
             /^\/proc\/[0-9]+\/fd\/?:$/ { split($0, a, "/"); cur = a[3]; next }
             / -> / {
                 t = $0; sub(/.* -> /, "", t)
                 if (index(t, mp) != 1) next
-                if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe) -> /) {
+                if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe|root) -> /) {
                     p = $0; sub(/.* \/proc\//, "", p); sub(/\/.*/, "", p); print p
                 } else {
                     print cur
