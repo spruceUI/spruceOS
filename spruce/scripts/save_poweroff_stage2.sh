@@ -37,6 +37,8 @@ USB_EXPORT="${SPRUCE_USB_EXPORT:-0}"
 USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
 SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
 SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
+MOUNTINFO="${SPRUCE_MOUNTINFO:-/proc/self/mountinfo}"
+SYS_BLOCK="${SPRUCE_SYS_BLOCK:-/sys/block}"
 
 # ...and stdin/stdout/stderr, which that loop deliberately skips. They are
 # inherited too, and whatever launched the shutdown decides where they point -
@@ -108,6 +110,7 @@ resolve_sd_mountpoint() {
 # the cost is irrelevant and the answer is the whole point: without it a
 # "clean umount FAILED" line names nothing (SPR-MED-199).
 stage2_dump_holders() {
+    _re="$(stage2_card_maps_re)"
     echo "stage2: holders of $SD_MOUNTPOINT after the sweep:"
     awk -v mp="$SD_MOUNTPOINT" '$2 ~ "^"mp"(/|$)" {print "  mount " $1 " on " $2}' /proc/mounts 2>/dev/null
     for _pp in /proc/[0-9]*; do
@@ -124,11 +127,65 @@ stage2_dump_holders() {
         done
         _m=$(grep -m1 " $SD_MOUNTPOINT/" "$_pp/maps" 2>/dev/null | awk '{print $NF}')
         [ -n "$_m" ] && _why="$_why map=$_m"
+        if [ -n "$_re" ]; then
+            _m=$(grep -m1 -E " ($_re) " "$_pp/maps" 2>/dev/null | awk '{print $4 "=" $NF}')
+            [ -n "$_m" ] && _why="$_why dev-map=$_m"
+        fi
         [ -n "$_why" ] && echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why"
     done
     awk -v mp="$SD_MOUNTPOINT" '$NF ~ "^"mp"/" {print "  unix-socket " $NF}' /proc/net/unix 2>/dev/null
     awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print "  swap " $1}' /proc/swaps 2>/dev/null
+    stage2_card_loops | while read -r _l _d; do
+        echo "  loop /dev/$_l ($_d) <- $(cat "$SYS_BLOCK/$_l/loop/backing_file" 2>/dev/null)"
+    done
+    stage2_dependent_mounts | sed 's/^/  dependent mount /'
     echo "stage2: end of holders"
+}
+
+# Loop devices backed by files on the card, one "loopN major:minor" per line.
+stage2_card_loops() {
+    for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
+        read -r _f < "$_bf" 2>/dev/null || continue
+        case "$_f" in "$SD_MOUNTPOINT"/*) ;; *) continue ;; esac
+        _l="${_bf#"$SYS_BLOCK"/}"
+        _l="${_l%%/*}"
+        echo "$_l $(cat "$SYS_BLOCK/$_l/dev" 2>/dev/null)"
+    done
+}
+
+# The card's device and its loops' devices as maps prints them (hex major:minor),
+# joined for grep -E. Finds files mapped through binds, e.g. the glibc on /usr/lib.
+stage2_card_maps_re() {
+    {
+        awk -v mp="$SD_MOUNTPOINT" '$5 == mp {print $3; exit}' "$MOUNTINFO" 2>/dev/null
+        stage2_card_loops | awk '{print $2}'
+    } | awk -F: 'NF == 2 {printf "%s%02x:%02x", (n++ ? "|" : ""), $1, $2}'
+}
+
+# Mount points that keep the card busy, newest first: mounts inside it, other
+# mounts of its device, loop filesystems backed by its files, overlays using it,
+# and everything mounted on top of those (by parent id, so same-path binds elsewhere stay).
+stage2_dependent_mounts() {
+    _loops=" $(stage2_card_loops | awk '{printf "/dev/%s ", $1}')"
+    awk -v mp="$SD_MOUNTPOINT" -v dev="$SD_DEV" -v loops="$_loops" '
+        {
+            id[NR] = $1; par[NR] = $2; mnt[NR] = $5
+            for (i = 7; i <= NF; i++) if ($i == "-") break
+            fs = $(i + 1); src = $(i + 2); so = $(i + 3)
+            if ($5 == mp) next
+            if (index($5, mp "/") == 1 || (dev != "" && src == dev) || index(loops, " " src " ") ||
+                (fs == "overlay" && (index(so, mp "/") || index(so, "/mnt/sdcard/") || index(so, "/mnt/SDCARD/"))))
+                dep[$1] = 1
+        }
+        END {
+            more = 1
+            while (more) {
+                more = 0
+                for (n = 1; n <= NR; n++)
+                    if (!(id[n] in dep) && (par[n] in dep)) { dep[id[n]] = 1; more = 1 }
+            }
+            for (n = NR; n > 0; n--) if (id[n] in dep) print mnt[n]
+        }' "$MOUNTINFO" 2>/dev/null
 }
 
 if [ "$STRICT_UNMOUNT" = "1" ]; then
@@ -145,6 +202,19 @@ else
         *"0xd05"*)   SD_MOUNTPOINT="/mnt/sdcard" ;;
         *)           SD_MOUNTPOINT="/mnt/SDCARD" ;;
     esac
+fi
+
+# A dynamic system shell maps the libc spruce binds over /usr/lib from a loop
+# file on the card, so this very process would pin it: re-run under a static copy.
+STAGE2_BUSYBOX=/tmp/save_poweroff_stage2_busybox
+if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
+    _re="$(stage2_card_maps_re)"
+    if [ -n "$_re" ] && grep -q -E " ($_re) " "/proc/$$/maps" 2>/dev/null &&
+        cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
+        chmod +x "$STAGE2_BUSYBOX" && "$STAGE2_BUSYBOX" true 2>/dev/null; then
+        export STAGE2_STATIC_SHELL="$STAGE2_BUSYBOX"
+        exec "$STAGE2_BUSYBOX" sh "$0" "$@"
+    fi
 fi
 
 # Now that the card's mount point is known, reopen stdout/stderr on a log
@@ -172,6 +242,7 @@ exec >"$STAGE2_LOG" 2>&1
 echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} strict=$STRICT_UNMOUNT ==="
 echo "stage2: logging to $STAGE2_LOG"
 echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
+[ -n "$STAGE2_STATIC_SHELL" ] && echo "stage2: re-run under $STAGE2_STATIC_SHELL (the system shell mapped the card)"
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
@@ -231,6 +302,8 @@ stage2_holder_pids() {
                 }
             }'
         grep -l " $SD_MOUNTPOINT/" /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
+        _re="$(stage2_card_maps_re)"
+        [ -n "$_re" ] && grep -l -E " ($_re) " /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
     } | sort -un | awk -v self="$$" '$1 > 1 && $1 != self'
 }
 
@@ -249,6 +322,25 @@ awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print $1}' /proc/swap
     swapoff "$swap" 2>/dev/null
 done
 
+# Strict: tear down by mountinfo parentage, newest first, so stacked mounts go
+# before their parents; whatever stays busy is detached lazily. Measured on a
+# BaseOS Flip (2026-10-17): the steps below left the 32-bit chroot, muOS and ext4 loops.
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    for _pass in 1 2 3; do
+        stage2_dependent_mounts | while read -r mnt; do umount "$mnt" 2>/dev/null; done
+        [ -z "$(stage2_dependent_mounts)" ] && break
+        stage2_kill_holders
+        sleep 0.2
+    done
+    _left="$(stage2_dependent_mounts)"
+    if [ -n "$_left" ]; then
+        echo "stage2: lazily detaching $(echo "$_left" | wc -l) dependent mounts"
+        echo "$_left" | while read -r mnt; do umount -l "$mnt" 2>/dev/null; done
+    fi
+    # A detached loop still holds its backing file on the card: release it, or
+    # (while still in use) let the kernel clear it on last close.
+    stage2_card_loops | while read -r _l _d; do losetup -d "/dev/$_l" 2>/dev/null; done
+else
 # Tear down all mounts that depend on the SD card.
 # On the Flip, this includes:
 #   - ~25 squashfs loop mounts from /mnt/sdcard/spruce/flip/*.sqsh → /usr/lib/*
@@ -272,6 +364,7 @@ if [ -n "$SD_DEV" ]; then
         sort -r | while read -r mnt; do
         umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
     done
+fi
 fi
 # 4. Now remount the SD card read-only (clears the filesystem dirty flag)
 #    and perform the final unmount.
