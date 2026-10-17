@@ -31,8 +31,11 @@ get_cfg_value() {
 # SA_PLUGIN_NUM / SA_PLUGIN for this launch: the game's pick (else the system's) in config.json, else the in-game
 # menu's [SpruceOS] VideoPlugin (0=GLideN64, 1=Rice, 2=Glide64mk2), else Rice; Rice once GLideN64 failed to load.
 select_mupen_plugin() {
-	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
-	case "$(jq -r --arg game "${GAME:-}" '.menuOptions.standaloneVideoPlugin | (.overrides[$game] // .selected) // empty' "$EMU_JSON_PATH" 2>/dev/null)" in
+	local menu pick
+	menu=$(get_cfg_value SpruceOS VideoPlugin 1)
+	pick=$(jq -r --arg game "${GAME:-}" '.menuOptions.standaloneVideoPlugin | (.overrides[$game] // .selected) // empty' "$EMU_JSON_PATH" 2>/dev/null)
+	SA_PLUGIN_NUM=$menu
+	case "$pick" in
 		GLideN64) SA_PLUGIN_NUM=0 ;;
 		Rice) SA_PLUGIN_NUM=1 ;;
 		Glide64mk2) SA_PLUGIN_NUM=2 ;;
@@ -43,6 +46,7 @@ select_mupen_plugin() {
 		2) SA_PLUGIN="glide64mk2" ;;
 		*) SA_PLUGIN="rice" ;;
 	esac
+	log_message "mupen_functions.sh: video plugin $SA_PLUGIN (config.json pick: ${pick:-none}, in-game menu: $menu${MUPEN_RICE_FALLBACK:+, Rice fallback})"
 }
 
 # Build launch args from current config. Called before each launch so
