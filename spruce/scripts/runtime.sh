@@ -134,7 +134,12 @@ update_checker &
 set_up_boot_action
 
 # Nothing from device_init may still be touching the display or the LEDs under the frontend.
-wait_device_init_jobs
+# PyUI waits for the display itself; a game staged to run first does not.
+if [ -f /tmp/cmd_to_run.sh ]; then
+    wait_device_init_jobs
+else
+    wait_device_init_jobs --except-display
+fi
 
 # start main loop
 log_message "Starting main loop"
