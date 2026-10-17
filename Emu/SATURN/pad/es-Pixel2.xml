@@ -1,5 +1,3 @@
-<?xml version="1.0"?>
-<inputList>
 	<inputConfig type="joystick" deviceName="pixel2_joypad" deviceGUID="19008d96010000000221000000010000">
 		<input name="a" type="button" id="1" value="1" />
 		<input name="b" type="button" id="0" value="1" />
@@ -17,4 +15,3 @@
 		<input name="x" type="button" id="2" value="1" />
 		<input name="y" type="button" id="3" value="1" />
 	</inputConfig>
-</inputList>
