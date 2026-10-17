@@ -304,7 +304,8 @@ device_get_battery_percent() {
     fi
 }
 
-EMU_LIST="retroarch scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
+# RetroArch runs as ra32.mini (RA_BIN in MiyooMini.cfg); retroarch stays for anything started by that name.
+EMU_LIST="retroarch ra32.mini scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
 BRIGHTNESS_FILE="/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/pwm0/duty_cycle"
 SCREEN_BLANK_FILE="/proc/mi_modules/fb/mi_fb0"
 BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
@@ -345,7 +346,7 @@ device_exit_sleep() {
 
     fi
 
-    pgrep retroarch 2>/dev/null && set_smart # return to smart mode
+    pidof retroarch ra32.mini >/dev/null && set_smart # return to smart mode
 }
 
 device_lid_sensor_ready() {
