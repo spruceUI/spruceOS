@@ -194,7 +194,7 @@ redact_ip6() {
     echo
     echo "==== config files the display settings write to ===="
     dump_node /appconfigs/system.json
-    dump_node /mnt/SDCARD/Saves/mini-flip-system.json
+    dump_node /mnt/SDCARD/Saves/miyoo-mini-system.json
 
     echo
     echo "==== processes that apply those settings ===="

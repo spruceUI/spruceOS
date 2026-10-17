@@ -9,7 +9,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
 get_config_path() {
-    echo "/mnt/SDCARD/Saves/mini-flip-system.json"
+    echo "/mnt/SDCARD/Saves/miyoo-mini-system.json"
 }
 
 ###############################################################################
