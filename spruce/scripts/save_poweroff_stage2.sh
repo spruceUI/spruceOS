@@ -119,11 +119,11 @@ stage2_dump_holders() {
         [ "$_pid" = "$$" ] && _why=" (stage2 itself)"
         for _link in cwd exe root; do
             _t=$(readlink "$_pp/$_link" 2>/dev/null) || continue
-            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
+            case "$_t" in "$SD_MOUNTPOINT" | "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
         done
         for _fd in "$_pp"/fd/*; do
             _t=$(readlink "$_fd" 2>/dev/null) || continue
-            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why fd=$_t"; break ;; esac
+            case "$_t" in "$SD_MOUNTPOINT" | "$SD_MOUNTPOINT"/*) _why="$_why fd=$_t"; break ;; esac
         done
         _m=$(grep -m1 " $SD_MOUNTPOINT/" "$_pp/maps" 2>/dev/null | awk '{print $NF}')
         [ -n "$_m" ] && _why="$_why map=$_m"
@@ -135,6 +135,7 @@ stage2_dump_holders() {
             echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why" ;;
         esac
         # A killed process stuck exiting (in a driver, say) can hold the card with no readable links.
+        readlink "$_pp/exe" >/dev/null 2>&1 || continue
         case "$(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)" in D|Z|X)
             echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) exiting/blocked, wchan $(cat "$_pp/wchan" 2>/dev/null)" ;;
         esac
@@ -313,11 +314,11 @@ stage2_kill_holders() {
 # took ~5 s a pass on the Smart Pro S, and it runs at least twice.
 stage2_holder_pids() {
     {
-        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/root /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" '
+        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/root /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" -v root="$SD_MOUNTPOINT" '
             /^\/proc\/[0-9]+\/fd\/?:$/ { split($0, a, "/"); cur = a[3]; next }
             / -> / {
                 t = $0; sub(/.* -> /, "", t)
-                if (index(t, mp) != 1) next
+                if (index(t, mp) != 1 && t != root) next
                 if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe|root) -> /) {
                     p = $0; sub(/.* \/proc\//, "", p); sub(/\/.*/, "", p); print p
                 } else {
