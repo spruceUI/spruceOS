@@ -20,6 +20,17 @@ for _name in rgb30 rgb20sx miniloong a10mini g350 xumini; do
 done
 rmdir "$OLD_CONFIG_DIR" 2>/dev/null || true
 
+# The gametank libretro core replaces the standalone as GameTank's default.
+_cfg=/mnt/SDCARD/Saves/spruce/emu_backups/GAMETANK.json
+if [ -f "$_cfg" ]; then
+    for _key in Emulator_A30 Emulator_64; do
+        if [ "$(jq -r ".menuOptions.$_key.selected // \"\"" "$_cfg")" = "gametank-standalone" ]; then
+            jq ".menuOptions.$_key.selected = \"gametank\"" "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
+            log_message "GameTank $_key: gametank-standalone -> gametank"
+        fi
+    done
+fi
+
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
