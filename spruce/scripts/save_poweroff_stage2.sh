@@ -166,9 +166,9 @@ stage2_on_card() {
 }
 
 # Mirror a line into the kernel log: stock Flips keep it across a warm reboot
-# (console-ramoops), and their only other log place, /tmp, does not survive.
+# (console-ramoops). <2> so it reaches the console past device_init's printk level 3.
 stage2_kmsg() {
-    echo "spruce stage2: $*" > /dev/kmsg 2>/dev/null
+    echo "<2>spruce stage2: $*" > /dev/kmsg 2>/dev/null
 }
 
 # Loop devices backed by files on the card, one "loopN major:minor" per line.
