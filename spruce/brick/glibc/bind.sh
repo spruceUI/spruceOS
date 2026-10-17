@@ -1,12 +1,16 @@
 #!/bin/sh
 # Overlays the muOS glibc 2.38 (shared with the Flip) onto the TrimUI 2.33 rootfs,
 # plus what PortMaster runtimes expect from a newer base. Only /run is written to the rootfs.
+# Libraries are copied to RAM and the image unmounted, so nothing maps the card at shutdown.
 # Binds go through the static busybox so no exec runs with a half-swapped libc.
 
 FLIP=/mnt/SDCARD/spruce/flip
 SQSH=$FLIP/muOS-pixie-reduced.sqsh
 MUOS=$FLIP/muOS
+LIBS=/tmp/glibc
 BB=/mnt/SDCARD/spruce/bin64/busybox
+
+[ -f /lib/libc-2.33.so ] || exit 0
 
 if [ -f "$SQSH-partaa" ]; then
     rm -f "$SQSH"
@@ -14,9 +18,16 @@ if [ -f "$SQSH-partaa" ]; then
 fi
 [ -f "$SQSH" ] || exit 1
 
-mkdir -p "$MUOS"
+mkdir -p "$MUOS" "$LIBS"
 grep -q " $MUOS " /proc/mounts || mount -t squashfs "$SQSH" "$MUOS" || exit 1
-[ -f /lib/libc-2.33.so ] || exit 0
+for f in lib/libc.so.6 lib/ld-linux-aarch64.so.1 lib/libm.so.6 lib/libpthread.so.0 \
+    lib/libdl.so.2 lib/librt.so.1 lib/libresolv.so.2 lib/libutil.so.1 lib/libanl.so.1 \
+    lib/libcrypt.so.1 lib/libnss_dns.so.2 lib/libnss_files.so.2 lib/libgcc_s.so.1 \
+    lib/libatomic.so.1.2.0 usr/lib/libstdc++.so.6.0.32 usr/lib/libz.so.1.3.1 \
+    usr/bin/setsid usr/bin/script; do
+    cp "$MUOS/$f" "$LIBS/" || { umount "$MUOS"; rm -rf "$LIBS"; exit 1; }
+done
+umount "$MUOS"
 
 [ -e /run ] || ln -s /var/run /run
 
@@ -43,26 +54,24 @@ if [ ! -e /usr/lib/libSDL2-2.0.so.0 ] && [ -e /usr/trimui/lib/libSDL2-2.0.so.0 ]
 fi
 
 bind() {
-    [ -e "$2" ] && $BB mount --bind "$MUOS/$1" "$2"
+    [ -e "$2" ] && $BB mount --bind "$LIBS/$1" "$2"
 }
 
-bind lib/libc.so.6 /lib/libc-2.33.so
-bind lib/ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
-bind lib/libm.so.6 /lib/libm-2.33.so
-bind lib/libpthread.so.0 /lib/libpthread-2.33.so
-bind lib/libdl.so.2 /lib/libdl-2.33.so
-bind lib/librt.so.1 /lib/librt-2.33.so
-bind lib/libresolv.so.2 /lib/libresolv-2.33.so
-bind lib/libutil.so.1 /lib/libutil-2.33.so
-bind lib/libanl.so.1 /lib/libanl-2.33.so
-bind lib/libcrypt.so.1 /lib/libcrypt-2.33.so
-bind lib/libnss_dns.so.2 /lib/libnss_dns-2.33.so
-bind lib/libnss_files.so.2 /lib/libnss_files-2.33.so
-bind usr/lib/libz.so.1.3.1 /usr/lib/libz.so.1.2.8
+bind libc.so.6 /lib/libc-2.33.so
+bind ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
+bind libm.so.6 /lib/libm-2.33.so
+bind libpthread.so.0 /lib/libpthread-2.33.so
+bind libdl.so.2 /lib/libdl-2.33.so
+bind librt.so.1 /lib/librt-2.33.so
+bind libresolv.so.2 /lib/libresolv-2.33.so
+bind libutil.so.1 /lib/libutil-2.33.so
+bind libanl.so.1 /lib/libanl-2.33.so
+bind libcrypt.so.1 /lib/libcrypt-2.33.so
+bind libnss_dns.so.2 /lib/libnss_dns-2.33.so
+bind libnss_files.so.2 /lib/libnss_files-2.33.so
+bind libz.so.1.3.1 /usr/lib/libz.so.1.2.8
 for d in /lib /usr/lib; do
-    bind lib/libgcc_s.so.1 $d/libgcc_s.so.1
-    bind lib/libatomic.so.1.2.0 $d/libatomic.so.1.2.0
-    bind usr/lib/libstdc++.so.6.0.32 $d/libstdc++.so.6.0.28
+    bind libgcc_s.so.1 $d/libgcc_s.so.1
+    bind libatomic.so.1.2.0 $d/libatomic.so.1.2.0
+    bind libstdc++.so.6.0.32 $d/libstdc++.so.6.0.28
 done
-
-touch /tmp/glibc_overlay
