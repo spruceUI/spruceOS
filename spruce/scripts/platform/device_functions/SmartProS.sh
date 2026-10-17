@@ -272,7 +272,7 @@ device_init() {
     # do it here, off the frontend's first frame.
     "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1 &
     # DRM master while it runs: no other display client may start before it exits.
-    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
+    DEVICE_INIT_DISPLAY_PIDS="$DEVICE_INIT_DISPLAY_PIDS $!"
 
     init_gpio_SmartProS
 
