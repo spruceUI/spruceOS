@@ -1,6 +1,5 @@
 import os
 import re
-import xml.etree.ElementTree as ET
 
 from utils.logger import PyUiLogger
 
@@ -37,6 +36,8 @@ class MiyooGameList:
             # Fix invalid & that are not part of an entity (e.g., &amp;, &lt;, etc.)
             content = re.sub(r'&(?![a-zA-Z]+;|#\d+;)', '&amp;', content)
             
+            # Deferred: off the startup path.
+            import xml.etree.ElementTree as ET
             # Parse the XML from the cleaned string
             root = ET.fromstring(content)
 

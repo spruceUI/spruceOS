@@ -1,18 +1,18 @@
-from devices.rgb30.rgb30 import Rgb30
+from devices.darkmoss.darkmoss_device import DarkmossDevice
 
 
-class XuMiniM(Rgb30):
+class XuMiniM(DarkmossDevice):
     """MagicX XU Mini M on dArkMoss: RK3326, 480x640 portrait, xu10-joypad.
 
-    A/B/X/Y/L1/R1/L2/R2/dpad and Rgb30's own SELECT_KEY/START_KEY defaults
+    A/B/X/Y/L1/R1/L2/R2/dpad and the default SELECT_KEY/START_KEY
     (314/315) already match this pad's codes; only a real MENU_KEY and the
     portrait-to-landscape software rotation are new here.
     """
 
     JOYPAD_NODE = "/dev/input/by-path/platform-xu10-joypad-event-joystick"
-    SYSTEM_JSON = "/mnt/SDCARD/App/PyUI/config/xumini-system.json"
-    SYSTEM_JSON_DEFAULT = "xumini-system.json"
-    SYSTEM_JSON_DIR = "xumini"
+    SYSTEM_JSON_NAME = "xumini-system.json"
+    # The 4.4 kernel lists the panel colour properties but rejects every set.
+    PANEL_CALIBRATION = False
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
     BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
     # The rk3326 base has no softvol Master and a 0-100 backlight: use the py-ui-config scripts.
@@ -30,16 +30,3 @@ class XuMiniM(Rgb30):
     # 270 the Miniloong (a rotate:3 panel) uses.
     def screen_rotation(self):
         return 90
-
-    # The 4.4 kernel lists the panel colour properties but rejects every set.
-    def supports_brightness_calibration(self):
-        return False
-
-    def supports_contrast_calibration(self):
-        return False
-
-    def supports_saturation_calibration(self):
-        return False
-
-    def supports_hue_calibration(self):
-        return False

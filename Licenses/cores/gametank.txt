@@ -1,7 +1,7 @@
 GameTank
-https://github.com/libretro/libgametank-libretro
+https://github.com/SundownerSport/gametank-libretro
 
-Copyright (c) GameTank contributors
+Copyright (c) 2020 Clyde Shaffer
 
 Licensed under the MIT License
 

@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import json
 import os
-import tempfile
 from pathlib import Path
 from typing import List, Tuple
 from devices.device import Device
@@ -75,6 +74,8 @@ class RomsListManager:
         # window is reachable. Same pattern as device_user_config.save_config.
         tempname = None
         try:
+            # Deferred: off the startup path.
+            import tempfile
             dirpath = os.path.dirname(self.entries_file) or "."
             # Named after the target so a stray temp left by a hard kill is
             # identifiable in Saves/ rather than an anonymous tmpXXXXXX.

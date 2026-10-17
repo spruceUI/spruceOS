@@ -29,8 +29,8 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # On a first boot PyUI has not copied its template to Saves/ yet; read the
     # template it will copy instead of skipping the whole
     # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
-    system_json="/mnt/SDCARD/Saves/mini-flip-system.json"
-    [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/mini-flip-system.json"
+    system_json="/mnt/SDCARD/Saves/miyoo-mini-system.json"
+    [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/miyoo-mini-system.json"
     wifi_enabled="$(jq -r '.wifi // 0' "$system_json" 2>/dev/null)"
     # Only the Mini Plus and Mini Flip have the RTL8188FU radio; the OG Mini and
     # V4 do not, and the template's wifi=1 would otherwise send them through

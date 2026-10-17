@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Polls for the pad node before the button watchdogs start: at most TICKS polls, TICK_S apart.
+PAD_NODE_WAIT_TICKS=40
+PAD_NODE_WAIT_TICK_S=0.05
+
 # True only if pid $1 is actually RUNNING script $2 - the script is argv[0] or
 # argv[1] - rather than merely mentioning it somewhere in its command line.
 # "pgrep -f <path>" alone is too loose: anything carrying the path further along
@@ -81,6 +85,17 @@ launch_common_startup_watchdogs_v2() {
         stop_running_watchdog "$_wd"
     done
     unset _wd
+
+    # The pad node may not exist yet at boot; a getevent that opens it too early exits for good.
+    _pad_ticks=0
+    while [ -n "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && [ ! -c "$EVENT_PATH_READ_INPUTS_SPRUCE" ] \
+        && [ "$_pad_ticks" -lt "$PAD_NODE_WAIT_TICKS" ]; do
+        sleep "$PAD_NODE_WAIT_TICK_S"
+        _pad_ticks=$((_pad_ticks + 1))
+    done
+    [ -n "$EVENT_PATH_READ_INPUTS_SPRUCE" ] && [ ! -c "$EVENT_PATH_READ_INPUTS_SPRUCE" ] \
+        && log_message "watchdogs: $EVENT_PATH_READ_INPUTS_SPRUCE still missing, starting the button watchdogs anyway"
+    unset _pad_ticks
 
     /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh &
     /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &

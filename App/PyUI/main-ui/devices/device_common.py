@@ -3,7 +3,6 @@
 import os
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 from pathlib import Path
@@ -944,6 +943,8 @@ class DeviceCommon(AbstractDevice):
 
     def is_filesystem_read_only(self,path="/mnt/SDCARD"):
         try:
+            # Deferred: off the startup path.
+            import tempfile
             with tempfile.NamedTemporaryFile(dir=path, delete=True):
                 pass
             return False

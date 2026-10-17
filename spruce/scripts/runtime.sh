@@ -34,12 +34,15 @@ write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
 
-set_performance
+# Extra cores stay up through the boot; the first set_smart offlines them.
+set_performance --no-offline
 # Roms/PORTS -> Roms/ports on the first boot after an install/update; before device_init.
 if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
     . /mnt/SDCARD/spruce/scripts/ports_migration.sh
     migrate_ports_dir
 fi
+# HOME is shared by every device on the card; the device that needs one writes it in device_init.
+rm -f "$HOME/.asoundrc"
 device_init
 ensure_dev_shm
 ensure_dev_fd
@@ -62,6 +65,7 @@ check_and_hide_update_app &
 # finished. firstboot may return success, warning, or failure; runtime chooses the closing
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_$(get_firstboot_key)"; then
+    wait_device_init_jobs   # firstboot.sh puts a PyUI on screen
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
 
@@ -89,7 +93,7 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
     else
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
-else
+elif archives_queued; then
     run_unpacker_foreground "foreground run" "0"
 fi
 
@@ -105,7 +109,8 @@ fi
     /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
 ) &
 
-launch_startup_watchdogs
+# Not awaited: the first menu frame does not need the watchdogs up.
+launch_startup_watchdogs &
 
 # Before the network, not after it: achievements are earned offline.
 raproxy_apply &
@@ -125,11 +130,11 @@ fi
 developer_mode_task &
 update_checker &
 
-# Initialize CPU settings
-set_smart
-
 # Set up the boot_to action prior to getting into the principal loop
 set_up_boot_action
+
+# Nothing from device_init may still be touching the display or the LEDs under the frontend.
+wait_device_init_jobs
 
 # start main loop
 log_message "Starting main loop"

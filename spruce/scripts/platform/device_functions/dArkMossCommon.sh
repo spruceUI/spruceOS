@@ -752,6 +752,7 @@ migrate_platform_files() {
     _old_lc="$(echo "$_old" | tr 'A-Z' 'a-z')"
     _ppsspp="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
     for _pair in \
+        "/mnt/SDCARD/Saves/${_old_lc}-system.json|$SYSTEM_JSON" \
         "/mnt/SDCARD/App/PyUI/config/${_old_lc}-system.json|$SYSTEM_JSON" \
         "/mnt/SDCARD/Saves/ra-configs/retroarch-$_old.cfg|/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg" \
         "$_ppsspp/ppsspp-$_old.ini|$_ppsspp/ppsspp-$PLATFORM.ini" \

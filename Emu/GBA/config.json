@@ -21,7 +21,8 @@
       "display": "Retroarch Core",
       "options": [
         "mgba",
-        "gpsp"
+        "gpsp",
+        "armgba"
       ],
       "selected": "gpsp",
       "overrides": {}

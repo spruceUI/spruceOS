@@ -125,8 +125,17 @@ class DescriptiveListView(ListView):
                 # Make the distance between the title and description less when using smaller rows
                 title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y() + Theme.scale_with_height_multiplier(5)
 
+            primary_text = gridOrListEntry.get_primary_text()
+            primary_text_max_width = Theme.scale_with_width_multiplier(35)
+            if(len(primary_text) > primary_text_max_width and actual_index == self.selected):
+                primary_text = TextUtils.scroll_string_chars(text=primary_text,
+                                        amt=self.scroll_value_text_amount,
+                                        max_chars=primary_text_max_width)
+            else:
+                primary_text = primary_text[:primary_text_max_width]
+
             title_w, title_h = Display.render_text(
-                gridOrListEntry.get_primary_text(), 
+                primary_text, 
                 row_offset_x + icon_w + Theme.get_descriptive_list_text_from_icon_offset(), 
                 title_y_offset, 
                 color, 

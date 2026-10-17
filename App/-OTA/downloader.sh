@@ -115,8 +115,9 @@ version_num() {
         minor=0; patch=0
     else
         minor="${rest%%.*}"
-        rest="${rest#*.}"
-        if [ "$rest" = "$minor" ]; then patch=0; else patch="${rest%%.*}"; fi
+        # Test for a patch field before stripping: comparing the stripped
+        # rest with minor read 4.5.5 as 4.5.0.
+        if [ "$rest" = "$minor" ]; then patch=0; else rest="${rest#*.}"; patch="${rest%%.*}"; fi
     fi
     [ -z "$minor" ] && minor=0
     [ -z "$patch" ] && patch=0
@@ -196,11 +197,21 @@ nightly_is_newer_than_advertised() {
     return 0
 }
 
+# Put the app's label back to "Check for Updates" (the boot-time check sets
+# "Update Available"), so the menu never contradicts this app.
+reset_update_label() {
+    if grep -q '"label"' "$CONFIG_FILE"; then
+        jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
+            "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
+    fi
+}
+
 # Optional $1 replaces the generic sentence, e.g. when the device is ahead
 # of the update feed.
 up_to_date_exit() {
     local installed="${INSTALLED_NIGHTLY_VERSION:-$CURRENT_VERSION}"
     [ -n "$INSTALLED_NIGHTLY_BUILD" ] && installed="$installed ($(short_build "$INSTALLED_NIGHTLY_BUILD"))"
+    reset_update_label
     display_image_and_text "$IMAGE_PATH" 35 25 "${1:-System is up to date.} Installed version: $installed" 75
     sleep 5
     rm -rf "$TMP_DIR"
@@ -668,10 +679,7 @@ if confirm 30 0; then
     log_message "OTA: Update confirmed"
 
     # Reset label on OTA app so it doesn't appear there's immediately an update after updating
-    if grep -q '"label"' "$CONFIG_FILE"; then
-        jq '.label = "Check for Updates" | .description = "Download and install updates over Wi-Fi"' \
-            "$CONFIG_FILE" > "$CONFIG_FILE.tmp" && mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
-    fi
+    reset_update_label
 
     "$(get_python_path)" /mnt/SDCARD/App/-Updater/updater.py
 
