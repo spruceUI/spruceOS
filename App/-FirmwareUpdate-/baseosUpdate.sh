@@ -1,7 +1,9 @@
 #!/bin/sh
-# BaseOS update for the Anbernic XX line, called by firmwareUpdate.sh.
+# BaseOS update, called by firmwareUpdate.sh on any BaseOS device: the Anbernic XX
+# line (pvaibhav/BaseOS) or the Miyoo Flip (apommel/baseos-my355); the platform cfg
+# names the project in BASEOS_REPO.
 #
-# BaseOS 1.3.0 and newer update themselves from a .bosupd file dropped at the
+# BaseOS 1.3.0 and newer (my355: 0.3.0) update themselves from a .bosupd file dropped at the
 # root of the frontend card: it applies the update at the next boot and removes
 # the file afterwards. So all this does is work out which file this model needs,
 # fetch it from the BaseOS releases, check it, and offer a reboot.
@@ -11,8 +13,9 @@
 
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 SD_ROOT="/mnt/SDCARD"
-API="https://api.github.com/repos/pvaibhav/BaseOS/releases/latest"
-MANUAL_HELP="Please visit github.com/pvaibhav/BaseOS to manually download the proper version for your device."
+REPO="${BASEOS_REPO:-pvaibhav/BaseOS}"
+API="https://api.github.com/repos/$REPO/releases/latest"
+MANUAL_HELP="Please visit github.com/$REPO to manually download the proper version for your device."
 
 baseos_field() {
     sed -n "s/^$1=//p" /etc/baseos-release 2>/dev/null | tr -d '"'
@@ -36,7 +39,7 @@ bail() {
 # No network is the normal case on a model with no built-in radio, so say what
 # to do about it rather than just refusing.
 dongle_bail() {
-    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/pvaibhav/BaseOS\n\nPress A to close."
+    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/$REPO\n\nPress A to close."
 }
 
 INSTALLED="$(baseos_field BASEOS_VERSION)"
@@ -62,6 +65,8 @@ ASSET_NAME="$(jq -r --arg t "baseos-${TARGET}-" '.assets[]? | select(.name | sta
 ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
 ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/baseos_release.json | head -n 1)"
 SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
+# GitHub's own sha256 of the asset, for releases without a SHA256SUMS (baseos-my355).
+ASSET_DIGEST="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .digest // empty' /tmp/baseos_release.json | head -n 1 | sed -n 's/^sha256://p')"
 
 if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
     bail "BaseOS ${LATEST:-latest} has no update file for this model ($TARGET), so it has to be installed by hand.\n\n$MANUAL_HELP"
@@ -108,12 +113,18 @@ if [ -n "$SUMS_URL" ] && curl -sf -m 20 -o /tmp/baseos_sums "$SUMS_URL"; then
         bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
     fi
     log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME"
+elif [ -n "$ASSET_DIGEST" ]; then
+    if [ "$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)" != "$ASSET_DIGEST" ]; then
+        rm -f "$SD_ROOT/$ASSET_NAME"
+        bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
+    fi
+    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME (GitHub asset digest)"
 else
-    log_message "baseosUpdate.sh: WARNING could not fetch SHA256SUMS, skipping the checksum check"
+    log_message "baseosUpdate.sh: WARNING no SHA256SUMS and no asset digest, skipping the checksum check"
 fi
 
 sync
 
-log_and_display_message "BaseOS $LATEST is ready to install. Your device will now reboot into the update procedure, and then power itself off once finished."
+log_and_display_message "BaseOS $LATEST is ready to install. Your device will now ${BASEOS_UPDATE_FINISH:-reboot into the update procedure, and then power itself off once finished}."
 sleep 8
 /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot

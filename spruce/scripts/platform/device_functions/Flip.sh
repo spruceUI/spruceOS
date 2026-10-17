@@ -323,7 +323,7 @@ launch_startup_watchdogs(){
 # Should the above be merged into here?
 check_if_fw_needs_update() {
     # BaseOS-my355 replaces the Miyoo firmware this version belongs to.
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && { echo "false"; return 0; }
+    [ -n "$SPRUCE_FLIP_BASEOS" ] && { baseos_fw_needs_update; return 0; }
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
