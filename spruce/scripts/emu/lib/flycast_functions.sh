@@ -13,14 +13,17 @@
 #   move_screenshots
 #   build_bios_view
 #   migrate_standalone_data
+#   share_vmus
 #   install_flycast_pad_mapping
 
-# The standalone's own data dir (cards, states, console settings, NAOMI/Atomiswave saves), kept apart
-# from the libretro core's files in BIOS/dc: save paths stay separate by module.
+# The standalone's own data dir (states, console settings, NAOMI/Atomiswave saves), kept apart from the libretro
+# core's files. Its VMU cards are not here: both modules use one card set (share_vmus).
 FLYCAST_SA_DATA="${FLYCAST_SA_DATA:-/mnt/SDCARD/Saves/saves/Flycast-standalone}"
 FLYCAST_BIOS_SRC="${FLYCAST_BIOS_SRC:-/mnt/SDCARD/BIOS/dc}"
 FLYCAST_BIOS_VIEW="${FLYCAST_BIOS_VIEW:-/tmp/flycast-bios}"
 FLYCAST_DEFAULTS="${FLYCAST_DEFAULTS:-/mnt/SDCARD/Emu/DC/default_configs}"
+# The one card set: the libretro core's cards in BIOS/dc, the only place it keeps them with shared VMUs.
+FLYCAST_VMU_DIR="${FLYCAST_VMU_DIR:-/mnt/SDCARD/BIOS/dc}"
 
 set_ui_scale() {
 
@@ -45,8 +48,8 @@ move_screenshots() {
 	mv /mnt/SDCARD/Emu/DC/[!dc]*.png "$ss_path" 2>/dev/null
 }
 
-# FLYCAST_BIOS_PATH target: links to the BIOS images in BIOS/dc only, so the standalone never reads
-# the VMU cards and nvmem the libretro core keeps beside them.
+# FLYCAST_BIOS_PATH target: links to the BIOS images in BIOS/dc only, so the standalone never reads the libretro
+# core's nvmem beside them; the shared cards reach it through Dreamcast.VMUPath alone.
 build_bios_view() {
 	rm -rf "$FLYCAST_BIOS_VIEW"
 	mkdir -p "$FLYCAST_BIOS_VIEW"
@@ -55,6 +58,37 @@ build_bios_view() {
 		case "${f##*/}" in
 			dc_boot.bin|dc_bios.bin|dc_flash.bin|*.zip|*.7z) ln -s "$f" "$FLYCAST_BIOS_VIEW/${f##*/}" ;;
 		esac
+	done
+}
+
+# 0 only when both files are known to hold the same bytes; with no compare tool, both are kept.
+vmu_same() {
+	if command -v cmp >/dev/null 2>&1; then cmp -s "$1" "$2"; return; fi
+	a=$(md5sum < "$1" 2>/dev/null) && b=$(md5sum < "$2" 2>/dev/null) && [ -n "$a" ] && [ "$a" = "$b" ]
+}
+
+# Cards the standalone kept in its own folders join the one set, never overwriting or losing a card: the only card
+# becomes the shared one, an identical copy is dropped, and a differing one stays beside it as <name>.standalone.bin.
+share_vmus() {
+	mkdir -p "$FLYCAST_VMU_DIR"
+	for port in A1 A2 B1 B2 C1 C2 D1 D2; do
+		shared="$FLYCAST_VMU_DIR/vmu_save_$port.bin"
+		for card in "$FLYCAST_SA_DATA/flycast/vmu_save_$port.bin" "$FLYCAST_BIOS_SRC/flycast/vmu_save_$port.bin"; do
+			[ -f "$card" ] || continue
+			if [ ! -e "$shared" ]; then
+				mv "$card" "$shared" && log_message "Flycast: $card is now the shared card $shared"
+			elif vmu_same "$card" "$shared"; then
+				rm -f "$card" && log_message "Flycast: $card equals the shared card $shared, dropped"
+			else
+				keep="$FLYCAST_VMU_DIR/vmu_save_$port.standalone.bin"
+				n=2
+				while [ -e "$keep" ]; do
+					keep="$FLYCAST_VMU_DIR/vmu_save_$port.standalone-$n.bin"
+					n=$((n + 1))
+				done
+				mv "$card" "$keep" && log_message "Flycast: $card differs from the shared card, kept as $keep"
+			fi
+		done
 	done
 }
 
@@ -101,6 +135,7 @@ run_flycast_standalone() {
 	# first launch moved them away; release a bind an older launch left behind.
 	umount "$HOME/data" 2>/dev/null
 
+	share_vmus
 	migrate_standalone_data
 	build_bios_view
 
@@ -114,10 +149,12 @@ run_flycast_standalone() {
 		install_flycast_pad_mapping
 	fi
 
+	# One card set with the libretro core: its folder and no per-game A1 card, as transient settings (-config is
+	# not saved to emu.cfg), so an updated card's own emu.cfg can't split the set again.
 	if [ "$CORE" = "Flycast2024-standalone" ]; then
-		./flycast2024 "$ROM_FILE" > $(emu_log_file) 2>&1
+		./flycast2024 -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
-		./flycast "$ROM_FILE" > $(emu_log_file) 2>&1
+		./flycast -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 
 	umount $HOME/bios
