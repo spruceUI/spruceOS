@@ -387,7 +387,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     umount_tries=0
     umount_ok=0
     while [ "$umount_tries" -lt 10 ]; do
-        if umount "$SD_MOUNTPOINT" 2>/dev/null; then
+        if umount_err=$(umount "$SD_MOUNTPOINT" 2>&1); then
             umount_ok=1
             break
         fi
@@ -400,6 +400,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
         echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
     else
         echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
+        echo "stage2: last umount error: ${umount_err:-none}"
         stage2_dump_holders
         umount -l "$SD_MOUNTPOINT"
     fi
