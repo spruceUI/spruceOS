@@ -155,6 +155,22 @@ stage2_dump_holders() {
     echo "stage2: end of holders"
 }
 
+# True when a path resolves onto the card's device (stock Flip: /data -> userdata,
+# which spruce binds from the card). Longest mount prefix wins; the last of equals is on top.
+stage2_on_card() {
+    _p=$(readlink -f "$1" 2>/dev/null) || return 1
+    awk -v p="$_p/" -v mp="$SD_MOUNTPOINT" '
+        $2 == mp { card = $1 }
+        { m = ($2 == "/") ? "/" : $2 "/"; if (index(p, m) == 1 && length(m) >= best) { best = length(m); src = $1 } }
+        END { exit !(card != "" && src == card) }' /proc/mounts
+}
+
+# Mirror a line into the kernel log: stock Flips keep it across a warm reboot
+# (console-ramoops), and their only other log place, /tmp, does not survive.
+stage2_kmsg() {
+    echo "spruce stage2: $*" > /dev/kmsg 2>/dev/null
+}
+
 # Loop devices backed by files on the card, one "loopN major:minor" per line.
 stage2_card_loops() {
     for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
@@ -253,6 +269,7 @@ STAGE2_LOG=/tmp/save_poweroff_stage2.log
 for _d in /data /mnt/data /mnt/UDISK; do
     case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
     [ -d "$_d" ] || continue
+    stage2_on_card "$_d" && continue
     if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
         rm -f "$_d/.spruce_shutdown_write_test"
         STAGE2_LOG="$_d/spruce_shutdown.log"
@@ -266,7 +283,10 @@ exec >"$STAGE2_LOG" 2>&1
 echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} strict=$STRICT_UNMOUNT ==="
 echo "stage2: logging to $STAGE2_LOG"
 echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
-[ -n "$STAGE2_STATIC_SHELL" ] && echo "stage2: re-run under $STAGE2_STATIC_SHELL"
+if [ -n "$STAGE2_STATIC_SHELL" ]; then
+    echo "stage2: re-run under $STAGE2_STATIC_SHELL"
+    stage2_kmsg "re-run under $STAGE2_STATIC_SHELL, log $STAGE2_LOG"
+fi
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
@@ -422,10 +442,12 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
 
     if [ "$umount_ok" -eq 1 ]; then
         echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
+        stage2_kmsg "unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
     else
         echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
         echo "stage2: last umount error: ${umount_err:-none}"
-        stage2_dump_holders
+        stage2_kmsg "clean umount FAILED after $umount_tries tries: ${umount_err:-none}"
+        stage2_dump_holders | while read -r _l; do echo "$_l"; stage2_kmsg "$_l"; done
         umount -l "$SD_MOUNTPOINT"
     fi
 else
