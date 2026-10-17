@@ -145,6 +145,12 @@ stage2_dump_holders() {
         echo "  loop /dev/$_l ($_d) <- $(cat "$SYS_BLOCK/$_l/loop/backing_file" 2>/dev/null)"
     done
     stage2_dependent_mounts | sed 's/^/  dependent mount /'
+    # What is still alive at all: a holder through a detached mount (an overlay
+    # whose upper sits on a card loop) shows no card path anywhere.
+    for _pp in /proc/[0-9]*; do
+        _e=$(readlink "$_pp/exe" 2>/dev/null) || continue
+        echo "  proc ${_pp#/proc/} ppid $(awk '/^PPid/{print $2}' "$_pp/status" 2>/dev/null) $(cat "$_pp/comm" 2>/dev/null) exe=$_e cwd=$(readlink "$_pp/cwd" 2>/dev/null)"
+    done
     echo "stage2: end of holders"
 }
 
@@ -220,13 +226,12 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     done
 fi
 
-# A dynamic system shell maps the libc spruce binds over /usr/lib from a loop
-# file on the card, so this very process would pin it: re-run under a static copy.
+# This process must not pin what it tears down: a dynamic shell maps the libc bound
+# from a card loop, and on the BaseOS Flip even a static one runs out of the /usr
+# overlay whose upper is a card loop. Re-run under a static copy in /tmp.
 STAGE2_BUSYBOX=/tmp/save_poweroff_stage2_busybox
 if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
-    _re="$(stage2_card_maps_re)"
-    if [ -n "$_re" ] && grep -q -E " ($_re) " "/proc/$$/maps" 2>/dev/null &&
-        cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
+    if cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
         chmod +x "$STAGE2_BUSYBOX" && "$STAGE2_BUSYBOX" true 2>/dev/null; then
         export STAGE2_STATIC_SHELL="$STAGE2_BUSYBOX"
         exec "$STAGE2_BUSYBOX" sh "$0" "$@"
@@ -258,7 +263,7 @@ exec >"$STAGE2_LOG" 2>&1
 echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} strict=$STRICT_UNMOUNT ==="
 echo "stage2: logging to $STAGE2_LOG"
 echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
-[ -n "$STAGE2_STATIC_SHELL" ] && echo "stage2: re-run under $STAGE2_STATIC_SHELL (the system shell mapped the card)"
+[ -n "$STAGE2_STATIC_SHELL" ] && echo "stage2: re-run under $STAGE2_STATIC_SHELL"
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
