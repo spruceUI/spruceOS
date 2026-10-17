@@ -1,0 +1,3 @@
+#!/bin/sh
+[ -f /tmp/glibc_overlay ] && exec /mnt/SDCARD/spruce/flip/muOS/usr/bin/script "$@"
+exec /usr/bin/script "$@"
