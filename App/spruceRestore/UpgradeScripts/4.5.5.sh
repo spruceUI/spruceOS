@@ -34,6 +34,10 @@ if [ -f "$_cfg" ]; then
             log_message "GameTank $_key: gametank-standalone -> gametank"
         fi
     done
+    if [ "$(jq -r '.menuOptions.Governor.selected // ""' "$_cfg")" = "Performance" ]; then
+        jq '.menuOptions.Governor.selected = "Smart"' "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
+        log_message "GameTank CPU mode: Performance -> Smart"
+    fi
 fi
 
 
