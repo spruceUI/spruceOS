@@ -6,6 +6,7 @@
     "raBuild": "64-bit",
     "Emulator_64": "km_ludicrousn64_2k22_xtreme_amped",
     "Emulator_32": "km_ludicrousn64_2k22_xtreme_amped",
-    "controlMode": "Spruce (per device)"
+    "controlMode": "Spruce (per device)",
+    "standaloneVideoPlugin": "In-game menu"
   }
 }

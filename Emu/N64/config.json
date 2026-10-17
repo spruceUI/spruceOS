@@ -102,6 +102,27 @@
       ],
       "selected": "Spruce (per device)",
       "overrides": {}
+    },
+    "standaloneVideoPlugin": {
+      "display": "Standalone: Video Plugin",
+      "devices": [
+        "MIYOO_FLIP",
+        "TRIMUI_A133P",
+        "TRIMUI_SMART_PRO_S",
+        "ANBERNIC_RGXX",
+        "GKD_PIXEL2",
+        "DARKMOSS",
+        "MIYOO_A30",
+        "MAGICX_A133P"
+      ],
+      "options": [
+        "In-game menu",
+        "GLideN64",
+        "Rice",
+        "Glide64mk2"
+      ],
+      "selected": "In-game menu",
+      "overrides": {}
     }
   },
   "sortOrder": 3900,

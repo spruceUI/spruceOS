@@ -28,6 +28,23 @@ get_cfg_value() {
 	echo "${result:-$3}"
 }
 
+# SA_PLUGIN_NUM / SA_PLUGIN for this launch: the game's pick (else the system's) in config.json, else the in-game
+# menu's [SpruceOS] VideoPlugin (0=GLideN64, 1=Rice, 2=Glide64mk2), else Rice; Rice once GLideN64 failed to load.
+select_mupen_plugin() {
+	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
+	case "$(jq -r --arg game "${GAME:-}" '.menuOptions.standaloneVideoPlugin | (.overrides[$game] // .selected) // empty' "$EMU_JSON_PATH" 2>/dev/null)" in
+		GLideN64) SA_PLUGIN_NUM=0 ;;
+		Rice) SA_PLUGIN_NUM=1 ;;
+		Glide64mk2) SA_PLUGIN_NUM=2 ;;
+	esac
+	[ -n "${MUPEN_RICE_FALLBACK:-}" ] && SA_PLUGIN_NUM=1
+	case "$SA_PLUGIN_NUM" in
+		0) SA_PLUGIN="gliden64" ;;
+		2) SA_PLUGIN="glide64mk2" ;;
+		*) SA_PLUGIN="rice" ;;
+	esac
+}
+
 # Build launch args from current config. Called before each launch so
 # a restart picks up any settings changed via the overlay menu.
 build_mupen_args() {
@@ -49,16 +66,7 @@ build_mupen_args() {
 		G_HEIGHT=$((DISPLAY_WIDTH * 3 / 4))
 	fi
 
-	# Read video plugin from overlay config (written to [SpruceOS] section)
-	# Values: 0=GLideN64, 1=Rice, 2=Glide64mk2
-	SA_PLUGIN_NUM=$(get_cfg_value SpruceOS VideoPlugin 1)
-	# Rice for the rest of this launch once GLideN64 has failed to load (run_mupen_standalone)
-	[ -n "${MUPEN_RICE_FALLBACK:-}" ] && SA_PLUGIN_NUM=1
-	case "$SA_PLUGIN_NUM" in
-		0) SA_PLUGIN="gliden64" ;;
-		2) SA_PLUGIN="glide64mk2" ;;
-		*) SA_PLUGIN="rice" ;;
-	esac
+	select_mupen_plugin
 
 	# Map plugin name to .so filename
 	case "$SA_PLUGIN" in
