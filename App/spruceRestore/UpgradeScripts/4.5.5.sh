@@ -20,6 +20,11 @@ for _name in rgb30 rgb20sx miniloong a10mini g350 xumini; do
 done
 rmdir "$OLD_CONFIG_DIR" 2>/dev/null || true
 
+# Miyoo Mini system json renamed. Overwrite: boot may already have seeded a default.
+if [ -f /mnt/SDCARD/Saves/mini-flip-system.json ]; then
+    mv -f /mnt/SDCARD/Saves/mini-flip-system.json /mnt/SDCARD/Saves/miyoo-mini-system.json && log_message "Renamed mini-flip-system.json to miyoo-mini-system.json"
+fi
+
 # The gametank libretro core replaces the standalone as GameTank's default.
 _cfg=/mnt/SDCARD/Saves/spruce/emu_backups/GAMETANK.json
 if [ -f "$_cfg" ]; then
@@ -29,6 +34,10 @@ if [ -f "$_cfg" ]; then
             log_message "GameTank $_key: gametank-standalone -> gametank"
         fi
     done
+    if [ "$(jq -r '.menuOptions.Governor.selected // ""' "$_cfg")" = "Performance" ]; then
+        jq '.menuOptions.Governor.selected = "Smart"' "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
+        log_message "GameTank CPU mode: Performance -> Smart"
+    fi
 fi
 
 

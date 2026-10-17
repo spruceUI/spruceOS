@@ -249,6 +249,7 @@ init_gpio_SmartProS() {
 
 runtime_mounts_SmartProS() {
 
+    /mnt/SDCARD/spruce/brick/glibc/bind.sh >> /mnt/SDCARD/Saves/spruce/spruce.log 2>&1
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &

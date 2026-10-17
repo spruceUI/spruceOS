@@ -637,3 +637,32 @@ PolygonOffsetFactor = 0.000000
 # Is multiplied by an implementation-specific value to create a constant depth offset
 PolygonOffsetUnits = 0.000000
 
+
+[Video-GLideN64]
+
+# Settings version. Don't touch it.
+configVersion = 29
+# Enable threaded video backend.
+ThreadedVideo = True
+# Frame buffer size is the factor of N64 native resolution.
+UseNativeResolutionFactor = 1
+# Screen aspect ratio. (0=stretch, 1=force 4:3, 2=force 16:9, 3=adjust 4:3, 4=adjust 16:9)
+AspectRatio = 1
+# Enable writing of fragment depth. Some mobile GPUs do not support it, thus made optional. Leave enabled.
+EnableFragmentDepthWrite = False
+# Do not use shaders to emulate N64 blending modes. Works faster on slow GPU. Can cause glitches.
+EnableLegacyBlending = True
+# Enable hybrid integer scaling filter. Can be slow with low-end GPUs.
+EnableHybridFilter = False
+# Render backgrounds mode. (HLE only). (0=One piece (fast), 1=Stripped (precise))
+BackgroundsMode = 0
+# Enable frame and/or depth buffer emulation.
+EnableFBEmulation = True
+# Enable color buffer copy to RDRAM. (0=do not copy, 1=copy in sync mode, 2=Double Buffer, 3=Triple Buffer)
+EnableCopyColorToRDRAM = 2
+# Enable depth buffer copy to RDRAM. (0=do not copy, 1=copy from video memory, 2=use software render)
+EnableCopyDepthToRDRAM = 2
+# Use persistent storage for compiled shaders.
+EnableShadersStorage = True
+# Swap frame buffers. (0=On VI update call, 1=On VI origin change, 2=On buffer update)
+BufferSwapMode = 1

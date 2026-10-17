@@ -46,10 +46,10 @@ class GKDDevice(DeviceCommon):
         pass
 
     def power_off_cmd(self):
-        return "poweroff"
+        return "systemctl poweroff"
 
     def reboot_cmd(self):
-        return "reboot"
+        return "systemctl reboot"
 
     def _set_lumination_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:

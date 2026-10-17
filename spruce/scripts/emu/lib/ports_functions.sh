@@ -89,15 +89,10 @@ run_port() {
     export HOME="/mnt/SDCARD/Saves/flip/home"
     export LD_LIBRARY_PATH="$PORTS_LD_LIBRARY_PATH:$LD_LIBRARY_PATH"
     export LC_ALL=C
-    # TODO: Remove this when portmaster updates spruce detection
-    if [ "$PLATFORM" = "Pixel2" ]; then
-        PM_DIR="/mnt/SDCARD/Roms/ports/PortMaster"
-        MOUNT_BIND=false
-    else
-        PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
-        MOUNT_BIND=true
-        export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
-    fi
+
+    export XDG_DATA_HOME="/mnt/SDCARD/Persistent/portmaster/"
+    PM_DIR="/mnt/SDCARD/Persistent/portmaster/PortMaster"
+    export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
 
     set_port_abxy_scheme
     is_retroarch_port
@@ -106,11 +101,9 @@ run_port() {
         cd /mnt/SDCARD/RetroArch/
         "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
     else
-        if [ "$MOUNT_BIND" = true ]; then
-            mount -o bind \
-                /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
-                /mnt/SDCARD/Persistent/portmaster/bin/python
-        fi
+        mount -o bind \
+            /mnt/SDCARD/Persistent/portmaster/bin/python3.10 \
+            /mnt/SDCARD/Persistent/portmaster/bin/python
 
         log_message "PORTS_DIR: $PORTS_DIR, HOME=$HOME, LD_LIBRARY_PATH=$LD_LIBRARY_PATH, PATH=$PATH"
         # "&>" is bash-only. This script is #!/bin/sh, and on the Debian-based
