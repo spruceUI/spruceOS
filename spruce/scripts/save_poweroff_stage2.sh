@@ -157,6 +157,7 @@ stage2_dump_holders() {
 # Loop devices backed by files on the card, one "loopN major:minor" per line.
 stage2_card_loops() {
     for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
+        [ -e "$_bf" ] || continue
         read -r _f < "$_bf" 2>/dev/null || continue
         case "$_f" in "$SD_MOUNTPOINT"/*) ;; *) continue ;; esac
         _l="${_bf#"$SYS_BLOCK"/}"
@@ -229,9 +230,10 @@ fi
 # This process must not pin what it tears down: a dynamic shell maps the libc bound
 # from a card loop, and on the BaseOS Flip even a static one runs out of the /usr
 # overlay whose upper is a card loop. Re-run under a static copy in /tmp.
-STAGE2_BUSYBOX=/tmp/save_poweroff_stage2_busybox
+# Named busybox: it takes its applet from argv[1] only under that name.
+STAGE2_BUSYBOX=/tmp/save_poweroff_stage2/busybox
 if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
-    if cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
+    if mkdir -p "${STAGE2_BUSYBOX%/*}" && cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
         chmod +x "$STAGE2_BUSYBOX" && "$STAGE2_BUSYBOX" true 2>/dev/null; then
         export STAGE2_STATIC_SHELL="$STAGE2_BUSYBOX"
         exec "$STAGE2_BUSYBOX" sh "$0" "$@"

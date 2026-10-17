@@ -31,15 +31,23 @@ shield_baseos_session() {
     cp "$_session" "/tmp/$_name.real" 2>/dev/null || return 0
     chmod +x "/tmp/$_name.real" 2>/dev/null
 
+    # Run the shim from /tmp: one started from /usr pins it, and on the BaseOS Flip /usr
+    # is an overlay on a card loop (the likely card holder in stage 2's retries, 2026-10-17).
+    _bb=/tmp/spruce-shield/busybox _shell=/bin/sh _sleep=sleep
+    if [ -x "$_bb" ] || { mkdir -p "${_bb%/*}" && cp /mnt/SDCARD/spruce/bin64/busybox "$_bb" 2>/dev/null &&
+        chmod +x "$_bb"; }; then
+        "$_bb" true 2>/dev/null && _shell="$_bb sh" _sleep="exec $_bb sleep"
+    fi
+
     cat > "/tmp/$_name.shim" <<SHIM
-#!/bin/sh
+#!$_shell
 # spruce shim over BaseOS's frontend session. Bind-mounted, never installed.
 # While a shutdown is in progress the real session must not run: it mounts the
 # SD card read-write when it finds it unmounted, which re-dirties the filesystem
 # save_poweroff.sh has just unmounted cleanly. The sleep keeps init's respawn
 # from becoming a hot loop for the few seconds before the power goes.
 if [ -e /tmp/shutting_down.lock ]; then
-    sleep 5
+    $_sleep 5
     exit 0
 fi
 exec /tmp/$_name.real "\$@"
