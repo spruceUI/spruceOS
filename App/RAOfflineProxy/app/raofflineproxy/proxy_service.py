@@ -82,6 +82,7 @@ REFRESH_PLAYED_WINDOW_DAYS = 7
 ONLINE_REFRESH_IDLE_DELAY_SECONDS = 5 * 60
 REFRESH_PLAYED_WINDOW_MS = REFRESH_PLAYED_WINDOW_DAYS * 24 * 60 * 60 * 1000
 CACHE_QUEUE_POLL_SECONDS = 60
+WORKER_STOP_TIMEOUT_SECONDS = 5.0
 ALWAYS_TRY_UPSTREAM_ACTIONS = {"login", "login2"}
 
 
@@ -1281,6 +1282,16 @@ def retry_storage_corruption_report() -> None:
     storage_corruption.mark_reported(upload_id)
 
 
+def stop_workers(workers: list, timeout: float = WORKER_STOP_TIMEOUT_SECONDS) -> None:
+    """Stops every worker, then waits for each so none still uses the storage once it is
+    closed."""
+    for worker in workers:
+        worker.stop()
+    for worker in workers:
+        if worker.is_alive():
+            worker.join(timeout)
+
+
 def run_proxy_service(
     config_data: dict, stop_event: threading.Event | None = None
 ) -> None:
@@ -1332,11 +1343,15 @@ def run_proxy_service(
         server.shutdown()
         serving_thread.join(timeout=5)
     finally:
-        connectivity_monitor.stop()
-        periodic_refresh.stop()
-        cache_queue_worker.stop()
-        folder_watcher.stop()
-        usage_reporter.stop()
+        stop_workers(
+            [
+                connectivity_monitor,
+                periodic_refresh,
+                cache_queue_worker,
+                folder_watcher,
+                usage_reporter,
+            ]
+        )
         usage_stats.flush()
         stop_ra_proxy_chain()
         server.server_close()

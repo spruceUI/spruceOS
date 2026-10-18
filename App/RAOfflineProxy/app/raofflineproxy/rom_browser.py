@@ -3,8 +3,6 @@ from __future__ import annotations
 import enum
 import json
 import logging
-import os
-import shutil
 import tempfile
 import time
 import urllib.error
@@ -17,13 +15,7 @@ from urllib.parse import urljoin
 from . import cache_budget, cache_keys, cache_queue, rate_limit, usage_stats
 from .auth import resolve_credentials
 from .cache_queue import QueuedRom
-from .config import (
-    FALLBACK_USER_AGENT,
-    RA_MEDIA_HOST,
-    ensure_config_dir,
-    image_caching_enabled,
-    upstream_host,
-)
+from .config import FALLBACK_USER_AGENT, RA_MEDIA_HOST, image_caching_enabled, upstream_host
 from .es_export import collect_cached_game_ids
 from .image_cache import (
     clear_all_cached_images,
@@ -35,7 +27,7 @@ from .image_cache import (
     resolve_cached_static_asset,
     schedule_image_download,
 )
-from .network import apply_scan_batch_cooldown, build_api_url, http_get
+from .network import build_api_url, http_get
 from .rom_cache import (
     CacheGameAuthError,
     cache_game,
@@ -65,6 +57,7 @@ ZIP_READABLE_ARCHIVE_EXTENSIONS = {".zip"}
 EXCLUDED_BROWSER_DIR_NAMES = {"Imgs"}
 MAX_SCAN_ENTRIES = 5000
 MAX_SCAN_DEPTH = 12
+PACE_POLL_SECONDS = 1.0
 # RetroAchievements adds hashes over time, so a "no match" is only cached long enough to
 # stop a repeated scan of the same folder from re-querying every unsupported ROM.
 GAMEID_MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -304,10 +297,11 @@ def cached_game_id_for_hash(storage: Storage, hash_value: str) -> int | None:
     entry = storage.get_cache(cache_keys.game_id(hash_value))
     if entry is not None:
         try:
-            game_id = parse_game_id_lookup(entry["responseBody"])
-        except GameIdLookupError:
-            game_id = None
-        if game_id is not None:
+            payload = json.loads(entry["responseBody"])
+        except Exception:
+            payload = {}
+        game_id = payload.get("GameID")
+        if isinstance(game_id, int) and game_id > 0:
             return game_id
 
     achievementsets_entry = storage.get_cache_by_prefix(
@@ -321,8 +315,8 @@ def cached_game_id_for_hash(storage: Storage, hash_value: str) -> int | None:
     except Exception:
         return None
 
-    game_id = payload.get("GameId") if isinstance(payload, dict) else None
-    return game_id if type(game_id) is int and game_id > 0 else None
+    game_id = payload.get("GameId")
+    return game_id if isinstance(game_id, int) and game_id > 0 else None
 
 
 def directory_has_supported_roms(path: Path) -> bool:
@@ -440,17 +434,16 @@ def hash_candidates_for_manual_cache(path: Path) -> list[str]:
     # Exactly one inner console ROM: hash its extracted content.
     if len(rom_entries) == 1:
         rom_entry = rom_entries[0]
+        with zipfile.ZipFile(path) as archive:
+            with archive.open(rom_entry) as source:
+                rom_bytes = source.read()
+
         suffix = Path(rom_entry.filename).suffix
         entry_name = Path(rom_entry.filename).stem
-        # /tmp is RAM-backed on handhelds. Stream to the proxy's data volume so
-        # extraction doesn't keep a whole ROM in Python plus another copy in tmpfs.
-        scratch = os.environ.get("RAOFFLINEPROXY_HASH_WORK_DIR") or ensure_config_dir()
-        with tempfile.TemporaryDirectory(prefix="rom-hash-", dir=scratch) as temp_dir:
+        with tempfile.TemporaryDirectory() as temp_dir:
             temp_name = entry_name if suffix else Path(rom_entry.filename).name
             temp_path = Path(temp_dir) / f"{temp_name}{suffix}"
-            with zipfile.ZipFile(path) as archive:
-                with archive.open(rom_entry) as source, temp_path.open("wb") as target:
-                    shutil.copyfileobj(source, target, length=64 * 1024)
+            temp_path.write_bytes(rom_bytes)
             if temp_path.suffix.lower() == ".chd":
                 result = hash_rom_candidates_result(temp_path)
                 if result.error is not None:
@@ -481,38 +474,7 @@ def game_id_from_response(body: str) -> int | None:
     except Exception:
         return None
     game_id = payload.get("GameID") if isinstance(payload, dict) else None
-    return game_id if type(game_id) is int and game_id > 0 else None
-
-
-class GameIdLookupError(RuntimeError):
-    """A failed lookup that must not be treated as an unsupported ROM."""
-
-    def __init__(self, reason: str):
-        super().__init__(reason)
-        self.reason = reason
-
-
-def parse_game_id_lookup(body: str) -> int | None:
-    """Accept positive IDs or an explicit successful zero-ID response only."""
-    try:
-        payload = json.loads(body)
-    except (ValueError, TypeError) as error:
-        raise GameIdLookupError("response") from error
-    if not isinstance(payload, dict):
-        raise GameIdLookupError("response")
-    if payload.get("Success") is False:
-        code = str(payload.get("Code", "")).lower()
-        error = str(payload.get("Error", "")).lower()
-        auth_errors = ("credential", "token", "login", "password", "access_denied", "invalid_user")
-        if any(word in code + " " + error for word in auth_errors):
-            raise GameIdLookupError("auth")
-        raise GameIdLookupError("response")
-    game_id = payload.get("GameID")
-    if type(game_id) is int and game_id > 0:
-        return game_id
-    if payload.get("Success") is True and type(game_id) is int and game_id == 0:
-        return None
-    raise GameIdLookupError("response")
+    return game_id if isinstance(game_id, int) and game_id > 0 else None
 
 
 def fetch_game_id(
@@ -527,11 +489,8 @@ def fetch_game_id(
         cached_game_id = game_id_from_response(cached["responseBody"])
         if cached_game_id is not None:
             return cached_game_id
-        if 0 <= current_millis() - cached["cachedAt"] < GAMEID_MISS_TTL_MS:
-            try:
-                return parse_game_id_lookup(cached["responseBody"])
-            except GameIdLookupError:
-                pass
+        if current_millis() - cached["cachedAt"] < GAMEID_MISS_TTL_MS:
+            return None
 
     url = build_api_url(
         upstream_host(config_data),
@@ -543,9 +502,13 @@ def fetch_game_id(
         },
     )
     response_body = http_get(url, proxy_user_agent(user_agent or FALLBACK_USER_AGENT))
-    game_id = parse_game_id_lookup(response_body)
-    storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
-    return game_id
+    payload = json.loads(response_body)
+    if is_cacheable_game_id_response(response_body):
+        storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
+    game_id = payload.get("GameID")
+    if not isinstance(game_id, int) or game_id <= 0:
+        return None
+    return int(game_id)
 
 
 def add_rom_to_cache(path: Path, storage: Storage, config_data: dict) -> AddRomResult:
@@ -713,22 +676,26 @@ def drain_cache_queue(
 ) -> DrainResult:
     """The single place that sends RA requests for bulk caching: works through the queue oldest
     first (or through keys, in order) within the caching budget. A window allows
-    CACHE_BUDGET_LIMIT cached games; ROMs RetroAchievements doesn't know don't count. A batch ends
+    CACHE_BUDGET_LIMIT cached games; ROMs RetroAchievements doesn't know don't count. After the
+    first CACHE_BURST_GAMES of a window, ROMs that need RetroAchievements start
+    CACHE_PACE_SECONDS apart, so the rest of the budget is spread over the window; the lock is
+    free while it waits. A batch ends
     after CACHE_BATCH_MAX_MS at the latest and leaves the rest for the next window. A 429 stops
     the queue for at least RATE_LIMIT_PAUSE_MS. Only one caller drains at a time; without
     wait_for_lock a concurrent call returns BUSY at once. A failed ROM keeps its place and is
     retried on a later round instead of back to back. on_item reports progress in games within
     the current window."""
     pause = should_pause or (lambda: False)
-    with cache_queue.drain_lock.hold(blocking=wait_for_lock, should_abort=pause) as acquired:
-        if not acquired:
+    with cache_queue.drain_lock.hold(blocking=wait_for_lock, should_abort=pause) as lock:
+        if not lock:
             return DrainResult(0, 0, DrainStop.BUSY)
-        with rate_limit.background():
+        with cache_queue.draining_lock.hold(shared=True), rate_limit.background():
             return _drain_locked(
                 storage,
                 config_data,
                 credentials,
                 user_agent,
+                lock,
                 pause,
                 None if keys is None else list(dict.fromkeys(keys)),
                 on_item,
@@ -736,11 +703,31 @@ def drain_cache_queue(
             )
 
 
+def past_burst(storage: Storage, requested: int) -> bool:
+    """Lookups for ROMs RetroAchievements doesn't know never fill the budget, so a drain's own
+    requests count as well."""
+    burst = cache_budget.CACHE_BURST_GAMES
+    return requested >= burst or cache_budget.used(storage) >= burst
+
+
+def wait_for_pace(ready_at: float, should_pause) -> bool:
+    """Waits until the monotonic clock reaches ready_at; False when should_pause asks to stop
+    first, so a paused drain lets a game cached by hand go ahead within a second."""
+    while True:
+        if should_pause():
+            return False
+        left = ready_at - time.monotonic()
+        if left <= 0:
+            return True
+        time.sleep(min(PACE_POLL_SECONDS, left))
+
+
 def _drain_locked(
     storage: Storage,
     config_data: dict,
     credentials: dict,
     user_agent: str,
+    lock,
     should_pause,
     pending_keys: list[str] | None,
     on_item,
@@ -749,6 +736,8 @@ def _drain_locked(
     cached = 0
     no_match = 0
     requested = 0
+    next_request_at = 0.0
+    paced = False
     started_at = current_millis()
     stop_at = started_at + cache_budget.CACHE_BATCH_MAX_MS
     known_game_ids = cached_game_ids(storage)
@@ -791,10 +780,12 @@ def _drain_locked(
         if stopped is not None:
             return stopped
         if current_millis() >= stop_at:
-            window_end = cache_budget.window_ends_at(storage)
-            cache_budget.pause_until(storage, window_end)
-            LOGGER.info("Cache queue: batch time limit reached, rest waits for the next window")
-            return result(DrainStop.BUDGET_EXHAUSTED, window_end, time_limited=True)
+            LOGGER.info("Cache queue: batch time limit reached")
+            return result(
+                DrainStop.BUDGET_EXHAUSTED,
+                cache_budget.next_available_at(storage),
+                time_limited=True,
+            )
         rom = next_rom()
         if rom is None:
             return result(DrainStop.EMPTY)
@@ -814,7 +805,18 @@ def _drain_locked(
         games_left = cache_budget.remaining(storage)
         if games_left == 0:
             return result(DrainStop.BUDGET_EXHAUSTED, cache_budget.next_available_at(storage))
-        apply_scan_batch_cooldown(requested)
+        if requested > 0 and not paced and past_burst(storage, requested):
+            # Another caller, e.g. a game cached by hand, may drain while this one waits, so
+            # everything is checked again afterwards.
+            with lock.released(should_pause):
+                ready = wait_for_pace(next_request_at, should_pause)
+            if not ready or not lock:
+                return result(DrainStop.PAUSED)
+            known_game_ids.update(cached_game_ids(storage))
+            paced = True
+            continue
+        paced = False
+        next_request_at = time.monotonic() + cache_budget.CACHE_PACE_SECONDS
         if on_item is not None:
             queued = len(pending_keys) if pending_keys is not None else cache_queue.count(storage)
             on_item(cached + 1, window_progress_total(cached, queued, games_left), rom.label)
