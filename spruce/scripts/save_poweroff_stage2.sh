@@ -339,9 +339,14 @@ fi
 # holder left after the sweep was an orphaned getevent with no card fd).
 stage2_kill_holders() {
     if [ "$STRICT_UNMOUNT" = "1" ]; then
+        # Logged even when the umount then succeeds: which processes held the card.
+        _swept=""
         for pid in $(stage2_holder_pids); do
+            _comm=""; { read -r _comm < "/proc/$pid/comm"; } 2>/dev/null
+            _swept="$_swept $pid:$_comm"
             kill -9 "$pid" 2>/dev/null
         done
+        [ -n "$_swept" ] && echo "stage2: swept holders:$_swept"
         return
     fi
 
