@@ -15,7 +15,6 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/flip_a30_brightness.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/usb_wifi_dongle.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh"
 
 get_config_path() {
     echo "/mnt/SDCARD/Saves/flip-system.json"
@@ -322,8 +321,6 @@ launch_startup_watchdogs(){
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
-    # BaseOS-my355 replaces the Miyoo firmware this version belongs to.
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && { baseos_fw_needs_update; return 0; }
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
@@ -402,8 +399,6 @@ runtime_mounts_Flip() {
 
 
 perform_fw_update_Flip() {
-    # No vendor flasher under BaseOS-my355, which updates itself from a .bosupd.
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && return 0
     miyoo_fw_update=0
     miyoo_fw_dir=/media/sdcard0
     if [ -f /media/sdcard0/miyoo355_fw.img ] ; then
@@ -422,15 +417,25 @@ perform_fw_update_Flip() {
 }
 
 
+# Hooks FlipBaseOS.sh replaces: the stock firmware has no respawned session to
+# shield, and starts all three vendor services.
+flip_shield_session() {
+    :
+}
+
+flip_start_vendor_services() {
+    /usr/miyoo/bin/btmanager &
+    /usr/miyoo/bin/hardwareservice &
+    /usr/miyoo/bin/miyoo_inputd &
+}
+
 device_init() {
-    # BaseOS-my355: shield its session under the /usr overlay and over it, since
-    # stage 2 drops the overlay before it unmounts the card.
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && shield_baseos_session /sbin/frontend-session
+    flip_shield_session
     runtime_mounts_Flip
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && shield_baseos_session /sbin/frontend-session
+    flip_shield_session
 
     echo 3 > /proc/sys/kernel/printk
-    [ -n "$SPRUCE_FLIP_BASEOS" ] || chmod a+x /usr/bin/notify
+    [ -e /usr/bin/notify ] && chmod a+x /usr/bin/notify
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
@@ -439,12 +444,7 @@ device_init() {
 
     insmod /lib/modules/rtk_btusb.ko
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
-    # BaseOS-my355 harvests only miyoo_inputd from the vendor services.
-    if [ -z "$SPRUCE_FLIP_BASEOS" ]; then
-        /usr/miyoo/bin/btmanager &
-        /usr/miyoo/bin/hardwareservice &
-    fi
-    /usr/miyoo/bin/miyoo_inputd &
+    flip_start_vendor_services
     sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
 
     #joypad
@@ -633,8 +633,6 @@ EOF
 # stock launcher script is re-entrant and still present after our hook install
 # (my355/init.sh renames it rather than replacing it).
 device_stock_ui_command() {
-    # BaseOS-my355 has no vendor UI; init respawns its own session instead.
-    [ -n "$SPRUCE_FLIP_BASEOS" ] && return 0
     printf '%s' "/usr/miyoo/bin/runmiyoo-original.sh"
 }
 
@@ -678,3 +676,8 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+# BaseOS-my355 (flagged by Flip.cfg) replaces some of the functions above.
+if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/FlipBaseOS.sh"
+fi
