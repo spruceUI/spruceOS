@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# Miyoo Flip under BaseOS-my355: sourced at the end of Flip.sh when Flip.cfg found
-# BaseOS, so these definitions replace the stock ones. Same hardware: PLATFORM=Flip.
+# BaseOS-my355 layer for the Miyoo Flip: sourced at the end of Flip.sh when Flip.cfg
+# found BaseOS (baseos/my355.cfg), so these replace the stock definitions. PLATFORM=Flip.
 
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh"
 

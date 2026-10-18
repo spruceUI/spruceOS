@@ -417,7 +417,7 @@ perform_fw_update_Flip() {
 }
 
 
-# Hooks FlipBaseOS.sh replaces: the stock firmware has no respawned session to
+# Hooks baseos/my355.sh replaces: the stock firmware has no respawned session to
 # shield, and starts all three vendor services.
 flip_shield_session() {
     :
@@ -679,5 +679,5 @@ work_led_on() {
 
 # BaseOS-my355 (flagged by Flip.cfg) replaces some of the functions above.
 if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
-    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/FlipBaseOS.sh"
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/baseos/my355.sh"
 fi
