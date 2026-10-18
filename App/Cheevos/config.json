@@ -3,5 +3,5 @@
     "icon": "cheevos.png",
     "launch": "launch.sh",
     "description": "RetroAchievements hub",
-    "gameProgress": 1
+    "gameProgress": 2
 }
