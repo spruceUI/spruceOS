@@ -98,7 +98,8 @@ fi
 # digest of the asset, and skip the check only when neither is there.
 WANT=""
 WANT_FROM=""
-if [ -n "$SUMS_URL" ] && curl -sf -m 20 -o /tmp/baseos_sums "$SUMS_URL"; then
+# download_url_to_file follows GitHub's redirect for release files (a bare curl -sf saved it empty).
+if [ -n "$SUMS_URL" ] && download_url_to_file "$SUMS_URL" /tmp/baseos_sums; then
     WANT="$(awk -v n="$ASSET_NAME" '$2 == n || $2 == "*"n {print $1}' /tmp/baseos_sums | head -n 1)"
     WANT_FROM="SHA256SUMS"
 fi
