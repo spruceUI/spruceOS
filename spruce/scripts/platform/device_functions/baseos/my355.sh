@@ -30,3 +30,12 @@ flip_start_vendor_services() {
 flip_shield_session() {
     shield_baseos_session /sbin/frontend-session
 }
+
+# From 1.2.0 (pre-releases included) rcK turns swap off, detaches the /usr overlay and
+# unmounts the card itself. Older ones need stage 2, which USB Storage Mode always uses.
+device_system_handles_sdcard_unmount() {
+    _my355="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    _my355="${_my355%%-*}"
+    case "$_my355" in ''|*[!0-9.]*) return 1 ;; esac
+    ! version_older_than "$_my355" "1.2.0"
+}
