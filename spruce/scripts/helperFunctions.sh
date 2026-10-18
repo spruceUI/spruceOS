@@ -562,11 +562,19 @@ version_older_than() {
 # ($BASEOS_REPO, from the platform cfg; TARGET_BASEOS_VERSION offline). Unreadable: "false".
 baseos_fw_needs_update() {
     _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    case "$_have" in
+    _core="${_have%%-*}"
+    case "$_core" in
         ''|*[!0-9.]*) echo "false"; return ;;
     esac
     _want="$(github_latest_version "${BASEOS_REPO:-pvaibhav/BaseOS}")" || _want="$TARGET_BASEOS_VERSION"
-    version_older_than "$_have" "$_want" && echo "true" || echo "false"
+    # A pre-release (1.2.0-beta.1) is older than its own release.
+    if version_older_than "$_core" "$_want"; then
+        echo "true"
+    elif [ "$_core" != "$_have" ] && ! version_older_than "$_want" "$_core"; then
+        echo "true"
+    else
+        echo "false"
+    fi
 }
 
 get_version_complex() {
