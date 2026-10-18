@@ -309,6 +309,10 @@ class RomsMenuCommon(ABC):
                         RecentsManager.add_game(selected.get_selection().get_value())
                         self.run_game(selected.get_selection().get_value())
                 elif(ControllerInput.X == selected.get_input() and not self.support_only_game_launching):
+                    PyUiState.set_last_game_selection(
+                        page_name, selected.get_selection().get_value().rom_file_path,
+                        getattr(self, 'subfolder', '') or ''
+                    )
                     gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
                     GameConfigMenu(
                         selected.get_selection().get_value().game_system, 
@@ -318,6 +322,10 @@ class RomsMenuCommon(ABC):
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input() and not self.support_only_game_launching):
+                    PyUiState.set_last_game_selection(
+                        page_name, selected.get_selection().get_value().rom_file_path,
+                        getattr(self, 'subfolder', '') or ''
+                    )
                     prev_view = Theme.get_game_selection_view_type()
                     self._menu_pressed(selected.get_selection().get_value(), rom_list)
                     # Regenerate as game config menu might've changed something
