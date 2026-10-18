@@ -1,7 +1,8 @@
 #!/bin/sh
-# BaseOS update for the Anbernic XX line, called by firmwareUpdate.sh.
+# BaseOS update for the Anbernic XX line and the Miyoo Flip, called by
+# firmwareUpdate.sh.
 #
-# BaseOS 1.3.0 and newer update themselves from a .bosupd file dropped at the
+# BaseOS (1.3.0 and newer on the XX) updates itself from a .bosupd file dropped at the
 # root of the frontend card: it applies the update at the next boot and removes
 # the file afterwards. So all this does is work out which file this model needs,
 # fetch it from the BaseOS releases, check it, and offer a reboot.
@@ -11,8 +12,6 @@
 
 BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 SD_ROOT="/mnt/SDCARD"
-API="https://api.github.com/repos/pvaibhav/BaseOS/releases/latest"
-MANUAL_HELP="Please visit github.com/pvaibhav/BaseOS to manually download the proper version for your device."
 
 baseos_field() {
     sed -n "s/^$1=//p" /etc/baseos-release 2>/dev/null | tr -d '"'
@@ -36,12 +35,24 @@ bail() {
 # No network is the normal case on a model with no built-in radio, so say what
 # to do about it rather than just refusing.
 dongle_bail() {
-    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/pvaibhav/BaseOS\n\nPress A to close."
+    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/$REPO\n\nPress A to close."
 }
 
 INSTALLED="$(baseos_field BASEOS_VERSION)"
 TARGET="$(baseos_field BASEOS_TARGET)"
-[ -n "$TARGET" ] || bail "Could not tell which BaseOS build this device runs, so there is nothing safe to download.\n\n$MANUAL_HELP"
+case "$TARGET" in
+    "") bail "Could not tell which BaseOS build this device runs, so there is nothing safe to download." ;;
+    my355)
+        REPO="apommel/baseos-my355"
+        DONE_MSG="Your device will now reboot to install the update, then restart once finished."
+        ;;
+    *)
+        REPO="pvaibhav/BaseOS"
+        DONE_MSG="Your device will now reboot into the update procedure, and then power itself off once finished."
+        ;;
+esac
+API="https://api.github.com/repos/$REPO/releases/latest"
+MANUAL_HELP="Please visit github.com/$REPO to manually download the proper version for your device."
 
 log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET"
 
@@ -114,6 +125,6 @@ fi
 
 sync
 
-log_and_display_message "BaseOS $LATEST is ready to install. Your device will now reboot into the update procedure, and then power itself off once finished."
+log_and_display_message "BaseOS $LATEST is ready to install. $DONE_MSG"
 sleep 8
 /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
