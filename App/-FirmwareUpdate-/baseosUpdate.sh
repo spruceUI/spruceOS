@@ -65,7 +65,7 @@ ASSET_NAME="$(jq -r --arg t "baseos-${TARGET}-" '.assets[]? | select(.name | sta
 ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
 ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/baseos_release.json | head -n 1)"
 SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
-# GitHub's own sha256 of the asset, for releases without a SHA256SUMS (baseos-my355).
+# GitHub's own sha256 of the asset, for releases without a SHA256SUMS (baseos-my355 before 1.2.0).
 ASSET_DIGEST="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .digest // empty' /tmp/baseos_release.json | head -n 1 | sed -n 's/^sha256://p')"
 
 if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
@@ -103,24 +103,26 @@ if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_N
 fi
 
 # A truncated or corrupt update file is worse than none: BaseOS would try to
-# apply it at boot. Check it against the release's own SHA256SUMS, and only
-# skip the check if that file could not be fetched.
+# apply it at boot. Check it against the release's SHA256SUMS entry, else GitHub's
+# digest of the asset, and skip the check only when neither is there.
+WANT=""
+WANT_FROM=""
 if [ -n "$SUMS_URL" ] && curl -sf -m 20 -o /tmp/baseos_sums "$SUMS_URL"; then
     WANT="$(awk -v n="$ASSET_NAME" '$2 == n || $2 == "*"n {print $1}' /tmp/baseos_sums | head -n 1)"
-    GOT="$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)"
-    if [ -n "$WANT" ] && [ "$WANT" != "$GOT" ]; then
+    WANT_FROM="SHA256SUMS"
+fi
+if [ -z "$WANT" ] && [ -n "$ASSET_DIGEST" ]; then
+    WANT="$ASSET_DIGEST"
+    WANT_FROM="GitHub asset digest"
+fi
+if [ -n "$WANT" ]; then
+    if [ "$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)" != "$WANT" ]; then
         rm -f "$SD_ROOT/$ASSET_NAME"
         bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
     fi
-    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME"
-elif [ -n "$ASSET_DIGEST" ]; then
-    if [ "$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)" != "$ASSET_DIGEST" ]; then
-        rm -f "$SD_ROOT/$ASSET_NAME"
-        bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
-    fi
-    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME (GitHub asset digest)"
+    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME ($WANT_FROM)"
 else
-    log_message "baseosUpdate.sh: WARNING no SHA256SUMS and no asset digest, skipping the checksum check"
+    log_message "baseosUpdate.sh: WARNING no SHA256SUMS entry and no asset digest, skipping the checksum check"
 fi
 
 sync
