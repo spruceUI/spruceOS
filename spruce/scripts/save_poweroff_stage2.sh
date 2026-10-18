@@ -171,6 +171,21 @@ stage2_kmsg() {
     echo "<2>spruce stage2: $*" > /dev/kmsg 2>/dev/null
 }
 
+# Wait $1 seconds by the uptime clock. A child exiting ends the busybox shell's own sleep at once:
+# after a USB session that cut init's 10 s grace to 0.4 s, and reboot -f preempted BaseOS's rcK.
+stage2_wait() {
+    _w_end=$(( $(stage2_uptime_cs) + $1 * 100 ))
+    while [ "$(stage2_uptime_cs)" -lt "$_w_end" ]; do
+        sleep 1
+    done
+}
+
+# Uptime in hundredths of a second ("1" + the decimals - 100: no octal from a leading zero).
+stage2_uptime_cs() {
+    read -r _w_up _w_rest < /proc/uptime
+    echo $(( ${_w_up%.*} * 100 + 1${_w_up#*.} - 100 ))
+}
+
 # Loop devices backed by files on the card, one "loopN major:minor" per line.
 stage2_card_loops() {
     for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
@@ -527,17 +542,17 @@ if [ "$FORCE_POWER_TRANSITION" = "1" ]; then
     if [ "$WANT_REBOOT" -eq 1 ]; then
         echo "stage2: forced reboot (init does not service power commands on this device)"
         reboot -f
-        sleep 3
+        stage2_wait 3
         echo "stage2: reboot -f did not take, trying sysrq"
         echo b > "$SYSRQ_TRIGGER" 2>/dev/null
     else
         echo "stage2: forced poweroff (init does not service power commands on this device)"
         poweroff -f
-        sleep 3
+        stage2_wait 3
         echo "stage2: poweroff -f did not take, trying sysrq"
         echo o > "$SYSRQ_TRIGGER" 2>/dev/null
     fi
-    sleep 5
+    stage2_wait 5
 elif [ "$STRICT_UNMOUNT" != "1" ]; then
     # The original: issue the command and let init take it from there. Every
     # device on this branch has been powering off this way for years, and the
@@ -558,23 +573,25 @@ echo 1 > "$SYSRQ_CTL" 2>/dev/null
 if [ "$WANT_REBOOT" -eq 1 ]; then
     echo "stage2: rebooting"
     reboot
-    sleep 10
+    stage2_wait 10
     echo "stage2: reboot did not take after 10s, forcing"
+    stage2_kmsg "reboot did not take after 10s, forcing"
     reboot -f
-    sleep 5
+    stage2_wait 5
     echo "stage2: reboot -f did not take, trying sysrq"
     echo b > "$SYSRQ_TRIGGER" 2>/dev/null
-    sleep 5
+    stage2_wait 5
 else
     echo "stage2: powering off"
     poweroff
-    sleep 10
+    stage2_wait 10
     echo "stage2: poweroff did not take after 10s, forcing"
+    stage2_kmsg "poweroff did not take after 10s, forcing"
     poweroff -f
-    sleep 5
+    stage2_wait 5
     echo "stage2: poweroff -f did not take, trying sysrq"
     echo o > "$SYSRQ_TRIGGER" 2>/dev/null
-    sleep 5
+    stage2_wait 5
 fi
 fi
 
