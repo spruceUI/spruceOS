@@ -21,15 +21,6 @@ baseos_field() {
     sed -n "s/^$1=//p" /etc/baseos-release 2>/dev/null | tr -d '"'
 }
 
-# 1.2.3 -> 1002003, for a plain numeric comparison. Prints nothing if the
-# version is not three numbers, and every caller treats that as "no opinion".
-version_num() {
-    case "$1" in
-        ''|*[!0-9.]*) return 1 ;;
-    esac
-    printf '%s' "$1" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}'
-}
-
 bail() {
     log_and_display_message "$1"
     sleep 6
@@ -72,11 +63,11 @@ if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
     bail "BaseOS ${LATEST:-latest} has no update file for this model ($TARGET), so it has to be installed by hand.\n\n$MANUAL_HELP"
 fi
 
-# An update file only applies on top of a BaseOS new enough to look for one.
+# An update file only applies on top of a BaseOS new enough to look for one. Status 1 = not
+# older (1.2.0-beta.1 is newer than 1.1.0, older than 1.2.0); 2 = unreadable, so no opinion.
 if [ -n "$INSTALLED" ]; then
-    _have="$(version_num "$INSTALLED")"
-    _latest="$(version_num "$LATEST")"
-    if [ -n "$_have" ] && [ -n "$_latest" ] && [ "$_have" -ge "$_latest" ] 2>/dev/null; then
+    baseos_version_older "$INSTALLED" "$LATEST"
+    if [ $? -eq 1 ]; then
         hide_fw_app
         log_and_display_message "Your installed BaseOS $INSTALLED is already the latest version. Press A to close."
         acknowledge

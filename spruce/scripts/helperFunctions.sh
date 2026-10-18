@@ -562,19 +562,20 @@ version_older_than() {
 # ($BASEOS_REPO, from the platform cfg; TARGET_BASEOS_VERSION offline). Unreadable: "false".
 baseos_fw_needs_update() {
     _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    _core="${_have%%-*}"
-    case "$_core" in
-        ''|*[!0-9.]*) echo "false"; return ;;
-    esac
     _want="$(github_latest_version "${BASEOS_REPO:-pvaibhav/BaseOS}")" || _want="$TARGET_BASEOS_VERSION"
-    # A pre-release (1.2.0-beta.1) is older than its own release.
-    if version_older_than "$_core" "$_want"; then
-        echo "true"
-    elif [ "$_core" != "$_have" ] && ! version_older_than "$_want" "$_core"; then
-        echo "true"
-    else
-        echo "false"
-    fi
+    baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
+}
+
+# True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)
+# before its own release. Status 2 when either is not x.y.z[-suffix].
+baseos_version_older() {
+    _bv_a="${1%%-*}"
+    _bv_b="${2%%-*}"
+    case "$_bv_a" in ''|*[!0-9.]*) return 2 ;; esac
+    case "$_bv_b" in ''|*[!0-9.]*) return 2 ;; esac
+    version_older_than "$_bv_a" "$_bv_b" && return 0
+    version_older_than "$_bv_b" "$_bv_a" && return 1
+    [ "$_bv_a" != "$1" ] && [ "$_bv_b" = "$2" ]
 }
 
 get_version_complex() {
