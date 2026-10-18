@@ -3,6 +3,8 @@ from __future__ import annotations
 import enum
 import json
 import logging
+import os
+import shutil
 import tempfile
 import time
 import urllib.error
@@ -15,7 +17,13 @@ from urllib.parse import urljoin
 from . import cache_budget, cache_keys, cache_queue, rate_limit, usage_stats
 from .auth import resolve_credentials
 from .cache_queue import QueuedRom
-from .config import FALLBACK_USER_AGENT, RA_MEDIA_HOST, image_caching_enabled, upstream_host
+from .config import (
+    FALLBACK_USER_AGENT,
+    RA_MEDIA_HOST,
+    ensure_config_dir,
+    image_caching_enabled,
+    upstream_host,
+)
 from .es_export import collect_cached_game_ids
 from .image_cache import (
     clear_all_cached_images,
@@ -296,11 +304,10 @@ def cached_game_id_for_hash(storage: Storage, hash_value: str) -> int | None:
     entry = storage.get_cache(cache_keys.game_id(hash_value))
     if entry is not None:
         try:
-            payload = json.loads(entry["responseBody"])
-        except Exception:
-            payload = {}
-        game_id = payload.get("GameID")
-        if isinstance(game_id, int) and game_id > 0:
+            game_id = parse_game_id_lookup(entry["responseBody"])
+        except GameIdLookupError:
+            game_id = None
+        if game_id is not None:
             return game_id
 
     achievementsets_entry = storage.get_cache_by_prefix(
@@ -314,8 +321,8 @@ def cached_game_id_for_hash(storage: Storage, hash_value: str) -> int | None:
     except Exception:
         return None
 
-    game_id = payload.get("GameId")
-    return game_id if isinstance(game_id, int) and game_id > 0 else None
+    game_id = payload.get("GameId") if isinstance(payload, dict) else None
+    return game_id if type(game_id) is int and game_id > 0 else None
 
 
 def directory_has_supported_roms(path: Path) -> bool:
@@ -433,16 +440,17 @@ def hash_candidates_for_manual_cache(path: Path) -> list[str]:
     # Exactly one inner console ROM: hash its extracted content.
     if len(rom_entries) == 1:
         rom_entry = rom_entries[0]
-        with zipfile.ZipFile(path) as archive:
-            with archive.open(rom_entry) as source:
-                rom_bytes = source.read()
-
         suffix = Path(rom_entry.filename).suffix
         entry_name = Path(rom_entry.filename).stem
-        with tempfile.TemporaryDirectory() as temp_dir:
+        # /tmp is RAM-backed on handhelds. Stream to the proxy's data volume so
+        # extraction doesn't keep a whole ROM in Python plus another copy in tmpfs.
+        scratch = os.environ.get("RAOFFLINEPROXY_HASH_WORK_DIR") or ensure_config_dir()
+        with tempfile.TemporaryDirectory(prefix="rom-hash-", dir=scratch) as temp_dir:
             temp_name = entry_name if suffix else Path(rom_entry.filename).name
             temp_path = Path(temp_dir) / f"{temp_name}{suffix}"
-            temp_path.write_bytes(rom_bytes)
+            with zipfile.ZipFile(path) as archive:
+                with archive.open(rom_entry) as source, temp_path.open("wb") as target:
+                    shutil.copyfileobj(source, target, length=64 * 1024)
             if temp_path.suffix.lower() == ".chd":
                 result = hash_rom_candidates_result(temp_path)
                 if result.error is not None:
@@ -473,7 +481,38 @@ def game_id_from_response(body: str) -> int | None:
     except Exception:
         return None
     game_id = payload.get("GameID") if isinstance(payload, dict) else None
-    return game_id if isinstance(game_id, int) and game_id > 0 else None
+    return game_id if type(game_id) is int and game_id > 0 else None
+
+
+class GameIdLookupError(RuntimeError):
+    """A failed lookup that must not be treated as an unsupported ROM."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
+
+
+def parse_game_id_lookup(body: str) -> int | None:
+    """Accept positive IDs or an explicit successful zero-ID response only."""
+    try:
+        payload = json.loads(body)
+    except (ValueError, TypeError) as error:
+        raise GameIdLookupError("response") from error
+    if not isinstance(payload, dict):
+        raise GameIdLookupError("response")
+    if payload.get("Success") is False:
+        code = str(payload.get("Code", "")).lower()
+        error = str(payload.get("Error", "")).lower()
+        auth_errors = ("credential", "token", "login", "password", "access_denied", "invalid_user")
+        if any(word in code + " " + error for word in auth_errors):
+            raise GameIdLookupError("auth")
+        raise GameIdLookupError("response")
+    game_id = payload.get("GameID")
+    if type(game_id) is int and game_id > 0:
+        return game_id
+    if payload.get("Success") is True and type(game_id) is int and game_id == 0:
+        return None
+    raise GameIdLookupError("response")
 
 
 def fetch_game_id(
@@ -488,8 +527,11 @@ def fetch_game_id(
         cached_game_id = game_id_from_response(cached["responseBody"])
         if cached_game_id is not None:
             return cached_game_id
-        if current_millis() - cached["cachedAt"] < GAMEID_MISS_TTL_MS:
-            return None
+        if 0 <= current_millis() - cached["cachedAt"] < GAMEID_MISS_TTL_MS:
+            try:
+                return parse_game_id_lookup(cached["responseBody"])
+            except GameIdLookupError:
+                pass
 
     url = build_api_url(
         upstream_host(config_data),
@@ -501,13 +543,9 @@ def fetch_game_id(
         },
     )
     response_body = http_get(url, proxy_user_agent(user_agent or FALLBACK_USER_AGENT))
-    payload = json.loads(response_body)
-    if is_cacheable_game_id_response(response_body):
-        storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
-    game_id = payload.get("GameID")
-    if not isinstance(game_id, int) or game_id <= 0:
-        return None
-    return int(game_id)
+    game_id = parse_game_id_lookup(response_body)
+    storage.upsert_cache(cache_keys.game_id(hash_value), response_body)
+    return game_id
 
 
 def add_rom_to_cache(path: Path, storage: Storage, config_data: dict) -> AddRomResult:

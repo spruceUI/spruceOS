@@ -67,14 +67,17 @@ def _sorted(achievements: list[Achievement], sort: str, players: int) -> list[Ac
     return list(achievements)
 
 
-def show_game(ctx: AppContext, game_id: int) -> None:
+def show_game(ctx: AppContext, game_id: int, *, refresh: bool = False) -> None:
     """Show a game's achievements until B.
 
     Args:
         ctx: App context.
         game_id: RA game ID.
+        refresh: Refresh this game in the background and update its visible rows.
     """
     detail = ctx.data.game_detail(game_id)
+    if refresh and detail is not None:
+        ctx.details.request(game_id, refresh=True)
     if detail is None:
         detail = _load(ctx, game_id)
         if detail is None:
@@ -87,72 +90,143 @@ def show_game(ctx: AppContext, game_id: int) -> None:
     earned = sum(1 for a in detail.achievements if a.unlocked)
     count = f"{earned}/{len(detail.achievements)}"
     title = Title(detail.title, count, game.highest_award if game else None)
-    _browse(ctx, detail, title, pending)
+    _browse(ctx, detail, title, pending, live=refresh)
 
 
-def _browse(ctx: AppContext, detail: GameDetail, title: Title, pending: dict) -> None:
-    """Show a game's achievements as a list or grid, and their cards, until B.
+def _browse(
+    ctx: AppContext, detail: GameDetail, title: Title, pending: dict, *, live: bool = False
+) -> None:
+    """Browse a game, optionally updating its rows after a targeted refresh."""
+    _GameBrowser(ctx, detail, title, pending, live=live).run()
+
+
+class _GameBrowser:
+    """Keep one game's view and selection across cards, options and live refreshes.
 
     Args:
-        ctx: App context.
-        detail: The game, with achievements.
-        title: Top-bar title.
-        pending: Pending unlocks by achievement ID.
+        ctx: Shared app context.
+        detail: Initial cached game details.
+        title: Initial top-bar title.
+        pending: Pending unlocks keyed by achievement ID.
+        live: Watch for refreshed game details.
     """
-    view = _View(
-        layout="grid" if ctx.settings.achievement_grid else "list",
-        sort=ctx.settings.achievement_sort,
-    )
-    selected = 0
-    shown: list[Achievement] = []
-    prepared: PreparedView | None = None  # kept while the card is open: back to the same page
-    while True:
-        if prepared is None:
-            shown = _sorted(
-                [a for a in detail.achievements if FILTERS[view.filter](a)],
-                view.sort,
-                detail.num_distinct_players,
-            )
-            if not shown:
-                message(detail.title, [strings.NO_ACHIEVEMENTS])
-                view = replace(view, filter="all")
-                continue
-            items = [_row(ctx, a, detail, pending) for a in shown]
-            layout = Layout.BADGES if view.layout == "grid" else Layout.LIST
-            prepared = PreparedView(title, items, selected=selected, layout=layout)
-        buttons = frozenset({Button.A, Button.Y, Button.MENU, Button.SELECT})
-        toggle = strings.HINT_LIST if view.layout == "grid" else strings.HINT_GRID
-        hints = [(Button.Y, strings.HINT_FILTER), (Button.SELECT, toggle)]
-        choice = prepared.show(buttons=buttons, hints=hints)
-        if choice is None:
-            return
-        if choice.button in (Button.Y, Button.MENU):
-            changed = _options(view)
-            if changed != view:
-                view, selected, prepared = changed, 0, None
-                ctx.update_settings(
-                    replace(
-                        ctx.settings,
-                        achievement_grid=view.layout == "grid",
-                        achievement_sort=view.sort,
-                    )
-                )
-            continue
-        selected = choice.index
-        if choice.button is Button.SELECT:  # list <-> grid, like PyUI's game lists
-            view = replace(view, layout="list" if view.layout == "grid" else "grid")
-            ctx.update_settings(replace(ctx.settings, achievement_grid=view.layout == "grid"))
-            prepared = None
-            continue
-        achievement = shown[choice.index]
-        show_achievement(
-            ctx,
-            achievement,
-            game_title=detail.title,
-            players=detail.num_distinct_players,
-            players_hardcore=detail.num_players_hardcore,
-            pending=pending.get(achievement.achievement_id),
+
+    def __init__(
+        self, ctx: AppContext, detail: GameDetail, title: Title, pending: dict, *, live: bool
+    ) -> None:
+        self.ctx, self.detail, self.title, self.pending = ctx, detail, title, pending
+        self.view = _View(
+            layout="grid" if ctx.settings.achievement_grid else "list",
+            sort=ctx.settings.achievement_sort,
         )
+        self.selected = 0
+        self.shown: list[Achievement] = []
+        self.prepared: PreparedView | None = None
+        self.live, self.revision = live, -1
+
+    def _achievements(self) -> list[Achievement]:
+        """Filter and sort the current game with the player's current choices."""
+        return _sorted(
+            [a for a in self.detail.achievements if FILTERS[self.view.filter](a)],
+            self.view.sort,
+            self.detail.num_distinct_players,
+        )
+
+    def _items(self) -> list[MenuItem]:
+        """Build rows for the current visible achievements and pending unlocks."""
+        return [_row(self.ctx, a, self.detail, self.pending) for a in self.shown]
+
+    def _refresh(self) -> list[MenuItem] | None:
+        """Update changed details in place, retaining the selected achievement by key."""
+        if not self.live or (version := self.ctx.data.version()) == self.revision:
+            return None
+        self.revision = version
+        detail = self.ctx.data.game_detail(self.detail.game_id)
+        if detail is None or detail == self.detail:
+            return None
+        self.detail, self.pending = detail, self.ctx.pending_awards()
+        self.shown = self._achievements()
+        if not self.shown:
+            self.view = replace(self.view, filter="all")
+            self.shown = self._achievements()
+        if not self.shown:
+            message(detail.title, [strings.NO_ACHIEVEMENT_SET])
+            return []
+        game = self.ctx.data.game(detail.game_id)
+        count = f"{sum(a.unlocked for a in detail.achievements)}/{len(detail.achievements)}"
+        self.title = Title(detail.title, count, game.highest_award if game else None)
+        if self.prepared is not None:
+            self.prepared.set_title(self.title)
+        return self._items()
+
+    def _prepare(self) -> None:
+        """Build a view, recovering from an empty filter through the usual message."""
+        self.shown = self._achievements()
+        if not self.shown:
+            message(self.detail.title, [strings.NO_ACHIEVEMENTS])
+            self.view = replace(self.view, filter="all")
+            return
+        layout = Layout.BADGES if self.view.layout == "grid" else Layout.LIST
+        self.prepared = PreparedView(
+            self.title, self._items(), selected=self.selected, layout=layout
+        )
+
+    def _configure(self, button: Button) -> None:
+        """Apply an options or layout change and remember the shared preferences."""
+        changed = (
+            replace(self.view, layout="list" if self.view.layout == "grid" else "grid")
+            if button is Button.SELECT
+            else _options(self.view)
+        )
+        if changed == self.view:
+            return
+        self.view, self.prepared = changed, None
+        if button is not Button.SELECT:
+            self.selected = 0
+        self.ctx.update_settings(
+            replace(
+                self.ctx.settings,
+                achievement_grid=changed.layout == "grid",
+                achievement_sort=changed.sort,
+            )
+        )
+
+    def run(self) -> None:
+        """Show achievements and their cards until B returns to the calling screen."""
+        buttons = frozenset({Button.A, Button.Y, Button.MENU, Button.SELECT})
+        while True:
+            if self.prepared is None:
+                self._prepare()
+            prepared = self.prepared
+            if prepared is None:
+                continue
+            # A refresh may have finished while a card or popup was open.
+            updated = self._refresh()
+            if updated is not None:
+                if not updated:
+                    return
+                prepared.update_items(updated)
+            toggle = strings.HINT_LIST if self.view.layout == "grid" else strings.HINT_GRID
+            choice = prepared.show(
+                buttons=buttons,
+                hints=[(Button.Y, strings.HINT_FILTER), (Button.SELECT, toggle)],
+                on_tick=self._refresh,
+            )
+            if choice is None:
+                return
+            self.selected = choice.index
+            if choice.button in (Button.Y, Button.MENU, Button.SELECT):
+                self._configure(choice.button)
+                continue
+            achievement = self.shown[choice.index]
+            show_achievement(
+                self.ctx,
+                achievement,
+                game_title=self.detail.title,
+                players=self.detail.num_distinct_players,
+                players_hardcore=self.detail.num_players_hardcore,
+                pending=self.pending.get(achievement.achievement_id),
+            )
 
 
 def _load(ctx: AppContext, game_id: int) -> GameDetail | None:
@@ -175,12 +249,22 @@ def _load(ctx: AppContext, game_id: int) -> GameDetail | None:
         return status is not None and status.state is FetchState.WAITING
 
     ctx.details.request(game_id)
-    if not wait_while(title, strings.LOADING_ACHIEVEMENTS, loading):
-        return None
-    detail = ctx.data.game_detail(game_id)
-    if detail is None:
-        message(title, _why_not(ctx.details.status(game_id), ctx.clock()))
-    return detail
+    while True:
+        if not wait_while(title, strings.LOADING_ACHIEVEMENTS, loading):
+            return None
+        detail = ctx.data.game_detail(game_id)
+        status = ctx.details.status(game_id)
+        if detail is not None:
+            return detail
+        if status is not None and status.state is FetchState.CANCELLED:
+            return None
+        message(title, _why_not(status, ctx.clock()))
+        # Start can replace a rejected key or retry while the failure is on screen.
+        detail = ctx.data.game_detail(game_id)
+        if detail is not None:
+            return detail
+        if not loading():
+            return None
 
 
 def _why_not(status: FetchStatus | None, now: float) -> list[str]:

@@ -44,6 +44,19 @@ class CheevosCacheManager:
         return list(cls._entries)
 
     @classmethod
+    def game_id_for_path(cls, path):
+        """Reuse loaded path mappings without waiting for or starting a CLI lookup."""
+        if not cls._loaded.is_set():
+            return None
+        key = raproxy_cli.rom_key(path)
+        matches = {
+            entry.game_id for entry in cls._entries
+            if entry.rom_path == key
+            and type(entry.game_id) is int and entry.game_id > 0
+        }
+        return next(iter(matches)) if len(matches) == 1 else None
+
+    @classmethod
     def is_pending(cls, rom_info: RomInfo) -> List[CheevosCacheEntry]:
         # TODO
         return False

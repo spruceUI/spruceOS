@@ -297,6 +297,7 @@ def main() -> None:
             "browser-root",
             "browser-list",
             "browser-list-fast",
+            "identify-rom",
             "cache-rom",
             "cache-roms",
             "export-cached-ids",
@@ -747,6 +748,12 @@ def main() -> None:
             finally:
                 storage.close()
             print(str(CACHED_IDS_FILE))
+            return
+
+        if args.command == "identify-rom":
+            from .identify_rom import run_identification
+            result = run_identification(args.path, config_data)
+            print(json.dumps(result, separators=(",", ":")))
             return
 
         if args.command == "cache-rom":
