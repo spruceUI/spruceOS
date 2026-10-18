@@ -321,16 +321,6 @@ launch_startup_watchdogs(){
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
-    # BaseOS writes "BaseOS x.y.z" to /usr/miyoo/version, so ask its own release file.
-    if [ -f /etc/baseos-release ]; then
-        _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release | tr -d '"')"
-        case "$_have" in
-            ''|*[!0-9.]*) echo "false"; return ;;
-        esac
-        _want="$(github_latest_version apommel/baseos-my355)" || _want="$TARGET_BASEOS_VERSION"
-        version_older_than "$_have" "$_want" && echo "true" || echo "false"
-        return
-    fi
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }

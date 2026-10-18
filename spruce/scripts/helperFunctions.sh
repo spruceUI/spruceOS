@@ -558,11 +558,19 @@ version_older_than() {
       "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
 }
 
+# The GitHub project this device's BaseOS build comes from, by its BASEOS_TARGET.
+baseos_repo() {
+    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')" in
+        my355) echo "apommel/baseos-my355" ;;
+        *) echo "pvaibhav/BaseOS" ;;
+    esac
+}
+
 # "true" when the installed BaseOS is older than the latest release of its project
-# ($BASEOS_REPO, from the platform cfg; TARGET_BASEOS_VERSION offline). Unreadable: "false".
+# (TARGET_BASEOS_VERSION from the platform cfg offline). Unreadable: "false".
 baseos_fw_needs_update() {
     _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    _want="$(github_latest_version "${BASEOS_REPO:-pvaibhav/BaseOS}")" || _want="$TARGET_BASEOS_VERSION"
+    _want="$(github_latest_version "$(baseos_repo)")" || _want="$TARGET_BASEOS_VERSION"
     baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
 }
 

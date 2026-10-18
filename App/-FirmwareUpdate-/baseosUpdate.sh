@@ -34,14 +34,13 @@ TARGET="$(baseos_field BASEOS_TARGET)"
 case "$TARGET" in
     "") bail "Could not tell which BaseOS build this device runs, so there is nothing safe to download." ;;
     my355)
-        REPO="apommel/baseos-my355"
         DONE_MSG="Your device will now reboot to install the update, then restart once finished."
         ;;
     *)
-        REPO="pvaibhav/BaseOS"
         DONE_MSG="Your device will now reboot into the update procedure, and then power itself off once finished."
         ;;
 esac
+REPO="$(baseos_repo)"
 API="https://api.github.com/repos/$REPO/releases/latest"
 MANUAL_HELP="Please visit github.com/$REPO to manually download the proper version for your device."
 
