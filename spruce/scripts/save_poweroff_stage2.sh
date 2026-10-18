@@ -113,6 +113,8 @@ stage2_dump_holders() {
     _re="$(stage2_card_maps_re)"
     echo "stage2: holders of $SD_MOUNTPOINT after the sweep:"
     awk -v mp="$SD_MOUNTPOINT" '$2 ~ "^"mp"(/|$)" {print "  mount " $1 " on " $2}' /proc/mounts 2>/dev/null
+    echo "  dependent mount ids: ${STAGE2_DEP_IDS:-none}"
+    _ids="$(echo $STAGE2_DEP_IDS | tr ' ' '|')"
     for _pp in /proc/[0-9]*; do
         _pid="${_pp#/proc/}"
         _why=""
@@ -130,6 +132,10 @@ stage2_dump_holders() {
         if [ -n "$_re" ]; then
             _m=$(grep -m1 -E " ($_re) " "$_pp/maps" 2>/dev/null | awk '{print $4 "=" $NF}')
             [ -n "$_m" ] && _why="$_why dev-map=$_m"
+        fi
+        if [ -n "$_ids" ]; then
+            _m=$(grep -l -E "^mnt_id:[[:space:]]+($_ids)\$" "$_pp"/fdinfo/* 2>/dev/null | head -1)
+            [ -n "$_m" ] && _why="$_why dep-mnt-fd=$(readlink "$_pp/fd/${_m##*/}" 2>/dev/null)"
         fi
         case "$_why" in "" | " (stage2 itself)") ;; *)
             echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why" ;;
@@ -212,12 +218,12 @@ stage2_card_maps_re() {
 # and everything mounted on top of those (by parent id, so same-path binds elsewhere stay).
 stage2_dependent_mounts() {
     _loops=" $(stage2_card_loops | awk '{printf "/dev/%s ", $1}')"
-    awk -v mp="$SD_MOUNTPOINT" -v dev="$SD_DEV" -v loops="$_loops" '
+    awk -v mp="$SD_MOUNTPOINT" -v dev="$SD_DEV" -v loops="$_loops" -v what="$1" '
         {
             id[NR] = $1; par[NR] = $2; mnt[NR] = $5
             for (i = 7; i <= NF; i++) if ($i == "-") break
             fs = $(i + 1); src = $(i + 2); so = $(i + 3)
-            if ($5 == mp) next
+            if ($5 == mp) { card = $1; next }
             if (index($5, mp "/") == 1 || (dev != "" && src == dev) || index(loops, " " src " ") ||
                 (fs == "overlay" && (index(so, mp "/") || index(so, "/mnt/sdcard/") || index(so, "/mnt/SDCARD/"))))
                 dep[$1] = 1
@@ -229,8 +235,21 @@ stage2_dependent_mounts() {
                 for (n = 1; n <= NR; n++)
                     if (!(id[n] in dep) && (par[n] in dep)) { dep[id[n]] = 1; more = 1 }
             }
-            for (n = NR; n > 0; n--) if (id[n] in dep) print mnt[n]
+            for (n = NR; n > 0; n--) if (id[n] in dep) print (what == "ids" ? id[n] : mnt[n])
+            if (what == "ids" && card != "") print card
         }' "$MOUNTINFO" 2>/dev/null
+}
+
+# Pids whose exe or cwd was reached through a mount in $STAGE2_DEP_IDS: opened here, the link carries
+# that mount and our own fdinfo names it. Builtins only; a failed open just skips (no exec: it would exit).
+stage2_link_mnt_pids() {
+    for _pp in /proc/[0-9]*; do
+        for _link in exe cwd; do
+            _mid=""
+            { while read -r _k _v; do [ "$_k" = "mnt_id:" ] && { _mid=$_v; break; }; done < /proc/self/fdinfo/9; } 9< "$_pp/$_link" 2>/dev/null
+            [ -n "$_mid" ] && case " $STAGE2_DEP_IDS " in *" $_mid "*) echo "${_pp#/proc/}"; break ;; esac
+        done
+    done
 }
 
 if [ "$STRICT_UNMOUNT" = "1" ]; then
@@ -363,8 +382,17 @@ stage2_holder_pids() {
         grep -l " $SD_MOUNTPOINT/" /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
         _re="$(stage2_card_maps_re)"
         [ -n "$_re" ] && grep -l -E " ($_re) " /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
+        # Through a mount that depends on the card (spruce's /usr overlay): no card path, only its mnt_id.
+        if [ -n "$STAGE2_DEP_IDS" ]; then
+            grep -l -E "^mnt_id:[[:space:]]+($(echo $STAGE2_DEP_IDS | tr ' ' '|'))\$" /proc/[0-9]*/fdinfo/* 2>/dev/null | awk -F/ '{print $3}'
+            stage2_link_mnt_pids
+        fi
     } | sort -un | awk -v self="$$" '$1 > 1 && $1 != self'
 }
+
+# Mount ids of what depends on the card, taken while it is all still mounted (a lazy detach drops them
+# from mountinfo): a holder through spruce's /usr overlay shows only the overlay's mnt_id (flip-91 B2, 10-18).
+[ "$STRICT_UNMOUNT" = "1" ] && STAGE2_DEP_IDS="$(stage2_dependent_mounts ids | tr '\n' ' ')"
 
 stage2_kill_holders
 
