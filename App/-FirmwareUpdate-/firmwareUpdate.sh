@@ -15,17 +15,13 @@ FW_DIR="/mnt/SDCARD/spruce/FIRMWARE_UPDATE"
 # get the free space on the SD card in MiB
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
-# BaseOS, on any model, updates itself from a .bosupd file at the root of the card.
+# BaseOS (Anbernic XX, Miyoo Flip) updates itself from a .bosupd file at the root of the card.
 [ -f /etc/baseos-release ] && exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 
 NEEDS_UPDATE=true
 case "$PLATFORM" in
 	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
-		;;
-	Anbernic*)
-		# BaseOS updates itself from a .bosupd file at the root of the card.
-		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 		;;
 	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"G350")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh

@@ -27,7 +27,7 @@ from .image_cache import (
     resolve_cached_static_asset,
     schedule_image_download,
 )
-from .network import apply_scan_batch_cooldown, build_api_url, http_get
+from .network import build_api_url, http_get
 from .rom_cache import (
     CacheGameAuthError,
     cache_game,
@@ -57,6 +57,7 @@ ZIP_READABLE_ARCHIVE_EXTENSIONS = {".zip"}
 EXCLUDED_BROWSER_DIR_NAMES = {"Imgs"}
 MAX_SCAN_ENTRIES = 5000
 MAX_SCAN_DEPTH = 12
+PACE_POLL_SECONDS = 1.0
 # RetroAchievements adds hashes over time, so a "no match" is only cached long enough to
 # stop a repeated scan of the same folder from re-querying every unsupported ROM.
 GAMEID_MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000
@@ -675,22 +676,26 @@ def drain_cache_queue(
 ) -> DrainResult:
     """The single place that sends RA requests for bulk caching: works through the queue oldest
     first (or through keys, in order) within the caching budget. A window allows
-    CACHE_BUDGET_LIMIT cached games; ROMs RetroAchievements doesn't know don't count. A batch ends
+    CACHE_BUDGET_LIMIT cached games; ROMs RetroAchievements doesn't know don't count. After the
+    first CACHE_BURST_GAMES of a window, ROMs that need RetroAchievements start
+    CACHE_PACE_SECONDS apart, so the rest of the budget is spread over the window; the lock is
+    free while it waits. A batch ends
     after CACHE_BATCH_MAX_MS at the latest and leaves the rest for the next window. A 429 stops
     the queue for at least RATE_LIMIT_PAUSE_MS. Only one caller drains at a time; without
     wait_for_lock a concurrent call returns BUSY at once. A failed ROM keeps its place and is
     retried on a later round instead of back to back. on_item reports progress in games within
     the current window."""
     pause = should_pause or (lambda: False)
-    with cache_queue.drain_lock.hold(blocking=wait_for_lock, should_abort=pause) as acquired:
-        if not acquired:
+    with cache_queue.drain_lock.hold(blocking=wait_for_lock, should_abort=pause) as lock:
+        if not lock:
             return DrainResult(0, 0, DrainStop.BUSY)
-        with rate_limit.background():
+        with cache_queue.draining_lock.hold(shared=True), rate_limit.background():
             return _drain_locked(
                 storage,
                 config_data,
                 credentials,
                 user_agent,
+                lock,
                 pause,
                 None if keys is None else list(dict.fromkeys(keys)),
                 on_item,
@@ -698,11 +703,31 @@ def drain_cache_queue(
             )
 
 
+def past_burst(storage: Storage, requested: int) -> bool:
+    """Lookups for ROMs RetroAchievements doesn't know never fill the budget, so a drain's own
+    requests count as well."""
+    burst = cache_budget.CACHE_BURST_GAMES
+    return requested >= burst or cache_budget.used(storage) >= burst
+
+
+def wait_for_pace(ready_at: float, should_pause) -> bool:
+    """Waits until the monotonic clock reaches ready_at; False when should_pause asks to stop
+    first, so a paused drain lets a game cached by hand go ahead within a second."""
+    while True:
+        if should_pause():
+            return False
+        left = ready_at - time.monotonic()
+        if left <= 0:
+            return True
+        time.sleep(min(PACE_POLL_SECONDS, left))
+
+
 def _drain_locked(
     storage: Storage,
     config_data: dict,
     credentials: dict,
     user_agent: str,
+    lock,
     should_pause,
     pending_keys: list[str] | None,
     on_item,
@@ -711,6 +736,8 @@ def _drain_locked(
     cached = 0
     no_match = 0
     requested = 0
+    next_request_at = 0.0
+    paced = False
     started_at = current_millis()
     stop_at = started_at + cache_budget.CACHE_BATCH_MAX_MS
     known_game_ids = cached_game_ids(storage)
@@ -753,10 +780,12 @@ def _drain_locked(
         if stopped is not None:
             return stopped
         if current_millis() >= stop_at:
-            window_end = cache_budget.window_ends_at(storage)
-            cache_budget.pause_until(storage, window_end)
-            LOGGER.info("Cache queue: batch time limit reached, rest waits for the next window")
-            return result(DrainStop.BUDGET_EXHAUSTED, window_end, time_limited=True)
+            LOGGER.info("Cache queue: batch time limit reached")
+            return result(
+                DrainStop.BUDGET_EXHAUSTED,
+                cache_budget.next_available_at(storage),
+                time_limited=True,
+            )
         rom = next_rom()
         if rom is None:
             return result(DrainStop.EMPTY)
@@ -776,7 +805,18 @@ def _drain_locked(
         games_left = cache_budget.remaining(storage)
         if games_left == 0:
             return result(DrainStop.BUDGET_EXHAUSTED, cache_budget.next_available_at(storage))
-        apply_scan_batch_cooldown(requested)
+        if requested > 0 and not paced and past_burst(storage, requested):
+            # Another caller, e.g. a game cached by hand, may drain while this one waits, so
+            # everything is checked again afterwards.
+            with lock.released(should_pause):
+                ready = wait_for_pace(next_request_at, should_pause)
+            if not ready or not lock:
+                return result(DrainStop.PAUSED)
+            known_game_ids.update(cached_game_ids(storage))
+            paced = True
+            continue
+        paced = False
+        next_request_at = time.monotonic() + cache_budget.CACHE_PACE_SECONDS
         if on_item is not None:
             queued = len(pending_keys) if pending_keys is not None else cache_queue.count(storage)
             on_item(cached + 1, window_progress_total(cached, queued, games_left), rom.label)

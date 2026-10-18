@@ -238,7 +238,7 @@ run_dsperate() {
 				grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
 				;;
 			"1")
-				_config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini" 
+				_config_path="/mnt/SDCARD/Saves/dsperate/one-stick.ini"
 				;;
 			*)
 				if [ "$PLATFORM" = "RGB30" ]; then
@@ -249,9 +249,13 @@ run_dsperate() {
 					# Z40 gets its own config to accommodate its unique touchscreen
 					_config_path="/mnt/SDCARD/Saves/dsperate/zero40.ini"
 
+				elif [ "$PLATFORM" = "Pixel2" ]; then
+					# Pixel2 gets its own config to accommodate for its inverted buttons
+					_config_path="/mnt/SDCARD/Saves/dsperate/pixel2.ini"
+
 				else
 					_config_path="/mnt/SDCARD/Saves/dsperate/two-sticks.ini"
-				fi 
+				fi
 				;;
 		esac
 

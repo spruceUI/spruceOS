@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Protocol
 from urllib.parse import parse_qsl, urlsplit
 
+import cheevos
 from cheevos.core.clock import ServerClock, network_clock
 from cheevos.core.errors import NetworkError
 from cheevos.core.ra_client.parse import parse_time
@@ -35,6 +36,18 @@ _DROPPED: tuple[type[BaseException], ...] = (
 )
 # Query parameters that carry credentials; never recorded, never matched on.
 _CREDENTIAL_PARAMS = frozenset({"y", "u"})
+
+
+def default_user_agent(platform: str) -> str:
+    """Return the User-Agent RA sees, e.g. ``"Cheevos/0.1.0 (SpruceOS; MiyooMini)"``.
+
+    Args:
+        platform: Spruce platform name.
+
+    Returns:
+        The User-Agent string.
+    """
+    return f"Cheevos/{cheevos.__version__} (SpruceOS; {platform})"
 
 
 @dataclass(frozen=True, slots=True)

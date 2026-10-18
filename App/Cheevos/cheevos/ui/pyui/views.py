@@ -97,7 +97,7 @@ class Layout(Enum):
     POPUP = "POPUP"  # small menu over the current screen (options, filters)
 
 
-# Called on every input timeout (~12x/s). Returning items replaces the list in place.
+# Called on every input timeout (~12x/s). Items replace the list; an empty list closes it.
 TickHandler = Callable[[], Sequence[MenuItem] | None]
 
 
@@ -350,6 +350,39 @@ class PreparedView:
         if len(self._entries) > _SLOW_LIST_ROWS or elapsed_ms > _SLOW_LIST_MS:
             logger.info("Prepared %d rows in %.0f ms", len(self._entries), elapsed_ms)
 
+    def set_title(self, title: str | Title) -> None:
+        """Update a live view's title, including the game's count and award dot."""
+        self._title = title
+        self._view.top_bar_text = title_bar.top_title(title)
+
+    def update_items(self, items: Sequence[MenuItem]) -> None:
+        """Replace rows, retaining the highlighted key and visible window where possible."""
+        view = self._view
+        selected = min(int(view.selected), len(self._entries) - 1)
+        key = self._entries[selected].get_value().key
+        self._count = len(items)
+        self._entries = _entries(items, self._layout)
+        view.set_options(self._entries)
+        view.selected = next(
+            (index for index, item in enumerate(items) if key and item.key == key),
+            min(selected, self._count - 1),
+        )
+        if self._layout is Layout.LIST:
+            window = view.max_rows
+            view.current_top = min(view.current_top, max(0, self._count - window))
+            view.current_bottom = min(view.current_top + window, self._count)
+            if not view.current_top <= view.selected < view.current_bottom:
+                # PyUI's center_selection() leaves index zero off-screen.
+                view.current_top = max(0, min(view.selected - window // 2, self._count - window))
+                view.current_bottom = min(view.current_top + window, self._count)
+        elif self._layout is Layout.BADGES:
+            window = view.rows * view.cols
+            view.current_left = min(view.current_left, (view.selected // view.cols) * view.cols)
+            view.current_right = min(view.current_left + window, self._count)
+            view.correct_selected_for_off_list()
+        if self._images is not None:
+            self._images.reset(self._entries)
+
     def show(
         self,
         *,
@@ -413,10 +446,9 @@ class PreparedView:
             # PyUI returns a Selection with no input after a timeout or a cursor move.
             if selection is None or selection.get_input() is None:
                 if on_tick is not None and (updated := on_tick()) is not None:
-                    self._entries = _entries(updated, self._layout)
-                    view.set_options(self._entries)
-                    if self._images is not None:
-                        self._images.reset(self._entries)
+                    if not updated:
+                        return None
+                    self.update_items(updated)
                 continue
             if selection.get_input() == ControllerInput.B:
                 return None

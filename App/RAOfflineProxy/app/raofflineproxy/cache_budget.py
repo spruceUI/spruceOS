@@ -8,16 +8,20 @@ from .storage import Storage, current_millis
 
 CACHE_BUDGET_LIMIT = 100
 CACHE_BUDGET_WINDOW_MS = 30 * 60 * 1000
-# Bounds how long one batch runs, e.g. on a stretch of ROMs RetroAchievements doesn't know,
-# which cost lookups but never fill the budget.
-CACHE_BATCH_MAX_MS = 10 * 60 * 1000
+# The first games of a window go out at once, so a small run feels instant; the rest is spread
+# over the window instead of sent as one burst, which RetroAchievements answers with a 429.
+CACHE_BURST_GAMES = 20
+CACHE_PACE_SECONDS = CACHE_BUDGET_WINDOW_MS / CACHE_BUDGET_LIMIT / 1000
+# Bounds how long one batch runs, so a bulk run hands the rest to the proxy service. A whole
+# window, so a paced batch can still use the full budget.
+CACHE_BATCH_MAX_MS = CACHE_BUDGET_WINDOW_MS
 
 
 @dataclass(frozen=True)
 class BudgetWindow:
     """One budget window: used counts games cached; lookups for ROMs RetroAchievements doesn't
-    know are free. paused_until holds the queue back after a 429 or after a batch hit its time
-    limit, so no new batch starts before then, and outlives the window."""
+    know are free. paused_until holds the queue back after a 429, so no new batch starts before
+    then, and outlives the window."""
 
     window_start: int = 0
     used: int = 0
@@ -53,9 +57,6 @@ class BudgetWindow:
         window = self.current(now, window_ms)
         window_opens_at = now if window.used < limit else window.window_start + window_ms
         return max(self.paused_until, window_opens_at)
-
-    def ends_at(self, now: int, window_ms: int = CACHE_BUDGET_WINDOW_MS) -> int:
-        return max(self.paused_until, self.current(now, window_ms).window_start + window_ms)
 
     def to_json(self) -> str:
         return json.dumps(
@@ -99,13 +100,13 @@ def pause_until(storage: Storage, until: int) -> None:
         save(storage, replace(window, paused_until=until))
 
 
+def used(storage: Storage, now: int | None = None) -> int:
+    return load(storage).current(now or current_millis()).used
+
+
 def remaining(storage: Storage, now: int | None = None) -> int:
     return load(storage).remaining(now or current_millis())
 
 
 def next_available_at(storage: Storage, now: int | None = None) -> int:
     return load(storage).next_available_at(now or current_millis())
-
-
-def window_ends_at(storage: Storage, now: int | None = None) -> int:
-    return load(storage).ends_at(now or current_millis())

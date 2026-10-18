@@ -26,20 +26,6 @@ HTTP_GET_MAX_429_RETRIES = 4
 HTTP_GET_INITIAL_429_BACKOFF_SECONDS = 2.0
 HTTP_GET_MAX_429_BACKOFF_SECONDS = 15.0
 RA_MIN_REQUEST_INTERVAL_SECONDS = 0.3
-SCAN_BATCH_SIZE = 50
-SCAN_BATCH_COOLDOWN_SECONDS = 30.0
-
-
-def apply_scan_batch_cooldown(scanned: int) -> bool:
-    if scanned > 0 and scanned % SCAN_BATCH_SIZE == 0:
-        LOGGER.info(
-            "Scan batch cooldown after %d scanned, sleeping %.1fs",
-            scanned,
-            SCAN_BATCH_COOLDOWN_SECONDS,
-        )
-        time.sleep(SCAN_BATCH_COOLDOWN_SECONDS)
-        return True
-    return False
 
 
 class RequestThrottle:

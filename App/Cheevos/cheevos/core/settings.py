@@ -65,7 +65,7 @@ class Settings:
     hide_descriptions: DescriptionHiding = DescriptionHiding.OFF
     auto_sync: bool = True
     game_list_details: bool = False
-    achievement_grid: bool = False
+    achievement_grid: bool = True
     achievement_sort: str = "order"
     awards_view: str = "carousel"
 
