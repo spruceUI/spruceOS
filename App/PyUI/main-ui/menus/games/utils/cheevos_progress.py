@@ -23,6 +23,13 @@ IDENTIFY_SCRIPT = os.path.join(APP_DIR, "identify-rom.sh")
 IDENTIFY_CONTRACT = 2
 WORK_DIR = "/mnt/SDCARD/Saves/cheevos/cache/identify-work"
 IDENTIFY_TIMEOUT = 60
+# Cheevos writes the helper's results here; Spruce reads only its matches, so a game
+# identified before opens without starting the helper.
+SAVED_IDENTIFICATIONS = "/mnt/SDCARD/Saves/cheevos/cache/rom-identifications.json"
+SAVED_VERSIONS = (1, 2)
+SAVED_MAX_BYTES = 256 * 1024
+# Above this, RA's ID is virtual (a hash it hasn't marked compatible); the helper decodes it.
+VIRTUAL_GAME_ID_BASE = 1_000_000_000
 
 
 def available():
@@ -54,11 +61,33 @@ def _stop(process):
 
 
 def identify(path):
-    """Trust Spruce's loaded game mapping first; Cheevos's helper handles every other path."""
+    """Trust Spruce's loaded mapping, then Cheevos's saved matches; the helper does the rest."""
     game_id = CheevosCacheManager.game_id_for_path(path)
+    if not (type(game_id) is int and game_id > 0):
+        game_id = _saved_match(path)
     if type(game_id) is int and game_id > 0:
         return {"status": "matched", "game_id": game_id}
     return _identify_with_helper(path)
+
+
+def _saved_match(path):
+    """Read the match Cheevos saved for this path; misses and saving stay with the helper."""
+    try:
+        if os.path.getsize(SAVED_IDENTIFICATIONS) > SAVED_MAX_BYTES:
+            return None
+        with open(SAVED_IDENTIFICATIONS, encoding="utf-8") as source:
+            saved = json.load(source)
+        if saved["version"] not in SAVED_VERSIONS:
+            return None
+        result = saved["entries"][os.path.abspath(path)]["result"]
+        if result["status"] != "matched":
+            return None
+        game_id = result["game_id"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    if type(game_id) is int and 0 < game_id <= VIRTUAL_GAME_ID_BASE:
+        return game_id
+    return None
 
 
 def _identify_with_helper(path):
