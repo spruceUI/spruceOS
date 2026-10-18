@@ -321,16 +321,6 @@ launch_startup_watchdogs(){
 
 # Should the above be merged into here?
 check_if_fw_needs_update() {
-    # BaseOS writes "BaseOS x.y.z" to /usr/miyoo/version, so ask its own release file.
-    if [ -f /etc/baseos-release ]; then
-        _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release | tr -d '"')"
-        case "$_have" in
-            ''|*[!0-9.]*) echo "false"; return ;;
-        esac
-        _want="$(github_latest_version apommel/baseos-my355)" || _want="$TARGET_BASEOS_VERSION"
-        version_older_than "$_have" "$_want" && echo "true" || echo "false"
-        return
-    fi
     VERSION="$(cat /usr/miyoo/version)"
     [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
@@ -427,12 +417,25 @@ perform_fw_update_Flip() {
 }
 
 
-device_init() {
-    runtime_mounts_Flip
+# Hooks baseos/my355.sh replaces: the stock firmware has no respawned session to
+# shield, and starts all three vendor services.
+flip_shield_session() {
+    :
+}
 
+flip_start_vendor_services() {
+    /usr/miyoo/bin/btmanager &
+    /usr/miyoo/bin/hardwareservice &
+    /usr/miyoo/bin/miyoo_inputd &
+}
+
+device_init() {
+    flip_shield_session
+    runtime_mounts_Flip
+    flip_shield_session
 
     echo 3 > /proc/sys/kernel/printk
-    chmod a+x /usr/bin/notify
+    [ -e /usr/bin/notify ] && chmod a+x /usr/bin/notify
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
@@ -441,9 +444,7 @@ device_init() {
 
     insmod /lib/modules/rtk_btusb.ko
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
-    /usr/miyoo/bin/btmanager &
-    /usr/miyoo/bin/hardwareservice &
-    /usr/miyoo/bin/miyoo_inputd &
+    flip_start_vendor_services
     sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
 
     #joypad
@@ -675,3 +676,8 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+# BaseOS-my355 (flagged by Flip.cfg) replaces some of the functions above.
+if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/baseos/my355.sh"
+fi

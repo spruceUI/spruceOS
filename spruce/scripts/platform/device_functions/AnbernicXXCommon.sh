@@ -12,6 +12,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh"
 
 # The XX line has no rumble GPIO, so utils/rumble.sh's rumble_gpio is not usable
 # here - see RUMBLE_GPIO in AnbernicXXCommon.cfg. The motor is driven through
@@ -154,14 +155,8 @@ send_virtual_key_L3() {
 }
 
 
-# An unreadable or unparseable version means "do not nag".
 check_if_fw_needs_update() {
-    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    case "$_have" in
-        ''|*[!0-9.]*) echo "false"; return ;;
-    esac
-    _want="$(github_latest_version pvaibhav/BaseOS)" || _want="$TARGET_BASEOS_VERSION"
-    version_older_than "$_have" "$_want" && echo "true" || echo "false"
+    baseos_fw_needs_update
 }
 
 has_lid() {
@@ -472,7 +467,9 @@ anbernic_xx_common_init() {
     stage_ra_autoconfig
 
     add_spruce_system_user
-    shield_baseos_session
+    # BaseOS 1.3.0 renamed the respawned session; older images still run nextui-session.
+    shield_baseos_session /sbin/frontend-session
+    shield_baseos_session /sbin/nextui-session
 }
 
 # RetroArch has no profile for this pad, so it announces "ANBERNIC-keys (1/1)
@@ -517,59 +514,6 @@ device_prepare_for_ports_run() {
 
 device_cleanup_after_ports_run() {
     treat_dpad_as_dpad
-}
-
-# Stop BaseOS's respawned session from re-mounting the card during shutdown.
-#
-# /etc/inittab has `::respawn:/sbin/nextui-session`, so the moment save_poweroff
-# kills the frontend, init starts another one. That script's job includes
-# mounting the card if it finds it unmounted - its own comment says the retry
-# covers "hot re-insertion after an unmount" - and it cannot tell a deliberate
-# shutdown unmount from a yanked card:
-#
-#     mount -t vfat -o rw,utf8,noatime,shortname=mixed "$dev" "$SD"
-#
-# Mounting read-write sets the FAT dirty bit. So stage 2 would unmount the card
-# cleanly and a second later BaseOS would helpfully mount it straight back, and
-# every boot still opened with "Volume was not properly unmounted". Traced end to
-# end: clean umount OK, then a session start in the same second.
-#
-# Bind a shim over it that steps aside while a shutdown is in progress. Same
-# technique spruce already uses for /etc/passwd and MainUI, and ephemeral for the
-# same reason: nothing is written to BaseOS's rootfs, a BaseOS update can neither
-# inherit nor break it, and a reboot removes it entirely. If anything here fails
-# we simply leave BaseOS's own script in place.
-shield_baseos_session() {
-    [ -f /sbin/nextui-session ] || return 0
-    # Already shielded - device_init can run more than once, and binding twice
-    # stacks mounts. Match on the name alone: /sbin is a symlink to /usr/sbin
-    # here, and /proc/mounts reports the resolved path, so testing for the
-    # literal "/sbin/..." finds nothing and happily binds again.
-    grep -q "nextui-session" /proc/mounts 2>/dev/null && return 0
-
-    cp /sbin/nextui-session /tmp/nextui-session.real 2>/dev/null || return 0
-    chmod +x /tmp/nextui-session.real 2>/dev/null
-
-    cat > /tmp/nextui-session.shim <<'SHIM'
-#!/bin/sh
-# spruce shim over BaseOS's frontend session. Bind-mounted, never installed.
-# While a shutdown is in progress the real session must not run: it mounts the
-# SD card read-write when it finds it unmounted, which re-dirties the filesystem
-# save_poweroff.sh has just unmounted cleanly. The sleep keeps init's respawn
-# from becoming a hot loop for the few seconds before the power goes.
-if [ -e /tmp/shutting_down.lock ]; then
-    sleep 5
-    exit 0
-fi
-exec /tmp/nextui-session.real "$@"
-SHIM
-    chmod +x /tmp/nextui-session.shim 2>/dev/null
-
-    if mount -o bind /tmp/nextui-session.shim /sbin/nextui-session 2>/dev/null; then
-        log_message "Shielded BaseOS session script against shutdown remounts"
-    else
-        log_message "Could not shield BaseOS session script; card may be remounted during shutdown"
-    fi
 }
 
 # Create the spruce system account. BaseOS ships only a root user, so the

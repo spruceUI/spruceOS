@@ -558,6 +558,34 @@ version_older_than() {
       "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
 }
 
+# The GitHub project this device's BaseOS build comes from, by its BASEOS_TARGET.
+baseos_repo() {
+    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')" in
+        my355) echo "apommel/baseos-my355" ;;
+        *) echo "pvaibhav/BaseOS" ;;
+    esac
+}
+
+# "true" when the installed BaseOS is older than the latest release of its project
+# (TARGET_BASEOS_VERSION from the platform cfg offline). Unreadable: "false".
+baseos_fw_needs_update() {
+    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    _want="$(github_latest_version "$(baseos_repo)")" || _want="$TARGET_BASEOS_VERSION"
+    baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
+}
+
+# True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)
+# before its own release. Status 2 when either is not x.y.z[-suffix].
+baseos_version_older() {
+    _bv_a="${1%%-*}"
+    _bv_b="${2%%-*}"
+    case "$_bv_a" in ''|*[!0-9.]*) return 2 ;; esac
+    case "$_bv_b" in ''|*[!0-9.]*) return 2 ;; esac
+    version_older_than "$_bv_a" "$_bv_b" && return 0
+    version_older_than "$_bv_b" "$_bv_a" && return 1
+    [ "$_bv_a" != "$1" ] && [ "$_bv_b" = "$2" ]
+}
+
 get_version_complex() {
     base_version=$(get_version)
 

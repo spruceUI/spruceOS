@@ -81,10 +81,9 @@ kill_current_process() {
     done
 }
 
-unmount_all() {
-    sync
-    log_message "save_poweroff.sh: Scanning for SD card related mounts..."
-    MOUNTS=$(awk '
+# The SD card related mounts in /proc/self/mountinfo: their mount points, or with "ids" their mount ids.
+sd_related_mounts() {
+    awk -v what="$1" '
         {
             target = $5
             split($0, parts, " - ")
@@ -99,10 +98,16 @@ unmount_all() {
                 device ~ "^'"$SD_MOUNTPOINT"'/" ||
                 device ~ "^/mnt/SDCARD/" ||
                 ($0 ~ "/mnt/SDCARD" && device == "overlay")) {
-                print target
+                print (what == "ids" ? $1 : target)
             }
         }
-    ' /proc/self/mountinfo)
+    ' /proc/self/mountinfo
+}
+
+unmount_all() {
+    sync
+    log_message "save_poweroff.sh: Scanning for SD card related mounts..."
+    MOUNTS=$(sd_related_mounts)
 
     # Unmount deepest paths first, but skip the main SD mount (stage2 handles that)
     echo "$MOUNTS" | sort -r | while read -r TARGET; do
@@ -527,6 +532,10 @@ if [ "$USB_STORAGE_EXPORT" != "1" ] && device_system_handles_sdcard_unmount; the
     exit 0
 fi
 
+# Their mount ids, for stage 2: unmount_all detaches a busy one lazily, which drops it from mountinfo, and a
+# holder through it (spruce's /usr overlay) is then found only by this id (flip-91 B2, 2026-10-18).
+SPRUCE_CARD_MNT_IDS="$(sd_related_mounts ids | tr '\n' ' ')"
+export SPRUCE_CARD_MNT_IDS
 unmount_all
 sleep 0.1
 unmount_all
