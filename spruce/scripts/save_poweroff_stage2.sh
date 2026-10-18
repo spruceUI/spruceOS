@@ -241,12 +241,12 @@ stage2_dependent_mounts() {
 }
 
 # Pids whose exe or cwd was reached through a mount in $STAGE2_DEP_IDS: opened here, the link carries
-# that mount and our own fdinfo names it. Builtins only; a failed open just skips (no exec: it would exit).
+# that mount and our own fdinfo names it. Builtins only; a failed open just skips, quietly: 2>/dev/null comes first.
 stage2_link_mnt_pids() {
     for _pp in /proc/[0-9]*; do
         for _link in exe cwd; do
             _mid=""
-            { while read -r _k _v; do [ "$_k" = "mnt_id:" ] && { _mid=$_v; break; }; done < /proc/self/fdinfo/9; } 9< "$_pp/$_link" 2>/dev/null
+            { while read -r _k _v; do [ "$_k" = "mnt_id:" ] && { _mid=$_v; break; }; done < /proc/self/fdinfo/9; } 2>/dev/null 9< "$_pp/$_link"
             [ -n "$_mid" ] && case " $STAGE2_DEP_IDS " in *" $_mid "*) echo "${_pp#/proc/}"; break ;; esac
         done
     done
@@ -390,9 +390,9 @@ stage2_holder_pids() {
     } | sort -un | awk -v self="$$" '$1 > 1 && $1 != self'
 }
 
-# Mount ids of what depends on the card, taken while it is all still mounted (a lazy detach drops them
-# from mountinfo): a holder through spruce's /usr overlay shows only the overlay's mnt_id (flip-91 B2, 10-18).
-[ "$STRICT_UNMOUNT" = "1" ] && STAGE2_DEP_IDS="$(stage2_dependent_mounts ids | tr '\n' ' ')"
+# Mount ids of what depends on the card: stage 1's (taken before its unmount_all lazily detached the busy ones,
+# which left mountinfo) and what is still mounted. A holder through spruce's /usr overlay has only that id.
+[ "$STRICT_UNMOUNT" = "1" ] && STAGE2_DEP_IDS="$SPRUCE_CARD_MNT_IDS $(stage2_dependent_mounts ids | tr '\n' ' ')"
 
 stage2_kill_holders
 
