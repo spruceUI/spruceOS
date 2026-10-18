@@ -86,6 +86,16 @@ class Paths:
         return self.cache_dir / "media.db"
 
     @property
+    def rom_identifications_file(self) -> Path:
+        """Game IDs the ROM identification helper found, by ROM path (.agents/integration.md)."""
+        return self.cache_dir / "rom-identifications.json"
+
+    @property
+    def identify_work_dir(self) -> Path:
+        """Where the identification helper extracts a zipped ROM to hash it (SD, not tmpfs)."""
+        return self.cache_dir / "identify-work"
+
+    @property
     def media_scratch(self) -> Path:
         """Extracted images for the current screen (RAM-backed on devices)."""
         return self.scratch / "media"
@@ -120,6 +130,11 @@ class Paths:
         return self.sdcard / "Saves" / "screenshots"
 
     @property
+    def proxy_app_dir(self) -> Path:
+        """The installed RAOfflineProxy app (read-only for us)."""
+        return self.sdcard / "App" / "RAOfflineProxy"
+
+    @property
     def proxy_data_dir(self) -> Path:
         """RAOfflineProxy's data directory (read-only for us)."""
-        return self.sdcard / "App" / "RAOfflineProxy" / "data"
+        return self.proxy_app_dir / "data"

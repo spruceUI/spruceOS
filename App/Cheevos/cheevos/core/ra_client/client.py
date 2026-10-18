@@ -11,7 +11,6 @@ from collections.abc import Callable, Iterable
 from typing import Any
 from urllib.parse import urlencode
 
-import cheevos
 from cheevos.core.errors import (
     ApiPayloadError,
     AuthError,
@@ -53,18 +52,6 @@ _HTTP_OK = 200
 _HTTP_NOT_FOUND = 404
 _HTTP_TOO_MANY = 429
 _AUTH_STATUSES = frozenset({401, 403})
-
-
-def default_user_agent(platform: str) -> str:
-    """Return the User-Agent RA sees, e.g. ``"Cheevos/0.1.0 (SpruceOS; MiyooMini)"``.
-
-    Args:
-        platform: Spruce platform name.
-
-    Returns:
-        The User-Agent string.
-    """
-    return f"Cheevos/{cheevos.__version__} (SpruceOS; {platform})"
 
 
 def _is_unauthenticated(data: object) -> bool:
