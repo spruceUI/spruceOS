@@ -304,7 +304,7 @@ disconnect_device() {
 }
 
 # WiFi goes first: on combo chips Bluetooth traffic can keep it from joining.
-# Give up after a minute so Bluetooth still comes on without a network.
+# Stop waiting when no saved network is in range, and after a minute regardless.
 wait_for_wifi() {
     _n=0
     while [ "$_n" -lt 60 ]; do
@@ -312,6 +312,10 @@ wait_for_wifi() {
             connecting) ;;
             *) return 0 ;;
         esac
+        if [ "$_n" -ge 10 ] && [ $((_n % 10)) -eq 0 ] && ! saved_wifi_in_range; then
+            log_message "bluetooth.sh: no saved WiFi network in range, not waiting" >/dev/null
+            return 0
+        fi
         sleep 1
         _n=$((_n + 1))
     done

@@ -1581,6 +1581,21 @@ bluetooth_setting_wanted() {
     [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]
 }
 
+# A hidden network never shows in a scan, so one saved counts as in range.
+saved_wifi_in_range() {
+    grep -q '^[[:space:]]*scan_ssid=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && return 0
+    _swr_saved=/tmp/wifi_saved_ssids.$$
+    /mnt/SDCARD/spruce/scripts/wifi.sh saved > "$_swr_saved" 2>/dev/null
+    if [ ! -s "$_swr_saved" ]; then
+        rm -f "$_swr_saved"
+        return 1
+    fi
+    /mnt/SDCARD/spruce/scripts/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
+    _swr_rc=$?
+    rm -f "$_swr_saved"
+    return "$_swr_rc"
+}
+
 # Print why a wpa_supplicant.conf is unusable, or nothing if it is fine.
 # Conservative on purpose: a false positive costs the user every saved network.
 # No quote checks - wpa_supplicant takes everything between the first and last

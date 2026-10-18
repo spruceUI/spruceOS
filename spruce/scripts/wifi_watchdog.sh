@@ -1,5 +1,5 @@
 #!/bin/sh
-# Restarts WiFi when the setting is on, a network is saved, and wlan0 has had no
+# Restarts WiFi when the setting is on, a saved network is in range, and wlan0 has had no
 # IPv4 address for a minute: five restarts, then a ten minute pause. Never
 # changes the setting. An address is enough - a LAN without internet or with
 # ICMP blocked is not broken WiFi.
@@ -58,6 +58,12 @@ while :; do
     down=$((now - last_ok))
     if [ "$restarts" -lt "$RESTART_LIMIT" ]; then
         [ "$down" -gt "$DOWN_SECONDS" ] || continue
+        # Restarting cannot reach a network that is not there, and on a shared
+        # chip each restart disturbs Bluetooth.
+        if ! saved_wifi_in_range; then
+            last_ok="$now"
+            continue
+        fi
         restarts=$((restarts + 1))
         log_message "wifi_watchdog.sh: no address on wlan0 for ${down}s, restarting WiFi ($restarts/$RESTART_LIMIT)"
         last_ok="$now"
