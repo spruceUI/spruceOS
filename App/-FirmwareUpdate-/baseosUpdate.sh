@@ -112,7 +112,7 @@ if [ -n "$WANT" ]; then
         rm -f "$SD_ROOT/$ASSET_NAME"
         bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
     fi
-    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME ($WANT_FROM)"
+    log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME ($WANT_FROM, sha256 $WANT)"
 else
     log_message "baseosUpdate.sh: WARNING no SHA256SUMS entry and no asset digest, skipping the checksum check"
 fi
