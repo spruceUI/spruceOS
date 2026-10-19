@@ -1746,6 +1746,57 @@ update_config=1"
     done
 }
 
+# NetworkManager boards: join $1 (SSID; $2 password, empty for an open network) within 45 s. nmcli's output can echo
+# the password, so only its exit status and a fixed phrase are logged. A profile for the SSID goes first (NM 1.52).
+nm_wifi_connect() {
+    command -v nmcli >/dev/null 2>&1 || { log_message "nm_wifi_connect: no nmcli"; return 1; }
+    nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r _uuid _type; do
+        [ "$_type" = "802-11-wireless" ] || continue
+        [ "$(nmcli -g 802-11-wireless.ssid connection show uuid "$_uuid" 2>/dev/null)" = "$1" ] || continue
+        nmcli connection delete uuid "$_uuid" >/dev/null 2>&1
+    done
+    if [ -n "$2" ]; then
+        _nm_err="$(nmcli -w 45 device wifi connect "$1" password "$2" 2>&1 >/dev/null)"
+    else
+        _nm_err="$(nmcli -w 45 device wifi connect "$1" 2>&1 >/dev/null)"
+    fi
+    _nm_rc=$?
+    [ "$_nm_rc" -eq 0 ] && { _nm_err=""; return 0; }
+    case "$_nm_rc" in
+        3) _nm_why="timed out after 45 s" ;;
+        4) _nm_why="activation failed" ;;
+        8) _nm_why="NetworkManager is not running" ;;
+        10) _nm_why="no such network or Wi-Fi device" ;;
+        *) _nm_why="error" ;;
+    esac
+    case "$_nm_err" in
+        *"ecrets were required"*) _nm_why="$_nm_why, secrets were required (wrong password?)" ;;
+        *"No network with SSID"*) _nm_why="$_nm_why, the network is not in range" ;;
+        *"No Wi-Fi device found"*) _nm_why="$_nm_why, no Wi-Fi device" ;;
+        *"property is invalid"*) _nm_why="$_nm_why, a setting was rejected" ;;
+    esac
+    _nm_err=""
+    log_message "nm_wifi_connect: nmcli exit $_nm_rc ($_nm_why)"
+    return "$_nm_rc"
+}
+
+# Give NetworkManager every network the card's wpa_supplicant.conf holds that it lacks: its own profiles live on the
+# base, so a reflash starts with none. $1 = the interface. Profiles take the SSID's name, as "device wifi connect" does.
+nm_import_card_networks() {
+    command -v nmcli >/dev/null 2>&1 || return 0
+    _known="$(nmcli -t -f NAME connection show 2>/dev/null | sed 's/\\:/:/g')"
+    wpa_conf_list_networks | while IFS="$(printf '\t')" read -r _ssid _psk; do
+        [ -n "$_ssid" ] || continue
+        printf '%s\n' "$_known" | grep -qxF "$_ssid" && continue
+        if [ -n "$_psk" ]; then
+            nmcli connection add type wifi ifname "${1:-wlan0}" con-name "$_ssid" ssid "$_ssid" \
+                wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$_psk" >/dev/null 2>&1
+        else
+            nmcli connection add type wifi ifname "${1:-wlan0}" con-name "$_ssid" ssid "$_ssid" >/dev/null 2>&1
+        fi && log_message "$PLATFORM: added network $_ssid from the card"
+    done
+}
+
 # Does this interface hold an address?
 #
 # Ask iproute2 and net-tools both, and believe either. An ifconfig-only version
