@@ -181,6 +181,15 @@
                 ],
                 "selected": "spruceUI"
             },
+            "randomThemeAtBoot": {
+                "display": "Randomize theme at boot",
+                "description": "just for you Puppycat",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "rumbleIntensity": {
                 "display": "Rumble intensity",
                 "description": "for system notifications",

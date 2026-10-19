@@ -59,6 +59,7 @@ flag_remove "in_menu" &
 unstage_archives_wanted
 check_and_handle_firmware_app &
 check_and_hide_update_app &
+randomize_theme_if_requested &
 
 # firstboot.sh owns onboarding and firstboot-required phases, but runtime owns the single
 # closing UX because only runtime knows when every required foreground unpack step has

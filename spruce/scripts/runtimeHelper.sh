@@ -649,3 +649,11 @@ set_up_boot_action() {
         esac
     fi
 }
+
+randomize_theme_if_requested() {
+    _setting="$(get_config_value '.menuOptions."System Settings".randomThemeAtBoot.selected' "False")"
+    if [ "$_setting" = "True" ]; then
+        log_message "Randomizing theme per user settings."
+        /mnt/SDCARD/spruce/scripts/random_theme.sh
+    fi
+}

@@ -1106,6 +1106,17 @@ get_pyui_config_value() {
     jq -r "${key} // \"$default\"" "$SYSTEM_JSON"
 }
 
+
+# EXAMPLE: set_pyui_config_value '.theme' "SPRUCE"
+set_pyui_config_value() {
+    local key="$1"
+    local value="$2"
+    local tmp="${SYSTEM_JSON}.tmp"
+
+    jq "${key} = \$value" --arg value "$value" "$SYSTEM_JSON" > "$tmp" &&
+        mv "$tmp" "$SYSTEM_JSON"
+}
+
 map_color_name_to_hex() {
     name="$1"
     case "$name" in
