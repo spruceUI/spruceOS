@@ -43,10 +43,13 @@ class Controller:
     # A screen that changes, or was just used, is redrawn as often as its view
     # asks (Display paces that to 60 frames a second). Once it has looked the same
     # for IDLE_AFTER_SECONDS (longer than the 1 s before a long title starts to
-    # scroll), get_input() sleeps until a button, request_redraw() or the
-    # screensaver, and the screen is drawn every IDLE_FRAME_SECONDS (the clock,
-    # the battery icon) instead of as fast as the device can.
+    # scroll) and IDLE_AFTER_FRAMES frames in a row (so a stall that leaves only a
+    # frame or two in that time can't pass for a still screen), get_input()
+    # sleeps until a button, request_redraw() or the screensaver, and the screen
+    # is drawn every IDLE_FRAME_SECONDS (the clock, the battery icon) instead of
+    # as fast as the device can.
     IDLE_AFTER_SECONDS = 1.5
+    IDLE_AFTER_FRAMES = 6
     IDLE_FRAME_SECONDS = 1.0
     _redraw_requested = False
     _last_press_time = 0
@@ -119,6 +122,10 @@ class Controller:
         now = time.monotonic()
         last_activity = max(Display.last_change_time(), Controller._last_press_time)
         if now - last_activity < Controller.IDLE_AFTER_SECONDS:
+            return 0
+        # A loop that draws nothing (waiting for one button) has no frames to count.
+        drew_since_last_wait = Display.last_present_time() > Controller.last_input_time
+        if drew_since_last_wait and Display.unchanged_frames() < Controller.IDLE_AFTER_FRAMES:
             return 0
         # From the last frame, or from the last wait in a loop that draws nothing.
         since = max(Display.last_present_time(), Controller.last_input_time)

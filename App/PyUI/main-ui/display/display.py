@@ -104,6 +104,7 @@ class Display:
     _shown_draws = []
     _last_change_time = 0
     _last_present_time = 0
+    _unchanged_frames = 0
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
@@ -1184,6 +1185,9 @@ class Display:
         now = time.monotonic()
         if cls._frame_draws != cls._shown_draws:
             cls._last_change_time = now
+            cls._unchanged_frames = 0
+        else:
+            cls._unchanged_frames += 1
         cls._shown_draws, cls._frame_draws = cls._frame_draws, []
         cls._last_present_time = now
 
@@ -1196,6 +1200,11 @@ class Display:
     def last_present_time(cls):
         """When the last frame was presented (time.monotonic())."""
         return cls._last_present_time
+
+    @classmethod
+    def unchanged_frames(cls):
+        """How many frames in a row have been presented the same as the one before."""
+        return cls._unchanged_frames
 
     @classmethod
     def pace_frame(cls):
