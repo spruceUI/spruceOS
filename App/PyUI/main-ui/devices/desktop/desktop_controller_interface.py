@@ -156,10 +156,11 @@ class DesktopControllerInterface(ControllerInterface):
             if self._on_script_progress is not None:
                 self._on_script_progress(list(self._script))
             if isinstance(step, Wait):
-                # One idle tick: PyUI redraws before the next step. At least 1/12 s, as views
-                # that poll without a timeout (the main menu) would make waits instant, and
-                # past PyUI's own timeout, which it truncates to whole ms.
-                time.sleep((max(timeout, WAIT_TICK_MS) + 1) / 1000)
+                # One idle tick of 1/12 s, then the view redraws before the next step. It may
+                # be waiting longer (an unchanged screen waits up to a second), so end its wait.
+                time.sleep(WAIT_TICK_MS / 1000)
+                from controller.controller import Controller
+                Controller.request_redraw()
                 return None
             if isinstance(step, Capture):
                 if self._on_capture is not None:
@@ -198,6 +199,14 @@ class DesktopControllerInterface(ControllerInterface):
 
     def clear_input(self):
         self._event.type = 0
+
+    def wake(self):
+        if self._scripted:
+            return  # scripted steps don't wait on SDL
+        # Any event ends SDL_WaitEventTimeout; _translate maps a user event to no input.
+        event = sdl2.SDL_Event()
+        event.type = sdl2.SDL_USEREVENT
+        sdl2.SDL_PushEvent(ctypes.byref(event))
 
     def clear_input_queue(self):
         # Live events only: scripted steps stay queued.
