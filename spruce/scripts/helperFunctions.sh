@@ -1763,6 +1763,7 @@ nm_wifi_connect() {
     _nm_rc=$?
     [ "$_nm_rc" -eq 0 ] && { _nm_err=""; return 0; }
     case "$_nm_rc" in
+        2) _nm_why="nmcli rejected the arguments" ;;
         3) _nm_why="timed out after 45 s" ;;
         4) _nm_why="activation failed" ;;
         8) _nm_why="NetworkManager is not running" ;;
