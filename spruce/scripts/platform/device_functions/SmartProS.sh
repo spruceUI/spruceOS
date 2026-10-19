@@ -272,7 +272,7 @@ device_init() {
     # do it here, off the frontend's first frame.
     "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1 &
     # DRM master while it runs: no other display client may start before it exits.
-    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
+    DEVICE_INIT_DISPLAY_PIDS="$DEVICE_INIT_DISPLAY_PIDS $!"
 
     init_gpio_SmartProS
 
@@ -292,7 +292,7 @@ device_init() {
     device_run_tsps_blobs
 
     # Not awaited: nothing before the first menu frame needs it.
-    device_run_thermal_process &
+    device_run_boot_thermal_process &
 
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
@@ -481,9 +481,30 @@ device_stop_thermal_process(){
     echo 0 > /sys/class/thermal/cooling_device0/cur_state
 }
 
+# Checks whether Fan boost is the configured switch action; returns 0 if it is.
+fan_boost_is_switch_action() {
+    [ "$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "")" = "Fan boost" ]
+}
+
+# Checks whether the switch reads as one of its two positions; returns 0 if it does.
+switch_position_is_readable() {
+    case "$(device_get_switch_position)" in
+        0|1) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Starts the thermal process at boot, unless the Fan boost switch action starts it
+# for the switch's current position.
+device_run_boot_thermal_process() {
+    if fan_boost_is_switch_action && switch_position_is_readable; then
+        return 0
+    fi
+    device_run_thermal_process
+}
+
 device_run_thermal_process(){
-    if [ "$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "")" = "Fan boost" ] \
-        && [ "$(device_get_switch_position)" = "1" ]; then
+    if fan_boost_is_switch_action && [ "$(device_get_switch_position)" = "1" ]; then
         /mnt/SDCARD/spruce/scripts/FN_Button/scene-fan.sh 1
     else
         /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
