@@ -97,6 +97,14 @@ class Display:
     
     _last_frame_time = 0
 
+    # The draw calls of the frame being drawn and of the one on screen. Comparing
+    # them at present() tells a screen that changed from one drawn the same again,
+    # which Controller.get_input stops redrawing so often once it has settled.
+    _frame_draws = []
+    _shown_draws = []
+    _last_change_time = 0
+    _last_present_time = 0
+
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
     _screensaver_active = False
@@ -492,6 +500,8 @@ class Display:
               render_bottom_bar_icons_and_images = True,
               force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
+        cls._frame_draws.append(("clear", cls.bg_path, cls.is_custom_theme_background,
+                                 cls.bg_canvas, cls.background_texture))
             
         if cls.is_custom_theme_background:
             #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
@@ -695,6 +705,8 @@ class Display:
                     render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=False):
         #with log_timing("Display.render_text", PyUiLogger.get_logger()):    
+            cls._frame_draws.append(("text", text, x, y, color, purpose, render_mode,
+                                     crop_w, crop_h, alpha, allow_fallback_font_for_missing_glyphs))
             start = time.perf_counter()
 
             primary_font = cls.fonts[purpose]
@@ -814,6 +826,8 @@ class Display:
     @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None, crop_w=None, crop_h=None):        
         #with log_timing("Display.render_image", PyUiLogger.get_logger()):    
+            cls._frame_draws.append(("image", image_path, x, y, render_mode, target_width,
+                                     target_height, resize_type, crop_w, crop_h))
             start = time.perf_counter()
             if(image_path is None or image_path in cls._problematic_images):
                 return 0, 0
@@ -913,6 +927,7 @@ class Display:
 
     @classmethod
     def render_box(cls, color, x, y, w, h):
+        cls._frame_draws.append(("box", color, x, y, w, h))
         sdl2.SDL_SetRenderDrawColor(cls.renderer.renderer, color[0], color[1], color[2], 255)
         rect = sdl2.SDL_Rect(x, y, w, h)
         sdl2.SDL_RenderFillRect(cls.renderer.renderer, rect)
@@ -1151,6 +1166,7 @@ class Display:
             sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
             cls.pace_frame()
             cls.renderer.present()
+            cls._frame_presented()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
             present_elapsed_ms = (time.perf_counter() - present_start) * 1000
             #PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
@@ -1162,6 +1178,24 @@ class Display:
 
             Device.get_device().post_present_operations()
             cls.start = time.perf_counter()
+
+    @classmethod
+    def _frame_presented(cls):
+        now = time.monotonic()
+        if cls._frame_draws != cls._shown_draws:
+            cls._last_change_time = now
+        cls._shown_draws, cls._frame_draws = cls._frame_draws, []
+        cls._last_present_time = now
+
+    @classmethod
+    def last_change_time(cls):
+        """When a presented frame last differed from the one before it (time.monotonic())."""
+        return cls._last_change_time
+
+    @classmethod
+    def last_present_time(cls):
+        """When the last frame was presented (time.monotonic())."""
+        return cls._last_present_time
 
     @classmethod
     def pace_frame(cls):
@@ -1341,6 +1375,10 @@ class Display:
     @classmethod
     def volume_changed(cls, vol):
         cls.top_bar.volume_changed(vol)
+        # Called from the volume key watcher's thread: show the change now, not
+        # at the next frame of a screen that is waiting for input.
+        from controller.controller import Controller
+        Controller.request_redraw()
 
     @classmethod
     def is_text_too_long(cls, line: str, font_purpose, clip_to_device_width) -> bool:

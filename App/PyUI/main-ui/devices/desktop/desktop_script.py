@@ -37,8 +37,8 @@ class Capture:
 
 @dataclass(frozen=True)
 class Wait:
-    """Let PyUI run idle input ticks, of 1/12 s or the view's input timeout if longer, e.g.
-    while something loads."""
+    """Let PyUI run idle input ticks of 1/12 s, each followed by a redraw, e.g. while something
+    loads."""
     ticks: int
 
 
