@@ -98,6 +98,8 @@ setup_network_services() {
     systemctl start systemd-resolved
     systemctl start NetworkManager
     systemctl start iwd
+    # NetworkManager's profiles live on /storage: a reflashed base gets the card's networks back
+    nm_import_card_networks wlan0
 
     # SYSTEM_JSON doesn't exists yet during first boot
     if [ -f "$SYSTEM_JSON" ]; then
@@ -185,8 +187,10 @@ device_wifi_power_off() {
     rfkill block wifi
 }
 
+# The card's wpa_supplicant.conf keeps the network too, as on every spruce device, so it outlives a reflash
 device_wifi_connect() {
-    nmcli -w 45 device wifi connect $1 password $2 >/dev/null 2>&1
+    wpa_conf_save_network "$1" "$2"
+    nm_wifi_connect "$1" "$2"
 }
 
 sync_volume_level() {
