@@ -1184,12 +1184,17 @@ class Display:
     def _frame_presented(cls):
         now = time.monotonic()
         if cls._frame_draws != cls._shown_draws:
-            cls._last_change_time = now
-            cls._unchanged_frames = 0
+            cls._screen_changed(now)
         else:
             cls._unchanged_frames += 1
         cls._shown_draws, cls._frame_draws = cls._frame_draws, []
         cls._last_present_time = now
+
+    @classmethod
+    def _screen_changed(cls, now=None):
+        # Restarts the wait before Controller.get_input lets the screen go idle.
+        cls._last_change_time = time.monotonic() if now is None else now
+        cls._unchanged_frames = 0
 
     @classmethod
     def last_change_time(cls):
@@ -1456,6 +1461,8 @@ class Display:
         Display.present()
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
+        # The message ends here: whatever comes next is drawn at full rate.
+        cls._screen_changed()
 
     @classmethod
     def write_message_multiline(cls,split_message, middle_height):
@@ -1492,3 +1499,5 @@ class Display:
         Display.present()
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
+        # The image ends here: whatever comes next is drawn at full rate.
+        cls._screen_changed()
