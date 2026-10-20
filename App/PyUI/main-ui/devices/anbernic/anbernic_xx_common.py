@@ -60,7 +60,7 @@ class AnbernicXXCommon(DeviceCommon):
         baseos_target = self._read_baseos_target()
         self.has_rgb_rings = baseos_target.startswith(ANBERNIC_XX_RGB_TARGETS)
         # Every clamshell target ends in "sp", as in the shell's has_lid().
-        self.has_lid_wake = baseos_target.endswith("sp") and os.path.exists(ANBERNIC_XX_OS_SLEEP)
+        self.has_lid_wake = baseos_target.endswith("sp") and os.access(ANBERNIC_XX_OS_SLEEP, os.W_OK)
         # device_name is set by the subclass before it calls up here. This used
         # to assign a model name unconditionally, which ran *after* the subclass
         # and so made every XX model report itself as that one model - no config

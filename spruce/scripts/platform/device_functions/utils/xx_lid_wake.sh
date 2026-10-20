@@ -33,9 +33,10 @@ xx_lid_wake_window() {
 
 # xx_set_lid_wake on|off. A failed write only costs the setting, never the sleep.
 xx_set_lid_wake() {
-    if [ "$1" = "on" ]; then _xx_policy=0; else _xx_policy=16; fi
-    { printf '%s' "$_xx_policy" > "$XX_OS_SLEEP"; } 2>/dev/null ||
-        log_message "xx_set_lid_wake: could not write $_xx_policy to $XX_OS_SLEEP"
+    local policy=16
+    [ "$1" = "on" ] && policy=0
+    { printf '%s' "$policy" > "$XX_OS_SLEEP"; } 2>/dev/null ||
+        log_message "xx_set_lid_wake: could not write $policy to $XX_OS_SLEEP"
 }
 
 # device_enter_sleep's suspend, called with the shutdown alarm armed. Returns on
@@ -69,6 +70,8 @@ xx_suspend_with_lid_wake() {
     # The window's alarm replaces the shutdown alarm until the window ends.
     lid_at_start="$(device_lid_open)"
     if ! set_wake_alarm "$window" "$WAKE_ALARM_PATH"; then
+        # No alarm can end the window, and sleep_helper's retries would keep it open.
+        xx_set_lid_wake off
         rm -f "$WAKE_ALARM_ARMED_FLAG"
         return 1
     fi
