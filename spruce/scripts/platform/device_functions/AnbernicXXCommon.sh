@@ -12,6 +12,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/xx_lid_wake.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh"
 
 # The XX line has no rumble GPIO, so utils/rumble.sh's rumble_gpio is not usable
@@ -105,7 +106,9 @@ trigger_device_sleep() {
 }
 
 device_enter_sleep() {
-    IDLE_TIMEOUT="$1"
+    # local: set_wake_alarm reassigns IDLE_TIMEOUT, and the lid wake window's
+    # alarm must not leak into sleep_helper's copy.
+    local IDLE_TIMEOUT="$1"
     WAKE_ALARM_PATH="$(find_wake_alarm_path)"
     rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -114,12 +117,14 @@ device_enter_sleep() {
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     [ -e "$WAKE_ALARM_PATH" ] && touch "$WAKE_ALARM_ARMED_FLAG"
     xx_rgb_off
-    trigger_device_sleep
+    xx_suspend_with_lid_wake "$IDLE_TIMEOUT"
 }
 
 device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
     rm -f "$WAKE_ALARM_ARMED_FLAG"
+    # BaseOS's default while awake, for any suspend that skips sleep_helper.
+    xx_lid_wake_supported && xx_set_lid_wake off
     xx_rgb_restore
 }
 

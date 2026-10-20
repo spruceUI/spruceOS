@@ -146,6 +146,10 @@ device_names() {
     if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
         echo "ANBERNIC_RGXX_RGB"
     fi
+    # Lid wake: the clamshells share their platforms with slabs too. See xx_lid_wake.sh.
+    if command -v xx_lid_wake_supported >/dev/null 2>&1 && xx_lid_wake_supported; then
+        echo "ANBERNIC_RGXX_LID_WAKE"
+    fi
 }
 
 # The live RetroArch config, seeded from the .bak when absent. The configs moved
