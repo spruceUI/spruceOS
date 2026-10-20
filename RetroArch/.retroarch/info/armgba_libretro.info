@@ -1,6 +1,6 @@
 display_name = "Nintendo - Game Boy Advance / Game Boy / Color (armGBA)"
 authors = "Jacob Cook"
-supported_extensions = "gba|bin|gb|gbc"
+supported_extensions = "gba|bin|gb|gbc|gb2|gba2"
 corename = "armGBA"
 manufacturer = "Nintendo"
 categories = "Emulator"
