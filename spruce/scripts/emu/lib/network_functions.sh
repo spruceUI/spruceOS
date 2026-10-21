@@ -15,7 +15,7 @@
 #   /mnt/SDCARD/spruce/scripts/networkservices.sh
 #
 # Provides:
-#   handle_network_services
+#   handle_network_services (returns 2 when the player pressed B on the WiFi wait screen)
 
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
@@ -23,7 +23,12 @@ cache_cheevos_at_launch() {
 	. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 	raproxy_rom_is_cached "$ROM_FILE" && return 0
 
-	network_is_connected true || check_and_connect_wifi || return 0
+	network_is_connected true || check_and_connect_wifi --cancellable
+	case $? in
+		0) ;;
+		2) return 2 ;;
+		*) return 0 ;;
+	esac
 
 	start_pyui_message_writer 1
 	display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "Caching achievements..." 75
@@ -72,9 +77,11 @@ handle_network_services() {
 
 	# Connect to WiFi if needed for any service
 	if $wifi_needed; then
-		if check_and_connect_wifi; then
-			wifi_connected=true
-		fi
+		check_and_connect_wifi --cancellable
+		case $? in
+			0) wifi_connected=true ;;
+			2) return 2 ;;
+		esac
 	fi
 
 	# Handle Syncthing sync if enabled
@@ -85,7 +92,10 @@ handle_network_services() {
 
 	fi
 
-	[ "$cheevos_wanted" = true ] && cache_cheevos_at_launch
+	if [ "$cheevos_wanted" = true ]; then
+		cache_cheevos_at_launch
+		[ $? -eq 2 ] && return 2
+	fi
 
 	# Handle network service disabling
 	if [ "$disable_wifi_in_game" = "True" ] || [ "$disable_net_serv_in_game" = "True" ]; then

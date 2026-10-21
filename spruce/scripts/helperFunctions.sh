@@ -1858,6 +1858,9 @@ network_is_connected() {
 	return 1 # No network connection
 }
 
+# Returns 0 once connected, 1 when not (START, timeout, WiFi or waiting off).
+# --cancellable also offers B on the wait screen, which returns 2: a game launch
+# uses it to go back to the menu, so a player out of range can pick another network.
 check_and_connect_wifi() {
     # Shutdown's Syncthing check calls this whatever the setting says; never turn WiFi on against it
     if ! wifi_setting_wanted; then
@@ -1888,8 +1891,13 @@ check_and_connect_wifi() {
     start_pyui_message_writer 1
     wifi_request restart
 
-    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
-        "Waiting to connect....\nPress START to continue anyway." 75
+    cancel_key=""
+    wait_text="Waiting to connect....\nPress START to continue anyway."
+    if [ "$1" = "--cancellable" ] && [ -n "$B_B" ]; then
+        cancel_key="$B_B"
+        wait_text="Waiting to connect....\nPress START to continue anyway, or B to go back."
+    fi
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "$wait_text" 75
 
     rm -f /tmp/ge_out 2>/dev/null
 
@@ -1899,7 +1907,7 @@ check_and_connect_wifi() {
 
     while true; do
         # 1. Check for user input
-        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2" "$cancel_key"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
@@ -1909,6 +1917,13 @@ check_and_connect_wifi() {
                     sleep 2
                     stop_pyui_message_writer
                     return 1
+                    ;;
+                *"key $B_B"*)
+                    # Only asked for with --cancellable
+                    log_message "WiFi wait left with B"
+                    kill "$GE_PID" 2>/dev/null
+                    stop_pyui_message_writer
+                    return 2
                     ;;
             esac
         fi
