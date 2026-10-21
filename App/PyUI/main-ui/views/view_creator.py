@@ -61,7 +61,8 @@ class ViewCreator:
                     carousel_resize_type=None,
                     grid_view_wrap_around_single_row=None,
                     icon_and_desc_use_image_in_place_of_icon=None,
-                    veritcal_carousel=None) -> object:
+                    veritcal_carousel=None,
+                    icon_and_desc_title_max_chars=None) -> object:
         
         if(len(options) == 0):
             return EmptyView()
@@ -82,7 +83,8 @@ class ViewCreator:
                     options=options,
                     selected=selected_index,
                     selected_bg=selected_bg,
-                    icon_and_desc_use_image_in_place_of_icon=icon_and_desc_use_image_in_place_of_icon
+                    icon_and_desc_use_image_in_place_of_icon=icon_and_desc_use_image_in_place_of_icon,
+                    title_max_chars=icon_and_desc_title_max_chars
                 )
 
             case ViewType.TEXT_AND_IMAGE:

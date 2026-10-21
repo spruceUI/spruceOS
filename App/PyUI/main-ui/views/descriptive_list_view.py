@@ -12,13 +12,19 @@ from views.list_view import ListView
 from views.text_utils import TextUtils
 
 class DescriptiveListView(ListView):
+    # For title_max_chars: leave titles whole, e.g. for callers that fit them to the row themselves
+    NO_TITLE_CAP = 0
 
+    # title_max_chars: titles longer than this are cut, and scroll while selected.
+    # None uses the default length for the screen width.
     def __init__(self, top_bar_text,
                  options: List[GridOrListEntry], selected_bg, selected : int = 0,
-                 icon_and_desc_use_image_in_place_of_icon=None):
+                 icon_and_desc_use_image_in_place_of_icon=None,
+                 title_max_chars=None):
         super().__init__()
         self.use_icons_to_calculate_line_height = False
         self.icon_and_desc_use_image_in_place_of_icon = icon_and_desc_use_image_in_place_of_icon
+        self.title_max_chars = title_max_chars
         self.top_bar_text = top_bar_text
         self.set_options(options)
         self.selected : int = selected
@@ -126,13 +132,16 @@ class DescriptiveListView(ListView):
                 title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y() + Theme.scale_with_height_multiplier(5)
 
             primary_text = gridOrListEntry.get_primary_text()
-            primary_text_max_width = Theme.scale_with_width_multiplier(35)
-            if(len(primary_text) > primary_text_max_width and actual_index == self.selected):
-                primary_text = TextUtils.scroll_string_chars(text=primary_text,
-                                        amt=self.scroll_value_text_amount,
-                                        max_chars=primary_text_max_width)
-            else:
-                primary_text = primary_text[:primary_text_max_width]
+            primary_text_max_width = self.title_max_chars
+            if(primary_text_max_width is None):
+                primary_text_max_width = Theme.scale_with_width_multiplier(35)
+            if(primary_text_max_width != DescriptiveListView.NO_TITLE_CAP and len(primary_text) > primary_text_max_width):
+                if(actual_index == self.selected):
+                    primary_text = TextUtils.scroll_string_chars(text=primary_text,
+                                            amt=self.scroll_value_text_amount,
+                                            max_chars=primary_text_max_width)
+                else:
+                    primary_text = primary_text[:primary_text_max_width]
 
             title_w, title_h = Display.render_text(
                 primary_text, 
