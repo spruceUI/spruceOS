@@ -27,6 +27,16 @@ class CachedImageTexture:
         self.width = width
         self.height = height
 
+class GlyphAdvances(dict):
+    # How far each character moves the pen in one font, measured the first time it is looked up
+    def __init__(self, font):
+        super().__init__()
+        self.font = font
+
+    def __missing__(self, char):
+        advance = self[char] = Display._measure_glyph_advance(self.font, char)
+        return advance
+
 class ImageTextureCache:
     def __init__(self):
         self.cache = {} 
@@ -94,6 +104,7 @@ class Display:
     _glyph_cache = {}
     _glyph_is_provided = None
     _glyph_supports_32bit = False
+    _glyph_advances = {} # font purpose -> GlyphAdvances of its font
     
     _last_frame_time = 0
 
@@ -378,6 +389,7 @@ class Display:
         cls.fallback_fonts.clear()
         
         cls._glyph_cache.clear()
+        cls._glyph_advances.clear()
 
     @classmethod
     def reinitialize(cls, bg=None):
@@ -1341,6 +1353,54 @@ class Display:
         sdl2.sdlttf.TTF_SizeUTF8(font, text.encode('utf-8'), w, h)
         return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), Device.get_device().fix_device_font_height_calc_issues(h.value)
 
+    # Text widths from each character's advance, which is measured once per font: much
+    # cheaper than TTF_SizeUTF8 for every string. Kerning is left out, so widths come out
+    # up to a few pixels wider than TTF_SizeUTF8's; use get_text_dimensions where exact
+    # widths matter.
+    @classmethod
+    def get_text_width_from_glyphs(cls, purpose, text):
+        width = sum(map(cls._get_glyph_advances(purpose).__getitem__, text))
+        return int(width * Device.get_device().get_text_width_measurement_multiplier())
+
+    @classmethod
+    def count_chars_that_fit(cls, purpose, text, max_width):
+        advances = cls._get_glyph_advances(purpose)
+        max_width /= Device.get_device().get_text_width_measurement_multiplier()
+        width = 0
+        for index, char in enumerate(text):
+            width += advances[char]
+            if width > max_width:
+                return index
+        return len(text)
+
+    @classmethod
+    def _get_glyph_advances(cls, purpose):
+        font = cls.fonts[purpose].font
+        advances = cls._glyph_advances.get(purpose)
+        if advances is None or advances.font is not font:
+            advances = cls._glyph_advances[purpose] = GlyphAdvances(font)
+        return advances
+
+    @classmethod
+    def _measure_glyph_advance(cls, font, char):
+        codepoint = ord(char)
+        minx, maxx, miny, maxy, advance = (ctypes.c_int() for _ in range(5))
+        metrics = [ctypes.byref(value) for value in (minx, maxx, miny, maxy, advance)]
+        failed = True
+        if cls._glyph_supports_32bit:
+            try:
+                failed = sdl2.sdlttf.TTF_GlyphMetrics32(font, codepoint, *metrics)
+            except RuntimeError: # PySDL2's stand-in for a function this SDL_ttf lacks
+                pass
+        if failed and codepoint <= 0xFFFF:
+            failed = sdl2.sdlttf.TTF_GlyphMetrics(font, codepoint, *metrics)
+        if failed:
+            w = sdl2.Sint32()
+            h = sdl2.Sint32()
+            sdl2.sdlttf.TTF_SizeUTF8(font, char.encode('utf-8'), w, h)
+            return w.value
+        return advance.value
+
 
     @classmethod
     def add_index_text(cls, index, total, force_include_index = False, letter = None):
@@ -1399,11 +1459,14 @@ class Display:
         try:
             if(Device.get_device().get_guaranteed_safe_max_text_char_count() >= len(line)):
                 return False
-            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
             max_width = Device.get_device().max_texture_width()
             if(clip_to_device_width):
                 max_width = min(max_width, Device.get_device().screen_width())
             max_width = max_width - int(10 * Device.get_device().screen_height()/480)
+            # Text well within the limit by its glyph estimate needs no exact (slower) measurement
+            if(Display.get_text_width_from_glyphs(font_purpose, line) <= max_width * 0.9):
+                return False
+            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
             return text_w > max_width
         except Exception as e:
             PyUiLogger.get_logger().warning(f"Error checking text length: {e}")
