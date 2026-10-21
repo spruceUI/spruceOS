@@ -386,7 +386,9 @@ device_lid_sensor_ready() {
 
 device_lid_open(){
     if [ -e "$LID_HALL_FILE" ]; then
-        head -c 1 "$LID_HALL_FILE" 2>/dev/null
+        # Builtins only: the lid watchdog asks twice a second
+        read -r _lid < "$LID_HALL_FILE" 2>/dev/null
+        echo "${_lid%"${_lid#?}"}"
     else
         echo "1"
     fi
