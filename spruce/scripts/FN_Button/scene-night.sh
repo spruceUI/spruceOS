@@ -25,6 +25,10 @@ case "$1" in
             fail "could not read a valid night brightness from $SPRUCE_CONFIG"
         contrast="$(jq -er '.menuOptions["Night Mode Settings"].contrast.selected | tonumber | select(. >= 0 and . <= 20)' "$SPRUCE_CONFIG" 2>> "$LOG_FILE")" ||
             fail "could not read a valid night contrast from $SPRUCE_CONFIG"
+        hue="$(jq -er '.menuOptions["Night Mode Settings"].hue.selected | tonumber | select(. >= 0 and . <= 20)' "$SPRUCE_CONFIG" 2>> "$LOG_FILE")" ||
+            fail "could not read a valid night hue from $SPRUCE_CONFIG"
+        saturation="$(jq -er '.menuOptions["Night Mode Settings"].saturation.selected | tonumber | select(. >= 0 and . <= 20)' "$SPRUCE_CONFIG" 2>> "$LOG_FILE")" ||
+            fail "could not read a valid night saturation from $SPRUCE_CONFIG"
 
         # Save the active display values before applying the configured night values.
         jq '{backlight, brightness, contrast, hue, saturation}' "$SYSTEM_JSON" > "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE" ||
