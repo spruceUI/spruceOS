@@ -19,6 +19,12 @@ count_entries() {
 # Get installed themes
 theme_list="$(get_full_list_of_installed_themes)"
 
+# Early out if only one theme installed.
+if [ "$(count_entries "$theme_list")" -lt 2 ]; then
+    log_message "random_theme.sh - Fewer than two themes installed? Aborting."
+    exit 1
+fi
+
 # Remove themes already selected this cycle
 if [ -s "$ALREADY_APPLIED_LIST" ] && [ -n "$theme_list" ]; then
     theme_list="$(printf '%s\n' "$theme_list" |
