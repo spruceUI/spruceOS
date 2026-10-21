@@ -74,7 +74,8 @@ if ! download_and_display_progress "$ASSET_URL" "$PART" "$ASSET_NAME" "$ASSET_SI
     bail "The oakMOSS update could not be downloaded. Please try again later."
 fi
 
-if ! curl -sf -m 20 -o /tmp/oakmoss_sums "$SUMS_URL"; then
+# Release files answer with a redirect, which download_url_to_file follows (a bare curl -sf saved them empty).
+if ! download_url_to_file "$SUMS_URL" /tmp/oakmoss_sums; then
     rm -f "$PART"
     bail "Could not download the release's checksums, so the update was not installed. Please try again later."
 fi

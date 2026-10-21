@@ -83,14 +83,16 @@ fi
 
 # The applier checks the archives inside against the manifest, but the manifest
 # itself is only trusted because the whole file matches the release's sums.
-if [ -n "$SUMS_URL" ] && curl -sf -m 20 -o /tmp/darkmoss_sums "$SUMS_URL"; then
+# download_url_to_file follows GitHub's redirect for release files (a bare curl -sf saved them empty).
+if [ -n "$SUMS_URL" ] && download_url_to_file "$SUMS_URL" /tmp/darkmoss_sums; then
     WANT="$(awk -v n="$ASSET_NAME" '$2 == n || $2 == "*"n {print $1}' /tmp/darkmoss_sums | head -n 1)"
     GOT="$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)"
     if [ -n "$WANT" ] && [ "$WANT" != "$GOT" ]; then
         rm -f "$SD_ROOT/$ASSET_NAME"
         bail "The downloaded dArkMoss update was damaged in transit and has been deleted. Please try again."
     fi
-    log_message "darkmossUpdate.sh: checksum ok for $ASSET_NAME"
+    if [ -n "$WANT" ]; then log_message "darkmossUpdate.sh: checksum ok for $ASSET_NAME"
+    else log_message "darkmossUpdate.sh: WARNING no SHA256SUMS entry for $ASSET_NAME, skipping the checksum check"; fi
 else
     log_message "darkmossUpdate.sh: WARNING could not fetch SHA256SUMS, skipping the checksum check"
 fi

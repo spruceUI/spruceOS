@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -119,7 +120,9 @@ class MagicXA133PDevice(TrimUIDevice):
         except OSError:
             version = ""
         if version:
-            return f"oakMOSS {version} ({model})"
+            # The line fits about 20 characters: a build past a tag shows as v0.5.0-beta.2+43.
+            version = re.sub(r"^(v?\d+\.\d+\.\d+(?:-beta\.\d+)?)-(\d+)-g[0-9a-f]+$", r"\1+\2", version)
+            return f"oakMOSS {version}"
         return f"magicx-tina ({model})"
 
     # ----- display -----
