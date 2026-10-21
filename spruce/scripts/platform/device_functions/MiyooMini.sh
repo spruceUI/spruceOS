@@ -160,11 +160,11 @@ display() {
 }
 
 rgb_led() {
-    log_message "rgb led not supported on miyoo mini"
+    log_message "rgb led not supported on miyoo mini" -v
 }
 
 enable_or_disable_rgb() {
-    log_message "rgb led not supported on miyoo mini"
+    log_message "rgb led not supported on miyoo mini" -v
 }
 
 enter_sleep() {
@@ -234,7 +234,7 @@ take_screenshot() {
 }
 
 set_default_ra_hotkeys() {
-    log_message "TODO: set_default_ra_hotkeys"
+    log_message "TODO: set_default_ra_hotkeys" -v
 }
 
 volume_down() {
