@@ -14,6 +14,35 @@ fail() {
     exit 1
 }
 
+apply_setting() {
+    setting="$1"
+    setter="$2"
+    value="$3"
+
+    if ! command -v "$setter" >/dev/null 2>&1; then
+        log_message "scene-night.sh: $setter is unavailable; skipping $setting"
+        return 0
+    fi
+
+    "$setter" "$value" 2>> "$LOG_FILE" ||
+        fail "$setter $value failed while applying $setting"
+}
+
+restore_setting() {
+    setting="$1"
+    setter="$2"
+
+    if ! command -v "$setter" >/dev/null 2>&1; then
+        log_message "scene-night.sh: $setter is unavailable; skipping restore of $setting"
+        return 0
+    fi
+
+    value="$(jq -er --arg key "$setting" '.[$key] | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
+        fail "could not read saved $setting from $SAVED_SETTINGS_FILE"
+    "$setter" "$value" 2>> "$LOG_FILE" ||
+        fail "$setter $value failed while restoring $setting"
+}
+
 mkdir -p /tmp/system/ || fail "could not create /tmp/system"
 
 case "$1" in
@@ -33,30 +62,20 @@ case "$1" in
         # Save the active display values before applying the configured night values.
         jq '{backlight, brightness, contrast, hue, saturation}' "$SYSTEM_JSON" > "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE" ||
             fail "could not save current display values from $SYSTEM_JSON"
-        set_backlight "$backlight" 2>> "$LOG_FILE" || fail "set_backlight $backlight failed"
-        set_brightness "$brightness" 2>> "$LOG_FILE" || fail "set_brightness $brightness failed"
-        set_contrast "$contrast" 2>> "$LOG_FILE" || fail "set_contrast $contrast failed"
-        set_hue "$hue" 2>> "$LOG_FILE" || fail "set_hue $hue failed"
-        set_saturation "$saturation" 2>> "$LOG_FILE" || fail "set_saturation $saturation failed"
+        apply_setting backlight set_backlight "$backlight"
+        apply_setting brightness set_brightness "$brightness"
+        apply_setting contrast set_contrast "$contrast"
+        apply_setting hue set_hue "$hue"
+        apply_setting saturation set_saturation "$saturation"
         ;;
     0)
         # Restore the saved values when the switch returns to its normal state.
         if [ -f "$SAVED_SETTINGS_FILE" ]; then
-            backlight="$(jq -er '.backlight | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
-                fail "could not read saved backlight from $SAVED_SETTINGS_FILE"
-            brightness="$(jq -er '.brightness | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
-                fail "could not read saved brightness from $SAVED_SETTINGS_FILE"
-            contrast="$(jq -er '.contrast | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
-                fail "could not read saved contrast from $SAVED_SETTINGS_FILE"
-            hue="$(jq -er '.hue | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
-                fail "could not read saved hue from $SAVED_SETTINGS_FILE"
-            saturation="$(jq -er '.saturation | numbers' "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE")" ||
-                fail "could not read saved saturation from $SAVED_SETTINGS_FILE"
-            set_backlight "$backlight" 2>> "$LOG_FILE" || fail "restoring backlight to $backlight failed"
-            set_brightness "$brightness" 2>> "$LOG_FILE" || fail "restoring brightness to $brightness failed"
-            set_contrast "$contrast" 2>> "$LOG_FILE" || fail "restoring contrast to $contrast failed"
-            set_hue "$hue" 2>> "$LOG_FILE" || fail "restoring hue to $hue failed"
-            set_saturation "$saturation" 2>> "$LOG_FILE" || fail "restoring saturation to $saturation failed"
+            restore_setting backlight set_backlight
+            restore_setting brightness set_brightness
+            restore_setting contrast set_contrast
+            restore_setting hue set_hue
+            restore_setting saturation set_saturation
             rm -f "$SAVED_SETTINGS_FILE" 2>> "$LOG_FILE" || fail "could not remove $SAVED_SETTINGS_FILE"
         fi
         ;;
