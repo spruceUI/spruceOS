@@ -77,6 +77,9 @@ device_init() {
         echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
     fi
     killall -9 main ### SUPER important in preventing .tmp_update suicide
+
+    # The stock firmware starts an unauthenticated root shell on telnet; Onion kills it the same way.
+    pkill -9 -f "telnetd -l sh" 2>/dev/null
 }
 
 # Sleeps floor at 10ms, so tiers are pulse rate, not strength.
