@@ -46,6 +46,28 @@ set_overclock() {
     cpuclock "$overclock_speed"
 }
 
+# ra32.mini re-pins the clock in this file at start, after its own menu and on SIGCONT;
+# without it, leaving RetroArch's menu drops the CPU to 1200 MHz until the game is closed.
+RA_CPUCLOCK_FILE="/mnt/SDCARD/RetroArch/cpuclock.txt"
+RA_CPUCLOCK_MARK="# written by spruce MiyooMini.sh"
+
+mode_clock_mhz() {
+    case "$1" in
+        Performance) echo 1400 ;;
+        Overclock) get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600" ;;
+        *) echo 1300 ;;
+    esac
+}
+
+# Mini Plus only until the other variants are measured; a card moved to another Mini drops our file.
+pin_ra_cpuclock() {
+    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_PLUS" ]; then
+        printf '%s\n%s\n' "$(mode_clock_mhz "$MODE")" "$RA_CPUCLOCK_MARK" > "$RA_CPUCLOCK_FILE"
+    elif grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+        rm -f "$RA_CPUCLOCK_FILE"
+    fi
+}
+
 device_init() {
     # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
@@ -166,6 +188,8 @@ setup_for_retroarch(){
         LD_PRELOAD= audioserver >/dev/null 2>&1 &
         sleep 0.5
     fi
+
+    pin_ra_cpuclock
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -346,7 +370,14 @@ device_exit_sleep() {
 
     fi
 
-    pidof retroarch ra32.mini >/dev/null && set_smart # return to smart mode
+    if pidof retroarch ra32.mini >/dev/null; then
+        # Back to the game's own CPU mode where it was pinned at launch, else smart mode
+        if grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+            cpuclock "$(head -n 1 "$RA_CPUCLOCK_FILE")"
+        else
+            set_smart
+        fi
+    fi
 }
 
 device_lid_sensor_ready() {
