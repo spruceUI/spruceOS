@@ -79,17 +79,16 @@ case "$PLATFORM" in
             *) ACCENT_PYUI_DEVICE="ANBERNIC_RGXX640480" ;;
         esac
         ;;
-    "Miniloong" | "RGB30" | "RGB20SX")
+    "Miniloong" | "RGB30" | "RGB20SX" | "A10Mini" | "XUMiniM" | "G350" | "V10")
+        # Every dArkMoss device, as in App/PyUI/launch.sh. Their PyUI device names don't
+        # always match PLATFORM (V10 -> POWKIDDY_V10, A10Mini -> A10MINI, ...), so take
+        # the name from device_names, the same source PyUI's launcher uses.
         export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll"
         export LD_LIBRARY_PATH="/mnt/SDCARD/App/PyUI/dll:/mnt/SDCARD/spruce/flip/lib:/usr/lib/aarch64-linux-gnu"
         export SDL_VIDEODRIVER=kmsdrm
         export SDL_AUDIODRIVER=alsa
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        if [ "$PLATFORM" = "Miniloong" ]; then
-            ACCENT_PYUI_DEVICE="MINILOONG_POCKET1"
-        else
-            ACCENT_PYUI_DEVICE="$PLATFORM"
-        fi
+        ACCENT_PYUI_DEVICE="$(device_names | head -n 1)"
         ;;
     "Pixel2")
         RUN_DIR="/usr/bin"
