@@ -257,6 +257,48 @@ set_contrast() {
     echo "$((level * 5))" > /sys/devices/virtual/disp/disp/attr/enhance_contrast || return 1
 }
 
+set_saturation() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 20 ] && level=20
+
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".saturation = $level" "$SYSTEM_JSON" > "$tmp" && mv"$tmp" "$SYSTEM_JSON" || {
+        rm -f "$tmp"
+        return 1
+    }
+
+    echo "$((level * 5))" > /sys/devices/virtual/disp/disp/attr/enhance_saturation || return 1
+}
+
+set_brightness() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 20 ] && level=20
+
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".brightness = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || {
+        rm -f "$tmp"
+        return 1
+    }
+
+    echo "$((level * 5))" > /sys/devices/virtual/disp/disp/attr/enhance_bright || return 1
+}
+
+set_hue() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 20 ] && level=20
+
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".hue = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || {
+        rm -f "$tmp"
+        return 1
+    }
+
+    echo "$(((level * 5) - 50))" > /sys/devices/virtual/disp/disp/attr/color_temperature || return 1
+}
+
 
 device_system_handles_sdcard_unmount() {
     # return 0 = true
