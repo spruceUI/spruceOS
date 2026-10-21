@@ -19,6 +19,39 @@ magicx_model() {
     echo "${m:-zero28}"
 }
 
+# oakMOSS release updates (App/-FirmwareUpdate-/oakmossUpdate.sh). /usr/magicx/version holds a release tag
+# (v0.6.0-beta.1) or a tag plus commits (v0.5.0-beta.2-43-gd3e0f8f); images from v0.5 on install an .omupd.
+oakmoss_installed_version() {
+    tr -d '\r\n' < /usr/magicx/version 2>/dev/null
+}
+
+oakmoss_can_update() {
+    [ -n "$(oakmoss_installed_version)" ] && [ -x /usr/magicx/bin/oakmoss-update.sh ]
+}
+
+# A fixed-width key: a beta sorts below its release, and a build past a tag above that tag.
+oakmoss_version_key() {
+    printf '%s\n' "$1" | sed 's/^[vV]//' | awk -F- '{
+        split($1, v, "."); beta = 999999; dev = 0
+        for (i = 2; i <= NF; i++) {
+            if ($i ~ /^beta\.[0-9]+$/) { sub(/^beta\./, "", $i); beta = $i }
+            else if ($i ~ /^[0-9]+$/) dev = $i
+        }
+        printf "%04d%04d%04d%06d%06d\n", v[1], v[2], v[3], beta, dev }'
+}
+
+# True when oakMOSS version $1 is older than $2.
+oakmoss_version_older() {
+    _a=$(oakmoss_version_key "$1"); _b=$(oakmoss_version_key "$2")
+    [ "$_a" != "$_b" ] && [ "$(printf '%s\n%s\n' "$_a" "$_b" | sort | head -n 1)" = "$_a" ]
+}
+
+check_if_fw_needs_update() {
+    oakmoss_can_update || { echo "false"; return; }
+    _want="$(github_latest_version spruceUI/oakMOSS)" || { echo "false"; return; }
+    oakmoss_version_older "$(oakmoss_installed_version)" "$_want" && echo "true" || echo "false"
+}
+
 # An oakMOSS image that carries its own library set (/usr/lib/oakmoss) gets it in the Flip libraries' place,
 # and no Flip library directory stays on either path. Without it, a cfg that defaults to the set falls back
 # to its MAGICX_FLIP_LD_PATH / MAGICX_FLIP_PORTS_PATH; any other cfg keeps its paths.

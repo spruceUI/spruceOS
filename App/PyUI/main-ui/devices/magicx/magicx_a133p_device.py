@@ -112,6 +112,14 @@ class MagicXA133PDevice(TrimUIDevice):
                 model = f.read().strip() or "unknown"
         except OSError:
             model = os.environ.get("PLATFORM", "").strip() or "unknown"
+        # oakMOSS images write their release version (v0.6.0-beta.1) next to the marker.
+        try:
+            with open("/usr/magicx/version") as f:
+                version = f.read().strip()
+        except OSError:
+            version = ""
+        if version:
+            return f"oakMOSS {version} ({model})"
         return f"magicx-tina ({model})"
 
     # ----- display -----

@@ -26,6 +26,9 @@ case "$PLATFORM" in
 	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"G350"|"V10")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
+	"Zero28"|"Zero40"|"XU20")
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/oakmossUpdate.sh
+		;;
 	*)
 		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
 		sleep 5
