@@ -243,6 +243,20 @@ EOF
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
+set_contrast() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 20 ] && level=20
+
+    tmp="${SYSTEM_JSON}.tmp.$$"
+    jq ".contrast = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || {
+        rm -f "$tmp"
+        return 1
+    }
+
+    echo "$((level * 5))" > /sys/devices/virtual/disp/disp/attr/enhance_contrast || return 1
+}
+
 
 device_system_handles_sdcard_unmount() {
     # return 0 = true
