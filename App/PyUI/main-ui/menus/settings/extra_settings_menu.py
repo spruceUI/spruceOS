@@ -111,18 +111,19 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                         value=self.launch_display_settings
                     )
             )
+        if Device.get_device().supports_night_mode():
 
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.settings_category(NightModeSettingsMenu.SETTINGS_CATEGORY),
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_night_mode_settings
-                    )
-            )
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text=Language.settings_category(NightModeSettingsMenu.SETTINGS_CATEGORY),
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_night_mode_settings
+                        )
+                )
 
         option_list.append(
                 GridOrListEntry(

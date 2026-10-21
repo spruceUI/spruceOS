@@ -314,3 +314,6 @@ class TrimUIDevice(DeviceCommon):
 
     def get_image_for_activity(self, activity):
         return MiyooTrimCommon.get_image_for_activity(activity)
+    
+    def supports_night_mode(self):
+        return True

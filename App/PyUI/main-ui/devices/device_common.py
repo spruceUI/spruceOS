@@ -1134,3 +1134,6 @@ class DeviceCommon(AbstractDevice):
 
     def fix_device_font_height_calc_issues(self, height):
         return height
+    
+    def supports_night_mode(self):
+        return False

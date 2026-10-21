@@ -28,3 +28,6 @@ class MagicXZero28(MagicXA133PDevice):
 
     def screen_rotation(self):
         return self._env_int("DISPLAY_ROTATION", 0)
+
+    def supports_night_mode(self):
+        return True
