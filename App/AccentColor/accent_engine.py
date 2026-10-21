@@ -159,6 +159,11 @@ def theme_palette(theme_dir):
     return dark
 
 
+def template_names(theme_dir, folder):
+    with open(os.path.join(theme_dir, "accent", "manifest.json"), "r", encoding="utf-8") as fh:
+        return list(json.load(fh)["templates"].get(folder, []))
+
+
 def template_folders(theme_dir):
     with open(os.path.join(theme_dir, "accent", "manifest.json"), "r", encoding="utf-8") as fh:
         return list(json.load(fh)["templates"])

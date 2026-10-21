@@ -13,6 +13,8 @@ menu's state is never touched.
 import argparse
 import logging
 import os
+import re
+import shutil
 import sys
 import time
 
@@ -219,6 +221,47 @@ class Picker:
         others = [f for f in eng.template_folders(self.theme_dir) if f != current]
         eng.apply_accent(self.theme_dir, self.rgb, folders=others,
                          progress=lambda d, t: self.draw_progress(d, t, "Updating other screen sizes..."))
+        self.refresh_scaled_copies()
+
+    def refresh_scaled_copies(self):
+        """Redo the copies PyUI's theme patcher made for screen sizes the theme doesn't ship.
+
+        A device whose resolution has no config_<W>x<H>.json gets a skin_<W>x<H> folder
+        scaled from skin/ the first time the theme loads (e.g. Powkiddy V10 at 480x320).
+        Those copies keep the colour they were made with, so after recolouring skin/
+        rescale its accent images into each such folder, with the patcher's own sizing
+        rules and PyUI's image utils.
+        """
+        shipped = set(eng.template_folders(self.theme_dir))
+        names = eng.template_names(self.theme_dir, "skin")
+        base = os.path.join(self.theme_dir, "skin")
+        utils = Device.get_device().get_image_utils()
+        theme_w, theme_h = utils.get_image_dimensions(os.path.join(base, "background.png"))
+        for folder in sorted(os.listdir(self.theme_dir)):
+            m = re.fullmatch(r"skin_(\d+)x(\d+)", folder)
+            if not m or folder in shipped:
+                continue
+            target_w, target_h = int(m.group(1)), int(m.group(2))
+            scale = min(target_w / theme_w, target_h / theme_h)
+            log().info("Refreshing patched copies in %s (scale %.3f)", folder, scale)
+            for i, name in enumerate(names):
+                src, out = os.path.join(base, name), os.path.join(self.theme_dir, folder, name)
+                if not os.path.isfile(out):
+                    continue
+                img_w, img_h = utils.get_image_dimensions(src)
+                new_w, new_h, keep_aspect = int(img_w * scale), int(img_h * scale), True
+                # same rules as DefaultThemePatcher.scale_image
+                if img_w == theme_w and img_h != theme_h:
+                    new_w, keep_aspect = target_w, False
+                if img_h == theme_h and img_w != theme_w:
+                    new_h, keep_aspect = target_h, False
+                if img_w == theme_w and img_h == theme_h:
+                    new_w, new_h, keep_aspect = target_w, target_h, False
+                os.remove(out)
+                utils.resize_image(src, out, new_w, new_h, preserve_aspect_ratio=keep_aspect)
+                if not os.path.isfile(out):
+                    shutil.copyfile(src, out)
+                self.draw_progress(i + 1, len(names), "Updating " + folder + "...")
 
     def run(self):
         held_since, last = None, None

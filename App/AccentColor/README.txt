@@ -31,6 +31,11 @@ accent/<skin folder>/<image>.png.tpl, one per listed image:
 accent/accent.json
     { "accent": "#RRGGBB" }, the current colour (the picker starts from it).
 
+Screen sizes the theme doesn't ship: PyUI's theme patcher scales skin/ into a
+skin_<W>x<H> folder the first time the theme loads on such a device (e.g. Powkiddy
+V10 at 480x320). After recolouring, the app rescales the accent images into those
+folders too, with the patcher's own sizing rules and PyUI's image utils.
+
 On apply, only these keys change: grid.selectedcolor (palette "ink") and
 list.selectedcolor (SEL) in every config*.json, and colors.selection, .accent and
 .text_selected in igm.json. Any other setting the user changed is kept.
