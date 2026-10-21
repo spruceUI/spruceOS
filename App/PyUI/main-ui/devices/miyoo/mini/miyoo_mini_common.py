@@ -984,6 +984,12 @@ class MiyooMiniCommon(MiyooDevice):
     # left over from Sprig that no spruce install has ever had.
 
 
+    @throttle.limit_refresh(1)
+    def post_present_operations(self):
+        threshold = self.miyoo_mini_specific_model_variables.low_memory_threshold_mb
+        if threshold is not None:
+            self.clear_display_cache_if_memory_full("MemAvailable", threshold)
+
     def get_fw_version(self):
         try:
             # Run fw_printenv and capture output
