@@ -6,7 +6,7 @@ from devices.miyoo.mini.og_mini_methods import OgMiniMethods
 
 class MiyooMiniSpecificModelVariables():
 
-    def __init__(self, width, height, supports_wifi, poweroff_cmd, reboot_cmd, get_charge_status, get_battery_percent, supports_volume, low_memory_threshold_mb=None):
+    def __init__(self, width, height, supports_wifi, poweroff_cmd, reboot_cmd, get_charge_status, get_battery_percent, supports_volume, low_memory_threshold_mb=None, uses_keymon_volume=False):
         self.width = width
         self.height = height
         self.supports_wifi = supports_wifi
@@ -17,6 +17,8 @@ class MiyooMiniSpecificModelVariables():
         self.supports_volume = supports_volume
         # MemAvailable (MB) below which PyUI drops its texture caches; None = never
         self.low_memory_threshold_mb = low_memory_threshold_mb
+        # keymon publishes the volume in shared memory (Mini Flip firmware); the rest watch system.json
+        self.uses_keymon_volume = uses_keymon_volume
 
 # --- Constant model presets ---
 
@@ -64,5 +66,6 @@ MIYOO_MINI_FLIP_VARIABLES = MiyooMiniSpecificModelVariables(
     reboot_cmd="reboot",
     get_charge_status=AxpTestMehthods.get_charge_status,
     get_battery_percent=AxpTestMehthods.get_battery_percent,
-    supports_volume=True
+    supports_volume=True,
+    uses_keymon_volume=True
 )

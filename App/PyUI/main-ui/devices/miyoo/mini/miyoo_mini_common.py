@@ -112,7 +112,7 @@ class MiyooMiniCommon(MiyooDevice):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.mainui_volume = None
-            self.keymon_volume = self._attach_keymon_volume() if device_name.endswith("MIYOO_MINI_FLIP") else None
+            self.keymon_volume = self._attach_keymon_volume() if miyoo_mini_specific_model_variables.uses_keymon_volume else None
             if self.keymon_volume is not None:
                 threading.Thread(target=self._watch_keymon_volume, daemon=True).start()
             # keymon owns the volume keys and writes /appconfigs/system.json on every
