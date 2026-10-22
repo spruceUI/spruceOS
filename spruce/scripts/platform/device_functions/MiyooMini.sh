@@ -346,6 +346,8 @@ BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
 LID_HALL_FILE="/sys/devices/soc0/soc/soc:hall-mh248/hallvalue"
 
 device_enter_sleep() {
+    # The clock to wake back to, as the Brick's suspend keeps its cpufreq state; cpufreq cannot see this PLL
+    cpuclock 2>/dev/null | sed -n 's/.*cpuclock=\([0-9]*\).*/\1/p' | tail -n 1 | awk '{ printf "%d\n", ($1 + 500000) / 1000000 }' > /tmp/sleep_cpuclock
     killall -9 keymon
     killall -q -SIGSTOP $(echo $EMU_LIST) 2>/dev/null
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
@@ -356,7 +358,10 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
-    cpuclock 1600                                               # wake up cpu speed
+    sleep_mhz=""
+    [ -r /tmp/sleep_cpuclock ] && read -r sleep_mhz < /tmp/sleep_cpuclock
+    case "$sleep_mhz" in ''|*[!0-9]*) sleep_mhz="" ;; *) [ "$sleep_mhz" -gt 100 ] || sleep_mhz="" ;; esac
+    cpuclock "${sleep_mhz:-1600}"                               # the clock from before the sleep (no record: 1600)
     /customer/app/keymon &
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
@@ -373,14 +378,15 @@ device_exit_sleep() {
 
     mini_reenable_buttons
 
-    if pidof retroarch ra32.mini >/dev/null; then
-        # Back to the game's own CPU mode where it was pinned at launch, else smart mode
-        if grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
-            cpuclock "$(head -n 1 "$RA_CPUCLOCK_FILE")"
-        else
-            set_smart
-        fi
+    # Set again last: ra32.mini re-pins its own clock on SIGCONT. Without a record, the game's pin, else smart
+    if [ -n "$sleep_mhz" ]; then
+        cpuclock "$sleep_mhz"
+    elif pidof retroarch ra32.mini >/dev/null && grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+        cpuclock "$(head -n 1 "$RA_CPUCLOCK_FILE")"
+    else
+        set_smart
     fi
+    rm -f /tmp/sleep_cpuclock
 }
 
 # Input back on after sleep; the Mini Flip's model file overrides it.
