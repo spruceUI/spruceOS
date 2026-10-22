@@ -93,7 +93,8 @@ case $INFO in
             *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+    *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
 esac
 fi
 

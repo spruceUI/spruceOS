@@ -433,7 +433,9 @@ unstage_archive() {
 # drawn. preCmd unpacks after it in the same foreground run, so moving any of
 # them there is a deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
-    if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
+    # The Mini V4 and Mini Flip (752x560) have always taken the 640x480 overlays
+    if { [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; } ||
+        { [ "$DISPLAY_WIDTH" = "752" ] && [ "$DISPLAY_HEIGHT" = "560" ]; }; then
         unstage_archive "overlays_640x480.7z" "preMenu"
     elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
         unstage_archive "overlays_1024x768.7z" "preMenu"

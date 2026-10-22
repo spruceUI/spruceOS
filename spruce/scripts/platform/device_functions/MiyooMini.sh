@@ -417,14 +417,14 @@ device_uses_pseudo_sleep() {
     echo "true"
 }
 
-# Miyoo Mini subtype detection
+# Miyoo Mini subtype: helperFunctions resolves MINI_MODEL once at platform detection
 
+# The OG Mini and the V4: no axp_test PMIC, no radio
 is_mini_og() {
-    if [ -e /customer/app/axp_test ]; then
-        return 1
-    else
-        return 0
-    fi
+    case "${MINI_MODEL:-}" in
+        MIYOO_MINI|MIYOO_MINI_V4) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
 # The OG Mini and V4 have no radio; without this a wifi=1 setting sends them through enable_wifi
@@ -462,24 +462,13 @@ device_start_dhcp_client() {
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3
 }
 
+# The V4 and Mini Flip panel, as the model overlay states it
 has_v4_screen() {
-    grep -q "752x560p" /sys/class/graphics/fb0/modes >/dev/null 2>&1
+    [ "${DISPLAY_WIDTH:-}" = "752" ]
 }
 
 get_miyoo_mini_variant() {
-    if is_mini_og; then
-        if has_v4_screen; then
-            echo "MIYOO_MINI_V4"
-        else
-            echo "MIYOO_MINI"
-        fi
-    else
-        if has_v4_screen; then
-            echo "MIYOO_MINI_FLIP"
-        else
-            echo "MIYOO_MINI_PLUS"
-        fi
-    fi
+    echo "${MINI_MODEL:-}"
 }
 
 run_poweroff_cmd() {
