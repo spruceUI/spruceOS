@@ -36,6 +36,17 @@ set_performance() {
     cpuclock 1400
 }
 
+# PyUI's screensaver asks for this at the menu. Models opt in with MINI_POWERSAVE_MHZ in their
+# overlay (cpufreq's own powersave is 400 MHz); the rest keep the smart clock, as before.
+set_powersave() {
+    if [ -n "${MINI_POWERSAVE_MHZ:-}" ]; then
+        log_message "Setting cpu to powersave (${MINI_POWERSAVE_MHZ} MHz)"
+        cpuclock "$MINI_POWERSAVE_MHZ"
+    else
+        set_smart
+    fi
+}
+
 set_overclock() {
     overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600")"
 
