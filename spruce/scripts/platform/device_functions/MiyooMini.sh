@@ -447,7 +447,8 @@ device_has_wifi_radio() {
 device_wifi_power_on() {
     is_mini_og && return 1
     [ -d /sys/class/net/wlan0 ] && return 0
-    grep -q "^8188fu " /proc/modules 2>/dev/null || insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko 2>/dev/null
+    # Log level 3 keeps the driver's warnings and errors; its default (4, info) fills dmesg with "Turbo EDCA" lines
+    grep -q "^8188fu " /proc/modules 2>/dev/null || insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko rtw_drv_log_level=3 2>/dev/null
     ifconfig lo up 2>/dev/null
     /customer/app/axp_test wifion >/dev/null 2>&1
     _left=10
