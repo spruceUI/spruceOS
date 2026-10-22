@@ -1,6 +1,8 @@
 """Remembered game IDs by ROM path: ``Saves/cheevos/cache/rom-identifications.json``.
 
-Spruce's own path-to-game mapping comes first and never reaches this cache. Entries are keyed
+Spruce's own path-to-game mapping comes first and never reaches this cache. Spruce then reads
+this file's matches itself, before starting the helper, so a match's shape is a contract: change
+it only under a new version (.agents/integration.md). Entries are keyed
 by absolute path, with no fingerprints: a known association stays valid when the ROM is
 patched or replaced at that path, since the menu only shows progress (.agents/integration.md).
 Confirmed misses expire after seven days, because RA adds hashes over time; errors and

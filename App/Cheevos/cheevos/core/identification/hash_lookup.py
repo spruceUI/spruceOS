@@ -38,13 +38,13 @@ from cheevos.core.identification.result import (
     positive_game_id,
     real_game_id,
 )
+from cheevos.core.ra_client.common import API_HOST
 
 if TYPE_CHECKING:
     from cheevos.core.ra_client.transport import Transport
 
 logger = logging.getLogger(__name__)
 
-API_HOST = "retroachievements.org"
 GAMEID_PREFIX = "gameid:"
 ACHIEVEMENTSETS_PREFIX = "achievementsets:"
 MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000  # the proxy's GAMEID_MISS_TTL_MS

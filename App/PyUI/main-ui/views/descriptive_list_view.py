@@ -42,6 +42,8 @@ class DescriptiveListView(ListView):
         self.scroll_value_text_amount = 0
         self.last_selected = -1
         self.selected_same_entry_time = time.time()
+        self.cut_titles = {}
+        self.value_widths = {}
         self.contains_any_icons = False
         if(icon_and_desc_use_image_in_place_of_icon):
             self.contains_any_icons = True # assume icons if we're using the images for icons
@@ -61,6 +63,38 @@ class DescriptiveListView(ListView):
     def options_are_alphabetized(self):
         return self.options_are_sorted
     
+    def _cut_title(self, text, max_width):
+        # The title, or the longest start of it that fits with "..." after it
+        key = (text, max_width)
+        cut = self.cut_titles.get(key)
+        if(cut is None):
+            if(len(self.cut_titles) >= 1000):
+                self.cut_titles.clear()
+            purpose = FontPurpose.DESCRIPTIVE_LIST_TITLE
+            cut = text
+            if(Display.get_text_width_from_glyphs(purpose, text) > max_width):
+                room = max_width - Display.get_text_width_from_glyphs(purpose, "...")
+                cut = text[:Display.count_chars_that_fit(purpose, text, room)].rstrip() + "..."
+            self.cut_titles[key] = cut
+        return cut
+
+    def _get_value_width(self, text):
+        # Exact width, to line values up on the right; measured once per text
+        width = self.value_widths.get(text)
+        if(width is None):
+            if(len(self.value_widths) >= 1000):
+                self.value_widths.clear()
+            width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, text)
+            self.value_widths[text] = width
+        return width
+
+    def _scroll_title(self, text, max_width):
+        # The title moved on by the scroll amount, wrapping round, cut to just past max_width
+        looped_text = text + " " * 8
+        start = self.scroll_value_text_amount % len(looped_text)
+        shown = looped_text[start:] + looped_text[:start]
+        return shown[:Display.count_chars_that_fit(FontPurpose.DESCRIPTIVE_LIST_TITLE, shown, max_width) + 1]
+
     def _render(self):
         visible_options: List[GridOrListEntry] = self.options[self.current_top:self.current_bottom]
 
@@ -125,25 +159,12 @@ class DescriptiveListView(ListView):
                 # Make the distance between the title and description less when using smaller rows
                 title_y_offset = row_offset_y + Theme.get_descriptive_list_text_offset_y() + Theme.scale_with_height_multiplier(5)
 
-            primary_text = gridOrListEntry.get_primary_text()
-            primary_text_max_width = Theme.scale_with_width_multiplier(35)
-            if(len(primary_text) > primary_text_max_width and actual_index == self.selected):
-                primary_text = TextUtils.scroll_string_chars(text=primary_text,
-                                        amt=self.scroll_value_text_amount,
-                                        max_chars=primary_text_max_width)
-            else:
-                primary_text = primary_text[:primary_text_max_width]
+            text_offset = Theme.get_descriptive_list_text_from_icon_offset()
+            title_x = row_offset_x + icon_w + text_offset
+            title_right_edge = Device.get_device().screen_width() - text_offset
 
-            title_w, title_h = Display.render_text(
-                primary_text, 
-                row_offset_x + icon_w + Theme.get_descriptive_list_text_from_icon_offset(), 
-                title_y_offset, 
-                color, 
-                FontPurpose.DESCRIPTIVE_LIST_TITLE,
-                render_mode=title_render_mode)
-
-            if(gridOrListEntry.get_value_text() is not None):
-                value_text = gridOrListEntry.get_value_text()
+            value_text = gridOrListEntry.get_value_text()
+            if(value_text is not None):
                 max_value_text_length = Theme.scale_with_width_multiplier(25)
                 
                 if(len(value_text) > max_value_text_length):
@@ -157,10 +178,35 @@ class DescriptiveListView(ListView):
 
                     value_text = "< " + value_text + " >"
 
+                value_width = self._get_value_width(value_text)
+                title_right_edge -= value_width + text_offset
+
+            # Titles that fit their room are left alone. Longer ones end with "...",
+            # and the selected one scrolls after a second.
+            primary_text = gridOrListEntry.get_primary_text()
+            title_room = title_right_edge - title_x
+            title_crop_w = None
+            if(primary_text):
+                cut_text = self._cut_title(primary_text, title_room)
+                if(cut_text != primary_text and actual_index == self.selected and self.scroll_value_text_amount > 0):
+                    primary_text = self._scroll_title(primary_text, title_room)
+                    title_crop_w = title_room
+                else:
+                    primary_text = cut_text
+
+            title_w, title_h = Display.render_text(
+                primary_text,
+                title_x,
+                title_y_offset,
+                color,
+                FontPurpose.DESCRIPTIVE_LIST_TITLE,
+                render_mode=title_render_mode,
+                crop_w=title_crop_w)
+
+            if(value_text is not None):
                 if(Theme.get_use_text_for_line_height()):
                     value_y = title_y_offset
                     value_render_mode = title_render_mode
-                    value_width, _ = Display.get_text_dimensions(FontPurpose.DESCRIPTIVE_LIST_TITLE, value_text)
                     value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset() - value_width
                 else:
                     value_x = Device.get_device().screen_width() - Theme.get_descriptive_list_text_from_icon_offset()

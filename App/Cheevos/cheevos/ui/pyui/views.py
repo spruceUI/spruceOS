@@ -17,13 +17,12 @@ from cheevos.ui.pyui.primitives import (
     Button,
     Text,
     displayable,
-    fit_text,
     fit_with_tail,
     screen_size,
 )
 from cheevos.ui.pyui.row_bars import Progress
 from cheevos.ui.pyui.status_bar import Hint
-from cheevos.ui.pyui.text import ListRoom, list_room
+from cheevos.ui.pyui.text import description_room
 from cheevos.ui.pyui.title_bar import Title
 from cheevos.ui.pyui.visible_images import ImageDemand, VisibleImages, demanding
 
@@ -119,13 +118,16 @@ def _lazy(source: Callable[[], Path | None]) -> Callable[[object], str | None]:
     return search
 
 
-def _entry(item: MenuItem, *, room: ListRoom | None) -> Any:  # noqa: ANN401
+def _entry(item: MenuItem, *, room: int | None) -> Any:  # noqa: ANN401
     """Convert one item into a PyUI ``GridOrListEntry``.
+
+    PyUI fits list titles to their room itself (SpruceOS #1900), and scrolls the selected one
+    when it doesn't fit, so titles are passed whole.
 
     Args:
         item: Row or tile.
-        room: A list row's room: the title is shortened so it never runs into the
-            right-aligned value, and the description keeps its tail (lists only).
+        room: A list row's description width: the description is shortened to it and keeps
+            its tail (lists only).
 
     Returns:
         The PyUI entry, carrying the item as its value.
@@ -135,15 +137,14 @@ def _entry(item: MenuItem, *, room: ListRoom | None) -> Any:  # noqa: ANN401
     icon = item.icon
     static = str(icon) if isinstance(icon, Path) else None
     searcher = None if icon is None or isinstance(icon, Path) else _lazy(icon)
+    title = displayable(item.title, Text.TITLE)
     if room is not None:
-        title = fit_text(item.title, Text.TITLE, room.title(item.value))
         description = (
-            fit_with_tail(item.description, item.tail, Text.BODY, room.full)
+            fit_with_tail(item.description, item.tail, Text.BODY, room)
             if item.description or item.tail
             else ""
         )
     else:
-        title = displayable(item.title, Text.TITLE)
         description = displayable(item.description, Text.BODY)
     if item.progress is not None:
         description = ""  # keeps the two-line row; the bar is drawn in its place
@@ -165,12 +166,12 @@ def _entries(items: Sequence[MenuItem], layout: Layout = Layout.LIST) -> list[An
 
     Args:
         items: Rows or tiles.
-        layout: Target view; list titles are fitted next to their values.
+        layout: Target view; list descriptions are fitted to the row.
 
     Returns:
         PyUI entries in the same order.
     """
-    room = list_room() if layout is Layout.LIST else None
+    room = description_room() if layout is Layout.LIST else None
     return [_entry(item, room=room) for item in items]
 
 
@@ -421,9 +422,7 @@ class PreparedView:
         finally:
             # Popups freeze the frame underneath as their backdrop until told they're done;
             # without this, every later screen is drawn over that frozen frame.
-            finished = getattr(self._view, "view_finished", None)
-            if finished is not None:
-                finished()
+            self._view.view_finished()
 
     def _select(
         self, accepted: list[Any], on_tick: TickHandler | None, *, global_start: bool

@@ -395,6 +395,11 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
+# runtime.sh runs enable_zram.sh only where this answers 0; a kernel without zram says 1
+device_supports_zram() {
+    return 0
+}
+
 # Bluetooth, driven by bluetooth.sh. A board with a radio answers 0 here and overrides
 # only the hooks its hardware needs; dArkMoss (systemd) overrides up/down whole.
 device_bluetooth_supported() {

@@ -83,7 +83,3 @@ class V10(DarkmossDevice):
     # frames 270 degrees to match.
     def screen_rotation(self):
         return 270
-
-    # No Wi-Fi chip.
-    def supports_wifi(self):
-        return False
