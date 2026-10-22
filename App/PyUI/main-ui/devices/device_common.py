@@ -940,6 +940,7 @@ class DeviceCommon(AbstractDevice):
             ConfigCopier.ensure_config(config_path, config_if_missing)
             self.system_config = DeviceUserConfig(config_path)
 
+        self.system_config.activate_display_profile()
 
     def is_filesystem_read_only(self,path="/mnt/SDCARD"):
         try:

@@ -381,7 +381,7 @@
                     "LED off",
                     "Quiet Mode",
                     "Silent Mode",
-                    "Night Mode",
+                    { "label": "Night Mode", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S"] },
                     "WiFi off",
                     { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
                     "Nothing"
@@ -397,7 +397,7 @@
                     "LED off",
                     "Quiet Mode",
                     "Silent Mode",
-                    "Night Mode",
+                    { "label": "Night Mode", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S"] },
                     "WiFi off",
                     { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
                     "Nothing"
@@ -413,7 +413,7 @@
                     "LED off",
                     "Quiet Mode",
                     "Silent Mode",
-                    "Night Mode",
+                    { "label": "Night Mode", "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S"] },
                     "WiFi off",
                     { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
                     { "label": "Fan boost", "devices": ["TRIMUI_SMART_PRO_S"] },

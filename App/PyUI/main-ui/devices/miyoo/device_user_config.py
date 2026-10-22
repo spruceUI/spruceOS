@@ -172,6 +172,29 @@ class DeviceUserConfig:
         )
         self.save_config()
 
+    def activate_display_profile(self):
+        profile = (
+            "nightmode"
+            if self.get_nightmode_active()
+            else "desired_display"
+        )
+        active_names = {
+            "backlight": "backlight",
+            "brightness": "brightness",
+            "contrast": "contrast",
+            "saturation": "saturation",
+            "hue": "hue",
+            "red": "disp_red",
+            "green": "disp_green",
+            "blue": "disp_blue",
+        }
+
+        for name, active_name in active_names.items():
+            self.config[active_name] = self._get_display_profile_value(
+                profile, name
+            )
+        self.save_config()
+
     def get_nightmode_backlight(self):
         return self._get_display_profile_value("nightmode", "backlight")
 
