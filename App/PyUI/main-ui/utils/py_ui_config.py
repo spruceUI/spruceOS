@@ -242,6 +242,10 @@ class PyUiConfig:
         return cls.get("poweroffCmd",None)
     
     @classmethod
+    def get_shutdown_image(cls):
+        return cls.get("shutdownImage",None)
+
+    @classmethod
     def get_reboot_cmd(cls):
         return cls.get("rebootCmd",None)
 

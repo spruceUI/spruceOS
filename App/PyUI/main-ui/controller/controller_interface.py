@@ -55,3 +55,9 @@ class ControllerInterface(ABC):
     # cannot be woken ignore it, and their wait runs to its timeout.
     def wake(self):
         pass
+
+    # The write end of a nonblocking pipe for signal.set_wakeup_fd: a signal ends
+    # a get_input() wait as wake() does (utils/shutdown.py). None where the
+    # interface cannot watch one; the wait then runs to its timeout.
+    def signal_wakeup_fd(self):
+        return None

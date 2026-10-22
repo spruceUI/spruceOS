@@ -5,6 +5,7 @@ from devices.device import Device
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from utils import shutdown
 
 class Controller:
     controller = None
@@ -276,6 +277,7 @@ class Controller:
 
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
+        shutdown.checkpoint()
         Controller.get_input_called_again = True
         if(Controller.return_count_of_current_input != 0 and Controller.still_held_down() and not called_from_check_for_hotkey):
             return True # TODO is this okay
@@ -296,6 +298,7 @@ class Controller:
         if Controller._screensaver_active:
             from display.screensaver import ScreenSaver
             while True:
+                shutdown.checkpoint()
                 ScreenSaver.render_if_needed()
                 Controller.controller_interface.force_refresh()
                 if Controller.still_held_down():
@@ -303,6 +306,7 @@ class Controller:
                     continue
                 ms = int(POLL_INTERVAL_SECONDS * 1000)
                 inp = Controller.controller_interface.get_input(ms)
+                shutdown.checkpoint()
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
                     continue
@@ -359,6 +363,7 @@ class Controller:
 
                 ms_remaining = int(remaining_time * 1000)
                 input = Controller.controller_interface.get_input(ms_remaining)
+                shutdown.checkpoint()
                 input = Device.get_device().check_for_button_remap(input)
                 Controller.set_last_input(input)
 

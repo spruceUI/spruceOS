@@ -74,8 +74,6 @@ class TrimUIDevice(DeviceCommon):
         return "reboot"
         
     def power_off(self):
-        Display.display_message(Language.label("poweringOff", "Powering off..."))
-        time.sleep(1)
         super().power_off()
         # So we dont update the display while shutting down
         time.sleep(10)
