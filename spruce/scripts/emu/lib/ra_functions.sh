@@ -141,7 +141,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI" | "GKD")
+		"TrimUI" | "GKD" | "MagicX")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"Miyoo" | "Anbernic")
@@ -270,7 +270,7 @@ run_retroarch() {
 		RA_PARAMS="-v"
 	fi
 	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"XUMiniM"|"G350"|"Anbernic"*)
+		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"XUMiniM"|"G350"|"V10"|"Anbernic"*)
 			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 			;;
 	esac

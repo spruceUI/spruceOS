@@ -108,6 +108,10 @@ class KeyWatcherController(ControllerInterface):
         
         self.last_held_input = None
         self.lock = threading.Lock()  # add a lock
+        # Signalled when a key is queued (or wake() is called), so get_input can
+        # sleep until then instead of returning at once or polling.
+        self.input_ready = threading.Condition(self.lock)
+        self.woken = False
         self.input_polling_thread = threading.Thread(target=self.poll_keyboard, daemon=True)
         self.input_polling_thread.start()
         self.print_key_changes = False
@@ -130,8 +134,10 @@ class KeyWatcherController(ControllerInterface):
         return self.last_held_input
 
     def clear_input(self):
+        # Drain what is queued without waiting for more (a held key keeps coming
+        # back, hence the cap).
         count = 0
-        while(count < 50 and self.get_input(0.001) != (None, None)):
+        while(count < 50 and self.get_input(0) is not None):
             count += 1
 
     def cache_last_event(self):
@@ -208,6 +214,7 @@ class KeyWatcherController(ControllerInterface):
                                 if mapped_event.controller_input not in self.held_controller_inputs:
                                     self.input_queue.append(mapped_event.controller_input)
                                 self.held_controller_inputs[mapped_event.controller_input] = now
+                                self.input_ready.notify_all()
                         elif mapped_event.key_state == KeyState.RELEASE:
                             with self.lock:
                                 self.key_change(mapped_event.controller_input,"RELEASE")
@@ -229,28 +236,39 @@ class KeyWatcherController(ControllerInterface):
             print(f"KEY,{controller_input},{direction}")
 
     def get_input(self, timeoutInMilliseconds):
-        timeoutInMilliseconds = 0
-        start_time = time.time()
-        timeout = timeoutInMilliseconds / 1000.0
-        do_get_input = True
-        while do_get_input:
-            with self.lock:
+        # Sleeps until a key arrives, wake() is called or the timeout passes. It
+        # used to poll every 5 ms, which made every call take at least that long,
+        # and then not to wait at all, which made every wait spin a core.
+        deadline = time.monotonic() + max(timeoutInMilliseconds, 0) / 1000.0
+        with self.input_ready:
+            while True:
                 # First, check the event queue
                 if self.input_queue:
                     value = self.input_queue.popleft()
                     self.last_held_input = value
                     return value
-                
+
                 # Fallback: return the first currently held key
                 if self.held_controller_inputs:
                     value = next(iter(self.held_controller_inputs))
                     self.last_held_input = value
                     return value
 
-            do_get_input = (time.time() - start_time) < timeout
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break  # a wake is kept for the next call that waits
+                if self.woken:
+                    self.woken = False
+                    break
+                self.input_ready.wait(remaining)
 
         self.last_held_input = None
         return None
+
+    def wake(self):
+        with self.input_ready:
+            self.woken = True
+            self.input_ready.notify_all()
 
     
     def clear_input_queue(self):

@@ -49,6 +49,7 @@ class AppContext:
             blocking (``None``: offline, RA unreachable, or none).
         clock: Wall clock.
         refresh_time: Refreshes app time and connectivity before on-demand date queries.
+        launch_game_id: Restricts refresh actions to this game in a direct launch.
     """
 
     paths: Paths
@@ -67,6 +68,7 @@ class AppContext:
     fetch_first_unlock: Callable[[int], int | None]
     clock: Callable[[], float] = network_clock.now
     refresh_time: Callable[[], bool] = field(default=lambda: True, repr=False)
+    launch_game_id: int | None = None
     _on_device: set[int] | None = field(default=None, repr=False)
     _saved_settings: Settings = field(init=False, repr=False)
 
@@ -94,6 +96,9 @@ class AppContext:
         Returns:
             ``True`` if a new sync started (``False`` if one is already running).
         """
+        if self.launch_game_id is not None:
+            self.details.request(self.launch_game_id, refresh=True)
+            return True
         options = SyncOptions(
             full=full,
             badge_scope=self.settings.badge_scope,

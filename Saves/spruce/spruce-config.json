@@ -49,6 +49,18 @@
                 ],
                 "selected": "4"
             },
+            "wakeOnLidOpen": {
+                "devices": ["ANBERNIC_RGXX_LID_WAKE"],
+                "display": "Wake on lid open",
+                "description": "uses more battery; timed: first 10/30m only",
+                "options": [
+                    "Off",
+                    "10m",
+                    "30m",
+                    "Always"
+                ],
+                "selected": "Off"
+            },
             "shutdownFromSleep": {
                 "display": "Shutdown after sleeping",
                 "description": "off sleeps indefinitely",
@@ -180,6 +192,15 @@
                     "Mega Mode"
                 ],
                 "selected": "spruceUI"
+            },
+            "randomThemeAtBoot": {
+                "display": "Randomize theme at boot",
+                "description": "just for you Puppycat",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             },
             "rumbleIntensity": {
                 "display": "Rumble intensity",
@@ -476,7 +497,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_A133P", "GKD_PIXEL2"],
+                "devices": ["TRIMUI_A133P", "GKD_PIXEL2", "MAGICX_A133P"],
                 "options": [
                     "Select",
                     "Start",

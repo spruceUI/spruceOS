@@ -9,10 +9,19 @@
 # Pids of device_init background jobs that must be gone before the frontend starts.
 # Only runtime.sh's shell owns them, so only it can wait on them.
 DEVICE_INIT_WAIT_PIDS=""
+# Pids of device_init jobs holding the display.
+DEVICE_INIT_DISPLAY_PIDS=""
 
 # Waits for the device_init jobs that must finish before the frontend starts; returns 0.
+# With --except-display, the display jobs are left running; the caller's frontend
+# must then wait for the display itself.
 wait_device_init_jobs() {
-    for _diw_pid in $DEVICE_INIT_WAIT_PIDS; do
+    _diw_pids="$DEVICE_INIT_WAIT_PIDS"
+    if [ "$1" != "--except-display" ]; then
+        _diw_pids="$_diw_pids $DEVICE_INIT_DISPLAY_PIDS"
+        DEVICE_INIT_DISPLAY_PIDS=""
+    fi
+    for _diw_pid in $_diw_pids; do
         wait "$_diw_pid" 2>/dev/null
     done
     DEVICE_INIT_WAIT_PIDS=""
@@ -647,5 +656,13 @@ set_up_boot_action() {
                 log_message "$("$(get_python_path)" /mnt/SDCARD/spruce/scripts/megamode.py "$PLATFORM" $(device_names) 2>&1)"
                 ;;
         esac
+    fi
+}
+
+randomize_theme_if_requested() {
+    _setting="$(get_config_value '.menuOptions."System Settings".randomThemeAtBoot.selected' "False")"
+    if [ "$_setting" = "True" ]; then
+        log_message "Randomizing theme per user settings."
+        /mnt/SDCARD/spruce/scripts/random_theme.sh
     fi
 }

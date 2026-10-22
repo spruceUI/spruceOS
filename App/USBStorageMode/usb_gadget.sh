@@ -34,7 +34,8 @@ usb_gadget_platform_setup() {
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
             ;;
         "Flip")
-            STORAGE_DEVICE="/dev/mmcblk1p1"
+            # Flip.cfg: mmcblk1p1 on stock, the mounted card under BaseOS-my355
+            STORAGE_DEVICE="$SD_DEV"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
             USB_UDC_CONTROLLER="fcc00000.dwc3"
@@ -72,6 +73,9 @@ usb_gadget_platform_setup() {
             return 1
             ;;
     esac
+    # An unresolved card exports nothing: an empty name would make
+    # safe_unmount_all's grep match every mount.
+    [ -n "$STORAGE_DEVICE" ] || return 1
     return 0
 }
 

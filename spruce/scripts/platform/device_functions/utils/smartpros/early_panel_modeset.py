@@ -5,6 +5,9 @@ first userspace SETCRTC after boot re-runs the whole panel init. Spending it
 here, in the background of device_init, keeps it off the frontend's first
 frame. Raw ioctls, no libdrm.
 
+Holds an exclusive flock on LOCK_PATH while it is DRM master; a display
+client must take that lock before opening the card.
+
 Exits silently on any failure: the frontend then does the modeset itself.
 """
 
@@ -16,6 +19,7 @@ import sys
 from collections import namedtuple
 
 CARD = "/dev/dri/card0"
+LOCK_PATH = "/tmp/early_panel_modeset.lock"
 DRM_MODE_CONNECTOR_DSI = 16
 DRM_MODE_CONNECTED = 1
 BPP = 32
@@ -105,7 +109,17 @@ def crtc_for(fd, encoder_ids, crtcs):
 
 
 def main():
+    lock = os.open(LOCK_PATH, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC, 0o666)
+    fcntl.flock(lock, fcntl.LOCK_EX)
     fd = os.open(CARD, os.O_RDWR | os.O_CLOEXEC)
+    try:
+        return set_black_mode(fd)
+    finally:
+        # Drops DRM master while the lock is still held.
+        os.close(fd)
+
+
+def set_black_mode(fd):
     crtcs, conns = get_resources(fd)
     for conn_id in conns:
         conn, encoders, mode = get_connector(fd, conn_id)

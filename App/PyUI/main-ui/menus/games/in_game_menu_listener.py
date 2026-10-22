@@ -57,7 +57,9 @@ class InGameMenuListener:
         Controller._game_running = True
         try:
             while(game_process.poll() is None):
-                if(Controller.get_input()):
+                # A timeout: nothing is drawn while the game runs, so the default
+                # wait would be the idle screen's, and the game's exit noticed late.
+                if(Controller.get_input(timeout=0.1)):
                     if (ControllerInput.MENU == Controller.last_input() and support_menu_button_in_game):
                         held_down = True
                         hold_start = time.time()

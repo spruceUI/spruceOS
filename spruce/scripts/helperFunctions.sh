@@ -128,6 +128,7 @@ device_names() {
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
+        V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
@@ -145,6 +146,10 @@ device_names() {
     # none, so no platform token can stand in for this. Set in AnbernicXXCommon.sh.
     if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
         echo "ANBERNIC_RGXX_RGB"
+    fi
+    # Lid wake: the clamshells share their platforms with slabs too. See xx_lid_wake.sh.
+    if command -v xx_lid_wake_supported >/dev/null 2>&1 && xx_lid_wake_supported; then
+        echo "ANBERNIC_RGXX_LID_WAKE"
     fi
 }
 
@@ -556,6 +561,34 @@ github_latest_version() {
 version_older_than() {
     [ "$(printf '%s' "$1" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" -lt \
       "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
+}
+
+# The GitHub project this device's BaseOS build comes from, by its BASEOS_TARGET.
+baseos_repo() {
+    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')" in
+        my355) echo "apommel/baseos-my355" ;;
+        *) echo "pvaibhav/BaseOS" ;;
+    esac
+}
+
+# "true" when the installed BaseOS is older than the latest release of its project
+# (TARGET_BASEOS_VERSION from the platform cfg offline). Unreadable: "false".
+baseos_fw_needs_update() {
+    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    _want="$(github_latest_version "$(baseos_repo)")" || _want="$TARGET_BASEOS_VERSION"
+    baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
+}
+
+# True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)
+# before its own release. Status 2 when either is not x.y.z[-suffix].
+baseos_version_older() {
+    _bv_a="${1%%-*}"
+    _bv_b="${2%%-*}"
+    case "$_bv_a" in ''|*[!0-9.]*) return 2 ;; esac
+    case "$_bv_b" in ''|*[!0-9.]*) return 2 ;; esac
+    version_older_than "$_bv_a" "$_bv_b" && return 0
+    version_older_than "$_bv_b" "$_bv_a" && return 1
+    [ "$_bv_a" != "$1" ] && [ "$_bv_b" = "$2" ]
 }
 
 get_version_complex() {
@@ -1078,6 +1111,17 @@ get_pyui_config_value() {
     jq -r "${key} // \"$default\"" "$SYSTEM_JSON"
 }
 
+
+# EXAMPLE: set_pyui_config_value '.theme' "SPRUCE"
+set_pyui_config_value() {
+    local key="$1"
+    local value="$2"
+    local tmp="${SYSTEM_JSON}.tmp"
+
+    jq "${key} = \$value" --arg value "$value" "$SYSTEM_JSON" > "$tmp" &&
+        mv "$tmp" "$SYSTEM_JSON"
+}
+
 map_color_name_to_hex() {
     name="$1"
     case "$name" in
@@ -1553,6 +1597,21 @@ bluetooth_setting_wanted() {
     [ "$(jq -r '.bluetooth // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]
 }
 
+# A hidden network never shows in a scan, so one saved counts as in range.
+saved_wifi_in_range() {
+    grep -q '^[[:space:]]*scan_ssid=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && return 0
+    _swr_saved=/tmp/wifi_saved_ssids.$$
+    /mnt/SDCARD/spruce/scripts/wifi.sh saved > "$_swr_saved" 2>/dev/null
+    if [ ! -s "$_swr_saved" ]; then
+        rm -f "$_swr_saved"
+        return 1
+    fi
+    /mnt/SDCARD/spruce/scripts/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
+    _swr_rc=$?
+    rm -f "$_swr_saved"
+    return "$_swr_rc"
+}
+
 # Print why a wpa_supplicant.conf is unusable, or nothing if it is fine.
 # Conservative on purpose: a false positive costs the user every saved network.
 # No quote checks - wpa_supplicant takes everything between the first and last
@@ -1692,6 +1751,58 @@ update_config=1"
     done
 }
 
+# NetworkManager boards: join $1 (SSID; $2 password, empty for an open network) within 45 s. nmcli's output can echo
+# the password, so only its exit status and a fixed phrase are logged. A profile for the SSID goes first (NM 1.52).
+nm_wifi_connect() {
+    command -v nmcli >/dev/null 2>&1 || { log_message "nm_wifi_connect: no nmcli"; return 1; }
+    nmcli -t -f UUID,TYPE connection show 2>/dev/null | while IFS=: read -r _uuid _type; do
+        [ "$_type" = "802-11-wireless" ] || continue
+        [ "$(nmcli -g 802-11-wireless.ssid connection show uuid "$_uuid" 2>/dev/null)" = "$1" ] || continue
+        nmcli connection delete uuid "$_uuid" >/dev/null 2>&1
+    done
+    if [ -n "$2" ]; then
+        _nm_err="$(nmcli -w 45 device wifi connect "$1" password "$2" 2>&1 >/dev/null)"
+    else
+        _nm_err="$(nmcli -w 45 device wifi connect "$1" 2>&1 >/dev/null)"
+    fi
+    _nm_rc=$?
+    [ "$_nm_rc" -eq 0 ] && { _nm_err=""; return 0; }
+    case "$_nm_rc" in
+        2) _nm_why="nmcli rejected the arguments" ;;
+        3) _nm_why="timed out after 45 s" ;;
+        4) _nm_why="activation failed" ;;
+        8) _nm_why="NetworkManager is not running" ;;
+        10) _nm_why="no such network or Wi-Fi device" ;;
+        *) _nm_why="error" ;;
+    esac
+    case "$_nm_err" in
+        *"ecrets were required"*) _nm_why="$_nm_why, secrets were required (wrong password?)" ;;
+        *"No network with SSID"*) _nm_why="$_nm_why, the network is not in range" ;;
+        *"No Wi-Fi device found"*) _nm_why="$_nm_why, no Wi-Fi device" ;;
+        *"property is invalid"*) _nm_why="$_nm_why, a setting was rejected" ;;
+    esac
+    _nm_err=""
+    log_message "nm_wifi_connect: nmcli exit $_nm_rc ($_nm_why)"
+    return "$_nm_rc"
+}
+
+# Give NetworkManager every network the card's wpa_supplicant.conf holds that it lacks: its own profiles live on the
+# base, so a reflash starts with none. $1 = the interface. Profiles take the SSID's name, as "device wifi connect" does.
+nm_import_card_networks() {
+    command -v nmcli >/dev/null 2>&1 || return 0
+    _known="$(nmcli -t -f NAME connection show 2>/dev/null | sed 's/\\:/:/g')"
+    wpa_conf_list_networks | while IFS="$(printf '\t')" read -r _ssid _psk; do
+        [ -n "$_ssid" ] || continue
+        printf '%s\n' "$_known" | grep -qxF "$_ssid" && continue
+        if [ -n "$_psk" ]; then
+            nmcli connection add type wifi ifname "${1:-wlan0}" con-name "$_ssid" ssid "$_ssid" \
+                wifi-sec.key-mgmt wpa-psk wifi-sec.psk "$_psk" >/dev/null 2>&1
+        else
+            nmcli connection add type wifi ifname "${1:-wlan0}" con-name "$_ssid" ssid "$_ssid" >/dev/null 2>&1
+        fi && log_message "$PLATFORM: added network $_ssid from the card"
+    done
+}
+
 # Does this interface hold an address?
 #
 # Ask iproute2 and net-tools both, and believe either. An ifconfig-only version
@@ -1747,6 +1858,9 @@ network_is_connected() {
 	return 1 # No network connection
 }
 
+# Returns 0 once connected, 1 when not (START, timeout, WiFi or waiting off).
+# --cancellable also offers B on the wait screen, which returns 2: a game launch
+# uses it to go back to the menu, so a player out of range can pick another network.
 check_and_connect_wifi() {
     # Shutdown's Syncthing check calls this whatever the setting says; never turn WiFi on against it
     if ! wifi_setting_wanted; then
@@ -1777,8 +1891,13 @@ check_and_connect_wifi() {
     start_pyui_message_writer 1
     wifi_request restart
 
-    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 \
-        "Waiting to connect....\nPress START to continue anyway." 75
+    cancel_key=""
+    wait_text="Waiting to connect....\nPress START to continue anyway."
+    if [ "$1" = "--cancellable" ] && [ -n "$B_B" ]; then
+        cancel_key="$B_B"
+        wait_text="Waiting to connect....\nPress START to continue anyway, or B to go back."
+    fi
+    display_image_and_text "/mnt/SDCARD/spruce/imgs/signal.png" 35 20 "$wait_text" 75
 
     rm -f /tmp/ge_out 2>/dev/null
 
@@ -1788,7 +1907,7 @@ check_and_connect_wifi() {
 
     while true; do
         # 1. Check for user input
-        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2"); then
+        if line=$(last_key_line /tmp/ge_out "$B_START" "$B_START_2" "$cancel_key"); then
             case "$line" in
                 *"key $B_START"* | *"key $B_START_2"*)
                     log_message "WiFi connection cancelled by user"
@@ -1798,6 +1917,13 @@ check_and_connect_wifi() {
                     sleep 2
                     stop_pyui_message_writer
                     return 1
+                    ;;
+                *"key $B_B"*)
+                    # Only asked for with --cancellable
+                    log_message "WiFi wait left with B"
+                    kill "$GE_PID" 2>/dev/null
+                    stop_pyui_message_writer
+                    return 2
                     ;;
             esac
         fi
