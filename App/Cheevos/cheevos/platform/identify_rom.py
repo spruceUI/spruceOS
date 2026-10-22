@@ -33,6 +33,7 @@ from cheevos.platform.paths import Paths
 if TYPE_CHECKING:
     from cheevos.core.identification.candidates import Hasher
     from cheevos.core.identification.hash_lookup import HashResolver
+    from cheevos.core.ra_client.transport import Transport
 
 logger = logging.getLogger("cheevos.identify")
 
@@ -106,12 +107,11 @@ def build_sources(paths: Paths, work_dir: Path) -> Sources:
         return load_proxy_hasher(paths.proxy_app_dir)
 
     def ra_lookup() -> HashResolver:
-        """Create RA's hash lookup over the app's HTTPS transport."""
+        """Create RA's hash lookup over Spruce's curl, or Python's HTTPS without it."""
         from cheevos.core.identification.hash_lookup import RaHashLookup
-        from cheevos.core.ra_client.transport import HttpTransport, default_user_agent
+        from cheevos.core.ra_client.common import default_user_agent
 
-        transport = HttpTransport(timeout=HTTP_TIMEOUT)
-        return RaHashLookup(transport, default_user_agent(paths.platform))
+        return RaHashLookup(ra_transport(), default_user_agent(paths.platform))
 
     return Sources(
         load_hasher=load_hasher,
@@ -120,6 +120,30 @@ def build_sources(paths: Paths, work_dir: Path) -> Sources:
         ra_lookup=ra_lookup,
         now=network_clock.now,
     )
+
+
+def ra_transport() -> Transport:
+    """Ask RA through the curl on Spruce's ``PATH``; Python's HTTPS only without a usable one.
+
+    Returns:
+        The transport.
+    """
+    import shutil
+
+    from cheevos.platform.curl_transport import CurlTransport
+
+    def python_transport() -> Transport:
+        """Python's HTTPS, which loads ``ssl`` (0.45 s on a Mini)."""
+        from cheevos.core.ra_client.transport import HttpTransport
+
+        return HttpTransport(timeout=HTTP_TIMEOUT)
+
+    curl = shutil.which("curl")
+    if curl is None:
+        logger.info("No curl on PATH; asking RA with Python's HTTPS")
+        return python_transport()
+    logger.info("Asking RA with %s", curl)
+    return CurlTransport(curl, python_transport, timeout=HTTP_TIMEOUT)
 
 
 def run(path: str, *, paths: Paths, sources: Sources) -> Identification:

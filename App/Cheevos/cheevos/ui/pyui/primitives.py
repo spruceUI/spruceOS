@@ -404,8 +404,10 @@ def track_color() -> tuple[int, int, int]:
 
 
 def wait_for(buttons: set[Button]) -> Button | None:
-    """Wait one input tick (~1/12 s) for one of ``buttons``.
+    """Wait one input tick for one of ``buttons``.
 
+    A tick is a frame while the screen changes or was just used, and up to a second once it
+    has settled, unless a worker asks for a redraw (.agents/pyui.md, "Idle frames").
     Returns ``None`` on timeout so callers can redraw (e.g. live sync progress). Start runs the
     global Start action (sync) unless ``buttons`` claims it.
 
