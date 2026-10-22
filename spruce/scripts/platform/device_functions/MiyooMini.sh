@@ -87,6 +87,10 @@ device_init() {
     # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
 
+    # The Menu key's in-game menu reaches RetroArch over 127.0.0.1; stock firmware leaves lo down and only the
+    # Wi-Fi bring-up or a PyUI popup raised it, so a V4/OG (or a Plus with Wi-Fi off) usually launched without it
+    ifconfig lo up 2>/dev/null
+
     mini_model_init
 
     # Export and prime the pwm backlight channel.
