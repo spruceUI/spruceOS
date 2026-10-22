@@ -77,6 +77,9 @@ def initialize_device(device, main_ui_mode):
     elif "A10MINI" == device:
         from devices.darkmoss.a10mini import A10Mini
         Device.init(A10Mini(device))
+    elif "A10MINIV4" == device:
+        from devices.darkmoss.a10miniv4 import A10MiniV4
+        Device.init(A10MiniV4(device))
     elif "MAGICX_XU_MINI_M" == device:
         from devices.darkmoss.xumini import XuMiniM
         Device.init(XuMiniM(device))

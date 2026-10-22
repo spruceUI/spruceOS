@@ -79,7 +79,7 @@ case "$PLATFORM" in
             *) ACCENT_PYUI_DEVICE="ANBERNIC_RGXX640480" ;;
         esac
         ;;
-    "Miniloong" | "RGB30" | "RGB20SX" | "A10Mini" | "XUMiniM" | "G350" | "V10")
+    "Miniloong" | "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10")
         # Every dArkMoss device, as in App/PyUI/launch.sh. Their PyUI device names don't
         # always match PLATFORM (V10 -> POWKIDDY_V10, A10Mini -> A10MINI, ...), so take
         # the name from device_names, the same source PyUI's launcher uses.

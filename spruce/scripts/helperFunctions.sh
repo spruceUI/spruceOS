@@ -72,6 +72,10 @@ case $INFO in
     *0xd04*)                                    # RK3326
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
             export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+            # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
+            if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
+                export PLATFORM="A10MiniV4"
+            fi
         else
             export PLATFORM="Pixel2"
         fi
@@ -127,6 +131,7 @@ device_names() {
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
+        A10MiniV4)        echo "A10MINIV4"; echo "DARKMOSS" ;;
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
