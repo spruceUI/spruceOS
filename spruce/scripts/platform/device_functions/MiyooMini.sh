@@ -385,6 +385,11 @@ mini_reenable_buttons() {
     echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
 }
 
+# The Mini kernels (4.9.84 #968, #1136, #1313) have no zram module: skip enable_zram.sh and its log line
+device_supports_zram() {
+    return 1
+}
+
 device_lid_sensor_ready() {
     [ -e "$LID_HALL_FILE" ]
 }
