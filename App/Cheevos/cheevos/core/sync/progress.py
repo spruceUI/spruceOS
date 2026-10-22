@@ -79,13 +79,20 @@ class ProgressTracker:
 
     Args:
         clock: Monotonic clock used for ETA estimates.
+        on_change: Notification after publishing a status, called outside the status lock.
     """
 
-    def __init__(self, clock: Callable[[], float] = time.monotonic) -> None:
+    def __init__(
+        self,
+        clock: Callable[[], float] = time.monotonic,
+        *,
+        on_change: Callable[[], None] = lambda: None,
+    ) -> None:
         self._lock = threading.Lock()
         self._status = SyncStatus()
         self._clock = clock
         self._phase_started = clock()
+        self._on_change = on_change
 
     def snapshot(self) -> SyncStatus:
         """Return the current status."""
@@ -96,6 +103,7 @@ class ProgressTracker:
         """Forget the previous sync (before starting a new one)."""
         with self._lock:
             self._status = SyncStatus()
+        self._on_change()
 
     def phase(self, phase: Phase, *, total: int = 0) -> None:
         """Enter a phase, resetting its counters.
@@ -109,6 +117,7 @@ class ProgressTracker:
             self._status = dataclasses.replace(
                 self._status, phase=phase, done=0, total=total, current="", eta_seconds=None
             )
+        self._on_change()
 
     def working_on(self, current: str) -> None:
         """Report the item being fetched.
@@ -118,6 +127,7 @@ class ProgressTracker:
         """
         with self._lock:
             self._status = dataclasses.replace(self._status, current=current)
+        self._on_change()
 
     def advance(self, *, detail: bool = False, media: bool = False, count: int = 1) -> None:
         """Count one finished item and update the ETA from the phase's average pace.
@@ -140,6 +150,7 @@ class ProgressTracker:
                 details_fetched=status.details_fetched + int(detail),
                 media_fetched=status.media_fetched + int(media),
             )
+        self._on_change()
 
     def finish(
         self,
@@ -167,3 +178,4 @@ class ProgressTracker:
                 finished_at=at,
                 retry_at=retry_at,
             )
+        self._on_change()

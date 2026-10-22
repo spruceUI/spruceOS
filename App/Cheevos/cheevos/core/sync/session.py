@@ -10,8 +10,9 @@ from cheevos.core.errors import ConfigError
 from cheevos.core.local_games import on_device_game_ids
 from cheevos.core.proxy import ProxyReader
 from cheevos.core.ra_client.client import RaClient
+from cheevos.core.ra_client.common import default_user_agent
 from cheevos.core.ra_client.pacer import Pacer
-from cheevos.core.ra_client.transport import HttpTransport, Transport, default_user_agent
+from cheevos.core.ra_client.transport import HttpTransport, Transport
 from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache
 from cheevos.core.sync.engine import SyncDeps
