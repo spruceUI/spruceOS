@@ -969,11 +969,13 @@ class MiyooMiniCommon(MiyooDevice):
     # left over from Sprig that no spruce install has ever had.
 
 
+    # Every Mini has the same SoC and in-package RAM: 48 MB is free at the menu (Plus, Mini Flip), 37-40 MB while a
+    # game runs beside PyUI (Plus), so the 100 MB the bigger devices use would clear the caches nonstop
+    LOW_MEMORY_THRESHOLD_MB = 24
+
     @throttle.limit_refresh(1)
     def post_present_operations(self):
-        threshold = self.miyoo_mini_specific_model_variables.low_memory_threshold_mb
-        if threshold is not None:
-            self.clear_display_cache_if_memory_full("MemAvailable", threshold)
+        self.clear_display_cache_if_memory_full("MemAvailable", self.LOW_MEMORY_THRESHOLD_MB)
 
     def get_fw_version(self):
         try:
