@@ -59,26 +59,24 @@ mode_clock_mhz() {
     esac
 }
 
-# Mini Plus only until the other variants are measured; a card moved to another Mini drops our file.
+# Models opt in from device_functions/miyoomini/ once measured (the Mini Plus has); the rest
+# drop the file spruce wrote, so a card moved from a Plus does not pin another model's clock.
 pin_ra_cpuclock() {
-    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_PLUS" ]; then
-        printf '%s\n%s\n' "$(mode_clock_mhz "$MODE")" "$RA_CPUCLOCK_MARK" > "$RA_CPUCLOCK_FILE"
-    elif grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+    if grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
         rm -f "$RA_CPUCLOCK_FILE"
     fi
+}
+
+# Per-model boot quirks; device_functions/miyoomini/$MINI_MODEL.sh overrides it
+mini_model_init() {
+    :
 }
 
 device_init() {
     # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
 
-    # Detect variant
-    variant="$(get_miyoo_mini_variant)"
-
-    if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
-        # Screen is off by like ~8px unless you do this, not sure why
-        cat /proc/ls
-    fi
+    mini_model_init
 
     # Export and prime the pwm backlight channel.
     #
@@ -86,9 +84,9 @@ device_init() {
     # the V4 with no pwm0 node at all -- /sys/class/pwm/pwmchip0 exists but is
     # never exported. Nothing could drive the backlight, and device_exit_sleep,
     # which restores brightness through that same node, had nothing to write to
-    # either. Flip is deliberately left out: its backlight already works and it
-    # does not come through here today.
-    if [ "$variant" = "MIYOO_MINI_PLUS" ] || is_mini_og; then
+    # either. The model overlay sets MINI_PRIME_PWM_BACKLIGHT; the Mini Flip leaves
+    # it unset: its backlight already works and it does not come through here today.
+    if [ "${MINI_PRIME_PWM_BACKLIGHT:-}" = "true" ]; then
         # export brightness settings
         [ -d /sys/class/pwm/pwmchip0/pwm0 ] || echo 0 > /sys/class/pwm/pwmchip0/export
         # Unsure what this value should be, 1k seems to work
@@ -215,12 +213,9 @@ post_pyui_exit(){
     log_message "MiyooMini doesn't need to do anything after pyui exit (should we call freemma?)" -v
 }
 
+# MINI_HAS_LID comes from the model overlay (the Mini Flip's hall sensor)
 launch_startup_watchdogs(){
-    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_FLIP" ]; then
-        launch_common_startup_watchdogs_v2 "true"
-    else
-        launch_common_startup_watchdogs_v2 "false"
-    fi
+    launch_common_startup_watchdogs_v2 "${MINI_HAS_LID:-false}"
 }
 
 # Should the above be merged into here?
@@ -361,14 +356,7 @@ device_exit_sleep() {
     send_event /dev/input/event0 116:1 
 
 
-    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
-        #TODO don't have a mini to test on but this should potentially be
-        #MMP only
-        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
-    else
-        [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
-
-    fi
+    mini_reenable_buttons
 
     if pidof retroarch ra32.mini >/dev/null; then
         # Back to the game's own CPU mode where it was pinned at launch, else smart mode
@@ -378,6 +366,12 @@ device_exit_sleep() {
             set_smart
         fi
     fi
+}
+
+# Input back on after sleep; the Mini Flip's model file overrides it.
+# TODO (no OG Mini to test on): this may only be needed on the Plus.
+mini_reenable_buttons() {
+    echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
 }
 
 device_lid_sensor_ready() {
@@ -492,3 +486,8 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+# What only one model does, last so its definitions win (as RGB20SX.sh over RGB30.sh)
+if [ -f "/mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/${MINI_MODEL:-}.sh" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/$MINI_MODEL.sh"
+fi
