@@ -1,5 +1,5 @@
 #!/bin/sh
-# dArkMoss update for the RGB30, RGB20SX, Miniloong, A10 Mini (and V4), G350 and V10, called by firmwareUpdate.sh.
+# dArkMoss update for the RGB30, RGB20SX, Miniloong, A10 Mini (and V4), G350, V10 and XU Mini M, called by firmwareUpdate.sh.
 #
 # Every dArkMoss release ships a dArkMoss_<UNIT>_<tag>.dmupd beside its image:
 # the boot partition plus the rootfs files the dArkMoss build authored, with its
