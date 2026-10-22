@@ -49,6 +49,7 @@ while true; do
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
+        hide_or_unhide_AccentColor_app
 
         prepare_for_pyui_launch
 
