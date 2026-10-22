@@ -121,8 +121,9 @@ check_for_update() {
         last_check=$(cat "$timestamp_file")
         time_diff=$((current_time - last_check))
         
-        # If less than 24 hours have passed, skip the check
-        if [ $time_diff -lt $check_interval ]; then
+        # If less than 24 hours have passed, skip the check. A negative gap means the clock is behind the
+        # stamp (a card moved to a Mini V4 boots at 1970): treat it as stale rather than skip forever.
+        if [ $time_diff -ge 0 ] && [ $time_diff -lt $check_interval ]; then
             log_message "Update Check: Skipping check, last check was $((time_diff / 3600)) hours ago"
             return 1
         fi
