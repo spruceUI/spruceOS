@@ -2,7 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LEDS_STATE=(false false false false false)
+# 0 = off
+# 1 = on
+# 2 = blinking
+LEDS_STATE=(0 0 0 0 0)
 
 leds_audio() {
   turn_off_all_leds
@@ -42,27 +45,53 @@ leds_audio() {
 }
 
 turn_on_led() {
-  if ! ${LEDS_STATE[$1]} ; then
+  if [ ${LEDS_STATE[$1]} -eq 0 ] ; then
     echo 1 > /sys/class/leds/led-$1/brightness
-    LEDS_STATE[$1]=true
+    LEDS_STATE[$1]=1
   fi
 }
 
 turn_off_led() {
-  if ${LEDS_STATE[$1]} ; then
+  if [ ${LEDS_STATE[$1]} -eq 1 ] ; then
     echo 0 > /sys/class/leds/led-$1/brightness
-    LEDS_STATE[$1]=false
+    LEDS_STATE[$1]=0
   fi
 }
 
 turn_off_all_leds() {
-  LEDS_STATE=(true true true true true)
+  LEDS_STATE=(1 1 1 1 1)
+  for l in 0 1 2 3 4; do
+    echo none > "/sys/class/leds/led-$l/trigger"
+    turn_off_led $l
+  done
+}
 
-  turn_off_led 0
-  turn_off_led 1
-  turn_off_led 2
-  turn_off_led 3
-  turn_off_led 4
+start_blink(){
+  if [ ${LEDS_STATE[$1]} -ne 2 ] ; then
+    echo pattern > "/sys/class/leds/led-$1/trigger"
+    echo 0 500 1 500 > "/sys/class/leds/led-$1/pattern"
+    LEDS_STATE[$1]=2
+  fi
+}
+
+stop_blink(){
+  if [ ${LEDS_STATE[$1]} -eq 2 ] ; then
+    echo none > "/sys/class/leds/led-$l/trigger"
+    echo 0 > /sys/class/leds/led-$1/brightness
+    LEDS_STATE[$1]=0
+  fi
+}
+
+is_charging(){
+  STATUS=$(device_get_charging_status)
+  if [ $STATUS = "Charging" ] ; then
+    turn_on_led 0
+    turn_on_led 1
+    start_blink $1
+  else
+    turn_off_led 0
+    stop_blink $1
+  fi
 }
 
 leds_battery() {
@@ -70,52 +99,45 @@ leds_battery() {
 
   while true; do
     CAPACITY=$(device_get_battery_percent)
-    STATUS=$(device_get_charging_status)
-
-    if [ "$STATUS" = "Charging" ] ; then
-      turn_on_led 0
-      turn_on_led 1
-    else
-      turn_off_led 0
-    fi
 
     if [ $CAPACITY -le $LOW_PERCENT ] ; then
       turn_on_led 0
-      turn_off_led 1
+      is_charging 1
       turn_off_led 2
       turn_off_led 3
       turn_off_led 4
-    fi
-
-    if [ $CAPACITY -gt $LOW_PERCENT ] ; then
-      turn_on_led 1
+    elif [ $CAPACITY -gt $LOW_PERCENT ] && [ $CAPACITY -le 25 ] ; then
+      is_charging 1
       turn_off_led 2
       turn_off_led 3
       turn_off_led 4
-    fi
-
-    if [ $CAPACITY -gt 25 ] ; then
+    elif [ $CAPACITY -gt 25 ] && [ $CAPACITY -le 50 ] ; then
+      stop_blink 1
       turn_on_led 1
-      turn_on_led 2
+      is_charging 2
       turn_off_led 3
       turn_off_led 4
-    fi
-
-    if [ $CAPACITY -gt 50 ] ; then
+    elif [ $CAPACITY -gt 50 ] && [ $CAPACITY -le 75 ] ; then
       turn_on_led 1
+      stop_blink 2
       turn_on_led 2
-      turn_on_led 3
+      is_charging 3
       turn_off_led 4
-    fi
-
-    if [ $CAPACITY -gt 75 ] ; then
+    elif [ $CAPACITY -gt 75 ] && [ $CAPACITY -le 100 ] ; then
+      turn_on_led 1
+      turn_on_led 2
+      stop_blink 3
+      turn_on_led 3
+      is_charging 4
+    elif [ $CAPACITY -eq 100 ] ; then
       turn_on_led 1
       turn_on_led 2
       turn_on_led 3
+      stop_blink 4
       turn_on_led 4
     fi
 
-    sleep 5
+    sleep 4
   done
 }
 
