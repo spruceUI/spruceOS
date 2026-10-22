@@ -9,13 +9,11 @@ from menus.settings import settings_menu
 from menus.settings.animation_settings_menu import AnimationSettingsMenu
 from menus.settings.cfw_system_settings_menu_for_category import CfwSystemSettingsMenuForCategory
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
-from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.game_art_display_settings_menu import GameArtDisplaySettingsMenu
 from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
 from menus.settings.language_menu import LanguageMenu
 from menus.settings.game_system_select_settings_menu import GameSystemSelectSettingsMenu
-from menus.settings.night_mode_settings_menu import NightModeSettingsMenu
 from menus.settings.time_settings_menu import TimeSettingsMenu
 from utils.cfw_system_config import CfwSystemConfig
 from utils.py_ui_config import PyUiConfig
@@ -26,14 +24,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
         self.on_screen_keyboard = OnScreenKeyboard()
-
-    def launch_display_settings(self,input):
-        if(ControllerInput.A == input):
-            DisplaySettingsMenu().show_menu()
-
-    def launch_night_mode_settings(self, input):
-        if ControllerInput.A == input:
-            NightModeSettingsMenu().show_menu()
 
     def launch_time_settings(self,input):
         if(ControllerInput.A == input):
@@ -91,8 +81,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
     def is_excluded_setting(self,category):
         excluded_settings = [
-            GameSwitcherSettingsMenu.SETTINGS_NAME,
-            NightModeSettingsMenu.SETTINGS_CATEGORY
+            GameSwitcherSettingsMenu.SETTINGS_NAME
         ]
         return category in excluded_settings
 
@@ -100,30 +89,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def build_options_list(self):
         option_list = []
         
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.display_settings(),
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_display_settings
-                    )
-            )
-        if Device.get_device().supports_night_mode():
-
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.settings_category(NightModeSettingsMenu.SETTINGS_CATEGORY),
-                            value_text=None,
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.launch_night_mode_settings
-                        )
-                )
 
         option_list.append(
                 GridOrListEntry(

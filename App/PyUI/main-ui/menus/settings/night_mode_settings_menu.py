@@ -1,11 +1,8 @@
-from menus.settings import settings_menu
+from menus.settings import shared_display_settings_menu
 
 
-class NightModeSettingsMenu(settings_menu.SettingsMenu):
+class NightModeSettingsMenu(shared_display_settings_menu.SharedDisplaySettingsMenu):
     SETTINGS_CATEGORY = "Night Mode Settings"
 
     def __init__(self):
         super().__init__()
-
-    def build_options_list(self):
-        return self.build_options_list_from_config_menu_options(self.SETTINGS_CATEGORY)
