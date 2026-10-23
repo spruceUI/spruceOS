@@ -710,9 +710,9 @@ hide_or_unhide_AccentColor_app() {
     _config="/mnt/SDCARD/App/AccentColor/config.json"
 
     if [ -d "${_theme_path}/accent" ]; then
-        sed -i 's|"label"|"#label"|' "$_config"
-    else
         sed -i 's|"#label"|"label"|' "$_config"
+    else
+        sed -i 's|"label"|"#label"|' "$_config"
     fi
 }
 
