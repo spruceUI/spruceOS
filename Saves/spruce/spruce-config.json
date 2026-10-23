@@ -352,7 +352,7 @@
                 "selected": "Game Switcher"
             },
             "menuButton": {
-                "devices": ["RGB30"],
+                "devices": ["RGB30", "V10"],
                 "display": "Menu button",
                 "description": "Which stick click opens the menu",
                 "options": [
