@@ -153,6 +153,7 @@ usb_gadget_release() {
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
             rmdir "$USB_CONFIG_PATH" "$USB_GADGET_PATH/functions/mass_storage.0" \
                 "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH" 2>/dev/null
+            systemctl -q is-enabled adbd 2>/dev/null && systemctl --no-block start adbd
             ;;
     esac
     sync
@@ -263,6 +264,8 @@ usb_export_gadget() {
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
             ;;
         "RGB30" | "RGB20SX" | "Miniloong")
+            # dArkMoss's adbd holds the same UDC.
+            systemctl stop adbd 2>/dev/null
             mkdir -p "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH"
             echo "0x1d6b" > "$USB_GADGET_PATH/idVendor"
             echo "0x0104" > "$USB_GADGET_PATH/idProduct"
