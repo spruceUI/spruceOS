@@ -3,11 +3,12 @@
 # remote, which no other watchdog reads: they register as an input device of
 # their own, and buttons_watchdog.sh reads a fixed list of nodes.
 #
-# Started and stopped by usb_audio_watchdog.sh for the card audio is routed to.
+# Started and stopped by usb_audio_watchdog.sh for the card audio is routed to,
+# or by a platform's udev rules for each USB input device.
 # A press steps the volume through the device's volume_up/volume_down, so the
 # card, the codec and the level stored for the UI move together. A held button
 # autorepeats; that steps at most every 0.3 s, the pace of buttons_watchdog.sh.
-# Exits when the nodes go away.
+# Whatever starts it must stop it: getevent keeps running after its nodes go.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
