@@ -1,0 +1,79 @@
+{
+    "name": "Spruce",
+    "author": "tenlevels",
+    "description": "spruce theme for a30",
+    "batteryPercentage": {
+        "color": "#EBDBB2",
+        "font": "nunwen.ttf",
+        "size": 20
+    },
+    "title": {
+        "font": "nunwen.ttf",
+        "size": 28,
+        "color": "#EBDBB2"
+    },
+    "hint": {
+        "font": "nunwen.ttf",
+        "size": 28,
+        "color": "#EBDBB2"
+    },
+    "currentpage": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#EBDBB2"
+    },
+    "total": {
+        "font": "nunwen.ttf",
+        "size": 24,
+        "color": "#D65D0E"
+    },
+    "grid": {
+        "font": "nunwen.ttf",
+        "grid1x4": 28,
+        "grid3x4": 20,
+        "color": "#7C6F64",
+        "selectedcolor": "#FBF1C7"
+    },
+    "list": {
+        "font": "nunwen.ttf",
+        "size": 27,
+        "color": "#FBF1C7",
+        "selectedcolor": "#FBF1C7"
+    },
+    "bindOverMiyooTheme": true,
+    "recentsEnabled": true,
+    "topBarInitialXOffset": 67,
+    "setTopBarTextToGameSelection": true,
+    "fullScreenGridGameMenuResizeType": "FIT",
+    "mainMenuTitle": "",
+    "displayVolumeNumbers": true,
+    "screensaver": {
+        "bgColor": "#282828",
+        "screensaverTimeoutSec": 60,
+        "widgets": [
+            {
+                "type": "clock",
+                "x": 0.5,
+                "y": 0.37,
+                "fontSize": 92,
+                "color": "#FFFFFF",
+                "enabled": true,
+                "font": "nunwen.ttf"
+            },
+            {
+                "type": "date",
+                "x": 0.5,
+                "y": 0.55,
+                "fontSize": 27,
+                "color": "#EBDBB2"
+            },
+            {
+                "type": "battery",
+                "x": 0.5,
+                "y": 0.7,
+                "fontSize": 22,
+                "color": "#88CC88"
+            }
+        ]
+    }
+}
