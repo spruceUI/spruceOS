@@ -31,7 +31,7 @@ from cheevos.core.sync.lazy_media import LazyMediaFetcher, MediaSession
 from cheevos.platform.paths import Paths
 from cheevos.ui.context import AppContext
 from cheevos.ui.media import MediaResolver
-from cheevos.ui.pyui import generated, primitives, status_bar, title_bar, visible_images
+from cheevos.ui.pyui import generated, primitives, redraw, status_bar, title_bar, visible_images
 from cheevos.ui.screens.home import Home
 from cheevos.ui.screens.setup import change_key, ensure_credentials
 from cheevos.ui.screens.status import SyncBar
@@ -323,11 +323,19 @@ def run(*, started_at: float, env: AppEnvironment, game_id: int | None = None) -
     except CheevosError:
         logger.exception("Could not open the caches")
         return
-    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer))
+    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer), on_change=redraw.request_redraw)
     details = DetailFetcher(
-        _detail_session(env, ctx_ref, pacer), clock=env.clock, online=env.online
+        _detail_session(env, ctx_ref, pacer),
+        clock=env.clock,
+        online=env.online,
+        on_change=redraw.request_redraw,
     )
-    sync = BackgroundSync(_sync_deps(env, ctx_ref, pacer), online=env.online, clock=env.clock)
+    sync = BackgroundSync(
+        _sync_deps(env, ctx_ref, pacer),
+        online=env.online,
+        clock=env.clock,
+        on_change=redraw.request_redraw,
+    )
     ctx = AppContext(
         paths=paths,
         credentials=credentials,

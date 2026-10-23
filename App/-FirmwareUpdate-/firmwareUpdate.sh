@@ -23,7 +23,7 @@ case "$PLATFORM" in
 	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"G350"|"V10")
+	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
 	"Zero28"|"Zero40"|"XU20")
