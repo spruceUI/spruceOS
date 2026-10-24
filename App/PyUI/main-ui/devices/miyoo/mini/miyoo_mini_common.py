@@ -911,6 +911,7 @@ class MiyooMiniCommon(MiyooDevice):
             
             PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
             Display.deinit_display()
+            os.sync()
 
             env = os.environ.copy()
             env["LD_PRELOAD"] = preload_path
