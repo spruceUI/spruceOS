@@ -37,6 +37,19 @@ class GlyphAdvances(dict):
         advance = self[char] = Display._measure_glyph_advance(self.font, char)
         return advance
 
+class FontCache(dict):
+    """Open a purpose's font when it is first needed, keeping ownership in this cache."""
+
+    def __init__(self, font_path=None):
+        super().__init__()
+        self.font_path = font_path
+
+    def __missing__(self, purpose):
+        font = Display._load_font(purpose, self.font_path)
+        self[purpose] = font
+        return font
+
+
 class ImageTextureCache:
     def __init__(self):
         self.cache = {} 
@@ -171,7 +184,7 @@ class Display:
             cls.log_sdl_error_if_any()
 
         if(Device.get_device().double_init_sdl_display()):
-            Display.deinit_display()
+            # reinitialize() already tears the display down.
             Display.reinitialize()
 
         if(Device.get_device().might_require_surface_format_conversion()):
@@ -254,17 +267,10 @@ class Display:
 
     @classmethod
     def init_fonts(cls):
-        cls.fonts = {
-            purpose: cls._load_font(purpose)
-            for purpose in FontPurpose
-        }
-
-        fallback_path = PyUiConfig.get_fallback_font()
-        
-        cls.fallback_fonts = {
-            purpose: cls._load_font(purpose, fallback_path)
-            for purpose in FontPurpose
-        }
+        # Most screens use only a few purposes, and ASCII text needs no fallback.
+        # In particular, do not open all 30 fonts before the first menu is shown.
+        cls.fonts = FontCache()
+        cls.fallback_fonts = FontCache(PyUiConfig.get_fallback_font())
 
     @classmethod
     def _init_display(cls):
