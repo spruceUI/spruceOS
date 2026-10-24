@@ -27,7 +27,7 @@
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_A133P", "RGB30", "RGB20SX"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_A133P", "RGB30", "RGB20SX", "RG353M"],
                 "description": "for non-red status LED",
                 "options": [
                     "Always off",
@@ -162,12 +162,6 @@
         },
         "System Settings": {
             "checkForUpdates": {
-                "devices":["MIYOO_FLIP",
-                           "MIYOO_MINI_FAMILY",
-                           "TRIMUI_A133P",
-                           "TRIMUI_SMART_PRO_S",
-                           "MIYOO_A30",
-                           "MAGICX_A133P"],
                 "display": "Check for spruce updates on startup",
                 "description": "if connected to Wi-Fi",
                 "options": [
@@ -206,10 +200,10 @@
                 "display": "Rumble intensity",
                 "description": "for system notifications",
                 "options": [
-                    "Strong",
-                    "Medium",
+                    "Off",
                     "Weak",
-                    "Off"
+                    "Medium",
+                    "Strong"
                 ],
                 "selected": "Medium"
             },
@@ -527,7 +521,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20", "RG353M"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
