@@ -5,6 +5,7 @@ import signal
 import sys
 import threading
 from devices.device import Device
+from devices.device_display_config_helper import DeviceDisplayConfigHelper
 from devices.device_factory import initialize_device
 from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
@@ -158,6 +159,7 @@ def check_for_startup_init_only(args):
     if(args.startupInitOnly):
         print("Running in startup init only mode")
         Device.get_device().startup_init(include_wifi=False)
+        DeviceDisplayConfigHelper.display_mode_changed()
         sys.exit(0)
 
 def main():
@@ -183,6 +185,8 @@ def main():
 
         with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
+            if main_ui_mode:
+                DeviceDisplayConfigHelper.display_mode_changed()
 
         # TZ only lives in the environment, so the saved zone has to be put back
         # every launch. Do it before anything reads the clock, and before any

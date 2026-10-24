@@ -1,170 +1,76 @@
-
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from devices.device_display_config_helper import DeviceDisplayConfigHelper
 from menus.settings import settings_menu
-from views.grid_or_list_entry import GridOrListEntry
-
-
+from menus.settings.desired_display_settings_menu import DesiredDisplaySettingsMenu
+from menus.settings.night_mode_settings_menu import NightModeSettingsMenu
 from menus.language.language import Language
+from views.grid_or_list_entry import GridOrListEntry
 
 class DisplaySettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
-    
-    def brightness_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_brightness()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_brightness()
 
-    def contrast_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_contrast()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_contrast()
+    def toggle_night_mode(self, input):
+        system_config = Device.get_device().get_system_config()
+        current_value = system_config.get_nightmode_active()
 
-    def saturation_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_saturation()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_saturation()
-    
-    def lumination_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_lumination()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_lumination()
-    
-    def hue_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_hue()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_hue()
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            value = False
+        elif (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            value = True
+        elif ControllerInput.A == input:
+            value = not current_value
+        else:
+            return
+        system_config.set_nightmode_active(value)
 
-    
-    def hue_adjust(self, input: ControllerInput):
-        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_hue()
-        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_hue()
+        DeviceDisplayConfigHelper.display_mode_changed()
 
-    def adjust_rgb(self, input: ControllerInput, getter, setter):
-        delta = 0
-        if(ControllerInput.DPAD_LEFT == input):
-            delta = -1
-        elif(ControllerInput.L1== input):
-            delta = -10
-        elif(ControllerInput.DPAD_RIGHT == input):
-            delta = +1
-        elif(ControllerInput.R1 == input):
-            delta = +10
+    def launch_display_settings(self,input):
+        if(ControllerInput.A == input):
+            DesiredDisplaySettingsMenu().show_menu()
 
-        new_value = getter() + delta
-        if(new_value < 0): 
-            new_value = 255
-        elif(new_value > 255): 
-            new_value = 0
-        
-        setter(new_value)
-            
+    def launch_night_mode_settings(self, input):
+        if ControllerInput.A == input:
+            NightModeSettingsMenu().show_menu()
+
     def build_options_list(self):
         option_list = []
-
+        
         option_list.append(
                 GridOrListEntry(
-                        primary_text=Language.backlight(),
-                        value_text="<    " + str(Device.get_device().lumination()) + "    >",
+                        primary_text=Language.display_settings(),
+                        value_text=None,
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.lumination_adjust
+                        value=self.launch_display_settings
+                    )
+            )
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.night_mode(),
+                        value_text="<    " + str(Device.get_device().get_system_config().get_nightmode_active()) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.toggle_night_mode
                     )
             )
 
-        if(Device.get_device().supports_brightness_calibration()):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.brightness(),
-                            value_text="<    " + str(Device.get_device().brightness()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.brightness_adjust
-                        )
-                )
-        if(Device.get_device().supports_contrast_calibration()):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.contrast(),
-                            value_text="<    " + str(Device.get_device().contrast()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.contrast_adjust
-                        )
-                )
-        if(Device.get_device().supports_saturation_calibration()):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.saturation(),
-                            value_text="<    " + str(Device.get_device().saturation()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.saturation_adjust
-                        )
-                )          
-        
-        if(Device.get_device().supports_hue_calibration()):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.hue(),
-                            value_text="<    " + str(Device.get_device().hue()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=self.hue_adjust
-                        )
-                )          
-        
-        if(Device.get_device().supports_rgb_calibration()):
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.red(),
-                            value_text="<    " + str(Device.get_device().get_disp_red()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=lambda input_value, getter=Device.get_device().get_disp_red, setter=Device.get_device().set_disp_red: self.adjust_rgb(input_value,getter,setter)
-                        )
-                )          
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.blue(),
-                            value_text="<    " + str(Device.get_device().get_disp_blue()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=lambda input_value, getter=Device.get_device().get_disp_blue, setter=Device.get_device().set_disp_blue: self.adjust_rgb(input_value,getter,setter)
-                        )
-                )          
-            option_list.append(
-                    GridOrListEntry(
-                            primary_text=Language.green(),
-                            value_text="<    " + str(Device.get_device().get_disp_green()) + "    >",
-                            image_path=None,
-                            image_path_selected=None,
-                            description=None,
-                            icon=None,
-                            value=lambda input_value, getter=Device.get_device().get_disp_green, setter=Device.get_device().set_disp_green: self.adjust_rgb(input_value,getter,setter)
-                        )
-                )          
-        
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.settings_category(NightModeSettingsMenu.SETTINGS_CATEGORY),
+                        value_text=None,
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.launch_night_mode_settings
+                    )
+            )
+    
         return option_list

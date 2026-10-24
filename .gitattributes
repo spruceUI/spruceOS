@@ -2,4 +2,6 @@
 *text eol=lf
 *.sh text eol=lf
 *.bat text eol=crlf
+spruce/scripts/FN_Button/apply-* text eol=lf
+spruce/scripts/FN_Button/fn-toggle text eol=lf
 RetroArch/.retroarch/cores64/scummvm_libretro.so filter=lfs diff=lfs merge=lfs -text

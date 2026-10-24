@@ -9,7 +9,6 @@ from menus.settings import settings_menu
 from menus.settings.animation_settings_menu import AnimationSettingsMenu
 from menus.settings.cfw_system_settings_menu_for_category import CfwSystemSettingsMenuForCategory
 from menus.settings.controller_settings_menu import ControllerSettingsMenu
-from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.game_art_display_settings_menu import GameArtDisplaySettingsMenu
 from menus.settings.game_select_settings_menu import GameSelectSettingsMenu
 from menus.settings.game_switcher_settings_menu import GameSwitcherSettingsMenu
@@ -25,10 +24,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
         self.on_screen_keyboard = OnScreenKeyboard()
-
-    def launch_display_settings(self,input):
-        if(ControllerInput.A == input):
-            DisplaySettingsMenu().show_menu()
 
     def launch_time_settings(self,input):
         if(ControllerInput.A == input):
@@ -94,17 +89,6 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def build_options_list(self):
         option_list = []
         
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.display_settings(),
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_display_settings
-                    )
-            )
 
         option_list.append(
                 GridOrListEntry(

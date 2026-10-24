@@ -6,5 +6,20 @@
         "saturation": 10,
         "hue":10,
         "wifi": 1,
-        "bluetooth": 0
+        "bluetooth": 0,
+        "nightMode": 0,
+        "nightModeSettings": {
+            "backlight": 10,
+            "brightness": 10,
+            "contrast": 10,
+            "saturation": 10,
+            "hue": 10
+        },
+        "defaultModeSettings": {
+            "backlight": 10,
+            "brightness": 10,
+            "contrast": 10,
+            "saturation": 10,
+            "hue": 10
+        }
 }

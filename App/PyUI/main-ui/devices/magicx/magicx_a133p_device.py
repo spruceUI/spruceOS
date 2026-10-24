@@ -217,3 +217,6 @@ class MagicXA133PDevice(TrimUIDevice):
 
     def volume_down(self):
         StdInBasedSendEventBinaryHelper.send_key_down_and_up(self.volume_event_path, 114)
+    
+    def supports_night_mode(self):
+        return True
