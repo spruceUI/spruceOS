@@ -450,6 +450,45 @@ jobs:
             exit 1
           fi
 
+      - name: Package RetroArch shaders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch"
+
+          ARGS=()
+          if [ -d "RetroArch/.retroarch/shaders" ]; then
+            cp -a "RetroArch/.retroarch/shaders" "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch/"
+            ARGS+=("mnt/SDCARD/RetroArch/.retroarch/shaders")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No RetroArch shaders folder found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/retroarch-shaders.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "RetroArch/.retroarch/shaders"
+            echo "Created preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+          
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
