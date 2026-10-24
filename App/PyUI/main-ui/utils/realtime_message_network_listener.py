@@ -246,7 +246,12 @@ class RealtimeMessageNetworkListener:
                     self.logger.info(f"Rendering image: {image_path} with text: {text}")
                     Display.clear("")
                     Display.render_image_and_text(
-                        image_path, text, int(args[2]), int(args[3]), int(args[4]))
+                        image_path=image_path,
+                        text=text,
+                        height_percent=int(args[2]),
+                        image_y_percent=int(args[3]),
+                        text_y_percent=int(args[4]),
+                    )
                     Display.present()
                 else:
                     self.logger.error("IMAGE_AND_TEXT missing args")

@@ -1209,8 +1209,13 @@ class Display:
         sdl2.SDL_RenderClear(renderer)
         if cls.background_texture is not None:
             sdl2.SDL_RenderCopy(renderer, cls.background_texture, None, None)
-        cls.render_image_and_text(PyUiConfig.get_shutdown_image(),
-                                  Language.label("poweringOff", "Powering off..."), 33, 10, 60)
+        cls.render_image_and_text(
+            image_path=Theme.get_shutdown_image(),
+            text=Language.label("poweringOff", "Powering off..."),
+            height_percent=33,
+            image_y_percent=10,
+            text_y_percent=60,
+        )
         cls._copy_canvas_to_window()
         cls.renderer.present()
 

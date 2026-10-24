@@ -10,10 +10,15 @@ low-battery shutdown keep their own screens, and from a game or app the
 message writer shows the shutdown screen, as before.
 
 The menu shows the message writer's IMAGE_AND_TEXT layout over the theme
-background, with the "poweringOff" label. The image is named by
-"shutdownImage" in py-ui-config.json; spruce sets it to
+background, with the localized "poweringOff" label. A theme can supply
+shutdown.qoi (or shutdown.png) in its active skin folder: skin_<W>x<H> when
+present, otherwise skin. Theme.get_shutdown_image() resolves it when the
+farewell is drawn, without preloading it at startup.
+
+If the theme has no shutdown image, the fallback is "shutdownImage" in
+py-ui-config.json; spruce sets it to
 /mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png, the one save_poweroff.sh shows
-for apps. With no shutdownImage the menu shows the text only.
+for apps. With neither image the menu shows the text only.
 
 The request
 -----------
