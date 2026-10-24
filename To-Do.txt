@@ -9,6 +9,7 @@
 
 --- Sun -----------------------------------------------------------------------
 
+- analog <-> dpad swap for V10
 - Mini splore update from tenlevels
 - Miyoo Mini: every model shares Saves/miyoo-mini-system.json. Can be broken out into separate per-device jsons later if needed.
 - PCSX Standalone on Miyoo Mini - we ship this and have scripting for it, but it doesn't work. Mini Flip - segfaults. Mini Plus - borks the screen.
@@ -23,12 +24,11 @@ RA build with Google cloud sync stuff?
     
 --- Ry ------------------------------------------------------------------------
 
-- RA cfg overhaul for older devices on newer RA builds - missing some entries
 - fake08 patches from TL
 - XX - polish shutdown paths - LEDs on, screen dim/off
 - XX - bootlogo app needs polish - add "bootlogo applied successfully" message
 -- need to update App/BootLogo/install_logo.sh to use PyUI display instead of legacy display(), as that one is not enabled on XX.
-
+- rg353m bring-up
 
 
 --- OTA ------------------------------------------------------------------------
