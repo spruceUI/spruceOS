@@ -1,6 +1,16 @@
 import threading
 import time
-from functools import wraps
+from functools import partial, wraps
+
+# The clock cache ages are measured on. CLOCK_BOOTTIME keeps counting while the device
+# is suspended, which time.monotonic() does not on Linux: after waking, the battery would
+# show its pre-sleep level for a whole window. Unlike time.time(), neither jumps when NTP
+# or the saved time sets the clock. Hosts without it, such as the desktop, use monotonic.
+try:
+    time.clock_gettime(time.CLOCK_BOOTTIME)
+    _elapsed = partial(time.clock_gettime, time.CLOCK_BOOTTIME)
+except (AttributeError, OSError):
+    _elapsed = time.monotonic
 
 def limit_refresh(seconds=15, fast_seconds=None, fast_while=None, background=False):
     """Cache the result for `seconds`.
@@ -46,7 +56,7 @@ def limit_refresh(seconds=15, fast_seconds=None, fast_while=None, background=Fal
 
         @wraps(orig_func)
         def wrapper(*args, **kwargs):
-            now = time.monotonic()
+            now = _elapsed()
             window = seconds
             if fast_while and fast_seconds is not None and args:
                 try:
@@ -69,7 +79,7 @@ def limit_refresh(seconds=15, fast_seconds=None, fast_while=None, background=Fal
                     # The Wi-Fi warm-up and first frame can arrive together. Only
                     # one initial read runs; both callers need its actual result.
                     with lock:
-                        now = time.monotonic()
+                        now = _elapsed()
                         if (not has_result[0] or now - last_called[0] >= window
                                 or getattr(wrapper, "_force_refresh", False)):
                             last_result[0] = orig_func(*args, **kwargs)

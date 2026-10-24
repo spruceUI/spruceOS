@@ -188,7 +188,6 @@ def main():
         # every launch. Do it before anything reads the clock, and before any
         # emulator is launched, since they inherit it from here.
         Device.get_device().restore_saved_timezone()
-        warm_wifi_status()
 
         PyUiState.init(Device.get_device().get_state_path())
 
@@ -196,9 +195,12 @@ def main():
         check_for_button_listener_mode(args)
         check_for_startup_init_only(args)
 
-        # The Roms scan is SD-bound; overlap it with the display bring-up below.
+        # The Roms scan is SD-bound and the first Wi-Fi status read blocks; overlap both
+        # with the display bring-up below. The helper modes and startupInitOnly (which
+        # has exited by now) show no menu, so they skip both.
         if main_ui_mode:
             Device.get_device().get_game_system_utils().prefetch_active_systems()
+            warm_wifi_status()
 
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
@@ -220,6 +222,7 @@ def main():
         check_for_option_list_file(args)
 
     main_menu = MainMenu()
+    main_menu.build_startup_menu()
 
     start_background_threads()
     # The CPU is held in performance mode until the menu is built.

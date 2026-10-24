@@ -62,6 +62,18 @@ class MainMenu:
         from menus.main_menu_popup import MainMenuPopup
         return MainMenuPopup()
 
+    def build_startup_menu(self):
+        """Build the systems menu now when the first screen is Games, as it is after
+        every game, so its scan runs before background work starts and while the CPU
+        is still in performance mode. The other menus are cheap to build."""
+        if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            return
+        selection = PyUiState.get_last_main_menu_selection()
+        # Matches run_main_menu_selection: these themes open Games unless App or Setting was last.
+        tabbed = Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()
+        if selection == "Game" or (tabbed and selection not in ["App", "Setting"]):
+            self.system_select_menu  # cached_property: reading it builds the menu
+
     def reorder_options(self,ordering, objects):
         # Create a lookup map for ordering priority
         order_map = {text: index for index, text in enumerate(ordering)}
