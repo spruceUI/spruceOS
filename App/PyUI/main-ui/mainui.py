@@ -255,8 +255,10 @@ def sigterm_handler(signum, frame):
     sys.exit() # Exit gracefully
 
 def exit_without_teardown():
-    """Finishes what sys.exit() finishes (non-daemon threads, then the log flush) and skips
-    the interpreter teardown after it: 0.25 s on the Mini Plus, paid before every app or game starts."""
+    """Joins non-daemon threads and flushes the log, then skips the interpreter teardown that
+    sys.exit() would add: 0.25 s on the Mini Plus, paid before every app or game starts.
+    No other exit hooks run, including the one that stops idle ThreadPoolExecutor workers:
+    shut an executor down before exiting (a with-block does), or the join waits forever."""
     main_thread = threading.main_thread()
     for thread in threading.enumerate():
         if thread is not main_thread and not thread.daemon:
