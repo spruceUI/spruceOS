@@ -158,6 +158,11 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"ITCH")
+		# A launcher the itch.io app wrote; it sets up the game itself.
+		sh "$ROM_FILE"
+		;;
+
 	"J2ME")
 		# The core execvp's "java"; fonts come from the JRE's own
 		# fontconfig.properties, so nothing else needs setting up here.

@@ -1,0 +1,40 @@
+{
+  "label": "itch.io",
+  "icon": "itch.png",
+  "iconsel": "itch_sel.png",
+  "themecolor": "FA5C5C",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "sh",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    }
+  },
+  "scanSubfolders": false,
+  "sortOrder": 5010,
+  "brand": "Other",
+  "type": "other",
+  "releaseYear": 2013,
+  "default_emulator": "sh",
+  "scaling_min_freq": 648000,
+  "devices": [
+    "TRIMUI_A133P",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "DARKMOSS",
+    "MAGICX_A133P"
+  ],
+  "alternativeFolderNames": [
+    "itch"
+  ]
+}
