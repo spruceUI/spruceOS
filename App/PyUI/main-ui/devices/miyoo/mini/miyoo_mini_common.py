@@ -102,6 +102,7 @@ class MiyooMiniCommon(MiyooDevice):
 
         # launch.sh preloads libpadsp for PyUI's own sounds; children must not inherit it.
         os.environ.pop("LD_PRELOAD", None)
+        MiyooMiniCommon._wait_for_mma_cleanup()
         self.device_name = device_name
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
@@ -131,6 +132,37 @@ class MiyooMiniCommon(MiyooDevice):
             threading.Thread(target=self.startup_init, daemon=True).start()
 
         super().__init__()
+
+    # launch.sh runs freemma in the background and passes its PID here. freemma frees
+    # graphics allocations it does not recognise, so nothing may touch MI or SDL until
+    # it has exited. It normally takes 0.1-2.3 s; past the timeout, startup goes on.
+    MMA_CLEANUP_PID_ENV = "PYUI_MMA_CLEANUP_PID"
+    MMA_CLEANUP_TIMEOUT_S = 15
+
+    @staticmethod
+    def _wait_for_mma_cleanup():
+        """Blocks until launch.sh's freemma has exited; returns at once if there is none."""
+        # Popped so that nothing PyUI starts waits on a stale PID.
+        pid = os.environ.pop(MiyooMiniCommon.MMA_CLEANUP_PID_ENV, "")
+        if not pid.isdigit():
+            return
+        start = time.monotonic()
+        while MiyooMiniCommon._process_is_running(pid):
+            if time.monotonic() - start >= MiyooMiniCommon.MMA_CLEANUP_TIMEOUT_S:
+                PyUiLogger.get_logger().warning(
+                    f"freemma (pid {pid}) still running after {MiyooMiniCommon.MMA_CLEANUP_TIMEOUT_S} s; starting anyway")
+                return
+            time.sleep(0.01)
+        PyUiLogger.get_logger().info(f"Waited {(time.monotonic() - start) * 1000:.0f} ms for freemma")
+
+    @staticmethod
+    def _process_is_running(pid):
+        try:
+            with open(f"/proc/{pid}/stat") as stat:
+                # The state follows the parenthesised name, which may itself contain spaces.
+                return stat.read().rsplit(")", 1)[1].split()[0] != "Z"
+        except (OSError, IndexError):
+            return False
 
 
     # The Flip's keymon keeps the volume (0-20) in its shared memory and never

@@ -13,6 +13,13 @@
 # !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
 ######################################################################################
 
+# Loaded once per shell: runtimeHelper.sh and the network libraries source this file
+# again. The marker is not exported, so a script run as a new shell loads the file
+# itself; its value, this shell's PID, also covers a forked shell that was given it.
+# Subshells keep $$ and inherit the functions. It is set at the end of the file, so a
+# load that failed part-way is retried.
+[ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
+
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
@@ -2042,3 +2049,5 @@ log_activity_event() {
     printf '{"ts":%s,"event":"%s","app":"%s","pid":%s}\n' \
         "$ts" "$event" "$safe_app" "$pid" >> "$LOG_FILE"
 }
+
+SPRUCE_HELPERS_LOADED=$$

@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 from pathlib import Path
 import signal
@@ -242,7 +243,23 @@ def sigterm_handler(signum, frame):
     PyUiLogger.get_logger().info(f"Received SIGTERM (Signal {signum}). Shutting down...")
     sys.exit() # Exit gracefully
 
+def exit_without_teardown():
+    """Finishes what sys.exit() finishes (non-daemon threads, then the log flush) and skips
+    the interpreter teardown after it: 0.25 s on the Mini Plus, paid before every app or game starts."""
+    main_thread = threading.main_thread()
+    for thread in threading.enumerate():
+        if thread is not main_thread and not thread.daemon:
+            thread.join()
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)
+
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
-    main()
-    os._exit(0)
+    try:
+        main()
+    except SystemExit:
+        # Every exit is a sys.exit() (always status 0); other exceptions keep their traceback.
+        pass
+    exit_without_teardown()
