@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import sdl2
-import sdl2.ext
+from display import sdl_backend
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from devices.charge.charge_status import ChargeStatus
@@ -88,7 +88,7 @@ class DesktopDevice(DeviceCommon):
         # A normal window at the device's size times the zoom, not a fullscreen one the size
         # of the monitor. Display stretches its canvas over the whole window.
         scale = self.options.scale
-        return sdl2.ext.Window(
+        return sdl_backend.Window(
             f"PyUI {self.options.width}x{self.options.height}",
             size=(self.options.width * scale, self.options.height * scale),
             flags=sdl2.SDL_WINDOW_SHOWN)

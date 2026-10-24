@@ -217,10 +217,10 @@ class MainMenu:
             Controller.gs_triggered = False
 
     def check_for_boxart_resizing(self):
-        from games.utils.box_art_resizer import BoxArtResizer
         py_ui_dir = Path(__file__).resolve().parent.parent.parent
         boxart_resize_trigger_file = py_ui_dir / "pyui_resize_boxart_trigger"
         if (boxart_resize_trigger_file).exists():
+            from games.utils.box_art_resizer import BoxArtResizer
             boxart_resize_trigger_file.unlink()
             BoxArtResizer.process_rom_folders()
 
