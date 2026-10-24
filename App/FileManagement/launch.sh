@@ -33,8 +33,11 @@ fi
 
 # GLES window on the Mali blob. The Miniloong Pocket 1 has the same GLES-only
 # Mali-G52 as the RGB30, so it needs the same context or vtree fails to open one.
-{ [ "$PLATFORM" = "RGB30" ] || [ "$PLATFORM" = "RGB20SX" ] || [ "$PLATFORM" = "Miniloong" ] || [ "$PLATFORM" = "A10Mini" ] || [ "$PLATFORM" = "A10MiniV4" ] || [ "$PLATFORM" = "XUMiniM" ] || [ "$PLATFORM" = "G350" ] || [ "$PLATFORM" = "V10" ]; } && export VTREE_GLES=1
-
+case "$PLATFORM" in
+    RGB30|RGB20SX|Miniloong|A10Mini|A10MiniV4|XUMiniM|G350|V10|RG353M)
+        export VTREE_GLES=1
+        ;;
+esac
 
 case "$PLATFORM" in
     "A30")
@@ -42,9 +45,6 @@ case "$PLATFORM" in
         killall -q -USR2 joystickinput
         ./vtree.a30 --rotate=3 >"$LOG_PATH" 2>&1
         killall -q -USR2 joystickinput
-        ;;
-    "Brick"|"BrickPro"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Pixel2"|"RGB30"|"RGB20SX"|"A10Mini"|"A10MiniV4"|"XUMiniM"|"G350"|"V10"|"Zero"*|"XU20")
-        ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
     "MiyooMini")
         # freemma releases the display from PyUI before vtree takes over.
@@ -62,8 +62,7 @@ case "$PLATFORM" in
         ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
     *)
-        log_message "File Management: unsupported PLATFORM: $PLATFORM"
-        exit 1
+        ./vtree.aarch64 >"$LOG_PATH" 2>&1
         ;;
 esac
 

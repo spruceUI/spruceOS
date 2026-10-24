@@ -10,6 +10,10 @@ check_if_fw_needs_update() {
     baseos_fw_needs_update
 }
 
+local_fw_update_file() {
+    baseos_local_update_file
+}
+
 # No vendor flasher: BaseOS updates itself from a .bosupd at the card root.
 perform_fw_update_Flip() {
     return 0

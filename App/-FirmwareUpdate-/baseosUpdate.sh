@@ -26,7 +26,7 @@ bail() {
 # No network is the normal case on a model with no built-in radio, so say what
 # to do about it rather than just refusing.
 dongle_bail() {
-    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or update BaseOS by hand from:\ngithub.com/$REPO\n\nPress A to close."
+    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or put the baseos-$TARGET .bosupd from github.com/$REPO at the root of this card and run this app again.\n\nPress A to close."
 }
 
 INSTALLED="$(baseos_field BASEOS_VERSION)"
@@ -45,6 +45,22 @@ API="https://api.github.com/repos/$REPO/releases/latest"
 MANUAL_HELP="Please visit github.com/$REPO to manually download the proper version for your device."
 
 log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET"
+
+# A .bosupd put at the root of the card by hand only needs the reboot.
+LOCAL="$(local_fw_update_file)"
+if [ -n "$LOCAL" ]; then
+    log_message "baseosUpdate.sh: found $LOCAL"
+    log_and_display_message "$(basename "$LOCAL") is on the card (you have BaseOS $INSTALLED).\n\nPress A to install it now, or B to cancel."
+    confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
+    if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+        bail "Please charge your device to at least 15%, or plug it in, then try again."
+    fi
+    sync
+    log_and_display_message "$DONE_MSG"
+    sleep 8
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+    exit 0
+fi
 
 log_and_display_message "BaseOS $INSTALLED is installed. Checking for a newer one. Press A to continue."
 acknowledge

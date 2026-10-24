@@ -17,10 +17,17 @@ class CheevosCacheManager:
     _entries: List[CheevosCacheEntry] = []
     _rom_paths = set()
     _loaded = threading.Event()
+    _start_lock = threading.Lock()
+    _started = False
 
     @classmethod
     def initialize(cls):
-        threading.Thread(target=cls.refresh, daemon=True).start()
+        # Home starts this after its first frame; earlier lookups can start it too.
+        # Share one worker so both paths reuse the same cached result.
+        with cls._start_lock:
+            if not cls._started and not cls._loaded.is_set():
+                threading.Thread(target=cls.refresh, daemon=True).start()
+                cls._started = True
 
     @classmethod
     def refresh(cls):
@@ -35,11 +42,13 @@ class CheevosCacheManager:
 
     @classmethod
     def is_cached(cls, rom_info: RomInfo) -> bool:
+        cls.initialize()
         cls._loaded.wait(5)
         return bool(cls._rom_paths) and raproxy_cli.rom_key(rom_info.rom_file_path) in cls._rom_paths
 
     @classmethod
     def get_cached(cls) -> List[CheevosCacheEntry]:
+        cls.initialize()
         cls._loaded.wait(30)
         return list(cls._entries)
 

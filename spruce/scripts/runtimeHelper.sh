@@ -68,7 +68,9 @@ show_fw_app() {
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
     hide_fw_app
-    [ "$(check_if_fw_needs_update)" = "true" ] && show_fw_app
+    if [ -n "$(local_fw_update_file)" ] || [ "$(check_if_fw_needs_update)" = "true" ]; then
+        show_fw_app
+    fi
 }
 
 # Download the OTA release info into "$TMP_DIR/spruce". Certificates are
@@ -353,6 +355,14 @@ check_and_hide_update_app() {
     fi
 }
 
+# networkservices.sh starts SSH and Samba once Wi-Fi connects; this task also covers
+# a network it does not wait for (eth0, Wi-Fi off). It polls slowly: each
+# network_is_connected pass forks about seven processes, and polling every 0.2 s
+# competed with the first menu frame for the CPU.
+DEV_MODE_FAST_POLLS=30		# 30 x 2 s = first minute
+DEV_MODE_FAST_INTERVAL=2
+DEV_MODE_SLOW_INTERVAL=10
+
 developer_mode_task() {
     if flag_check "developer_mode"; then
         samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
@@ -360,9 +370,14 @@ developer_mode_task() {
         ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            # Loop until network is connected
+            _dev_polls=0
             while ! network_is_connected true; do
-                sleep 0.2
+                if [ "$_dev_polls" -lt "$DEV_MODE_FAST_POLLS" ]; then
+                    sleep "$DEV_MODE_FAST_INTERVAL"
+                    _dev_polls=$((_dev_polls + 1))
+                else
+                    sleep "$DEV_MODE_SLOW_INTERVAL"
+                fi
             done
 
             if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then

@@ -22,8 +22,8 @@ class RecentsManager:
         cls._wait_for_init()
         cls._recentsManager.add_game(rom_info)
         games = cls._recentsManager.get_games()
-        if len(games) > 20:
-            for game in games[20:]:
+        if len(games) > 1000:
+            for game in games[1000:]:
                 cls._recentsManager.remove_game(game)
                 
     @classmethod

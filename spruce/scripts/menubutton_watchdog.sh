@@ -126,8 +126,10 @@ getevent -pid $$ $MENU_BTN_EVENTS | while read line; do
         *"key $B_START 1"*  | \
         *"key $B_R1"*      | \
         *"key $B_R2"*      | \
+        *"key $B_R3"*      | \
         *"key $B_L1"*      | \
         *"key $B_L2"*      | \
+        *"key $B_L3"*      | \
         *"key $B_A 1"*     | \
         *"key $B_B 1"*     | \
         *"key $B_X 1"*     | \

@@ -59,6 +59,7 @@ See our updating spruce [Wiki page for more info](https://github.com/spruceUI/sp
 * Game Switcher: Hold MENU for 3 seconds
 * Brightness down: START + L1 or MENU + VOLDOWN
 * Brightness up: START + R1 or MENU + VOLUP
+* D-pad as left stick (A10 Mini, Powkiddy V10 and stickless Anbernic XX, in game): MENU + SELECT toggles it
 
 \*Holding POWER after the vibration occurs will cause your device to force shutdown (in case of freezes etc.)
 

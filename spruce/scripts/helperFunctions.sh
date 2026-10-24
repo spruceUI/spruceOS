@@ -13,6 +13,13 @@
 # !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
 ######################################################################################
 
+# Loaded once per shell: runtimeHelper.sh and the network libraries source this file
+# again. The marker is not exported, so a script run as a new shell loads the file
+# itself; its value, this shell's PID, also covers a forked shell that was given it.
+# Subshells keep $$ and inherit the functions. It is set at the end of the file, so a
+# load that failed part-way is retried.
+[ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
+
 # variables used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
@@ -129,6 +136,7 @@ device_names() {
         Pixel2)           echo "GKD_PIXEL2" ;;
         RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
+        RG353M)           echo "RG353M"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         A10MiniV4)        echo "A10MINIV4"; echo "DARKMOSS" ;;
@@ -585,6 +593,12 @@ baseos_fw_needs_update() {
     baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
 }
 
+# A .bosupd for this model put at the root of the card by hand.
+baseos_local_update_file() {
+    _target="$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    [ -n "$_target" ] && ls /mnt/SDCARD/baseos-"$_target"-*.bosupd 2>/dev/null | sort | tail -n 1
+}
+
 # True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)
 # before its own release. Status 2 when either is not x.y.z[-suffix].
 baseos_version_older() {
@@ -709,10 +723,14 @@ hide_or_unhide_AccentColor_app() {
     _theme_path="/mnt/SDCARD/Themes/${_cur_theme}"
     _config="/mnt/SDCARD/App/AccentColor/config.json"
 
+    # Rewriting an unchanged file still forces FAT directory writes on every
+    # menu restart. Only touch the app config when its visibility changes.
     if [ -d "${_theme_path}/accent" ]; then
+        if grep -qF '"#label"' "$_config"; then
+            sed -i 's|"#label"|"label"|' "$_config"
+        fi
+    elif grep -qF '"label"' "$_config"; then
         sed -i 's|"label"|"#label"|' "$_config"
-    else
-        sed -i 's|"#label"|"label"|' "$_config"
     fi
 }
 
@@ -1202,6 +1220,10 @@ set_rgb_in_menu() {
 
 set_network_proxy() {
     enable_proxy="$(get_config_value '.menuOptions."Proxy Settings".enableProxy.selected' "False")"
+    if [ "$enable_proxy" != "True" ]; then
+        unset http_proxy https_proxy
+        return 0
+    fi
     proxy_protocol="$(get_config_value '.menuOptions."Proxy Settings".proxyProtocol.selected' "http")"
     proxy_address="$(get_config_value '.menuOptions."Proxy Settings".proxyAddress.selected' "")"
     proxy_port="$(get_config_value '.menuOptions."Proxy Settings".proxyPort.selected' "")"
@@ -2041,3 +2063,5 @@ log_activity_event() {
     printf '{"ts":%s,"event":"%s","app":"%s","pid":%s}\n' \
         "$ts" "$event" "$safe_app" "$pid" >> "$LOG_FILE"
 }
+
+SPRUCE_HELPERS_LOADED=$$

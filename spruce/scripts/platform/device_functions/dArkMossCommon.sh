@@ -230,6 +230,16 @@ darkmoss_installed_version() {
     sed -n 's/^OS_VERSION="\{0,1\}[vV]\{0,1\}\([0-9]\{1,\}\.[0-9]\{1,\}\.[0-9]\{1,\}\)"\{0,1\}$/\1/p' /etc/os-release 2>/dev/null
 }
 
+# The image's unit, not $PLATFORM: the RGB20SX runs the RGB30 image.
+darkmoss_unit() {
+    _unit="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+    printf '%s' "${_unit:-$PLATFORM}" | tr 'a-z' 'A-Z'
+}
+
+local_fw_update_file() {
+    ls /mnt/SDCARD/dArkMoss_"$(darkmoss_unit)"_*.dmupd 2>/dev/null | sort | tail -n 1
+}
+
 check_if_fw_needs_update() {
     _have="$(darkmoss_installed_version)"
     if [ -z "$_have" ]; then
