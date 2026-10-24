@@ -12,18 +12,40 @@ class V10KeyMappingProvider(DarkmossKeyMappingProvider):
     the UI never sees SELECT and START held together; releasing START releases
     MENU. SELECT's own release after the chord is swallowed, having already
     been sent.
+
+    L3/R3 can also be configured as the menu button, using the same pattern as
+    the RGB30: whichever thumb click matches the current menuButton setting
+    becomes MENU, while the other remains L3/R3.
     """
 
     SELECT_KEY = 704
     START_KEY = 709
+    L3_KEY = 705     # BTN_TRIGGER_HAPPY2
+    R3_KEY = 708     # BTN_TRIGGER_HAPPY5
 
-    def __init__(self, key_mappings):
-        super().__init__(key_mappings)
-        self.select_down = False
-        self.select_released_by_chord = False
-        self.menu_down = False
+    THUMB_FALLBACK = {
+        L3_KEY: ControllerInput.L3,
+        R3_KEY: ControllerInput.R3,
+    }
+
+    def _menu_thumb_code(self):
+        # Same logic as the RGB30: the user-selected thumb-click becomes MENU;
+        # any other case leaves the other click as L3/R3.
+        from devices.device import Device
+        from utils.cfw_system_config import CfwSystemConfig
+
+        option = CfwSystemConfig.get_menu_option("Button Settings", "menuButton") or {}
+        if not Device.supports_device(option.get("devices")):
+            return None
+        if "R3" == option.get("selected"):
+            return self.R3_KEY
+        return self.L3_KEY
 
     def get_mapped_events(self, key_event):
+        # Give L3/R3 the same menu-or-fallback behavior as other dArkMoss devices.
+        if key_event.event_type == self.EV_KEY and key_event.code in self.THUMB_FALLBACK:
+            return self._map_thumb_click(key_event)
+
         if key_event.event_type == self.EV_KEY:
             if key_event.code == self.SELECT_KEY:
                 if key_event.value == 1:
@@ -45,6 +67,7 @@ class V10KeyMappingProvider(DarkmossKeyMappingProvider):
                         self.menu_down = False
                         return [InputResult(ControllerInput.MENU, KeyState.RELEASE)]
                     return None  # autorepeat while the chord is held
+
         return super().get_mapped_events(key_event)
 
 
