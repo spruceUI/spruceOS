@@ -136,7 +136,7 @@ EOF
 
 device_init() {
     sync_volume_level
-    install_usb_audio_rules
+    install_usb_audio_rules &
     disable_swap
     set_loading_screen &
     setup_network_services &
