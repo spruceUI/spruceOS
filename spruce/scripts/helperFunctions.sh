@@ -586,6 +586,12 @@ baseos_fw_needs_update() {
     baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
 }
 
+# A .bosupd for this model put at the root of the card by hand.
+baseos_local_update_file() {
+    _target="$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    [ -n "$_target" ] && ls /mnt/SDCARD/baseos-"$_target"-*.bosupd 2>/dev/null | sort | tail -n 1
+}
+
 # True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)
 # before its own release. Status 2 when either is not x.y.z[-suffix].
 baseos_version_older() {

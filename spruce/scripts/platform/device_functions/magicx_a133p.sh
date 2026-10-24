@@ -46,6 +46,10 @@ oakmoss_version_older() {
     [ "$_a" != "$_b" ] && [ "$(printf '%s\n%s\n' "$_a" "$_b" | sort | head -n 1)" = "$_a" ]
 }
 
+local_fw_update_file() {
+    oakmoss_can_update && ls /mnt/SDCARD/oakmoss-"$(magicx_model)"-*.omupd 2>/dev/null | sort | tail -n 1
+}
+
 check_if_fw_needs_update() {
     oakmoss_can_update || { echo "false"; return; }
     _want="$(github_latest_version spruceUI/oakMOSS)" || { echo "false"; return; }

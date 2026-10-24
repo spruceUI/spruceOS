@@ -27,6 +27,22 @@ if ! oakmoss_can_update; then
     bail "This system card has no oakMOSS update support (oakMOSS ${INSTALLED:-unknown}).\n\n$MANUAL_HELP"
 fi
 
+# The base installs an .omupd at the root of the card at boot, so one put there by hand only needs the reboot.
+LOCAL="$(local_fw_update_file)"
+if [ -n "$LOCAL" ]; then
+    log_message "oakmossUpdate.sh: found $LOCAL"
+    log_and_display_message "$(basename "$LOCAL") is on the card (you have oakMOSS $INSTALLED).\n\nPress A to restart and install it, or B to cancel."
+    confirm || { log_message "oakmossUpdate.sh: user cancelled"; exit 0; }
+    if [ "$(device_get_battery_percent)" -lt 30 ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
+        bail "Please charge your device to at least 30%, or plug it in, then try again."
+    fi
+    sync
+    log_and_display_message "Your device will now restart and install the update: do not power it off while it shows Updating."
+    sleep 5
+    /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+    exit 0
+fi
+
 log_and_display_message "oakMOSS $INSTALLED is installed. Checking for a newer one. Press A to continue."
 acknowledge
 

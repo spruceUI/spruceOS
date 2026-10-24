@@ -183,6 +183,11 @@ check_if_fw_needs_update() {
     log_message "Missing check_if_fw_needs_update function"
 }
 
+# The newest update file for this device's base OS put on the card by hand, if any.
+local_fw_update_file() {
+    return 0
+}
+
 take_screenshot() {
     log_message "Missing take_screenshot function"
 }

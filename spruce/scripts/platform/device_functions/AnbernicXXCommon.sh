@@ -164,6 +164,10 @@ check_if_fw_needs_update() {
     baseos_fw_needs_update
 }
 
+local_fw_update_file() {
+    baseos_local_update_file
+}
+
 has_lid() {
     # BaseOS's build target names the model exactly, and every clamshell target
     # in the line ends in "sp" (rg34xxsp, rg35xxsp, rgsp).

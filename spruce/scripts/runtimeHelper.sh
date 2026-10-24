@@ -68,7 +68,9 @@ show_fw_app() {
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
     hide_fw_app
-    [ "$(check_if_fw_needs_update)" = "true" ] && show_fw_app
+    if [ -n "$(local_fw_update_file)" ] || [ "$(check_if_fw_needs_update)" = "true" ]; then
+        show_fw_app
+    fi
 }
 
 # Download the OTA release info into "$TMP_DIR/spruce". Certificates are
