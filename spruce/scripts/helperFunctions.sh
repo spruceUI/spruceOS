@@ -129,6 +129,7 @@ device_names() {
         Pixel2)           echo "GKD_PIXEL2" ;;
         RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
+        RG353M)           echo "RG353M"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         A10MiniV4)        echo "A10MINIV4"; echo "DARKMOSS" ;;

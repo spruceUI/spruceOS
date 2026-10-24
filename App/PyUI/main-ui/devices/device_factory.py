@@ -68,6 +68,9 @@ def initialize_device(device, main_ui_mode):
     elif "ROCKNIX_RGDS" == device:
         from devices.rocknix.rocknix_rgds import RocknixRgds
         Device.init(RocknixRgds(device))
+    elif "RG353M" == device:
+        from devices.darkmoss.rg353m import Rg353m
+        Device.init(Rg353m(device))
     elif "RGB30" == device:
         from devices.darkmoss.rgb30 import Rgb30
         Device.init(Rgb30(device))
