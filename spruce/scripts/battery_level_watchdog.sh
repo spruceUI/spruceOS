@@ -70,8 +70,7 @@ force_shutdown_if_needed() {
 while true; do
     current_battery_percent=$(device_get_battery_percent)
     percent_to_warn_at="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
-    led_mode="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
-    
+
     # force a safe shutdown at 1% regardless of settings
     force_shutdown_if_needed "$current_battery_percent"
 
@@ -114,13 +113,21 @@ while true; do
         done
     else
         flag_remove "low_battery"
-        if [ "$led_mode" = "Always on" ]; then
-            work_led_on
-        elif [ "$led_mode" = "On in menu only" ] && flag_check "in_menu"; then
-            work_led_on
-        else # if [ "$led_mode" = "Always Off" ]; then
-            work_led_off
-        fi
+
+        # Only these devices have the ledMode setting enabled
+		case "$PLATFORM" in
+			"A30"|"Flip"|"MiyooMini"|"Zero40"|"XU20"|"Zero28"|"RGB30"|"RGB20SX")
+                led_mode="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
+                if [ "$led_mode" = "Always on" ]; then
+                    work_led_on
+                elif [ "$led_mode" = "On in menu only" ] && flag_check "in_menu"; then
+                    work_led_on
+                else # if [ "$led_mode" = "Always Off" ]; then
+                    work_led_off
+                fi
+				;;
+			*) ;;
+		esac
     fi
 
     sleep $SLEEP
