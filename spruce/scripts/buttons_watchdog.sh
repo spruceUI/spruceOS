@@ -7,6 +7,7 @@
 
 START_DOWN=false
 SELECT_DOWN=false
+L3_DOWN=false
 
 nearest_system_brightness() {
     input=$1
@@ -362,12 +363,14 @@ getevent $EVENTS | while read line; do
                 volume_down_bg &
                 PID_DOWN=$!
             fi
+            L3_down=true
         ;;
         *"key $B_L3 0") # L3 released
             if [ "$B_VOLDOWN" = "DOESNT_EXIST" ]; then
                 [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
                 PID_UP=""
             fi
+            L3_down=false
         ;;
         *"key $B_R3 1") # L3 pressed
             if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$SELECT_DOWN" = "true" ]; then
@@ -381,6 +384,9 @@ getevent $EVENTS | while read line; do
                 CURR_VOLUME=$(get_volume_level)
                 volume_up_bg &
                 PID_UP=$!
+            fi
+            if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$L3_down" = "true" ]; then
+                swap_dpad_analog_toggle
             fi
         ;;
         *"key $B_R3 0") # L3 released
