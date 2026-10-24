@@ -19,6 +19,32 @@ set_event_arg_for_idlemon() {
     EVENT_ARG="-e $(readlink -f /dev/input/by-path/platform-odroidgo2-joypad-joystick)"
 }
 
+# No sticks: dArkMoss's joypad driver can report the d-pad as the left stick.
+DPAD_ANALOG="/sys/devices/platform/odroidgo2-joypad/dpad_analog"
+_v10_dpad_analog() {
+    [ -w "$DPAD_ANALOG" ] || return 0
+    printf '%s' "$1" > "$DPAD_ANALOG"
+    log_message "V10 d-pad as stick: $1"
+}
+
+# MENU+SELECT in game flips it, for games that only listen to the stick.
+swap_dpad_analog_toggle() {
+    flag_check "in_menu" && return 0
+    case "$(cat "$DPAD_ANALOG" 2>/dev/null)" in
+        1) _v10_dpad_analog 0 ;;
+        *) _v10_dpad_analog 1 ;;
+    esac
+    vibrate &
+}
+
+treat_dpad_as_analog() {
+    _v10_dpad_analog 1
+}
+
+treat_dpad_as_dpad() {
+    _v10_dpad_analog 0
+}
+
 device_get_charging_status() {
     if grep -qs "^1$" /sys/class/power_supply/ac/online /sys/class/power_supply/usb/online; then
         if [ "$(cat "$BATTERY/capacity" 2>/dev/null)" = "100" ]; then
