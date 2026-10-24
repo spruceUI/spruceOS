@@ -10,12 +10,10 @@ from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
-from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
 import sdl2
-import sdl2.ext
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
@@ -60,7 +58,6 @@ def log_renderer_info():
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
-    CheevosCacheManager.initialize()
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
@@ -87,6 +84,13 @@ def start_background_threads():
     # Follows the USB audio route for as long as the menu runs
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
+
+def finish_startup():
+    """Release the startup clock and warm optional data after the first frame."""
+    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
+    CheevosCacheManager.initialize()
+
 
 def verify_config_exists(config_path):
     # Determine the directory where this script resides
@@ -225,9 +229,9 @@ def main():
     main_menu.build_startup_menu()
 
     start_background_threads()
-    # The CPU is held in performance mode until the menu is built.
-    # Return it to normal on a thread: offlining cores would delay the first input.
-    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    # Keep the startup clock through the first visible frame. Optional proxy
+    # reads can then run while the user is at Home, rather than competing with it.
+    Display.after_next_present(finish_startup)
     keep_running = True
     PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):
