@@ -153,7 +153,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "true"
+    launch_common_startup_watchdogs_v2
     # Same per-start-of-frontend dedupe the common launcher applies to its own
     # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
     # not stack a second theme_watchdog / leds_manager on the first.
