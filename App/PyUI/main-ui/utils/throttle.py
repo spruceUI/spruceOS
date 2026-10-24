@@ -46,15 +46,18 @@ def limit_refresh(seconds=15, fast_seconds=None, fast_while=None, background=Fal
 
         @wraps(orig_func)
         def wrapper(*args, **kwargs):
-            now = time.time()
+            now = time.monotonic()
             window = seconds
             if fast_while and fast_seconds is not None and args:
                 try:
-                    if getattr(args[0], fast_while, 0) > now:
+                    if getattr(args[0], fast_while, 0) > time.time():
                         window = fast_seconds
                 except Exception:
                     pass
-            if now - last_called[0] >= window or getattr(wrapper, "_force_refresh", False):
+            # A cold boot can still be at epoch + a few seconds. The first read must
+            # run even then, and NTP must not extend or expire a duration cache.
+            if (not has_result[0] or now - last_called[0] >= window
+                    or getattr(wrapper, "_force_refresh", False)):
                 if background and has_result[0]:
                     with lock:
                         if not refreshing[0]:
@@ -63,10 +66,16 @@ def limit_refresh(seconds=15, fast_seconds=None, fast_while=None, background=Fal
                             wrapper._force_refresh = False
                             threading.Thread(target=refresh_in_background, args=(args, kwargs), daemon=True).start()
                 else:
-                    last_called[0] = now
-                    last_result[0] = orig_func(*args, **kwargs)
-                    has_result[0] = True
-                    wrapper._force_refresh = False
+                    # The Wi-Fi warm-up and first frame can arrive together. Only
+                    # one initial read runs; both callers need its actual result.
+                    with lock:
+                        now = time.monotonic()
+                        if (not has_result[0] or now - last_called[0] >= window
+                                or getattr(wrapper, "_force_refresh", False)):
+                            last_result[0] = orig_func(*args, **kwargs)
+                            last_called[0] = now
+                            has_result[0] = True
+                            wrapper._force_refresh = False
             return last_result[0]
 
         # Add method to force refresh

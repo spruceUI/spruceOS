@@ -1,16 +1,10 @@
 
 from pathlib import Path
+from functools import cached_property
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
-from menus.app.app_menu import AppMenu
-from menus.games.collections_menu import CollectionsMenu
-from menus.games.favorites_menu import FavoritesMenu
-from menus.games.game_system_select_menu import GameSystemSelectMenu
-from menus.games.just_games_menu import JustGamesMenu
 from menus.language.language import Language
-from menus.main_menu_popup import MainMenuPopup
-from menus.games.recents_menu import RecentsMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -33,15 +27,40 @@ class LazySettingsMenu:
 
 
 class MainMenu:
-    def __init__(self):
-        self.app_menu = AppMenu()
-        self.favorites_menu = FavoritesMenu()
-        self.collections_menu = CollectionsMenu()
-        self.recents_menu = RecentsMenu()
-        self.settings_menu = LazySettingsMenu()
-        self.system_select_menu = GameSystemSelectMenu(self.app_menu, self.favorites_menu, self.collections_menu, self.recents_menu, self.settings_menu)
+    # Keep each menu and its imports until the user first opens it.
+    @cached_property
+    def settings_menu(self):
+        return LazySettingsMenu()
 
-        self.popup_menu = MainMenuPopup()
+    @cached_property
+    def app_menu(self):
+        from menus.app.app_menu import AppMenu
+        return AppMenu()
+
+    @cached_property
+    def favorites_menu(self):
+        from menus.games.favorites_menu import FavoritesMenu
+        return FavoritesMenu()
+
+    @cached_property
+    def collections_menu(self):
+        from menus.games.collections_menu import CollectionsMenu
+        return CollectionsMenu()
+
+    @cached_property
+    def recents_menu(self):
+        from menus.games.recents_menu import RecentsMenu
+        return RecentsMenu()
+
+    @cached_property
+    def system_select_menu(self):
+        from menus.games.game_system_select_menu import GameSystemSelectMenu
+        return GameSystemSelectMenu(self.app_menu, self.favorites_menu, self.collections_menu, self.recents_menu, self.settings_menu)
+
+    @cached_property
+    def popup_menu(self):
+        from menus.main_menu_popup import MainMenuPopup
+        return MainMenuPopup()
 
     def reorder_options(self,ordering, objects):
         # Create a lookup map for ordering priority
@@ -196,6 +215,7 @@ class MainMenu:
 
     def run_main_menu_selection(self):
         if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            from menus.games.just_games_menu import JustGamesMenu
             while(True):
                 JustGamesMenu().run_rom_selection()
 

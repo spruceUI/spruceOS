@@ -14,7 +14,6 @@ from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
-from option_select_ui import OptionSelectUI
 import sdl2
 import sdl2.ext
 
@@ -22,13 +21,11 @@ from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
-from utils.button_listener import ButtonListener
 from utils.cfw_system_config import CfwSystemConfig
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
-from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
 from utils.time_logger import log_timing
 
 
@@ -68,6 +65,17 @@ def background_startup():
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
 
+def warm_wifi_status():
+    """Overlap the first blocking Wi-Fi status read with theme and display setup."""
+    def read_status():
+        try:
+            Device.get_device().get_wifi_status()
+        except Exception:
+            PyUiLogger.get_logger().exception("Wi-Fi status warm-up failed")
+
+    threading.Thread(target=read_status, name="WifiStatus", daemon=True).start()
+
+
 def start_background_threads():
     startup_thread = threading.Thread(target=Device.get_device().perform_startup_tasks)
     startup_thread.start()
@@ -105,6 +113,7 @@ def check_for_msg_display(args):
 
 def check_for_option_list_file(args):
     if(args.optionListFile):
+        from option_select_ui import OptionSelectUI
         OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile, True)
 
 def check_for_msg_display_realtime(args):
@@ -124,6 +133,7 @@ def check_for_msg_display_realtime(args):
                 elif message.startswith("OPTION_LIST:"):
                     option_list_file = message[len("OPTION_LIST:"):].strip()
                     PyUiLogger.get_logger().info(f"Option list file: {option_list_file}")
+                    from option_select_ui import OptionSelectUI
                     OptionSelectUI.display_option_list("",option_list_file, False)
                 else:
                     Display.display_message(message)
@@ -135,10 +145,12 @@ def check_for_msg_display_realtime(args):
 
 def check_for_msg_display_socket_based(args):
     if(args.msgDisplayRealtimePort):
+        from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
         RealtimeMessageNetworkListener(args.msgDisplayRealtimePort).start()
 
 def check_for_button_listener_mode(args):
     if(args.buttonListenerMode):
+        from utils.button_listener import ButtonListener
         print("Running in button listener mode")
         ButtonListener().start()
 
@@ -176,6 +188,7 @@ def main():
         # every launch. Do it before anything reads the clock, and before any
         # emulator is launched, since they inherit it from here.
         Device.get_device().restore_saved_timezone()
+        warm_wifi_status()
 
         PyUiState.init(Device.get_device().get_state_path())
 
