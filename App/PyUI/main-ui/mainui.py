@@ -26,6 +26,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from utils.time_logger import log_timing
+from utils import shutdown
 
 
 
@@ -186,6 +187,10 @@ def main():
         if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
             main_ui_mode = False
 
+        if main_ui_mode:
+            # Before the slow part of startup, so a power-off during it still gets the farewell.
+            shutdown.listen()
+
         with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
 
@@ -218,6 +223,8 @@ def main():
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
+        if main_ui_mode:
+            shutdown.arm(Display.present_farewell, Controller.controller_interface.signal_wakeup_fd())
 
         Device.get_device().perform_sdcard_ro_check()
 

@@ -270,6 +270,10 @@ class Theme():
             return background_img
 
     @classmethod
+    def get_shutdown_image(cls):
+        return cls._asset("shutdown.qoi") or PyUiConfig.get_shutdown_image()
+
+    @classmethod
     def favorite(cls): return cls._asset("ic-favorite-n.qoi")
     
     @classmethod

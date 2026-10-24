@@ -10,6 +10,7 @@ from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
+from menus.language.language import Language
 import sdl2
 from display import sdl_backend
 import sdl2.sdlttf
@@ -20,6 +21,7 @@ import ctypes
 
 from utils.py_ui_config import PyUiConfig
 from utils.time_logger import log_timing
+from utils import shutdown
 
 @dataclass
 class CachedImageTexture:
@@ -1155,6 +1157,7 @@ class Display:
     start = 0
     @classmethod
     def present(cls, fade=False):
+            shutdown.checkpoint()
             present_start = time.perf_counter()
 
             if Theme.render_top_and_bottom_bar_last():
@@ -1165,24 +1168,7 @@ class Display:
                     cls._add_index_last_args = None
                 cls.bottom_bar_text = None
 
-            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
-
-            if Device.get_device().should_scale_screen():
-                scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
-                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
-                sdl2.SDL_DestroyTexture(scaled_canvas)
-            elif(0 == Device.get_device().screen_rotation()):
-                if(fade):
-                    cls.fade_transition(cls.bg_canvas, cls.render_canvas)
-                else:
-                    sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
-            else:   
-                    rotated_texture = cls.rotate_canvas()
-                    if(rotated_texture is not None):
-                        sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
-                        sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
-
-            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls._copy_canvas_to_window(fade)
             cls.pace_frame()
             cls.renderer.present()
             cls._frame_presented()
@@ -1197,6 +1183,69 @@ class Display:
 
             Device.get_device().post_present_operations()
             cls.start = time.perf_counter()
+
+    @classmethod
+    def _copy_canvas_to_window(cls, fade=False):
+        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
+
+        if Device.get_device().should_scale_screen():
+            scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
+            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
+            sdl2.SDL_DestroyTexture(scaled_canvas)
+        elif(0 == Device.get_device().screen_rotation()):
+            if(fade):
+                cls.fade_transition(cls.bg_canvas, cls.render_canvas)
+            else:
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
+        else:
+            rotated_texture = cls.rotate_canvas()
+            if(rotated_texture is not None):
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
+                sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
+
+        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+
+    @classmethod
+    def present_farewell(cls):
+        """The shutdown screen in the message writer's layout, presented at once: no
+        menu bars, no frame pacing, no post-present work."""
+        renderer = cls.renderer.renderer
+        sdl2.SDL_SetRenderTarget(renderer, cls.render_canvas)
+        sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)
+        sdl2.SDL_RenderClear(renderer)
+        if cls.background_texture is not None:
+            sdl2.SDL_RenderCopy(renderer, cls.background_texture, None, None)
+        cls.render_image_and_text(
+            image_path=Theme.get_shutdown_image(),
+            text=Language.label("poweringOff", "Powering off..."),
+            height_percent=33,
+            image_y_percent=10,
+            text_y_percent=60,
+        )
+        cls._copy_canvas_to_window()
+        cls.renderer.present()
+
+    @classmethod
+    def render_image_and_text(cls, image_path, text, height_percent, image_y_percent, text_y_percent):
+        """An image centred above a message, as percentages of the usable height. Draws
+        only: no clear, no present."""
+        padding = cls.get_top_bar_height()
+        usable_height = cls.get_usable_screen_height()
+        image_height = int(usable_height * (height_percent / 100))
+        image_y = int(image_y_percent / 100 * usable_height) + padding
+        text_y = int(text_y_percent / 100 * usable_height) + padding
+        cls.render_image(
+            image_path,
+            Device.get_device().screen_width() // 2,
+            image_y,
+            RenderMode.TOP_CENTER_ALIGNED,
+            Device.get_device().screen_width(),
+            image_height
+        )
+        cls.write_message_multiline_starting_height_specified(
+            cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
+            text_y
+        )
 
     @classmethod
     def after_next_present(cls, callback):

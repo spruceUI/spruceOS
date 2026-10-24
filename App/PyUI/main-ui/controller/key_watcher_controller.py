@@ -3,6 +3,7 @@
 from collections import deque
 import errno
 import os
+import select
 import struct
 import threading
 import time
@@ -112,6 +113,11 @@ class KeyWatcherController(ControllerInterface):
         # sleep until then instead of returning at once or polling.
         self.input_ready = threading.Condition(self.lock)
         self.woken = False
+        # For signal_wakeup_fd(): poll_keyboard wakes get_input() when a signal
+        # arrives, since a signal handler must not take the lock.
+        self._signal_read_fd, self._signal_write_fd = os.pipe()
+        os.set_blocking(self._signal_read_fd, False)
+        os.set_blocking(self._signal_write_fd, False)
         self.input_polling_thread = threading.Thread(target=self.poll_keyboard, daemon=True)
         self.input_polling_thread.start()
         self.print_key_changes = False
@@ -176,6 +182,12 @@ class KeyWatcherController(ControllerInterface):
             try:
 
                 try:
+                    ready, _, _ = select.select([self.fd, self._signal_read_fd], [], [])
+                    if self._signal_read_fd in ready:
+                        os.read(self._signal_read_fd, 4096)
+                        self.wake()
+                    if self.fd not in ready:
+                        continue
                     data = os.read(self.fd, self.event_size)
                 except OSError as e:
                     if e.errno == errno.EINTR:
@@ -193,6 +205,7 @@ class KeyWatcherController(ControllerInterface):
                                 self.fd = fd_tmp
                         except OSError as e:
                             pass
+                        continue
                     else:
                         logger.exception("Unexpected OSError while reading input")
                         return
@@ -269,6 +282,9 @@ class KeyWatcherController(ControllerInterface):
         with self.input_ready:
             self.woken = True
             self.input_ready.notify_all()
+
+    def signal_wakeup_fd(self):
+        return self._signal_write_fd if self.fd is not None else None
 
     
     def clear_input_queue(self):
