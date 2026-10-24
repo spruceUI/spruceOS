@@ -406,6 +406,50 @@ jobs:
           echo "Archive contents:"
           7z l "$OTA_ARCHIVE"
 
+      - name: Package NDS resource folders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/Emu/NDS"
+
+          ARGS=()
+          if [ -d "Emu/NDS/resources" ]; then
+            cp -a "Emu/NDS/resources" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/resources")
+          fi
+
+          if [ -d "Emu/NDS/res" ]; then
+            cp -a "Emu/NDS/res" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/res")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No NDS resource folders found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/nds-resources.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "Emu/NDS/resources" "Emu/NDS/res"
+            echo "Created preMenu NDS archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu NDS archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
