@@ -133,7 +133,8 @@ class TopBar:
                 self.top_bar_w = max(self.top_bar_w, w)
                 self.top_bar_h = max(self.top_bar_h, h)
                 #Volume
-            if(time.time() - self.volume_changed_time < 3):
+            # Models without a volume control (Mini V1-V4) declare it, as the skipped-menu bar above checks
+            if(time.time() - self.volume_changed_time < 3 and Device.get_device().supports_volume()):
                 if(Theme.display_volume_numbers()):
                     w, h = Display.render_text(str(self.volume),x_offset, center_of_bar,  Theme.text_color(FontPurpose.BATTERY_PERCENT), FontPurpose.BATTERY_PERCENT, RenderMode.MIDDLE_RIGHT_ALIGNED)
                     x_offset = x_offset - w - padding

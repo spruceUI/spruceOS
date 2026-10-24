@@ -8,24 +8,18 @@ import logging
 import os
 import ssl
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 from urllib.parse import parse_qsl, urlsplit
 
-import cheevos
 from cheevos.core.clock import ServerClock, network_clock
 from cheevos.core.errors import NetworkError
+from cheevos.core.ra_client.common import API_HOST, API_V2_HOST, RA_HOSTS, Response
 from cheevos.core.ra_client.parse import parse_time
 
 logger = logging.getLogger(__name__)
 
-API_HOST = "retroachievements.org"
-API_V2_HOST = "api.retroachievements.org"  # the JSON:API (events' award tiers)
-MEDIA_HOST = "media.retroachievements.org"
-STATIC_HOST = "static.retroachievements.org"  # the site's own art (site award badges)
-# RA's fixed hosts, the only ones that may fall back to HTTP when TLS fails.
-RA_HOSTS = frozenset({API_HOST, API_V2_HOST, MEDIA_HOST, STATIC_HOST})
 DEFAULT_TIMEOUT = 15.0
 
 # A kept-alive connection the server closed between requests: reconnect and retry once.
@@ -36,33 +30,6 @@ _DROPPED: tuple[type[BaseException], ...] = (
 )
 # Query parameters that carry credentials; never recorded, never matched on.
 _CREDENTIAL_PARAMS = frozenset({"y", "u"})
-
-
-def default_user_agent(platform: str) -> str:
-    """Return the User-Agent RA sees, e.g. ``"Cheevos/0.1.0 (SpruceOS; MiyooMini)"``.
-
-    Args:
-        platform: Spruce platform name.
-
-    Returns:
-        The User-Agent string.
-    """
-    return f"Cheevos/{cheevos.__version__} (SpruceOS; {platform})"
-
-
-@dataclass(frozen=True, slots=True)
-class Response:
-    """An HTTP response, fully read.
-
-    Attributes:
-        status: HTTP status code.
-        headers: Response headers with lower-cased names.
-        body: Response body.
-    """
-
-    status: int
-    headers: dict[str, str] = field(default_factory=dict)
-    body: bytes = b""
 
 
 class Transport(Protocol):

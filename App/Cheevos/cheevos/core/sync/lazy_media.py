@@ -55,6 +55,8 @@ class LazyMediaFetcher:
         offline_backoff: Seconds to ignore requests after a network failure.
         max_queue: Maximum waiting requests. When full, a request for the screen drops the last
             one waiting, and a ``later`` one is ignored (either can be requested again).
+        on_change: Notification after an image is stored and its version published, outside
+            the worker lock.
     """
 
     def __init__(
@@ -64,11 +66,13 @@ class LazyMediaFetcher:
         clock: Callable[[], float] = time.monotonic,
         offline_backoff: float = 60.0,
         max_queue: int = 500,
+        on_change: Callable[[], None] = lambda: None,
     ) -> None:
         self._open_session = open_session
         self._clock = clock
         self._offline_backoff = offline_backoff
         self._max_queue = max_queue
+        self._on_change = on_change
         self._lock = threading.Lock()
         self._waiting: deque[str] = deque()  # next to download first
         self._paths: dict[str, str] = {}  # waiting key -> media-host path
@@ -250,6 +254,7 @@ class LazyMediaFetcher:
             with self._lock:
                 self._stored.add(key)
                 self._version += 1
+            self._on_change()
         finally:
             with self._lock:
                 self._in_flight = None

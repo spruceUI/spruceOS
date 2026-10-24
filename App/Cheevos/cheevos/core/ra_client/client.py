@@ -30,18 +30,12 @@ from cheevos.core.models import (
     UserProfile,
 )
 from cheevos.core.ra_client import parse, v2
+from cheevos.core.ra_client.common import API_HOST, API_V2_HOST, MEDIA_HOST, STATIC_HOST, Response
 from cheevos.core.ra_client.pacer import API_INTERVAL, LONG_PAUSE, MEDIA_INTERVAL, Pacer
 from cheevos.core.ra_client.parse_awards import parse_awards
 from cheevos.core.ra_client.recent import INITIAL_WINDOW, UnlockPage, fetch_recent_unlocks
 from cheevos.core.ra_client.redact import install_redaction
-from cheevos.core.ra_client.transport import (
-    API_HOST,
-    API_V2_HOST,
-    MEDIA_HOST,
-    STATIC_HOST,
-    Response,
-    Transport,
-)
+from cheevos.core.ra_client.transport import Transport
 
 logger = logging.getLogger(__name__)
 

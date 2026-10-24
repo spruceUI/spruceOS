@@ -106,6 +106,7 @@ class DetailFetcher:
             stop event, again after RA rejects the key (the user may have entered a new one).
         clock: App clock (epoch seconds).
         online: Refreshes app time before checking a stored RA pause, when supplied.
+        on_change: Notification after a fetch outcome is published, outside the worker lock.
     """
 
     def __init__(
@@ -114,10 +115,12 @@ class DetailFetcher:
         *,
         clock: Callable[[], float] = network_clock.now,
         online: Callable[[], bool] | None = None,
+        on_change: Callable[[], None] = lambda: None,
     ) -> None:
         self._open_session = open_session
         self._clock = clock
         self._online = online
+        self._on_change = on_change
         self._lock = threading.Lock()
         self._waiting: deque[int] = deque()  # next to fetch first
         self._statuses: dict[int, FetchStatus] = {}
@@ -297,6 +300,7 @@ class DetailFetcher:
                 self._statuses.pop(game_id, None)
             else:
                 self._statuses[game_id] = status
+        self._on_change()
 
     @staticmethod
     def _close(session: DetailSession) -> None:

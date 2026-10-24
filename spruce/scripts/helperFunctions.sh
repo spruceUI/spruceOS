@@ -72,6 +72,10 @@ case $INFO in
     *0xd04*)                                    # RK3326
         if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
             export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+            # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
+            if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
+                export PLATFORM="A10MiniV4"
+            fi
         else
             export PLATFORM="Pixel2"
         fi
@@ -93,7 +97,8 @@ case $INFO in
             *)                      export PLATFORM="AnbernicXX640480" ;;
         esac
         ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+    *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
 esac
 fi
 
@@ -126,6 +131,7 @@ device_names() {
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
+        A10MiniV4)        echo "A10MINIV4"; echo "DARKMOSS" ;;
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
@@ -695,6 +701,18 @@ low_battery_check() {
         acknowledge
         flag_remove "low_battery"
         stop_pyui_message_writer
+    fi
+}
+
+hide_or_unhide_AccentColor_app() {
+    _cur_theme="$(get_pyui_config_value ".theme" "SPRUCE")"
+    _theme_path="/mnt/SDCARD/Themes/${_cur_theme}"
+    _config="/mnt/SDCARD/App/AccentColor/config.json"
+
+    if [ -d "${_theme_path}/accent" ]; then
+        sed -i 's|"label"|"#label"|' "$_config"
+    else
+        sed -i 's|"#label"|"label"|' "$_config"
     fi
 }
 

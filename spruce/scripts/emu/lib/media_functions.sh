@@ -53,11 +53,7 @@ run_gvu() {
 
 	if [ "$PLATFORM" = "MiyooMini" ]; then
 		export GVU_DISPLAY_ROTATION=180
-		# Detect V4 (Mini Flip) by fb0 resolution
-		if grep -q "752x560p" /sys/class/graphics/fb0/modes 2>/dev/null; then
-			export GVU_DISPLAY_W=752
-			export GVU_DISPLAY_H=560
-		fi
+		# GVU_DISPLAY_W/H above: the model overlay sets the V4 and Mini Flip panel
 		pidof audioserver >/dev/null || { LD_PRELOAD= audioserver >/dev/null 2>&1 & sleep 0.5; }
 		export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
 		export SDL_AUDIODRIVER=dsp

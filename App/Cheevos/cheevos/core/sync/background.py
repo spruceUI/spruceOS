@@ -30,6 +30,7 @@ class BackgroundSync:
             sync's cancel event (its client's waits stop when it is set).
         online: Connectivity check passed to the engine.
         clock: App time shared with the transport and UI.
+        on_change: Called after each status change, outside the status lock.
     """
 
     def __init__(
@@ -38,11 +39,12 @@ class BackgroundSync:
         *,
         online: Callable[[], bool],
         clock: Callable[[], float] = network_clock.now,
+        on_change: Callable[[], None] = lambda: None,
     ) -> None:
         self._open_deps = open_deps
         self._online = online
         self._clock = clock
-        self._tracker = ProgressTracker()
+        self._tracker = ProgressTracker(on_change=on_change)
         self._cancel = threading.Event()
         self._thread: threading.Thread | None = None
 

@@ -67,7 +67,7 @@ def wait_while(title: str, text: str, working: Callable[[], bool]) -> bool:
     Args:
         title: Top-bar text.
         text: What is happening.
-        working: Polled on every input tick (~1/12 s).
+        working: Checked on each input tick; worker notifications end an idle wait early.
 
     Returns:
         ``True`` once the work is over; ``False`` if B was pressed first.

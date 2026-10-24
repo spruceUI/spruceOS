@@ -13,6 +13,7 @@ import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from cheevos.ui.pyui import texture_budget
 
@@ -129,7 +130,7 @@ def bootstrap(setup: PyUiSetup, device_factory: Callable[[], object]) -> None:
     Controller.init()
 
 
-def _warm_wifi_status(device: object) -> None:
+def _warm_wifi_status(device: Any) -> None:  # noqa: ANN401 — PyUI device
     """Read PyUI's Wi-Fi status on a thread while the display starts.
 
     The top bar draws it from the first frame and PyUI caches it: only the first read waits
@@ -140,14 +141,11 @@ def _warm_wifi_status(device: object) -> None:
     Args:
         device: The PyUI device object.
     """
-    read = getattr(device, "get_wifi_status", None)
-    if read is None:
-        return
 
     def warm() -> None:
         """Read once; a failure leaves the first frame to read it as before."""
         try:
-            read()
+            device.get_wifi_status()
         except Exception:  # the warm-up must never stop start-up
             logger.debug("Wi-Fi status warm-up failed", exc_info=True)
 
@@ -157,10 +155,8 @@ def _warm_wifi_status(device: object) -> None:
 def pyui_device(name: str) -> object:
     """Create PyUI's device object, exactly as PyUI's launcher does.
 
-    Use ``devices.device_factory`` to avoid importing the launcher. Older SpruceOS releases
-    expose the same factory only through ``mainui``; importing it does not start PyUI (its
-    ``main()`` is guarded). ``DESKTOP``, the development window, is configured by
-    ``PYUI_DESKTOP_*`` variables.
+    Use ``devices.device_factory`` to avoid importing the launcher. ``DESKTOP``, the
+    development window, is configured by ``PYUI_DESKTOP_*`` variables.
 
     Args:
         name: PyUI device name as passed to ``mainui.py -device``, e.g. ``"MIYOO_MINI_PLUS"``.
@@ -169,13 +165,7 @@ def pyui_device(name: str) -> object:
         The initialised device, also registered with PyUI's ``Device`` holder.
     """
     from devices.device import Device
-
-    try:
-        from devices.device_factory import initialize_device
-    except ModuleNotFoundError as error:
-        if error.name != "devices.device_factory":
-            raise  # a missing factory dependency is a real start-up failure
-        from mainui import initialize_device
+    from devices.device_factory import initialize_device
 
     # main_ui_mode=False: none of the launcher-only background services.
     initialize_device(name, main_ui_mode=False)

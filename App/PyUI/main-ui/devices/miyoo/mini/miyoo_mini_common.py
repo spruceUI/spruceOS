@@ -112,7 +112,7 @@ class MiyooMiniCommon(MiyooDevice):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.mainui_volume = None
-            self.keymon_volume = self._attach_keymon_volume() if device_name.endswith("MIYOO_MINI_FLIP") else None
+            self.keymon_volume = self._attach_keymon_volume() if miyoo_mini_specific_model_variables.uses_keymon_volume else None
             if self.keymon_volume is not None:
                 threading.Thread(target=self._watch_keymon_volume, daemon=True).start()
             # keymon owns the volume keys and writes /appconfigs/system.json on every
@@ -123,9 +123,11 @@ class MiyooMiniCommon(MiyooDevice):
             # stale until the next unrelated write (Mini Plus/Flip, 2026-09-04).
             # The granularity repeat keeps re-reading the file for two seconds
             # after any change, which catches every same-second write.
-            self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2,
-                repeat_trigger_for_mtime_granularity_issues=True)
+            # The Mini Flip reads keymon's shared memory above instead, so it needs no file watcher.
+            if self.keymon_volume is None:
+                self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
+                    "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2,
+                    repeat_trigger_for_mtime_granularity_issues=True)
             threading.Thread(target=self.startup_init, daemon=True).start()
 
         super().__init__()
@@ -164,35 +166,18 @@ class MiyooMiniCommon(MiyooDevice):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
             return
 
+        # keymon leaves stale bytes after the closing brace, so strict JSON fails on
+        # every press; scan for `"vol" : number` instead.
         volume = None
 
         try:
-            # First try normal JSON parsing
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                volume = data.get("vol")
-
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                m = re.search(r'"vol"\s*:\s*(\d+)', f.read())
+            if m:
+                volume = int(m.group(1))
         except Exception as e:
-            # keymon leaves stale bytes after the closing brace, so strict JSON
-            # fails on every press; the regex below is the normal path here.
-            PyUiLogger.get_logger().debug(
-                f"JSON parse failed for {path}, attempting fallback parse: {e}"
-            )
-
-            # Fallback: scan file text for `"vol" : number`
-            try:
-                with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                    for line in f:
-                        # Match: "vol" : 23   (allow spaces)
-                        m = re.search(r'"vol"\s*:\s*(\d+)', line)
-                        if m:
-                            volume = int(m.group(1))
-                            break
-            except Exception as e2:
-                PyUiLogger.get_logger().warning(
-                    f"Fallback parse failed for {path}: {e2}"
-                )
-                return
+            PyUiLogger.get_logger().warning(f"Volume read failed for {path}: {e}")
+            return
 
         if volume is None:
             return
