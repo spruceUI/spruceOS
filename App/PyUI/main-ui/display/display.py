@@ -11,8 +11,9 @@ from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
 import sdl2
-import sdl2.ext
+from display import sdl_backend
 import sdl2.sdlttf
+import sdl2.sdlimage
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
@@ -120,6 +121,7 @@ class Display:
     _glyph_advances = {} # font purpose -> GlyphAdvances of its font
     
     _last_frame_time = 0
+    _after_present = []
 
     # The draw calls of the frame being drawn and of the one on screen. Comparing
     # them at present() tells a screen that changed from one drawn the same again,
@@ -274,10 +276,10 @@ class Display:
 
     @classmethod
     def _init_display(cls):
-        with log_timing("sdl2.ext.init", PyUiLogger.get_logger()):    
-            sdl2.ext.init(controller=False)
+        with log_timing(f"SDL video/events initialization ({sdl_backend.get_backend_name()})", PyUiLogger.get_logger()):
+            sdl_backend.init()
 
-        # After sdl2.ext.init, never before: SDL_Init calls
+        # After SDL initialization, never before: SDL_Init calls
         # SDL_GL_ResetAttributes and would wipe anything set earlier. Before
         # the window, because that is when the EGL config is chosen.
         if Device.get_device().wants_gles_context():
@@ -296,14 +298,14 @@ class Display:
                 width, height = display_mode.w, display_mode.h
                 #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
 
-        with log_timing("sdl2.ext.Window", PyUiLogger.get_logger()):    
+        with log_timing("SDL window", PyUiLogger.get_logger()):
             cls.window = Device.get_device().create_window(width, height)
             cls.window.show()
 
 
-        with log_timing("sdl2.ext.Renderer", PyUiLogger.get_logger()):    
+        with log_timing("SDL renderer", PyUiLogger.get_logger()):
             sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
-            cls.renderer = sdl2.ext.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
+            cls.renderer = sdl_backend.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
 
     @classmethod
     def deinit_display(cls):
@@ -314,6 +316,9 @@ class Display:
 
     @classmethod
     def deinit_display_v1(cls):
+        cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
         if cls.render_canvas:
             sdl2.SDL_DestroyTexture(cls.render_canvas)
             cls.render_canvas = None
@@ -321,23 +326,21 @@ class Display:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
         if cls.renderer is not None:
-            sdl2.SDL_DestroyRenderer(cls.renderer.sdlrenderer)
+            cls.renderer.destroy()
             cls.renderer = None
         if cls.window is not None:
-            sdl2.SDL_DestroyWindow(cls.window.window)
+            cls.window.close()
             cls.window = None
         cls.deinit_fonts()
-        cls._unload_bg_texture()
-        cls._text_texture_cache.clear_cache()
-        cls._image_texture_cache.clear_cache()
         cls.bg = None
 
         sdl2.SDL_Quit()
-        if hasattr(os, "sync"):
-            os.sync()
 
     @classmethod
     def deinit_display_v2(cls):
+        cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
         if cls.render_canvas:
             sdl2.SDL_DestroyTexture(cls.render_canvas)
             cls.render_canvas = None
@@ -355,9 +358,6 @@ class Display:
             cls.window = None
 
         cls.deinit_fonts()
-        cls._unload_bg_texture()
-        cls._text_texture_cache.clear_cache()
-        cls._image_texture_cache.clear_cache()
 
         sdl2.SDL_Quit()
 
@@ -1199,6 +1199,11 @@ class Display:
             cls.start = time.perf_counter()
 
     @classmethod
+    def after_next_present(cls, callback):
+        """Run callback once on the UI thread after the next completed frame."""
+        cls._after_present.append(callback)
+
+    @classmethod
     def _frame_presented(cls):
         now = time.monotonic()
         if cls._frame_draws != cls._shown_draws:
@@ -1207,6 +1212,9 @@ class Display:
             cls._unchanged_frames += 1
         cls._shown_draws, cls._frame_draws = cls._frame_draws, []
         cls._last_present_time = now
+        callbacks, cls._after_present = cls._after_present, []
+        for callback in callbacks:
+            callback()
 
     @classmethod
     def _screen_changed(cls, now=None):

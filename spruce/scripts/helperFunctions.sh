@@ -710,9 +710,13 @@ hide_or_unhide_AccentColor_app() {
     _theme_path="/mnt/SDCARD/Themes/${_cur_theme}"
     _config="/mnt/SDCARD/App/AccentColor/config.json"
 
+    # Rewriting an unchanged file still forces FAT directory writes on every
+    # menu restart. Only touch the app config when its visibility changes.
     if [ -d "${_theme_path}/accent" ]; then
-        sed -i 's|"#label"|"label"|' "$_config"
-    else
+        if grep -qF '"#label"' "$_config"; then
+            sed -i 's|"#label"|"label"|' "$_config"
+        fi
+    elif grep -qF '"label"' "$_config"; then
         sed -i 's|"label"|"#label"|' "$_config"
     fi
 }
@@ -1203,6 +1207,10 @@ set_rgb_in_menu() {
 
 set_network_proxy() {
     enable_proxy="$(get_config_value '.menuOptions."Proxy Settings".enableProxy.selected' "False")"
+    if [ "$enable_proxy" != "True" ]; then
+        unset http_proxy https_proxy
+        return 0
+    fi
     proxy_protocol="$(get_config_value '.menuOptions."Proxy Settings".proxyProtocol.selected' "http")"
     proxy_address="$(get_config_value '.menuOptions."Proxy Settings".proxyAddress.selected' "")"
     proxy_port="$(get_config_value '.menuOptions."Proxy Settings".proxyPort.selected' "")"
