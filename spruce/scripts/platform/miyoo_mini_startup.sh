@@ -13,7 +13,7 @@
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
-# audioserver starts in device_init, once the stock main has let go of the audio device.
+# audioserver starts in device_init, once the stock startup sound has let go of the audio device.
 /customer/app/keymon &
 
 touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
