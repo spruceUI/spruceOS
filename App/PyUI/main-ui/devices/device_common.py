@@ -56,6 +56,9 @@ class DeviceCommon(AbstractDevice):
                     return
 
     def power_off(self):
+        # Shown here: waiting on the command, the menu can't act on the CFW's
+        # own farewell request (docs/shutdown_readme.txt).
+        Display.present_farewell()
         if PyUiConfig.get_poweroff_cmd():
             self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
         else:
