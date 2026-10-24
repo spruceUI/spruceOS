@@ -112,9 +112,25 @@ device_init() {
         echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
     fi
     killall -9 main ### SUPER important in preventing .tmp_update suicide
+    start_audioserver_after_main &
 
     # The stock firmware starts an unauthenticated root shell on telnet; Onion kills it the same way.
     pkill -9 -f "telnetd -l sh" 2>/dev/null
+}
+
+# The stock main holds the audio device until it has exited: an audioserver started
+# before that fails MI_AO_SetPubAttr (0xa0052009) and dies. Every audioserver start
+# also makes the next process to open MI_SYS wait ~2 s, so start it once, here,
+# rather than leaving it to launch.sh's fallback right before the menu.
+start_audioserver_after_main() {
+    _main_wait=50  # each poll forks twice: a few seconds at most
+    while pidof main >/dev/null && [ "$_main_wait" -gt 0 ]; do
+        sleep 0.02
+        _main_wait=$((_main_wait - 1))
+    done
+    pidof audioserver >/dev/null && return 0
+    unset LD_PRELOAD
+    exec audioserver >/dev/null 2>&1
 }
 
 # Sleeps floor at 10ms, so tiers are pulse rate, not strength.

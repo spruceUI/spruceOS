@@ -282,11 +282,18 @@ case "$PLATFORM" in
         # Menu sounds go to audioserver through /dev/dsp (audio_player_oss.py).
         # Its boot-time start fails on some units, so make sure it is up.
         pidof audioserver >/dev/null || { audioserver >/dev/null 2>&1 & sleep 0.5; }
-        export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
 
+        # freemma frees what an exited graphics app left behind and clears the
+        # framebuffer. MI_SYS_Init in the first new process after an audioserver start
+        # (and at times after a long idle) waits ~2 s in the kernel, so it runs while
+        # Python imports; PyUI waits for this PID before it touches MI or SDL. Started
+        # inside $( ) so that init reaps it.
+        unset PYUI_MMA_CLEANUP_PID
         if [ $skip_freemma -eq 0 ]; then
-            freemma
+            PYUI_MMA_CLEANUP_PID="$(freemma >/dev/null 2>&1 & echo $!)"
+            export PYUI_MMA_CLEANUP_PID
         fi
+        export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
 
         miyoo_device=$(get_miyoo_mini_variant)
 
