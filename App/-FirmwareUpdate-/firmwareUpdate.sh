@@ -80,7 +80,7 @@ confirm_update() {
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
 		"MiyooMini")
-			conf_msg="Your $SPRUCE_DEVICE_NAME will now reboot into the OEM firmware update and show a rocket. Keep it plugged in and be patient, as it will take a few minutes. It will restart itself again once complete. If no rocket appears, power it off, then hold MENU while plugging it in."
+			conf_msg="Your $SPRUCE_DEVICE_NAME will now shut down. Once it is off, unplug the charger and plug it back in to start the manufacturer firmware update. A rocket appears; do not unplug it until it finishes, as it will take a few minutes. If no rocket appears, hold MENU while plugging it in."
 			;;
 		"Brick"|"BrickPro"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
@@ -92,7 +92,11 @@ confirm_update() {
 	acknowledge
 	flag_add "first_boot_$PLATFORM"
 	sync
-	/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+	if [ "$PLATFORM" = "MiyooMini" ]; then
+		/mnt/SDCARD/spruce/scripts/save_poweroff.sh
+	else
+		/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+	fi
 }
 
 check_for_connection() {

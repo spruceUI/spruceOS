@@ -93,6 +93,11 @@ device_init() {
 
     mini_model_init
 
+    # The firmware updater leaves its image at the card root; drop it once flashed
+    if [ -n "$FW_FILE" ] && [ -f "/mnt/SDCARD/$FW_FILE" ] && [ "$(check_if_fw_needs_update)" = "false" ]; then
+        rm -f "/mnt/SDCARD/$FW_FILE"
+    fi
+
     # Export and prime the pwm backlight channel.
     #
     # This used to sit inside the Plus branch above, which left the OG Mini and
@@ -251,7 +256,7 @@ launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "${MINI_HAS_LID:-false}"
 }
 
-# Only models with an FW_FILE (the Mini Flip) have an image to update to
+# Only models with an FW_FILE (Mini Plus, Mini Flip) have an image to update to
 check_if_fw_needs_update() {
     [ -n "$FW_FILE" ] || { echo "false"; return; }
     VERSION="$(/etc/fw_printenv miyoo_version 2>/dev/null | cut -d= -f2)"
