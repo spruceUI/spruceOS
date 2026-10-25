@@ -259,6 +259,9 @@ jobs:
               .git/*|.git|.github/*|.github|.gitignore|.gitattributes)
                 return 0
                 ;;
+              .gitkeep|*/.gitkeep)
+                return 0
+                ;;
               create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
@@ -472,6 +475,7 @@ jobs:
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
             -xr!.git \
             -xr!.github \
+            -xr!.gitkeep \
             -x!.gitignore \
             -x!.gitattributes \
             -x!create_spruce_release.bat \
