@@ -612,13 +612,18 @@ jobs:
             | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy V10          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | A10 Mini              | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | G350                  | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | MagicX XU Mini M      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
 
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
-            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+            > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M and Anbernic RG353M:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
