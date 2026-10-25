@@ -1,18 +1,22 @@
 #!/bin/sh
-# Charge screen for a Mini Flip that a charger switched on. miyoo_mini_startup.sh runs this before keymon and
-# the rest of the boot; it returns to let the boot continue, or powers the unit off, which keeps it charging.
+# Charge screen for a Miyoo Mini that a charger switched on. miyoo_mini_startup.sh runs this before keymon and
+# the rest of the boot; it returns to let the boot continue, or powers the unit off.
 #
-# The AXP223 sets register 0x00 bit 0 when inserting the charger is what powered the unit on, and clears it after a
-# power-key start, cable or not; pwrkeyval reads 0 either way on this model. Bits 7 and 5 are the ACIN and VBUS
-# inputs, so "charger still in" is either of them. Register 0xb9 bits 0-6 are the battery percentage.
+# How a charger start shows, by what the unit has rather than by model:
+#   AXP223 PMIC (Plus, Mini Flip)   register 0x00 bit 0 is set when the charger powered the unit on and clear after a
+#                                   power-key start; bits 7 and 5 are the ACIN and VBUS inputs; 0xb9 bits 0-6 are the
+#                                   battery percentage. pwrkeyval reads 0 either way on these boards.
+#   no PMIC (Mini, Mini v4)         pwrkeyval 0 and GPIO 59 (VBUS) 1, the stock MainUI's own test: U-Boot passes
+#                                   powerkey=1 only while POWER is down, so a boot without it on USB is the charger's
 #
-#   POWER held for CG_HOLD_SECS                   continue booting, with the boot screen put back as it was found
-#   POWER pressed and let go                      restart the idle countdown
-#   lid closed, charger pulled, or CG_IDLE_TICKS  power off
+#   POWER held for CG_HOLD_SECS         continue booting, with the boot screen put back as it was found
+#   POWER pressed and let go            restart the idle countdown, and light the screen if it was dark
+#   lid closed, or charger pulled       power off
+#   CG_IDLE_TICKS without a press       darken the screen and wait, as the stock charge screen does; on the boards
+#                                       without a PMIC USB holds the board up, so a power-off would only start it again
 #
-# Opt-in for now: only with spruce/flags/charge_gate present. The gate checks for what it needs rather than for a
-# model: a readable AXP223 and a 752x560 framebuffer are only on the Mini Flip. Anything missing or unexpected means
-# the boot continues as if this script did not exist.
+# Opt-in for now: only with spruce/flags/charge_gate present. Anything missing or unexpected means the boot continues
+# as if this script did not exist.
 
 CG_SD=/mnt/SDCARD
 CG_AXP_READ="$CG_SD/spruce/miyoomini/bin/axp_read"
@@ -24,19 +28,17 @@ CG_STATE=/tmp/charge_gate
 CG_KEYS=/dev/input/event0
 CG_FB=/dev/fb0
 CG_FB_SYS=/sys/class/graphics/fb0
+CG_PWRKEY=/sys/devices/soc0/soc/soc:gpio_keys/pwrkeyval
+CG_GPIO=/sys/class/gpio
 # The same nodes as device_functions/MiyooMini.sh, which only helperFunctions.sh may source and which is not
 # loaded this early
 CG_LID=/sys/devices/soc0/soc/soc:hall-mh248/hallvalue
-CG_BACKLIGHT=/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/pwm0/duty_cycle
+CG_PWM=/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0
+CG_BACKLIGHT="$CG_PWM/pwm0/duty_cycle"
 CG_GUI=/proc/mi_modules/fb/mi_fb0
 
-# The frames are built for this framebuffer shape by miyoomini/make_charge_frames.py in spruceSource, which also
-# holds axp_read's source
-CG_WIDTH=752
-CG_HEIGHT=560
-CG_STRIDE=3008
 CG_FRAME_COUNT=5
-CG_FRAME_USEC=300000
+CG_FRAME_USEC=400000
 CG_HOLD_SECS=1
 CG_RELEASE_TICKS=3
 CG_IDLE_TICKS=15
@@ -46,15 +48,17 @@ CG_POWEROFF_WAIT=30
 
 CG_OUTCOME=""
 CG_IDLE=0
+CG_DARK=0
 CG_KEY_DOWN=0
 CG_HOLD_PID=""
 CG_PAN_Y=0
+CG_PMIC=0
 
 cg_log() {
     echo "$(cut -d' ' -f1 /proc/uptime 2>/dev/null) $*" 2>/dev/null >> "$CG_LOG"
 }
 
-# Prints one register as 0xNN; fails when the reader is missing or the bus read fails
+# Prints one register as 0xNN; fails when there is no PMIC to read
 cg_reg() {
     _v="$("$CG_AXP_READ" "$1" 2>/dev/null)" || return 1
     case "$_v" in
@@ -63,16 +67,33 @@ cg_reg() {
     esac
 }
 
-cg_charger_started() {
-    _v="$(cg_reg 0x00)" || return 1
-    [ $((_v & 0x01)) -ne 0 ] && [ $((_v & 0xa0)) -ne 0 ]
+# GPIO 59 is VBUS divided down; prints 1 with USB power present. Exported here when nothing has yet
+cg_vbus() {
+    [ -e "$CG_GPIO/gpio59" ] || echo 59 2>/dev/null > "$CG_GPIO/export"
+    read -r _vbus 2>/dev/null < "$CG_GPIO/gpio59/value" || return 1
+    echo "$_vbus"
 }
 
-# An unreadable register counts as present: a false "unplugged" would power off a unit that is charging,
-# while the idle countdown bounds the other mistake
+cg_charger_started() {
+    if [ "$CG_PMIC" = 1 ]; then
+        _v="$(cg_reg 0x00)" || return 1
+        [ $((_v & 0x01)) -ne 0 ] && [ $((_v & 0xa0)) -ne 0 ]
+    else
+        read -r _key 2>/dev/null < "$CG_PWRKEY" || return 1
+        [ "$_key" = 0 ] && [ "$(cg_vbus)" = 1 ]
+    fi
+}
+
+# An unreadable source counts as present: a false "unplugged" would power off a unit that is charging, while the
+# idle countdown bounds the other mistake
 cg_charger_present() {
-    _v="$(cg_reg 0x00)" || return 0
-    [ $((_v & 0xa0)) -ne 0 ]
+    if [ "$CG_PMIC" = 1 ]; then
+        _v="$(cg_reg 0x00)" || return 0
+        [ $((_v & 0xa0)) -ne 0 ]
+    else
+        _vbus="$(cg_vbus)" || return 0
+        [ "$_vbus" != 0 ]
+    fi
 }
 
 cg_lid_open() {
@@ -81,30 +102,34 @@ cg_lid_open() {
     [ "${_lid%"${_lid#?}"}" != "0" ]
 }
 
-# Sets CG_PAN_Y to the visible page; fails unless the framebuffer has the shape the frames were built for
-cg_fb_ready() {
+# Picks the frame set built for the framebuffer as it is now (charge/<width>x<height>/band.txt holds
+# "<width> <height> <top row> <rows>") and sets CG_SET, the shape and the band; fails when none fits
+cg_pick_frames() {
     read -r _size 2>/dev/null < "$CG_FB_SYS/virtual_size" || return 1
     read -r _stride 2>/dev/null < "$CG_FB_SYS/stride" || return 1
     read -r _pan 2>/dev/null < "$CG_FB_SYS/pan" || return 1
-    [ "${_size%%,*}" = "$CG_WIDTH" ] && [ "$_stride" = "$CG_STRIDE" ] || return 1
     CG_PAN_Y="${_pan#*,}"
-    case "$CG_PAN_Y" in ''|*[!0-9]*) return 1 ;; esac
-    [ $(( ${_size#*,} - CG_PAN_Y )) -ge "$CG_HEIGHT" ]
-}
-
-# Sets CG_BAND_TOP and CG_BAND_ROWS; fails unless band.txt describes rows inside the screen
-cg_band_ready() {
-    read -r CG_BAND_TOP CG_BAND_ROWS 2>/dev/null < "$CG_FRAMES/band.txt" || return 1
-    case "$CG_BAND_TOP:$CG_BAND_ROWS" in *[!0-9:]*|:*|*:) return 1 ;; esac
-    [ "$CG_BAND_ROWS" -gt 0 ] && [ $((CG_BAND_TOP + CG_BAND_ROWS)) -le "$CG_HEIGHT" ] || return 1
-    _n=1
-    while [ "$_n" -le "$CG_FRAME_COUNT" ]; do
-        [ -r "$CG_FRAMES/frame-$_n.raw.gz" ] || return 1
-        _n=$((_n + 1))
+    case "$CG_PAN_Y:${_size%%,*}:${_size#*,}:$_stride" in *[!0-9:]*|*::*|:*|*:) return 1 ;; esac
+    for _band in "$CG_FRAMES"/*/band.txt; do
+        read -r CG_WIDTH CG_HEIGHT CG_BAND_TOP CG_BAND_ROWS 2>/dev/null < "$_band" || continue
+        case "$CG_WIDTH:$CG_HEIGHT:$CG_BAND_TOP:$CG_BAND_ROWS" in *[!0-9:]*|*::*|:*|*:) continue ;; esac
+        [ "$CG_WIDTH" = "${_size%%,*}" ] && [ "$_stride" = $((CG_WIDTH * 4)) ] || continue
+        [ $(( ${_size#*,} - CG_PAN_Y )) -ge "$CG_HEIGHT" ] || continue
+        [ "$CG_BAND_ROWS" -gt 0 ] && [ $((CG_BAND_TOP + CG_BAND_ROWS)) -le "$CG_HEIGHT" ] || continue
+        CG_SET="${_band%/band.txt}"
+        CG_STRIDE="$_stride"
+        _n=1
+        while [ "$_n" -le "$CG_FRAME_COUNT" ]; do
+            [ -r "$CG_SET/frame-$_n.raw.gz" ] || continue 2
+            _n=$((_n + 1))
+        done
+        return 0
     done
+    return 1
 }
 
-# The first frame to show: the vendor's levels, at 25, 50, 75 and 99 percent
+# The first frame to show: the vendor's levels, at 25, 50, 75 and 99 percent. Without a PMIC there is no reading
+# to go on, so the tree fills from empty
 cg_level_frame() {
     _v="$(cg_reg 0xb9)" || { echo 1; return; }
     _pct=$((_v & 0x7f))
@@ -131,15 +156,27 @@ cg_restore_screen() {
 }
 
 cg_draw() {
-    zcat "$CG_FRAMES/frame-$1.raw.gz" |
+    zcat "$CG_SET/frame-$1.raw.gz" |
         dd of="$CG_FB" bs="$CG_STRIDE" seek=$((CG_PAN_Y + CG_BAND_TOP)) conv=notrunc 2>/dev/null
+}
+
+# The Mini, v4 and Plus come up with the PWM channel unexported and the panel lit, so there is no node to darken
+# it with; export it with the stock charge screen's period and level. spruce sets its own when its boot gets there
+cg_backlight_ready() {
+    [ -e "$CG_BACKLIGHT" ] && return
+    echo 0 2>/dev/null > "$CG_PWM/export"
+    echo 800 2>/dev/null > "$CG_PWM/pwm0/period"
+    echo "$CG_DEFAULT_BACKLIGHT" 2>/dev/null > "$CG_BACKLIGHT"
+    echo 1 2>/dev/null > "$CG_PWM/pwm0/enable"
 }
 
 cg_screen() {
     if [ "$1" = "on" ]; then
+        rm -f "$CG_STATE/dark"
         echo "GUI_SHOW 0 on" 2>/dev/null > "$CG_GUI"
         echo "$CG_BRIGHTNESS" 2>/dev/null > "$CG_BACKLIGHT"
     else
+        touch "$CG_STATE/dark"
         echo "0" 2>/dev/null > "$CG_BACKLIGHT"
         echo "GUI_SHOW 0 off" 2>/dev/null > "$CG_GUI"
     fi
@@ -161,7 +198,12 @@ cg_on_event() {
         key)
             CG_IDLE=0
             case "$2" in
-                1) CG_KEY_DOWN=1; cg_cancel_hold_timer; cg_start_hold_timer ;;
+                1)
+                    CG_KEY_DOWN=1
+                    [ "$CG_DARK" = 1 ] && { CG_DARK=0; cg_screen on; }
+                    cg_cancel_hold_timer
+                    cg_start_hold_timer
+                    ;;
                 0) CG_KEY_DOWN=0; cg_cancel_hold_timer ;;
             esac
             ;;
@@ -180,10 +222,12 @@ cg_on_event() {
                 CG_OUTCOME=off
                 return
             fi
+            [ "$CG_DARK" = 1 ] && return
             CG_IDLE=$((CG_IDLE + 1))
             if [ "$CG_IDLE" -ge "$CG_IDLE_TICKS" ]; then
-                cg_log "idle: powering off"
-                CG_OUTCOME=off
+                cg_log "idle: screen off"
+                CG_DARK=1
+                cg_screen off
             elif [ $((CG_IDLE % CG_LEVEL_TICKS)) -eq 0 ]; then
                 cg_level_frame > "$CG_STATE/start"
             fi
@@ -210,11 +254,16 @@ cg_start_frame() {
 }
 
 # Stops at the stop file rather than by signal, so a draw is never cut off half way and never lands after the
-# screen is put back
+# screen is put back. Redrawing the frame already shown flashes on panels that tear, so an unchanged frame (a
+# full battery shows frame 5 alone) is drawn once
 cg_animate() {
     _frame="$(cg_start_frame)"
+    _shown=""
     while [ ! -e "$CG_STATE/stop" ]; do
-        cg_draw "$_frame"
+        if [ ! -e "$CG_STATE/dark" ] && [ "$_frame" != "$_shown" ]; then
+            cg_draw "$_frame"
+            _shown="$_frame"
+        fi
         usleep "$CG_FRAME_USEC"
         _frame=$((_frame + 1))
         [ "$_frame" -gt "$CG_FRAME_COUNT" ] && _frame="$(cg_start_frame)"
@@ -247,13 +296,22 @@ cg_kill_tree() {
     kill "$1" 2>/dev/null
 }
 
+# With a PMIC, poweroff cuts the rails. Without one, GPIO 85 holds the board on, and the stock firmware releases it
+# and reboots; BusyBox's poweroff leaves those boards running
 cg_power_off() {
     cg_screen off
     sync
-    poweroff
-    # poweroff only asks init; if the unit is still up after this, let it boot rather than hang dark
+    if [ "$CG_PMIC" = 1 ]; then
+        poweroff
+    else
+        [ -e "$CG_GPIO/gpio85" ] || echo 85 2>/dev/null > "$CG_GPIO/export"
+        echo out 2>/dev/null > "$CG_GPIO/gpio85/direction"
+        echo 0 2>/dev/null > "$CG_GPIO/gpio85/value"
+        reboot
+    fi
+    # Both only ask; if the unit is still up after this, let it boot rather than hang dark
     sleep "$CG_POWEROFF_WAIT"
-    cg_log "still running after poweroff: continuing the boot"
+    cg_log "still running after power-off: continuing the boot"
 }
 
 cg_run() {
@@ -262,6 +320,8 @@ cg_run() {
     mkfifo "$CG_STATE/events" || return 0
     exec 4<>"$CG_STATE/events"
 
+    cg_backlight_ready
+    CG_BRIGHTNESS=""
     read -r CG_BRIGHTNESS 2>/dev/null < "$CG_BACKLIGHT"
     CG_SAVED_BRIGHTNESS="${CG_BRIGHTNESS:-0}"
     [ "${CG_BRIGHTNESS:-0}" -gt 0 ] 2>/dev/null || CG_BRIGHTNESS="$CG_DEFAULT_BACKLIGHT"
@@ -317,14 +377,14 @@ cg_run() {
 
 cg_main() {
     [ -f "$CG_FLAG" ] || return 0
+    cg_reg 0x00 >/dev/null && CG_PMIC=1
     cg_charger_started || return 0
-    cg_band_ready || return 0
-    cg_fb_ready || return 0
+    cg_pick_frames || return 0
     # Keeps the previous run: switching a unit back on with the charger is itself a charge-screen boot.
     # printf, not ":": a failed redirection on a special builtin would end the script
     mv -f "$CG_LOG" "${CG_LOG%.log}.1.log" 2>/dev/null
     printf '' 2>/dev/null > "$CG_LOG"
-    cg_log "charger-started boot: charge screen"
+    cg_log "charger-started boot: charge screen (${CG_WIDTH}x${CG_HEIGHT}, $([ "$CG_PMIC" = 1 ] && echo PMIC || echo no PMIC))"
     cg_run
 }
 
