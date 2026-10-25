@@ -7,7 +7,6 @@ from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
 from menus.settings.about_menu import AboutMenu
-from menus.settings.display_settings_menu import DisplaySettingsMenu
 from menus.settings.extra_settings_menu import ExtraSettingsMenu
 from menus.settings.bluetooth_menu import BluetoothMenu
 from menus.settings.sound_settings import SoundSettings
@@ -33,10 +32,12 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
            Device.get_device().prompt_power_down()
     
-    def show_display_menu(self, input: ControllerInput):
-        if(ControllerInput.A == input):
-            DisplaySettingsMenu().show_menu()
-
+    def lumination_adjust(self, input: ControllerInput):
+        if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            Device.get_device().lower_lumination()
+        elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            Device.get_device().raise_lumination()
+        
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
             Device.get_device().volume_down()
@@ -139,15 +140,15 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         value=self.shutdown
                     )
             )
-        
         option_list.append(
                 GridOrListEntry(
-                        primary_text=Language.display_settings(),
+                        primary_text=Language.backlight(),
+                        value_text="<    " + str(Device.get_device().lumination()) + "    >",
                         image_path=None,
                         image_path_selected=None,
                         description=None,
                         icon=None,
-                        value=self.show_display_menu
+                        value=self.lumination_adjust
                     )
             )
 
