@@ -25,20 +25,22 @@ if [ -f /mnt/SDCARD/Saves/mini-flip-system.json ]; then
     mv -f /mnt/SDCARD/Saves/mini-flip-system.json /mnt/SDCARD/Saves/miyoo-mini-system.json && log_message "Renamed mini-flip-system.json to miyoo-mini-system.json"
 fi
 
-# The gametank libretro core replaces the standalone as GameTank's default.
-_cfg=/mnt/SDCARD/Saves/spruce/emu_backups/GAMETANK.json
-if [ -f "$_cfg" ]; then
-    for _key in Emulator_A30 Emulator_64; do
-        if [ "$(jq -r ".menuOptions.$_key.selected // \"\"" "$_cfg")" = "gametank-standalone" ]; then
-            jq ".menuOptions.$_key.selected = \"gametank\"" "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
-            log_message "GameTank $_key: gametank-standalone -> gametank"
-        fi
-    done
-    if [ "$(jq -r '.menuOptions.Governor.selected // ""' "$_cfg")" = "Performance" ]; then
-        jq '.menuOptions.Governor.selected = "Smart"' "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
-        log_message "GameTank CPU mode: Performance -> Smart"
-    fi
-fi
+# A restore puts back every saved "selected", so a changed default whose old value
+# is still an option needs moving in the backup, or the old default wins.
+migrate_selected() {
+    _cfg="/mnt/SDCARD/Saves/spruce/emu_backups/$1.json"
+    [ -f "$_cfg" ] || return 0
+    [ "$(jq -r --arg k "$2" '.menuOptions[$k].selected // ""' "$_cfg")" = "$3" ] || return 0
+    jq --arg k "$2" --arg v "$4" '.menuOptions[$k].selected = $v' "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
+    log_message "$1 $2: $3 -> $4"
+}
+
+migrate_selected GAMETANK Emulator_A30 gametank-standalone gametank
+migrate_selected GAMETANK Emulator_64 gametank-standalone gametank
+migrate_selected GAMETANK Governor Performance Smart
+migrate_selected DC Emulator_RGB30 Flycast-standalone Flycast-libretro
+migrate_selected SATURN Emulator_RGB30 yabasanshiro-standalone-hle yabasanshiro_generic_libretro
+migrate_selected N64 controlMode Custom "Spruce (per device)"
 
 
 # -------------------- UPGRADE COMPLETION --------------------
