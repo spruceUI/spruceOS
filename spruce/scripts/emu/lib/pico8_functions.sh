@@ -123,6 +123,11 @@ run_pico8() {
 	else
 		PICO8_BINARY="pico8_64"
 
+		# These SDLs hand pico-8 Menu as Escape, which opens its console
+		case "$PLATFORM" in
+			Flip|Brick*|SmartPro|Zero*|XU20) export PICO8_IGM_HIDE_SCANCODE=41 ;;
+		esac
+
 		# use_wget is 1, so PICO-8 shells out to wget for every cart fetch.
 		# spruce/bin64/wget is first on PATH but is linked against
 		# libpcre.so.1, which the RGB30's dArkMoss base does not ship - it
