@@ -162,7 +162,7 @@ class Display:
             cls.init_fonts()
 
 
-        if hasattr(sdl2.sdlttf, "TTF_GlyphIsProvided32"):
+        if sdl2.sdlttf.dll.version_tuple >= (2, 0, 18):
             cls._glyph_is_provided = sdl2.sdlttf.TTF_GlyphIsProvided32
             cls._glyph_supports_32bit = True
         else:
