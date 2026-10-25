@@ -56,6 +56,11 @@ run_pico8() {
 		PICO8_BINARY="pico8_dyn"
 		killall audioserver
 		cpuclock 1600
+		# With audioserver gone nothing applies the volume, and MI_AO starts at full
+		(sleep 2; set_volume "$(get_volume_level)" false) &
+		export PICO8_IGM_INPUT=/dev/input/event0 PICO8_IGM_B_UP="1 103" PICO8_IGM_B_DOWN="1 108" \
+			PICO8_IGM_B_LEFT="1 105" PICO8_IGM_B_RIGHT="1 106" PICO8_IGM_B_A="1 57" PICO8_IGM_B_B="1 29" \
+			PICO8_IGM_HIDE_SCANCODE=41
 		sed 's|^transform_screen 135$|transform_screen 0|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 44 224 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 
@@ -131,14 +136,34 @@ run_pico8() {
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 	fi
 
+	# The spruce in-game menu and save states, from spruceUI/pico8-spruce.
+	# Preloaded on the pico-8 command alone, so nothing else launch runs gets it.
+	IGM_LIB=""
+	if [ "$(jq -r '.menuOptions.inGameMenu.selected // "True"' "$EMU_JSON_PATH")" = "True" ]; then
+		case "$PICO8_BINARY" in
+			pico8_dyn) IGM_LIB="$EMU_DIR/lib-igm/pico8-igm-armhf.so" ;;
+			*)         IGM_LIB="$EMU_DIR/lib-igm/pico8-igm-arm64.so" ;;
+		esac
+		[ -f "$IGM_LIB" ] || IGM_LIB=""
+	fi
+	PICO8_PRELOAD="$LD_PRELOAD"
+	if [ -n "$IGM_LIB" ]; then
+		PICO8_PRELOAD="$IGM_LIB${LD_PRELOAD:+:$LD_PRELOAD}"
+		export_spruce_theme_dir
+		touch /tmp/pico8_igm
+	fi
+
 	if [ "${GAME##*.}" = "splore" ]; then
 		if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -ne 0 ]; then
 			check_and_connect_wifi
 		fi
-		$PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > $(emu_log_file) 2>&1
+		LD_PRELOAD="$PICO8_PRELOAD" $PICO8_BINARY -splore -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -root_path "/mnt/SDCARD/Roms/PICO8/" $SCALING > $(emu_log_file) 2>&1
 	else
-		$PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > $(emu_log_file) 2>&1
+		# A state only loads in the pico-8 build that saved it, so each build keeps its own
+		PICO_PAK_STATES_DIR="/mnt/SDCARD/Saves/states/PICO-8/$PICO8_BINARY" PICO8_IGM_CART="$ROM_FILE" \
+			LD_PRELOAD="$PICO8_PRELOAD" $PICO8_BINARY -width $DISPLAY_WIDTH -height $DISPLAY_HEIGHT -scancodes -run "$ROM_FILE" $SCALING > $(emu_log_file) 2>&1
 	fi
+	rm -f /tmp/pico8_igm
 	sync
 
 	# send signal USR1 to joystickinput to switch to ANALOG MODE

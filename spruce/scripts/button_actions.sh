@@ -319,6 +319,9 @@ perform_action() {
             killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
         elif pgrep -f "\./mupen64plus" >/dev/null; then
             killall -q -USR2 mupen64plus
+        elif [ -f /tmp/pico8_igm ] && pgrep -f "pico8_64|pico8_dyn" >/dev/null; then
+            # Only while the menu library is preloaded: SIGUSR2 kills a bare pico-8
+            killall -q -USR2 pico8_64 pico8_dyn
         else
             send_menu_button_to_retroarch
         fi

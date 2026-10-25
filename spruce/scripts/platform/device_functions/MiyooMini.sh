@@ -295,9 +295,10 @@ get_volume_level() {
 set_volume() {
     # NOTE: This won't always work. They will often just error.
     # But sometimes they do work. It's based on if something else is already controlling the volume.
-    # The main purpose of this is for NDS volume since drastic does some weird stuff
+    # The main purpose of this is for NDS volume since drastic does some weird stuff,
+    # and PICO-8, whose SDL drives MI_AO with audioserver stopped
     # Can add more apps as needed
-    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+    if pgrep -f "./drastic(32|64)?|pico8_dyn" >/dev/null; then
         VOLUME_LV="$1"
         SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
         /mnt/SDCARD/spruce/miyoomini/bin/mm_set_volume.py "$VOLUME_LV" &
