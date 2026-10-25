@@ -42,6 +42,12 @@ migrate_selected DC Emulator_RGB30 Flycast-standalone Flycast-libretro
 migrate_selected SATURN Emulator_RGB30 yabasanshiro-standalone-hle yabasanshiro_generic_libretro
 migrate_selected N64 controlMode Custom "Spruce (per device)"
 
+# Emu/NDS/usrcheat.dat was a duplicate of Emu/NDS/cheats/usrcheat.dat and is gone.
+for _ini in /mnt/SDCARD/Saves/dsperate/*.ini; do
+    [ -f "$_ini" ] || continue
+    sed -i 's|^cheats = /mnt/SDCARD/Emu/NDS/usrcheat.dat$|cheats = /mnt/SDCARD/Emu/NDS/cheats/usrcheat.dat|' "$_ini"
+done
+
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
