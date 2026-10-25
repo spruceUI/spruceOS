@@ -18,9 +18,19 @@ FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 # BaseOS (Anbernic XX, Miyoo Flip) updates itself from a .bosupd file at the root of the card.
 [ -f /etc/baseos-release ] && exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 
+unsupported_device() {
+	log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${SPRUCE_DEVICE_NAME:-$PLATFORM}."
+	sleep 5
+	exit 1
+}
+
 NEEDS_UPDATE=true
 case "$PLATFORM" in
 	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
+		NEEDS_UPDATE="$(check_if_fw_needs_update)"
+		;;
+	"MiyooMini")
+		[ -n "$FW_FILE" ] || unsupported_device
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
 	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM")
@@ -30,9 +40,7 @@ case "$PLATFORM" in
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/oakmossUpdate.sh
 		;;
 	*)
-		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
-		sleep 5
-		exit 1
+		unsupported_device
 		;;
 esac
 
@@ -70,6 +78,9 @@ confirm_update() {
 			;;
 		"Flip")
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
+			;;
+		"MiyooMini")
+			conf_msg="Your $SPRUCE_DEVICE_NAME will now reboot into the OEM firmware update and show a rocket. Keep it plugged in and be patient, as it will take a few minutes. It will restart itself again once complete. If no rocket appears, power it off, then hold MENU while plugging it in."
 			;;
 		"Brick"|"BrickPro"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
@@ -158,7 +169,7 @@ if [ "$(device_get_charging_status)" = "Discharging" ]; then
 		sleep 1
 		if confirm; then
 			# Re-evaluate charging status
-			if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ] && [ "$(device_get_battery_percent)" -ge 35 ]; then
+			if [ "$(device_get_charging_status)" != "Discharging" ] || { [ "$PLATFORM" != "A30" ] && [ "$PLATFORM" != "MiyooMini" ] && [ "$(device_get_battery_percent)" -ge 35 ]; }; then
 				log_message "firmwareUpdate.sh: Device is now plugged in, or at least >35% capacity. Continuing."
 				break
 			else
@@ -175,7 +186,7 @@ else
 fi
 
 # Give them one last warning, and a chance to proceed with or cancel the FW update.
-if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ]; then
+if [ "$(device_get_charging_status)" != "Discharging" ] || { [ "$PLATFORM" != "A30" ] && [ "$PLATFORM" != "MiyooMini" ]; }; then
 	log_and_display_message "WARNING: If powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software. Press A to continue, or B to cancel."
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."

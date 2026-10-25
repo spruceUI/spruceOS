@@ -251,9 +251,11 @@ launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2 "${MINI_HAS_LID:-false}"
 }
 
-# Should the above be merged into here?
+# Only models with an FW_FILE (the Mini Flip) have an image to update to
 check_if_fw_needs_update() {
-    log_message "No Fw Check for MiyooMini" -v
+    [ -n "$FW_FILE" ] || { echo "false"; return; }
+    VERSION="$(/etc/fw_printenv miyoo_version 2>/dev/null | cut -d= -f2)"
+    [ -n "$VERSION" ] && [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
 
 take_screenshot() {

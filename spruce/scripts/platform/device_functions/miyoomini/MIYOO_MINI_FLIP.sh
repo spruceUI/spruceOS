@@ -1,6 +1,11 @@
 #!/bin/sh
 # Miyoo Mini Flip: what only this model does. Sourced last by MiyooMini.sh.
 
+# The firmware updater leaves its image at the card root; drop it once flashed
+mini_model_init() {
+    [ -f "/mnt/SDCARD/$FW_FILE" ] && [ "$(check_if_fw_needs_update)" = "false" ] && rm -f "/mnt/SDCARD/$FW_FILE"
+}
+
 mini_reenable_buttons() {
     [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
 }
