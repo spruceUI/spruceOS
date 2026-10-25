@@ -219,13 +219,15 @@ class MiyooFlip(MiyooDevice):
         
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        with open("/sys/class/power_supply/ac/online", "r") as f:
-            ac_online = int(f.read().strip())
-            
-        if(ac_online):
-           return ChargeStatus.CHARGING
-        else:
-            return ChargeStatus.DISCONNECTED
+        # The charger reports a PC port under usb, so either node counts.
+        for node in ("/sys/class/power_supply/usb/online", "/sys/class/power_supply/ac/online"):
+            try:
+                with open(node, "r") as f:
+                    if int(f.read().strip()):
+                        return ChargeStatus.CHARGING
+            except (OSError, ValueError):
+                continue
+        return ChargeStatus.DISCONNECTED
     
     @throttle.limit_refresh(15)
     def get_battery_percent(self):
