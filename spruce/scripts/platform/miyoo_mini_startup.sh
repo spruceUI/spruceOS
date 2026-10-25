@@ -13,6 +13,10 @@
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
+# A boot that the charger started shows a charge screen here and powers off, or returns to continue the boot.
+# Before keymon, which would act on the POWER presses the charge screen reads.
+sh /mnt/SDCARD/spruce/scripts/platform/miyoomini/charge_gate.sh
+
 # audioserver starts in device_init, once the stock startup sound has let go of the audio device.
 /customer/app/keymon &
 
