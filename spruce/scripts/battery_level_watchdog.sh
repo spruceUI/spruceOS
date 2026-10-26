@@ -117,7 +117,7 @@ while true; do
         # Only these devices have the ledMode setting enabled
 		case "$PLATFORM" in
 			"A30"|"Flip"|"MiyooMini"|"Zero40"|"XU20"|"Zero28"|"RGB30"|"RGB20SX")
-                led_mode="$(get_config_value '.menuOptions."Battery Settings".ledMode.selected' "Always off")"
+                led_mode="$(get_config_value '.menuOptions."System Settings".ledMode.selected' "Always off")"
                 if [ "$led_mode" = "Always on" ]; then
                     work_led_on
                 elif [ "$led_mode" = "On in menu only" ] && flag_check "in_menu"; then

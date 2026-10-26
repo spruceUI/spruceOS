@@ -29,13 +29,13 @@ menu_button_down () {
 
         # Launch background timer that waits required seconds, then triggers the action
         (
-            menu_hold_time=$(get_config_value '.menuOptions."Game Switcher Settings".menuHoldTime.selected' 2)
+            menu_hold_time=$(get_config_value '.menuOptions."Button Settings".menuHoldTime.selected' 1)
             sleep "$menu_hold_time"
             # Check if the menubtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
             if [ -e /tmp/menubtn ] && [ ! -e /tmp/menubtn_cancelled ]; then
                 rm -f /tmp/menubtn
                 rm -f /tmp/menubtn_cancelled
-                do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
+                do_vibrate="$(get_config_value '.menuOptions."Button Settings".menuShouldVibrate.selected' "True")"
                 # Only vibrate if enabled
                 if [ "$do_vibrate" = "True" ]; then
                     vibrate &

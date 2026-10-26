@@ -195,6 +195,27 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
                 "selected": "L3"
             },
+            "menuHoldTime": {
+                "display": "Menu Hold Time",
+                "description": "seconds before GS launch from menu",
+                "options": [
+                    "0.2",
+                    "0.5",
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "selected": "1"
+            },
+            "menuShouldVibrate": {
+                "display": "Vibrate on Menu Hold",
+                "description": "when launching GS from menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
             "volumeButtons": {
                 "devices": ["RGB30", "RGB20SX"],
                 "display": "Volume buttons",
@@ -266,7 +287,7 @@
         },
         "Emulator Settings": {
             "tapHomeAction": {
-                "display": "Tap home key action",
+                "display": "Tap menu button action",
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
@@ -276,7 +297,7 @@
                 "selected": "Emulator menu"
             },
             "holdHomeAction": {
-                "display": "Hold home key action",
+                "display": "Hold menu button action",
                 "options": [
                     "Emulator menu",
                     "Game Switcher",
@@ -387,30 +408,6 @@
                     "False"
                 ],
                 "selected": "False"
-            }
-        },
-        "Game Switcher Settings": {
-            "menuHoldTime": {
-                "display": "Menu Hold Time",
-                "description": "seconds before GS launch from menu",
-                "options": [
-                    "0",
-                    "0.5",
-                    "1",
-                    "2",
-                    "3",
-                    "4"
-                ],
-                "selected": "1"
-            },
-            "menuShouldVibrate": {
-                "display": "Vibrate on Menu Hold",
-                "description": "when launching GS from menu",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
             }
         },
         "LEDs Settings": {
