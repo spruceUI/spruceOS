@@ -51,6 +51,11 @@ run_gvu() {
 		export GVU_DISPLAY_ROTATION=270
 	fi
 
+	# A10 Mini V4: panel mounted upside down; GVU draws past the rotated SDL.
+	if [ "$PLATFORM" = "A10MiniV4" ]; then
+		export GVU_DISPLAY_ROTATION=180
+	fi
+
 	if [ "$PLATFORM" = "MiyooMini" ]; then
 		export GVU_DISPLAY_ROTATION=180
 		# GVU_DISPLAY_W/H above: the model overlay sets the V4 and Mini Flip panel

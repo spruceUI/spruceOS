@@ -241,6 +241,8 @@ run_dsperate() {
 				else
 					_config_path="/mnt/SDCARD/Saves/dsperate/no-sticks.ini"
 					grep -q "rg28xx" /etc/baseos-release && export DS_ROTATE=270
+					# The V4's panel is mounted upside down and DSperate's KMS scanout skips the rotated SDL.
+					[ "$PLATFORM" = "A10MiniV4" ] && export DS_ROTATE=180
 				fi
 				;;
 			"1")
