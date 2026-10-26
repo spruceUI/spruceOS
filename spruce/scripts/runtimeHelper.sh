@@ -42,7 +42,15 @@ run_sd_card_fix_if_triggered() {
         mkdir -p /tmp/sdfix
         cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
         chmod 777 /tmp/sdfix/repairSD.sh
-        /tmp/sdfix/repairSD.sh run
+        # Without spruce's library path: a shell started with it can map libraries from the card
+        # and would hold the card it is about to unmount. The repair gets the path as
+        # SDFIX_LD_LIBRARY_PATH and keeps its system folders for its tools.
+        (
+            SDFIX_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+            export SDFIX_LD_LIBRARY_PATH
+            unset LD_LIBRARY_PATH
+            exec /tmp/sdfix/repairSD.sh run
+        )
     fi
 }
 
