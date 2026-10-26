@@ -99,6 +99,13 @@ fetch_release_info() {
 
 check_for_update() {
 
+    # No radio, no network, no check - and none of the three 20-second waits.
+    if ! wifi_available_on_device; then
+        log_message "Update Check: device has no WiFi, skipping."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     SD_CARD="/mnt/SDCARD"
     OTA_URL="https://spruceui.github.io/OTA/spruce"
     OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
@@ -107,11 +114,6 @@ check_for_update() {
     # queue for the EZ Updater, and this function removes its own scratch dir.
     TMP_DIR="$SD_CARD/App/-OTA/check_tmp"
     CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
-
-    should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
-    if [ "$should_check" = "False" ]; then
-        return 1
-    fi
 
     timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     check_interval=86400  # 24 hours in seconds
@@ -144,12 +146,6 @@ check_for_update() {
     # Update timestamp for next check
     date +%s > "$timestamp_file"
 
-    # No radio, no network, no check - and none of the three 20-second waits.
-    if ! wifi_available_on_device; then
-        log_message "Update Check: device has no WiFi, skipping."
-        rm -rf "$TMP_DIR"
-        return 1
-    fi
 
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")

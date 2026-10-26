@@ -201,7 +201,7 @@
             },
             "menuHoldTime": {
                 "display": "Menu button hold Time",
-                "description": "seconds before GS launch from menu",
+                "description": "seconds before triggering hold action",
                 "options": [
                     "0.2",
                     "0.5",
@@ -316,6 +316,7 @@
             },
             "raIgmColorway": {
                 "display": "RA: in-game menu colors",
+                "description": "Themes may override this",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
                 "options": [
                     "spruce",
@@ -1047,15 +1048,6 @@
                     "Always on"
                 ],
                 "selected": "Always off"
-            },
-            "checkForUpdates": {
-                "display": "Check for spruce updates on startup",
-                "description": "if connected to Wi-Fi",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
             },
             "bootTo": {
                 "display": "Launch application on startup",
