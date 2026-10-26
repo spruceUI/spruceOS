@@ -192,6 +192,8 @@ stage2_uptime_cs() {
     echo $(( ${_w_up%.*} * 100 + 1${_w_up#*.} - 100 ))
 }
 
+# tasks/repairSD.sh keeps copies of the card helpers below for the SD card repair; change both together.
+
 # Loop devices backed by files on the card, one "loopN major:minor" per line.
 stage2_card_loops() {
     for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
