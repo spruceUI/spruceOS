@@ -157,6 +157,69 @@
                 ],
                 "selected": "Both"
             },
+            "globalScreenshotShortcut": {
+                "display": "Global sceenshot hotkey",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "L2+R2+Y",
+                    "L2+R2+X",
+                    "L2+R2+DOWN"
+                ],
+                "selected": "L2+R2+Y"
+            },
+            "menuButton": {
+                "devices": ["RGB30", "POWKIDDY_V10"],
+                "display": "Menu button",
+                "description": "Which stick click opens the menu",
+                "options": [
+                    "L3",
+                    "R3"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
+                "selected": "L3"
+            },
+            "tapMenuAction": {
+                "display": "Tap Menu button action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Emulator menu"
+            },
+            "holdMenuAction": {
+                "display": "Hold Menu button action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Game Switcher"
+            },
+            "menuHoldTime": {
+                "display": "Menu button hold Time",
+                "description": "seconds before GS launch from menu",
+                "options": [
+                    "0.2",
+                    "0.5",
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "selected": "1"
+            },
+            "menuShouldVibrate": {
+                "display": "Vibrate on Menu hold",
+                "description": "when hold action triggered",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
             "powerButtonHoldTime": {
                 "display": "Power button hold time",
                 "description": "for quick shutdown (seconds)",
@@ -183,49 +246,6 @@
                     "Nothing"
                 ],
                 "selected": "Game Switcher"
-            },
-            "menuButton": {
-                "devices": ["RGB30", "POWKIDDY_V10"],
-                "display": "Menu button",
-                "description": "Which stick click opens the menu",
-                "options": [
-                    "L3",
-                    "R3"
-                ],
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
-                "selected": "L3"
-            },
-            "menuHoldTime": {
-                "display": "Menu Hold Time",
-                "description": "seconds before GS launch from menu",
-                "options": [
-                    "0.2",
-                    "0.5",
-                    "1",
-                    "2",
-                    "3"
-                ],
-                "selected": "1"
-            },
-            "menuShouldVibrate": {
-                "display": "Vibrate on Menu Hold",
-                "description": "when launching GS from menu",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "volumeButtons": {
-                "devices": ["RGB30", "RGB20SX"],
-                "display": "Volume buttons",
-                "description": "Swap up and down if your rocker is fitted the other way",
-                "options": [
-                    "Standard",
-                    "Swapped"
-                ],
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
-                "selected": "Standard"
             },
             "fnF1Action": {
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
@@ -273,39 +293,19 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",
                 "selected": "LED off"
             },
-            "globalScreenshotShortcut": {
-                "display": "Global sceenshot shortcut",
-                "description": "reboot to apply",
+            "volumeButtons": {
+                "devices": ["RGB30", "RGB20SX"],
+                "display": "Volume buttons",
+                "description": "Swap up and down if your rocker is fitted the other way",
                 "options": [
-                    "Off",
-                    "L2+R2+Y",
-                    "L2+R2+X",
-                    "L2+R2+DOWN"
+                    "Standard",
+                    "Swapped"
                 ],
-                "selected": "L2+R2+Y"
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
+                "selected": "Standard"
             }
         },
         "Emulator Settings": {
-            "tapHomeAction": {
-                "display": "Tap menu button action",
-                "options": [
-                    "Emulator menu",
-                    "Game Switcher",
-                    "Exit game",
-                    "Nothing"
-                ],
-                "selected": "Emulator menu"
-            },
-            "holdHomeAction": {
-                "display": "Hold menu button action",
-                "options": [
-                    "Emulator menu",
-                    "Game Switcher",
-                    "Exit game",
-                    "Nothing"
-                ],
-                "selected": "Game Switcher"
-            },
             "raInGameMenu": {
                 "display": "RA: use in-game menu",
                 "options": [
