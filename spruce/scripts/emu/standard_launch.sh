@@ -44,8 +44,13 @@ set_emu_core_from_emu_json
 if [ -z "$CORE" ] || [ "$CORE" = "null" ]; then	use_default_emulator ; fi
 get_core_override
 get_mode_override
-set_cpu_mode
+# B on the WiFi wait screen goes back to the menu, so this comes before anything is set up for the game
 handle_network_services
+if [ $? -eq 2 ]; then
+	log_message "-----Launch cancelled on the WiFi wait screen-----"
+	exit 0
+fi
+set_cpu_mode
 led_effect &
 flag_add 'emulator_launched' --tmp
 

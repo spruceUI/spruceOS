@@ -17,11 +17,11 @@ NIGHTLY_BASE_FILE="/mnt/SDCARD/Saves/spruce/ota_nightly_base"
 ##### FUNCTIONS #####
 
 is_wifi_connected() {
-    if ping -c 3 -W 2 spruceui.github.io > /dev/null 2>&1; then
-        log_message "GitHub ping successful; device is online."
+    if internet_reachable; then
+        log_message "GitHub reachable; device is online."
         return 0
     else
-        display_image_and_text "$BAD_IMG" 35 20 "GitHub ping failed; device is offline. Aborting." 75
+        display_image_and_text "$BAD_IMG" 35 20 "Could not reach GitHub; device is offline. Aborting." 75
         return 1
     fi
 }

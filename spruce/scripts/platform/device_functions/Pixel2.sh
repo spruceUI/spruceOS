@@ -98,6 +98,8 @@ setup_network_services() {
     systemctl start systemd-resolved
     systemctl start NetworkManager
     systemctl start iwd
+    # NetworkManager's profiles live on /storage: a reflashed base gets the card's networks back
+    nm_import_card_networks wlan0
 
     # SYSTEM_JSON doesn't exists yet during first boot
     if [ -f "$SYSTEM_JSON" ]; then
@@ -113,8 +115,28 @@ setup_network_services() {
     fi
 }
 
+# Volume keys on USB input devices (headset remotes, keyboards). The rules live
+# in /run, so they last this boot only and nothing on the OS partition changes.
+install_usb_audio_rules() {
+    _run="/usr/bin/systemd-run --no-block --collect --setenv=XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/var/run/0-runtime-dir} --setenv=PATH=$PATH"
+    mkdir -p /run/udev/rules.d
+    cat > /run/udev/rules.d/90-spruce-usb-audio.rules <<EOF
+# A reader per USB input device that has keys and is not a gamepad, run by
+# systemd so udev does not kill it.
+ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_BUS}=="usb", ENV{ID_INPUT_KEY}=="1", ENV{ID_INPUT_JOYSTICK}!="1", RUN+="$_run --unit=spruce-usb-remote-%k /bin/sh /mnt/SDCARD/spruce/scripts/usb_audio_remote.sh /dev/input/%k"
+# getevent spins rather than exits when its node is removed, and its unit would
+# hold the name the next device on this node needs.
+ACTION=="remove", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_BUS}=="usb", ENV{ID_INPUT_JOYSTICK}!="1", RUN+="/usr/bin/systemctl stop --no-block spruce-usb-remote-%k.service"
+EOF
+    udevadm control --reload
+    # A headset already plugged in at boot. A change, not an add: every udev
+    # listener sees the event, and an add tells them a present device is new.
+    udevadm trigger --action=change --subsystem-match=input --property-match=ID_BUS=usb
+}
+
 device_init() {
     sync_volume_level
+    install_usb_audio_rules &
     disable_swap
     set_loading_screen &
     setup_network_services &
@@ -151,7 +173,7 @@ post_pyui_exit(){
 }
 
 launch_startup_watchdogs(){
-    launch_common_startup_watchdogs_v2 "true"
+    launch_common_startup_watchdogs_v2
     # Same per-start-of-frontend dedupe the common launcher applies to its own
     # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
     # not stack a second theme_watchdog / leds_manager on the first.
@@ -185,8 +207,10 @@ device_wifi_power_off() {
     rfkill block wifi
 }
 
+# The card's wpa_supplicant.conf keeps the network too, as on every spruce device, so it outlives a reflash
 device_wifi_connect() {
-    nmcli -w 45 device wifi connect $1 password $2 >/dev/null 2>&1
+    wpa_conf_save_network "$1" "$2"
+    nm_wifi_connect "$1" "$2"
 }
 
 sync_volume_level() {
@@ -204,6 +228,19 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
+get_current_volume() {
+    wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{ print $2 }'
+}
+
+# The level of the output playing now; the stored level can be another output's.
+get_current_volume_level() {
+    vol=$(get_current_volume)
+    [ -n "$vol" ] || { get_volume_level; return; }
+    for i in $(seq 0 20); do map_mainui_volume_to_system_value "$i"; done |
+        awk -v v="$vol" '{ d = $1 - v; if (d < 0) d = -d }
+            NR == 1 || d < best { best = d; level = NR - 1 } END { print level }'
+}
+
 set_volume() {
     VOL_VAL="${1:-0}" # default to mute if no value supplied
     SAVE_TO_CONFIG="${2:-true}" # Optional 2nd arg, defaults to true
@@ -219,19 +256,20 @@ set_volume() {
 }
 
 volume_down() {
-    VALUE=$(get_volume_level)
+    VALUE=$(get_current_volume_level)
     if [ $VALUE -gt 0 ] ; then
         VALUE=$((${VALUE} - 1))
-        set_volume "$VALUE"
     fi
+    # Saved even at the limit: buttons_watchdog steps a held key from it.
+    set_volume "$VALUE"
 }
 
 volume_up() {
-    VALUE=$(get_volume_level)
+    VALUE=$(get_current_volume_level)
     if [ $VALUE -lt 20 ] ; then
         VALUE=$((${VALUE} + 1))
-        set_volume "$VALUE"
     fi
+    set_volume "$VALUE"
 }
 
 # Map the MainUI Volume level to System Value

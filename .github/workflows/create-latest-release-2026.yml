@@ -200,6 +200,9 @@ jobs:
               .git/*|.git|.github/*|.github|.gitignore|.gitattributes)
                 return 0
                 ;;
+              .gitkeep|*/.gitkeep)
+                return 0
+                ;;
               create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
@@ -393,6 +396,7 @@ jobs:
             -mx=7 \
             -ms=off \
             -mf- \
+            -xr!.gitkeep \
             "$OTA_ARCHIVE" \
             @"$OTA_7Z_LIST"
 
@@ -406,11 +410,95 @@ jobs:
           echo "Archive contents:"
           7z l "$OTA_ARCHIVE"
 
+      - name: Package NDS resource folders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/Emu/NDS"
+
+          ARGS=()
+          if [ -d "Emu/NDS/resources" ]; then
+            cp -a "Emu/NDS/resources" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/resources")
+          fi
+
+          if [ -d "Emu/NDS/res" ]; then
+            cp -a "Emu/NDS/res" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/res")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No NDS resource folders found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/nds-resources.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "Emu/NDS/resources" "Emu/NDS/res"
+            echo "Created preMenu NDS archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu NDS archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+
+      - name: Package RetroArch shaders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch"
+
+          ARGS=()
+          if [ -d "RetroArch/.retroarch/shaders" ]; then
+            cp -a "RetroArch/.retroarch/shaders" "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch/"
+            ARGS+=("mnt/SDCARD/RetroArch/.retroarch/shaders")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No RetroArch shaders folder found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/retroarch-shaders.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "RetroArch/.retroarch/shaders"
+            echo "Created preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+          
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
             -xr!.git \
             -xr!.github \
+            -xr!.gitkeep \
             -x!.gitignore \
             -x!.gitattributes \
             -x!create_spruce_release.bat \
@@ -524,13 +612,18 @@ jobs:
             | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy V10          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | A10 Mini              | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | G350                  | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | MagicX XU Mini M      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
 
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
-            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+            > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M and Anbernic RG353M:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 

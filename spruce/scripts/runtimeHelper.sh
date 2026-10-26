@@ -9,10 +9,19 @@
 # Pids of device_init background jobs that must be gone before the frontend starts.
 # Only runtime.sh's shell owns them, so only it can wait on them.
 DEVICE_INIT_WAIT_PIDS=""
+# Pids of device_init jobs holding the display.
+DEVICE_INIT_DISPLAY_PIDS=""
 
 # Waits for the device_init jobs that must finish before the frontend starts; returns 0.
+# With --except-display, the display jobs are left running; the caller's frontend
+# must then wait for the display itself.
 wait_device_init_jobs() {
-    for _diw_pid in $DEVICE_INIT_WAIT_PIDS; do
+    _diw_pids="$DEVICE_INIT_WAIT_PIDS"
+    if [ "$1" != "--except-display" ]; then
+        _diw_pids="$_diw_pids $DEVICE_INIT_DISPLAY_PIDS"
+        DEVICE_INIT_DISPLAY_PIDS=""
+    fi
+    for _diw_pid in $_diw_pids; do
         wait "$_diw_pid" 2>/dev/null
     done
     DEVICE_INIT_WAIT_PIDS=""
@@ -59,7 +68,9 @@ show_fw_app() {
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
     hide_fw_app
-    [ "$(check_if_fw_needs_update)" = "true" ] && show_fw_app
+    if [ -n "$(local_fw_update_file)" ] || [ "$(check_if_fw_needs_update)" = "true" ]; then
+        show_fw_app
+    fi
 }
 
 # Download the OTA release info into "$TMP_DIR/spruce". Certificates are
@@ -112,8 +123,9 @@ check_for_update() {
         last_check=$(cat "$timestamp_file")
         time_diff=$((current_time - last_check))
         
-        # If less than 24 hours have passed, skip the check
-        if [ $time_diff -lt $check_interval ]; then
+        # If less than 24 hours have passed, skip the check. A negative gap means the clock is behind the
+        # stamp (a card moved to a Mini V4 boots at 1970): treat it as stale rather than skip forever.
+        if [ $time_diff -ge 0 ] && [ $time_diff -lt $check_interval ]; then
             log_message "Update Check: Skipping check, last check was $((time_diff / 3600)) hours ago"
             return 1
         fi
@@ -142,7 +154,7 @@ check_for_update() {
     # Try up to 3 times to get a connection
     attempts=0
     while [ $attempts -lt 3 ]; do
-        if ping -c 3 spruceui.github.io >/dev/null 2>&1; then
+        if internet_reachable; then
             break
         fi
         attempts=$((attempts + 1))
@@ -343,6 +355,14 @@ check_and_hide_update_app() {
     fi
 }
 
+# networkservices.sh starts SSH and Samba once Wi-Fi connects; this task also covers
+# a network it does not wait for (eth0, Wi-Fi off). It polls slowly: each
+# network_is_connected pass forks about seven processes, and polling every 0.2 s
+# competed with the first menu frame for the CPU.
+DEV_MODE_FAST_POLLS=30		# 30 x 2 s = first minute
+DEV_MODE_FAST_INTERVAL=2
+DEV_MODE_SLOW_INTERVAL=10
+
 developer_mode_task() {
     if flag_check "developer_mode"; then
         samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
@@ -350,9 +370,14 @@ developer_mode_task() {
         ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            # Loop until network is connected
+            _dev_polls=0
             while ! network_is_connected true; do
-                sleep 0.2
+                if [ "$_dev_polls" -lt "$DEV_MODE_FAST_POLLS" ]; then
+                    sleep "$DEV_MODE_FAST_INTERVAL"
+                    _dev_polls=$((_dev_polls + 1))
+                else
+                    sleep "$DEV_MODE_SLOW_INTERVAL"
+                fi
             done
 
             if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
@@ -424,7 +449,9 @@ unstage_archive() {
 # drawn. preCmd unpacks after it in the same foreground run, so moving any of
 # them there is a deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
-    if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
+    # The Mini V4 and Mini Flip (752x560) have always taken the 640x480 overlays
+    if { [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; } ||
+        { [ "$DISPLAY_WIDTH" = "752" ] && [ "$DISPLAY_HEIGHT" = "560" ]; }; then
         unstage_archive "overlays_640x480.7z" "preMenu"
     elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
         unstage_archive "overlays_1024x768.7z" "preMenu"
@@ -647,5 +674,13 @@ set_up_boot_action() {
                 log_message "$("$(get_python_path)" /mnt/SDCARD/spruce/scripts/megamode.py "$PLATFORM" $(device_names) 2>&1)"
                 ;;
         esac
+    fi
+}
+
+randomize_theme_if_requested() {
+    _setting="$(get_config_value '.menuOptions."System Settings".randomThemeAtBoot.selected' "False")"
+    if [ "$_setting" = "True" ]; then
+        log_message "Randomizing theme per user settings."
+        /mnt/SDCARD/spruce/scripts/random_theme.sh
     fi
 }

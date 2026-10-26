@@ -76,6 +76,7 @@ class FetchState(Enum):
     WAITING = "waiting"  # queued or being fetched
     DONE = "done"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 @dataclass(frozen=True, slots=True)
@@ -105,6 +106,7 @@ class DetailFetcher:
             stop event, again after RA rejects the key (the user may have entered a new one).
         clock: App clock (epoch seconds).
         online: Refreshes app time before checking a stored RA pause, when supplied.
+        on_change: Notification after a fetch outcome is published, outside the worker lock.
     """
 
     def __init__(
@@ -113,18 +115,22 @@ class DetailFetcher:
         *,
         clock: Callable[[], float] = network_clock.now,
         online: Callable[[], bool] | None = None,
+        on_change: Callable[[], None] = lambda: None,
     ) -> None:
         self._open_session = open_session
         self._clock = clock
         self._online = online
+        self._on_change = on_change
         self._lock = threading.Lock()
         self._waiting: deque[int] = deque()  # next to fetch first
         self._statuses: dict[int, FetchStatus] = {}
         self._stop = threading.Event()
+        self._request_stop = threading.Event()
+        self._active: int | None = None
         self._wake = threading.Event()
         self._thread: threading.Thread | None = None
 
-    def request(self, game_id: int) -> None:
+    def request(self, game_id: int, *, refresh: bool = False) -> None:
         """Ask for a game's achievements (non-blocking, thread-safe).
 
         The latest request goes first, even for a game already waiting. A failed game is tried
@@ -132,12 +138,13 @@ class DetailFetcher:
 
         Args:
             game_id: RA game ID.
+            refresh: Re-fetch a game previously completed by this worker.
         """
         with self._lock:
             if self._stop.is_set():
                 return
             status = self._statuses.get(game_id)
-            if status is not None and status.state is FetchState.DONE:
+            if status is not None and status.state is FetchState.DONE and not refresh:
                 return
             if game_id in self._waiting:
                 self._waiting.remove(game_id)
@@ -152,6 +159,16 @@ class DetailFetcher:
                 self._thread.start()
         self._wake.set()
 
+    def cancel(self, game_id: int) -> None:
+        """Cancel a queued or active game request, retaining saved details."""
+        with self._lock:
+            if game_id in self._waiting:
+                self._waiting.remove(game_id)
+                self._statuses[game_id] = FetchStatus(FetchState.CANCELLED)
+            if self._active == game_id:
+                self._request_stop.set()
+        self._wake.set()
+
     def status(self, game_id: int) -> FetchStatus | None:
         """Return a requested game's state, or ``None`` if it was never requested."""
         with self._lock:
@@ -163,7 +180,9 @@ class DetailFetcher:
         Args:
             timeout: Seconds to wait for a request in flight.
         """
-        self._stop.set()
+        with self._lock:
+            self._stop.set()
+            self._request_stop.set()
         self._wake.set()
         if self._thread is not None:
             self._thread.join(timeout)
@@ -192,7 +211,10 @@ class DetailFetcher:
     def _take(self) -> int | None:
         """Pop the next requested game, or ``None`` when nothing is waiting."""
         with self._lock:
-            return self._waiting.popleft() if self._waiting else None
+            self._active = self._waiting.popleft() if self._waiting else None
+            if not self._stop.is_set():
+                self._request_stop.clear()
+            return self._active
 
     def _open(self, game_id: int) -> DetailSession | None:
         """Open a session, failing ``game_id`` if that is impossible.
@@ -204,7 +226,7 @@ class DetailFetcher:
             The session, or ``None``.
         """
         try:
-            return self._open_session(self._stop)
+            return self._open_session(self._request_stop)
         except (CheevosError, OSError, sqlite3.Error):
             logger.exception("Could not open a session to load a game's achievements")
             self._finish(game_id, FetchStatus(FetchState.FAILED, Failure.ERROR))
@@ -220,7 +242,7 @@ class DetailFetcher:
         Returns:
             ``False`` when RA rejected the key (the session should be reopened).
         """
-        client, data, _ = session
+        _client, data, _ = session
         now = self._clock()
         until = _float(data.get_meta(RATE_LIMITED_UNTIL_KEY))
         if until is not None and self._online is not None:
@@ -232,12 +254,10 @@ class DetailFetcher:
             self._finish(game_id, FetchStatus(FetchState.FAILED, Failure.RATE_LIMITED, until))
             return True
         try:
-            game = data.game(game_id)
-            detail = client.game_detail(game_id)
-            fingerprint = game.fingerprint if game is not None else ""
-            data.save_game_detail(detail, fingerprint=fingerprint, synced_at=int(self._clock()))
+            self._download(session, game_id)
         except RequestCancelledError:
-            self._finish(game_id, None)  # closing: nobody is waiting any more
+            status = None if self._stop.is_set() else FetchStatus(FetchState.CANCELLED)
+            self._finish(game_id, status)
         except AuthError:
             self._finish(game_id, FetchStatus(FetchState.FAILED, Failure.AUTH))
             return False
@@ -257,6 +277,16 @@ class DetailFetcher:
             self._finish(game_id, _DONE)
         return True
 
+    def _download(self, session: DetailSession, game_id: int) -> None:
+        """Fetch and commit one game unless its request was cancelled."""
+        client, data, _ = session
+        game = data.game(game_id)
+        detail = client.game_detail(game_id)
+        if self._request_stop.is_set():
+            raise RequestCancelledError
+        fingerprint = game.fingerprint if game is not None else ""
+        data.save_game_detail(detail, fingerprint=fingerprint, synced_at=int(self._clock()))
+
     def _finish(self, game_id: int, status: FetchStatus | None) -> None:
         """Record a game's outcome (``None`` forgets it, so it can be requested again).
 
@@ -265,10 +295,12 @@ class DetailFetcher:
             status: The outcome.
         """
         with self._lock:
+            self._active = None
             if status is None:
                 self._statuses.pop(game_id, None)
             else:
                 self._statuses[game_id] = status
+        self._on_change()
 
     @staticmethod
     def _close(session: DetailSession) -> None:

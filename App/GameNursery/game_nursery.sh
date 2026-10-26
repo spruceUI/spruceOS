@@ -21,11 +21,11 @@ log_message "--DEBUG-- LD_LIBRARY_PATH: $LD_LIBRARY_PATH" -v
 ##### FUNCTIONS #####
 
 is_wifi_connected() {
-    if ping -c 3 github.com > /dev/null 2>&1; then
-        log_message "Github ping successful; device is online."
+    if internet_reachable https://github.com; then
+        log_message "GitHub reachable; device is online."
         return 0
     else
-        log_and_display_message "Github ping failed; device is offline. Aborting."
+        log_and_display_message "Could not reach GitHub; device is offline. Aborting."
         return 1
     fi
 }

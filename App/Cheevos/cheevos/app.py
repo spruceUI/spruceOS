@@ -31,7 +31,7 @@ from cheevos.core.sync.lazy_media import LazyMediaFetcher, MediaSession
 from cheevos.platform.paths import Paths
 from cheevos.ui.context import AppContext
 from cheevos.ui.media import MediaResolver
-from cheevos.ui.pyui import generated, primitives, status_bar, title_bar, visible_images
+from cheevos.ui.pyui import generated, primitives, redraw, status_bar, title_bar, visible_images
 from cheevos.ui.screens.home import Home
 from cheevos.ui.screens.setup import change_key, ensure_credentials
 from cheevos.ui.screens.status import SyncBar
@@ -297,12 +297,13 @@ def _sync_deps(
     return open_deps
 
 
-def run(*, started_at: float, env: AppEnvironment) -> None:
+def run(*, started_at: float, env: AppEnvironment, game_id: int | None = None) -> None:
     """Run the app until the user leaves the home screen.
 
     Args:
         started_at: ``time.monotonic()`` at process start (for the start-up log line).
         env: App environment.
+        game_id: Open and refresh this game only, returning to Spruce on B.
     """
     paths = env.paths
     icons = _icons_dir()
@@ -322,11 +323,19 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
     except CheevosError:
         logger.exception("Could not open the caches")
         return
-    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer))
+    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer), on_change=redraw.request_redraw)
     details = DetailFetcher(
-        _detail_session(env, ctx_ref, pacer), clock=env.clock, online=env.online
+        _detail_session(env, ctx_ref, pacer),
+        clock=env.clock,
+        online=env.online,
+        on_change=redraw.request_redraw,
     )
-    sync = BackgroundSync(_sync_deps(env, ctx_ref, pacer), online=env.online, clock=env.clock)
+    sync = BackgroundSync(
+        _sync_deps(env, ctx_ref, pacer),
+        online=env.online,
+        clock=env.clock,
+        on_change=redraw.request_redraw,
+    )
     ctx = AppContext(
         paths=paths,
         credentials=credentials,
@@ -344,16 +353,22 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
         fetch_first_unlock=on_demand.first_unlock,
         clock=env.clock,
         refresh_time=env.online,
+        launch_game_id=game_id,
     )
     ctx_ref.append(ctx)
     auto_sync = settings.auto_sync if env.auto_sync is None else env.auto_sync
     logger.info("UI ready after %.2fs", time.monotonic() - started_at)
     generated.use_scratch(paths.scaled_scratch)
     visible_images.track_images(lambda: ctx.media.version, ctx.media.new_window)
-    bar = SyncBar(ctx, _icons_dir(bar=True), lambda: change_key(ctx))
+    bar = _session_bar(ctx, _icons_dir(bar=True), game_id)
     try:
         with status_bar.installed(bar.status, bar.press_start), title_bar.installed():
-            Home(ctx, sync_when_shown=auto_sync).run()
+            if game_id is None:
+                Home(ctx, sync_when_shown=auto_sync).run()
+            else:
+                from cheevos.ui.screens.game_detail import show_game
+
+                show_game(ctx, game_id, refresh=True)
     finally:
         ctx.flush_settings()
         sync.cancel()
@@ -365,3 +380,12 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
         # Extracted and enlarged images live in RAM (tmpfs) on devices; give it back.
         shutil.rmtree(paths.media_scratch, ignore_errors=True)
         shutil.rmtree(paths.scaled_scratch, ignore_errors=True)
+
+
+def _session_bar(ctx: AppContext, icons: Path, game_id: int | None) -> SyncBar:
+    """Build the account or single-game session's status and Start action."""
+    if game_id is not None:
+        from cheevos.ui.screens.game_status import GameSyncBar
+
+        return GameSyncBar(ctx, icons, lambda: change_key(ctx), game_id)
+    return SyncBar(ctx, icons, lambda: change_key(ctx))

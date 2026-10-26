@@ -1,4 +1,22 @@
+from controller.controller_inputs import ControllerInput
+from controller.key_watcher_controller import HorizontalStickAxis, VerticalStickAxis
 from devices.darkmoss.darkmoss_device import DarkmossDevice
+from devices.darkmoss.darkmoss_key_mapping_provider import DarkmossKeyMappingProvider
+
+
+class XuMiniMKeyMappingProvider(DarkmossKeyMappingProvider):
+    """xu10-joypad reports both sticks turned (measured on hardware): across on
+    the Y code with left negative, up/down on the X code with up positive."""
+
+    def __init__(self, key_mappings):
+        super().__init__(key_mappings)
+        # VerticalStickAxis presses its first input on a negative value; up reads positive here.
+        self.stick_axes = {
+            self.ABS_Y: HorizontalStickAxis(ControllerInput.LEFT_STICK_LEFT, ControllerInput.LEFT_STICK_RIGHT),
+            self.ABS_X: VerticalStickAxis(ControllerInput.LEFT_STICK_DOWN, ControllerInput.LEFT_STICK_UP),
+            self.ABS_RY: HorizontalStickAxis(ControllerInput.RIGHT_STICK_LEFT, ControllerInput.RIGHT_STICK_RIGHT),
+            self.ABS_RX: VerticalStickAxis(ControllerInput.RIGHT_STICK_DOWN, ControllerInput.RIGHT_STICK_UP),
+        }
 
 
 class XuMiniM(DarkmossDevice):
@@ -30,3 +48,6 @@ class XuMiniM(DarkmossDevice):
     # 270 the Miniloong (a rotate:3 panel) uses.
     def screen_rotation(self):
         return 90
+
+    def _mapping_provider(self, key_mappings):
+        return XuMiniMKeyMappingProvider(key_mappings)

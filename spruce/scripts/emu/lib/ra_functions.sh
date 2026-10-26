@@ -17,6 +17,7 @@
 #
 # Provides:
 #   prepare_ra_config
+#   export_spruce_theme_dir
 #   run_retroarch
 #   ready_architecture_dependent_states
 #   stash_architecture_dependent_states
@@ -141,7 +142,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI" | "GKD")
+		"TrimUI" | "GKD" | "MagicX")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"Miyoo" | "Anbernic")
@@ -209,6 +210,22 @@ apply_baseos_ra_overlay() {
 	RA_PARAMS="${RA_PARAMS} --appendconfig $overlay"
 }
 
+# Hand the IGM the active theme dir so a theme can ship its own igm.json.
+# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
+# configs store a full path, so accept either. Leaving the variable unset
+# is fine - the binary falls through to the colourway it was given.
+export_spruce_theme_dir() {
+	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
+	case "$_theme" in
+		/*)      _theme_dir="${_theme%/}" ;;
+		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
+		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
+	esac
+	if [ -d "$_theme_dir" ]; then
+		export SPRUCE_THEME_DIR="$_theme_dir"
+	fi
+}
+
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
@@ -232,19 +249,7 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
-	# Hand the IGM the active theme dir so a theme can ship its own igm.json.
-	# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
-	# configs store a full path, so accept either. Leaving the variable unset
-	# is fine - the binary falls through to the colourway it was given.
-	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
-	case "$_theme" in
-		/*)      _theme_dir="${_theme%/}" ;;
-		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
-		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
-	esac
-	if [ -d "$_theme_dir" ]; then
-		export SPRUCE_THEME_DIR="$_theme_dir"
-	fi
+	export_spruce_theme_dir
 
 	setup_for_retroarch
 	cd "$RA_DIR"
@@ -269,11 +274,7 @@ run_retroarch() {
 	if [ "$VERBOSE_EMU" = "1" ]; then
 		RA_PARAMS="-v"
 	fi
-	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"XUMiniM"|"G350"|"Anbernic"*)
-			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
-			;;
-	esac
+	RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 
 	apply_baseos_ra_overlay
 

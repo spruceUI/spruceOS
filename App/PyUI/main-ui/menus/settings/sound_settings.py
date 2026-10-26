@@ -20,11 +20,13 @@ class SoundSettings(SettingsMenu):
         if (input == ControllerInput.A or input == ControllerInput.DPAD_LEFT or input == ControllerInput.DPAD_RIGHT):
             Device.get_device().get_system_config().set_play_button_press_sound(not Device.get_device().get_system_config().play_button_press_sound())
             Theme.button_press_sounds_changed()
+            Device.get_device().menu_sound_settings_changed()
 
     def toggle_bgm(self, input):
         if (input == ControllerInput.A or input == ControllerInput.DPAD_LEFT or input == ControllerInput.DPAD_RIGHT):
             Device.get_device().get_system_config().set_play_bgm(not Device.get_device().get_system_config().play_bgm())
             Theme.bgm_setting_changed()
+            Device.get_device().menu_sound_settings_changed()
 
     def adjust_bgm_volume(self, input):
         curr_volume = Device.get_device().get_system_config().bgm_volume()

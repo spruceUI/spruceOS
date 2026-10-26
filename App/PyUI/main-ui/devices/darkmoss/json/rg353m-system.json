@@ -1,0 +1,10 @@
+{
+        "vol": 10,
+        "backlight": 6,
+        "brightness": 12,
+        "contrast": 12,
+        "saturation": 10,
+        "hue":10,
+        "wifi": 0,
+        "bluetooth": 0
+}

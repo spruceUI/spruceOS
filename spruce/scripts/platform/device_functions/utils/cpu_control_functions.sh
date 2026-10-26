@@ -147,6 +147,10 @@ set_smart() {
     SMART_DOWN_FACTOR=1
     SMART_SAMPLING_RATE=10000
     scaling_min_freq="${1:-$CPU_SMART_MIN_FREQ}"
+    # Opt-in (platform cfg): no emulator's scaling_min_freq may take SMART below this floor.
+    if [ -n "$CPU_SMART_FLOOR_FREQ" ] && [ "$scaling_min_freq" -lt "$CPU_SMART_FLOOR_FREQ" ] 2>/dev/null; then
+        scaling_min_freq="$CPU_SMART_FLOOR_FREQ"
+    fi
 
     if [ -n "$CPU_SMART_MAX_FREQ" ]; then
         scaling_max_freq="$CPU_SMART_MAX_FREQ"

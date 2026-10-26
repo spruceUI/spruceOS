@@ -13,7 +13,11 @@
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
-audioserver &
+# A boot that the charger started shows a charge screen here and powers off, or returns to continue the boot.
+# Before keymon, which would act on the POWER presses the charge screen reads.
+sh /mnt/SDCARD/spruce/scripts/platform/miyoomini/charge_gate.sh
+
+# audioserver starts in device_init, once the stock startup sound has let go of the audio device.
 /customer/app/keymon &
 
 touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
@@ -39,7 +43,10 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
         sh /mnt/SDCARD/spruce/scripts/wifi.sh apply --wait
-        adbd &
+        # Network ADB is an unauthenticated root shell: developer mode only (flag_check is not loaded yet)
+        if [ -f /mnt/SDCARD/spruce/flags/developer_mode ] || [ -f /mnt/SDCARD/spruce/flags/developer_mode.lock ]; then
+            adbd &
+        fi
     fi
 ) &
 

@@ -39,7 +39,13 @@ while true; do
         exit 0
     fi
 
-    stop_pyui_message_writer
+    # A staged command runs without passing through launch.sh, so only it needs
+    # the graphics cleanup here; launch.sh does its own before the menu.
+    if [ -f /tmp/cmd_to_run.sh ]; then
+        stop_pyui_message_writer
+    else
+        kill_pyui_message_writer
+    fi
     # Not awaited: the menu does not depend on the LEDs.
     ( enable_or_disable_rgb; set_rgb_in_menu ) &
     set_network_proxy
@@ -49,6 +55,7 @@ while true; do
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
+        hide_or_unhide_AccentColor_app
 
         prepare_for_pyui_launch
 

@@ -10,6 +10,7 @@ from display.on_screen_keyboard import OnScreenKeyboard
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.games.collections.collections_management_menu import CollectionsManagementMenu
 from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
+from menus.games.utils import cheevos_progress
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
@@ -245,6 +246,14 @@ class GameSelectMenuPopup:
                 description=None,
                 icon=None,
                 value=lambda input_value, rom_info=rom_info: self.select_specific_boxart(input_value, rom_info)
+            ))
+
+        if not os.path.isdir(rom_info.rom_file_path) and cheevos_progress.available():
+            popup_options.append(GridOrListEntry(
+                primary_text=Language.label("viewAchievementProgress", "View achievement progress"),
+                value=lambda input_value, rom_info=rom_info: (
+                    cheevos_progress.show_progress(rom_info) if input_value == ControllerInput.A else None
+                )
             ))
 
         if(PyUiConfig.get_cache_cheevos_cmd()

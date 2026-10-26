@@ -19,6 +19,7 @@ except ModuleNotFoundError:
 CACHE_QUEUE_MAX_ATTEMPTS = 3
 DRAIN_LOCK_FILE = CONFIG_DIR / "cache_queue.drain.lock"
 BULK_RUN_LOCK_FILE = CONFIG_DIR / "cache_queue.bulk.lock"
+DRAINING_LOCK_FILE = CONFIG_DIR / "cache_queue.draining.lock"
 LOCK_POLL_SECONDS = 0.5
 
 
@@ -167,14 +168,12 @@ class _FileLock:
     def hold(self, shared: bool = False, blocking: bool = True, should_abort=None):
         ensure_config_dir()
         with self.path.open("a+") as handle:
-            if not self._acquire(handle, shared, blocking, should_abort):
-                yield False
-                return
+            held = _HeldLock(handle, shared, self._acquire(handle, shared, blocking, should_abort))
             try:
-                yield True
+                yield held
             finally:
-                if fcntl is not None:
-                    fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+                if held:
+                    _unlock(handle)
 
     def held_elsewhere(self) -> bool:
         with self.hold(blocking=False) as acquired:
@@ -195,12 +194,46 @@ class _FileLock:
                 time.sleep(LOCK_POLL_SECONDS)
 
 
+class _HeldLock:
+    """What hold() yields: true while the lock is held."""
+
+    def __init__(self, handle, shared: bool, acquired: bool) -> None:
+        self.handle = handle
+        self.shared = shared
+        self.acquired = acquired
+
+    def __bool__(self) -> bool:
+        return self.acquired
+
+    @contextlib.contextmanager
+    def released(self, should_abort=None):
+        """Lets other callers take the lock meanwhile, then waits to take it back; afterwards
+        the lock is false when should_abort gave up on that."""
+        _unlock(self.handle)
+        self.acquired = False
+        try:
+            yield
+        finally:
+            self.acquired = _FileLock._acquire(self.handle, self.shared, True, should_abort)
+
+
+def _unlock(handle) -> None:
+    if fcntl is not None:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
 # Only one caller drains at a time: a bulk run's first batch waits for it, the service's worker
 # skips its round.
 drain_lock = _FileLock(DRAIN_LOCK_FILE)
+# Held (shared) for a whole drain, also while it waits for its pace with drain_lock released.
+draining_lock = _FileLock(DRAINING_LOCK_FILE)
 # Held (shared) while a bulk run hashes and runs its first batch; the service's worker stands
 # down meanwhile so it never drains a queue that is still filling.
 bulk_run_lock = _FileLock(BULK_RUN_LOCK_FILE)
+
+
+def draining_elsewhere() -> bool:
+    return draining_lock.held_elsewhere()
 
 
 def bulk_run_active() -> bool:

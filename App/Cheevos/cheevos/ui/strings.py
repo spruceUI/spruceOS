@@ -89,6 +89,8 @@ NO_GAMES = "No games match this filter."
 NO_DETAILS = "This game's achievements aren't downloaded yet."
 NO_DETAILS_HINT = "To have every game's achievements offline: Settings → Download every game."
 LOADING_ACHIEVEMENTS = "Loading achievements…"
+GAME_REFRESH = "Refresh game"
+GAME_REFRESH_FAILED = "Couldn't refresh · showing saved data"
 LOAD_NETWORK = "Couldn't reach RetroAchievements · check the Wi-Fi."
 LOAD_ERROR = "Loading failed · see the log."
 

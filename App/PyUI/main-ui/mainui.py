@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 from pathlib import Path
 import signal
@@ -10,26 +11,22 @@ from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
-from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
-from option_select_ui import OptionSelectUI
 import sdl2
-import sdl2.ext
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
-from utils.button_listener import ButtonListener
 from utils.cfw_system_config import CfwSystemConfig
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
-from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
 from utils.time_logger import log_timing
+from utils import shutdown
 
 
 
@@ -63,10 +60,20 @@ def log_renderer_info():
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
-    CheevosCacheManager.initialize()
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
+
+def warm_wifi_status():
+    """Overlap the first blocking Wi-Fi status read with theme and display setup."""
+    def read_status():
+        try:
+            Device.get_device().get_wifi_status()
+        except Exception:
+            PyUiLogger.get_logger().exception("Wi-Fi status warm-up failed")
+
+    threading.Thread(target=read_status, name="WifiStatus", daemon=True).start()
+
 
 def start_background_threads():
     startup_thread = threading.Thread(target=Device.get_device().perform_startup_tasks)
@@ -79,6 +86,13 @@ def start_background_threads():
     # Follows the USB audio route for as long as the menu runs
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
+
+def finish_startup():
+    """Release the startup clock and warm optional data after the first frame."""
+    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
+    CheevosCacheManager.initialize()
+
 
 def verify_config_exists(config_path):
     # Determine the directory where this script resides
@@ -105,6 +119,7 @@ def check_for_msg_display(args):
 
 def check_for_option_list_file(args):
     if(args.optionListFile):
+        from option_select_ui import OptionSelectUI
         OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile, True)
 
 def check_for_msg_display_realtime(args):
@@ -124,6 +139,7 @@ def check_for_msg_display_realtime(args):
                 elif message.startswith("OPTION_LIST:"):
                     option_list_file = message[len("OPTION_LIST:"):].strip()
                     PyUiLogger.get_logger().info(f"Option list file: {option_list_file}")
+                    from option_select_ui import OptionSelectUI
                     OptionSelectUI.display_option_list("",option_list_file, False)
                 else:
                     Display.display_message(message)
@@ -135,10 +151,12 @@ def check_for_msg_display_realtime(args):
 
 def check_for_msg_display_socket_based(args):
     if(args.msgDisplayRealtimePort):
+        from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
         RealtimeMessageNetworkListener(args.msgDisplayRealtimePort).start()
 
 def check_for_button_listener_mode(args):
     if(args.buttonListenerMode):
+        from utils.button_listener import ButtonListener
         print("Running in button listener mode")
         ButtonListener().start()
 
@@ -169,6 +187,10 @@ def main():
         if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
             main_ui_mode = False
 
+        if main_ui_mode:
+            # Before the slow part of startup, so a power-off during it still gets the farewell.
+            shutdown.listen()
+
         with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
 
@@ -183,9 +205,12 @@ def main():
         check_for_button_listener_mode(args)
         check_for_startup_init_only(args)
 
-        # The Roms scan is SD-bound; overlap it with the display bring-up below.
+        # The Roms scan is SD-bound and the first Wi-Fi status read blocks; overlap both
+        # with the display bring-up below. The helper modes and startupInitOnly (which
+        # has exited by now) show no menu, so they skip both.
         if main_ui_mode:
             Device.get_device().get_game_system_utils().prefetch_active_systems()
+            warm_wifi_status()
 
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
@@ -198,6 +223,8 @@ def main():
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
+        if main_ui_mode:
+            shutdown.arm(Display.present_farewell, Controller.controller_interface.signal_wakeup_fd())
 
         Device.get_device().perform_sdcard_ro_check()
 
@@ -207,11 +234,12 @@ def main():
         check_for_option_list_file(args)
 
     main_menu = MainMenu()
+    main_menu.build_startup_menu()
 
     start_background_threads()
-    # The CPU is held in performance mode until the menu is built.
-    # Return it to normal on a thread: offlining cores would delay the first input.
-    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    # Keep the startup clock through the first visible frame. Optional proxy
+    # reads can then run while the user is at Home, rather than competing with it.
+    Display.after_next_present(finish_startup)
     keep_running = True
     PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):
@@ -226,7 +254,25 @@ def sigterm_handler(signum, frame):
     PyUiLogger.get_logger().info(f"Received SIGTERM (Signal {signum}). Shutting down...")
     sys.exit() # Exit gracefully
 
+def exit_without_teardown():
+    """Joins non-daemon threads and flushes the log, then skips the interpreter teardown that
+    sys.exit() would add: 0.25 s on the Mini Plus, paid before every app or game starts.
+    No other exit hooks run, including the one that stops idle ThreadPoolExecutor workers:
+    shut an executor down before exiting (a with-block does), or the join waits forever."""
+    main_thread = threading.main_thread()
+    for thread in threading.enumerate():
+        if thread is not main_thread and not thread.daemon:
+            thread.join()
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)
+
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
-    main()
-    os._exit(0)
+    try:
+        main()
+    except SystemExit:
+        # Every exit is a sys.exit() (always status 0); other exceptions keep their traceback.
+        pass
+    exit_without_teardown()

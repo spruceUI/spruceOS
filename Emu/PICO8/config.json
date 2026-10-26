@@ -42,6 +42,15 @@
       "selected": "False",
       "overrides": {}
     },
+    "inGameMenu": {
+      "display": "In-game Menu & Save States",
+      "options": [
+        "True",
+        "False"
+      ],
+      "selected": "True",
+      "overrides": {}
+    },
     "controlMode": {
       "display": "Control Profile",
       "options": [

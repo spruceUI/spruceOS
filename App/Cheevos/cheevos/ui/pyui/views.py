@@ -17,13 +17,12 @@ from cheevos.ui.pyui.primitives import (
     Button,
     Text,
     displayable,
-    fit_text,
     fit_with_tail,
     screen_size,
 )
 from cheevos.ui.pyui.row_bars import Progress
 from cheevos.ui.pyui.status_bar import Hint
-from cheevos.ui.pyui.text import ListRoom, list_room
+from cheevos.ui.pyui.text import description_room
 from cheevos.ui.pyui.title_bar import Title
 from cheevos.ui.pyui.visible_images import ImageDemand, VisibleImages, demanding
 
@@ -97,7 +96,7 @@ class Layout(Enum):
     POPUP = "POPUP"  # small menu over the current screen (options, filters)
 
 
-# Called on every input timeout (~12x/s). Returning items replaces the list in place.
+# Called on every input timeout (~12x/s). Items replace the list; an empty list closes it.
 TickHandler = Callable[[], Sequence[MenuItem] | None]
 
 
@@ -119,13 +118,16 @@ def _lazy(source: Callable[[], Path | None]) -> Callable[[object], str | None]:
     return search
 
 
-def _entry(item: MenuItem, *, room: ListRoom | None) -> Any:  # noqa: ANN401
+def _entry(item: MenuItem, *, room: int | None) -> Any:  # noqa: ANN401
     """Convert one item into a PyUI ``GridOrListEntry``.
+
+    PyUI fits list titles to their room itself (SpruceOS #1900), and scrolls the selected one
+    when it doesn't fit, so titles are passed whole.
 
     Args:
         item: Row or tile.
-        room: A list row's room: the title is shortened so it never runs into the
-            right-aligned value, and the description keeps its tail (lists only).
+        room: A list row's description width: the description is shortened to it and keeps
+            its tail (lists only).
 
     Returns:
         The PyUI entry, carrying the item as its value.
@@ -135,15 +137,14 @@ def _entry(item: MenuItem, *, room: ListRoom | None) -> Any:  # noqa: ANN401
     icon = item.icon
     static = str(icon) if isinstance(icon, Path) else None
     searcher = None if icon is None or isinstance(icon, Path) else _lazy(icon)
+    title = displayable(item.title, Text.TITLE)
     if room is not None:
-        title = fit_text(item.title, Text.TITLE, room.title(item.value))
         description = (
-            fit_with_tail(item.description, item.tail, Text.BODY, room.full)
+            fit_with_tail(item.description, item.tail, Text.BODY, room)
             if item.description or item.tail
             else ""
         )
     else:
-        title = displayable(item.title, Text.TITLE)
         description = displayable(item.description, Text.BODY)
     if item.progress is not None:
         description = ""  # keeps the two-line row; the bar is drawn in its place
@@ -165,12 +166,12 @@ def _entries(items: Sequence[MenuItem], layout: Layout = Layout.LIST) -> list[An
 
     Args:
         items: Rows or tiles.
-        layout: Target view; list titles are fitted next to their values.
+        layout: Target view; list descriptions are fitted to the row.
 
     Returns:
         PyUI entries in the same order.
     """
-    room = list_room() if layout is Layout.LIST else None
+    room = description_room() if layout is Layout.LIST else None
     return [_entry(item, room=room) for item in items]
 
 
@@ -350,6 +351,39 @@ class PreparedView:
         if len(self._entries) > _SLOW_LIST_ROWS or elapsed_ms > _SLOW_LIST_MS:
             logger.info("Prepared %d rows in %.0f ms", len(self._entries), elapsed_ms)
 
+    def set_title(self, title: str | Title) -> None:
+        """Update a live view's title, including the game's count and award dot."""
+        self._title = title
+        self._view.top_bar_text = title_bar.top_title(title)
+
+    def update_items(self, items: Sequence[MenuItem]) -> None:
+        """Replace rows, retaining the highlighted key and visible window where possible."""
+        view = self._view
+        selected = min(int(view.selected), len(self._entries) - 1)
+        key = self._entries[selected].get_value().key
+        self._count = len(items)
+        self._entries = _entries(items, self._layout)
+        view.set_options(self._entries)
+        view.selected = next(
+            (index for index, item in enumerate(items) if key and item.key == key),
+            min(selected, self._count - 1),
+        )
+        if self._layout is Layout.LIST:
+            window = view.max_rows
+            view.current_top = min(view.current_top, max(0, self._count - window))
+            view.current_bottom = min(view.current_top + window, self._count)
+            if not view.current_top <= view.selected < view.current_bottom:
+                # PyUI's center_selection() leaves index zero off-screen.
+                view.current_top = max(0, min(view.selected - window // 2, self._count - window))
+                view.current_bottom = min(view.current_top + window, self._count)
+        elif self._layout is Layout.BADGES:
+            window = view.rows * view.cols
+            view.current_left = min(view.current_left, (view.selected // view.cols) * view.cols)
+            view.current_right = min(view.current_left + window, self._count)
+            view.correct_selected_for_off_list()
+        if self._images is not None:
+            self._images.reset(self._entries)
+
     def show(
         self,
         *,
@@ -388,9 +422,7 @@ class PreparedView:
         finally:
             # Popups freeze the frame underneath as their backdrop until told they're done;
             # without this, every later screen is drawn over that frozen frame.
-            finished = getattr(self._view, "view_finished", None)
-            if finished is not None:
-                finished()
+            self._view.view_finished()
 
     def _select(
         self, accepted: list[Any], on_tick: TickHandler | None, *, global_start: bool
@@ -413,10 +445,9 @@ class PreparedView:
             # PyUI returns a Selection with no input after a timeout or a cursor move.
             if selection is None or selection.get_input() is None:
                 if on_tick is not None and (updated := on_tick()) is not None:
-                    self._entries = _entries(updated, self._layout)
-                    view.set_options(self._entries)
-                    if self._images is not None:
-                        self._images.reset(self._entries)
+                    if not updated:
+                        return None
+                    self.update_items(updated)
                 continue
             if selection.get_input() == ControllerInput.B:
                 return None

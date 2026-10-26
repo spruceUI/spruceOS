@@ -68,6 +68,9 @@ def initialize_device(device, main_ui_mode):
     elif "ROCKNIX_RGDS" == device:
         from devices.rocknix.rocknix_rgds import RocknixRgds
         Device.init(RocknixRgds(device))
+    elif "RG353M" == device:
+        from devices.darkmoss.rg353m import Rg353m
+        Device.init(Rg353m(device))
     elif "RGB30" == device:
         from devices.darkmoss.rgb30 import Rgb30
         Device.init(Rgb30(device))
@@ -77,12 +80,18 @@ def initialize_device(device, main_ui_mode):
     elif "A10MINI" == device:
         from devices.darkmoss.a10mini import A10Mini
         Device.init(A10Mini(device))
+    elif "A10MINIV4" == device:
+        from devices.darkmoss.a10miniv4 import A10MiniV4
+        Device.init(A10MiniV4(device))
     elif "MAGICX_XU_MINI_M" == device:
         from devices.darkmoss.xumini import XuMiniM
         Device.init(XuMiniM(device))
     elif "G350" == device:
         from devices.darkmoss.g350 import G350
         Device.init(G350(device))
+    elif "POWKIDDY_V10" == device:
+        from devices.darkmoss.v10 import V10
+        Device.init(V10(device))
     elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
         from devices.magicx.magicx_zero28 import MagicXZero28
         Device.init(MagicXZero28(device, main_ui_mode))

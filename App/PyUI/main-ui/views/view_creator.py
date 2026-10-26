@@ -4,16 +4,7 @@ from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
 from themes.theme import Theme
-from views.carousel_view import CarouselView
-from views.descriptive_list_view import DescriptiveListView
-from views.empty_view import EmptyView
-from views.full_screen_grid_view import FullScreenGridView
 from views.grid_or_list_entry import GridOrListEntry
-from views.grid_view import GridView
-from views.image_list_view import ImageListView
-from views.non_descriptive_list_view import NonDescriptiveListView
-from views.popup_text_list_view import PopupTextListView
-from views.text_list_view import TextListView
 from views.text_to_image_relationship import TextToImageRelationship
 from views.view_type import ViewType
 from utils.logger import PyUiLogger
@@ -64,6 +55,7 @@ class ViewCreator:
                     veritcal_carousel=None) -> object:
         
         if(len(options) == 0):
+            from views.empty_view import EmptyView
             return EmptyView()
 
         if(ViewType.POPUP == view_type and not Device.get_device().supports_popup_menu()):
@@ -77,6 +69,7 @@ class ViewCreator:
                     if icon is not None or option.get_description() is not None:
                         selected_bg = Theme.get_list_large_selected_bg()
 
+                from views.descriptive_list_view import DescriptiveListView
                 return DescriptiveListView(
                     top_bar_text=top_bar_text,
                     options=options,
@@ -86,6 +79,7 @@ class ViewCreator:
                 )
 
             case ViewType.TEXT_AND_IMAGE:
+                from views.non_descriptive_list_view import NonDescriptiveListView
                 text_and_image_list_view_mode = Theme.text_and_image_list_view_mode()
                 img_width = Theme.get_list_game_select_img_width()
 
@@ -147,6 +141,7 @@ class ViewCreator:
                     text_to_image_relationship = TextToImageRelationship.TEXT_AROUND_RIGHT_IMAGE
                     usable_height = None
 
+                from views.image_list_view import ImageListView
                 return ImageListView(
                     top_bar_text=top_bar_text,
                     options=options,
@@ -163,6 +158,8 @@ class ViewCreator:
                 )
 
             case ViewType.TEXT_ONLY:
+                from views.non_descriptive_list_view import NonDescriptiveListView
+                from views.text_list_view import TextListView
                 return TextListView(
                     top_bar_text=top_bar_text,
                     options=options,
@@ -174,6 +171,8 @@ class ViewCreator:
                 )
 
             case ViewType.POPUP:
+                from views.non_descriptive_list_view import NonDescriptiveListView
+                from views.popup_text_list_view import PopupTextListView
                 return PopupTextListView(
                     options=options,
                     selected_index=selected_index,
@@ -190,6 +189,7 @@ class ViewCreator:
                     grid_selected_bg = Theme.get_grid_bg(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
                     grid_unselected_bg = Theme.get_grid_bg_unselected(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
                 
+                from views.grid_view import GridView
                 return GridView(
                     top_bar_text=top_bar_text,
                     options=options,
@@ -217,6 +217,7 @@ class ViewCreator:
                     grid_selected_bg = Theme.get_grid_bg(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
                     grid_unselected_bg = Theme.get_grid_bg_unselected(rows, cols, use_mutli_row_grid_select_as_backup_for_single_row_grid_select)
                 
+                from views.full_screen_grid_view import FullScreenGridView
                 return FullScreenGridView(
                     top_bar_text=top_bar_text,
                     options=options,
@@ -231,6 +232,7 @@ class ViewCreator:
                     image_resize_height_multiplier=image_resize_height_multiplier
                 )
             case ViewType.CAROUSEL:
+                from views.carousel_view import CarouselView
                 return CarouselView(
                     top_bar_text=top_bar_text,
                     options=options,

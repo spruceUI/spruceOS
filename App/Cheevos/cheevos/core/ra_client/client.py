@@ -11,7 +11,6 @@ from collections.abc import Callable, Iterable
 from typing import Any
 from urllib.parse import urlencode
 
-import cheevos
 from cheevos.core.errors import (
     ApiPayloadError,
     AuthError,
@@ -31,18 +30,12 @@ from cheevos.core.models import (
     UserProfile,
 )
 from cheevos.core.ra_client import parse, v2
+from cheevos.core.ra_client.common import API_HOST, API_V2_HOST, MEDIA_HOST, STATIC_HOST, Response
 from cheevos.core.ra_client.pacer import API_INTERVAL, LONG_PAUSE, MEDIA_INTERVAL, Pacer
 from cheevos.core.ra_client.parse_awards import parse_awards
 from cheevos.core.ra_client.recent import INITIAL_WINDOW, UnlockPage, fetch_recent_unlocks
 from cheevos.core.ra_client.redact import install_redaction
-from cheevos.core.ra_client.transport import (
-    API_HOST,
-    API_V2_HOST,
-    MEDIA_HOST,
-    STATIC_HOST,
-    Response,
-    Transport,
-)
+from cheevos.core.ra_client.transport import Transport
 
 logger = logging.getLogger(__name__)
 
@@ -53,18 +46,6 @@ _HTTP_OK = 200
 _HTTP_NOT_FOUND = 404
 _HTTP_TOO_MANY = 429
 _AUTH_STATUSES = frozenset({401, 403})
-
-
-def default_user_agent(platform: str) -> str:
-    """Return the User-Agent RA sees, e.g. ``"Cheevos/0.1.0 (SpruceOS; MiyooMini)"``.
-
-    Args:
-        platform: Spruce platform name.
-
-    Returns:
-        The User-Agent string.
-    """
-    return f"Cheevos/{cheevos.__version__} (SpruceOS; {platform})"
 
 
 def _is_unauthenticated(data: object) -> bool:

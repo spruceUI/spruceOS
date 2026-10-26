@@ -15,22 +15,32 @@ FW_DIR="/mnt/SDCARD/spruce/FIRMWARE_UPDATE"
 # get the free space on the SD card in MiB
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
+# BaseOS (Anbernic XX, Miyoo Flip) updates itself from a .bosupd file at the root of the card.
+[ -f /etc/baseos-release ] && exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
+
+unsupported_device() {
+	log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${SPRUCE_DEVICE_NAME:-$PLATFORM}."
+	sleep 5
+	exit 1
+}
+
 NEEDS_UPDATE=true
 case "$PLATFORM" in
 	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	Anbernic*)
-		# BaseOS updates itself from a .bosupd file at the root of the card.
-		exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
+	"MiyooMini")
+		[ -n "$FW_FILE" ] || unsupported_device
+		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"G350")
+	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
+	"Zero28"|"Zero40"|"XU20")
+		exec /mnt/SDCARD/App/-FirmwareUpdate-/oakmossUpdate.sh
+		;;
 	*)
-		log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${PLATFORM}."
-		sleep 5
-		exit 1
+		unsupported_device
 		;;
 esac
 
@@ -69,6 +79,9 @@ confirm_update() {
 		"Flip")
 			conf_msg="Your Flip will now reboot into the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
+		"MiyooMini")
+			conf_msg="Your $SPRUCE_DEVICE_NAME will now shut down. Once it is off, unplug the charger and plug it back in to start the manufacturer firmware update. A rocket appears; do not unplug it until it finishes, as it will take a few minutes. If no rocket appears, hold MENU while plugging it in."
+			;;
 		"Brick"|"BrickPro"|"SmartPro"*)
 			conf_msg="Your $PLATFORM will now reboot. Hold the VOLUME DOWN key as it does so in order to initiate the OEM firmware update process. Once started, please be patient, as it will take a few minutes. It will restart itself again once complete."
 			;;
@@ -79,7 +92,11 @@ confirm_update() {
 	acknowledge
 	flag_add "first_boot_$PLATFORM"
 	sync
-	/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+	if [ "$PLATFORM" = "MiyooMini" ]; then
+		/mnt/SDCARD/spruce/scripts/save_poweroff.sh
+	else
+		/mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
+	fi
 }
 
 check_for_connection() {
@@ -90,7 +107,7 @@ check_for_connection() {
         exit 1
     fi
 
-    if ! ping -c 3 github.com > /dev/null 2>&1; then
+    if ! internet_reachable https://github.com; then
 		display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 25 25 "Unable to connect to GitHub repository. Please check your connection and try again." 75
 		sleep 5
         exit 1
@@ -156,7 +173,7 @@ if [ "$(device_get_charging_status)" = "Discharging" ]; then
 		sleep 1
 		if confirm; then
 			# Re-evaluate charging status
-			if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ] && [ "$(device_get_battery_percent)" -ge 35 ]; then
+			if [ "$(device_get_charging_status)" != "Discharging" ] || { [ "$PLATFORM" != "A30" ] && [ "$PLATFORM" != "MiyooMini" ] && [ "$(device_get_battery_percent)" -ge 35 ]; }; then
 				log_message "firmwareUpdate.sh: Device is now plugged in, or at least >35% capacity. Continuing."
 				break
 			else
@@ -173,7 +190,7 @@ else
 fi
 
 # Give them one last warning, and a chance to proceed with or cancel the FW update.
-if [ "$(device_get_charging_status)" != "Discharging" ] || [ "$PLATFORM" != "A30" ]; then
+if [ "$(device_get_charging_status)" != "Discharging" ] || { [ "$PLATFORM" != "A30" ] && [ "$PLATFORM" != "MiyooMini" ]; }; then
 	log_and_display_message "WARNING: If powered off before the update is complete, your device could become temporarily bricked, requiring you to run the unbricker software. Press A to continue, or B to cancel."
 	if confirm; then
 		log_message "firmwareUpdate.sh: A button pressed. Confirming update."

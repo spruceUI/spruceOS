@@ -168,6 +168,7 @@ class OptionSelectUI:
         def run_action(val):
             if exit_after_running:
                 Display.deinit_display()
+                os.sync()
                 subprocess.run(val, shell=True)
                 sys.exit(0)
             elif execute_immediately:
@@ -319,6 +320,7 @@ class OptionSelectUI:
                 if isinstance(val, str):
                     if exit_after_running:
                         Display.deinit_display()
+                        os.sync()
                         subprocess.run(val, shell=True)
                         sys.exit(0)
 

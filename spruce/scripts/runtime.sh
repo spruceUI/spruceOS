@@ -59,6 +59,7 @@ flag_remove "in_menu" &
 unstage_archives_wanted
 check_and_handle_firmware_app &
 check_and_hide_update_app &
+randomize_theme_if_requested &
 
 # firstboot.sh owns onboarding and firstboot-required phases, but runtime owns the single
 # closing UX because only runtime knows when every required foreground unpack step has
@@ -106,7 +107,9 @@ fi
 
 (
     /mnt/SDCARD/spruce/scripts/set_up_swap.sh || true
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
+    if device_supports_zram; then
+        /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
+    fi
 ) &
 
 # Not awaited: the first menu frame does not need the watchdogs up.
@@ -134,7 +137,12 @@ update_checker &
 set_up_boot_action
 
 # Nothing from device_init may still be touching the display or the LEDs under the frontend.
-wait_device_init_jobs
+# PyUI waits for the display itself; a game staged to run first does not.
+if [ -f /tmp/cmd_to_run.sh ]; then
+    wait_device_init_jobs
+else
+    wait_device_init_jobs --except-display
+fi
 
 # start main loop
 log_message "Starting main loop"

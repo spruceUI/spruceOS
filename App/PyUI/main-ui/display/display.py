@@ -10,15 +10,18 @@ from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
+from menus.language.language import Language
 import sdl2
-import sdl2.ext
+from display import sdl_backend
 import sdl2.sdlttf
+import sdl2.sdlimage
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 import ctypes
 
 from utils.py_ui_config import PyUiConfig
 from utils.time_logger import log_timing
+from utils import shutdown
 
 @dataclass
 class CachedImageTexture:
@@ -26,6 +29,29 @@ class CachedImageTexture:
         self.texture = texture
         self.width = width
         self.height = height
+
+class GlyphAdvances(dict):
+    # How far each character moves the pen in one font, measured the first time it is looked up
+    def __init__(self, font):
+        super().__init__()
+        self.font = font
+
+    def __missing__(self, char):
+        advance = self[char] = Display._measure_glyph_advance(self.font, char)
+        return advance
+
+class FontCache(dict):
+    """Open a purpose's font when it is first needed, keeping ownership in this cache."""
+
+    def __init__(self, font_path=None):
+        super().__init__()
+        self.font_path = font_path
+
+    def __missing__(self, purpose):
+        font = Display._load_font(purpose, self.font_path)
+        self[purpose] = font
+        return font
+
 
 class ImageTextureCache:
     def __init__(self):
@@ -94,8 +120,19 @@ class Display:
     _glyph_cache = {}
     _glyph_is_provided = None
     _glyph_supports_32bit = False
+    _glyph_advances = {} # font purpose -> GlyphAdvances of its font
     
     _last_frame_time = 0
+    _after_present = []
+
+    # The draw calls of the frame being drawn and of the one on screen. Comparing
+    # them at present() tells a screen that changed from one drawn the same again,
+    # which Controller.get_input stops redrawing so often once it has settled.
+    _frame_draws = []
+    _shown_draws = []
+    _last_change_time = 0
+    _last_present_time = 0
+    _unchanged_frames = 0
 
     _image_texture_cache = ImageTextureCache()
     _text_texture_cache = TextTextureCache()
@@ -125,7 +162,7 @@ class Display:
             cls.init_fonts()
 
 
-        if hasattr(sdl2.sdlttf, "TTF_GlyphIsProvided32"):
+        if sdl2.sdlttf.dll.version_tuple >= (2, 0, 18):
             cls._glyph_is_provided = sdl2.sdlttf.TTF_GlyphIsProvided32
             cls._glyph_supports_32bit = True
         else:
@@ -151,7 +188,7 @@ class Display:
             cls.log_sdl_error_if_any()
 
         if(Device.get_device().double_init_sdl_display()):
-            Display.deinit_display()
+            # reinitialize() already tears the display down.
             Display.reinitialize()
 
         if(Device.get_device().might_require_surface_format_conversion()):
@@ -234,24 +271,17 @@ class Display:
 
     @classmethod
     def init_fonts(cls):
-        cls.fonts = {
-            purpose: cls._load_font(purpose)
-            for purpose in FontPurpose
-        }
-
-        fallback_path = PyUiConfig.get_fallback_font()
-        
-        cls.fallback_fonts = {
-            purpose: cls._load_font(purpose, fallback_path)
-            for purpose in FontPurpose
-        }
+        # Most screens use only a few purposes, and ASCII text needs no fallback.
+        # In particular, do not open all 30 fonts before the first menu is shown.
+        cls.fonts = FontCache()
+        cls.fallback_fonts = FontCache(PyUiConfig.get_fallback_font())
 
     @classmethod
     def _init_display(cls):
-        with log_timing("sdl2.ext.init", PyUiLogger.get_logger()):    
-            sdl2.ext.init(controller=False)
+        with log_timing(f"SDL video/events initialization ({sdl_backend.get_backend_name()})", PyUiLogger.get_logger()):
+            sdl_backend.init()
 
-        # After sdl2.ext.init, never before: SDL_Init calls
+        # After SDL initialization, never before: SDL_Init calls
         # SDL_GL_ResetAttributes and would wipe anything set earlier. Before
         # the window, because that is when the EGL config is chosen.
         if Device.get_device().wants_gles_context():
@@ -270,14 +300,14 @@ class Display:
                 width, height = display_mode.w, display_mode.h
                 #PyUiLogger.get_logger().info(f"Display size: {width}x{height}")
 
-        with log_timing("sdl2.ext.Window", PyUiLogger.get_logger()):    
+        with log_timing("SDL window", PyUiLogger.get_logger()):
             cls.window = Device.get_device().create_window(width, height)
             cls.window.show()
 
 
-        with log_timing("sdl2.ext.Renderer", PyUiLogger.get_logger()):    
+        with log_timing("SDL renderer", PyUiLogger.get_logger()):
             sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_SCALE_QUALITY, b"2")
-            cls.renderer = sdl2.ext.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
+            cls.renderer = sdl_backend.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
 
     @classmethod
     def deinit_display(cls):
@@ -288,6 +318,9 @@ class Display:
 
     @classmethod
     def deinit_display_v1(cls):
+        cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
         if cls.render_canvas:
             sdl2.SDL_DestroyTexture(cls.render_canvas)
             cls.render_canvas = None
@@ -295,23 +328,21 @@ class Display:
             sdl2.SDL_DestroyTexture(cls.bg_canvas)
             cls.bg_canvas = None
         if cls.renderer is not None:
-            sdl2.SDL_DestroyRenderer(cls.renderer.sdlrenderer)
+            cls.renderer.destroy()
             cls.renderer = None
         if cls.window is not None:
-            sdl2.SDL_DestroyWindow(cls.window.window)
+            cls.window.close()
             cls.window = None
         cls.deinit_fonts()
-        cls._unload_bg_texture()
-        cls._text_texture_cache.clear_cache()
-        cls._image_texture_cache.clear_cache()
         cls.bg = None
 
         sdl2.SDL_Quit()
-        if hasattr(os, "sync"):
-            os.sync()
 
     @classmethod
     def deinit_display_v2(cls):
+        cls._unload_bg_texture()
+        cls._text_texture_cache.clear_cache()
+        cls._image_texture_cache.clear_cache()
         if cls.render_canvas:
             sdl2.SDL_DestroyTexture(cls.render_canvas)
             cls.render_canvas = None
@@ -329,9 +360,6 @@ class Display:
             cls.window = None
 
         cls.deinit_fonts()
-        cls._unload_bg_texture()
-        cls._text_texture_cache.clear_cache()
-        cls._image_texture_cache.clear_cache()
 
         sdl2.SDL_Quit()
 
@@ -369,6 +397,7 @@ class Display:
         cls.fallback_fonts.clear()
         
         cls._glyph_cache.clear()
+        cls._glyph_advances.clear()
 
     @classmethod
     def reinitialize(cls, bg=None):
@@ -492,6 +521,8 @@ class Display:
               render_bottom_bar_icons_and_images = True,
               force_top_and_bottom_bar = False):
         cls.top_bar_text = top_bar_text
+        cls._frame_draws.append(("clear", cls.bg_path, cls.is_custom_theme_background,
+                                 cls.bg_canvas, cls.background_texture))
             
         if cls.is_custom_theme_background:
             #cls.render_image(cls.bg_path, Device.get_device().screen_width()//2, Device.get_device().screen_height()//2, RenderMode.MIDDLE_CENTER_ALIGNED, Device.get_device().screen_width(), Device.get_device().screen_height(), ResizeType.ZOOM)
@@ -695,6 +726,8 @@ class Display:
                     render_mode=RenderMode.TOP_LEFT_ALIGNED,
                     crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=False):
         #with log_timing("Display.render_text", PyUiLogger.get_logger()):    
+            cls._frame_draws.append(("text", text, x, y, color, purpose, render_mode,
+                                     crop_w, crop_h, alpha, allow_fallback_font_for_missing_glyphs))
             start = time.perf_counter()
 
             primary_font = cls.fonts[purpose]
@@ -814,6 +847,8 @@ class Display:
     @classmethod
     def render_image(cls, image_path: str, x: int, y: int, render_mode=RenderMode.TOP_LEFT_ALIGNED, target_width=None, target_height=None, resize_type=None, crop_w=None, crop_h=None):        
         #with log_timing("Display.render_image", PyUiLogger.get_logger()):    
+            cls._frame_draws.append(("image", image_path, x, y, render_mode, target_width,
+                                     target_height, resize_type, crop_w, crop_h))
             start = time.perf_counter()
             if(image_path is None or image_path in cls._problematic_images):
                 return 0, 0
@@ -913,6 +948,7 @@ class Display:
 
     @classmethod
     def render_box(cls, color, x, y, w, h):
+        cls._frame_draws.append(("box", color, x, y, w, h))
         sdl2.SDL_SetRenderDrawColor(cls.renderer.renderer, color[0], color[1], color[2], 255)
         rect = sdl2.SDL_Rect(x, y, w, h)
         sdl2.SDL_RenderFillRect(cls.renderer.renderer, rect)
@@ -1121,6 +1157,7 @@ class Display:
     start = 0
     @classmethod
     def present(cls, fade=False):
+            shutdown.checkpoint()
             present_start = time.perf_counter()
 
             if Theme.render_top_and_bottom_bar_last():
@@ -1131,26 +1168,10 @@ class Display:
                     cls._add_index_last_args = None
                 cls.bottom_bar_text = None
 
-            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
-
-            if Device.get_device().should_scale_screen():
-                scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
-                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
-                sdl2.SDL_DestroyTexture(scaled_canvas)
-            elif(0 == Device.get_device().screen_rotation()):
-                if(fade):
-                    cls.fade_transition(cls.bg_canvas, cls.render_canvas)
-                else:
-                    sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
-            else:   
-                    rotated_texture = cls.rotate_canvas()
-                    if(rotated_texture is not None):
-                        sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
-                        sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
-
-            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls._copy_canvas_to_window(fade)
             cls.pace_frame()
             cls.renderer.present()
+            cls._frame_presented()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
             present_elapsed_ms = (time.perf_counter() - present_start) * 1000
             #PyUiLogger.get_logger().info(f"frametime was {elapsed_ms:.1f} mS")
@@ -1162,6 +1183,108 @@ class Display:
 
             Device.get_device().post_present_operations()
             cls.start = time.perf_counter()
+
+    @classmethod
+    def _copy_canvas_to_window(cls, fade=False):
+        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, None)
+
+        if Device.get_device().should_scale_screen():
+            scaled_canvas = cls.scale_texture_to_fit(cls.render_canvas, Device.get_device().output_screen_width(), Device.get_device().output_screen_height())
+            sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, scaled_canvas, None, None)
+            sdl2.SDL_DestroyTexture(scaled_canvas)
+        elif(0 == Device.get_device().screen_rotation()):
+            if(fade):
+                cls.fade_transition(cls.bg_canvas, cls.render_canvas)
+            else:
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, cls.render_canvas, None, None)
+        else:
+            rotated_texture = cls.rotate_canvas()
+            if(rotated_texture is not None):
+                sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
+                sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
+
+        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+
+    @classmethod
+    def present_farewell(cls):
+        """The shutdown screen in the message writer's layout, presented at once: no
+        menu bars, no frame pacing, no post-present work."""
+        renderer = cls.renderer.renderer
+        sdl2.SDL_SetRenderTarget(renderer, cls.render_canvas)
+        sdl2.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)
+        sdl2.SDL_RenderClear(renderer)
+        if cls.background_texture is not None:
+            sdl2.SDL_RenderCopy(renderer, cls.background_texture, None, None)
+        cls.render_image_and_text(
+            image_path=Theme.get_shutdown_image(),
+            text=Language.label("poweringOff", "Powering off..."),
+            height_percent=33,
+            image_y_percent=10,
+            text_y_percent=60,
+        )
+        cls._copy_canvas_to_window()
+        cls.renderer.present()
+
+    @classmethod
+    def render_image_and_text(cls, image_path, text, height_percent, image_y_percent, text_y_percent):
+        """An image centred above a message, as percentages of the usable height. Draws
+        only: no clear, no present."""
+        padding = cls.get_top_bar_height()
+        usable_height = cls.get_usable_screen_height()
+        image_height = int(usable_height * (height_percent / 100))
+        image_y = int(image_y_percent / 100 * usable_height) + padding
+        text_y = int(text_y_percent / 100 * usable_height) + padding
+        cls.render_image(
+            image_path,
+            Device.get_device().screen_width() // 2,
+            image_y,
+            RenderMode.TOP_CENTER_ALIGNED,
+            Device.get_device().screen_width(),
+            image_height
+        )
+        cls.write_message_multiline_starting_height_specified(
+            cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
+            text_y
+        )
+
+    @classmethod
+    def after_next_present(cls, callback):
+        """Run callback once on the UI thread after the next completed frame."""
+        cls._after_present.append(callback)
+
+    @classmethod
+    def _frame_presented(cls):
+        now = time.monotonic()
+        if cls._frame_draws != cls._shown_draws:
+            cls._screen_changed(now)
+        else:
+            cls._unchanged_frames += 1
+        cls._shown_draws, cls._frame_draws = cls._frame_draws, []
+        cls._last_present_time = now
+        callbacks, cls._after_present = cls._after_present, []
+        for callback in callbacks:
+            callback()
+
+    @classmethod
+    def _screen_changed(cls, now=None):
+        # Restarts the wait before Controller.get_input lets the screen go idle.
+        cls._last_change_time = time.monotonic() if now is None else now
+        cls._unchanged_frames = 0
+
+    @classmethod
+    def last_change_time(cls):
+        """When a presented frame last differed from the one before it (time.monotonic())."""
+        return cls._last_change_time
+
+    @classmethod
+    def last_present_time(cls):
+        """When the last frame was presented (time.monotonic())."""
+        return cls._last_present_time
+
+    @classmethod
+    def unchanged_frames(cls):
+        """How many frames in a row have been presented the same as the one before."""
+        return cls._unchanged_frames
 
     @classmethod
     def pace_frame(cls):
@@ -1293,6 +1416,54 @@ class Display:
         sdl2.sdlttf.TTF_SizeUTF8(font, text.encode('utf-8'), w, h)
         return int(w.value * Device.get_device().get_text_width_measurement_multiplier()), Device.get_device().fix_device_font_height_calc_issues(h.value)
 
+    # Text widths from each character's advance, which is measured once per font: much
+    # cheaper than TTF_SizeUTF8 for every string. Kerning is left out, so widths come out
+    # up to a few pixels wider than TTF_SizeUTF8's; use get_text_dimensions where exact
+    # widths matter.
+    @classmethod
+    def get_text_width_from_glyphs(cls, purpose, text):
+        width = sum(map(cls._get_glyph_advances(purpose).__getitem__, text))
+        return int(width * Device.get_device().get_text_width_measurement_multiplier())
+
+    @classmethod
+    def count_chars_that_fit(cls, purpose, text, max_width):
+        advances = cls._get_glyph_advances(purpose)
+        max_width /= Device.get_device().get_text_width_measurement_multiplier()
+        width = 0
+        for index, char in enumerate(text):
+            width += advances[char]
+            if width > max_width:
+                return index
+        return len(text)
+
+    @classmethod
+    def _get_glyph_advances(cls, purpose):
+        font = cls.fonts[purpose].font
+        advances = cls._glyph_advances.get(purpose)
+        if advances is None or advances.font is not font:
+            advances = cls._glyph_advances[purpose] = GlyphAdvances(font)
+        return advances
+
+    @classmethod
+    def _measure_glyph_advance(cls, font, char):
+        codepoint = ord(char)
+        minx, maxx, miny, maxy, advance = (ctypes.c_int() for _ in range(5))
+        metrics = [ctypes.byref(value) for value in (minx, maxx, miny, maxy, advance)]
+        failed = True
+        if cls._glyph_supports_32bit:
+            try:
+                failed = sdl2.sdlttf.TTF_GlyphMetrics32(font, codepoint, *metrics)
+            except RuntimeError: # PySDL2's stand-in for a function this SDL_ttf lacks
+                pass
+        if failed and codepoint <= 0xFFFF:
+            failed = sdl2.sdlttf.TTF_GlyphMetrics(font, codepoint, *metrics)
+        if failed:
+            w = sdl2.Sint32()
+            h = sdl2.Sint32()
+            sdl2.sdlttf.TTF_SizeUTF8(font, char.encode('utf-8'), w, h)
+            return w.value
+        return advance.value
+
 
     @classmethod
     def add_index_text(cls, index, total, force_include_index = False, letter = None):
@@ -1341,17 +1512,24 @@ class Display:
     @classmethod
     def volume_changed(cls, vol):
         cls.top_bar.volume_changed(vol)
+        # Called from the volume key watcher's thread: show the change now, not
+        # at the next frame of a screen that is waiting for input.
+        from controller.controller import Controller
+        Controller.request_redraw()
 
     @classmethod
     def is_text_too_long(cls, line: str, font_purpose, clip_to_device_width) -> bool:
         try:
             if(Device.get_device().get_guaranteed_safe_max_text_char_count() >= len(line)):
                 return False
-            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
             max_width = Device.get_device().max_texture_width()
             if(clip_to_device_width):
                 max_width = min(max_width, Device.get_device().screen_width())
             max_width = max_width - int(10 * Device.get_device().screen_height()/480)
+            # Text well within the limit by its glyph estimate needs no exact (slower) measurement
+            if(Display.get_text_width_from_glyphs(font_purpose, line) <= max_width * 0.9):
+                return False
+            text_w, text_h = Display.get_text_dimensions(font_purpose, line)
             return text_w > max_width
         except Exception as e:
             PyUiLogger.get_logger().warning(f"Error checking text length: {e}")
@@ -1409,6 +1587,8 @@ class Display:
         Display.present()
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
+        # The message ends here: whatever comes next is drawn at full rate.
+        cls._screen_changed()
 
     @classmethod
     def write_message_multiline(cls,split_message, middle_height):
@@ -1445,3 +1625,5 @@ class Display:
         Display.present()
         # Sleep for the specified duration in milliseconds
         time.sleep(duration_ms / 1000)
+        # The image ends here: whatever comes next is drawn at full rate.
+        cls._screen_changed()

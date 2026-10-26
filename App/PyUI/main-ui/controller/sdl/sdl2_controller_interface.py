@@ -104,6 +104,12 @@ class Sdl2ControllerInterface(ControllerInterface):
     def clear_input(self):
         self.event.type = 0
 
+    def wake(self):
+        # Any event ends SDL_WaitEventTimeout; a user event maps to no input.
+        event = sdl2.SDL_Event()
+        event.type = sdl2.SDL_USEREVENT
+        sdl2.SDL_PushEvent(byref(event))
+
     def cache_last_event(self):
         self.cached_event = self.event
         self.clear_input()

@@ -16,9 +16,9 @@ vibrate() {
     
     for _i in 0 1 2 ; do
         /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/magicx/led.sh on
-        sleep 0.05
+        sleep 0.08
         /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/magicx/led.sh off
-        sleep 0.05
+        sleep 0.08
     done
 }
 
