@@ -188,15 +188,6 @@ case $EMU_NAME in
 		run_port
 		;;
 
-	"PS")
-		if [ "$CORE" = "PCSX-ReARMed-standalone" ]; then
-			. /mnt/SDCARD/spruce/scripts/emu/lib/pcsx_functions.sh
-			run_pcsx_standalone
-		else
-			run_retroarch
-		fi
-		;;
-
 	"PSP")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ppsspp_functions.sh
 		run_ppsspp

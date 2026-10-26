@@ -28,11 +28,10 @@
         "DARKMOSS"
       ],
       "options": [
-        "PCSX-ReARMed-standalone",
         "pcsx_rearmed",
         "swanstation"
       ],
-      "selected": "PCSX-ReARMed-standalone",
+      "selected": "pcsx_rearmed",
       "overrides": {}
     },
     "Emulator_A30": {
@@ -42,8 +41,7 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "km_duckswanstation_xtreme_amped",
-        "PCSX-ReARMed-standalone"
+        "km_duckswanstation_xtreme_amped"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
@@ -73,8 +71,7 @@
       ],
       "options": [
         "pcsx_rearmed",
-        "swanstation",
-        "PCSX-ReARMed-standalone"
+        "swanstation"
       ],
       "selected": "pcsx_rearmed",
       "overrides": {}
