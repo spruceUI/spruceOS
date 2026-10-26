@@ -216,6 +216,22 @@ run_drastic_trngaje_Pixel2() {
 }
 
 
+##### DARKMOSS #####
+
+# The unmodified 64-bit DraStic. It draws through the system SDL, which already
+# turns the picture on the rotated panels (A10 Mini V4, V10, XU Mini M).
+
+run_drastic_RGB30()     { run_drastic64 ; }
+run_drastic_RGB20SX()   { run_drastic64 ; }
+run_drastic_Miniloong() { run_drastic64 ; }
+run_drastic_A10Mini()   { run_drastic64 ; }
+run_drastic_A10MiniV4() { run_drastic64 ; }
+run_drastic_G350()      { run_drastic64 ; }
+run_drastic_V10()       { run_drastic64 ; }
+run_drastic_XUMiniM()   { run_drastic64 ; }
+run_drastic_RG353M()    { run_drastic64 ; }
+
+
 ##### CONFIG HANDLING #####
 
 # Configs are set PER-DEVICE, but are currently shared by all variants of DraStic on that device.
