@@ -10,23 +10,25 @@ else
     exit 1
 fi
 
-# Settings that moved to another category: merge_configs.py matches by path, so
-# move them in the backup or the saved choice resets to the default.
-# move_setting OLD_CATEGORY NEW_CATEGORY KEY
+# Settings that moved to another category or were renamed: merge_configs.py
+# matches by path, so move them in the backup or the saved choice resets.
+# move_setting OLD_CATEGORY NEW_CATEGORY KEY [NEW_KEY]
 move_setting() {
     _old=".menuOptions.\"$1\".\"$3\""
-    _new=".menuOptions.\"$2\".\"$3\""
+    _new=".menuOptions.\"$2\".\"${4:-$3}\""
     for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce/backups/spruce-config.json; do
         [ -f "$_cfg" ] || continue
         [ "$(jq -r "$_old.selected // \"\"" "$_cfg")" != "" ] || continue
         jq "$_new = $_old | del($_old)" "$_cfg" > "$_cfg.tmp" && mv "$_cfg.tmp" "$_cfg"
-        log_message "Moved $3 from $1 to $2 in $_cfg"
+        log_message "Moved $1 $3 to $2 ${4:-$3} in $_cfg"
     done
 }
 
 move_setting "Battery Settings" "System Settings" ledMode
 move_setting "Game Switcher Settings" "Button Settings" menuHoldTime
 move_setting "Game Switcher Settings" "Button Settings" menuShouldVibrate
+move_setting "Emulator Settings" "Button Settings" tapHomeAction tapMenuAction
+move_setting "Emulator Settings" "Button Settings" holdHomeAction holdMenuAction
 
 # Menu hold time lost its 0 and 4 options: keep the nearest choice.
 _hold='.menuOptions."Button Settings".menuHoldTime.selected'
