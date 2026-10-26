@@ -154,7 +154,7 @@ check_for_update() {
     # Try up to 3 times to get a connection
     attempts=0
     while [ $attempts -lt 3 ]; do
-        if ping -c 3 spruceui.github.io >/dev/null 2>&1; then
+        if internet_reachable; then
             break
         fi
         attempts=$((attempts + 1))

@@ -107,7 +107,7 @@ check_for_connection() {
         exit 1
     fi
 
-    if ! ping -c 3 github.com > /dev/null 2>&1; then
+    if ! internet_reachable https://github.com; then
 		display_image_and_text "/mnt/SDCARD/spruce/imgs/notfound.png" 25 25 "Unable to connect to GitHub repository. Please check your connection and try again." 75
 		sleep 5
         exit 1

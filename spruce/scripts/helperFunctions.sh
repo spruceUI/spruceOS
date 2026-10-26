@@ -1045,6 +1045,11 @@ download_url_to_file() {
     fi
 }
 
+# Any HTTP response counts; -k so a wrong clock doesn't read as offline.
+internet_reachable() {
+    curl -sk -o /dev/null -m 5 --connect-timeout 3 "${1:-https://spruceui.github.io}"
+}
+
 get_remote_filesize_bytes() {
     url="$1"
     if command -v curl >/dev/null 2>&1; then
@@ -1890,7 +1895,7 @@ network_is_connected() {
     fi
 
 	if $iface_up; then
-		if ping -c 1 -W 3 1.1.1.1 >/dev/null 2>&1; then
+		if internet_reachable; then
 			return 0 # Success
         fi
 	fi
