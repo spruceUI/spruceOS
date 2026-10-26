@@ -14,7 +14,7 @@
         "Performance",
         "Overclock"
       ],
-      "selected": "Performance",
+      "selected": "Smart",
       "overrides": {}
     },
     "Emulator_A30": {
@@ -23,10 +23,10 @@
         "MIYOO_A30"
       ],
       "options": [
-        "gametank-standalone",
-        "libgametank"
+        "gametank",
+        "gametank-standalone"
       ],
-      "selected": "gametank-standalone",
+      "selected": "gametank",
       "overrides": {}
     },
     "Emulator_64": {
@@ -41,9 +41,10 @@
         "MAGICX_A133P"
       ],
       "options": [
+        "gametank",
         "gametank-standalone"
       ],
-      "selected": "gametank-standalone",
+      "selected": "gametank",
       "overrides": {}
     }
   },
@@ -51,7 +52,7 @@
   "brand": "other",
   "type": "fantasy",
   "releaseYear": 2023,
-  "default_emulator": "libgametank",
+  "default_emulator": "gametank",
   "scaling_min_freq": 1008000,
   "alternativeFolderNames": ["gametank","libgametank","gt"]
 }

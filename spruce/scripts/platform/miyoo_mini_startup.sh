@@ -13,7 +13,7 @@
 export PATH="/mnt/SDCARD/spruce/miyoomini/bin:/mnt/SDCARD/spruce/bin:$PATH"
 export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/miyoomini/lib/:/config/lib/:/customer/lib:/mnt/SDCARD/miyoo/lib"
 
-audioserver &
+# audioserver starts in device_init, once the stock startup sound has let go of the audio device.
 /customer/app/keymon &
 
 touch /mnt/SDCARD/spruce/bin/python/bin/MainUI
@@ -29,8 +29,8 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # On a first boot PyUI has not copied its template to Saves/ yet; read the
     # template it will copy instead of skipping the whole
     # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
-    system_json="/mnt/SDCARD/Saves/mini-flip-system.json"
-    [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/mini-flip-system.json"
+    system_json="/mnt/SDCARD/Saves/miyoo-mini-system.json"
+    [ -f "$system_json" ] || system_json="/mnt/SDCARD/App/PyUI/main-ui/devices/miyoo/mini/miyoo-mini-system.json"
     wifi_enabled="$(jq -r '.wifi // 0' "$system_json" 2>/dev/null)"
     # Only the Mini Plus and Mini Flip have the RTL8188FU radio; the OG Mini and
     # V4 do not, and the template's wifi=1 would otherwise send them through
@@ -39,7 +39,10 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
         sh /mnt/SDCARD/spruce/scripts/wifi.sh apply --wait
-        adbd &
+        # Network ADB is an unauthenticated root shell: developer mode only (flag_check is not loaded yet)
+        if [ -f /mnt/SDCARD/spruce/flags/developer_mode ] || [ -f /mnt/SDCARD/spruce/flags/developer_mode.lock ]; then
+            adbd &
+        fi
     fi
 ) &
 

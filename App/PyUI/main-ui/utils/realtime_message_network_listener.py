@@ -8,7 +8,6 @@ from devices.device import Device
 from display.display import Display
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
-from menus.common.top_bar import TopBar
 from option_select_ui import OptionSelectUI
 from utils.logger import PyUiLogger
 from utils.progress_bar_geometry import progress_bar_geometry
@@ -242,29 +241,16 @@ class RealtimeMessageNetworkListener:
 
             elif cmd == "IMAGE_AND_TEXT":
                 if args:
-                    padding = Display.get_top_bar_height()
                     image_path = args[0]
                     text = args[1]
-                    height_percent = int(args[2])  
-                    usable_height = Display.get_usable_screen_height()
-                    image_height = int(usable_height * (height_percent / 100))
-                    image_y = int(int(args[3])/100 * usable_height) + padding
-                    text_y = int(int(args[4])/100 * usable_height) + padding
-
                     self.logger.info(f"Rendering image: {image_path} with text: {text}")
-
                     Display.clear("")
-                    Display.render_image(
-                        image_path,
-                        Device.get_device().screen_width() // 2,
-                        image_y,
-                        RenderMode.TOP_CENTER_ALIGNED,
-                        Device.get_device().screen_width(),
-                        image_height
-                    )
-                    Display.write_message_multiline_starting_height_specified(
-                        Display.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
-                        text_y
+                    Display.render_image_and_text(
+                        image_path=image_path,
+                        text=text,
+                        height_percent=int(args[2]),
+                        image_y_percent=int(args[3]),
+                        text_y_percent=int(args[4]),
                     )
                     Display.present()
                 else:

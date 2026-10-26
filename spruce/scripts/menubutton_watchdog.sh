@@ -4,6 +4,7 @@
 . /mnt/SDCARD/spruce/scripts/button_actions.sh
 
 log_message "menubutton_watchdog.sh: Started up."
+select_held=false
 
 cancel_menu_hold() {
     # If the menu button is currently held, cancel both tap and hold
@@ -109,7 +110,7 @@ getevent -pid $$ $MENU_BTN_EVENTS | while read line; do
     case $line in
         # Home key down
         *"key $B_MENU 1"*)
-                menu_button_down
+                [ "$select_held" = "false" ] && menu_button_down
             ;;
 
         # Home key up
@@ -121,13 +122,21 @@ getevent -pid $$ $MENU_BTN_EVENTS | while read line; do
             [ -e /tmp/menubtn ] && swap_dpad_analog_toggle
             cancel_menu_hold
             resume_drastic
+            select_held=true
             ;;
 
+        *"key $B_SELECT 0"*)
+            cancel_menu_hold
+            resume_drastic
+            select_held=false
+            ;;
         *"key $B_START 1"*  | \
         *"key $B_R1"*      | \
         *"key $B_R2"*      | \
+        *"key $B_R3"*      | \
         *"key $B_L1"*      | \
         *"key $B_L2"*      | \
+        *"key $B_L3"*      | \
         *"key $B_A 1"*     | \
         *"key $B_B 1"*     | \
         *"key $B_X 1"*     | \

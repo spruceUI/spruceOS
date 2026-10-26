@@ -1,13 +1,12 @@
 
 
-from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.mini.axp_test_methods import AxpTestMehthods
 from devices.miyoo.mini.og_mini_methods import OgMiniMethods
 
 
 class MiyooMiniSpecificModelVariables():
 
-    def __init__(self, width, height, supports_wifi, poweroff_cmd, reboot_cmd, get_charge_status, get_battery_percent, supports_volume):
+    def __init__(self, width, height, supports_wifi, poweroff_cmd, reboot_cmd, get_charge_status, get_battery_percent, supports_volume, uses_keymon_volume=False):
         self.width = width
         self.height = height
         self.supports_wifi = supports_wifi
@@ -16,6 +15,8 @@ class MiyooMiniSpecificModelVariables():
         self.get_charge_status = get_charge_status
         self.get_battery_percent = get_battery_percent
         self.supports_volume = supports_volume
+        # keymon publishes the volume in shared memory (Mini Flip firmware); the rest watch system.json
+        self.uses_keymon_volume = uses_keymon_volume
 
 # --- Constant model presets ---
 
@@ -61,5 +62,6 @@ MIYOO_MINI_FLIP_VARIABLES = MiyooMiniSpecificModelVariables(
     reboot_cmd="reboot",
     get_charge_status=AxpTestMehthods.get_charge_status,
     get_battery_percent=AxpTestMehthods.get_battery_percent,
-    supports_volume=True
+    supports_volume=True,
+    uses_keymon_volume=True
 )

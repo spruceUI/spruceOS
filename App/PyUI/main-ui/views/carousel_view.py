@@ -41,6 +41,7 @@ class CarouselView(View):
         self.selected_entry_width_percent = selected_entry_width_percent
         self.shrink_further_away = shrink_further_away
         self.sides_hang_off_edge = sides_hang_off_edge
+        self.last_animation_time = 0
         if(set_bottom_bar_text_to_selection is None):
             set_bottom_bar_text_to_selection = not self.set_top_bar_text_to_selection
 
@@ -246,8 +247,10 @@ class CarouselView(View):
                                 target_width=target_width,
                                 target_height=target_height,
                                 resize_type=resize_type)
-            
+    
+    
     def _render_horizontal(self):
+        
         self.correct_selected_for_off_list()
         self._clear()
 
@@ -303,11 +306,12 @@ class CarouselView(View):
                 for i, x in enumerate(x_offsets)
             ]
 
-
         if(self.prev_visible_options is not None and self.selected != self.prev_selected):
+            self.last_animation_time = time.perf_counter()
             self.animate_transition_horizontal()
-        else:
-            self.animated_count = 0
+        elif (self.animated_count != 0):
+            if(time.perf_counter() - self.last_animation_time > Device.get_device().get_system_config().get_input_rate_limit_ms()*4 / 1000):
+                self.animated_count = 0
         
         iterable = list(enumerate(visible_options))
 
@@ -394,9 +398,11 @@ class CarouselView(View):
 
 
         if(self.prev_visible_options is not None and self.selected != self.prev_selected):
+            self.last_animation_time = time.perf_counter()
             self.animate_transition_vertical()
-        else:
-            self.animated_count = 0
+        elif (self.animated_count != 0):
+            if(time.perf_counter() - self.last_animation_time > Device.get_device().get_system_config().get_input_rate_limit_ms()*4 / 1000):
+                self.animated_count = 0
         
         iterable = list(enumerate(visible_options))
 
@@ -546,6 +552,7 @@ class CarouselView(View):
     def animate_transition_horizontal(self):
         if(not self.skip_next_animation):
             animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
+            animation_frames = max(animation_frames, 6)
             if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
                 render_mode = self.get_img_render_mode()
                 #frame_duration = 1 / 60.0  # 60 FPS

@@ -1,0 +1,5 @@
+#!/bin/sh
+for t in /usr/bin/timeout /bin/timeout; do
+    [ -x "$t" ] && exec "$t" "$@"
+done
+exec /mnt/SDCARD/spruce/bin64/busybox timeout "$@"

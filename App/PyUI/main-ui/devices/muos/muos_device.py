@@ -8,7 +8,6 @@ from controller.controller_inputs import ControllerInput
 from devices.charge.charge_status import ChargeStatus
 import os
 from devices.device_common import DeviceCommon
-from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from display.display import Display
@@ -17,7 +16,6 @@ from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
 from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
-from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
@@ -31,6 +29,7 @@ class MuosDevice(DeviceCommon):
     def __init__(self):
         self.button_remapper = ButtonRemapper(self.system_config)
         self.muos_systems = self.load_assign_json()
+        self.game_utils = MuosGameSystemUtils(self.muos_systems)
 
     def setup_system_config(self):
         base_dir = os.path.abspath(sys.path[0])
@@ -295,7 +294,7 @@ class MuosDevice(DeviceCommon):
             return 1
         
     def get_game_system_utils(self):
-        return MuosGameSystemUtils(self.muos_systems)
+        return self.game_utils
     
     
     def load_assign_json(self, uppercase_keys: bool = True) -> dict:

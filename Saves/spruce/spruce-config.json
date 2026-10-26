@@ -27,7 +27,7 @@
         "Battery Settings": {
             "ledMode": {
                 "display": "Power indicator LED mode",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_A133P", "RGB30", "RGB20SX"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_A133P", "RGB30", "RGB20SX", "RG353M"],
                 "description": "for non-red status LED",
                 "options": [
                     "Always off",
@@ -48,6 +48,18 @@
                     "20"
                 ],
                 "selected": "4"
+            },
+            "wakeOnLidOpen": {
+                "devices": ["ANBERNIC_RGXX_LID_WAKE"],
+                "display": "Wake on lid open",
+                "description": "uses more battery; timed: first 10/30m only",
+                "options": [
+                    "Off",
+                    "10m",
+                    "30m",
+                    "Always"
+                ],
+                "selected": "Off"
             },
             "shutdownFromSleep": {
                 "display": "Shutdown after sleeping",
@@ -150,12 +162,6 @@
         },
         "System Settings": {
             "checkForUpdates": {
-                "devices":["MIYOO_FLIP",
-                           "MIYOO_MINI_FAMILY",
-                           "TRIMUI_A133P",
-                           "TRIMUI_SMART_PRO_S",
-                           "MIYOO_A30",
-                           "MAGICX_A133P"],
                 "display": "Check for spruce updates on startup",
                 "description": "if connected to Wi-Fi",
                 "options": [
@@ -181,14 +187,23 @@
                 ],
                 "selected": "spruceUI"
             },
+            "randomThemeAtBoot": {
+                "display": "Randomize theme at boot",
+                "description": "just for you Puppycat",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "rumbleIntensity": {
                 "display": "Rumble intensity",
                 "description": "for system notifications",
                 "options": [
-                    "Strong",
-                    "Medium",
+                    "Off",
                     "Weak",
-                    "Off"
+                    "Medium",
+                    "Strong"
                 ],
                 "selected": "Medium"
             },
@@ -225,10 +240,13 @@
             },
             "useZRAM":{
                 "devices": [
+                    "MIYOO_A30",
                     "MIYOO_FLIP",
                     "GKD_PIXEL2",
+                    "MAGICX_A133P",
                     "TRIMUI_A133P",
-                    "TRIMUI_SMART_PRO_S"
+                    "TRIMUI_SMART_PRO_S",
+                    "DARKMOSS"
                 ],
                 "display": "Enable ZRAM",
                 "description": "50% of device RAM; reboot to apply",
@@ -273,20 +291,10 @@
                 ],
                 "selected": "1392"
             },
-            "trimuiOSD": {
-                "devices": ["TRIMUI_SMART_PRO_S", "TRIMUI_A133P"],
-                "display": "Run TrimUI OSD",
-                "description": "Stock TrimUI popups for volume, brightness and the switch. PyUI draws its own.",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False"
-            },
             "customThermals": {
                 "devices": ["TRIMUI_SMART_PRO_S"],
-                "display": "Thermal Control",
-                "description": "Customize fan profiles",
+                "display": "Fan Speed",
+                "description": "cooling fan profiles",
                 "options": [
                     "Off",
                     "Adaptive",
@@ -338,7 +346,7 @@
                 "selected": "Game Switcher"
             },
             "menuButton": {
-                "devices": ["RGB30"],
+                "devices": ["RGB30", "POWKIDDY_V10"],
                 "display": "Menu button",
                 "description": "Which stick click opens the menu",
                 "options": [
@@ -399,6 +407,7 @@
                     "Silent Mode",
                     "WiFi off",
                     { "label": "Joystick Toggle", "devices": ["TRIMUI_BRICK"] },
+                    { "label": "Fan boost", "devices": ["TRIMUI_SMART_PRO_S"] },
                     "Nothing"
                 ],
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",
@@ -482,7 +491,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_A133P", "GKD_PIXEL2"],
+                "devices": ["TRIMUI_A133P", "GKD_PIXEL2", "MAGICX_A133P"],
                 "options": [
                     "Select",
                     "Start",
@@ -512,7 +521,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20", "RG353M"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
@@ -651,8 +660,9 @@
         "LEDs Settings": {
             "LEDsMode": {
                 "display": "LEDs mode",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
                 "devices": ["GKD_PIXEL2"],
-                "description": "reload UI to apply",
+                "description": "applies immediately",
                 "options": [
                     "Off",
                     "Battery",
@@ -1140,7 +1150,7 @@
             },
             "webApiKey": {
                 "display": "Web API Key",
-                "description": "For the Cheevos app: retroachievements.org > Settings > Keys",
+                "description": "For the Cheevos app: retroachievements.org > Settings > Applications",
                 "type": "freeText",
                 "selected": "",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"

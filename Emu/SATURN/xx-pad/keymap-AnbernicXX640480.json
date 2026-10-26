@@ -1,42 +1,42 @@
 {
   "0_ANBERNIC-keys_19000000010000000100000000010000": {
     "a": {
-      "id": 3,
-      "type": "button",
-      "value": 1
-    },
-    "b": {
       "id": 4,
       "type": "button",
       "value": 1
     },
+    "b": {
+      "id": 3,
+      "type": "button",
+      "value": 1
+    },
     "c": {
-      "id": 13,
-      "type": "button",
-      "value": 1
-    },
-    "x": {
-      "id": 6,
-      "type": "button",
-      "value": 1
-    },
-    "y": {
-      "id": 5,
-      "type": "button",
-      "value": 1
-    },
-    "z": {
-      "id": 14,
-      "type": "button",
-      "value": 1
-    },
-    "l": {
       "id": 7,
       "type": "button",
       "value": 1
     },
-    "r": {
+    "x": {
+      "id": 5,
+      "type": "button",
+      "value": 1
+    },
+    "y": {
+      "id": 6,
+      "type": "button",
+      "value": 1
+    },
+    "z": {
       "id": 8,
+      "type": "button",
+      "value": 1
+    },
+    "l": {
+      "id": 13,
+      "type": "button",
+      "value": 1
+    },
+    "r": {
+      "id": 14,
       "type": "button",
       "value": 1
     },

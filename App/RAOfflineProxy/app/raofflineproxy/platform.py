@@ -519,14 +519,22 @@ def _muos_enable_user_init() -> None:
 
 def muos_boot_hook_script(config_data: dict) -> str:
     launcher = autostart_command(config_data)[0]
+    data_dir = Path(launcher).parent / "data"
+    boot_log = data_dir / "boot.log"
     return "\n".join(
         [
             "#!/bin/sh",
             "set -eu",
             "",
-            f'if [ -x "{launcher}" ]; then',
-            f'  exec "{launcher}" boot-reconcile >/dev/null 2>&1 || true',
+            f'mkdir -p "{data_dir}"',
+            'stamp() { date "+%Y-%m-%d %H:%M:%S"; }',
+            f'if [ ! -x "{launcher}" ]; then',
+            f'  echo "$(stamp) launcher missing or not executable: {launcher}" >>"{boot_log}"',
+            "  exit 0",
             "fi",
+            f'echo "$(stamp) boot hook start, uptime $(cut -d" " -f1 /proc/uptime)s" >>"{boot_log}"',
+            f'"{launcher}" boot-reconcile >>"{boot_log}" 2>&1 || echo "$(stamp) boot-reconcile failed ($?)" >>"{boot_log}"',
+            f'echo "$(stamp) boot hook done" >>"{boot_log}"',
             "",
         ]
     )

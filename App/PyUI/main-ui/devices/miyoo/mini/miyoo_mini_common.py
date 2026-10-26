@@ -2,7 +2,6 @@ import ctypes
 import re
 import tempfile
 import time
-from asyncio import sleep
 import json
 from pathlib import Path
 import subprocess
@@ -20,16 +19,13 @@ from devices.miyoo.mini.miyoo_mini_flip_shared_memory_writer import MiyooMiniFli
 from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MiyooMiniSpecificModelVariables
 from devices.miyoo.miyoo_device import MiyooDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
-from devices.miyoo.device_user_config import DeviceUserConfig
 from devices.miyoo_trim_common import MiyooTrimCommon
 from devices.utils.file_watcher import FileWatcher
 from devices.utils.process_runner import ProcessRunner
 from menus.games.utils.rom_info import RomInfo
 from utils import throttle
-from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.py_ui_config import PyUiConfig
-from utils.time_logger import log_timing
 
 MAX_VOLUME = 20
 MIN_RAW_VALUE = -60
@@ -106,17 +102,18 @@ class MiyooMiniCommon(MiyooDevice):
 
         # launch.sh preloads libpadsp for PyUI's own sounds; children must not inherit it.
         os.environ.pop("LD_PRELOAD", None)
+        MiyooMiniCommon._wait_for_mma_cleanup()
         self.device_name = device_name
         self.miyoo_mini_specific_model_variables = miyoo_mini_specific_model_variables
         self.controller_interface = self.build_controller_interface()
 
-        self._load_system_config("/mnt/SDCARD/Saves/mini-flip-system.json", Path(__file__).resolve().parent  / 'mini-flip-system.json')
+        self._load_system_config("/mnt/SDCARD/Saves/miyoo-mini-system.json", Path(__file__).resolve().parent  / 'miyoo-mini-system.json')
         
         if(main_ui_mode):
             self.miyoo_mini_flip_shared_memory_writer = MiyooMiniFlipSharedMemoryWriter()
             self.miyoo_games_file_parser = MiyooGamesFileParser()        
             self.mainui_volume = None
-            self.keymon_volume = self._attach_keymon_volume() if device_name.endswith("MIYOO_MINI_FLIP") else None
+            self.keymon_volume = self._attach_keymon_volume() if miyoo_mini_specific_model_variables.uses_keymon_volume else None
             if self.keymon_volume is not None:
                 threading.Thread(target=self._watch_keymon_volume, daemon=True).start()
             # keymon owns the volume keys and writes /appconfigs/system.json on every
@@ -127,12 +124,45 @@ class MiyooMiniCommon(MiyooDevice):
             # stale until the next unrelated write (Mini Plus/Flip, 2026-09-04).
             # The granularity repeat keeps re-reading the file for two seconds
             # after any change, which catches every same-second write.
-            self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
-                "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2,
-                repeat_trigger_for_mtime_granularity_issues=True)
+            # The Mini Flip reads keymon's shared memory above instead, so it needs no file watcher.
+            if self.keymon_volume is None:
+                self.mainui_config_thread, self.mainui_config_thread_stop_event = FileWatcher().start_file_watcher(
+                    "/appconfigs/system.json", self.on_mainui_config_change, interval=0.2,
+                    repeat_trigger_for_mtime_granularity_issues=True)
             threading.Thread(target=self.startup_init, daemon=True).start()
 
         super().__init__()
+
+    # launch.sh runs freemma in the background and passes its PID here. freemma frees
+    # graphics allocations it does not recognise, so nothing may touch MI or SDL until
+    # it has exited. It normally takes 0.1-2.3 s; past the timeout, startup goes on.
+    MMA_CLEANUP_PID_ENV = "PYUI_MMA_CLEANUP_PID"
+    MMA_CLEANUP_TIMEOUT_S = 15
+
+    @staticmethod
+    def _wait_for_mma_cleanup():
+        """Blocks until launch.sh's freemma has exited; returns at once if there is none."""
+        # Popped so that nothing PyUI starts waits on a stale PID.
+        pid = os.environ.pop(MiyooMiniCommon.MMA_CLEANUP_PID_ENV, "")
+        if not pid.isdigit():
+            return
+        start = time.monotonic()
+        while MiyooMiniCommon._process_is_running(pid):
+            if time.monotonic() - start >= MiyooMiniCommon.MMA_CLEANUP_TIMEOUT_S:
+                PyUiLogger.get_logger().warning(
+                    f"freemma (pid {pid}) still running after {MiyooMiniCommon.MMA_CLEANUP_TIMEOUT_S} s; starting anyway")
+                return
+            time.sleep(0.01)
+        PyUiLogger.get_logger().info(f"Waited {(time.monotonic() - start) * 1000:.0f} ms for freemma")
+
+    @staticmethod
+    def _process_is_running(pid):
+        try:
+            with open(f"/proc/{pid}/stat") as stat:
+                # The state follows the parenthesised name, which may itself contain spaces.
+                return stat.read().rsplit(")", 1)[1].split()[0] != "Z"
+        except (OSError, IndexError):
+            return False
 
 
     # The Flip's keymon keeps the volume (0-20) in its shared memory and never
@@ -168,35 +198,18 @@ class MiyooMiniCommon(MiyooDevice):
             PyUiLogger.get_logger().warning(f"File not found: {path}")
             return
 
+        # keymon leaves stale bytes after the closing brace, so strict JSON fails on
+        # every press; scan for `"vol" : number` instead.
         volume = None
 
         try:
-            # First try normal JSON parsing
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                volume = data.get("vol")
-
+            with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                m = re.search(r'"vol"\s*:\s*(\d+)', f.read())
+            if m:
+                volume = int(m.group(1))
         except Exception as e:
-            # keymon leaves stale bytes after the closing brace, so strict JSON
-            # fails on every press; the regex below is the normal path here.
-            PyUiLogger.get_logger().debug(
-                f"JSON parse failed for {path}, attempting fallback parse: {e}"
-            )
-
-            # Fallback: scan file text for `"vol" : number`
-            try:
-                with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                    for line in f:
-                        # Match: "vol" : 23   (allow spaces)
-                        m = re.search(r'"vol"\s*:\s*(\d+)', line)
-                        if m:
-                            volume = int(m.group(1))
-                            break
-            except Exception as e2:
-                PyUiLogger.get_logger().warning(
-                    f"Fallback parse failed for {path}: {e2}"
-                )
-                return
+            PyUiLogger.get_logger().warning(f"Volume read failed for {path}: {e}")
+            return
 
         if volume is None:
             return
@@ -380,7 +393,7 @@ class MiyooMiniCommon(MiyooDevice):
 
         except Exception:
             try:
-                import subprocess
+                pass
 
                 # Escape key for safety (basic)
                 safe_key = key.replace('"', r'\"')
@@ -898,6 +911,7 @@ class MiyooMiniCommon(MiyooDevice):
             
             PyUiLogger.get_logger().debug(f"About to launch {cmds} from dir {directory}")
             Display.deinit_display()
+            os.sync()
 
             env = os.environ.copy()
             env["LD_PRELOAD"] = preload_path
@@ -966,7 +980,7 @@ class MiyooMiniCommon(MiyooDevice):
         return FfmpegImageUtils()
 
     def get_boxart_small_resize_dimensions(self):
-        return 400,300
+        return 200, 200
 
     def get_boxart_medium_resize_dimensions(self):
         return 400,300
@@ -1020,4 +1034,4 @@ class MiyooMiniCommon(MiyooDevice):
 
 
     def animation_divisor(self):
-        return self.get_system_config().animation_speed(2) 
+        return self.get_system_config().animation_speed(1) 

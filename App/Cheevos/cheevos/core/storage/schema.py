@@ -13,11 +13,13 @@ from cheevos.core.models import (
     AchievementType,
     Award,
     AwardKind,
+    AwardType,
     GameDetail,
     GameProgress,
 )
 
-SCHEMA_VERSION = 2  # 2: awards gained console_id and display_order
+# 2: awards gained console_id and display_order. 3: event and site awards, event tiers.
+SCHEMA_VERSION = 3
 DDL = """
 CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE profile (username TEXT PRIMARY KEY, json TEXT NOT NULL, synced_at INTEGER NOT NULL);
@@ -44,10 +46,20 @@ CREATE TABLE game_stats (
     num_players_hc INTEGER NOT NULL
 );
 CREATE TABLE awards (
-    game_id INTEGER NOT NULL, kind TEXT NOT NULL, title TEXT NOT NULL,
-    console_id INTEGER NOT NULL, console_name TEXT NOT NULL, image_icon TEXT NOT NULL,
-    awarded_at INTEGER, display_order INTEGER NOT NULL,
-    PRIMARY KEY (game_id, kind)
+    position INTEGER NOT NULL, type TEXT NOT NULL, data INTEGER NOT NULL,
+    extra INTEGER NOT NULL, title TEXT NOT NULL, console_name TEXT NOT NULL,
+    image_icon TEXT NOT NULL, awarded_at INTEGER, console_id INTEGER NOT NULL,
+    display_order INTEGER NOT NULL, display_tier INTEGER
+);
+CREATE INDEX awards_by_type ON awards(type, extra);
+CREATE TABLE events (
+    event_id INTEGER PRIMARY KEY, title TEXT NOT NULL, image TEXT NOT NULL, points INTEGER,
+    fetched_at INTEGER NOT NULL
+);
+CREATE TABLE event_tiers (
+    event_id INTEGER NOT NULL REFERENCES events(event_id) ON DELETE CASCADE,
+    tier INTEGER NOT NULL, label TEXT NOT NULL, points INTEGER NOT NULL, image TEXT NOT NULL,
+    PRIMARY KEY (event_id, tier)
 );
 """
 
@@ -79,7 +91,8 @@ ACHIEVEMENT_COLUMNS = (
 )
 # Same order as the model's fields.
 AWARD_COLUMNS = (
-    "game_id, title, console_name, image_icon, kind, awarded_at, console_id, display_order"
+    "type, data, extra, title, console_name, image_icon, awarded_at, console_id, "
+    "display_order, position, display_tier"
 )
 ACTIVITY_ORDER = (
     "MAX(COALESCE(most_recent_awarded_at, 0), COALESCE(last_played_at, 0)) DESC, "
@@ -181,14 +194,17 @@ def award_row(award: Award) -> tuple[object, ...]:
         Values for an insert.
     """
     return (
-        award.game_id,
+        award.type.value,
+        award.data,
+        award.extra,
         award.title,
         award.console_name,
         award.image_icon,
-        award.kind.value,
         award.awarded_at,
         award.console_id,
         award.display_order,
+        award.position,
+        award.display_tier,
     )
 
 
@@ -202,7 +218,23 @@ def award_from_row(row: sqlite3.Row) -> Award:
         The award.
     """
     r = row
-    return Award(r[0], r[1], r[2], r[3], AwardKind(r[4]), r[5], r[6], r[7])
+    return Award(AwardType(r[0]), r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10])
+
+
+def award_filter(kind: AwardKind) -> tuple[str, tuple[object, ...]]:
+    """Return the ``WHERE`` clause selecting one kind of game award.
+
+    Args:
+        kind: The kind.
+
+    Returns:
+        SQL with ``?`` marks, and its parameters.
+    """
+    mastery = kind in (AwardKind.MASTERED, AwardKind.COMPLETED)
+    hardcore = kind in (AwardKind.MASTERED, AwardKind.BEATEN_HARDCORE)
+    kind_type = AwardType.MASTERY if mastery else AwardType.GAME_BEATEN
+    mode = "extra = 1" if hardcore else "extra != 1"  # AwardDataExtra 1 = hardcore
+    return f"WHERE type = ? AND {mode} ", (kind_type.value,)
 
 
 def game_from_detail(detail: GameDetail) -> GameProgress:

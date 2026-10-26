@@ -4,7 +4,6 @@ from menus.games.collections_menu import CollectionsMenu
 from menus.games.favorites_menu import FavoritesMenu
 from menus.games.recents_menu import RecentsMenu
 from menus.games.searched_roms_menu import SearchedRomsMenu
-from menus.settings.basic_settings_menu import BasicSettingsMenu
 from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_creator import ViewCreator
@@ -25,6 +24,8 @@ class MainMenuPopup:
 
     def open_settings(self, input):
         if (ControllerInput.A == input):
+            # Deferred: off the startup path.
+            from menus.settings.basic_settings_menu import BasicSettingsMenu
             BasicSettingsMenu().show_menu()
             
     def open_recents(self, input):

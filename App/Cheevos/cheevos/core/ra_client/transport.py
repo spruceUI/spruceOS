@@ -8,19 +8,18 @@ import logging
 import os
 import ssl
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 from urllib.parse import parse_qsl, urlsplit
 
 from cheevos.core.clock import ServerClock, network_clock
 from cheevos.core.errors import NetworkError
+from cheevos.core.ra_client.common import API_HOST, API_V2_HOST, RA_HOSTS, Response
 from cheevos.core.ra_client.parse import parse_time
 
 logger = logging.getLogger(__name__)
 
-API_HOST = "retroachievements.org"
-MEDIA_HOST = "media.retroachievements.org"
 DEFAULT_TIMEOUT = 15.0
 
 # A kept-alive connection the server closed between requests: reconnect and retry once.
@@ -31,21 +30,6 @@ _DROPPED: tuple[type[BaseException], ...] = (
 )
 # Query parameters that carry credentials; never recorded, never matched on.
 _CREDENTIAL_PARAMS = frozenset({"y", "u"})
-
-
-@dataclass(frozen=True, slots=True)
-class Response:
-    """An HTTP response, fully read.
-
-    Attributes:
-        status: HTTP status code.
-        headers: Response headers with lower-cased names.
-        body: Response body.
-    """
-
-    status: int
-    headers: dict[str, str] = field(default_factory=dict)
-    body: bytes = b""
 
 
 class Transport(Protocol):
@@ -170,7 +154,7 @@ class HttpTransport:
             try:
                 return self._retry_dropped(method, host, path, headers)
             except ssl.SSLError as exc:
-                if host not in (API_HOST, MEDIA_HOST) or host in self._plain_hosts:
+                if host not in RA_HOSTS or host in self._plain_hosts:
                     raise
                 logger.warning("TLS unavailable for %s (%s); using HTTP", host, type(exc).__name__)
                 self._discard(host)
@@ -275,8 +259,9 @@ class FixtureTransport:
     API requests match a recorded response by endpoint and parameters (credentials ignored).
     When nothing matches exactly and the endpoint was recorded only once, that response is
     served: endpoint-wide options such as page sizes then don't need to match the recording.
-    Media paths are served from ``media_dir`` laid out like the media host
-    (``<media_dir>/Badge/123.png``).
+    The v2 API's resources are recorded by path, e.g. ``"v2/events"``. Media paths are served
+    from ``media_dir`` laid out like the media host (``<media_dir>/Badge/123.png``); the static
+    host's art lives under ``<media_dir>/assets/``.
 
     Args:
         fixtures_dir: Directory with ``manifest.json`` and the recorded JSON files.
@@ -308,8 +293,8 @@ class FixtureTransport:
             The recorded response, or a 404 response.
         """
         parts = urlsplit(path)
-        if host != MEDIA_HOST and parts.path.startswith("/API/"):
-            method = parts.path.removeprefix("/API/").removesuffix(".php")
+        if host == API_V2_HOST or (host == API_HOST and parts.path.startswith("/API/")):
+            method = parts.path.removeprefix("/API/").removesuffix(".php").lstrip("/")
             params = {
                 key: value for key, value in parse_qsl(parts.query) if key not in _CREDENTIAL_PARAMS
             }

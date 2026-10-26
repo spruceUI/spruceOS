@@ -10,6 +10,7 @@ from cheevos.core.settings import DescriptionHiding
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui import image_frames
 from cheevos.ui.pyui import primitives as ui
 from cheevos.ui.pyui.primitives import Align, Button, Text
 from cheevos.ui.screens.common import PADDING, fullscreen
@@ -133,7 +134,7 @@ class _Card:
     def header(self) -> None:
         """Draw the badge, the title (up to two lines) and points."""
         achievement = self._achievement
-        ui.image(
+        width, height = ui.image(
             self._ctx.media.badge(
                 achievement, unlocked=achievement.unlocked or self._pending is not None
             ),
@@ -142,9 +143,14 @@ class _Card:
             BADGE_SIZE,
             BADGE_SIZE,
         )
+        if achievement.hardcore:
+            image_frames.draw(
+                image_frames.Frame.GOLD,
+                (PADDING, self._area.y + PADDING, width, height),
+            )
         width = self._area.width - self._x - PADDING
         for line in ui.wrap(achievement.title, Text.TITLE, width)[:2]:
-            ui.text(line, self._x, self._y, Text.TITLE, selected=True)
+            ui.text(line, self._x, self._y, Text.TITLE, accent=True)
             self._y += ui.line_height(Text.TITLE)
         meta = strings.DETAIL_META.format(
             points=fmt.points(achievement.points), retro=fmt.number(achievement.retro_points)

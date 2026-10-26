@@ -1,5 +1,5 @@
 #!/bin/sh
-# dArkMoss update for the RGB30, RGB20SX, Miniloong and A10 Mini, called by firmwareUpdate.sh.
+# dArkMoss update for the RGB30, RGB20SX, Miniloong, A10 Mini (and V4), G350, V10 and XU Mini M, called by firmwareUpdate.sh.
 #
 # Every dArkMoss release ships a dArkMoss_<UNIT>_<tag>.dmupd beside its image:
 # the boot partition plus the rootfs files the dArkMoss build authored, with its
@@ -8,13 +8,12 @@
 # it against the release's SHA256SUMS, runs its applier, and reboots.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
 SD_ROOT="/mnt/SDCARD"
 API="https://api.github.com/repos/spruceUI/dArkMoss/releases/latest"
 MANUAL_HELP="Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device."
-# The image's unit, not $PLATFORM: the RGB20SX runs the RGB30 image.
-UNIT="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-UNIT="$(printf '%s' "${UNIT:-$PLATFORM}" | tr 'a-z' 'A-Z')"
+UNIT="$(darkmoss_unit)"
 
 bail() {
     log_and_display_message "$1"
@@ -25,33 +24,44 @@ bail() {
 INSTALLED="$(darkmoss_installed_version)"
 log_message "darkmossUpdate.sh: installed ${INSTALLED:-unknown}"
 
-log_and_display_message "dArkMoss ${INSTALLED:-(unknown version)} is installed. Checking for a newer one. Press A to continue."
-acknowledge
+# A .dmupd put at the root of the card by hand is installed as it is: there is
+# no release to check it against, and its applier still checks what is inside.
+LOCAL="$(local_fw_update_file)"
+if [ -n "$LOCAL" ]; then
+    ASSET_NAME="$(basename "$LOCAL")"
+    ASSET_SIZE="$(stat -c %s "$LOCAL")"
+    LATEST="$(printf '%s' "$ASSET_NAME" | sed "s/^dArkMoss_${UNIT}_//; s/\\.dmupd$//; s/^[vV]//")"
+    log_message "darkmossUpdate.sh: found $LOCAL"
+else
+    log_and_display_message "dArkMoss ${INSTALLED:-(unknown version)} is installed. Checking for a newer one. Press A to continue."
+    acknowledge
 
-if [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
-    bail "WiFi is off, so the update cannot be downloaded. Please enable WiFi from spruce settings and try again."
-fi
-if ! curl -sf -m 20 -o /tmp/darkmoss_release.json "$API"; then
-    bail "Could not reach GitHub to look for a dArkMoss update. Please try again later."
-fi
+    if [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
+        bail "WiFi is off, so the update cannot be downloaded. Please enable WiFi from spruce settings and try again."
+    fi
+    if ! curl -sf -m 20 -o /tmp/darkmoss_release.json "$API"; then
+        bail "Could not reach GitHub to look for a dArkMoss update. Please try again later."
+    fi
 
-LATEST="$(jq -r '.tag_name // empty' /tmp/darkmoss_release.json | sed 's/^[vV]//')"
-ASSET_NAME="$(jq -r --arg t "dArkMoss_${UNIT}_" '.assets[]? | select(.name | startswith($t) and endswith(".dmupd")) | .name' /tmp/darkmoss_release.json | head -n 1)"
-ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/darkmoss_release.json | head -n 1)"
-ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/darkmoss_release.json | head -n 1)"
-SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_download_url' /tmp/darkmoss_release.json | head -n 1)"
+    LATEST="$(jq -r '.tag_name // empty' /tmp/darkmoss_release.json | sed 's/^[vV]//')"
+    ASSET_NAME="$(jq -r --arg t "dArkMoss_${UNIT}_" '.assets[]? | select(.name | startswith($t) and endswith(".dmupd")) | .name' /tmp/darkmoss_release.json | head -n 1)"
+    ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/darkmoss_release.json | head -n 1)"
+    ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/darkmoss_release.json | head -n 1)"
+    SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_download_url' /tmp/darkmoss_release.json | head -n 1)"
 
-if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
-    bail "dArkMoss ${LATEST:-latest} has no update file for this device ($UNIT), so it has to be installed by hand.\n\n$MANUAL_HELP"
-fi
+    if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
+        bail "dArkMoss ${LATEST:-latest} has no update file for this device ($UNIT), so it has to be installed by hand.\n\n$MANUAL_HELP"
+    fi
 
-if [ -n "$INSTALLED" ]; then
-    _have="$(printf '%s' "$INSTALLED" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
-    _latest="$(printf '%s' "$LATEST" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
-    if [ "$_have" -ge "$_latest" ] 2>/dev/null; then
-        log_and_display_message "Your installed dArkMoss $INSTALLED is already the latest release. Press A to close."
-        acknowledge
-        exit 0
+    if [ -n "$INSTALLED" ]; then
+        _have="$(printf '%s' "$INSTALLED" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+        _latest="$(printf '%s' "$LATEST" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
+        if [ "$_have" -ge "$_latest" ] 2>/dev/null; then
+            hide_fw_app
+            log_and_display_message "Your installed dArkMoss $INSTALLED is already the latest release. Press A to close."
+            acknowledge
+            exit 0
+        fi
     fi
 fi
 
@@ -71,32 +81,39 @@ if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status
     bail "Please charge your device to at least 15%, or plug it in, then try again."
 fi
 
-log_and_display_message "dArkMoss $LATEST is available (you have ${INSTALLED:-an unknown version}).\n\nPress A to download and install it now, or B to cancel."
-confirm || { log_message "darkmossUpdate.sh: user cancelled"; exit 0; }
-
-if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then
-    rm -f "$SD_ROOT/$ASSET_NAME"
-    bail "The dArkMoss update could not be downloaded. Please try again later."
-fi
-
-# The applier checks the archives inside against the manifest, but the manifest
-# itself is only trusted because the whole file matches the release's sums.
-if [ -n "$SUMS_URL" ] && curl -sf -m 20 -o /tmp/darkmoss_sums "$SUMS_URL"; then
-    WANT="$(awk -v n="$ASSET_NAME" '$2 == n || $2 == "*"n {print $1}' /tmp/darkmoss_sums | head -n 1)"
-    GOT="$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)"
-    if [ -n "$WANT" ] && [ "$WANT" != "$GOT" ]; then
-        rm -f "$SD_ROOT/$ASSET_NAME"
-        bail "The downloaded dArkMoss update was damaged in transit and has been deleted. Please try again."
-    fi
-    log_message "darkmossUpdate.sh: checksum ok for $ASSET_NAME"
+if [ -n "$LOCAL" ]; then
+    log_and_display_message "$ASSET_NAME is on the card (you have dArkMoss ${INSTALLED:-an unknown version}).\n\nPress A to install it now, or B to cancel."
+    confirm || { log_message "darkmossUpdate.sh: user cancelled"; exit 0; }
 else
-    log_message "darkmossUpdate.sh: WARNING could not fetch SHA256SUMS, skipping the checksum check"
+    log_and_display_message "dArkMoss $LATEST is available (you have ${INSTALLED:-an unknown version}).\n\nPress A to download and install it now, or B to cancel."
+    confirm || { log_message "darkmossUpdate.sh: user cancelled"; exit 0; }
+
+    if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then
+        rm -f "$SD_ROOT/$ASSET_NAME"
+        bail "The dArkMoss update could not be downloaded. Please try again later."
+    fi
+
+    # The applier checks the archives inside against the manifest, but the manifest
+    # itself is only trusted because the whole file matches the release's sums.
+    # download_url_to_file follows GitHub's redirect for release files (a bare curl -sf saved them empty).
+    if [ -n "$SUMS_URL" ] && download_url_to_file "$SUMS_URL" /tmp/darkmoss_sums; then
+        WANT="$(awk -v n="$ASSET_NAME" '$2 == n || $2 == "*"n {print $1}' /tmp/darkmoss_sums | head -n 1)"
+        GOT="$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)"
+        if [ -n "$WANT" ] && [ "$WANT" != "$GOT" ]; then
+            rm -f "$SD_ROOT/$ASSET_NAME"
+            bail "The downloaded dArkMoss update was damaged in transit and has been deleted. Please try again."
+        fi
+        if [ -n "$WANT" ]; then log_message "darkmossUpdate.sh: checksum ok for $ASSET_NAME"
+        else log_message "darkmossUpdate.sh: WARNING no SHA256SUMS entry for $ASSET_NAME, skipping the checksum check"; fi
+    else
+        log_message "darkmossUpdate.sh: WARNING could not fetch SHA256SUMS, skipping the checksum check"
+    fi
 fi
 
 APPLY_DIR="$(mktemp -d /var/tmp/dmupd-apply.XXXXXX)"
 if ! tar -xf "$SD_ROOT/$ASSET_NAME" -C "$APPLY_DIR" apply.sh 2>/dev/null; then
     rm -rf "$APPLY_DIR" "$SD_ROOT/$ASSET_NAME"
-    bail "The downloaded file is not a dArkMoss update and has been deleted.\n\n$MANUAL_HELP"
+    bail "$ASSET_NAME is not a dArkMoss update and has been deleted.\n\n$MANUAL_HELP"
 fi
 
 log_and_display_message "Installing dArkMoss $LATEST. This takes a minute or two. Do not power off the device."

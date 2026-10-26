@@ -37,6 +37,8 @@ USB_EXPORT="${SPRUCE_USB_EXPORT:-0}"
 USB_SESSION_DIR="${USB_SESSION_DIR:-/tmp/usbstorage}"
 SYSRQ_CTL="${SPRUCE_SYSRQ_CTL:-/proc/sys/kernel/sysrq}"
 SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
+MOUNTINFO="${SPRUCE_MOUNTINFO:-/proc/self/mountinfo}"
+SYS_BLOCK="${SPRUCE_SYS_BLOCK:-/sys/block}"
 
 # ...and stdin/stdout/stderr, which that loop deliberately skips. They are
 # inherited too, and whatever launched the shutdown decides where they point -
@@ -108,26 +110,146 @@ resolve_sd_mountpoint() {
 # the cost is irrelevant and the answer is the whole point: without it a
 # "clean umount FAILED" line names nothing (SPR-MED-199).
 stage2_dump_holders() {
+    _re="$(stage2_card_maps_re)"
     echo "stage2: holders of $SD_MOUNTPOINT after the sweep:"
     awk -v mp="$SD_MOUNTPOINT" '$2 ~ "^"mp"(/|$)" {print "  mount " $1 " on " $2}' /proc/mounts 2>/dev/null
+    echo "  dependent mount ids: ${STAGE2_DEP_IDS:-none}"
+    _ids="$(echo $STAGE2_DEP_IDS | tr ' ' '|')"
     for _pp in /proc/[0-9]*; do
         _pid="${_pp#/proc/}"
-        [ "$_pid" = "$$" ] && continue
         _why=""
-        for _link in cwd exe; do
+        [ "$_pid" = "$$" ] && _why=" (stage2 itself)"
+        for _link in cwd exe root; do
             _t=$(readlink "$_pp/$_link" 2>/dev/null) || continue
-            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
+            case "$_t" in "$SD_MOUNTPOINT" | "$SD_MOUNTPOINT"/*) _why="$_why $_link=$_t" ;; esac
         done
         for _fd in "$_pp"/fd/*; do
             _t=$(readlink "$_fd" 2>/dev/null) || continue
-            case "$_t" in "$SD_MOUNTPOINT"/*) _why="$_why fd=$_t"; break ;; esac
+            case "$_t" in "$SD_MOUNTPOINT" | "$SD_MOUNTPOINT"/*) _why="$_why fd=$_t"; break ;; esac
         done
         _m=$(grep -m1 " $SD_MOUNTPOINT/" "$_pp/maps" 2>/dev/null | awk '{print $NF}')
         [ -n "$_m" ] && _why="$_why map=$_m"
-        [ -n "$_why" ] && echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why"
+        if [ -n "$_re" ]; then
+            _m=$(grep -m1 -E " ($_re) " "$_pp/maps" 2>/dev/null | awk '{print $4 "=" $NF}')
+            [ -n "$_m" ] && _why="$_why dev-map=$_m"
+        fi
+        if [ -n "$_ids" ]; then
+            _m=$(grep -l -E "^mnt_id:[[:space:]]+($_ids)\$" "$_pp"/fdinfo/* 2>/dev/null | head -1)
+            [ -n "$_m" ] && _why="$_why dep-mnt-fd=$(readlink "$_pp/fd/${_m##*/}" 2>/dev/null)"
+        fi
+        case "$_why" in "" | " (stage2 itself)") ;; *)
+            echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why" ;;
+        esac
+        # A killed process stuck exiting (in a driver, say) can hold the card with no readable links.
+        readlink "$_pp/exe" >/dev/null 2>&1 || continue
+        case "$(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)" in D|Z|X)
+            echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) exiting/blocked, wchan $(cat "$_pp/wchan" 2>/dev/null)" ;;
+        esac
     done
     awk -v mp="$SD_MOUNTPOINT" '$NF ~ "^"mp"/" {print "  unix-socket " $NF}' /proc/net/unix 2>/dev/null
+    awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print "  swap " $1}' /proc/swaps 2>/dev/null
+    stage2_card_loops | while read -r _l _d; do
+        echo "  loop /dev/$_l ($_d) <- $(cat "$SYS_BLOCK/$_l/loop/backing_file" 2>/dev/null)"
+    done
+    stage2_dependent_mounts | sed 's/^/  dependent mount /'
+    # What is still alive at all: a holder through a detached mount (an overlay
+    # whose upper sits on a card loop) shows no card path anywhere.
+    for _pp in /proc/[0-9]*; do
+        _e=$(readlink "$_pp/exe" 2>/dev/null) || continue
+        echo "  proc ${_pp#/proc/} ppid $(awk '/^PPid/{print $2}' "$_pp/status" 2>/dev/null) $(cat "$_pp/comm" 2>/dev/null) exe=$_e cwd=$(readlink "$_pp/cwd" 2>/dev/null)"
+    done
     echo "stage2: end of holders"
+}
+
+# True when a path resolves onto the card's device (stock Flip: /data -> userdata,
+# which spruce binds from the card). Longest mount prefix wins; the last of equals is on top.
+stage2_on_card() {
+    _p=$(readlink -f "$1" 2>/dev/null) || return 1
+    awk -v p="$_p/" -v mp="$SD_MOUNTPOINT" '
+        $2 == mp { card = $1 }
+        { m = ($2 == "/") ? "/" : $2 "/"; if (index(p, m) == 1 && length(m) >= best) { best = length(m); src = $1 } }
+        END { exit !(card != "" && src == card) }' /proc/mounts
+}
+
+# Mirror a line into the kernel log: stock Flips keep it across a warm reboot
+# (console-ramoops). <2> so it reaches the console past device_init's printk level 3.
+stage2_kmsg() {
+    echo "<2>spruce stage2: $*" > /dev/kmsg 2>/dev/null
+}
+
+# Wait $1 seconds by the uptime clock. A child exiting ends the busybox shell's own sleep at once:
+# after a USB session that cut init's 10 s grace to 0.4 s, and reboot -f preempted BaseOS's rcK.
+stage2_wait() {
+    _w_end=$(( $(stage2_uptime_cs) + $1 * 100 ))
+    while [ "$(stage2_uptime_cs)" -lt "$_w_end" ]; do
+        sleep 1
+    done
+}
+
+# Uptime in hundredths of a second ("1" + the decimals - 100: no octal from a leading zero).
+stage2_uptime_cs() {
+    read -r _w_up _w_rest < /proc/uptime
+    echo $(( ${_w_up%.*} * 100 + 1${_w_up#*.} - 100 ))
+}
+
+# Loop devices backed by files on the card, one "loopN major:minor" per line.
+stage2_card_loops() {
+    for _bf in "$SYS_BLOCK"/loop*/loop/backing_file; do
+        [ -e "$_bf" ] || continue
+        read -r _f < "$_bf" 2>/dev/null || continue
+        case "$_f" in "$SD_MOUNTPOINT"/*) ;; *) continue ;; esac
+        _l="${_bf#"$SYS_BLOCK"/}"
+        _l="${_l%%/*}"
+        echo "$_l $(cat "$SYS_BLOCK/$_l/dev" 2>/dev/null)"
+    done
+}
+
+# The card's device and its loops' devices as maps prints them (hex major:minor),
+# joined for grep -E. Finds files mapped through binds, e.g. the glibc on /usr/lib.
+stage2_card_maps_re() {
+    {
+        awk -v mp="$SD_MOUNTPOINT" '$5 == mp {print $3; exit}' "$MOUNTINFO" 2>/dev/null
+        stage2_card_loops | awk '{print $2}'
+    } | awk -F: 'NF == 2 {printf "%s%02x:%02x", (n++ ? "|" : ""), $1, $2}'
+}
+
+# Mount points that keep the card busy, newest first: mounts inside it, other
+# mounts of its device, loop filesystems backed by its files, overlays using it,
+# and everything mounted on top of those (by parent id, so same-path binds elsewhere stay).
+stage2_dependent_mounts() {
+    _loops=" $(stage2_card_loops | awk '{printf "/dev/%s ", $1}')"
+    awk -v mp="$SD_MOUNTPOINT" -v dev="$SD_DEV" -v loops="$_loops" -v what="$1" '
+        {
+            id[NR] = $1; par[NR] = $2; mnt[NR] = $5
+            for (i = 7; i <= NF; i++) if ($i == "-") break
+            fs = $(i + 1); src = $(i + 2); so = $(i + 3)
+            if ($5 == mp) { card = $1; next }
+            if (index($5, mp "/") == 1 || (dev != "" && src == dev) || index(loops, " " src " ") ||
+                (fs == "overlay" && (index(so, mp "/") || index(so, "/mnt/sdcard/") || index(so, "/mnt/SDCARD/"))))
+                dep[$1] = 1
+        }
+        END {
+            more = 1
+            while (more) {
+                more = 0
+                for (n = 1; n <= NR; n++)
+                    if (!(id[n] in dep) && (par[n] in dep)) { dep[id[n]] = 1; more = 1 }
+            }
+            for (n = NR; n > 0; n--) if (id[n] in dep) print (what == "ids" ? id[n] : mnt[n])
+            if (what == "ids" && card != "") print card
+        }' "$MOUNTINFO" 2>/dev/null
+}
+
+# Pids whose exe or cwd was reached through a mount in $STAGE2_DEP_IDS: opened here, the link carries
+# that mount and our own fdinfo names it. Builtins only; a failed open just skips, quietly: 2>/dev/null comes first.
+stage2_link_mnt_pids() {
+    for _pp in /proc/[0-9]*; do
+        for _link in exe cwd; do
+            _mid=""
+            { while read -r _k _v; do [ "$_k" = "mnt_id:" ] && { _mid=$_v; break; }; done < /proc/self/fdinfo/9; } 2>/dev/null 9< "$_pp/$_link"
+            [ -n "$_mid" ] && case " $STAGE2_DEP_IDS " in *" $_mid "*) echo "${_pp#/proc/}"; break ;; esac
+        done
+    done
 }
 
 if [ "$STRICT_UNMOUNT" = "1" ]; then
@@ -146,6 +268,29 @@ else
     esac
 fi
 
+# Inherited fds on the card would make this process its own holder. The loop at the
+# top skips 10 and up because the shell reads this script through one of those.
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    for _fd in /proc/$$/fd/*; do
+        _n="${_fd##*/}"
+        [ "$_n" -gt 2 ] 2>/dev/null || continue
+        case "$(readlink "$_fd" 2>/dev/null)" in "$SD_MOUNTPOINT"/*) eval "exec ${_n}>&-" 2>/dev/null ;; esac
+    done
+fi
+
+# This process must not pin what it tears down: a dynamic shell maps the libc bound
+# from a card loop, and on the BaseOS Flip even a static one runs out of the /usr
+# overlay whose upper is a card loop. Re-run under a static copy in /tmp.
+# Named busybox: it takes its applet from argv[1] only under that name.
+STAGE2_BUSYBOX=/tmp/save_poweroff_stage2/busybox
+if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
+    if mkdir -p "${STAGE2_BUSYBOX%/*}" && cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
+        chmod +x "$STAGE2_BUSYBOX" && "$STAGE2_BUSYBOX" true 2>/dev/null; then
+        export STAGE2_STATIC_SHELL="$STAGE2_BUSYBOX"
+        exec "$STAGE2_BUSYBOX" sh "$0" "$@"
+    fi
+fi
+
 # Now that the card's mount point is known, reopen stdout/stderr on a log
 # file that is NOT on the card - chosen here rather than above precisely so it
 # can be checked against the mount point. On every path, strict or not: a
@@ -158,6 +303,7 @@ STAGE2_LOG=/tmp/save_poweroff_stage2.log
 for _d in /data /mnt/data /mnt/UDISK; do
     case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
     [ -d "$_d" ] || continue
+    stage2_on_card "$_d" && continue
     if touch "$_d/.spruce_shutdown_write_test" 2>/dev/null; then
         rm -f "$_d/.spruce_shutdown_write_test"
         STAGE2_LOG="$_d/spruce_shutdown.log"
@@ -171,6 +317,10 @@ exec >"$STAGE2_LOG" 2>&1
 echo "=== save_poweroff stage 2, uptime $(cut -d" " -f1 /proc/uptime 2>/dev/null)s, arg=${1:-none} strict=$STRICT_UNMOUNT ==="
 echo "stage2: logging to $STAGE2_LOG"
 echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
+if [ -n "$STAGE2_STATIC_SHELL" ]; then
+    echo "stage2: re-run under $STAGE2_STATIC_SHELL"
+    stage2_kmsg "re-run under $STAGE2_STATIC_SHELL, log $STAGE2_LOG"
+fi
 # Anything that pins the filesystem has to go, or the umount below silently
 # degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
 # /proc/mounts looks clean, but the superblock lives on until the last reference
@@ -189,9 +339,14 @@ echo "stage2: SD_MOUNTPOINT=$SD_MOUNTPOINT"
 # holder left after the sweep was an orphaned getevent with no card fd).
 stage2_kill_holders() {
     if [ "$STRICT_UNMOUNT" = "1" ]; then
+        # Logged even when the umount then succeeds: which processes held the card.
+        _swept=""
         for pid in $(stage2_holder_pids); do
+            _comm=""; { read -r _comm < "/proc/$pid/comm"; } 2>/dev/null
+            _swept="$_swept $pid:$_comm"
             kill -9 "$pid" 2>/dev/null
         done
+        [ -n "$_swept" ] && echo "stage2: swept holders:$_swept"
         return
     fi
 
@@ -218,20 +373,31 @@ stage2_kill_holders() {
 # took ~5 s a pass on the Smart Pro S, and it runs at least twice.
 stage2_holder_pids() {
     {
-        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" '
+        ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/root /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" -v root="$SD_MOUNTPOINT" '
             /^\/proc\/[0-9]+\/fd\/?:$/ { split($0, a, "/"); cur = a[3]; next }
             / -> / {
                 t = $0; sub(/.* -> /, "", t)
-                if (index(t, mp) != 1) next
-                if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe) -> /) {
+                if (index(t, mp) != 1 && t != root) next
+                if ($0 ~ / \/proc\/[0-9]+\/(cwd|exe|root) -> /) {
                     p = $0; sub(/.* \/proc\//, "", p); sub(/\/.*/, "", p); print p
                 } else {
                     print cur
                 }
             }'
         grep -l " $SD_MOUNTPOINT/" /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
+        _re="$(stage2_card_maps_re)"
+        [ -n "$_re" ] && grep -l -E " ($_re) " /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
+        # Through a mount that depends on the card (spruce's /usr overlay): no card path, only its mnt_id.
+        if [ -n "$STAGE2_DEP_IDS" ]; then
+            grep -l -E "^mnt_id:[[:space:]]+($(echo $STAGE2_DEP_IDS | tr ' ' '|'))\$" /proc/[0-9]*/fdinfo/* 2>/dev/null | awk -F/ '{print $3}'
+            stage2_link_mnt_pids
+        fi
     } | sort -un | awk -v self="$$" '$1 > 1 && $1 != self'
 }
+
+# Mount ids of what depends on the card: stage 1's (taken before its unmount_all lazily detached the busy ones,
+# which left mountinfo) and what is still mounted. A holder through spruce's /usr overlay has only that id.
+[ "$STRICT_UNMOUNT" = "1" ] && STAGE2_DEP_IDS="$SPRUCE_CARD_MNT_IDS $(stage2_dependent_mounts ids | tr '\n' ' ')"
 
 stage2_kill_holders
 
@@ -242,6 +408,31 @@ sync
 # Discover the SD card's block device from its mount entry
 SD_DEV=$(awk -v mp="$SD_MOUNTPOINT" '$2 == mp {print $1; exit}' /proc/mounts)
 
+# A swap file on the SD card holds it open for writing until swapoff.
+awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print $1}' /proc/swaps | \
+    while read -r swap; do
+    swapoff "$swap" 2>/dev/null
+done
+
+# Strict: tear down by mountinfo parentage, newest first, so stacked mounts go
+# before their parents; whatever stays busy is detached lazily. Measured on a
+# BaseOS Flip (2026-10-17): the steps below left the 32-bit chroot, muOS and ext4 loops.
+if [ "$STRICT_UNMOUNT" = "1" ]; then
+    for _pass in 1 2 3; do
+        stage2_dependent_mounts | while read -r mnt; do umount "$mnt" 2>/dev/null; done
+        [ -z "$(stage2_dependent_mounts)" ] && break
+        stage2_kill_holders
+        sleep 0.2
+    done
+    _left="$(stage2_dependent_mounts)"
+    if [ -n "$_left" ]; then
+        echo "stage2: lazily detaching $(echo "$_left" | wc -l) dependent mounts"
+        echo "$_left" | while read -r mnt; do umount -l "$mnt" 2>/dev/null; done
+    fi
+    # A detached loop still holds its backing file on the card: release it, or
+    # (while still in use) let the kernel clear it on last close.
+    stage2_card_loops | while read -r _l _d; do losetup -d "/dev/$_l" 2>/dev/null; done
+else
 # Tear down all mounts that depend on the SD card.
 # On the Flip, this includes:
 #   - ~25 squashfs loop mounts from /mnt/sdcard/spruce/flip/*.sqsh → /usr/lib/*
@@ -266,6 +457,7 @@ if [ -n "$SD_DEV" ]; then
         umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
     done
 fi
+fi
 # 4. Now remount the SD card read-only (clears the filesystem dirty flag)
 #    and perform the final unmount.
 mount -o remount,ro "$SD_MOUNTPOINT" 2>/dev/null
@@ -287,7 +479,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     umount_tries=0
     umount_ok=0
     while [ "$umount_tries" -lt 10 ]; do
-        if umount "$SD_MOUNTPOINT" 2>/dev/null; then
+        if umount_err=$(umount "$SD_MOUNTPOINT" 2>&1); then
             umount_ok=1
             break
         fi
@@ -298,9 +490,12 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
 
     if [ "$umount_ok" -eq 1 ]; then
         echo "stage2: unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
+        stage2_kmsg "unmounted $SD_MOUNTPOINT cleanly after $umount_tries retries"
     else
         echo "stage2: clean umount FAILED after $umount_tries tries, falling back to lazy - filesystem will be left dirty"
-        stage2_dump_holders
+        echo "stage2: last umount error: ${umount_err:-none}"
+        stage2_kmsg "clean umount FAILED after $umount_tries tries: ${umount_err:-none}"
+        stage2_dump_holders | while read -r _l; do echo "$_l"; stage2_kmsg "$_l"; done
         umount -l "$SD_MOUNTPOINT"
     fi
 else
@@ -380,17 +575,17 @@ if [ "$FORCE_POWER_TRANSITION" = "1" ]; then
     if [ "$WANT_REBOOT" -eq 1 ]; then
         echo "stage2: forced reboot (init does not service power commands on this device)"
         reboot -f
-        sleep 3
+        stage2_wait 3
         echo "stage2: reboot -f did not take, trying sysrq"
         echo b > "$SYSRQ_TRIGGER" 2>/dev/null
     else
         echo "stage2: forced poweroff (init does not service power commands on this device)"
         poweroff -f
-        sleep 3
+        stage2_wait 3
         echo "stage2: poweroff -f did not take, trying sysrq"
         echo o > "$SYSRQ_TRIGGER" 2>/dev/null
     fi
-    sleep 5
+    stage2_wait 5
 elif [ "$STRICT_UNMOUNT" != "1" ]; then
     # The original: issue the command and let init take it from there. Every
     # device on this branch has been powering off this way for years, and the
@@ -411,23 +606,25 @@ echo 1 > "$SYSRQ_CTL" 2>/dev/null
 if [ "$WANT_REBOOT" -eq 1 ]; then
     echo "stage2: rebooting"
     reboot
-    sleep 10
+    stage2_wait 10
     echo "stage2: reboot did not take after 10s, forcing"
+    stage2_kmsg "reboot did not take after 10s, forcing"
     reboot -f
-    sleep 5
+    stage2_wait 5
     echo "stage2: reboot -f did not take, trying sysrq"
     echo b > "$SYSRQ_TRIGGER" 2>/dev/null
-    sleep 5
+    stage2_wait 5
 else
     echo "stage2: powering off"
     poweroff
-    sleep 10
+    stage2_wait 10
     echo "stage2: poweroff did not take after 10s, forcing"
+    stage2_kmsg "poweroff did not take after 10s, forcing"
     poweroff -f
-    sleep 5
+    stage2_wait 5
     echo "stage2: poweroff -f did not take, trying sysrq"
     echo o > "$SYSRQ_TRIGGER" 2>/dev/null
-    sleep 5
+    stage2_wait 5
 fi
 fi
 

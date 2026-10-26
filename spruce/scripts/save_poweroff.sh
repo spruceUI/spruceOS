@@ -17,6 +17,7 @@ mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN"
 
 STAGE_2_SD_PATH=/mnt/SDCARD/spruce/scripts/save_poweroff_stage2.sh
 STAGE_2_TMP_PATH=/tmp/save_poweroff_stage2.sh
+PYUI_FAREWELL=0 # 1 once the PyUI menu was asked for its farewell frame
 
 # --reboot        reboot instead of powering off
 # --usb-storage   the USB Storage Mode app is handing over: no emulator, no
@@ -39,6 +40,21 @@ for arg in "$@"; do
 done
 
 ##### FUNCTION DEFINITIONS ####################
+
+# On a power-off from the menu, ask it for its farewell frame and carry on
+# without waiting (App/PyUI/docs/shutdown_readme.txt). Reboot, USB Storage Mode
+# and the forced low-battery shutdown keep their own screens. SIGURG is ignored
+# by default, so other PyUI processes don't notice.
+request_pyui_farewell() {
+    usb_storage_exit && return 0
+    [ "$s2_arg" = "--reboot" ] && return 0
+    flag_check "forced_shutdown" && return 0
+    flag_check "in_menu" || return 0
+    if pkill -URG -f '/App/PyUI/main-ui/[m]ainui[.]py'; then
+        PYUI_FAREWELL=1
+        log_message "save_poweroff.sh: asked the PyUI menu for its farewell frame"
+    fi
+}
 
 blink_led_if_applicable() {
     [ "$LED_PATH" != "not applicable" ] && echo heartbeat > "$LED_PATH"/trigger 2>/dev/null
@@ -81,10 +97,9 @@ kill_current_process() {
     done
 }
 
-unmount_all() {
-    sync
-    log_message "save_poweroff.sh: Scanning for SD card related mounts..."
-    MOUNTS=$(awk '
+# The SD card related mounts in /proc/self/mountinfo: their mount points, or with "ids" their mount ids.
+sd_related_mounts() {
+    awk -v what="$1" '
         {
             target = $5
             split($0, parts, " - ")
@@ -99,10 +114,16 @@ unmount_all() {
                 device ~ "^'"$SD_MOUNTPOINT"'/" ||
                 device ~ "^/mnt/SDCARD/" ||
                 ($0 ~ "/mnt/SDCARD" && device == "overlay")) {
-                print target
+                print (what == "ids" ? $1 : target)
             }
         }
-    ' /proc/self/mountinfo)
+    ' /proc/self/mountinfo
+}
+
+unmount_all() {
+    sync
+    log_message "save_poweroff.sh: Scanning for SD card related mounts..."
+    MOUNTS=$(sd_related_mounts)
 
     # Unmount deepest paths first, but skip the main SD mount (stage2 handles that)
     echo "$MOUNTS" | sort -r | while read -r TARGET; do
@@ -216,8 +237,11 @@ stop_problematic_scripts() {
     killall -q -15 runtime.sh
     killall -q -15 principal.sh
 
-    # Ensure PyUI message writer can run
-    killall -q -9 MainUI
+    # Ensure PyUI message writer can run. A menu showing its farewell frame
+    # stays until kill_remaining_background_processes.
+    if [ "$PYUI_FAREWELL" != 1 ]; then
+        killall -q -9 MainUI
+    fi
     sleep 0.5
 
     # kill lid watchdog so that closing the lid doesn't interrupt the save/shutdown procedure
@@ -282,8 +306,15 @@ dim_screen_and_do_syncthing_check() {
 }
 
 kill_remaining_background_processes() {
-    # Stop the PyUI message writer — it has file handles open on the SD card
-    stop_pyui_message_writer
+    if [ "$PYUI_FAREWELL" = 1 ]; then
+        # Not stop_pyui_message_writer: its freemma (where a device has it)
+        # clears the farewell frame and stalls for 2 s while the menu is alive.
+        kill_pyui_message_writer
+        killall -q -9 MainUI
+    else
+        # Stop the PyUI message writer — it has file handles open on the SD card
+        stop_pyui_message_writer
+    fi
 
     # Kill dim_screen if it's still running (writes to sysfs, but inherits SD fds)
     if [ -n "$DIM_SCREEN_PID" ]; then
@@ -431,6 +462,9 @@ fi
 echo $$ > "$PIDFILE"
 trap '[ "$(cat "$PIDFILE" 2>/dev/null)" = "$$" ] && rm -rf "$LOCKDIR"' EXIT INT TERM
 
+# First, so the screen answers the power button as soon as it can.
+request_pyui_farewell
+
 
 
                   ########
@@ -466,7 +500,7 @@ stage_shutdown_stage_2
 
 [ "$USB_STORAGE_EXPORT" = 1 ] || blink_led_if_applicable
 /mnt/SDCARD/spruce/scripts/bluetooth.sh suspend
-device_prepare_for_poweroff
+device_prepare_for_poweroff "$s2_arg"   # "--reboot" when this ends in a reboot
 log_message "save_poweroff.sh: device prepared, closing apps"
 log_activity_event "$(get_current_app)" "STOP"
 stop_problematic_scripts
@@ -527,6 +561,10 @@ if [ "$USB_STORAGE_EXPORT" != "1" ] && device_system_handles_sdcard_unmount; the
     exit 0
 fi
 
+# Their mount ids, for stage 2: unmount_all detaches a busy one lazily, which drops it from mountinfo, and a
+# holder through it (spruce's /usr overlay) is then found only by this id (flip-91 B2, 2026-10-18).
+SPRUCE_CARD_MNT_IDS="$(sd_related_mounts ids | tr '\n' ' ')"
+export SPRUCE_CARD_MNT_IDS
 unmount_all
 sleep 0.1
 unmount_all

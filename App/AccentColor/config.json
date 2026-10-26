@@ -1,0 +1,7 @@
+{
+  "label": "Accent Color",
+  "icon": "accentcolor.png",
+  "launch": "launch.sh",
+  "description": "Recolor your theme's accent to any color",
+  "hideInSimpleMode": true
+}

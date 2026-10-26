@@ -12,7 +12,7 @@ import subprocess
 class SprigMiyooMiniCommon(MiyooMiniCommon):
     def __init__(self, device_name, main_ui_mode, miyoo_mini_specific_model_variables: MiyooMiniSpecificModelVariables):
         super().__init__(device_name, main_ui_mode, miyoo_mini_specific_model_variables)
-        self.sprig_config_path = "/mnt/SDCARD/Saves/mini-flip-system.json"
+        self.sprig_config_path = "/mnt/SDCARD/Saves/miyoo-mini-system.json"
         self.last_volume = None
         self.last_backlight = None
         if(main_ui_mode):

@@ -9,19 +9,26 @@
 
 --- Sun -----------------------------------------------------------------------
 
+- analog <-> dpad swap for V10
 - Mini splore update from tenlevels
+- Miyoo Mini: every model shares Saves/miyoo-mini-system.json. Can be broken out into separate per-device jsons later if needed.
 - PCSX Standalone on Miyoo Mini - we ship this and have scripting for it, but it doesn't work. Mini Flip - segfaults. Mini Plus - borks the screen.
 - RA spruce menu: add customization options for hiding Retroarch as an option, add FF speed etc etc. Probably add this to the igm.cfg?
-- Bug Reporter... has bugs..... tsps specifically reported
+- "I feel like we need a separate channel for achievements-related stuff 😅 
+Just found one interesting issue - started one PS ROM, received RA warning saying something about inability to generate achievements hash.
+Dug a bit, our RA is built without Deflate (cdzl) and FLAC (cdfl) flags. Any particular reason for that?
+And our PCSX-ReARMed core is a bit dated and without Zstandard decoder support.
+Let's just say some people use cdzl and cdfl for their rom collections as it saves quite some space (in some cases, around 20-50%). Having them manually decode each rom (and even figuring out that they need to do that, RA warning is not very meaningful) is probably not the best UX."
+
+RA build with Google cloud sync stuff? 
     
 --- Ry ------------------------------------------------------------------------
 
-- RA cfg overhaul for older devices on newer RA builds - missing some entries
 - fake08 patches from TL
 - XX - polish shutdown paths - LEDs on, screen dim/off
 - XX - bootlogo app needs polish - add "bootlogo applied successfully" message
 -- need to update App/BootLogo/install_logo.sh to use PyUI display instead of legacy display(), as that one is not enabled on XX.
-- attach check_and_connect_wifi() to dsperate exec paths when appropriate;
+- rg353m bring-up
 
 
 --- OTA ------------------------------------------------------------------------

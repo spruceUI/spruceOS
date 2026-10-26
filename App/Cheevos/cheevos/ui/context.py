@@ -9,6 +9,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 from cheevos.core.clock import network_clock
+from cheevos.core.credentials import Credentials
 from cheevos.core.local_games import on_device_game_ids
 from cheevos.core.models import PendingAward, Unlock
 from cheevos.core.proxy import ProxyReader
@@ -18,8 +19,7 @@ from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache
 from cheevos.core.sync.background import BackgroundSync
 from cheevos.core.sync.detail_fetch import DetailFetcher
-from cheevos.core.sync.engine import FULL_SINCE_KEY, SyncOptions
-from cheevos.core.sync.session import Credentials
+from cheevos.core.sync.options import FULL_SINCE_KEY, SyncOptions
 from cheevos.platform.paths import Paths
 from cheevos.ui.media import MediaResolver
 
@@ -49,6 +49,7 @@ class AppContext:
             blocking (``None``: offline, RA unreachable, or none).
         clock: Wall clock.
         refresh_time: Refreshes app time and connectivity before on-demand date queries.
+        launch_game_id: Restricts refresh actions to this game in a direct launch.
     """
 
     paths: Paths
@@ -67,7 +68,13 @@ class AppContext:
     fetch_first_unlock: Callable[[int], int | None]
     clock: Callable[[], float] = network_clock.now
     refresh_time: Callable[[], bool] = field(default=lambda: True, repr=False)
+    launch_game_id: int | None = None
     _on_device: set[int] | None = field(default=None, repr=False)
+    _saved_settings: Settings = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        """Remember the loaded settings so unchanged sessions need no write."""
+        self._saved_settings = self.settings
 
     def icon(self, name: str) -> Path:
         """Return a bundled outline icon.
@@ -89,6 +96,9 @@ class AppContext:
         Returns:
             ``True`` if a new sync started (``False`` if one is already running).
         """
+        if self.launch_game_id is not None:
+            self.details.request(self.launch_game_id, refresh=True)
+            return True
         options = SyncOptions(
             full=full,
             badge_scope=self.settings.badge_scope,
@@ -107,13 +117,23 @@ class AppContext:
             self.sync.cancel()  # a running one would carry on with its plan
 
     def update_settings(self, settings: Settings) -> None:
-        """Replace and persist the settings.
+        """Apply settings immediately in memory; the app saves them on exit.
 
         Args:
             settings: New settings.
         """
         self.settings = settings
-        save_settings(self.paths.settings_file, settings)
+
+    def flush_settings(self) -> None:
+        """Save changed settings once, logging write failures so shutdown can continue."""
+        if self.settings == self._saved_settings:
+            return
+        try:
+            save_settings(self.paths.settings_file, self.settings)
+        except OSError:
+            logger.exception("Could not save settings")
+            return
+        self._saved_settings = self.settings
 
     def on_device_ids(self) -> set[int]:
         """Return RA game IDs with a ROM on this SD card (computed once per app run)."""

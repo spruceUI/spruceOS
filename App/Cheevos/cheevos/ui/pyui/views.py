@@ -9,35 +9,30 @@ from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from cheevos.core.models import AwardKind
-from cheevos.ui.pyui import grid_frames, row_bars, status_bar, title_bar
+from cheevos.ui.pyui import image_frames, row_bars, status_bar, title_bar
+from cheevos.ui.pyui.image_frames import Frame
 from cheevos.ui.pyui.primitives import (
     Button,
     Text,
     displayable,
-    fit_text,
+    fit_with_tail,
     screen_size,
 )
 from cheevos.ui.pyui.row_bars import Progress
 from cheevos.ui.pyui.status_bar import Hint
-from cheevos.ui.pyui.text import ListRoom, list_room
+from cheevos.ui.pyui.text import description_room
 from cheevos.ui.pyui.title_bar import Title
 from cheevos.ui.pyui.visible_images import ImageDemand, VisibleImages, demanding
 
+if TYPE_CHECKING:
+    from cheevos.ui.pyui.badge_grid import Details
+
 logger = logging.getLogger(__name__)
 
-_CAPTION_MARGIN = 12  # keeps neighbouring grid captions apart
-# Grids are designed at 640x480: 4 columns of 155 px, under the theme's 90 px list rows
-# (SPRUCE). Other screens scale that like the theme scales its rows (see grid_shape).
-_REFERENCE_COLUMN = 155
+# The theme's list rows at its 640x480 design (SPRUCE): sizes scale like them (theme_scale).
 _REFERENCE_ROW = 90
-_GRID_PAD = 10  # PyUI's GridView x_pad on each side
-_TIGHTEST = 0.75  # a column may be up to a quarter narrower than designed, to fit another one
-_CAPTION_GAP = 2  # between a tile's image and its caption
-BADGE_TILE = 64  # RA achievement badges are 64x64
-ICON_TILE = 96  # RA game icons are 96x96
 # Log list preparation times for big lists or slow builds (performance diagnostics on devices).
 _SLOW_LIST_ROWS = 100
 _SLOW_LIST_MS = 200
@@ -59,7 +54,11 @@ class MenuItem:
         value: Right-aligned text, e.g. ``"2/138"`` (lists only; may be empty).
         key: Caller-defined identifier, returned unchanged on selection.
         progress: A progress bar shown instead of the description (lists only).
-        frame: An award frame around the tile's image (grids only; RA's colours).
+        frame: Outline outside the image (lists, grids and the carousel; RA's colours).
+        details: Second line under a badge grid while the tile is selected (badge grids only;
+            the first is the title and ``value``).
+        tail: Kept whole after the description, e.g. a date: the description is shortened
+            first (lists and the carousel).
     """
 
     title: str
@@ -68,7 +67,9 @@ class MenuItem:
     value: str = ""
     key: str = ""
     progress: Progress | None = None
-    frame: AwardKind | None = None
+    frame: Frame | None = None
+    details: Details | None = None
+    tail: str = ""
 
 
 @dataclass(frozen=True, slots=True)
@@ -90,11 +91,12 @@ class Layout(Enum):
     """Supported PyUI view types."""
 
     LIST = "ICON_AND_DESC"
-    GRID = "GRID"
+    BADGES = "BADGES"  # compact badge grid with the selection's details (badge_grid.py)
+    CAROUSEL = "CAROUSEL"  # animated carousel with the selection's details (carousel.py)
     POPUP = "POPUP"  # small menu over the current screen (options, filters)
 
 
-# Called on every input timeout (~12x/s). Returning items replaces the list in place.
+# Called on every input timeout (~12x/s). Items replace the list; an empty list closes it.
 TickHandler = Callable[[], Sequence[MenuItem] | None]
 
 
@@ -116,14 +118,16 @@ def _lazy(source: Callable[[], Path | None]) -> Callable[[object], str | None]:
     return search
 
 
-def _entry(item: MenuItem, *, room: ListRoom | None, caption: int = 0) -> Any:  # noqa: ANN401
+def _entry(item: MenuItem, *, room: int | None) -> Any:  # noqa: ANN401
     """Convert one item into a PyUI ``GridOrListEntry``.
+
+    PyUI fits list titles to their room itself (SpruceOS #1900), and scrolls the selected one
+    when it doesn't fit, so titles are passed whole.
 
     Args:
         item: Row or tile.
-        room: A list row's room: the title is shortened so it never runs into the
-            right-aligned value (lists only).
-        caption: Width a grid tile's caption must fit (PyUI doesn't shorten captions).
+        room: A list row's description width: the description is shortened to it and keeps
+            its tail (lists only).
 
     Returns:
         The PyUI entry, carrying the item as its value.
@@ -133,14 +137,14 @@ def _entry(item: MenuItem, *, room: ListRoom | None, caption: int = 0) -> Any:  
     icon = item.icon
     static = str(icon) if isinstance(icon, Path) else None
     searcher = None if icon is None or isinstance(icon, Path) else _lazy(icon)
+    title = displayable(item.title, Text.TITLE)
     if room is not None:
-        title = fit_text(item.title, Text.TITLE, room.title(item.value))
-        description = fit_text(item.description, Text.BODY, room.full) if item.description else ""
-    elif caption:
-        title = fit_text(item.title, Text.GRID, caption)
-        description = ""
+        description = (
+            fit_with_tail(item.description, item.tail, Text.BODY, room)
+            if item.description or item.tail
+            else ""
+        )
     else:
-        title = displayable(item.title, Text.TITLE)
         description = displayable(item.description, Text.BODY)
     if item.progress is not None:
         description = ""  # keeps the two-line row; the bar is drawn in its place
@@ -157,25 +161,18 @@ def _entry(item: MenuItem, *, room: ListRoom | None, caption: int = 0) -> Any:  
     )
 
 
-def _entries(
-    items: Sequence[MenuItem], layout: Layout = Layout.LIST, columns: int = 0
-) -> list[Any]:
+def _entries(items: Sequence[MenuItem], layout: Layout = Layout.LIST) -> list[Any]:
     """Convert items into PyUI entries.
 
     Args:
         items: Rows or tiles.
-        layout: Target view; list titles are fitted next to their values.
-        columns: Grid columns (grid captions are fitted to a column).
+        layout: Target view; list descriptions are fitted to the row.
 
     Returns:
         PyUI entries in the same order.
     """
-    room = list_room() if layout is Layout.LIST else None
-    caption = 0
-    if layout is Layout.GRID and columns:
-        width, _ = screen_size()
-        caption = width // columns - _CAPTION_MARGIN
-    return [_entry(item, room=room, caption=caption) for item in items]
+    room = description_room() if layout is Layout.LIST else None
+    return [_entry(item, room=room) for item in items]
 
 
 def _sample_row(entries: Sequence[Any]) -> Any:  # noqa: ANN401 — PyUI entry
@@ -237,58 +234,20 @@ def _one_sample_row() -> Iterator[None]:
         ListView._calculate_line_height = original
 
 
-def grid_shape(width: int, usable_height: int, column: float, row: float) -> tuple[int, int]:
-    """Return how many columns and rows of grid cells fit on a screen.
-
-    Nothing in Spruce or PyUI knows a panel's DPI. Themes decide how big things are drawn at
-    each resolution instead (SPRUCE ships a skin per resolution), and they keep the same
-    number of list rows on every landscape screen, only bigger. Grids follow the theme: tiles
-    and columns scale like its rows, and rows are as tall as its caption layout needs. So wide
-    screens get more columns and square or portrait ones more rows, but tiles never shrink to
-    squeeze more in.
-
-    Args:
-        width: Screen width.
-        usable_height: Height between the top and bottom bars.
-        column: Designed column width at this scale (a column may be a quarter narrower).
-        row: Smallest row that fits a tile and its caption.
+def theme_scale() -> float:
+    """Return how much bigger the theme draws than its 640x480 design (its list rows' height).
 
     Returns:
-        ``(columns, rows)``, at least one each.
-    """
-    columns = (width - 2 * _GRID_PAD) / column
-    tight = 1 if columns % 1 >= _TIGHTEST else 0
-    return max(int(columns) + tight, 1), max(int(usable_height // row), 1)
-
-
-def _screen_grid(tile: int) -> tuple[int, int, int]:
-    """Shape a grid for this screen and theme (see :func:`grid_shape`).
-
-    A row has to hold what ``GridView._render_cell`` draws in it: the image, centred and moved
-    by the theme's image offset, above a caption that sits one line up from the row's bottom
-    and moves by the theme's caption offset.
-
-    Args:
-        tile: Image size at 640x480.
-
-    Returns:
-        ``(columns, rows, image size)``.
+        The scale (1.0 at 640x480 in SPRUCE).
     """
     from display.display import Display
-    from display.font_purpose import FontPurpose
     from themes.theme import Theme
 
-    width, height = screen_size()
     list_row = int(Display.get_image_dimensions(Theme.get_list_large_selected_bg())[1])
-    scale = list_row / _REFERENCE_ROW if list_row else min(width / 640, height / 480)
-    size = round(tile * scale)
-    caption = int(Display.get_line_height(FontPurpose.GRID_MULTI_ROW))
-    image_offset = int(Theme.get_grid_multi_row_img_y_offset(caption))
-    caption_offset = int(Theme.multi_row_grid_text_y_offset())
-    row = 4 * caption - 2 * caption_offset + image_offset + size + 2 * _CAPTION_GAP
-    usable = int(Display.get_usable_screen_height())
-    columns, rows = grid_shape(width, usable, _REFERENCE_COLUMN * scale, max(row, 1))
-    return columns, rows, size
+    if list_row:
+        return list_row / _REFERENCE_ROW
+    width, height = screen_size()
+    return min(width / 640, height / 480)
 
 
 def choose(  # noqa: PLR0913 — keyword-only presentation options
@@ -298,7 +257,6 @@ def choose(  # noqa: PLR0913 — keyword-only presentation options
     selected: int = 0,
     buttons: frozenset[Button] = frozenset({Button.A}),
     layout: Layout = Layout.LIST,
-    tile: int = BADGE_TILE,
     on_tick: TickHandler | None = None,
     full_status: bool = False,
     hints: Sequence[Hint] = (),
@@ -314,9 +272,8 @@ def choose(  # noqa: PLR0913 — keyword-only presentation options
         items: Rows (list) or tiles (grid), in order. Must not be empty.
         selected: Initially highlighted index.
         buttons: Buttons that confirm a choice (B always backs out).
-        layout: List with icons and descriptions, or image grid (shaped by :func:`grid_shape`).
-        tile: Grid image size at 640x480 (scaled like the theme). Without one, PyUI loads
-            every tile's image when the grid opens to find the tallest.
+        layout: List with icons and descriptions, compact badge grid (``badge_grid``), carousel
+            (``carousel``) or popup menu.
         on_tick: Called on each input timeout; returned items replace the current ones.
         full_status: Show the detailed sync status in the bottom bar (home, settings), not
             only progress.
@@ -325,12 +282,12 @@ def choose(  # noqa: PLR0913 — keyword-only presentation options
     Returns:
         The choice, or ``None`` when B is pressed.
     """
-    view = PreparedView(title, items, selected=selected, layout=layout, tile=tile)
+    view = PreparedView(title, items, selected=selected, layout=layout)
     return view.show(buttons=buttons, on_tick=on_tick, full_status=full_status, hints=hints)
 
 
 class PreparedView:
-    """A list or grid, prepared once and shown as often as needed (see :func:`choose`).
+    """A list, grid or carousel, prepared once and shown as often as needed (see :func:`choose`).
 
     Preparing a big list is the slow part: 0.9 s for 2,940 games on a Mini, against 60 ms to
     show it again. A screen that comes back to the same rows (the games list, back from a game)
@@ -342,9 +299,8 @@ class PreparedView:
             and its award dot).
         items: Rows (list) or tiles (grid), in order. Must not be empty.
         selected: Initially highlighted index.
-        layout: List with icons and descriptions, or image grid (shaped by :func:`grid_shape`).
-        tile: Grid image size at 640x480 (scaled like the theme). Without one, PyUI loads
-            every tile's image when the grid opens to find the tallest.
+        layout: List with icons and descriptions, compact badge grid (``badge_grid``), carousel
+            (``carousel``) or popup menu.
     """
 
     def __init__(
@@ -354,7 +310,6 @@ class PreparedView:
         *,
         selected: int = 0,
         layout: Layout = Layout.LIST,
-        tile: int = BADGE_TILE,
     ) -> None:
         from views.view_creator import ViewCreator
         from views.view_type import ViewType
@@ -362,34 +317,72 @@ class PreparedView:
         started = time.monotonic()
         self._title = title
         self._layout = layout
-        columns, rows, size = _screen_grid(tile) if layout is Layout.GRID else (0, 0, None)
-        self._columns = columns
-        self._entries = _entries(items, layout, columns)
-        # PyUI asks every row for its image and measures every row's text here.
-        with demanding(ImageDemand.MEASURED), _one_sample_row():
-            self._view = ViewCreator.create_view(
-                view_type=ViewType[layout.value],
-                top_bar_text=title_bar.top_title(title),
-                options=self._entries,
-                selected_index=selected,
-                cols=columns or None,
-                rows=rows or None,
-                grid_resized_width=size,
-                grid_resized_height=size,
-            )
+        self._count = len(items)
+        self._entries = _entries(items, layout)
+        top = title_bar.top_title(title)
+        # The grid and the carousel load when first shown: Home doesn't need them.
+        if layout is Layout.BADGES:
+            from cheevos.ui.pyui import badge_grid
+
+            self._view = badge_grid.create(top, self._entries, selected, theme_scale())
+        elif layout is Layout.CAROUSEL:
+            from cheevos.ui.pyui import carousel
+
+            self._view = carousel.create(top, self._entries, selected, theme_scale())
+        else:
+            # PyUI asks every row for its image and measures every row's text here.
+            with demanding(ImageDemand.MEASURED), _one_sample_row():
+                self._view = ViewCreator.create_view(
+                    view_type=ViewType[layout.value],
+                    top_bar_text=top,
+                    options=self._entries,
+                    selected_index=selected,
+                )
         if layout is Layout.LIST and any(item.progress is not None for item in items):
             row_bars.attach(self._view)
-        self._images = (
-            None
-            if layout is Layout.POPUP
-            else VisibleImages(self._view, self._entries, grid=columns > 0)
-        )
-        if layout is Layout.GRID and any(item.frame is not None for item in items):
-            grid_frames.attach(self._view)
+        if layout is Layout.LIST:
+            image_frames.attach_list(self._view)
+        # The carousel follows its own images (its window wraps around the list).
+        tracked = layout not in (Layout.POPUP, Layout.CAROUSEL)
+        grid = layout is Layout.BADGES
+        self._images = VisibleImages(self._view, self._entries, grid=grid) if tracked else None
         self._shown = False
         elapsed_ms = (time.monotonic() - started) * 1000
         if len(self._entries) > _SLOW_LIST_ROWS or elapsed_ms > _SLOW_LIST_MS:
             logger.info("Prepared %d rows in %.0f ms", len(self._entries), elapsed_ms)
+
+    def set_title(self, title: str | Title) -> None:
+        """Update a live view's title, including the game's count and award dot."""
+        self._title = title
+        self._view.top_bar_text = title_bar.top_title(title)
+
+    def update_items(self, items: Sequence[MenuItem]) -> None:
+        """Replace rows, retaining the highlighted key and visible window where possible."""
+        view = self._view
+        selected = min(int(view.selected), len(self._entries) - 1)
+        key = self._entries[selected].get_value().key
+        self._count = len(items)
+        self._entries = _entries(items, self._layout)
+        view.set_options(self._entries)
+        view.selected = next(
+            (index for index, item in enumerate(items) if key and item.key == key),
+            min(selected, self._count - 1),
+        )
+        if self._layout is Layout.LIST:
+            window = view.max_rows
+            view.current_top = min(view.current_top, max(0, self._count - window))
+            view.current_bottom = min(view.current_top + window, self._count)
+            if not view.current_top <= view.selected < view.current_bottom:
+                # PyUI's center_selection() leaves index zero off-screen.
+                view.current_top = max(0, min(view.selected - window // 2, self._count - window))
+                view.current_bottom = min(view.current_top + window, self._count)
+        elif self._layout is Layout.BADGES:
+            window = view.rows * view.cols
+            view.current_left = min(view.current_left, (view.selected // view.cols) * view.cols)
+            view.current_right = min(view.current_left + window, self._count)
+            view.correct_selected_for_off_list()
+        if self._images is not None:
+            self._images.reset(self._entries)
 
     def show(
         self,
@@ -429,9 +422,7 @@ class PreparedView:
         finally:
             # Popups freeze the frame underneath as their backdrop until told they're done;
             # without this, every later screen is drawn over that frozen frame.
-            finished = getattr(self._view, "view_finished", None)
-            if finished is not None:
-                finished()
+            self._view.view_finished()
 
     def _select(
         self, accepted: list[Any], on_tick: TickHandler | None, *, global_start: bool
@@ -454,10 +445,9 @@ class PreparedView:
             # PyUI returns a Selection with no input after a timeout or a cursor move.
             if selection is None or selection.get_input() is None:
                 if on_tick is not None and (updated := on_tick()) is not None:
-                    self._entries = _entries(updated, self._layout, self._columns)
-                    view.set_options(self._entries)
-                    if self._images is not None:
-                        self._images.reset(self._entries)
+                    if not updated:
+                        return None
+                    self.update_items(updated)
                 continue
             if selection.get_input() == ControllerInput.B:
                 return None
@@ -465,4 +455,6 @@ class PreparedView:
                 status_bar.press_start()
                 continue
             item = selection.get_selection().get_value()
-            return Choice(item, selection.get_index(), Button(selection.get_input().name))
+            # A short carousel repeats its entries: map the selection back to the items.
+            index = selection.get_index() % max(self._count, 1)
+            return Choice(item, index, Button(selection.get_input().name))

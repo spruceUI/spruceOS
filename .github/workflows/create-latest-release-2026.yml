@@ -200,6 +200,9 @@ jobs:
               .git/*|.git|.github/*|.github|.gitignore|.gitattributes)
                 return 0
                 ;;
+              .gitkeep|*/.gitkeep)
+                return 0
+                ;;
               create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
@@ -393,6 +396,7 @@ jobs:
             -mx=7 \
             -ms=off \
             -mf- \
+            -xr!.gitkeep \
             "$OTA_ARCHIVE" \
             @"$OTA_7Z_LIST"
 
@@ -406,11 +410,95 @@ jobs:
           echo "Archive contents:"
           7z l "$OTA_ARCHIVE"
 
+      - name: Package NDS resource folders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/Emu/NDS"
+
+          ARGS=()
+          if [ -d "Emu/NDS/resources" ]; then
+            cp -a "Emu/NDS/resources" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/resources")
+          fi
+
+          if [ -d "Emu/NDS/res" ]; then
+            cp -a "Emu/NDS/res" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
+            ARGS+=("mnt/SDCARD/Emu/NDS/res")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No NDS resource folders found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/nds-resources.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "Emu/NDS/resources" "Emu/NDS/res"
+            echo "Created preMenu NDS archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu NDS archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+
+      - name: Package RetroArch shaders for preMenu auto-extract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
+          mkdir -p "$ARCHIVE_DIR"
+
+          WORKDIR="$(mktemp -d)"
+          trap 'rm -rf "$WORKDIR"' EXIT
+
+          mkdir -p "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch"
+
+          ARGS=()
+          if [ -d "RetroArch/.retroarch/shaders" ]; then
+            cp -a "RetroArch/.retroarch/shaders" "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch/"
+            ARGS+=("mnt/SDCARD/RetroArch/.retroarch/shaders")
+          fi
+
+          if [ "${#ARGS[@]}" -eq 0 ]; then
+            echo "No RetroArch shaders folder found; skipping preMenu archive."
+            exit 0
+          fi
+
+          ARCHIVE_PATH="$ARCHIVE_DIR/retroarch-shaders.7z"
+          rm -f "$ARCHIVE_PATH"
+
+          if (
+            cd "$WORKDIR"
+            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
+          ); then
+            rm -rf "RetroArch/.retroarch/shaders"
+            echo "Created preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            ls -lh "$ARCHIVE_PATH"
+          else
+            echo "ERROR: Failed to create preMenu RetroArch shaders archive: $ARCHIVE_PATH"
+            exit 1
+          fi
+          
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
             -xr!.git \
             -xr!.github \
+            -xr!.gitkeep \
             -x!.gitignore \
             -x!.gitattributes \
             -x!create_spruce_release.bat \
@@ -463,29 +551,6 @@ jobs:
           tag_name: v${{ steps.get_version.outputs.version }}
           name: spruceOS v${{ steps.get_version.outputs.version }}
           body: |
-            | Device                | Support Status        |
-            |-----------------------|-----------------------|
-            | Miyoo Flip            | Stable |
-            | Miyoo A30             | Stable |
-            | Trimui Smart Pro      | Stable |
-            | Trimui Brick          | Stable |
-            | Trimui Smart Pro S    | Stable |
-            | Trimui Brick Pro      | Stable |
-            | Miyoo Mini Flip       | Stable |
-            | Miyoo Mini Plus       | Stable |
-            | Miyoo Mini v1-4       | Stable |
-            | Anbernic RGXX+ series | Stable |
-            | Powkiddy RGB30        | Stable |
-            | Powkiddy RGB20SX      | Stable |
-            | Miniloong Pocket 1    | Stable |
-            | MagicX Zero 28 / Zero 40 / XU20 | In Development, testers wanted! |
-
-            > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
-
-            > **Powkiddy RGB30, RGB20SX and Miniloong Pocket 1:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
-
-            >**BaseOS and DarkMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
-
             # What's New
 
             Check out the wiki for info on ROM folders and apps [Here](https://github.com/spruceUI/spruceOS/wiki)
@@ -500,13 +565,12 @@ jobs:
             ## Improvements
             -
 
-            ## Installation
+            # Installation
 
-            ## New Installer App
-            - Try the all-in-one installer app for a super easy installation!
-            - No need to download a release or format your card manually!
-            - Compatible versions for Windows, Mac and Linux!
-            - Lets you install Stable, Nightlies and Twig (GKD Pixel 2 only) all in one click!
+            ## Installer App
+            Try the all-in-one installer app for a super easy installation! No need to download a release or format your card manually. Available for Windows, Mac and Linux! You can install spruceOS Stable, spruceOS Nightlies, any necessaryTF1 images, or twigUI (a spruce experience for GKD Pixel 2 only) in just one click!
+
+            The installer app can also be used to update an existing spruceOS installation to the latest version, or even scrape boxart for your library.
 
             | Platform | Download |
             |----------|----------|
@@ -524,12 +588,46 @@ jobs:
             - Extract onto your PC using [7zip](https://www.7-zip.org/download.html)
             - Copy the entire contents to a blank FAT32 formatted SD card.
             - Seriously, use 7zip to extract onto your PC THEN copy the files. IDK why but Windows breaks stuff if you use its built in extraction tool.
+            - For 2-slot devices that require a TF1 image, download the appropriate TF1 image from the links below and flash it to a separate SD card. See the table below for which TF1 image is required for your device, if any.
 
             ## OTA Update
 
             - `spruceOTA-${{ steps.previous_release.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z` contains only the files changed since the previous stable release.
             - It also contains a deletion manifest for files removed since the previous stable release.
             - This package is intended for OTA updates from `${{ steps.previous_release.outputs.tag }}` to `v${{ steps.get_version.outputs.version }}`.
+
+            # Supported Devices
+            | Device                | Support Status        | Separate TF1 Required? |
+            |-----------------------|-----------------------|------------------------|
+            | Miyoo Flip            | Supported | No |
+            | Miyoo A30             | Supported | No |
+            | Trimui Smart Pro      | Supported | No |
+            | Trimui Brick          | Supported | No |
+            | Trimui Smart Pro S    | Supported | No |
+            | Trimui Brick Pro      | Supported | No |
+            | Miyoo Mini Flip       | Supported | No |
+            | Miyoo Mini Plus       | Supported | No |
+            | Miyoo Mini v1-4       | Supported | No |
+            | Anbernic H700 devices | Supported | Yes, [BaseOS](https://github.com/pvaibhav/BaseOS/releases/latest) |
+            | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy V10          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | A10 Mini              | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | G350                  | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | MagicX XU Mini M      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
+            | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
+            | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
+
+            > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M and Anbernic RG353M:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+
+            >**BaseOS, dArkMoss, and oakMoss images can be downloaded and installed automatically using their corresponding tabs on the Spruce Installer application for Windows, Mac and Linux!**
 
           repository: spruceUI/spruceOS
           token: ${{ secrets.PAT_TOKEN }}

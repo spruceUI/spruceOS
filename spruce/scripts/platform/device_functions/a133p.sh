@@ -301,8 +301,6 @@ launch_startup_watchdogs() {
         /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
         pin_cpu "$SYSTEM_CPU" -n usb_wifi_watchdog.sh &
     fi
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # Backlight steps over set_backlight above; the same trio as trimui_delegate.sh's.

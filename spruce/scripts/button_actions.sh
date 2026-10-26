@@ -120,7 +120,20 @@ kill_pcsx() {
 
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
-    killall -q -15 ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui GameTankEmulator
+    _emus="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui GameTankEmulator"
+    killall -q -15 $_emus
+    # RetroArch only sets a flag on the first SIGTERM, so one stuck in its own
+    # shutdown (a blocking RetroAchievements read after sleep/wake) never exits
+    # and the Game Switcher looks frozen. Wait up to 10 s for a clean exit,
+    # then SIGKILL: the same trade-off save_poweroff.sh makes.
+    _t0=$(date +%s)
+    while pidof $_emus >/dev/null 2>&1 && [ $(( $(date +%s) - _t0 )) -lt 10 ]; do
+        sleep 0.2
+    done
+    if pidof $_emus >/dev/null 2>&1; then
+        log_message "button_actions.sh: emulator still alive after 10 s, sending SIGKILL"
+        killall -q -9 $_emus
+    fi
 }
 
 kill_dsperate() {
@@ -306,6 +319,9 @@ perform_action() {
             killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
         elif pgrep -f "\./mupen64plus" >/dev/null; then
             killall -q -USR2 mupen64plus
+        elif [ -f /tmp/pico8_igm ] && pgrep -f "pico8_64|pico8_dyn" >/dev/null; then
+            # Only while the menu library is preloaded: SIGUSR2 kills a bare pico-8
+            killall -q -USR2 pico8_64 pico8_dyn
         else
             send_menu_button_to_retroarch
         fi

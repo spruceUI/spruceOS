@@ -16,10 +16,12 @@
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
     "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
+    "shutdownImage":"/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png",
     "longTaskCmd":"/mnt/SDCARD/spruce/scripts/long_task.sh",
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
+    "volumeCmd":"/mnt/SDCARD/App/PyUI/set-volume.sh",
     "btAudioDeviceCmd":"/mnt/SDCARD/App/PyUI/get-bt-audio-device.sh",
     "usbAudioSupportedCmd":"/mnt/SDCARD/App/PyUI/get-usb-audio-supported.sh",
     "usbAudioRoutePath":"/tmp/usb_audio_route",
@@ -28,6 +30,7 @@
     "cacheCheevosCmd":"/mnt/SDCARD/spruce/scripts/raproxyCacheRom.sh",
     "timezoneDir":"/mnt/SDCARD/spruce/zoneinfo",
     "cfwVersionFile": "/mnt/SDCARD/spruce/spruce",
+    "fallbackFontPath": "/mnt/SDCARD/Themes/SPRUCE/nunwen.ttf",
     "aboutEntries" : [
         {
            "display":"Spruce version",

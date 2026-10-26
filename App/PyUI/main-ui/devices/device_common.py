@@ -3,17 +3,17 @@
 import os
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 from pathlib import Path
+import sdl2
+from display import sdl_backend
 from audio.audio_player_none import AudioPlayerNone
 from controller.controller_inputs import ControllerInput
 from menus.language.language import Language
 from devices.abstract_device import AbstractDevice
 from devices.bluetooth.bluetooth_command import BluetoothCommand
 from devices.miyoo.device_user_config import DeviceUserConfig
-from devices.utils.process_runner import ProcessRunner
 from devices.wifi.wifi_connection_quality_info import WiFiConnectionQualityInfo
 from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
@@ -56,6 +56,9 @@ class DeviceCommon(AbstractDevice):
                     return
 
     def power_off(self):
+        # Shown here: waiting on the command, the menu can't act on the CFW's
+        # own farewell request (docs/shutdown_readme.txt).
+        Display.present_farewell()
         if PyUiConfig.get_poweroff_cmd():
             self.run_cmd([PyUiConfig.get_poweroff_cmd()], is_power_cmd=True)
         else:
@@ -576,10 +579,19 @@ class DeviceCommon(AbstractDevice):
 
     def exit_pyui(self):
         Display.deinit_display()
+        # Graphics teardown no longer syncs. Flush settings that are saved without
+        # fsync (CFW config, theme edits) before a restart or a hand-off.
+        if hasattr(os, "sync"):
+            os.sync()
         sys.exit()
 
     def double_init_sdl_display(self):
         return False
+
+    def create_window(self, width, height):
+        """The window Display draws into, given the display's current size: fullscreen on
+        a handheld."""
+        return sdl_backend.Window("Minimal SDL2 GUI", size=(width, height), flags=sdl2.SDL_WINDOW_FULLSCREEN)
 
     def supports_volume(self):
         return True
@@ -740,10 +752,10 @@ class DeviceCommon(AbstractDevice):
         return True
 
     def get_boxart_small_resize_dimensions(self):
-        return 640, 480
+        return 200, 200
 
     def get_boxart_medium_resize_dimensions(self):
-        return 640, 480
+        return 400, 300
 
     def get_boxart_large_resize_dimensions(self):
         return 640, 480
@@ -938,6 +950,8 @@ class DeviceCommon(AbstractDevice):
 
     def is_filesystem_read_only(self,path="/mnt/SDCARD"):
         try:
+            # Deferred: off the startup path.
+            import tempfile
             with tempfile.NamedTemporaryFile(dir=path, delete=True):
                 pass
             return False
@@ -1029,6 +1043,10 @@ class DeviceCommon(AbstractDevice):
         # Need to test 1 at a time to ensure it works
         return False
 
+    def get_sdl_backend(self):
+        """Override with ext on a device that needs the original PySDL2 wrappers."""
+        return "direct"
+
     def wants_gles_context(self):
         """
         Ask SDL for an OpenGL ES EGL config rather than a desktop GL one.
@@ -1104,6 +1122,10 @@ class DeviceCommon(AbstractDevice):
     def clear_framebuffer(self):
         pass
 
+    def menu_sound_settings_changed(self):
+        """Called after the button-press-sound or background-music setting changes."""
+        pass
+
     def are_headphones_plugged_in(self):
         return False
         
@@ -1124,3 +1146,6 @@ class DeviceCommon(AbstractDevice):
 
     def get_game_images_folder_name(self):
         return "Imgs"
+
+    def fix_device_font_height_calc_issues(self, height):
+        return height

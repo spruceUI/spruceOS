@@ -1,171 +1,228 @@
-"""The awards wall: each game's highest award, framed in RA's colours, with filter and sort (Y).
+"""The Awards screen: the profile's game, event and site badges (.agents/product.md, "Awards").
 
-RA's own showcase lists mastered games (gold border) and completed ones; this wall also shows
-beaten games, since beating a game is a milestone on a handheld too. A game that holds both a
-Beaten and a Mastered award appears once, with the higher one. A opens the game.
+Three views of the same awards: a carousel, a compact grid and a list. Select cycles them and
+the choice is remembered (``awards_view``); Y or Menu change the view, filter and sort. A
+opens a game's achievements; event and site badges have nothing more to show.
 """
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 
-from cheevos.core.models import Award, AwardKind
+from cheevos.core.awards import gallery, group, site_order
+from cheevos.core.models import Award, AwardGroup, AwardKind
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui.badge_grid import Details
 from cheevos.ui.pyui.primitives import Button
-from cheevos.ui.pyui.views import ICON_TILE, Layout, MenuItem, choose
+from cheevos.ui.pyui.views import Layout, MenuItem, PreparedView
+from cheevos.ui.screens.award_text import AwardText, describe
 from cheevos.ui.screens.common import message, pick
 from cheevos.ui.screens.game_detail import show_game
 
-# Higher wins when a game holds several awards (RA's own HighestAwardKind order).
-RANK = {
-    AwardKind.MASTERED: 3,
-    AwardKind.COMPLETED: 2,
-    AwardKind.BEATEN_HARDCORE: 1,
-    AwardKind.BEATEN_SOFTCORE: 0,
+Shown = tuple[Award, AwardText]
+
+FILTERS: dict[str, Callable[[Award], bool]] = {
+    "all": lambda _a: True,
+    "game": lambda a: group(a) is AwardGroup.GAME,
+    "mastered": lambda a: group(a) is AwardGroup.GAME and a.kind is AwardKind.MASTERED,
+    "completed": lambda a: group(a) is AwardGroup.GAME and a.kind is AwardKind.COMPLETED,
+    "event": lambda a: group(a) is AwardGroup.EVENT,
+    "site": lambda a: group(a) is AwardGroup.SITE,
 }
-MASTERY = frozenset({AwardKind.MASTERED, AwardKind.COMPLETED})
+_NO_CONSOLES = frozenset({"event", "site"})  # console sorting is for game awards
+LAYOUTS = {"carousel": Layout.CAROUSEL, "grid": Layout.BADGES, "list": Layout.LIST}
+_NEXT_VIEW = {"carousel": "grid", "grid": "list", "list": "carousel"}
 
 
 @dataclass(frozen=True, slots=True)
 class _View:
-    """Filter and sort choices.
+    """Presentation choices.
 
     Attributes:
-        filter: Key of ``strings.AWARD_FILTERS``.
+        layout: Key of :data:`LAYOUTS`.
+        filter: Key of :data:`FILTERS`.
         sort: Key of ``strings.AWARD_SORTS``.
     """
 
+    layout: str = "carousel"
     filter: str = "all"
     sort: str = "newest"
 
 
-def highest_per_game(awards: Sequence[Award]) -> list[Award]:
-    """Keep each game's highest award, in the order the games first appear.
+def next_view(layout: str) -> str:
+    """Return the view Select switches to: carousel, grid, list, then the carousel again."""
+    return _NEXT_VIEW.get(layout, "carousel")
+
+
+def arrange(awards: Sequence[Shown], view: _View) -> list[Shown]:
+    """Filter and sort the awards; every view shows the same result.
 
     Args:
-        awards: All visible game awards.
-
-    Returns:
-        One award per game.
-    """
-    best: dict[int, Award] = {}
-    for award in awards:
-        known = best.get(award.game_id)
-        if known is None or RANK[award.kind] > RANK[known.kind]:
-            best[award.game_id] = award
-    return list(best.values())
-
-
-def arrange(awards: Sequence[Award], view: _View) -> list[Award]:
-    """Filter and sort awards for the wall.
-
-    Args:
-        awards: One award per game.
-        view: Filter and sort.
+        awards: Gallery awards with their text, in RA's order.
+        view: Filter and sort (console sorting only applies to game awards).
 
     Returns:
         The awards to show, in order.
     """
-    if view.filter == "mastery":
-        awards = [award for award in awards if award.kind in MASTERY]
-    elif view.filter == "beaten":
-        awards = [award for award in awards if award.kind not in MASTERY]
-    if view.sort == "site":  # the user's own arrangement on RA's site
-        return sorted(awards, key=lambda a: (a.display_order, -(a.awarded_at or 0)))
+    shown = [pair for pair in awards if FILTERS.get(view.filter, FILTERS["all"])(pair[0])]
+    if view.sort == "site":  # the player's own arrangement, gallery by gallery
+        order = {award.key: index for index, award in enumerate(site_order([a for a, _ in shown]))}
+        return sorted(shown, key=lambda pair: order[pair[0].key])
     if view.sort == "title":
-        return sorted(awards, key=lambda a: a.title.lower())
-    if view.sort == "console":
-        return sorted(awards, key=lambda a: (a.console_name.lower(), a.title.lower()))
-    return sorted(awards, key=lambda a: -(a.awarded_at or 0))
+        return sorted(shown, key=lambda pair: pair[1].title.casefold())
+    if view.sort == "console" and view.filter not in _NO_CONSOLES:
+        return sorted(
+            shown,
+            key=lambda pair: (
+                group(pair[0]) is not AwardGroup.GAME,
+                pair[0].console_name.casefold(),
+                pair[1].title.casefold(),
+            ),
+        )
+    return sorted(shown, key=lambda pair: (-(pair[0].awarded_at or 0), pair[0].position))
 
 
-def _tiles(ctx: AppContext, awards: Sequence[Award]) -> list[MenuItem]:
-    """Build the wall's tiles: game icon, title caption, award frame.
+def _item(ctx: AppContext, award: Award, text: AwardText) -> MenuItem:
+    """Build one award's carousel tile, grid tile or list row.
 
     Args:
         ctx: App context.
-        awards: Awards to show.
+        award: The award.
+        text: Its text.
 
     Returns:
-        The tiles.
+        The item.
     """
-    return [
-        MenuItem(
-            award.title,
-            icon=lambda award=award: ctx.media.game_icon(award.game_id, award.image_icon),
-            key=str(award.game_id),
-            frame=award.kind,
-        )
-        for award in awards
-    ]
+    key, path = text.image
+    fallback = "gamepad" if award.game_id is not None else "crown"
+    return MenuItem(
+        text.title,
+        text.description,
+        icon=lambda: ctx.media.resolve(key, path or None, fallback),
+        key=award.key,
+        frame=text.frame,
+        details=Details(text.description, text.date),
+        tail=text.date,
+    )
 
 
 def show_awards(ctx: AppContext) -> None:
-    """Show the awards wall until B; A opens the game, Y filters and sorts.
+    """Show the awards until B (Select: view, Y or Menu: options, A: open).
 
     Args:
         ctx: App context.
     """
-    _counts, awards = ctx.data.awards()
-    best = highest_per_game(awards)
-    if not best:
+    _counts, visible = ctx.data.awards(gallery=True)
+    events = ctx.data.events()
+    awards = [(award, describe(award, events)) for award in gallery(visible)]
+    if not awards:
         message(strings.AWARDS, [strings.NO_AWARDS])
         return
-    view = _View()
-    shown = arrange(best, view)
-    items = _tiles(ctx, shown)
+    _browse(ctx, awards)
+
+
+def _browse(ctx: AppContext, awards: list[Shown]) -> None:
+    """Show the awards in the chosen view until B.
+
+    Args:
+        ctx: App context.
+        awards: Gallery awards with their text.
+    """
+    view = _View(layout=ctx.settings.awards_view)
     selected = 0
+    shown: list[Shown] = []
+    prepared: PreparedView | None = None  # kept while a game is open: back to the same page
+    buttons = frozenset({Button.A, Button.Y, Button.MENU, Button.SELECT})
     while True:
-        if not shown:
-            message(strings.AWARDS, [strings.NO_AWARDS_MATCH])
-            view = _View()
-            shown = arrange(best, view)
-            items = _tiles(ctx, shown)
-            continue
-        title = strings.AWARDS_TITLE.format(count=fmt.number(len(shown)))
-        choice = choose(
-            title,
-            items,
-            selected=selected,
-            buttons=frozenset({Button.A, Button.Y}),
-            layout=Layout.GRID,
-            tile=ICON_TILE,
-            hints=[(Button.Y, strings.HINT_FILTER)],
-        )
+        if prepared is None:
+            shown = arrange(awards, view)
+            if not shown:
+                message(strings.AWARDS, [strings.NO_AWARDS_MATCH])
+                view, selected = replace(view, filter="all"), 0
+                continue
+            items = [_item(ctx, award, text) for award, text in shown]
+            title = strings.AWARDS_TITLE.format(count=fmt.number(len(shown)))
+            selected = min(selected, len(items) - 1)
+            prepared = PreparedView(title, items, selected=selected, layout=LAYOUTS[view.layout])
+        toggle = strings.AWARD_VIEWS[next_view(view.layout)]
+        hints = [(Button.Y, strings.HINT_FILTER), (Button.SELECT, toggle)]
+        choice = prepared.show(buttons=buttons, hints=hints)
         if choice is None:
             return
-        if choice.button is Button.Y:
-            changed = _options(view)
-            if changed != view:
-                view, selected = changed, 0
-                shown = arrange(best, view)
-                items = _tiles(ctx, shown)
-            continue
         selected = choice.index
-        show_game(ctx, shown[choice.index].game_id)
+        if choice.button is Button.SELECT:  # carousel -> grid -> list, keeping the selection
+            view = _remember(ctx, replace(view, layout=next_view(view.layout)))
+            prepared = None
+        elif choice.button in (Button.Y, Button.MENU):
+            changed = _options(view, [award for award, _ in awards])
+            if changed != view:
+                if (changed.filter, changed.sort) != (view.filter, view.sort):
+                    selected = 0  # a new filter or sort starts at the top
+                view, prepared = _remember(ctx, changed), None
+        else:
+            award = shown[selected][0]
+            # Only game awards open: event and site IDs are never game IDs, and old events'
+            # masteries are event badges too.
+            if group(award) is AwardGroup.GAME and award.game_id is not None:
+                show_game(ctx, award.game_id)
 
 
-def _options(view: _View) -> _View:
-    """Let the user change the filter or sort through popups.
+def _remember(ctx: AppContext, view: _View) -> _View:
+    """Keep the view for next time (settings are saved on exit).
+
+    Args:
+        ctx: App context.
+        view: The new choices.
+
+    Returns:
+        ``view``.
+    """
+    if ctx.settings.awards_view != view.layout:
+        ctx.update_settings(replace(ctx.settings, awards_view=view.layout))
+    return view
+
+
+def _options(view: _View, awards: Sequence[Award]) -> _View:
+    """Let the user change the view, filter or sort through popups.
 
     Args:
         view: Current choices.
+        awards: The gallery's awards (for the filters' counts).
 
     Returns:
         The updated choices (unchanged if the user backed out).
     """
-    menu = {
-        "filter": strings.FILTER.format(value=strings.AWARD_FILTERS[view.filter]),
-        "sort": strings.SORT.format(value=strings.AWARD_SORTS[view.sort]),
+    sorts = {
+        key: label
+        for key, label in strings.AWARD_SORTS.items()
+        if key != "console" or view.filter not in _NO_CONSOLES
     }
-    which = pick(strings.AWARDS, menu, "filter")
+    sort = view.sort if view.sort in sorts else "newest"
+    menu = {
+        "layout": strings.VIEW.format(value=strings.AWARD_VIEWS[view.layout]),
+        "filter": strings.FILTER.format(value=strings.AWARD_FILTERS[view.filter]),
+        "sort": strings.SORT.format(value=strings.AWARD_SORTS[sort]),
+    }
+    which = pick(strings.AWARDS, menu, "layout")
+    if which == "layout":
+        layout = pick(strings.AWARDS, strings.AWARD_VIEWS, view.layout)
+        return replace(view, layout=layout) if layout else view
     if which == "filter":
-        chosen = pick(strings.AWARDS, strings.AWARD_FILTERS, view.filter)
-        return replace(view, filter=chosen) if chosen else view
+        counts = {key: sum(1 for a in awards if test(a)) for key, test in FILTERS.items()}
+        filters = {  # empty filters are left out, except "All" and the current one
+            key: strings.AWARD_FILTER_COUNT.format(label=label, count=fmt.number(counts[key]))
+            for key, label in strings.AWARD_FILTERS.items()
+            if counts[key] or key in ("all", view.filter)
+        }
+        chosen = pick(strings.AWARDS, filters, view.filter)
+        if not chosen:
+            return view
+        keeps_sort = view.sort != "console" or chosen not in _NO_CONSOLES
+        return replace(view, filter=chosen, sort=view.sort if keeps_sort else "newest")
     if which == "sort":
-        chosen = pick(strings.AWARDS, strings.AWARD_SORTS, view.sort)
+        chosen = pick(strings.AWARDS, sorts, sort)
         return replace(view, sort=chosen) if chosen else view
     return view

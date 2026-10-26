@@ -22,23 +22,37 @@
       "selected": "Performance",
       "overrides": {}
     },
+    "raBuild": {
+      "display": "RA Build",
+      "devices": [
+        "MIYOO_FLIP",
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
+      ],
+      "options": [
+        "64-bit",
+        "32-bit"
+      ],
+      "selected": "64-bit",
+      "overrides": {}
+    },
     "Emulator_RGB30": {
       "display": "Emulator",
       "devices": [
         "DARKMOSS"
       ],
       "options": [
-        "yabasanshiro-standalone-hle",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
-        "yabasanshiro_a133p_libretro"
+        "yabasanshiro-standalone-hle"
       ],
-      "selected": "yabasanshiro-standalone-hle",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_Flip": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
@@ -46,7 +60,7 @@
         "MIYOO_FLIP",
         "ANBERNIC_RGXX"
       ],
-      "selected": "yabasanshiro_libretro",
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_Pixel2": {
@@ -65,28 +79,55 @@
     "Emulator_SmartProS": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_smartpros_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
         "TRIMUI_SMART_PRO_S"
       ],
-      "selected": "yabasanshiro_smartpros_libretro",
+      "selected": "yabasanshiro_generic_libretro",
+      "overrides": {}
+    },
+    "Emulator_Brick": {
+      "display": "Emulator",
+      "options": [
+        "yabasanshiro_generic_libretro",
+        "yabasanshiro-standalone-bios",
+        "yabasanshiro-standalone-hle"
+      ],
+      "devices": [
+        "TRIMUI_A133P"
+      ],
+      "selected": "yabasanshiro_generic_libretro",
       "overrides": {}
     },
     "Emulator_64": {
       "display": "Emulator",
       "options": [
-        "yabasanshiro_a133p_libretro",
+        "yabasanshiro_generic_libretro",
         "yabasanshiro-standalone-bios",
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "TRIMUI_A133P",
         "MAGICX_A133P"
       ],
-      "selected": "yabasanshiro_a133p_libretro",
+      "selected": "yabasanshiro_generic_libretro",
+      "overrides": {}
+    },
+    "Emulator_32": {
+      "display": "Emulator",
+      "options": [
+        "yabadabadoo"
+      ],
+      "devices": [
+        "MIYOO_MINI_FAMILY",
+        "MIYOO_A30",
+        "MIYOO_FLIP",
+        "ANBERNIC_RGXX",
+        "DARKMOSS"
+      ],
+      "selected": "yabadabadoo",
       "overrides": {}
     }
   },
@@ -96,17 +137,6 @@
   "releaseYear": 1994,
   "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000,
-  "devices": [
-    "TRIMUI_BRICK",
-    "TRIMUI_BRICK_PRO",
-    "TRIMUI_SMART_PRO",
-    "TRIMUI_SMART_PRO_S",
-    "MIYOO_FLIP",
-    "GKD_PIXEL2",
-    "ANBERNIC_RGXX",
-    "DARKMOSS",
-    "MAGICX_A133P"
-  ],
   "alternativeFolderNames": [
     "saturn",
     "segasaturn",

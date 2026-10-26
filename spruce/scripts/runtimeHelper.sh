@@ -6,6 +6,28 @@
 . /mnt/SDCARD/spruce/scripts/network/sshFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
+# Pids of device_init background jobs that must be gone before the frontend starts.
+# Only runtime.sh's shell owns them, so only it can wait on them.
+DEVICE_INIT_WAIT_PIDS=""
+# Pids of device_init jobs holding the display.
+DEVICE_INIT_DISPLAY_PIDS=""
+
+# Waits for the device_init jobs that must finish before the frontend starts; returns 0.
+# With --except-display, the display jobs are left running; the caller's frontend
+# must then wait for the display itself.
+wait_device_init_jobs() {
+    _diw_pids="$DEVICE_INIT_WAIT_PIDS"
+    if [ "$1" != "--except-display" ]; then
+        _diw_pids="$_diw_pids $DEVICE_INIT_DISPLAY_PIDS"
+        DEVICE_INIT_DISPLAY_PIDS=""
+    fi
+    for _diw_pid in $_diw_pids; do
+        wait "$_diw_pid" 2>/dev/null
+    done
+    DEVICE_INIT_WAIT_PIDS=""
+    return 0
+}
+
 run_sd_card_fix_if_triggered() {
     needs_fix=false
     if [ -e /mnt/SDCARD/FIX_MY_SDCARD ]; then
@@ -24,6 +46,17 @@ run_sd_card_fix_if_triggered() {
     fi
 }
 
+# Read by PortMaster's device_info.txt. In /tmp because the card moves between devices.
+write_device_info() {
+    cat > /tmp/spruce_device_info.env <<EOF
+CFW_NAME="spruce"
+CFW_VERSION="$(get_version)"
+DEVICE_NAME="$SPRUCE_DEVICE_NAME"
+SPRUCE_PLATFORM="$PLATFORM"
+ANALOG_STICKS="$DEVICE_NUM_ANALOG_STICKS"
+EOF
+}
+
 hide_fw_app() {
     jq 'if .label then ."#label" = .label | del(.label) else . end' /mnt/SDCARD/App/-FirmwareUpdate-/config.json > /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp && mv /mnt/SDCARD/App/-FirmwareUpdate-/config.json.tmp /mnt/SDCARD/App/-FirmwareUpdate-/config.json
 }
@@ -34,11 +67,9 @@ show_fw_app() {
 
 # Define the function to check and hide the firmware update app
 check_and_handle_firmware_app() {
-    need_fw_update="$(check_if_fw_needs_update)"
-    if [ "$need_fw_update" = "true" ]; then
+    hide_fw_app
+    if [ -n "$(local_fw_update_file)" ] || [ "$(check_if_fw_needs_update)" = "true" ]; then
         show_fw_app
-    else
-        hide_fw_app
     fi
 }
 
@@ -92,8 +123,9 @@ check_for_update() {
         last_check=$(cat "$timestamp_file")
         time_diff=$((current_time - last_check))
         
-        # If less than 24 hours have passed, skip the check
-        if [ $time_diff -lt $check_interval ]; then
+        # If less than 24 hours have passed, skip the check. A negative gap means the clock is behind the
+        # stamp (a card moved to a Mini V4 boots at 1970): treat it as stale rather than skip forever.
+        if [ $time_diff -ge 0 ] && [ $time_diff -lt $check_interval ]; then
             log_message "Update Check: Skipping check, last check was $((time_diff / 3600)) hours ago"
             return 1
         fi
@@ -122,7 +154,7 @@ check_for_update() {
     # Try up to 3 times to get a connection
     attempts=0
     while [ $attempts -lt 3 ]; do
-        if ping -c 3 spruceui.github.io >/dev/null 2>&1; then
+        if internet_reachable; then
             break
         fi
         attempts=$((attempts + 1))
@@ -135,12 +167,9 @@ check_for_update() {
         sleep 20
     done
 
-    # Get current version based on mode
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
-        CURRENT_VERSION=$(get_version_complex)
-    else
-        CURRENT_VERSION=$(get_version)
-    fi
+    # Anyone can pick the nightly channel: read the installed nightly's full
+    # version from its root marker (a stable card reads its plain version).
+    CURRENT_VERSION=$(get_version_complex)
 
     read_only_check
 
@@ -202,17 +231,17 @@ check_for_update() {
         # Target version is higher, always consider it an update
         update_available=1
     elif [ "$version_higher" = "0" ] && [ "$target_base_version" = "$current_base_version" ]; then
-        # Same base version, check suffixes
-        if flag_check "developer_mode" || flag_check "tester_mode"; then
-            # For testers/developers, nightlies are updates
-            if [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
-                update_available=1
-            elif [ "$nightly_rebuilt" = "1" ]; then
-                log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
-                update_available=1
-            elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
-                log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
-            fi
+        # Same base version: the stable release of the installed nightly, a
+        # newer nightly or a rebuilt one is an update, as downloader.sh offers it.
+        if [ -z "$target_suffix" ] && [ -n "$current_date" ]; then
+            update_available=1
+        elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -gt "$current_date" ]; then
+            update_available=1
+        elif [ "$nightly_rebuilt" = "1" ]; then
+            log_message "Update Check: Nightly $TARGET_VERSION was rebuilt (installed build $current_build, published $target_build)"
+            update_available=1
+        elif [ -n "$target_date" ] && [ -n "$current_date" ] && [ "$target_date" -lt "$current_date" ]; then
+            log_message "Update Check: Installed nightly $CURRENT_VERSION is newer than the published $TARGET_VERSION (update feed not refreshed yet?)"
         fi
     fi
 
@@ -250,6 +279,8 @@ check_for_update() {
             if [ "$(echo "$target_base_version $prompted_base_version" | awk '{split($1,a,"."); split($2,b,"."); for (i=1; i<=3; i++) {if (a[i]<b[i]) {print $2; exit} else if (a[i]>b[i]) {print $1; exit}} print $2}')" != "$prompted_base_version" ]; then
                 newer_than_prompted=1
             elif [ -n "$prompted_date" ] && [ -n "$target_date" ] && [ "$target_date" -gt "$prompted_date" ]; then
+                newer_than_prompted=1
+            elif [ "$target_base_version" = "$prompted_base_version" ] && [ -z "$target_suffix" ] && [ -n "$prompted_date" ]; then
                 newer_than_prompted=1
             elif [ "$nightly_rebuilt" = "1" ] && [ "$prompted_version" = "$TARGET_VERSION" ] && [ "$prompted_build" != "$target_build" ]; then
                 newer_than_prompted=1
@@ -324,6 +355,14 @@ check_and_hide_update_app() {
     fi
 }
 
+# networkservices.sh starts SSH and Samba once Wi-Fi connects; this task also covers
+# a network it does not wait for (eth0, Wi-Fi off). It polls slowly: each
+# network_is_connected pass forks about seven processes, and polling every 0.2 s
+# competed with the first menu frame for the CPU.
+DEV_MODE_FAST_POLLS=30		# 30 x 2 s = first minute
+DEV_MODE_FAST_INTERVAL=2
+DEV_MODE_SLOW_INTERVAL=10
+
 developer_mode_task() {
     if flag_check "developer_mode"; then
         samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
@@ -331,9 +370,14 @@ developer_mode_task() {
         ssh_service=$(get_ssh_service_name)
 
         if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            # Loop until network is connected
+            _dev_polls=0
             while ! network_is_connected true; do
-                sleep 0.2
+                if [ "$_dev_polls" -lt "$DEV_MODE_FAST_POLLS" ]; then
+                    sleep "$DEV_MODE_FAST_INTERVAL"
+                    _dev_polls=$((_dev_polls + 1))
+                else
+                    sleep "$DEV_MODE_SLOW_INTERVAL"
+                fi
             done
 
             if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
@@ -405,7 +449,9 @@ unstage_archive() {
 # drawn. preCmd unpacks after it in the same foreground run, so moving any of
 # them there is a deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
-    if [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; then
+    # The Mini V4 and Mini Flip (752x560) have always taken the 640x480 overlays
+    if { [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; } ||
+        { [ "$DISPLAY_WIDTH" = "752" ] && [ "$DISPLAY_HEIGHT" = "560" ]; }; then
         unstage_archive "overlays_640x480.7z" "preMenu"
     elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
         unstage_archive "overlays_1024x768.7z" "preMenu"
@@ -418,24 +464,6 @@ unstage_archives_wanted() {
     fi
     if [ "$DEVICE_HAS_32_BIT_RA" = "true" ] || [ "$DEVICE_USES_64_BIT_RA" != "true" ]; then
         unstage_archive "cores32.7z" "preMenu"
-    fi
-}
-
-UPDATE_ICON="/mnt/SDCARD/Themes/SPRUCE/icons/app/firmwareupdate.png"
-
-# This works with checker to display a notification if an update is available
-# But only on next boot. So if they find the app by themselves it's fine.
-update_notification(){
-    if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 0 ]; then
-        exit 1
-    fi
-
-    if flag_check "update_available"; then
-        available_version=$(cat "$(flag_path update_available)")
-        display --icon "$UPDATE_ICON" -t "Update available!
-Version ${available_version} is ready to install
-Go to Apps and look for 'Update Available'" --okay
-        flag_remove "update_available"
     fi
 }
 
@@ -465,6 +493,15 @@ read_unpack_state() {
     fi
 }
 
+# Checks whether any archive is waiting to be unpacked; returns 0 if one is.
+# The lanes checked must match archiveUnpacker.sh.
+archives_queued() {
+    for _aq in /mnt/SDCARD/Themes/*.7z /mnt/SDCARD/spruce/archives/preMenu/*.7z /mnt/SDCARD/spruce/archives/preCmd/*.7z; do
+        [ -e "$_aq" ] && return 0
+    done
+    return 1
+}
+
 run_archive_unpacker_foreground() {
     SPRUCE_FIRSTBOOT_UI="$FIRSTBOOT_PROGRESS_CONTEXT_UI" \
     SPRUCE_FIRSTBOOT_ARCHIVE_TOTAL="${FIRSTBOOT_PROGRESS_CONTEXT_TOTAL:-0}" \
@@ -476,6 +513,7 @@ run_unpacker_foreground() {
     log_prefix="$1"
     firstboot_ui="$2"
 
+    wait_device_init_jobs   # the unpack status is shown by a PyUI
     firstboot_progress_prepare_unpacker_context "${firstboot_ui:-0}"
     run_archive_unpacker_foreground
     firstboot_progress_finalize_unpacker_context "${firstboot_ui:-0}"
@@ -636,5 +674,13 @@ set_up_boot_action() {
                 log_message "$("$(get_python_path)" /mnt/SDCARD/spruce/scripts/megamode.py "$PLATFORM" $(device_names) 2>&1)"
                 ;;
         esac
+    fi
+}
+
+randomize_theme_if_requested() {
+    _setting="$(get_config_value '.menuOptions."System Settings".randomThemeAtBoot.selected' "False")"
+    if [ "$_setting" = "True" ]; then
+        log_message "Randomizing theme per user settings."
+        /mnt/SDCARD/spruce/scripts/random_theme.sh
     fi
 }

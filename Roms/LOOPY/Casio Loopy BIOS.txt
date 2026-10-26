@@ -1,0 +1,6 @@
+The Casio Loopy needs its BIOS. Put these files in /BIOS on the SD card:
+
+loopy_bios.bin       required, 32 KB, MD5 d527e3ed1bf9bd0661154c202a65c5bd
+loopy_soundbios.bin  optional, 512 KB, MD5 c0f1c899c9ca098663d046d60779711d (no sound without it)
+
+Wanwan Aijou Monogatari's expansion sound needs its .wav files in a "pcm" folder next to the ROM.

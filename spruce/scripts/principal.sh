@@ -19,6 +19,11 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# Polls for a CPU mode change in flight to finish before a game launch:
+# at most TICKS polls, TICK_S apart.
+CPU_LOCK_WAIT_TICKS=30
+CPU_LOCK_WAIT_TICK_S=0.05
+
 while true; do
     log_message "Starting new loop of principal.sh"
 
@@ -33,11 +38,16 @@ while true; do
         log_message "exit_to_stock flag present; leaving principal.sh for the boot session"
         exit 0
     fi
-    set_smart
 
-    stop_pyui_message_writer
-    enable_or_disable_rgb
-    set_rgb_in_menu
+    # A staged command runs without passing through launch.sh, so only it needs
+    # the graphics cleanup here; launch.sh does its own before the menu.
+    if [ -f /tmp/cmd_to_run.sh ]; then
+        stop_pyui_message_writer
+    else
+        kill_pyui_message_writer
+    fi
+    # Not awaited: the menu does not depend on the LEDs.
+    ( enable_or_disable_rgb; set_rgb_in_menu ) &
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
@@ -45,6 +55,7 @@ while true; do
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
+        hide_or_unhide_AccentColor_app
 
         prepare_for_pyui_launch
 
@@ -97,6 +108,12 @@ while true; do
         sync
         cmd="$(sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh)"
         log_activity_event "$cmd" "START"
+        # A CPU mode change still in flight makes set_performance a no-op.
+        _cpu_ticks=0
+        while flag_check "setting_cpu" && [ "$_cpu_ticks" -lt "$CPU_LOCK_WAIT_TICKS" ]; do
+            sleep "$CPU_LOCK_WAIT_TICK_S"
+            _cpu_ticks=$((_cpu_ticks + 1))
+        done
         set_performance # lead with this to speed up launching
 
         udpbcast -f /tmp/host_msg 2>/dev/null &

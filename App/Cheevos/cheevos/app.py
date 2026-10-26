@@ -13,32 +13,33 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
 
 from cheevos.core.clock import network_clock
+from cheevos.core.credentials import Credentials
 from cheevos.core.errors import AuthError, CheevosError
 from cheevos.core.models import Unlock
-from cheevos.core.net import is_online
 from cheevos.core.proxy import ProxyReader
-from cheevos.core.ra_client.client import RaClient
 from cheevos.core.ra_client.pacer import API_INTERVAL, Pacer
-from cheevos.core.ra_client.transport import HttpTransport, Transport
 from cheevos.core.screenshots import ScreenshotIndex, screenshot_directory
 from cheevos.core.settings import load_settings
 from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache
 from cheevos.core.sync.background import BackgroundSync
 from cheevos.core.sync.detail_fetch import DetailFetcher, DetailSession
-from cheevos.core.sync.engine import SyncDeps
 from cheevos.core.sync.lazy_media import LazyMediaFetcher, MediaSession
-from cheevos.core.sync.session import Credentials, make_client, open_sync_deps
 from cheevos.platform.paths import Paths
 from cheevos.ui.context import AppContext
 from cheevos.ui.media import MediaResolver
-from cheevos.ui.pyui import generated, primitives, status_bar, title_bar, visible_images
+from cheevos.ui.pyui import generated, primitives, redraw, status_bar, title_bar, visible_images
 from cheevos.ui.screens.home import Home
 from cheevos.ui.screens.setup import change_key, ensure_credentials
 from cheevos.ui.screens.status import SyncBar
+
+if TYPE_CHECKING:
+    from cheevos.core.ra_client.client import RaClient
+    from cheevos.core.ra_client.transport import Transport
+    from cheevos.core.sync.engine import SyncDeps
 
 logger = logging.getLogger(__name__)
 _T = TypeVar("_T")
@@ -46,6 +47,56 @@ _T = TypeVar("_T")
 _RES = Path(__file__).resolve().parent / "res"
 _LARGE_SCREEN_WIDTH = 1000
 _SHUTDOWN_TIMEOUT = 3.0
+
+# The RA client, its transport (http.client, ssl) and the sync engine load on first use, on
+# the worker threads or when the user asks: the first frame doesn't need them
+# (.agents/device.md, "Start-up").
+
+
+def _http_transport() -> Transport:
+    """Create the real HTTPS transport.
+
+    Returns:
+        A new transport.
+    """
+    from cheevos.core.ra_client.transport import HttpTransport
+
+    return HttpTransport()
+
+
+def _is_online() -> bool:
+    """Check that RA is reachable (see :func:`cheevos.core.net.is_online`).
+
+    Returns:
+        Whether RA answered.
+    """
+    from cheevos.core.net import is_online
+
+    return is_online()
+
+
+def _client(
+    env: AppEnvironment,
+    credentials: Credentials,
+    transport: Transport,
+    pacer: Pacer,
+    cancel: threading.Event | None = None,
+) -> RaClient:
+    """Create an RA client for these credentials (see :func:`sync.session.make_client`).
+
+    Args:
+        env: App environment.
+        credentials: Account.
+        transport: HTTP transport.
+        pacer: The app's shared request pacer.
+        cancel: Set to stop the client's waits.
+
+    Returns:
+        The client.
+    """
+    from cheevos.core.sync.session import make_client
+
+    return make_client(env.paths, credentials, transport, pacer=pacer, cancel=cancel)
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,8 +114,8 @@ class AppEnvironment:
     """
 
     paths: Paths
-    transport_factory: Callable[[], Transport] = HttpTransport
-    online: Callable[[], bool] = is_online
+    transport_factory: Callable[[], Transport] = _http_transport
+    online: Callable[[], bool] = _is_online
     clock: Callable[[], float] = network_clock.now
     auto_sync: bool | None = None
     api_interval: float = API_INTERVAL
@@ -101,9 +152,7 @@ def _validator(env: AppEnvironment, pacer: Pacer) -> Callable[[str, str], bool |
 
     def validate(username: str, key: str) -> bool | None:
         """Ask RA whether ``key`` is valid for ``username`` (anything but a rejection: unknown)."""
-        client = make_client(
-            env.paths, Credentials(username, key), env.transport_factory(), pacer=pacer
-        )
+        client = _client(env, Credentials(username, key), env.transport_factory(), pacer)
         try:
             return client.validate_key()
         except AuthError:
@@ -153,7 +202,7 @@ class _OnDemand:
         """
         env = self._env
         credentials = self._ctx_ref[0].credentials
-        client = make_client(env.paths, credentials, env.transport_factory(), pacer=self._pacer)
+        client = _client(env, credentials, env.transport_factory(), self._pacer)
         try:
             return request(client)
         except CheevosError:
@@ -178,7 +227,7 @@ def _media_session(
     def open_session() -> MediaSession:
         """Open a client and an image-cache connection for the fetcher thread."""
         credentials = ctx_ref[0].credentials
-        client = make_client(env.paths, credentials, env.transport_factory(), pacer=pacer)
+        client = _client(env, credentials, env.transport_factory(), pacer)
         media = MediaCache.open(env.paths.media_db, env.paths.media_scratch)
         return client, media, media.close
 
@@ -205,7 +254,7 @@ def _detail_session(
         """Open a client (its waits end with ``stop``) and a data-cache connection."""
         credentials = ctx_ref[0].credentials
         transport = env.transport_factory()
-        client = make_client(env.paths, credentials, transport, pacer=pacer, cancel=stop)
+        client = _client(env, credentials, transport, pacer, cancel=stop)
         data = DataCache.open(env.paths.data_db, credentials.username)
 
         def close() -> None:
@@ -240,18 +289,21 @@ def _sync_deps(
     def open_deps(cancel: threading.Event) -> SyncDeps:
         """Open the sync's client and caches; its waits stop when ``cancel`` is set."""
         credentials = ctx_ref[0].credentials
+        from cheevos.core.sync.session import open_sync_deps
+
         transport = env.transport_factory()
         return open_sync_deps(env.paths, credentials, transport, pacer=pacer, cancel=cancel)
 
     return open_deps
 
 
-def run(*, started_at: float, env: AppEnvironment) -> None:
+def run(*, started_at: float, env: AppEnvironment, game_id: int | None = None) -> None:
     """Run the app until the user leaves the home screen.
 
     Args:
         started_at: ``time.monotonic()`` at process start (for the start-up log line).
         env: App environment.
+        game_id: Open and refresh this game only, returning to Spruce on B.
     """
     paths = env.paths
     icons = _icons_dir()
@@ -271,11 +323,19 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
     except CheevosError:
         logger.exception("Could not open the caches")
         return
-    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer))
+    fetcher = LazyMediaFetcher(_media_session(env, ctx_ref, pacer), on_change=redraw.request_redraw)
     details = DetailFetcher(
-        _detail_session(env, ctx_ref, pacer), clock=env.clock, online=env.online
+        _detail_session(env, ctx_ref, pacer),
+        clock=env.clock,
+        online=env.online,
+        on_change=redraw.request_redraw,
     )
-    sync = BackgroundSync(_sync_deps(env, ctx_ref, pacer), online=env.online, clock=env.clock)
+    sync = BackgroundSync(
+        _sync_deps(env, ctx_ref, pacer),
+        online=env.online,
+        clock=env.clock,
+        on_change=redraw.request_redraw,
+    )
     ctx = AppContext(
         paths=paths,
         credentials=credentials,
@@ -293,18 +353,24 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
         fetch_first_unlock=on_demand.first_unlock,
         clock=env.clock,
         refresh_time=env.online,
+        launch_game_id=game_id,
     )
     ctx_ref.append(ctx)
-    if settings.auto_sync if env.auto_sync is None else env.auto_sync:
-        ctx.start_sync()
+    auto_sync = settings.auto_sync if env.auto_sync is None else env.auto_sync
     logger.info("UI ready after %.2fs", time.monotonic() - started_at)
     generated.use_scratch(paths.scaled_scratch)
     visible_images.track_images(lambda: ctx.media.version, ctx.media.new_window)
-    bar = SyncBar(ctx, _icons_dir(bar=True), lambda: change_key(ctx))
+    bar = _session_bar(ctx, _icons_dir(bar=True), game_id)
     try:
         with status_bar.installed(bar.status, bar.press_start), title_bar.installed():
-            Home(ctx).run()
+            if game_id is None:
+                Home(ctx, sync_when_shown=auto_sync).run()
+            else:
+                from cheevos.ui.screens.game_detail import show_game
+
+                show_game(ctx, game_id, refresh=True)
     finally:
+        ctx.flush_settings()
         sync.cancel()
         sync.join(_SHUTDOWN_TIMEOUT)
         details.close()
@@ -314,3 +380,12 @@ def run(*, started_at: float, env: AppEnvironment) -> None:
         # Extracted and enlarged images live in RAM (tmpfs) on devices; give it back.
         shutil.rmtree(paths.media_scratch, ignore_errors=True)
         shutil.rmtree(paths.scaled_scratch, ignore_errors=True)
+
+
+def _session_bar(ctx: AppContext, icons: Path, game_id: int | None) -> SyncBar:
+    """Build the account or single-game session's status and Start action."""
+    if game_id is not None:
+        from cheevos.ui.screens.game_status import GameSyncBar
+
+        return GameSyncBar(ctx, icons, lambda: change_key(ctx), game_id)
+    return SyncBar(ctx, icons, lambda: change_key(ctx))

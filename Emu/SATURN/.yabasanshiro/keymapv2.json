@@ -1,7 +1,7 @@
 {
   "0_Xbox 360 Controller_030000005e0400008e02000014010000": {
     "a": {
-      "id": 2,
+      "id": 0,
       "type": "button",
       "value": 1
     },
@@ -26,12 +26,12 @@
       "value": 0
     },
     "b": {
-      "id": 0,
+      "id": 1,
       "type": "button",
       "value": 1
     },
     "c": {
-      "id": 1,
+      "id": 4,
       "type": "button",
       "value": 1
     },
@@ -41,8 +41,8 @@
       "value": 4
     },
     "l": {
-      "id": 4,
-      "type": "button",
+      "id": 2,
+      "type": "axis",
       "value": 1
     },
     "left": {
@@ -52,7 +52,7 @@
     },
     "r": {
       "id": 5,
-      "type": "button",
+      "type": "axis",
       "value": 1
     },
     "right": {
@@ -77,7 +77,7 @@
     },
     "x": {
       "id": 2,
-      "type": "axis",
+      "type": "button",
       "value": 1
     },
     "y": {
@@ -87,13 +87,13 @@
     },
     "z": {
       "id": 5,
-      "type": "axis",
+      "type": "button",
       "value": 1
     }
   },
   "0_Xbox 360 Controller_0300a3845e0400008e02000014010000": {
     "a": {
-      "id": 1,
+      "id": 0,
       "type": "button",
       "value": 1
     },
@@ -108,13 +108,13 @@
       "value": -1
     },
     "b": {
-      "id": 0,
+      "id": 1,
       "type": "button",
       "value": 1
     },
     "c": {
-      "id": 2,
-      "type": "axis",
+      "id": 4,
+      "type": "button",
       "value": 1
     },
     "down": {
@@ -123,8 +123,8 @@
       "value": 4
     },
     "l": {
-      "id": 4,
-      "type": "button",
+      "id": 2,
+      "type": "axis",
       "value": 1
     },
     "left": {
@@ -134,7 +134,7 @@
     },
     "r": {
       "id": 5,
-      "type": "button",
+      "type": "axis",
       "value": 1
     },
     "right": {
@@ -153,18 +153,18 @@
       "value": 1
     },
     "x": {
-      "id": 3,
+      "id": 2,
       "type": "button",
       "value": 1
     },
     "y": {
-      "id": 2,
+      "id": 3,
       "type": "button",
       "value": 1
     },
     "z": {
       "id": 5,
-      "type": "axis",
+      "type": "button",
       "value": 1
     }
   },

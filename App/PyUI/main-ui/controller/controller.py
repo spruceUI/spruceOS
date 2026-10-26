@@ -5,6 +5,7 @@ from devices.device import Device
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from utils import shutdown
 
 class Controller:
     controller = None
@@ -40,6 +41,19 @@ class Controller:
     _screensaver_holds = 0
     # Logical-space point of the last TOUCH_TAP, set by the touch watcher
     touch_point = None
+    # A screen that changes, or was just used, is redrawn as often as its view
+    # asks (Display paces that to 60 frames a second). Once it has looked the same
+    # for IDLE_AFTER_SECONDS (longer than the 1 s before a long title starts to
+    # scroll) and IDLE_AFTER_FRAMES frames in a row (so a stall that leaves only a
+    # frame or two in that time can't pass for a still screen), get_input()
+    # sleeps until a button, request_redraw() or the screensaver, and the screen
+    # is drawn every IDLE_FRAME_SECONDS (the clock, the battery icon) instead of
+    # as fast as the device can.
+    IDLE_AFTER_SECONDS = 1.5
+    IDLE_AFTER_FRAMES = 6
+    IDLE_FRAME_SECONDS = 1.0
+    _redraw_requested = False
+    _last_press_time = 0
 
     # The sequence we want to detect
     _SECRET_CODE = [
@@ -88,6 +102,35 @@ class Controller:
     @staticmethod
     def init_controller():
         Controller.controller_interface.init_controller()
+
+    @staticmethod
+    def request_redraw():
+        """Have the screen drawn again now, from any thread, by ending a wait for input.
+
+        For changes no button makes (a volume key, a download finishing): a screen that
+        looks the same is otherwise only drawn every IDLE_FRAME_SECONDS.
+        """
+        Controller._redraw_requested = True
+        if Controller.controller_interface is not None:
+            Controller.controller_interface.wake()
+
+    @staticmethod
+    def _default_timeout():
+        from display.display import Display
+        if Controller._redraw_requested:
+            Controller._redraw_requested = False
+            return 0
+        now = time.monotonic()
+        last_activity = max(Display.last_change_time(), Controller._last_press_time)
+        if now - last_activity < Controller.IDLE_AFTER_SECONDS:
+            return 0
+        # A loop that draws nothing (waiting for one button) has no frames to count.
+        drew_since_last_wait = Display.last_present_time() > Controller.last_input_time
+        if drew_since_last_wait and Display.unchanged_frames() < Controller.IDLE_AFTER_FRAMES:
+            return 0
+        # From the last frame, or from the last wait in a loop that draws nothing.
+        since = max(Display.last_present_time(), Controller.last_input_time)
+        return max(since + Controller.IDLE_FRAME_SECONDS - now, 0)
 
 
     @staticmethod
@@ -193,8 +236,54 @@ class Controller:
         Controller.clear_last_input()
         Controller.gs_triggered = False
 
+
+    return_count_of_current_input = 0
+    last_hold_return_time  = 0
+
+    #This is to account for dumb coding elsewhere that I don't want to fix
+    get_input_called_again = False
+
+    @staticmethod
+    def last_input():
+
+        if(not Controller.get_input_called_again):
+            # Means someone is calling for a cached value, not a call after
+            # an input has actually been requested. This method should have never existed
+            # as it has a dual purpose which makes the delay difficult
+            return Controller.last_controller_input
+        
+        if(Controller.last_controller_input is None):
+            return None
+        
+        now = time.monotonic()
+        if(Controller.return_count_of_current_input == 0):
+            # This is for initiating turbo mode
+            Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
+        else:
+            # Means we have already returned once
+            elapsed = now - Controller.last_hold_return_time
+            if(elapsed < Controller.hold_delay):
+                return None
+            
+            if(Controller.return_count_of_current_input == 1):
+                # This is the delay for each press AFTER turbo mode is engaged
+                Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
+
+        Controller.last_hold_return_time = now
+        Controller.return_count_of_current_input += 1
+        Controller.get_input_called_again = False
+        return Controller.last_controller_input
+
+
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
+        shutdown.checkpoint()
+        Controller.get_input_called_again = True
+        if(Controller.return_count_of_current_input != 0 and Controller.still_held_down() and not called_from_check_for_hotkey):
+            return True # TODO is this okay
+        if(not called_from_check_for_hotkey):
+            Controller.return_count_of_current_input = 0
+        
         if(Controller.first_check_after_gs_triggered):
             #Let user stop holding menu
             Controller.first_check_after_gs_triggered = False
@@ -209,6 +298,7 @@ class Controller:
         if Controller._screensaver_active:
             from display.screensaver import ScreenSaver
             while True:
+                shutdown.checkpoint()
                 ScreenSaver.render_if_needed()
                 Controller.controller_interface.force_refresh()
                 if Controller.still_held_down():
@@ -216,6 +306,7 @@ class Controller:
                     continue
                 ms = int(POLL_INTERVAL_SECONDS * 1000)
                 inp = Controller.controller_interface.get_input(ms)
+                shutdown.checkpoint()
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
                     continue
@@ -243,7 +334,7 @@ class Controller:
             callback()
 
         if timeout == DEFAULT_TIMEOUT_FLAG:
-            timeout = Device.get_device().input_timeout_default()
+            timeout = Controller._default_timeout()
 
         now = time.monotonic()
         time_since_last_input = now - Controller.last_input_time
@@ -257,19 +348,9 @@ class Controller:
         Controller.controller_interface.force_refresh()
         start_time = time.monotonic()
 
-        # Wait if the input is being held down (anti-repeat logic)
-        while Controller.still_held_down() and (time.monotonic() - start_time < Controller.hold_delay):
-            Controller.controller_interface.force_refresh()
-            time.sleep(POLL_INTERVAL_SECONDS)
-
         was_hotkey = False
         started_held_down = Controller.still_held_down()
-        if not Controller.still_held_down():
-            #if(Controller.last_controller_input is not None):
-            #    PyUiLogger.get_logger().info(f"Controller input is not longer held down")
-            # Reset hold delay and clear any lingering event
-            Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
-
+        if not Controller.still_held_down():                
             # Blocking wait for event until timeout
             elapsed = time.monotonic() - start_time
             remaining_time = timeout - elapsed
@@ -282,6 +363,7 @@ class Controller:
 
                 ms_remaining = int(remaining_time * 1000)
                 input = Controller.controller_interface.get_input(ms_remaining)
+                shutdown.checkpoint()
                 input = Device.get_device().check_for_button_remap(input)
                 Controller.set_last_input(input)
 
@@ -301,7 +383,7 @@ class Controller:
                             while Controller.still_held_down() and not called_from_check_for_hotkey:
                                 Controller.check_for_hotkey()
                     elif (Controller.last_controller_input in (ControllerInput.VOLUME_UP, ControllerInput.VOLUME_DOWN)
-                          and not called_from_check_for_hotkey):
+                        and not called_from_check_for_hotkey):
                         # Pads that carry the volume keys on the gamepad node (Miniloong)
                         # deliver them here instead of through a KeyWatcher; give them the
                         # watcher's treatment (device.special_input -> step + indicator +
@@ -311,6 +393,9 @@ class Controller:
                         Controller.clear_last_input()
                     else:
                         break  # Valid non-hotkey input
+                if Controller._redraw_requested:
+                    Controller._redraw_requested = False
+                    break
                 elapsed = time.monotonic() - start_time
                 remaining_time = timeout - elapsed
                 if not called_from_check_for_hotkey and Controller._screensaver_allowed() and screensaver_timeout > 0:
@@ -321,12 +406,6 @@ class Controller:
                         Controller._try_start_screensaver(Display)
                     break
 
-
-        #TODO i think this loop is in the wrong place
-        # Wait if the input is being held down (anti-repeat logic)
-        while started_held_down and Controller.still_held_down() and (time.monotonic() - start_time < Controller.hold_delay):
-            Controller.controller_interface.force_refresh()
-            time.sleep(POLL_INTERVAL_SECONDS)
 
         if Controller.still_held_down():
             if(ControllerInput.MENU == Controller.last_input()):
@@ -341,14 +420,11 @@ class Controller:
                     RecentsMenuGS().run_rom_selection()
                     Controller.clear_last_input()
                     Controller.gs_triggered = False
-            elif(started_held_down):
-                #if(Controller.last_controller_input is not None):
-                #    PyUiLogger.get_logger().info(f"Controller input held down but isn't menu")
-                Controller.hold_delay = Device.get_device().get_system_config().get_input_rate_limit_ms() / 1000
 
         Controller.last_input_time = time.monotonic()
         if Controller.last_controller_input is not None:
             Controller.screensaver_input_tracking_time = time.monotonic()
+            Controller._last_press_time = Controller.screensaver_input_tracking_time
         #if(Controller.last_controller_input is not None):
         #    PyUiLogger.get_logger().info(f"returning last_controller_input as: {Controller.last_controller_input}")
 
@@ -401,12 +477,6 @@ class Controller:
     @staticmethod
     def clear_input_queue():
         Controller.controller_interface.clear_input_queue()
-
-    @staticmethod
-    def last_input():
-        #if(Controller.last_controller_input is not None):
-        #    PyUiLogger.get_logger().info(f"Returning last input: {Controller.last_controller_input}")
-        return Controller.last_controller_input
 
     @staticmethod 
     def add_button_watcher(button_watcher):
@@ -481,6 +551,10 @@ class Controller:
                     Device.get_device().special_input(controller_input, 0)
 
             Controller.last_press_time_map.pop(controller_input,None)
+
+        # Volume, brightness and power keys come from their own watcher threads;
+        # whatever they changed on screen shows now.
+        Controller.request_redraw()
 
     @staticmethod
     def wait_for_input(wanted_inputs):

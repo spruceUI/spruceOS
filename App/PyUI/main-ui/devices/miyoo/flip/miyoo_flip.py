@@ -1,16 +1,12 @@
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import threading
-import time
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
 from controller.controller_inputs import ControllerInput
-from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
 import os
 from controller.key_watcher_controller import KeyWatcherController
-from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.miyoo.flip.miyoo_flip_poller import MiyooFlipPoller
 from devices.miyoo.miyoo_device import MiyooDevice
@@ -223,13 +219,15 @@ class MiyooFlip(MiyooDevice):
         
     @throttle.limit_refresh(5)
     def get_charge_status(self):
-        with open("/sys/class/power_supply/ac/online", "r") as f:
-            ac_online = int(f.read().strip())
-            
-        if(ac_online):
-           return ChargeStatus.CHARGING
-        else:
-            return ChargeStatus.DISCONNECTED
+        # The charger reports a PC port under usb, so either node counts.
+        for node in ("/sys/class/power_supply/usb/online", "/sys/class/power_supply/ac/online"):
+            try:
+                with open(node, "r") as f:
+                    if int(f.read().strip()):
+                        return ChargeStatus.CHARGING
+            except (OSError, ValueError):
+                continue
+        return ChargeStatus.DISCONNECTED
     
     @throttle.limit_refresh(15)
     def get_battery_percent(self):

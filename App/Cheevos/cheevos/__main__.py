@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import argparse
 import logging
 import os
 import signal
@@ -18,6 +19,7 @@ from types import FrameType
 STARTED_AT = time.monotonic()
 
 from cheevos import app  # noqa: E402 — after STARTED_AT so start-up timing includes imports
+from cheevos.platform.arguments import add_game_argument  # noqa: E402
 from cheevos.platform.paths import Paths  # noqa: E402
 from cheevos.ui.pyui import bootstrap  # noqa: E402
 
@@ -69,6 +71,9 @@ def main() -> int:
     Returns:
         Process exit code.
     """
+    parser = argparse.ArgumentParser(prog="python -m cheevos")
+    add_game_argument(parser)
+    args = parser.parse_args()
     platform_name = os.environ.get("PLATFORM", "unknown")
     pyui_logger = _configure_logging(_SDCARD / "Saves" / "spruce" / f"cheevos-{platform_name}.log")
     device_name = os.environ.get("CHEEVOS_PYUI_DEVICE")
@@ -86,12 +91,12 @@ def main() -> int:
         state_path=_SDCARD / "Saves" / "cheevos" / "pyui-state.json",
         cfw_config_path=_SDCARD / "Saves" / "spruce" / "spruce-config.json",
     )
-    bootstrap.bootstrap(setup, lambda: bootstrap.hardware_device(device_name))
+    bootstrap.bootstrap(setup, lambda: bootstrap.pyui_device(device_name))
     logger.info("PyUI ready after %.2fs", time.monotonic() - STARTED_AT)
 
     try:
         env = app.AppEnvironment(paths=Paths.from_env())
-        app.run(started_at=STARTED_AT, env=env)
+        app.run(started_at=STARTED_AT, env=env, game_id=args.game_id)
     except Exception:
         logger.exception("Unhandled error")
         return 1

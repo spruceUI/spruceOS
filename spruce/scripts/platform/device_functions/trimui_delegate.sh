@@ -277,8 +277,6 @@ launch_trimui_startup_watchdogs() {
         /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
         pin_cpu "$SYSTEM_CPU" -n usb_audio_watchdog.sh &
     fi
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 launch_startup_watchdogs() {
@@ -334,21 +332,6 @@ restart_trimui_inputd() {
     pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
 }
 
-
-run_trimui_osdd() {
-    if [ -x "/usr/trimui/osd/trimui_osdd" ]; then
-        cd /usr/trimui/osd || return 1
-        LD_LIBRARY_PATH=/usr/trimui/lib ./trimui_osdd &
-        log_message "Attempted to start trimui_osdd"
-    else
-        log_message "trimui_osdd not found. Skipping."
-    fi
-
-    {
-        sleep 2 # ensure OSDD fully initializes before setting hotkey
-        echo -n $OSD_HOTKEY > /tmp/trimui_osd/hotkeyshow   # tells keymon to pull up OSD
-    } &
-}
 
 current_backlight() {
     jq -r '.backlight' "$SYSTEM_JSON"

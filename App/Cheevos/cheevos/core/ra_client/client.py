@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import logging
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any
 from urllib.parse import urlencode
 
-import cheevos
 from cheevos.core.errors import (
     ApiPayloadError,
     AuthError,
@@ -22,17 +22,20 @@ from cheevos.core.models import (
     RECENT_UNLOCK_COUNT,
     Award,
     AwardCounts,
+    EventInfo,
     GameDetail,
     GameProgress,
     RecentUnlock,
     Unlock,
     UserProfile,
 )
-from cheevos.core.ra_client import parse
+from cheevos.core.ra_client import parse, v2
+from cheevos.core.ra_client.common import API_HOST, API_V2_HOST, MEDIA_HOST, STATIC_HOST, Response
 from cheevos.core.ra_client.pacer import API_INTERVAL, LONG_PAUSE, MEDIA_INTERVAL, Pacer
+from cheevos.core.ra_client.parse_awards import parse_awards
 from cheevos.core.ra_client.recent import INITIAL_WINDOW, UnlockPage, fetch_recent_unlocks
 from cheevos.core.ra_client.redact import install_redaction
-from cheevos.core.ra_client.transport import API_HOST, MEDIA_HOST, Response, Transport
+from cheevos.core.ra_client.transport import Transport
 
 logger = logging.getLogger(__name__)
 
@@ -43,18 +46,6 @@ _HTTP_OK = 200
 _HTTP_NOT_FOUND = 404
 _HTTP_TOO_MANY = 429
 _AUTH_STATUSES = frozenset({401, 403})
-
-
-def default_user_agent(platform: str) -> str:
-    """Return the User-Agent RA sees, e.g. ``"Cheevos/0.1.0 (SpruceOS; MiyooMini)"``.
-
-    Args:
-        platform: Spruce platform name.
-
-    Returns:
-        The User-Agent string.
-    """
-    return f"Cheevos/{cheevos.__version__} (SpruceOS; {platform})"
 
 
 def _is_unauthenticated(data: object) -> bool:
@@ -135,6 +126,9 @@ class RaClient:
         self._api_key = api_key
         self._transport = transport
         self._headers = {"User-Agent": user_agent, "Accept": "application/json"}
+        # The v2 API reads the same Web API key from a header (RAWeb's api-token-header guard).
+        v2_headers = {**self._headers, "Accept": "application/vnd.api+json", "X-API-Key": api_key}
+        self._v2 = functools.partial(self._get_json, API_V2_HOST, headers=v2_headers)
         self._pacer = pacer if pacer is not None else Pacer(min_interval, burst=1, clock=clock)
         media_interval = MEDIA_INTERVAL if self._pacer.enabled else 0.0
         self._media_pacer = Pacer(media_interval, burst=1, clock=clock)
@@ -220,7 +214,29 @@ class RaClient:
         Returns:
             Counters and awards.
         """
-        return parse.parse_awards(self._api("API_GetUserAwards"))
+        return parse_awards(self._api("API_GetUserAwards"))
+
+    def events(self, event_ids: Iterable[int]) -> list[EventInfo]:
+        """Fetch events with their award tiers from RA's v2 API (see :func:`v2.fetch_events`).
+
+        Args:
+            event_ids: Event IDs (an event award's ``AwardData``).
+
+        Returns:
+            The events RA knows and shows.
+        """
+        return v2.fetch_events(self._v2, event_ids)
+
+    def event_points(self, event_ids: Iterable[int]) -> dict[int, int]:
+        """Add up what events are worth (see :func:`v2.fetch_event_points`).
+
+        Args:
+            event_ids: Event IDs.
+
+        Returns:
+            Points per event ID.
+        """
+        return v2.fetch_event_points(self._v2, event_ids)
 
     def unlocks_between(self, start: int, end: int) -> list[Unlock]:
         """Fetch the user's unlocks in a time window (``API_GetAchievementsEarnedBetween``).
@@ -306,6 +322,8 @@ class RaClient:
     def media(self, path: str) -> bytes:
         """Download a file from RA's media host (badges, game icons, avatars).
 
+        The site's own art (``/assets/...``, site award badges) comes from its static host.
+
         Args:
             path: Media path, e.g. ``"/Badge/198102_lock.png"``.
 
@@ -319,7 +337,8 @@ class RaClient:
         if not path.startswith("/"):
             raise ApiPayloadError(f"invalid media path {path!r}")
         self._wait(self._media_pacer.reserve())
-        response = self._transport.get(MEDIA_HOST, path, self._headers)
+        host = STATIC_HOST if path.startswith("/assets/") else MEDIA_HOST
+        response = self._transport.get(host, path, self._headers)
         if response.status == _HTTP_OK:
             return response.body
         if response.status >= 500:  # noqa: PLR2004 — HTTP server errors
@@ -339,11 +358,24 @@ class RaClient:
             The decoded JSON body.
         """
         query = urlencode({"y": self._api_key, "u": self._username, **params})
-        path = f"/API/{method}.php?{query}"
+        return self._get_json(API_HOST, f"/API/{method}.php?{query}", method, self._headers)
+
+    def _get_json(self, host: str, path: str, method: str, headers: dict[str, str]) -> Any:  # noqa: ANN401 — decoded JSON
+        """GET JSON from RA's API, retrying rate limits and server errors.
+
+        Args:
+            host: API host.
+            path: Path with its query.
+            method: Endpoint name, for logs and errors (never the path: it holds the key).
+            headers: Request headers.
+
+        Returns:
+            The decoded JSON body.
+        """
         attempt = 0
         while True:
             self._wait(self._pacer.reserve())
-            response = self._transport.get(API_HOST, path, self._headers)
+            response = self._transport.get(host, path, headers)
             delay = self._retry_delay(method, response, attempt)
             if delay is None:
                 return self._decode(method, response)

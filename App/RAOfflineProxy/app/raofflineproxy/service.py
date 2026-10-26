@@ -13,10 +13,12 @@ from .config import (
     CONFIG_DIR,
     DATABASE_FILE,
     LOG_FILE,
+    MAX_PROXY_PORT,
     configure_logging,
     proxy_host,
     proxy_port,
     running_on_darkos,
+    save_config,
 )
 from .darkos_service import (
     darkos_service_start,
@@ -32,6 +34,8 @@ from .state import (
     save_pid,
     save_service_status,
 )
+
+PORT_FALLBACK_ATTEMPTS = 50
 
 SERVICE_COMMAND_MARKERS = [
     "-m raofflineproxy.main run-service",
@@ -231,6 +235,22 @@ def port_is_available(config_data: dict) -> bool:
     return True
 
 
+def relocate_proxy_port(config_data: dict) -> int:
+    taken = proxy_port(config_data)
+    last_candidate = min(taken + PORT_FALLBACK_ATTEMPTS, MAX_PROXY_PORT)
+    for candidate in range(taken + 1, last_candidate + 1):
+        candidate_config = {**config_data, "proxy_port": candidate}
+        if port_is_available(candidate_config):
+            config_data["proxy_port"] = candidate
+            save_config(config_data)
+            logging.getLogger("raofflineproxy").warning("Port %d is in use, switched proxy_port to %d", taken, candidate)
+            return candidate
+    raise RuntimeError(
+        f"Port {taken} already in use and no free port found up to {last_candidate}"
+        " - change proxy_port in config.json"
+    )
+
+
 def start_service_process(config_data: dict) -> dict:
     if running_on_darkos():
         return darkos_service_start()
@@ -254,10 +274,7 @@ def start_service_process(config_data: dict) -> dict:
     # errno in service.log while the menu reports a successful start. Check here, where
     # the error can still be shown, unless the boot entrypoint already holds the socket.
     if not listen_fd and not port_is_available(config_data):
-        port = proxy_port(config_data)
-        raise RuntimeError(
-            f"Port {port} already in use - change proxy_port in config.json"
-        )
+        relocate_proxy_port(config_data)
     pass_fds: tuple[int, ...] = ()
     env = None
     if listen_fd:

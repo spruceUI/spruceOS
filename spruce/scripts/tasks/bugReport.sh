@@ -6,6 +6,7 @@ output7z=/mnt/SDCARD/bug_report.7z
 code_file=/mnt/SDCARD/bug_report_code.txt
 device_state=/mnt/SDCARD/Saves/spruce/device_state.log
 UPLOAD_URL="https://spruce-bug-reports.thespruceosteam.workers.dev/upload"
+SPRUCE_VERSION=$(cat /mnt/SDCARD/spruce/spruce 2>/dev/null)
 
 if [ -f $output7z ] ; then
     rm $output7z
@@ -64,7 +65,7 @@ redact_ip6() {
     if command -v get_miyoo_mini_variant >/dev/null 2>&1; then
         echo "mini variant  : $(get_miyoo_mini_variant 2>/dev/null)"
     fi
-    echo "spruce version: $(cat /mnt/SDCARD/spruce/spruce 2>/dev/null)"
+    echo "spruce version: $SPRUCE_VERSION"
 
     echo
     echo "==== display / backlight nodes ===="
@@ -194,7 +195,7 @@ redact_ip6() {
     echo
     echo "==== config files the display settings write to ===="
     dump_node /appconfigs/system.json
-    dump_node /mnt/SDCARD/Saves/mini-flip-system.json
+    dump_node /mnt/SDCARD/Saves/miyoo-mini-system.json
 
     echo
     echo "==== processes that apply those settings ===="
@@ -574,6 +575,7 @@ s/\(added network \).*\( from the card\)/\1<redacted>\2/
 s/\(Selected \).*!$/\1<redacted>!/
 s/\(escaped SSID: \).*/\1<redacted>/
 s/\(Copying freeText '[^']*': \).*/\1<redacted>/
+s/\(onscreen_keyboard_option - INFO - Updating [^ ]* to \).*/\1<redacted>/
 s/\([?&][upt]=\)[^& "']*/\1<redacted>/g
 EOF
 
@@ -632,9 +634,11 @@ upload_report() {
 if upload_report; then
     echo "$report_code" > "$code_file"
     log_message "bugReport.sh: uploaded as $report_code"
-    log_and_display_message "Bug report sent. Your code is\n\n$report_code\n\nPost this code in the spruce Discord.\nIt is also saved in bug_report_code.txt on the SD card.\n\nPress A to continue."
+
+    gh_qr_code="$(qr_code -t "https://github.com/spruceUI/spruceOS/issues/new?template=bug_report.yml&report-code=$report_code&version=$SPRUCE_VERSION")"
+    display_image_and_text "$gh_qr_code" 50 5 "Bug report sent. Your code is: SPR-MENR7V\nScan the QR code to create a GitHub issue or use the report code in our Discord to receive support.\n\nPress A to continue." 58
 else
-    log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in the spruce Discord.\n\nPress A to continue."
+    log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in a GitHub issue or in our Discord to receive support.\n\nPress A to continue."
 fi
 acknowledge
 stop_pyui_message_writer

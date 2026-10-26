@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import threading
 from pathlib import Path
@@ -112,6 +113,16 @@ class MagicXA133PDevice(TrimUIDevice):
                 model = f.read().strip() or "unknown"
         except OSError:
             model = os.environ.get("PLATFORM", "").strip() or "unknown"
+        # oakMOSS images write their release version (v0.6.0-beta.1) next to the marker.
+        try:
+            with open("/usr/magicx/version") as f:
+                version = f.read().strip()
+        except OSError:
+            version = ""
+        if version:
+            # The line fits about 20 characters: a build past a tag shows as v0.5.0-beta.2+43.
+            version = re.sub(r"^(v?\d+\.\d+\.\d+(?:-beta\.\d+)?)-(\d+)-g[0-9a-f]+$", r"\1+\2", version)
+            return f"oakMOSS {version}"
         return f"magicx-tina ({model})"
 
     # ----- display -----

@@ -13,7 +13,6 @@ from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
-from views.view_type import ViewType
 
 
 class GameSystemSelectMenu:
@@ -298,7 +297,7 @@ class GameSystemSelectMenu:
         systems_list = []
         self.add_start_of_list_extras_to_systems_list(systems_list)        
 
-        active_systems = self.game_utils.get_active_systems()
+        active_systems = self.game_utils.take_prefetched_active_systems()
 
         index = 0
         total_count = len(active_systems)

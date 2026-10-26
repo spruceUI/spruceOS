@@ -6,12 +6,12 @@ import dataclasses
 from collections.abc import Callable
 
 from cheevos.core.credentials import (
+    Credentials,
     looks_like_api_key,
     read_api_key,
     read_username,
     save_api_key,
 )
-from cheevos.core.sync.session import Credentials
 from cheevos.platform.paths import Paths
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext

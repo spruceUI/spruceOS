@@ -52,6 +52,7 @@ case "$PLATFORM" in
     ;;
   *)
     # Flip / Pixel2: use the kernel's module loader if available.
+    # A30: zram is built into the stock kernel, so there is nothing to load.
     if command -v modprobe >/dev/null 2>&1; then
       modprobe zram 2>/dev/null || true
     elif command -v busybox >/dev/null 2>&1; then

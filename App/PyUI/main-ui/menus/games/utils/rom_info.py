@@ -1,7 +1,6 @@
 
 
 from dataclasses import dataclass
-import os
 
 from games.utils.game_system import GameSystem
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils

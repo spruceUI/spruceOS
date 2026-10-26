@@ -34,7 +34,8 @@ usb_gadget_platform_setup() {
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
             ;;
         "Flip")
-            STORAGE_DEVICE="/dev/mmcblk1p1"
+            # Flip.cfg: mmcblk1p1 on stock, the mounted card under BaseOS-my355
+            STORAGE_DEVICE="$SD_DEV"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/rockchip"
             USB_UDC_CONTROLLER="fcc00000.dwc3"
@@ -72,6 +73,9 @@ usb_gadget_platform_setup() {
             return 1
             ;;
     esac
+    # An unresolved card exports nothing: an empty name would make
+    # safe_unmount_all's grep match every mount.
+    [ -n "$STORAGE_DEVICE" ] || return 1
     return 0
 }
 
@@ -149,6 +153,7 @@ usb_gadget_release() {
             rm -f "$USB_CONFIG_PATH/mass_storage.0" 2>/dev/null
             rmdir "$USB_CONFIG_PATH" "$USB_GADGET_PATH/functions/mass_storage.0" \
                 "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH" 2>/dev/null
+            systemctl -q is-enabled adbd 2>/dev/null && systemctl --no-block start adbd
             ;;
     esac
     sync
@@ -228,25 +233,45 @@ usb_export_gadget() {
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             ;;
         "Pixel2")
-            mkdir $USB_GADGET_PATH -m 0770
-            echo "0x2207" > $USB_GADGET_PATH/idVendor
-            echo "0x0000" > $USB_GADGET_PATH/idProduct
-            echo "0x0200" > $USB_GADGET_PATH/bcdUSB
-            mkdir $USB_GADGET_PATH/strings/0x409 -m 0770
-            echo “0123456789ABCDEF” > $USB_GADGET_PATH/strings/0x409/serialnumber
-            echo “GameKiddy” > $USB_GADGET_PATH/strings/0x409/manufacturer
-            echo “Pixel2” > $USB_GADGET_PATH/strings/0x409/product
-            mkdir $USB_CONFIG_PATH -m 0770
-            mkdir $USB_CONFIG_PATH/strings/0x409 -m 0770
-            echo "mass_storage" > $USB_CONFIG_PATH/strings/0x409/configuration
-            mkdir $USB_GADGET_PATH/functions/mass_storage.0
-            echo $STORAGE_DEVICE > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/file
-		    echo 1 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable
-		    echo 0 > $USB_GADGET_PATH/functions/mass_storage.0/lun.0/nofua
-            ln -s $USB_GADGET_PATH/functions/mass_storage.0 $USB_GADGET_PATH/configs/b.1/mass_storage.0
-            echo $USB_UDC_CONTROLLER > $USB_GADGET_PATH/UDC
+            # As on the Flip, an adb gadget may already own these names and
+            # hold the UDC, so add the disk to it rather than building a second
+            # gadget, which could not bind while adb holds the UDC. Identity is
+            # written only when the gadget is new, so an existing adb gadget
+            # keeps its own.
+            if [ ! -d "$USB_GADGET_PATH" ]; then
+                mkdir -p "$USB_GADGET_PATH/strings/0x409" "$USB_CONFIG_PATH/strings/0x409"
+                echo "0x2207" > "$USB_GADGET_PATH/idVendor"
+                echo "0x0000" > "$USB_GADGET_PATH/idProduct"
+                echo "0x0200" > "$USB_GADGET_PATH/bcdUSB"
+                echo "0123456789ABCDEF" > "$USB_GADGET_PATH/strings/0x409/serialnumber"
+                echo "GameKiddy" > "$USB_GADGET_PATH/strings/0x409/manufacturer"
+                echo "Pixel2" > "$USB_GADGET_PATH/strings/0x409/product"
+                echo "mass_storage" > "$USB_CONFIG_PATH/strings/0x409/configuration"
+            fi
+            mkdir -p "$USB_CONFIG_PATH" "$USB_GADGET_PATH/functions/mass_storage.0"
+            echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
+            echo 0 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/nofua"
+            echo "$STORAGE_DEVICE" > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/file"
+            # A bound gadget refuses a new link, and an adb service may rebind
+            # the gadget as soon as it is released, so retry until it holds.
+            _i=0
+            while [ ! -e "$USB_CONFIG_PATH/mass_storage.0" ] && [ $_i -lt 10 ]; do
+                echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+                ln -s "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH/" 2>/dev/null || sleep 0.1
+                _i=$((_i + 1))
+            done
+            # The bind fails until adbd has rewritten its descriptors, and an
+            # adb service may already have bound the gadget, disk included.
+            _i=0
+            while [ -z "$(cat "$USB_GADGET_PATH/UDC" 2>/dev/null)" ] && [ $_i -lt 15 ]; do
+                echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC" 2>/dev/null
+                [ -n "$(cat "$USB_GADGET_PATH/UDC" 2>/dev/null)" ] || sleep 0.2
+                _i=$((_i + 1))
+            done
+            [ -n "$(cat "$USB_GADGET_PATH/UDC" 2>/dev/null)" ] ||
+                echo "USB Storage Mode: could not bind $USB_UDC_CONTROLLER" >&2
             ;;
-            "SmartProS" | "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*)
+        "SmartProS" | "AnbernicRG28XX" | "AnbernicRGCubeXX" | "AnbernicXX640480"* | "AnbernicXX720480"*)
             echo "" > "$USB_GADGET_PATH/UDC" 2>/dev/null
             mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0"
             echo 1 > "$USB_GADGET_PATH/functions/mass_storage.0/lun.0/removable"
@@ -259,6 +284,8 @@ usb_export_gadget() {
             echo "$USB_UDC_CONTROLLER" > "$USB_GADGET_PATH/UDC"
             ;;
         "RGB30" | "RGB20SX" | "Miniloong")
+            # dArkMoss's adbd holds the same UDC.
+            systemctl stop adbd 2>/dev/null
             mkdir -p "$USB_GADGET_PATH/strings/0x409" "$USB_GADGET_PATH/functions/mass_storage.0" "$USB_CONFIG_PATH"
             echo "0x1d6b" > "$USB_GADGET_PATH/idVendor"
             echo "0x0104" > "$USB_GADGET_PATH/idProduct"

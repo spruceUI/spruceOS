@@ -1,6 +1,5 @@
 import json
 import os
-import tempfile
 import threading
 
 from utils.logger import PyUiLogger
@@ -28,6 +27,8 @@ class UserConfig:
     def save_config(cls):
         with cls._lock:
             try:
+                # Deferred: off the startup path.
+                import tempfile
                 dirpath = os.path.dirname(cls.FILEPATH)
 
                 with tempfile.NamedTemporaryFile(

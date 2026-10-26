@@ -117,9 +117,6 @@ set_volume() {
         if [ "$current_volume" -ne "$new_vol" ]; then
             save_volume_to_config_file "$new_vol"
             sed "s/\"vol\":[[:space:]]*[0-9]\+/\"vol\": $new_vol/" /mnt/UDISK/system.json > /mnt/UDISK/system.json.tmp && mv /mnt/UDISK/system.json.tmp /mnt/UDISK/system.json
-            if ! pgrep MainUI >/dev/null; then
-                /usr/trimui/osd/show_volume_msg.sh "$new_vol" &
-            fi
         fi
     fi
 
@@ -242,18 +239,23 @@ init_gpio_SmartProS() {
     # echo -n in > /sys/class/gpio/gpio363/direction
 
     #splash rumble
-    echo 32768 > /sys/class/motor/level 
-    sleep 0.2
-    echo 0 > /sys/class/motor/level 
+    # Not awaited: the sleep must not hold up device_init.
+    (
+        echo 32768 > /sys/class/motor/level
+        sleep 0.2
+        echo 0 > /sys/class/motor/level
+    ) &
 }
 
 runtime_mounts_SmartProS() {
 
+    /mnt/SDCARD/spruce/brick/glibc/bind.sh >> /mnt/SDCARD/Saves/spruce/spruce.log 2>&1
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
-    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     wait
+    # Not awaited: the SDL libraries are needed only once the frontend starts.
+    /mnt/SDCARD/spruce/brick/sdl2/bind.sh &
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
@@ -263,6 +265,14 @@ device_init() {
 
     export LD_LIBRARY_PATH="/usr/trimui/lib:/usr/lib:/lib"
     chmod a+x /usr/bin/notify
+
+    echo 1 > /sys/class/drm/card0-DSI-1/rotate
+    echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
+    # The first userspace modeset after boot re-runs the whole panel init;
+    # do it here, off the frontend's first frame.
+    "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/device_functions/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1 &
+    # DRM master while it runs: no other display client may start before it exits.
+    DEVICE_INIT_DISPLAY_PIDS="$DEVICE_INIT_DISPLAY_PIDS $!"
 
     init_gpio_SmartProS
 
@@ -280,16 +290,17 @@ device_init() {
 
 
     device_run_tsps_blobs
-    device_run_thermal_process
+
+    # Not awaited: nothing before the first menu frame needs it.
+    device_run_boot_thermal_process &
 
     # Install the configured switch action into /usr/trimui/scene so the physical
     # switch follows Settings -> Button Settings -> Switch action. --now also
     # adopts, once, whatever action was already installed - on the Brick line that
     # is whatever the old fn_editor app last wrote, and it outlives the SD card.
-    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now
-
-    run_osd="$(get_config_value '.menuOptions."System Settings".trimuiOSD.selected' "False")"
-    [ "$run_osd" = "True" ] && run_trimui_osdd
+    # Its boot LED scene must land before the menu LEDs are set.
+    /mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action --now &
+    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
 
     echo 1 > /sys/class/speaker/mute
 
@@ -301,9 +312,6 @@ device_init() {
     tinymix set 29 1
     amixer set DAC 255 # reset this to max so we're not double attenuating vol with two different mixer controls
 
-    echo 1 > /sys/class/drm/card0-DSI-1/rotate
-    echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
-    
     (
         # Set volume on startup by simulating button presses
         # Alternative is shared memory to keymon
@@ -437,24 +445,21 @@ release_trimui_fan_cap() {
 }
 
 device_run_tsps_blobs() {
-    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
+    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice"
     release_trimui_fan_cap
     # again once a freshly started hardwareservice has applied its settings
     ( sleep 3; release_trimui_fan_cap ) &
 }
 
 device_prepare_for_poweroff() {
-    touch /tmp/trimui_osd/osdd_quit
     wifi_request suspend --wait
 }
 
 device_home_button_pressed() {
     # The Smart Pro S has no Fn keys, only the top Home button (KEY_HOMEPAGE) and
-    # the switch. The stock OSD daemon (trimui_osdd) is absent on this device, so
-    # the old "touch /tmp/show_osdd" was a no-op. Instead run the action the user
-    # picked in Settings -> Button Settings -> Home button action, through the
-    # shared perform_action dispatch (button_actions.sh, sourced by
-    # buttons_watchdog.sh) that the Menu button also uses.
+    # the switch. Run the action the user picked in Settings -> Button Settings ->
+    # Home button action, through the shared perform_action dispatch
+    # (button_actions.sh, sourced by buttons_watchdog.sh) that the Menu button also uses.
     action="$(get_config_value '.menuOptions."Button Settings".homeAction.selected' "Game Switcher")"
     perform_action "$action"
 
@@ -476,26 +481,45 @@ device_stop_thermal_process(){
     echo 0 > /sys/class/thermal/cooling_device0/cur_state
 }
 
+# Checks whether Fan boost is the configured switch action; returns 0 if it is.
+fan_boost_is_switch_action() {
+    [ "$(get_config_value '.menuOptions."Button Settings".switchAction.selected' "")" = "Fan boost" ]
+}
+
+# Checks whether the switch reads as one of its two positions; returns 0 if it does.
+switch_position_is_readable() {
+    case "$(device_get_switch_position)" in
+        0|1) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# Starts the thermal process at boot, unless the Fan boost switch action starts it
+# for the switch's current position.
+device_run_boot_thermal_process() {
+    if fan_boost_is_switch_action && switch_position_is_readable; then
+        return 0
+    fi
+    device_run_thermal_process
+}
+
 device_run_thermal_process(){
-    /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
+    if fan_boost_is_switch_action && [ "$(device_get_switch_position)" = "1" ]; then
+        /mnt/SDCARD/spruce/scripts/FN_Button/scene-fan.sh 1
+    else
+        /mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting
+    fi
 }
 
 set_backlight() {
-    val="$1"
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 10 ] && level=10
+    eval "raw=\$SYSTEM_BRIGHTNESS_$level"
+    echo "$raw" > "$DEVICE_BRIGHTNESS_PATH"
 
-    # Clamp input to 1–10
-    [ "$val" -lt 1 ] && val=1
-    [ "$val" -gt 10 ] && val=10
-
-    # Convert 1–10 → 1–255
-    val_255=$(( (val - 1) * 254 / 9 + 1 ))
-
-    # actually change the backlight
-    echo "$val_255" > /sys/class/backlight/backlight0/brightness
-
-    # update device system json
     tmp="${SYSTEM_JSON}.tmp.$$"
-    jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
+    jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
 

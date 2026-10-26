@@ -183,6 +183,11 @@ check_if_fw_needs_update() {
     log_message "Missing check_if_fw_needs_update function"
 }
 
+# The newest update file for this device's base OS put on the card by hand, if any.
+local_fw_update_file() {
+    return 0
+}
+
 take_screenshot() {
     log_message "Missing take_screenshot function"
 }
@@ -272,6 +277,10 @@ turn_off_screen() {
 
 turn_on_screen() {
     log_message "Missing turn_on_screen function"
+}
+
+work_led_off() {
+    log_message "Missing work_led_off function"
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
@@ -393,6 +402,11 @@ device_wifi_connect() {
 # Called by wifi.sh forget-all, which applies the saved setting afterwards.
 device_wifi_forget_all() {
     wpa_forget_all_networks
+}
+
+# runtime.sh runs enable_zram.sh only where this answers 0; a kernel without zram says 1
+device_supports_zram() {
+    return 0
 }
 
 # Bluetooth, driven by bluetooth.sh. A board with a radio answers 0 here and overrides

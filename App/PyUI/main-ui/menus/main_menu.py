@@ -1,17 +1,10 @@
 
 from pathlib import Path
+from functools import cached_property
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
-from menus.app.app_menu import AppMenu
-from menus.games.collections_menu import CollectionsMenu
-from menus.games.favorites_menu import FavoritesMenu
-from menus.games.game_system_select_menu import GameSystemSelectMenu
-from menus.games.just_games_menu import JustGamesMenu
 from menus.language.language import Language
-from menus.main_menu_popup import MainMenuPopup
-from menus.settings.basic_settings_menu import BasicSettingsMenu
-from menus.games.recents_menu import RecentsMenu
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -20,16 +13,66 @@ from views.selection import Selection
 from views.view_creator import ViewCreator
 
 
-class MainMenu:
-    def __init__(self):
-        self.app_menu = AppMenu()
-        self.favorites_menu = FavoritesMenu()
-        self.collections_menu = CollectionsMenu()
-        self.recents_menu = RecentsMenu()
-        self.settings_menu = BasicSettingsMenu()
-        self.system_select_menu = GameSystemSelectMenu(self.app_menu, self.favorites_menu, self.collections_menu, self.recents_menu, self.settings_menu)
+class LazySettingsMenu:
+    """Settings menu that is created on first show and reused afterwards."""
 
-        self.popup_menu = MainMenuPopup()
+    def __init__(self):
+        self._menu = None
+
+    def show_menu(self):
+        if self._menu is None:
+            from menus.settings.basic_settings_menu import BasicSettingsMenu
+            self._menu = BasicSettingsMenu()
+        return self._menu.show_menu()
+
+
+class MainMenu:
+    # Keep each menu and its imports until the user first opens it.
+    @cached_property
+    def settings_menu(self):
+        return LazySettingsMenu()
+
+    @cached_property
+    def app_menu(self):
+        from menus.app.app_menu import AppMenu
+        return AppMenu()
+
+    @cached_property
+    def favorites_menu(self):
+        from menus.games.favorites_menu import FavoritesMenu
+        return FavoritesMenu()
+
+    @cached_property
+    def collections_menu(self):
+        from menus.games.collections_menu import CollectionsMenu
+        return CollectionsMenu()
+
+    @cached_property
+    def recents_menu(self):
+        from menus.games.recents_menu import RecentsMenu
+        return RecentsMenu()
+
+    @cached_property
+    def system_select_menu(self):
+        from menus.games.game_system_select_menu import GameSystemSelectMenu
+        return GameSystemSelectMenu(self.app_menu, self.favorites_menu, self.collections_menu, self.recents_menu, self.settings_menu)
+
+    @cached_property
+    def popup_menu(self):
+        from menus.main_menu_popup import MainMenuPopup
+        return MainMenuPopup()
+
+    def build_startup_menu(self):
+        """Build the systems menu now when the first screen is Games, as it is after
+        every game, so its scan runs before background work starts and while the CPU
+        is still in performance mode. The other menus are cheap to build."""
+        if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            return
+        selection = PyUiState.get_last_main_menu_selection()
+        # Matches run_main_menu_selection: these themes open Games unless App or Setting was last.
+        tabbed = Theme.skip_main_menu() or Theme.merge_main_menu_and_game_menu()
+        if selection == "Game" or (tabbed and selection not in ["App", "Setting"]):
+            self.system_select_menu  # cached_property: reading it builds the menu
 
     def reorder_options(self,ordering, objects):
         # Create a lookup map for ordering priority
@@ -174,16 +217,17 @@ class MainMenu:
             Controller.gs_triggered = False
 
     def check_for_boxart_resizing(self):
-        from games.utils.box_art_resizer import BoxArtResizer
         py_ui_dir = Path(__file__).resolve().parent.parent.parent
         boxart_resize_trigger_file = py_ui_dir / "pyui_resize_boxart_trigger"
         if (boxart_resize_trigger_file).exists():
+            from games.utils.box_art_resizer import BoxArtResizer
             boxart_resize_trigger_file.unlink()
             BoxArtResizer.process_rom_folders()
 
 
     def run_main_menu_selection(self):
         if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            from menus.games.just_games_menu import JustGamesMenu
             while(True):
                 JustGamesMenu().run_rom_selection()
 

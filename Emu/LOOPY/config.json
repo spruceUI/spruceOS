@@ -1,0 +1,28 @@
+{
+  "label": "Loopy",
+  "icon": "loopy.png",
+  "iconsel": "loopy_sel.png",
+  "themecolor": "e4007f",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "bin|loopy|zip|7z",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Performance",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 3175,
+  "brand": "Casio",
+  "type": "homeconsole",
+  "releaseYear": 1995,
+  "default_emulator": "gloopy",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": ["loopy","casioloopy"]
+}

@@ -1,0 +1,21 @@
+{
+  "DC": {
+    "Governor": "Performance",
+    "Emulator_RGB30": "Flycast-libretro",
+    "Emulator_A30": "flycast",
+    "raBuild": "64-bit",
+    "Emulator_64": "Flycast-libretro"
+  },
+  "NAOMI": {
+    "Governor": "Performance",
+    "Emulator_A30": "flycast",
+    "raBuild": "64-bit",
+    "Emulator_64": "Flycast-libretro"
+  },
+  "ATOMISWAVE": {
+    "Governor": "Performance",
+    "Emulator_A30": "flycast",
+    "raBuild": "64-bit",
+    "Emulator_64": "Flycast-libretro"
+  }
+}

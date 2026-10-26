@@ -1,13 +1,12 @@
-"""Text handling for the PyUI bridge: glyph coverage, fast width estimates, fitting.
+"""Text handling for the PyUI bridge: glyph coverage and fitting.
 
-Theme fonts vary a lot (the Pico-8 theme's pixel font lacks "·" and "…"), and measuring every
-row with SDL_ttf is too slow on a Miyoo Mini for big lists, so widths come from cached glyph
-advances.
+Theme fonts vary a lot (the Pico-8 theme's pixel font lacks "·" and "…"). Widths come from
+PyUI's per-font glyph advances (``Display.get_text_width_from_glyphs``, SpruceOS #1900): measuring
+every row with SDL_ttf is too slow on a Miyoo Mini for big lists.
 """
 
 from __future__ import annotations
 
-import ctypes
 import functools
 import logging
 import re
@@ -31,12 +30,11 @@ _ASCII_FALLBACKS = {
     "\u201c": '"',
     "\u201d": '"',
 }
-_BMP_MAX = 0xFFFF  # Legacy SDL_ttf glyph APIs only take 16-bit code points.
-# Width estimates ignore kerning; keep a little slack so fitted text never touches neighbours.
-_FIT_MARGIN = 0.97
+_ELLIPSIS = "..."  # as PyUI ends the list titles it shortens
 # Share of the screen width the top-bar title may use if PyUI's top bar can't be measured.
 _TITLE_WIDTH_SHARE = 0.44
 _TOP_BAR_PAD = 10  # PyUI's spacing in the top bar (TopBar.render_top_bar_menu_not_skipped)
+_ICON_SHARE = 0.125  # PyUI's icon column: 1/8 of the selected-row background's width
 _title_rooms: dict[int, int] = {}  # screen width -> room for the title
 
 
@@ -64,29 +62,21 @@ def font_purpose(role: Text) -> object:
     return FontPurpose[role.value]
 
 
-@functools.lru_cache(maxsize=256)
-def _has_glyph(purpose: str, char: str) -> bool:
-    """Whether the active theme's font for ``purpose`` can draw ``char``.
+def _has_glyph(role: Text, char: str) -> bool:
+    """Whether the active theme's font for ``role`` can draw ``char``.
 
     Args:
-        purpose: ``FontPurpose`` member name.
+        role: Text role.
         char: One character.
 
     Returns:
-        ``True`` if the font has a glyph (or the check is unavailable).
+        ``True`` if the font has a glyph (or no fonts are loaded yet).
     """
     from display.display import Display
-    from display.font_purpose import FontPurpose
-    from sdl2 import sdlttf
 
-    fonts = getattr(Display, "fonts", None)
-    loaded = fonts.get(FontPurpose[purpose]) if fonts else None
-    if loaded is None:
+    if not getattr(Display, "fonts", None):
         return True
-    try:
-        return bool(sdlttf.TTF_GlyphIsProvided32(loaded.font, ord(char)))
-    except (AttributeError, RuntimeError):  # PySDL2 uses RuntimeError stubs on SDL_ttf < 2.0.18.
-        return ord(char) > _BMP_MAX or bool(sdlttf.TTF_GlyphIsProvided(loaded.font, ord(char)))
+    return not Display.requires_fallback_font(char, font_purpose(role))
 
 
 def displayable(value: str, role: Text = Text.BODY) -> str:
@@ -114,7 +104,7 @@ def displayable(value: str, role: Text = Text.BODY) -> str:
     chars = set(text)
     for char in chars - glyphs.checked:  # each character is looked up once per font
         glyphs.checked.add(char)
-        if not char.isascii() and not _has_glyph(role.value, char):
+        if not char.isascii() and not _has_glyph(role, char):
             glyphs.swaps[ord(char)] = _ASCII_FALLBACKS.get(char) or _plain(char)
             glyphs.missing.add(char)
     if chars.isdisjoint(glyphs.missing):
@@ -155,77 +145,10 @@ def _plain(char: str) -> str:
     return base or char
 
 
-class _Advances(dict[str, int]):
-    """How far each character advances the pen in one theme font, measured on first use.
-
-    Measuring long lists costs a dictionary lookup per character instead of an SDL_ttf call
-    per string (on the Mini, per-string measurement of 1,000 rows took longer than 15 s).
-
-    Args:
-        purpose: ``FontPurpose`` member name.
-    """
-
-    def __init__(self, purpose: str) -> None:
-        super().__init__()
-        self._purpose = purpose
-
-    def __missing__(self, char: str) -> int:
-        """Measure a character the first time it is looked up."""
-        width = self[char] = _advance(self._purpose, char)
-        return width
-
-
-_advances: dict[Text, _Advances] = {}
-
-
-def _font_advances(role: Text) -> _Advances:
-    """Return the advance table of the theme font for ``role``.
-
-    Args:
-        role: Text role.
-
-    Returns:
-        Character to advance width.
-    """
-    found = _advances.get(role)
-    if found is None:
-        found = _advances[role] = _Advances(role.value)
-    return found
-
-
-def _advance(purpose: str, char: str) -> int:
-    """Measure how far one character advances the pen in the theme font for ``purpose``.
-
-    Args:
-        purpose: ``FontPurpose`` member name.
-        char: One character.
-
-    Returns:
-        Advance width in pixels.
-    """
-    from display.display import Display
-    from display.font_purpose import FontPurpose
-    from sdl2 import sdlttf
-
-    font = Display.fonts[FontPurpose[purpose]].font
-    codepoint = ord(char)
-    metrics = [ctypes.c_int() for _ in range(5)]
-    pointers = [ctypes.byref(m) for m in metrics]
-    try:
-        failed = sdlttf.TTF_GlyphMetrics32(font, codepoint, *pointers)
-    except (AttributeError, RuntimeError):  # PySDL2 uses RuntimeError stubs on SDL_ttf < 2.0.18.
-        failed = (
-            sdlttf.TTF_GlyphMetrics(font, codepoint, *pointers) if codepoint <= _BMP_MAX else True
-        )
-    if not failed:
-        return metrics[4].value
-    return int(Display.get_text_dimensions(FontPurpose[purpose], char)[0])
-
-
 def text_width(value: str, role: Text) -> int:
-    """Estimate the rendered width of ``value`` from cached glyph advances.
+    """Estimate the rendered width of ``value`` from PyUI's cached glyph advances.
 
-    Ignores kerning, which is within a few pixels for UI text; callers keep a small margin.
+    Kerning is left out, so the estimate comes out a few pixels wider than SDL_ttf's.
 
     Args:
         value: Text (already passed through :func:`displayable`).
@@ -234,20 +157,9 @@ def text_width(value: str, role: Text) -> int:
     Returns:
         Width in pixels.
     """
-    return sum(map(_font_advances(role).__getitem__, value))
+    from display.display import Display
 
-
-@functools.lru_cache(maxsize=8)
-def _ellipsis(role: Text) -> str:
-    """Return "…" if the font for ``role`` has it, else "...".
-
-    Args:
-        role: Text role.
-
-    Returns:
-        The ellipsis to append when truncating.
-    """
-    return displayable("…", role)
+    return int(Display.get_text_width_from_glyphs(font_purpose(role), value))
 
 
 def fit_title(value: str) -> str:
@@ -337,62 +249,59 @@ def fit_text(value: str, role: Text, max_width: int) -> str:
     Returns:
         The text, truncated if needed.
     """
+    from display.display import Display
+
     value = displayable(value, role)
-    budget = int(max_width * _FIT_MARGIN)
-    advances = _font_advances(role)
-    if sum(map(advances.__getitem__, value)) <= budget:
+    if text_width(value, role) <= max_width:
         return value
-    ellipsis = _ellipsis(role)
-    remaining = budget - sum(map(advances.__getitem__, ellipsis))
-    for index, char in enumerate(value):
-        remaining -= advances[char]
-        if remaining < 0:
-            return value[:index].rstrip() + ellipsis
-    return value
+    room = max_width - text_width(_ELLIPSIS, role)
+    return (
+        value[: Display.count_chars_that_fit(font_purpose(role), value, room)].rstrip() + _ELLIPSIS
+    )
 
 
-@dataclass(frozen=True, slots=True)
-class ListRoom:
-    """Width a list row's text has, from the theme's layout (see :func:`list_room`).
+def fit_with_tail(value: str, tail: str, role: Text, max_width: int) -> str:
+    """Fit ``"value · tail"``, shortening ``value`` first so ``tail`` (a date) stays whole.
 
-    Attributes:
-        full: Width without a right-aligned value (descriptions, titles without a value).
-        gap: Space between the title and the value.
-        least: Width a title keeps however wide the value is.
-    """
-
-    full: int
-    gap: int
-    least: int
-
-    def title(self, value_text: str) -> int:
-        """Return the width left for a title next to a right-aligned value.
-
-        Args:
-            value_text: The row's right-aligned value (may be empty).
-
-        Returns:
-            Maximum title width in pixels.
-        """
-        if not value_text:
-            return self.full
-        return max(self.full - text_width(value_text, Text.TITLE) - self.gap, self.least)
-
-
-def list_room() -> ListRoom:
-    """Measure the room for text in a list row; measure once per list, not once per row.
-
-    Mirrors PyUI's descriptive list layout: the icon column is 12.5% of the row, the title
-    starts a theme-defined offset after it, and the value is right-aligned with that offset.
+    Args:
+        value: Text that may be shortened.
+        tail: Text kept whole when there is room for it (may be empty).
+        role: Text role (font).
+        max_width: Available width in pixels.
 
     Returns:
-        The room.
+        The joined text, shortened if needed.
+    """
+    if not tail or not value:
+        return fit_text(value or tail, role, max_width)
+    joined = displayable(f"{value} · {tail}", role)
+    if text_width(joined, role) <= max_width:
+        return joined
+    end = " " + displayable(f"· {tail}", role)  # displayable() strips a leading space
+    room = max_width - text_width(end, role)
+    if room < text_width(_ELLIPSIS, role) * 4:
+        return fit_text(joined, role, max_width)
+    return fit_text(value, role, room) + end
+
+
+def description_room() -> int:
+    """Measure the width a list row's description has; measure once per list, not per row.
+
+    PyUI fits list titles itself, but not descriptions. Mirrors its descriptive list layout:
+    the icon column is 12.5% of the selected-row background's width, and the text starts a
+    theme-defined offset after it and ends that offset before the screen edge. The background
+    isn't always as wide as the screen: most themes have a 640 px one at every resolution, and
+    SPRUCE's is 640 px at 480x800.
+
+    Returns:
+        Width in pixels.
     """
     from devices.device import Device
+    from display.display import Display
     from themes.theme import Theme
 
     screen = int(Device.get_device().screen_width())
+    row = int(Display.get_image_dimensions(Theme.get_list_large_selected_bg())[0]) or screen
     gap = int(Theme.get_descriptive_list_text_from_icon_offset())
-    used = int(Theme.get_descriptive_list_icon_offset_x()) + screen // 8 + gap * 2
-    least = screen // 4
-    return ListRoom(max(screen - used, least), gap, least)
+    used = int(Theme.get_descriptive_list_icon_offset_x()) + int(row * _ICON_SHARE) + gap * 2
+    return max(screen - used, screen // 4)

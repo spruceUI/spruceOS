@@ -1,6 +1,5 @@
 
 from controller.controller_inputs import ControllerInput
-from menus.language.language import Language
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator

@@ -12,6 +12,7 @@ class Button(Enum):
     B = "B"
     X = "X"
     Y = "Y"
+    MENU = "MENU"
     UP = "DPAD_UP"
     DOWN = "DPAD_DOWN"
     LEFT = "DPAD_LEFT"

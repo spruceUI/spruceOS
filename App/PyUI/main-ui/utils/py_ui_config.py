@@ -1,17 +1,20 @@
 import json
 import os
+from pathlib import Path
 
 from utils.logger import PyUiLogger
 
 class PyUiConfig:
     _data = {}
     _config_path = None
+    _current_dir = None
 
     @classmethod
     def init(cls, config_path, initial_data=None):
         cls._config_path = config_path
         cls._data = initial_data or {}
         cls.load()
+        cls._current_dir = Path(__file__).resolve().parent
 
     @classmethod
     def save(cls):
@@ -91,6 +94,10 @@ class PyUiConfig:
     @classmethod
     def enable_button_watchers(cls):
         return cls._data.get("enableButtonWatchers", True)
+
+    @classmethod
+    def get_fallback_font(cls):
+        return cls._data.get("fallbackFontPath", cls._current_dir / "promptfont.ttf")
 
     @classmethod
     def get_main_menu_title(cls):
@@ -235,6 +242,10 @@ class PyUiConfig:
         return cls.get("poweroffCmd",None)
     
     @classmethod
+    def get_shutdown_image(cls):
+        return cls.get("shutdownImage",None)
+
+    @classmethod
     def get_reboot_cmd(cls):
         return cls.get("rebootCmd",None)
 
@@ -261,6 +272,10 @@ class PyUiConfig:
     @classmethod
     def get_backlight_cmd(cls):
         return cls.get("backlightCmd",None)
+
+    @classmethod
+    def get_volume_cmd(cls):
+        return cls.get("volumeCmd",None)
 
     @classmethod
     def get_bt_audio_device_cmd(cls):

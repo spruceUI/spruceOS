@@ -9,7 +9,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 
 get_config_path() {
-    echo "/mnt/SDCARD/Saves/mini-flip-system.json"
+    echo "/mnt/SDCARD/Saves/miyoo-mini-system.json"
 }
 
 ###############################################################################
@@ -36,6 +36,17 @@ set_performance() {
     cpuclock 1400
 }
 
+# PyUI's screensaver asks for this at the menu. Models opt in with MINI_POWERSAVE_MHZ in their
+# overlay (cpufreq's own powersave is 400 MHz); the rest keep the smart clock, as before.
+set_powersave() {
+    if [ -n "${MINI_POWERSAVE_MHZ:-}" ]; then
+        log_message "Setting cpu to powersave (${MINI_POWERSAVE_MHZ} MHz)"
+        cpuclock "$MINI_POWERSAVE_MHZ"
+    else
+        set_smart
+    fi
+}
+
 set_overclock() {
     overclock_speed="$(get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600")"
 
@@ -46,16 +57,45 @@ set_overclock() {
     cpuclock "$overclock_speed"
 }
 
+# ra32.mini re-pins the clock in this file at start, after its own menu and on SIGCONT;
+# without it, leaving RetroArch's menu drops the CPU to 1200 MHz until the game is closed.
+RA_CPUCLOCK_FILE="/mnt/SDCARD/RetroArch/cpuclock.txt"
+RA_CPUCLOCK_MARK="# written by spruce MiyooMini.sh"
+
+mode_clock_mhz() {
+    case "$1" in
+        Performance) echo 1400 ;;
+        Overclock) get_config_value '.menuOptions."System Settings".overclockSpeedMiyooMini.selected' "1600" ;;
+        *) echo 1300 ;;
+    esac
+}
+
+# Models opt in from device_functions/miyoomini/ once measured (the Mini Plus has); the rest
+# drop the file spruce wrote, so a card moved from a Plus does not pin another model's clock.
+pin_ra_cpuclock() {
+    if grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+        rm -f "$RA_CPUCLOCK_FILE"
+    fi
+}
+
+# Per-model boot quirks; device_functions/miyoomini/$MINI_MODEL.sh overrides it
+mini_model_init() {
+    :
+}
+
 device_init() {
     # Enable GPIO48 for vibration motor
     echo 48 > /sys/class/gpio/export
 
-    # Detect variant
-    variant="$(get_miyoo_mini_variant)"
+    # The Menu key's in-game menu reaches RetroArch over 127.0.0.1; stock firmware leaves lo down and only the
+    # Wi-Fi bring-up or a PyUI popup raised it, so a V4/OG (or a Plus with Wi-Fi off) usually launched without it
+    ifconfig lo up 2>/dev/null
 
-    if [ "$variant" = "MIYOO_MINI_PLUS" ]; then
-        # Screen is off by like ~8px unless you do this, not sure why
-        cat /proc/ls
+    mini_model_init
+
+    # The firmware updater leaves its image at the card root; drop it once flashed
+    if [ -n "$FW_FILE" ] && [ -f "/mnt/SDCARD/$FW_FILE" ] && [ "$(check_if_fw_needs_update)" = "false" ]; then
+        rm -f "/mnt/SDCARD/$FW_FILE"
     fi
 
     # Export and prime the pwm backlight channel.
@@ -64,9 +104,9 @@ device_init() {
     # the V4 with no pwm0 node at all -- /sys/class/pwm/pwmchip0 exists but is
     # never exported. Nothing could drive the backlight, and device_exit_sleep,
     # which restores brightness through that same node, had nothing to write to
-    # either. Flip is deliberately left out: its backlight already works and it
-    # does not come through here today.
-    if [ "$variant" = "MIYOO_MINI_PLUS" ] || is_mini_og; then
+    # either. The model overlay sets MINI_PRIME_PWM_BACKLIGHT; the Mini Flip leaves
+    # it unset: its backlight already works and it does not come through here today.
+    if [ "${MINI_PRIME_PWM_BACKLIGHT:-}" = "true" ]; then
         # export brightness settings
         [ -d /sys/class/pwm/pwmchip0/pwm0 ] || echo 0 > /sys/class/pwm/pwmchip0/export
         # Unsure what this value should be, 1k seems to work
@@ -77,6 +117,27 @@ device_init() {
         echo 1 >  /sys/class/pwm/pwmchip0/pwm0/enable
     fi
     killall -9 main ### SUPER important in preventing .tmp_update suicide
+    start_audioserver_after_startup_sound &
+
+    # The stock firmware starts an unauthenticated root shell on telnet; Onion kills it the same way.
+    pkill -9 -f "telnetd -l sh" 2>/dev/null
+}
+
+# The stock main script plays its startup sound with audio_all_test, which holds the
+# audio device until it exits: an audioserver started before that fails
+# MI_AO_SetPubAttr (0xa0052009) and dies. The player is normally gone by now; the wait
+# covers a slow one. Every audioserver start also makes the next process to open MI_SYS
+# wait ~2 s, so start it once, here, rather than leaving it to launch.sh's fallback
+# right before the menu.
+start_audioserver_after_startup_sound() {
+    _sound_wait=50  # each poll forks twice: a few seconds at most
+    while pidof audio_all_test >/dev/null && [ "$_sound_wait" -gt 0 ]; do
+        sleep 0.02
+        _sound_wait=$((_sound_wait - 1))
+    done
+    pidof audioserver >/dev/null && return 0
+    unset LD_PRELOAD
+    exec audioserver >/dev/null 2>&1
 }
 
 # Sleeps floor at 10ms, so tiers are pulse rate, not strength.
@@ -135,11 +196,11 @@ display() {
 }
 
 rgb_led() {
-    log_message "rgb led not supported on miyoo mini"
+    log_message "rgb led not supported on miyoo mini" -v
 }
 
 enable_or_disable_rgb() {
-    log_message "rgb led not supported on miyoo mini"
+    log_message "rgb led not supported on miyoo mini" -v
 }
 
 enter_sleep() {
@@ -163,6 +224,8 @@ setup_for_retroarch(){
         LD_PRELOAD= audioserver >/dev/null 2>&1 &
         sleep 0.5
     fi
+
+    pin_ra_cpuclock
 
 	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
 		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
@@ -188,17 +251,16 @@ post_pyui_exit(){
     log_message "MiyooMini doesn't need to do anything after pyui exit (should we call freemma?)" -v
 }
 
+# MINI_HAS_LID comes from the model overlay (the Mini Flip's hall sensor)
 launch_startup_watchdogs(){
-    if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI_FLIP" ]; then
-        launch_common_startup_watchdogs_v2 "true"
-    else
-        launch_common_startup_watchdogs_v2 "false"
-    fi
+    launch_common_startup_watchdogs_v2 "${MINI_HAS_LID:-false}"
 }
 
-# Should the above be merged into here?
+# Only models with an FW_FILE (Mini Plus, Mini Flip) have an image to update to
 check_if_fw_needs_update() {
-    log_message "No Fw Check for MiyooMini" -v
+    [ -n "$FW_FILE" ] || { echo "false"; return; }
+    VERSION="$(/etc/fw_printenv miyoo_version 2>/dev/null | cut -d= -f2)"
+    [ -n "$VERSION" ] && [ "$VERSION" -ge "$TARGET_FW_VERSION" ] && echo "false" || echo "true"
 }
 
 take_screenshot() {
@@ -207,7 +269,7 @@ take_screenshot() {
 }
 
 set_default_ra_hotkeys() {
-    log_message "TODO: set_default_ra_hotkeys"
+    log_message "TODO: set_default_ra_hotkeys" -v
 }
 
 volume_down() {
@@ -233,9 +295,10 @@ get_volume_level() {
 set_volume() {
     # NOTE: This won't always work. They will often just error.
     # But sometimes they do work. It's based on if something else is already controlling the volume.
-    # The main purpose of this is for NDS volume since drastic does some weird stuff
+    # The main purpose of this is for NDS volume since drastic does some weird stuff,
+    # and PICO-8, whose SDL drives MI_AO with audioserver stopped
     # Can add more apps as needed
-    if pgrep -f "./drastic(32|64)?" >/dev/null; then
+    if pgrep -f "./drastic(32|64)?|pico8_dyn" >/dev/null; then
         VOLUME_LV="$1"
         SAVE_TO_CONFIG="${2:-true}"   # Optional 2nd arg, defaults to true
         /mnt/SDCARD/spruce/miyoomini/bin/mm_set_volume.py "$VOLUME_LV" &
@@ -301,13 +364,16 @@ device_get_battery_percent() {
     fi
 }
 
-EMU_LIST="retroarch scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
+# RetroArch runs as ra32.mini (RA_BIN in MiyooMini.cfg); retroarch stays for anything started by that name.
+EMU_LIST="retroarch ra32.mini scummvm pico8_dyn drastic OpenBOR OpenBOR_mod OpenBOR_new ffplay MainUI"
 BRIGHTNESS_FILE="/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0/pwm0/duty_cycle"
 SCREEN_BLANK_FILE="/proc/mi_modules/fb/mi_fb0"
 BUTTON_ENABLE_FILE="/sys/module/gpio_keys_polled/parameters/button_enable"
 LID_HALL_FILE="/sys/devices/soc0/soc/soc:hall-mh248/hallvalue"
 
 device_enter_sleep() {
+    # The clock to wake back to, as the Brick's suspend keeps its cpufreq state; cpufreq cannot see this PLL
+    cpuclock 2>/dev/null | sed -n 's/.*cpuclock=\([0-9]*\).*/\1/p' | tail -n 1 | awk '{ printf "%d\n", ($1 + 500000) / 1000000 }' > /tmp/sleep_cpuclock
     killall -9 keymon
     killall -q -SIGSTOP $(echo $EMU_LIST) 2>/dev/null
     cat "$BRIGHTNESS_FILE" > /tmp/saved_brightness 2>/dev/null  # backup current brightness
@@ -318,7 +384,10 @@ device_enter_sleep() {
 }
 
 device_exit_sleep() {
-    cpuclock 1600                                               # wake up cpu speed
+    sleep_mhz=""
+    [ -r /tmp/sleep_cpuclock ] && read -r sleep_mhz < /tmp/sleep_cpuclock
+    case "$sleep_mhz" in ''|*[!0-9]*) sleep_mhz="" ;; *) [ "$sleep_mhz" -gt 100 ] || sleep_mhz="" ;; esac
+    cpuclock "${sleep_mhz:-1600}"                               # the clock from before the sleep (no record: 1600)
     /customer/app/keymon &
     killall -q -SIGCONT $(echo $EMU_LIST) 2>/dev/null
     echo "GUI_SHOW 0 on" > "$SCREEN_BLANK_FILE" 2>/dev/null     # unblank screen
@@ -333,16 +402,28 @@ device_exit_sleep() {
     send_event /dev/input/event0 116:1 
 
 
-    if [ "$(get_miyoo_mini_variant)" != "MIYOO_MINI_FLIP" ]; then
-        #TODO don't have a mini to test on but this should potentially be
-        #MMP only
-        echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+    mini_reenable_buttons
+
+    # Set again last: ra32.mini re-pins its own clock on SIGCONT. Without a record, the game's pin, else smart
+    if [ -n "$sleep_mhz" ]; then
+        cpuclock "$sleep_mhz"
+    elif pidof retroarch ra32.mini >/dev/null && grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
+        cpuclock "$(head -n 1 "$RA_CPUCLOCK_FILE")"
     else
-        [ -e "$BUTTON_ENABLE_FILE" ] && echo "Y" > "$BUTTON_ENABLE_FILE" 2>/dev/null # re-enable input
-
+        set_smart
     fi
+    rm -f /tmp/sleep_cpuclock
+}
 
-    pgrep retroarch 2>/dev/null && set_smart # return to smart mode
+# Input back on after sleep; the Mini Flip's model file overrides it.
+# TODO (no OG Mini to test on): this may only be needed on the Plus.
+mini_reenable_buttons() {
+    echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
+}
+
+# The Mini kernels (4.9.84 #968, #1136, #1313) have no zram module: skip enable_zram.sh and its log line
+device_supports_zram() {
+    return 1
 }
 
 device_lid_sensor_ready() {
@@ -351,7 +432,9 @@ device_lid_sensor_ready() {
 
 device_lid_open(){
     if [ -e "$LID_HALL_FILE" ]; then
-        head -c 1 "$LID_HALL_FILE" 2>/dev/null
+        # Builtins only: the lid watchdog asks twice a second
+        read -r _lid < "$LID_HALL_FILE" 2>/dev/null
+        echo "${_lid%"${_lid#?}"}"
     else
         echo "1"
     fi
@@ -380,14 +463,14 @@ device_uses_pseudo_sleep() {
     echo "true"
 }
 
-# Miyoo Mini subtype detection
+# Miyoo Mini subtype: helperFunctions resolves MINI_MODEL once at platform detection
 
+# The OG Mini and the V4: no axp_test PMIC, no radio
 is_mini_og() {
-    if [ -e /customer/app/axp_test ]; then
-        return 1
-    else
-        return 0
-    fi
+    case "${MINI_MODEL:-}" in
+        MIYOO_MINI|MIYOO_MINI_V4) return 0 ;;
+        *) return 1 ;;
+    esac
 }
 
 # The OG Mini and V4 have no radio; without this a wifi=1 setting sends them through enable_wifi
@@ -400,7 +483,8 @@ device_has_wifi_radio() {
 device_wifi_power_on() {
     is_mini_og && return 1
     [ -d /sys/class/net/wlan0 ] && return 0
-    grep -q "^8188fu " /proc/modules 2>/dev/null || insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko 2>/dev/null
+    # Log level 3 keeps the driver's warnings and errors; its default (4, info) fills dmesg with "Turbo EDCA" lines
+    grep -q "^8188fu " /proc/modules 2>/dev/null || insmod /mnt/SDCARD/spruce/miyoomini/drivers/8188fu.ko rtw_drv_log_level=3 2>/dev/null
     ifconfig lo up 2>/dev/null
     /customer/app/axp_test wifion >/dev/null 2>&1
     _left=10
@@ -425,24 +509,13 @@ device_start_dhcp_client() {
     pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3
 }
 
+# The V4 and Mini Flip panel, as the model overlay states it
 has_v4_screen() {
-    grep -q "752x560p" /sys/class/graphics/fb0/modes >/dev/null 2>&1
+    [ "${DISPLAY_WIDTH:-}" = "752" ]
 }
 
 get_miyoo_mini_variant() {
-    if is_mini_og; then
-        if has_v4_screen; then
-            echo "MIYOO_MINI_V4"
-        else
-            echo "MIYOO_MINI"
-        fi
-    else
-        if has_v4_screen; then
-            echo "MIYOO_MINI_FLIP"
-        else
-            echo "MIYOO_MINI_PLUS"
-        fi
-    fi
+    echo "${MINI_MODEL:-}"
 }
 
 run_poweroff_cmd() {
@@ -466,3 +539,8 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+# What only one model does, last so its definitions win (as RGB20SX.sh over RGB30.sh)
+if [ -f "/mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/${MINI_MODEL:-}.sh" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/miyoomini/$MINI_MODEL.sh"
+fi

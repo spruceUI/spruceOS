@@ -39,13 +39,26 @@ start_raproxy_process() {
 
 	# start-proxy, not boot-reconcile: that one obeys the app's own autostart
 	# flag and does nothing when it is off.
-	_ra_proxy_run start-proxy >/dev/null 2>&1 &
+	(
+		_out="$(_ra_proxy_run start-proxy 2>&1)" && exit 0
+		log_message "RAOfflineProxy: start-proxy failed: $_out"
+		ra_proxy_unpatch_host
+	) &
+}
+
+# A broken install cannot restore the host it patched in, which leaves
+# RetroArch logging in to nothing.
+ra_proxy_unpatch_host() {
+	sed -i 's|^cheevos_custom_host = "127\.0\.0\.1:[0-9]*"$|cheevos_custom_host = ""|' "$(ensure_ra_config_path)"
 }
 
 # Not a kill: the app restores the RetroArch host it replaced, and a user's own
 # custom host is part of that.
 stop_raproxy_process() {
-	ra_proxy_is_installed && _ra_proxy_run stop-proxy >/dev/null 2>&1
+	if ! ra_proxy_is_installed || ! _out="$(_ra_proxy_run stop-proxy 2>&1)"; then
+		log_message "RAOfflineProxy: stop-proxy failed: $_out"
+		ra_proxy_unpatch_host
+	fi
 
 	ra_proxy_is_running || return 0
 	log_message "RAOfflineProxy: stop-proxy left it running, killing"

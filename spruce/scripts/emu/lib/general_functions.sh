@@ -15,7 +15,6 @@
 #   get_core_override
 #   get_mode_override
 #   set_cpu_mode
-#   pin_to_dedicated_cores
 #   emu_log_file
 #   vk_display_preload
 
@@ -217,18 +216,4 @@ set_cpu_mode() {
 		smart_freq="$(jq -r '.scaling_min_freq' "$EMU_JSON_PATH")"
 		/mnt/SDCARD/spruce/scripts/enforceSmartCPU.sh "$smart_freq" &
 	fi
-}
-
-pin_to_dedicated_cores() {
-	comm="$1"
-	delay="${2:-1}"
-
-    # get the last two cores that are online
-    EMU_CPUS=${DEVICE_MAX_CORES_ONLINE#"${DEVICE_MAX_CORES_ONLINE%??}"}
-    {
-        sleep "$delay"
-        pgrep "$comm" | while read -r pid; do
-            pin_cpu "$EMU_CPUS" -p "$pid"
-        done
-    } &
 }

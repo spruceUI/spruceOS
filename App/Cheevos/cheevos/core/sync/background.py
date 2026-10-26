@@ -1,15 +1,23 @@
-"""Run syncs on a worker thread while the UI keeps going (.agents/sync-and-storage.md)."""
+"""Run syncs on a worker thread while the UI keeps going (.agents/sync-and-storage.md).
+
+The engine, and the RA client it pulls in, load on the worker thread when the first sync
+starts: they aren't needed for the first frame (.agents/device.md, "Start-up").
+"""
 
 from __future__ import annotations
 
 import logging
 import threading
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from cheevos.core.clock import network_clock
 from cheevos.core.errors import CheevosError
-from cheevos.core.sync.engine import SyncDeps, SyncEngine, SyncOptions
+from cheevos.core.sync.options import SyncOptions
 from cheevos.core.sync.progress import Failure, Phase, ProgressTracker, SyncStatus
+
+if TYPE_CHECKING:
+    from cheevos.core.sync.engine import SyncDeps
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +30,7 @@ class BackgroundSync:
             sync's cancel event (its client's waits stop when it is set).
         online: Connectivity check passed to the engine.
         clock: App time shared with the transport and UI.
+        on_change: Called after each status change, outside the status lock.
     """
 
     def __init__(
@@ -30,11 +39,12 @@ class BackgroundSync:
         *,
         online: Callable[[], bool],
         clock: Callable[[], float] = network_clock.now,
+        on_change: Callable[[], None] = lambda: None,
     ) -> None:
         self._open_deps = open_deps
         self._online = online
         self._clock = clock
-        self._tracker = ProgressTracker()
+        self._tracker = ProgressTracker(on_change=on_change)
         self._cancel = threading.Event()
         self._thread: threading.Thread | None = None
 
@@ -92,6 +102,8 @@ class BackgroundSync:
             logger.exception("Could not start sync")
             self._tracker.finish(Phase.FAILED, failure=Failure.ERROR, at=self._clock())
             return
+        from cheevos.core.sync.engine import SyncEngine
+
         try:
             engine = SyncEngine(
                 deps, self._tracker, self._cancel, online=self._online, clock=self._clock

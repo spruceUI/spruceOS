@@ -1,9 +1,5 @@
 from pathlib import Path
-import re
-import shutil
-import subprocess
 import threading
-import time
 
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
 from controller.controller_inputs import ControllerInput
@@ -52,11 +48,19 @@ ANBERNIC_XX_FAMILY = "ANBERNIC_RGXX"
 ANBERNIC_XX_RGB = "ANBERNIC_RGXX_RGB"
 ANBERNIC_XX_RGB_TARGETS = ("rg40xx", "rgcubexx")
 
+# Only the clamshells whose kernel can let the lid wake them (BaseOS's os_sleep).
+# Kept in step with xx_lid_wake_supported() in the shell's xx_lid_wake.sh.
+ANBERNIC_XX_LID_WAKE = "ANBERNIC_RGXX_LID_WAKE"
+ANBERNIC_XX_OS_SLEEP = "/sys/class/power_supply/axp2202-battery/os_sleep"
+
 
 class AnbernicXXCommon(DeviceCommon):
     def __init__(self, main_ui_mode):
         self.audio_player = AudioPlayerDelegateSdl2()
-        self.has_rgb_rings = self._read_rgb_rings()
+        baseos_target = self._read_baseos_target()
+        self.has_rgb_rings = baseos_target.startswith(ANBERNIC_XX_RGB_TARGETS)
+        # Every clamshell target ends in "sp", as in the shell's has_lid().
+        self.has_lid_wake = baseos_target.endswith("sp") and os.access(ANBERNIC_XX_OS_SLEEP, os.W_OK)
         # device_name is set by the subclass before it calls up here. This used
         # to assign a model name unconditionally, which ran *after* the subclass
         # and so made every XX model report itself as that one model - no config
@@ -462,19 +466,20 @@ class AnbernicXXCommon(DeviceCommon):
         names = [self.device_name, ANBERNIC_XX_FAMILY]
         if self.has_rgb_rings:
             names.append(ANBERNIC_XX_RGB)
+        if self.has_lid_wake:
+            names.append(ANBERNIC_XX_LID_WAKE)
         return names
 
     @staticmethod
-    def _read_rgb_rings():
+    def _read_baseos_target():
         try:
             with open("/etc/baseos-release") as f:
                 for line in f:
                     if line.startswith("BASEOS_TARGET="):
-                        target = line.split("=", 1)[1].strip().strip('"')
-                        return target.startswith(ANBERNIC_XX_RGB_TARGETS)
+                        return line.split("=", 1)[1].strip().strip('"')
         except Exception as e:
             PyUiLogger.get_logger().error(f"Could not read BaseOS target : {e}")
-        return False
+        return ""
 
     def check_for_button_remap(self, input):
         return self.button_remapper.get_mappping(input)

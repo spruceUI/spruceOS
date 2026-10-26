@@ -34,7 +34,6 @@ run_drastic() {
 run_drastic64() {
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib64
 	ready_arch_64_states
-	pin_to_dedicated_cores drastic64 2
 	./drastic64 "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
@@ -103,7 +102,6 @@ run_drastic_A30() {
 	export SDL_AUDIODRIVER=mmiyoo
 	export EGL_VIDEODRIVER=mmiyoo
 
-	pin_to_dedicated_cores drastic32 2
 	./drastic32 "$ROM_FILE"  > $(emu_log_file) 2>&1
 
 	# remove soft link and resume joystickinput
@@ -355,18 +353,66 @@ save_drastic_configs() {
 # The 32-bit versions are used exclusively with Steward, REGARDLESS of host device's bitness.
 # All original and trngaje versions should use the 64-bit states.
 
+# DraStic keeps saves and states in $EMU_DIR/backup; the folder of the arch not
+# in use waits as backup-32 / backup-64. A plain "mv backup-64 backup" is only a
+# rename while backup/ does not exist. The release ships backup/ (a .gitkeep),
+# so a fresh install, a full update or a run that died before the stash leaves
+# it there, and mv then moves the saves INTO it (backup/backup-64/): DraStic
+# starts with no saves and the next stash buries them one level deeper.
+#
+# move_drastic_saves FROM TO: rename when TO is absent; otherwise move each entry
+# of FROM that TO lacks, never overwriting, and leave FROM holding only the
+# conflicts (logged), so nothing is lost either way.
+move_drastic_saves() {
+	_from="$EMU_DIR/$1"
+	_to="$EMU_DIR/$2"
+	[ -d "$_from" ] || return 0
+	if [ ! -e "$_to" ]; then
+		mv "$_from" "$_to"
+		return
+	fi
+	for _f in "$_from"/* "$_from"/.[!.]*; do
+		[ -e "$_f" ] || continue
+		_name="${_f##*/}"
+		if [ "$_name" = ".gitkeep" ]; then
+			rm -f "$_f"
+		elif [ ! -e "$_to/$_name" ]; then
+			mv "$_f" "$_to/"
+		else
+			log_message "drastic_functions.sh: $1/$_name kept apart, $2 already has one"
+		fi
+	done
+	rmdir "$_from" 2>/dev/null
+}
+
+# Saves an earlier nested mv buried one level down (backup-64/backup-64, ...)
+# come back up, without overwriting anything made since. Files that clash stay
+# in a "recovered-..." folder next to them, where a user can still find them.
+unnest_drastic_saves() {
+	for _d in backup backup-32 backup-64; do
+		for _n in backup backup-32 backup-64; do
+			[ -d "$EMU_DIR/$_d/$_n" ] || continue
+			move_drastic_saves "$_d/$_n" "$_d"
+			[ -d "$EMU_DIR/$_d/$_n" ] && [ ! -e "$EMU_DIR/$_d/recovered-$_n" ] && \
+				mv "$EMU_DIR/$_d/$_n" "$EMU_DIR/$_d/recovered-$_n"
+		done
+	done
+}
+
 ready_arch_64_states() {
-	[ -d "$EMU_DIR/backup-64" ] && mv "$EMU_DIR/backup-64" "$EMU_DIR/backup"
+	unnest_drastic_saves
+	move_drastic_saves backup-64 backup
 }
 
 ready_arch_32_states() {
-	[ -d "$EMU_DIR/backup-32" ] && mv "$EMU_DIR/backup-32" "$EMU_DIR/backup"
+	unnest_drastic_saves
+	move_drastic_saves backup-32 backup
 }
 
 stash_arch_64_states() {
-	[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-64"
+	move_drastic_saves backup backup-64
 }
 
 stash_arch_32_states() {
-	[ -d "$EMU_DIR/backup" ] && mv "$EMU_DIR/backup" "$EMU_DIR/backup-32"
+	move_drastic_saves backup backup-32
 }

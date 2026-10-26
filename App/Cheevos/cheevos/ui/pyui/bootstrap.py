@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import logging
 import sys
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 from cheevos.ui.pyui import texture_budget
 
@@ -86,9 +88,9 @@ def bootstrap(setup: PyUiSetup, device_factory: Callable[[], object]) -> None:
 
     Args:
         setup: Paths and theme to use.
-        device_factory: Creates the PyUI device object (a real device class on hardware, the
-            desktop shim during development). Called after configs are loaded, because device
-            constructors read them.
+        device_factory: Creates the PyUI device object (the handheld's, or PyUI's
+            ``DESKTOP`` device during development). Called after configs are loaded, because
+            device constructors read them.
     """
     from controller.controller import Controller
     from devices.device import Device
@@ -109,6 +111,7 @@ def bootstrap(setup: PyUiSetup, device_factory: Callable[[], object]) -> None:
 
     Device.init(device_factory())
     device = Device.get_device()
+    _warm_wifi_status(device)
     # TZ lives only in the process environment; PyUI's launcher re-applies the saved zone at
     # every start, and so must we, or clocks show UTC.
     device.restore_saved_timezone()
@@ -127,11 +130,33 @@ def bootstrap(setup: PyUiSetup, device_factory: Callable[[], object]) -> None:
     Controller.init()
 
 
-def hardware_device(name: str) -> object:
-    """Create PyUI's device object for real hardware, exactly as PyUI's launcher does.
+def _warm_wifi_status(device: Any) -> None:  # noqa: ANN401 — PyUI device
+    """Read PyUI's Wi-Fi status on a thread while the display starts.
 
-    Reuses ``mainui.initialize_device`` so every device Spruce supports works without a copy
-    of its device table. Importing ``mainui`` does not start PyUI (its ``main()`` is guarded).
+    The top bar draws it from the first frame and PyUI caches it: only the first read waits
+    for ``wifiCmd status`` (0.4 s on a Mini), the rest return the cached value and refresh in
+    the background. Reading it here, during the display's second of start-up, takes that wait
+    off the first frame (.agents/device.md, "Start-up").
+
+    Args:
+        device: The PyUI device object.
+    """
+
+    def warm() -> None:
+        """Read once; a failure leaves the first frame to read it as before."""
+        try:
+            device.get_wifi_status()
+        except Exception:  # the warm-up must never stop start-up
+            logger.debug("Wi-Fi status warm-up failed", exc_info=True)
+
+    threading.Thread(target=warm, name="wifi-warm-up", daemon=True).start()
+
+
+def pyui_device(name: str) -> object:
+    """Create PyUI's device object, exactly as PyUI's launcher does.
+
+    Use ``devices.device_factory`` to avoid importing the launcher. ``DESKTOP``, the
+    development window, is configured by ``PYUI_DESKTOP_*`` variables.
 
     Args:
         name: PyUI device name as passed to ``mainui.py -device``, e.g. ``"MIYOO_MINI_PLUS"``.
@@ -140,7 +165,7 @@ def hardware_device(name: str) -> object:
         The initialised device, also registered with PyUI's ``Device`` holder.
     """
     from devices.device import Device
-    from mainui import initialize_device
+    from devices.device_factory import initialize_device
 
     # main_ui_mode=False: none of the launcher-only background services.
     initialize_device(name, main_ui_mode=False)

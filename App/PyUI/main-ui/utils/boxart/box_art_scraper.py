@@ -5,10 +5,7 @@ from pathlib import Path
 import subprocess
 import re
 import time
-import urllib.request
 from typing import List, Optional
-import xml.etree.ElementTree as ET
-import glob
 
 from devices.device import Device
 from display.display import Display
@@ -99,17 +96,14 @@ class BoxArtScraper:
         )
         return result == 0
 
-    def log_message(self, msg: str):
-        PyUiLogger.get_logger().info(msg)
-
     def log_and_display_message(self, msg: str):
-        self.log_message(msg)
+        PyUiLogger.get_logger().info(msg)
         Display.display_message(msg)
 
     def is_wifi_connected(self) -> bool:
         """Check network connectivity by pinging Cloudflare."""
         if self._ping("1.1.1.1", count=3, timeout=2):
-            self.log_message("Cloudflare ping successful; device is online.")
+            PyUiLogger.get_logger().info("Cloudflare ping successful; device is online.")
             return True
         else:
             self.log_and_display_message(Language.label("cloudflareOfflineAborting", "Cloudflare ping failed; device is offline. Aborting."))
@@ -264,6 +258,8 @@ class BoxArtScraper:
 
         # Parse XML
         try:
+            # Deferred: off the startup path.
+            import xml.etree.ElementTree as ET
             tree = ET.parse(xml_path)
             root = tree.getroot()
 
@@ -565,7 +561,7 @@ class BoxArtScraper:
     def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str) -> bool:
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
-            self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
+            PyUiLogger.get_logger().info(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
             return False
 
         remote_image_name = self.find_image_name(sys_name, rom_file_name)
@@ -579,10 +575,10 @@ class BoxArtScraper:
                 continue
             remote_image_name = self.find_image_name(fallback_sys, rom_file_name)
             if remote_image_name:
-                self.log_message(f"BoxartScraper: Matched {rom_file_name} via {fallback_sys} fallback")
+                PyUiLogger.get_logger().info(f"BoxartScraper: Matched {rom_file_name} via {fallback_sys} fallback")
                 return self.download_remote_image(fallback_ra, remote_image_name, image_path)
 
-        self.log_message(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
+        PyUiLogger.get_logger().info(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
         return False
 
     def download_remote_image_for_system(self, sys_name: str, remote_image_name: str, image_path: str):
@@ -595,12 +591,12 @@ class BoxArtScraper:
         boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
         fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
 
-        self.log_message(f"BoxartScraper: Downloading {boxart_url}")
+        PyUiLogger.get_logger().info(f"BoxartScraper: Downloading {boxart_url}")
         success = self._download_file(boxart_url, image_path)
         if not success:
-            self.log_message(f"BoxartScraper: failed {boxart_url}, trying fallback.")
+            PyUiLogger.get_logger().info(f"BoxartScraper: failed {boxart_url}, trying fallback.")
             if not self._download_file(fallback_url, image_path):
-                self.log_message(f"BoxartScraper: failed {fallback_url}.")
+                PyUiLogger.get_logger().info(f"BoxartScraper: failed {fallback_url}.")
         return success
 
     @pauses_idle_shutdown
@@ -652,7 +648,7 @@ class BoxArtScraper:
                 try:
                     future.result()  # triggers exception if any occurred
                 except Exception as e:
-                    self.log_message(f"BoxartScraper: Error in batch download - {e}")
+                    PyUiLogger.get_logger().info(f"BoxartScraper: Error in batch download - {e}")
         
         BoxArtResizer.patch_boxart_list([p for _, p in roms_and_paths])
 
@@ -678,7 +674,7 @@ class BoxArtScraper:
                         success_count = success_count +1
                         downloaded_files.append(result)
                 except Exception as e:
-                    self.log_message(f"BoxartScraper: Error processing a ROM - {e}")
+                    PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
 
         self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
         time.sleep(2)
@@ -698,12 +694,12 @@ class BoxArtScraper:
 
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
-            self.log_message(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
+            PyUiLogger.get_logger().info(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
             return tasks
 
         extensions = self._get_supported_extensions(sys_name)
         if not extensions:
-            self.log_message(f"BoxartScraper: No supported extensions found for {sys_name}.")
+            PyUiLogger.get_logger().info(f"BoxartScraper: No supported extensions found for {sys_name}.")
             return tasks
 
         for root, _, files in os.walk(sys_path):
@@ -769,9 +765,12 @@ class BoxArtScraper:
     def _download_file(self, url: str, dest_path: str) -> bool:
         """Download file to destination path."""
         try:
+            # Deferred: urllib.request has a heavy import graph.
+            import urllib.request
             urllib.request.urlretrieve(url, dest_path)
             return True
-        except Exception:
+        except Exception as e:
+            PyUiLogger.get_logger().error(e)
             if os.path.exists(dest_path):
                 os.remove(dest_path)
             return False

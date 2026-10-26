@@ -2,14 +2,16 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# YabaSanshiro keeps its pad map in keymapv2.json under Emu/SATURN/.yabasanshiro,
-# the tree spruceBackup carries across updates; the shipped default lives
-# beside it as .bak. backup.bin in the same directory is the Saturn's battery
-# RAM (save data) and is never touched. On the XX platforms the next launch
-# seeds the platform's pad entry into the restored file again.
-LIVE_KEYMAP="/mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json"
-BACKUP_KEYMAP="/mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json.bak"
+# Standalone only: its keymap sits in Emu/SATURN/.yabasanshiro, which spruceBackup carries across updates, so this
+# release's default ships in Emu/SATURN/default_configs. backup.bin (battery RAM), RetroArch's YabaSanshiro files and
+# the menu picks are never touched; each board's pad seed is applied again at launch.
+DEF=/mnt/SDCARD/Emu/SATURN/default_configs
+
+restore() {  # restore <default> <live>
+    [ -f "$1" ] || { log_message "Reset YabaSanshiro config: $1 does not exist, $2 not restored"; return 1; }
+    mkdir -p "${2%/*}"
+    [ -f "$1" ] && cp -f "$1" "$2"
+}
 
 log_message "Resetting YabaSanshiro config to default."
-[ -e "$BACKUP_KEYMAP" ] && cp -f "$BACKUP_KEYMAP" "$LIVE_KEYMAP"
-[ -e "$BACKUP_KEYMAP" ] || log_message "Reset YabaSanshiro config: $BACKUP_KEYMAP does not exist, nothing restored"
+restore "$DEF/yabasanshiro/keymapv2.json" /mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json

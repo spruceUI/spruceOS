@@ -12,6 +12,8 @@
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/sleep_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/xx_lid_wake.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh"
 
 # The XX line has no rumble GPIO, so utils/rumble.sh's rumble_gpio is not usable
 # here - see RUMBLE_GPIO in AnbernicXXCommon.cfg. The motor is driven through
@@ -104,7 +106,9 @@ trigger_device_sleep() {
 }
 
 device_enter_sleep() {
-    IDLE_TIMEOUT="$1"
+    # local: set_wake_alarm reassigns IDLE_TIMEOUT, and the lid wake window's
+    # alarm must not leak into sleep_helper's copy.
+    local IDLE_TIMEOUT="$1"
     WAKE_ALARM_PATH="$(find_wake_alarm_path)"
     rm -f "$WAKE_ALARM_ARMED_FLAG" "$SLEEP_TIMER_FILE"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
@@ -113,12 +117,14 @@ device_enter_sleep() {
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
     [ -e "$WAKE_ALARM_PATH" ] && touch "$WAKE_ALARM_ARMED_FLAG"
     xx_rgb_off
-    trigger_device_sleep
+    xx_suspend_with_lid_wake "$IDLE_TIMEOUT"
 }
 
 device_exit_sleep() {
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
     rm -f "$WAKE_ALARM_ARMED_FLAG"
+    # BaseOS's default while awake, for any suspend that skips sleep_helper.
+    xx_lid_wake_supported && xx_set_lid_wake off
     xx_rgb_restore
 }
 
@@ -154,14 +160,12 @@ send_virtual_key_L3() {
 }
 
 
-# An unreadable or unparseable version means "do not nag".
 check_if_fw_needs_update() {
-    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    case "$_have" in
-        ''|*[!0-9.]*) echo "false"; return ;;
-    esac
-    _want="$(github_latest_version pvaibhav/BaseOS)" || _want="$TARGET_BASEOS_VERSION"
-    version_older_than "$_have" "$_want" && echo "true" || echo "false"
+    baseos_fw_needs_update
+}
+
+local_fw_update_file() {
+    baseos_local_update_file
 }
 
 has_lid() {
@@ -472,7 +476,9 @@ anbernic_xx_common_init() {
     stage_ra_autoconfig
 
     add_spruce_system_user
-    shield_baseos_session
+    # BaseOS 1.3.0 renamed the respawned session; older images still run nextui-session.
+    shield_baseos_session /sbin/frontend-session
+    shield_baseos_session /sbin/nextui-session
 }
 
 # RetroArch has no profile for this pad, so it announces "ANBERNIC-keys (1/1)
@@ -517,59 +523,6 @@ device_prepare_for_ports_run() {
 
 device_cleanup_after_ports_run() {
     treat_dpad_as_dpad
-}
-
-# Stop BaseOS's respawned session from re-mounting the card during shutdown.
-#
-# /etc/inittab has `::respawn:/sbin/nextui-session`, so the moment save_poweroff
-# kills the frontend, init starts another one. That script's job includes
-# mounting the card if it finds it unmounted - its own comment says the retry
-# covers "hot re-insertion after an unmount" - and it cannot tell a deliberate
-# shutdown unmount from a yanked card:
-#
-#     mount -t vfat -o rw,utf8,noatime,shortname=mixed "$dev" "$SD"
-#
-# Mounting read-write sets the FAT dirty bit. So stage 2 would unmount the card
-# cleanly and a second later BaseOS would helpfully mount it straight back, and
-# every boot still opened with "Volume was not properly unmounted". Traced end to
-# end: clean umount OK, then a session start in the same second.
-#
-# Bind a shim over it that steps aside while a shutdown is in progress. Same
-# technique spruce already uses for /etc/passwd and MainUI, and ephemeral for the
-# same reason: nothing is written to BaseOS's rootfs, a BaseOS update can neither
-# inherit nor break it, and a reboot removes it entirely. If anything here fails
-# we simply leave BaseOS's own script in place.
-shield_baseos_session() {
-    [ -f /sbin/nextui-session ] || return 0
-    # Already shielded - device_init can run more than once, and binding twice
-    # stacks mounts. Match on the name alone: /sbin is a symlink to /usr/sbin
-    # here, and /proc/mounts reports the resolved path, so testing for the
-    # literal "/sbin/..." finds nothing and happily binds again.
-    grep -q "nextui-session" /proc/mounts 2>/dev/null && return 0
-
-    cp /sbin/nextui-session /tmp/nextui-session.real 2>/dev/null || return 0
-    chmod +x /tmp/nextui-session.real 2>/dev/null
-
-    cat > /tmp/nextui-session.shim <<'SHIM'
-#!/bin/sh
-# spruce shim over BaseOS's frontend session. Bind-mounted, never installed.
-# While a shutdown is in progress the real session must not run: it mounts the
-# SD card read-write when it finds it unmounted, which re-dirties the filesystem
-# save_poweroff.sh has just unmounted cleanly. The sleep keeps init's respawn
-# from becoming a hot loop for the few seconds before the power goes.
-if [ -e /tmp/shutting_down.lock ]; then
-    sleep 5
-    exit 0
-fi
-exec /tmp/nextui-session.real "$@"
-SHIM
-    chmod +x /tmp/nextui-session.shim 2>/dev/null
-
-    if mount -o bind /tmp/nextui-session.shim /sbin/nextui-session 2>/dev/null; then
-        log_message "Shielded BaseOS session script against shutdown remounts"
-    else
-        log_message "Could not shield BaseOS session script; card may be remounted during shutdown"
-    fi
 }
 
 # Create the spruce system account. BaseOS ships only a root user, so the
@@ -950,8 +903,14 @@ wait_for_wlan0() {
 }
 
 device_wifi_power_off() {
-    # Unloading the driver is what drops the rail: 8821cs calls
-    # sunxi_wlan_set_power on the way out. There is no sysfs node that does it.
+    # The rail also powers the chip's Bluetooth: kept while that is on.
+    bluetooth_setting_wanted && return 0
+    xx_wifi_module_unload
+}
+
+# Unloading the driver is what drops the rail: 8821cs calls
+# sunxi_wlan_set_power on the way out. There is no sysfs node that does it.
+xx_wifi_module_unload() {
     if lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
         rmmod "$WIFI_MODULE" 2>/dev/null
         log_message "WiFi radio powered down ($WIFI_MODULE unloaded)"
@@ -1171,7 +1130,7 @@ device_ensure_wifi_interface() {
 # not carried into the next boot in a half-initialised state. This is the half
 # that stops the wedge being created, rather than recovering from it after.
 device_prepare_for_poweroff() {
-    device_wifi_power_off
+    xx_wifi_module_unload
     xx_rgb_off
 }
 
@@ -1179,9 +1138,12 @@ device_bluetooth_supported() {
     return 0
 }
 
-# WiFi and Bluetooth share the RTL8821CS, and Bluetooth goes up second: with
-# no wlan0 the chip is not powered, and the radio cannot come up.
+# WiFi and Bluetooth share the RTL8821CS: with no wlan0 the chip is not
+# powered, so load its driver if WiFi left it out, and wait for wlan0.
 device_bluetooth_radio_up() {
+    if ! lsmod 2>/dev/null | grep -q "^$WIFI_MODULE "; then
+        insmod "$WIFI_MODULE_PATH" 2>/dev/null || return 1
+    fi
     _n=0
     while [ ! -d /sys/class/net/wlan0 ] && [ "$_n" -lt 30 ]; do
         sleep 1
@@ -1195,6 +1157,7 @@ device_bluetooth_radio_up() {
 device_bluetooth_radio_down() {
     killall rtk_hciattach 2>/dev/null
     rfkill block bluetooth
+    wifi_setting_wanted || xx_wifi_module_unload
 }
 
 # BaseOS leaves D-Bus and every Bluetooth daemon to the frontend. A dbus-daemon

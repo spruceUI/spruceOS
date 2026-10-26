@@ -6,6 +6,8 @@
 . /mnt/SDCARD/spruce/scripts/button_actions.sh
 
 START_DOWN=false
+SELECT_DOWN=false
+L3_DOWN=false
 
 nearest_system_brightness() {
     input=$1
@@ -250,6 +252,12 @@ getevent $EVENTS | while read line; do
         *"key $B_START 0"*) # START key up
             START_DOWN=false
         ;;
+        *"key $B_SELECT 1"*) # SELECT key down
+            SELECT_DOWN=true
+        ;;
+        *"key $B_SELECT 0"*) # SELECT key up
+            SELECT_DOWN=false
+        ;;
         *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
                 brightness_down
@@ -304,7 +312,6 @@ getevent $EVENTS | while read line; do
                 PID_DOWN=$!
             else
                 volume_down # ensure fire the first run
-
                 CURR_VOLUME=$(get_volume_level)
                 volume_down_bg &
                 PID_DOWN=$!
@@ -331,7 +338,6 @@ getevent $EVENTS | while read line; do
                 PID_UP=$!
             else
                 volume_up # ensure fire the first run
-
                 CURR_VOLUME=$(get_volume_level)
                 volume_up_bg &
                 PID_UP=$!
@@ -343,6 +349,51 @@ getevent $EVENTS | while read line; do
         ;;
         *"key $B_HOME 1"*) # Home Button Pressed
             device_home_button_pressed
+        ;;
+        *"key $B_L3 1") # L3 pressed
+            if [ "$B_VOLDOWN" = "DOESNT_EXIST" ] && [ "$SELECT_DOWN" = "true" ]; then
+                if [ "${VOLUME_KEYS_ON_PAD:-0}" = "1" ] && flag_check "in_menu"; then continue; fi
+                [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
+                PID_DOWN=""
+                [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
+                PID_UP=""
+
+                volume_down # ensure fire the first run
+                CURR_VOLUME=$(get_volume_level)
+                volume_down_bg &
+                PID_DOWN=$!
+            fi
+            L3_down=true
+        ;;
+        *"key $B_L3 0") # L3 released
+            if [ "$B_VOLDOWN" = "DOESNT_EXIST" ]; then
+                [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
+                PID_UP=""
+            fi
+            L3_down=false
+        ;;
+        *"key $B_R3 1") # L3 pressed
+            if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$SELECT_DOWN" = "true" ]; then
+                if [ "${VOLUME_KEYS_ON_PAD:-0}" = "1" ] && flag_check "in_menu"; then continue; fi
+                [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
+                PID_UP=""
+                [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
+                PID_DOWN=""
+
+                volume_up # ensure fire the first run
+                CURR_VOLUME=$(get_volume_level)
+                volume_up_bg &
+                PID_UP=$!
+            fi
+            if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$L3_down" = "true" ]; then
+                swap_dpad_analog_toggle
+            fi
+        ;;
+        *"key $B_R3 0") # L3 released
+            if [ "$B_VOLDOWN" = "DOESNT_EXIST" ]; then
+                [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
+                PID_UP=""
+            fi
         ;;
     esac
 done

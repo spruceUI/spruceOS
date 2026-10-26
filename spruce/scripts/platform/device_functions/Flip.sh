@@ -317,8 +317,6 @@ launch_startup_watchdogs(){
     if device_usb_audio_supported; then
         /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
     fi
-
-    /mnt/SDCARD/spruce/scripts/enable_zram.sh &
 }
 
 # Should the above be merged into here?
@@ -419,12 +417,25 @@ perform_fw_update_Flip() {
 }
 
 
-device_init() {
-    runtime_mounts_Flip
+# Hooks baseos/my355.sh replaces: the stock firmware has no respawned session to
+# shield, and starts all three vendor services.
+flip_shield_session() {
+    :
+}
 
+flip_start_vendor_services() {
+    /usr/miyoo/bin/btmanager &
+    /usr/miyoo/bin/hardwareservice &
+    /usr/miyoo/bin/miyoo_inputd &
+}
+
+device_init() {
+    flip_shield_session
+    runtime_mounts_Flip
+    flip_shield_session
 
     echo 3 > /proc/sys/kernel/printk
-    chmod a+x /usr/bin/notify
+    [ -e /usr/bin/notify ] && chmod a+x /usr/bin/notify
 
     export LD_LIBRARY_PATH=/usr/miyoo/lib:/usr/lib:/lib
 
@@ -433,9 +444,7 @@ device_init() {
 
     insmod /lib/modules/rtk_btusb.ko
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
-    /usr/miyoo/bin/btmanager &
-    /usr/miyoo/bin/hardwareservice &
-    /usr/miyoo/bin/miyoo_inputd &
+    flip_start_vendor_services
     sleep 0.2   # leave this here or else buttons_watchdog.sh fails to start
 
     #joypad
@@ -535,7 +544,9 @@ device_wifi_power_on() {
 device_wifi_power_off() {
     # A dongle's driver stays loaded with its interface down (cheap to turn
     # back on; the watchdog unloads it when the dongle is pulled). The rail is
-    # written 0 either way: with a dongle it already is.
+    # written 0 either way: with a dongle it already is. The rail also powers
+    # the chip's Bluetooth, so without a dongle it stays on while that is on.
+    bluetooth_setting_wanted && ! usb_wifi_dongle_active && return 0
     echo 0 > /sys/class/rkwifi/wifi_power
 }
 
@@ -631,6 +642,19 @@ device_bluetooth_supported() {
     return 0
 }
 
+BT_HCI_WAIT=10
+
+# hci0 lives on the WiFi rail: power it if WiFi left it off. A dongle keeps it off.
+device_bluetooth_radio_up() {
+    usb_wifi_dongle_active && return 1
+    [ -d /sys/class/net/wlan0 ] || device_usb_wifi_onboard_restore
+}
+
+device_bluetooth_radio_down() {
+    hciconfig hci0 down 2>/dev/null
+    wifi_setting_wanted || usb_wifi_dongle_active || echo 0 > /sys/class/rkwifi/wifi_power
+}
+
 device_bluetoothd_start() {
     /etc/init.d/S40bluetooth start
 }
@@ -652,3 +676,8 @@ work_led_off() {
 work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
+
+# BaseOS-my355 (flagged by Flip.cfg) replaces some of the functions above.
+if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/device_functions/baseos/my355.sh"
+fi

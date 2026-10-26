@@ -14,9 +14,23 @@
 # CPU_PERF_MAX_FREQ
 # CPU_OVERCLOCK_MAX_FREQ
 # CONSERVATIVE_POLICY_DIR
+#
+# optional, per device (the DRAM controller follows the CPU mode; unset = no DRAM writes):
+# DRAM_DEVFREQ_DIR, DRAM_MIN_FREQ, DRAM_MAX_FREQ
+# DRAM_POWERSAVE_GOVERNOR, DRAM_SMART_GOVERNOR, DRAM_PERFORMANCE_GOVERNOR, DRAM_OVERCLOCK_GOVERNOR
 
 CPU_0_DIR=/sys/devices/system/cpu/cpu0/cpufreq
 CPU_4_DIR=/sys/devices/system/cpu/cpu4/cpufreq
+
+# set_dram_governor <governor>: the CPU mode's governor for the DRAM controller, over its full range. As on ROCKNIX,
+# dArkOS and muOS: performance holds the top step, powersave the lowest, an ondemand governor scales with load.
+set_dram_governor() {
+    [ -n "$1" ] && [ -n "$DRAM_DEVFREQ_DIR" ] && [ -d "$DRAM_DEVFREQ_DIR" ] || return 0
+    # Reopen the full range first: a min or max left by anything else would cap what the governor can pick.
+    [ -n "$DRAM_MIN_FREQ" ] && echo "$DRAM_MIN_FREQ" > "$DRAM_DEVFREQ_DIR/min_freq"
+    [ -n "$DRAM_MAX_FREQ" ] && echo "$DRAM_MAX_FREQ" > "$DRAM_DEVFREQ_DIR/max_freq"
+    echo "$1" > "$DRAM_DEVFREQ_DIR/governor"
+}
 
 unlock_governor() {
     for file in scaling_governor scaling_min_freq scaling_max_freq; do
@@ -33,8 +47,9 @@ lock_governor() {
 }
 
 # Usage:
-#   cores_online "0123"           -> cores 0-3
-#   cores_online "0135"     -> online cores 0,1,3,5; offline others
+#   cores_online "0123"                -> cores 0-3
+#   cores_online "0135"                -> online cores 0,1,3,5; offline others
+#   cores_online "4567" --no-offline   -> online cores 4-7; leave the others as they are
 cores_online() {
     [ -z "$1" ] && return  # skip empty call
     core_string="${1:-0123}"
@@ -51,6 +66,12 @@ cores_online() {
             (*"$cpu"*) val=1 ;;
             (*)        val=0 ;;
         esac
+
+        # Offlining is a slow hotplug; a caller may leave it to the next call.
+        [ "$val" = 0 ] && [ "$2" = "--no-offline" ] && continue
+
+        # Re-locking a core already in that state only costs forks.
+        read -r cur < "$cpu_path/online" 2>/dev/null && [ "$cur" = "$val" ] && continue
 
         # lock requested cpus online and all others offline
         chmod a+w "$cpu_path/online" 2>/dev/null
@@ -111,6 +132,7 @@ set_powersave(){
             echo "$DEVICE_POWERSAVE_LOW_FREQ" > "$CPU_4_DIR/scaling_min_freq"
             echo "$DEVICE_POWERSAVE_HIGH_FREQ" > "$CPU_4_DIR/scaling_max_freq"
         fi
+        set_dram_governor "$DRAM_POWERSAVE_GOVERNOR"
 
         lock_governor 2>/dev/null
         log_message "CPU locked to POWERSAVE: core(s) $DEVICE_MIN_CORES_ONLINE @ $DEVICE_POWERSAVE_LOW_FREQ to $DEVICE_POWERSAVE_HIGH_FREQ"
@@ -125,6 +147,10 @@ set_smart() {
     SMART_DOWN_FACTOR=1
     SMART_SAMPLING_RATE=10000
     scaling_min_freq="${1:-$CPU_SMART_MIN_FREQ}"
+    # Opt-in (platform cfg): no emulator's scaling_min_freq may take SMART below this floor.
+    if [ -n "$CPU_SMART_FLOOR_FREQ" ] && [ "$scaling_min_freq" -lt "$CPU_SMART_FLOOR_FREQ" ] 2>/dev/null; then
+        scaling_min_freq="$CPU_SMART_FLOOR_FREQ"
+    fi
 
     if [ -n "$CPU_SMART_MAX_FREQ" ]; then
         scaling_max_freq="$CPU_SMART_MAX_FREQ"
@@ -164,6 +190,7 @@ set_smart() {
             echo "$GPU_SMART_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
             echo "$GPU_SMART_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
+        set_dram_governor "$DRAM_SMART_GOVERNOR"
 
         lock_governor 2>/dev/null
         log_message "CPU Mode now locked to SMART: core(s) $CPU_SMART_CORES_ONLINE @ $scaling_min_freq to $CPU_PERF_MAX_FREQ"
@@ -171,11 +198,12 @@ set_smart() {
     fi
 }
 
+# Optional --no-offline leaves the cores outside the performance set as they are.
 set_performance() {
     log_message "set_performance called"
     if ! flag_check "setting_cpu"; then
         flag_add "setting_cpu" --tmp
-        cores_online "$DEVICE_MAX_CORES_ONLINE"
+        cores_online "$DEVICE_MAX_CORES_ONLINE" "$1"
 
         unlock_governor 2>/dev/null
 
@@ -194,6 +222,7 @@ set_performance() {
             echo "$GPU_PERFORMANCE_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
             echo "$GPU_PERFORMANCE_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
+        set_dram_governor "$DRAM_PERFORMANCE_GOVERNOR"
 
         lock_governor 2>/dev/null
         log_message "CPU Mode now locked to PERFORMANCE: $DEVICE_MAX_CORES_ONLINE @ $CPU_PERF_MAX_FREQ"
@@ -224,6 +253,7 @@ set_overclock() {
             echo "$GPU_OVERCLOCK_MAX_FREQ" > "$GPU_GOVENOR_DIR/max_freq"
             echo "$GPU_OVERCLOCK_GOVERNOR" > "$GPU_GOVENOR_DIR/governor"
         fi
+        set_dram_governor "$DRAM_OVERCLOCK_GOVERNOR"
 
         lock_governor 2>/dev/null
         log_message "CPU Mode now locked to OVERCLOCK: $DEVICE_MAX_CORES_ONLINE @ $CPU_OVERCLOCK_MAX_FREQ"

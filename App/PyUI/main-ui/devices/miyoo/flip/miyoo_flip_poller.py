@@ -1,6 +1,5 @@
 
 import time
-from utils.logger import PyUiLogger
 from devices.utils.process_runner import ProcessRunner
 
 class MiyooFlipPoller:

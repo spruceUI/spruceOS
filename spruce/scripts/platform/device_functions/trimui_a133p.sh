@@ -97,6 +97,7 @@ check_if_fw_needs_update() {
 
 runtime_mounts_a133p() {
 
+    /mnt/SDCARD/spruce/brick/glibc/bind.sh >> /mnt/SDCARD/Saves/spruce/spruce.log 2>&1
     mount -o bind "${SPRUCE_ETC_DIR}/profile" /etc/profile &
     mount -o bind "${SPRUCE_ETC_DIR}/group" /etc/group &
     mount -o bind "${SPRUCE_ETC_DIR}/passwd" /etc/passwd &
@@ -107,6 +108,14 @@ runtime_mounts_a133p() {
     wait
     touch /mnt/SDCARD/spruce/flip/bin/MainUI
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
+}
+
+# DHCP must not hold the WiFi lock while waiting for a lease.
+# Use a separate session to survive launcher exit.
+device_start_dhcp_client() {
+    pgrep -f "udhcpc.*wlan0" >/dev/null && return 0
+    setsid udhcpc -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
+    return 0
 }
 
 # Stock runs its own wpa_supplicant (procd S96), which procd spawns just after
@@ -193,7 +202,7 @@ device_init_a133p() {
         /mnt/SDCARD/spruce/scripts/bluetooth.sh boot
     ) &
     amixer set 'Soft Volume Master' 255 # reset this to max so we're not double attenuating vol with two different mixer controls
-    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice musicserver"
+    run_trimui_blobs "trimui_inputd trimui_scened trimui_btmanager hardwareservice"
 
     (
         # Set volume on startup by simulating button presses

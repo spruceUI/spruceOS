@@ -19,6 +19,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "a5200": ["a5200"],
         "ardens": ["Ardens"],
         "arduous": ["Arduous"],
+        "armgba": ["armGBA"],
         "atari800": ["Atari800"],
         "bk": ["bk"],
         "bluemsx": ["blueMSX"],
@@ -42,6 +43,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "frodo": ["Frodo"],
         "fuse": ["Fuse"],
         "gambatte": ["Gambatte"],
+        "gametank": ["GameTank"],
         "gearboy": ["Gearboy"],
         "gearcoleco": ["Gearcoleco"],
         "gearsystem": ["Gearsystem"],
@@ -55,7 +57,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "km_flycast_xtreme": ["Flycast Xtreme"],
         "km_ludicrousn64_2k22_xtreme_amped": ["LudicrousN64 2K22 Xtreme Amped"],
         "km_parallel_n64_xtreme_amped_turbo": ["ParaLLEl N64 Xtreme Amped Turbo"],
-        "libgametank": ["GameTank (Rust)"],
+        "gloopy": ["Gloopy"],
         "lowresnx": ["lowresnx"],
         "lutro": ["Lutro"],
         "mame2003_plus": ["MAME 2003-Plus"],
@@ -129,7 +131,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         self.rom_utils = RomUtils(self.roms_paths[0])
 
     def get_game_system_by_name(self, system_name) -> GameSystem:
-        game_system_config = FileBasedGameSystemConfig(system_name)
+        game_system_config = FileBasedGameSystemConfig(system_name, os.path.join(self.emu_path, system_name))
 
         if(game_system_config is not None):
             display_name = game_system_config.get_label()

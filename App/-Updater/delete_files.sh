@@ -40,6 +40,7 @@ APP_DELETE_LIST="
 -FirmwareUpdate-
 -OTA
 -Updater
+AccentColor
 Cheevos
 Credits
 FileManagement
@@ -58,6 +59,7 @@ USBStorageMode
 # Delete all spruce-provided emu folders; users should use custom-named system folders if 
 # they want any changes to persist. Any user data in these should have already been backed
 # up earlier in the update process anyhow.
+# exclude J2ME: the Game Nursery installs its Java runtime there
 EMU_DIR="/mnt/SDCARD/Emu"
 EMU_DELETE_LIST="
 A30PORTS
@@ -96,6 +98,7 @@ GG
 GW
 INTELLIVISION
 JAGUAR
+LOOPY
 LYNX
 MAME2003PLUS
 MD
@@ -109,6 +112,7 @@ MSX
 N64
 NAOMI
 NDS
+NDSI
 NEOCD
 NEOGEO
 NGP

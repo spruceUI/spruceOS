@@ -2,11 +2,11 @@
 # Cheevos launcher. Spruce's Apps menu runs this through principal.sh after PyUI exits;
 # PyUI restarts when it returns.
 #
-# Each branch mirrors the matching branch of App/PyUI/launch.sh (SpruceOS 4.5.0+): the SDL
+# Each branch mirrors the matching branch of the App/PyUI/launch.sh Cheevos ships with: the SDL
 # libraries and drivers, the PyUI device name, the Python binary and the working directory
-# PyUI uses on that platform. Only the Miyoo Mini family has been tested on hardware. If the
-# app can't start, or the platform is unknown, a message is shown through PyUI's own launcher, which knows every
-# platform Spruce supports.
+# PyUI uses on that platform. Cheevos supports every device SpruceOS supports. If the app
+# can't start, or the platform is unknown, a message is shown through PyUI's own launcher,
+# which knows every platform Spruce supports.
 
 # shellcheck source=/dev/null
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -33,6 +33,9 @@ case "$PLATFORM" in
         export SDL_AUDIODRIVER=mmiyoo
         export EGL_VIDEODRIVER=mmiyoo
         export SDL_MMIYOO_DOUBLE_BUFFER=1
+        # Mirror PyUI's menu audio setup: libpadsp sends /dev/dsp writes to audioserver.
+        pidof audioserver >/dev/null || { audioserver >/dev/null 2>&1 & sleep 0.5; }
+        export LD_PRELOAD="/mnt/SDCARD/miyoo/lib/libpadsp.so"
         freemma
         CHEEVOS_PYUI_DEVICE="$(get_miyoo_mini_variant)"
         ;;
@@ -121,7 +124,7 @@ export PYTHONPATH="$APP_DIR"
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 cd "$RUN_DIR" || cd "$APP_DIR" || exit 1
-"$PYTHON" -m cheevos 2>"$STDERR_LOG"
+"$PYTHON" -m cheevos "$@" 2>"$STDERR_LOG"
 STATUS=$?
 [ -n "$CLEANUP" ] && $CLEANUP
 if [ "$STATUS" -ne 0 ]; then

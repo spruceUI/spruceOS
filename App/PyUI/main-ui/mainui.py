@@ -1,35 +1,32 @@
 import argparse
+import logging
 import os
 from pathlib import Path
 import signal
 import sys
 import threading
 from devices.device import Device
-from devices.miyoo.mini.miyoo_mini_flip_specific_model_variables import MIYOO_MINI_FLIP_VARIABLES, MIYOO_MINI_PLUS, MIYOO_MINI_V1_V2_V3_VARIABLES, MIYOO_MINI_V4_VARIABLES
+from devices.device_factory import initialize_device
 from devices.miyoo.user_config import UserConfig
 from menus.app.hidden_apps_manager import AppsManager
 from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.custom_gameswitcher_list_manager import CustomGameSwitcherListManager
-from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.language.language import Language
-from option_select_ui import OptionSelectUI
 import sdl2
-import sdl2.ext
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
 from display.display import Display
 from themes.theme import Theme
-from utils.button_listener import ButtonListener
 from utils.cfw_system_config import CfwSystemConfig
 from utils.config_copier import ConfigCopier
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
-from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
 from utils.time_logger import log_timing
+from utils import shutdown
 
 
 
@@ -60,102 +57,23 @@ def log_renderer_info():
     for i in range(num):
         PyUiLogger.get_logger().info(f"Found Video Decoder {i}: {sdl2.SDL_GetVideoDriver(i).decode()}")
 
-def initialize_device(device, main_ui_mode):
-    if "MIYOO_FLIP" == device or "SPRUCE_MIYOO_FLIP" == device:
-        from devices.miyoo.flip.miyoo_flip import MiyooFlip
-        Device.init(MiyooFlip(device, main_ui_mode))
-    elif "MIYOO_MINI" == device:
-        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
-        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_V1_V2_V3_VARIABLES))
-    elif "MIYOO_MINI_V4" == device:
-        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
-        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_V4_VARIABLES))
-    elif "MIYOO_MINI_PLUS" == device:
-        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
-        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_PLUS))
-    elif "MIYOO_MINI_FLIP" == device:
-        from devices.miyoo.mini.miyoo_mini_common import MiyooMiniCommon
-        Device.init(MiyooMiniCommon(device,main_ui_mode,MIYOO_MINI_FLIP_VARIABLES))
-    elif "SPRIG_MIYOO_MINI" == device:
-        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
-        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_V1_V2_V3_VARIABLES))
-    elif "SPRIG_MIYOO_MINI_V4" == device:
-        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
-        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_V4_VARIABLES))
-    elif "SPRIG_MIYOO_MINI_PLUS" == device:
-        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
-        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_PLUS))
-    elif "SPRIG_MIYOO_MINI_FLIP" == device:
-        from devices.miyoo.mini.sprig_miyoo_mini_common import SprigMiyooMiniCommon
-        Device.init(SprigMiyooMiniCommon(device, main_ui_mode,MIYOO_MINI_FLIP_VARIABLES))
-    elif "TRIMUI_BRICK" == device or "SPRUCE_TRIMUI_BRICK" == device:
-        from devices.trimui.trim_ui_brick import TrimUIBrick
-        Device.init(TrimUIBrick(device,main_ui_mode))
-    elif "TRIMUI_BRICK_PRO" == device or "SPRUCE_TRIMUI_BRICK_PRO" == device:
-        from devices.trimui.trim_ui_brick_pro import TrimUIBrickPro
-        Device.init(TrimUIBrickPro(device,main_ui_mode))
-    elif "TRIMUI_SMART_PRO" == device or "SPRUCE_TRIMUI_SMART_PRO" == device:
-        from devices.trimui.trim_ui_smart_pro import TrimUISmartPro
-        Device.init(TrimUISmartPro(device,main_ui_mode))
-    elif "TRIMUI_SMART_PRO_S" == device or "SPRUCE_TRIMUI_SMART_PRO_S" == device:
-        from devices.trimui.trim_ui_smart_pro_s import TrimUISmartProS
-        Device.init(TrimUISmartProS(device,main_ui_mode))
-    elif "MIYOO_A30" == device or "SPRUCE_MIYOO_A30" == device:
-        from devices.miyoo.a30.miyoo_a30 import MiyooA30
-        Device.init(MiyooA30(device, main_ui_mode))
-    elif "ANBERNIC_RGXX720480" == device:
-        from devices.anbernic.anbernic_xx_720_x_480 import Anbernic720x480
-        Device.init(Anbernic720x480(main_ui_mode))
-    elif "ANBERNIC_RG28XX" == device:
-        from devices.anbernic.anbernic_rg28xx import AnbernicRG28xx
-        Device.init(AnbernicRG28xx(main_ui_mode))
-    elif "MINILOONG_POCKET1" == device:
-        from devices.miniloong.miniloong_pocket1 import MiniloongPocket1
-        Device.init(MiniloongPocket1(device, main_ui_mode))
-    elif "ANBERNIC_RGCUBEXX" == device:
-        from devices.anbernic.anbernic_rgcubexx import AnbernicRGCubeXX
-        Device.init(AnbernicRGCubeXX(main_ui_mode))
-    elif "ANBERNIC_RGXX640480" == device:
-        from devices.anbernic.anbernic_xx_640_x_480 import Anbernic640x480
-        Device.init(Anbernic640x480(main_ui_mode))
-    elif "ANBERNIC_MUOS" == device:
-        from devices.muos.muos_anbernic_rgxx import MuosAnbernicRGXX
-        Device.init(MuosAnbernicRGXX(device))        
-    elif "ROCKNIX_RGDS" == device:
-        from devices.rocknix.rocknix_rgds import RocknixRgds
-        Device.init(RocknixRgds(device))        
-    elif "RGB30" == device:
-        from devices.rgb30.rgb30 import Rgb30
-        Device.init(Rgb30(device))
-    elif "RGB20SX" == device:
-        from devices.rgb30.rgb20sx import Rgb20sx
-        Device.init(Rgb20sx(device))
-    elif "A10MINI" == device:
-        from devices.a10mini.a10mini import A10Mini
-        Device.init(A10Mini(device))
-    elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
-        from devices.magicx.magicx_zero28 import MagicXZero28
-        Device.init(MagicXZero28(device, main_ui_mode))
-    elif "MAGICX_ZERO40" == device or "SPRUCE_MAGICX_ZERO40" == device:
-        from devices.magicx.magicx_zero40 import MagicXZero40
-        Device.init(MagicXZero40(device, main_ui_mode))
-    elif "MAGICX_XU20" == device or "SPRUCE_MAGICX_XU20" == device:
-        from devices.magicx.magicx_xu20 import MagicXXU20
-        Device.init(MagicXXU20(device, main_ui_mode))
-    elif "GKD_PIXEL2" == device:
-        from devices.gkd.gkd_pixel2 import GKDPixel2
-        Device.init(GKDPixel2(device, main_ui_mode))
-    else:
-        raise RuntimeError(f"{device} is not a supported device")
-
-
 def background_startup():
     FavoritesManager.initialize(Device.get_device().get_favorites_path())
     RecentsManager.initialize(Device.get_device().get_recents_path())
-    CheevosCacheManager.initialize()
     CustomGameSwitcherListManager.initialize()
     CollectionsManager.initialize(Device.get_device().get_collections_path())
     AppsManager.initialize(Device.get_device().get_apps_config_path())
+
+def warm_wifi_status():
+    """Overlap the first blocking Wi-Fi status read with theme and display setup."""
+    def read_status():
+        try:
+            Device.get_device().get_wifi_status()
+        except Exception:
+            PyUiLogger.get_logger().exception("Wi-Fi status warm-up failed")
+
+    threading.Thread(target=read_status, name="WifiStatus", daemon=True).start()
+
 
 def start_background_threads():
     startup_thread = threading.Thread(target=Device.get_device().perform_startup_tasks)
@@ -168,6 +86,13 @@ def start_background_threads():
     # Follows the USB audio route for as long as the menu runs
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
+
+def finish_startup():
+    """Release the startup clock and warm optional data after the first frame."""
+    threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
+    CheevosCacheManager.initialize()
+
 
 def verify_config_exists(config_path):
     # Determine the directory where this script resides
@@ -194,6 +119,7 @@ def check_for_msg_display(args):
 
 def check_for_option_list_file(args):
     if(args.optionListFile):
+        from option_select_ui import OptionSelectUI
         OptionSelectUI.display_option_list(args.optionListTitle,args.optionListFile, True)
 
 def check_for_msg_display_realtime(args):
@@ -213,6 +139,7 @@ def check_for_msg_display_realtime(args):
                 elif message.startswith("OPTION_LIST:"):
                     option_list_file = message[len("OPTION_LIST:"):].strip()
                     PyUiLogger.get_logger().info(f"Option list file: {option_list_file}")
+                    from option_select_ui import OptionSelectUI
                     OptionSelectUI.display_option_list("",option_list_file, False)
                 else:
                     Display.display_message(message)
@@ -224,10 +151,12 @@ def check_for_msg_display_realtime(args):
 
 def check_for_msg_display_socket_based(args):
     if(args.msgDisplayRealtimePort):
+        from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
         RealtimeMessageNetworkListener(args.msgDisplayRealtimePort).start()
 
 def check_for_button_listener_mode(args):
     if(args.buttonListenerMode):
+        from utils.button_listener import ButtonListener
         print("Running in button listener mode")
         ButtonListener().start()
 
@@ -258,6 +187,10 @@ def main():
         if(args.msgDisplayRealtime or args.msgDisplay or args.msgDisplayRealtimePort or args.optionListFile or args.buttonListenerMode):
             main_ui_mode = False
 
+        if main_ui_mode:
+            # Before the slow part of startup, so a power-off during it still gets the farewell.
+            shutdown.listen()
+
         with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
 
@@ -272,6 +205,13 @@ def main():
         check_for_button_listener_mode(args)
         check_for_startup_init_only(args)
 
+        # The Roms scan is SD-bound and the first Wi-Fi status read blocks; overlap both
+        # with the display bring-up below. The helper modes and startupInitOnly (which
+        # has exited by now) show no menu, so they skip both.
+        if main_ui_mode:
+            Device.get_device().get_game_system_utils().prefetch_active_systems()
+            warm_wifi_status()
+
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
 
@@ -283,6 +223,8 @@ def main():
         #2nd init is just to allow scaling if needed
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
+        if main_ui_mode:
+            shutdown.arm(Display.present_farewell, Controller.controller_interface.signal_wakeup_fd())
 
         Device.get_device().perform_sdcard_ro_check()
 
@@ -292,8 +234,12 @@ def main():
         check_for_option_list_file(args)
 
     main_menu = MainMenu()
+    main_menu.build_startup_menu()
 
     start_background_threads()
+    # Keep the startup clock through the first visible frame. Optional proxy
+    # reads can then run while the user is at Home, rather than competing with it.
+    Display.after_next_present(finish_startup)
     keep_running = True
     PyUiLogger.get_logger().info("Entering main loop")
     while(keep_running):
@@ -308,7 +254,25 @@ def sigterm_handler(signum, frame):
     PyUiLogger.get_logger().info(f"Received SIGTERM (Signal {signum}). Shutting down...")
     sys.exit() # Exit gracefully
 
+def exit_without_teardown():
+    """Joins non-daemon threads and flushes the log, then skips the interpreter teardown that
+    sys.exit() would add: 0.25 s on the Mini Plus, paid before every app or game starts.
+    No other exit hooks run, including the one that stops idle ThreadPoolExecutor workers:
+    shut an executor down before exiting (a with-block does), or the join waits forever."""
+    main_thread = threading.main_thread()
+    for thread in threading.enumerate():
+        if thread is not main_thread and not thread.daemon:
+            thread.join()
+    logging.shutdown()
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(0)
+
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
-    main()
-    os._exit(0)
+    try:
+        main()
+    except SystemExit:
+        # Every exit is a sys.exit() (always status 0); other exceptions keep their traceback.
+        pass
+    exit_without_teardown()

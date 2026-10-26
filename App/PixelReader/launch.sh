@@ -46,7 +46,7 @@ else
 			# .gptk on the wrong physical key.
 			export_sdl_gamecontroller_map positional
 			;;
-		"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini")
+		"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"XUMiniM"|"G350"|"V10"|"RG353M")
 			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
 			;;
 	esac

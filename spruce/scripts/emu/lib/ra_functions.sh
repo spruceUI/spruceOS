@@ -14,10 +14,10 @@
 # Requires functions:
 #   get_config_value
 #   log_message
-#   pin_to_dedicated_cores
 #
 # Provides:
 #   prepare_ra_config
+#   export_spruce_theme_dir
 #   run_retroarch
 #   ready_architecture_dependent_states
 #   stash_architecture_dependent_states
@@ -59,6 +59,9 @@ prepare_ra_config() {
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+	rac_user=$(printf '%s' "$rac_user" | sed 's/[\\&|]/\\&/g')
+	rac_pass=$(printf '%s' "$rac_pass" | sed 's/[\\&|]/\\&/g')
+
 	log_message "Cheevos mode is $rac_mode" -v
 	case "$rac_mode" in
 		"Disabled")
@@ -139,7 +142,7 @@ prepare_ra_config() {
 
 	# Set hotkey enable button based on spruceUI config
 	case "$BRAND" in
-		"TrimUI" | "GKD")
+		"TrimUI" | "GKD" | "MagicX")
 			hotkey_enable="$(get_config_value '.menuOptions."Emulator Settings".raHotkeyTrimUI.selected' "Menu")"
 			;;
 		"Miyoo" | "Anbernic")
@@ -207,6 +210,22 @@ apply_baseos_ra_overlay() {
 	RA_PARAMS="${RA_PARAMS} --appendconfig $overlay"
 }
 
+# Hand the IGM the active theme dir so a theme can ship its own igm.json.
+# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
+# configs store a full path, so accept either. Leaving the variable unset
+# is fine - the binary falls through to the colourway it was given.
+export_spruce_theme_dir() {
+	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
+	case "$_theme" in
+		/*)      _theme_dir="${_theme%/}" ;;
+		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
+		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
+	esac
+	if [ -d "$_theme_dir" ]; then
+		export SPRUCE_THEME_DIR="$_theme_dir"
+	fi
+}
+
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
 
@@ -230,19 +249,7 @@ run_retroarch() {
 		rm -f "$IGM_FLAG"
 	fi
 
-	# Hand the IGM the active theme dir so a theme can ship its own igm.json.
-	# .theme in $SYSTEM_JSON is a bare folder name, but the vendor stock
-	# configs store a full path, so accept either. Leaving the variable unset
-	# is fine - the binary falls through to the colourway it was given.
-	_theme="$(jq -r '.theme // empty' "$SYSTEM_JSON" 2>/dev/null)"
-	case "$_theme" in
-		/*)      _theme_dir="${_theme%/}" ;;
-		""|null) _theme_dir="/mnt/SDCARD/Themes/SPRUCE" ;;
-		*)       _theme_dir="/mnt/SDCARD/Themes/${_theme}" ;;
-	esac
-	if [ -d "$_theme_dir" ]; then
-		export SPRUCE_THEME_DIR="$_theme_dir"
-	fi
+	export_spruce_theme_dir
 
 	setup_for_retroarch
 	cd "$RA_DIR"
@@ -252,8 +259,6 @@ run_retroarch() {
 	else
 		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
 	fi
-
-	pin_to_dedicated_cores "$RA_BIN"
 
 	ra_start_setup_saves_and_states_for_core_differences
 
@@ -269,11 +274,7 @@ run_retroarch() {
 	if [ "$VERBOSE_EMU" = "1" ]; then
 		RA_PARAMS="-v"
 	fi
-	case "$PLATFORM" in
-		"Pixel2"|"Flip"|"Miniloong"|"SmartPro"|"SmartProS"|"Brick"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"A30"|"MiyooMini"|"RGB30"|"RGB20SX"|"A10Mini"|"Anbernic"*)
-			RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
-			;;
-	esac
+	RA_PARAMS="${RA_PARAMS} --config ${PLATFORM_CFG}"
 
 	apply_baseos_ra_overlay
 
@@ -514,6 +515,7 @@ backup_rac_creds_to_spruce_cfg() {
 load_n64_controller_profile() {
 	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
 	case "$profile" in
+		*"Spruce"*) profile_name="Spruce-$PLATFORM" ;;	# the board's own layout
 		*"Classic"*) profile_name="Classic" ;;
 		*"Action"*) profile_name="Action" ;;
 		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected
@@ -522,6 +524,10 @@ load_n64_controller_profile() {
 
 	SRC="/mnt/SDCARD/Emu/N64/remaps"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
+	if [ ! -f "${SRC}/${profile_name}.rmp" ]; then
+		log_message "N64 controls: no ${profile_name}.rmp, core remaps left as they are"
+		return 0
+	fi
 
 	for dir in "$DST"/*; do
 		[ ! -d "$dir" ] && continue
@@ -529,10 +535,21 @@ load_n64_controller_profile() {
 		case "$dirname" in
 			*"n64"*|*"N64"*)
 				cp -f "${SRC}/${profile_name}.rmp" "${dir}/${dirname}.rmp"
+				case "$profile_name" in Spruce-*) n64_override_deadzone "$dirname" ;; esac
 			;;
 			*) ;; # if core display name doesn't have N64 in it, do nothing.
 		esac
 	done
+}
+
+# Spruce puts C on buttons beside a real right stick: RetroArch ORs the two, so a stick resting at -1 swallows
+# them unless a deadzone zeroes it first. The core overrides ship one; a restored backup can bring back older ones.
+n64_override_deadzone() {
+	cfg="/mnt/SDCARD/RetroArch/.retroarch/config/$1/$1.cfg"
+	grep -q '^input_analog_deadzone' "$cfg" 2>/dev/null && return 0
+	mkdir -p "$(dirname "$cfg")"
+	[ -s "$cfg" ] && [ -n "$(tail -c 1 "$cfg")" ] && echo >> "$cfg"
+	echo 'input_analog_deadzone = "0.010000"' >> "$cfg"
 }
 
 save_custom_n64_controller_profile() {
