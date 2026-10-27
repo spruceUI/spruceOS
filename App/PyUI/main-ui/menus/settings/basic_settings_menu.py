@@ -34,15 +34,10 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
            Device.get_device().prompt_power_down()
     
     def lumination_adjust(self, input: ControllerInput):
-        step = 0
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            step = -1
+            Device.get_device().lower_lumination()
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            step = 1
-
-        current_profile = "nightmode" if Device.get_device().get_system_config().get_nightmode_active() else "desired_display"
-
-        DeviceDisplayConfigHelper.adjust_display_setting(step, "backlight", current_profile, maximum=10)
+            Device.get_device().raise_lumination()
         
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
@@ -137,11 +132,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         system_config = Device.get_device().get_system_config()
         current_value = system_config.get_nightmode_active()
 
-        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            value = False
-        elif (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            value = True
-        elif ControllerInput.A == input:
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input) or (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input) or (ControllerInput.A == input):
             value = not current_value
         else:
             return
