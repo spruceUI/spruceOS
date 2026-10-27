@@ -392,7 +392,6 @@ device_system_handles_sdcard_unmount() {
     return 1 # A30 leaves dirty bit set?
 }
 
-
 # Strict unmount: udhcpc, joypad, joystickinput, getevent and inotifywait hold
 # the card by cwd/exe, so the fd-only sweep left every umount to the lazy path.
 device_needs_strict_unmount() {
@@ -407,59 +406,7 @@ work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
 
-
-nearest_system_brightness() {
-    input=$1
-    levels="$SYSTEM_BACKLIGHT_LEVEL_0 $SYSTEM_BACKLIGHT_LEVEL_1 $SYSTEM_BACKLIGHT_LEVEL_2 $SYSTEM_BACKLIGHT_LEVEL_3 $SYSTEM_BACKLIGHT_LEVEL_4 $SYSTEM_BACKLIGHT_LEVEL_5 $SYSTEM_BACKLIGHT_LEVEL_6 $SYSTEM_BACKLIGHT_LEVEL_7 $SYSTEM_BACKLIGHT_LEVEL_8 $SYSTEM_BACKLIGHT_LEVEL_9 $SYSTEM_BACKLIGHT_LEVEL_10"
-
-    nearest=""
-    min_diff=""
-
-    for level in $levels; do
-        diff=$((input - level))
-        # absolute value
-        if [ "$diff" -lt 0 ]; then
-            diff=$(( -diff ))
-        fi
-
-        if [ -z "$min_diff" ] || [ "$diff" -lt "$min_diff" ]; then
-            min_diff=$diff
-            nearest=$level
-        fi
-    done
-
-    # Find the index of the nearest level
-    idx=0
-    for level in $levels; do
-        if [ "$level" -eq "$nearest" ]; then
-            var="SYSTEM_BACKLIGHT_LEVEL_$idx"
-            eval "echo \${$var}"
-            return
-        fi
-        idx=$((idx + 1))
-    done
-}
-
-get_brightness_level() {
-    value=$(cat "$DEVICE_BACKLIGHT_PATH")
-    nearest=$(nearest_system_brightness "$value")
-    case $nearest in
-        $SYSTEM_BACKLIGHT_LEVEL_0) echo 0 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_1) echo 1 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_2) echo 2 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_3) echo 3 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_4) echo 4 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_5) echo 5 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_6) echo 6 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_7) echo 7 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_8) echo 8 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_9) echo 9 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_10) echo 10 ;;
-        *) echo 5 ;;
-    esac
-}
-
-map_brightness_to_system_value() {
+_map_backlight_to_system_value() {
     case $1 in
         0) echo $SYSTEM_BACKLIGHT_LEVEL_0 ;;
         1) echo $SYSTEM_BACKLIGHT_LEVEL_1 ;;
@@ -477,22 +424,22 @@ map_brightness_to_system_value() {
 }
 
 device_backlight_down() {
-    BRIGHTNESS_LV=$(get_brightness_level)
-    if [ "$BRIGHTNESS_LV" -gt 0 ] ; then
-        BRIGHTNESS_LV=$((BRIGHTNESS_LV-1))
-        SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
-        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+    _backlight_level=$(get_pyui_config_value '.backlight' 5)
+    if [ "$_backlight_level" -gt 0 ] ; then
+        _backlight_level=$((_backlight_level-1))
+        _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
+        echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
+        set_pyui_config_value '.backlight' "$_backlight_level"
     fi
 }
 
 device_backlight_up() {
-    BRIGHTNESS_LV=$(get_brightness_level)
-    if [ "$BRIGHTNESS_LV" -lt 10 ] ; then
-        BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
-        SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
-        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+    _backlight_level=$(get_pyui_config_value '.backlight' 5)
+    if [ "$_backlight_level" -lt 10 ] ; then
+        _backlight_level=$((_backlight_level+1))
+        _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
+        echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
+        set_pyui_config_value '.backlight' "$_backlight_level"
     fi
 }
 

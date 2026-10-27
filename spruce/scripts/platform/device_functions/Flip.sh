@@ -682,58 +682,7 @@ if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
 fi
 
 
-nearest_system_brightness() {
-    input=$1
-    levels="$SYSTEM_BACKLIGHT_LEVEL_0 $SYSTEM_BACKLIGHT_LEVEL_1 $SYSTEM_BACKLIGHT_LEVEL_2 $SYSTEM_BACKLIGHT_LEVEL_3 $SYSTEM_BACKLIGHT_LEVEL_4 $SYSTEM_BACKLIGHT_LEVEL_5 $SYSTEM_BACKLIGHT_LEVEL_6 $SYSTEM_BACKLIGHT_LEVEL_7 $SYSTEM_BACKLIGHT_LEVEL_8 $SYSTEM_BACKLIGHT_LEVEL_9 $SYSTEM_BACKLIGHT_LEVEL_10"
-
-    nearest=""
-    min_diff=""
-
-    for level in $levels; do
-        diff=$((input - level))
-        # absolute value
-        if [ "$diff" -lt 0 ]; then
-            diff=$(( -diff ))
-        fi
-
-        if [ -z "$min_diff" ] || [ "$diff" -lt "$min_diff" ]; then
-            min_diff=$diff
-            nearest=$level
-        fi
-    done
-
-    # Find the index of the nearest level
-    idx=0
-    for level in $levels; do
-        if [ "$level" -eq "$nearest" ]; then
-            var="SYSTEM_BACKLIGHT_LEVEL_$idx"
-            eval "echo \${$var}"
-            return
-        fi
-        idx=$((idx + 1))
-    done
-}
-
-get_brightness_level() {
-    value=$(cat "$DEVICE_BACKLIGHT_PATH")
-    nearest=$(nearest_system_brightness "$value")
-    case $nearest in
-        $SYSTEM_BACKLIGHT_LEVEL_0) echo 0 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_1) echo 1 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_2) echo 2 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_3) echo 3 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_4) echo 4 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_5) echo 5 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_6) echo 6 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_7) echo 7 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_8) echo 8 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_9) echo 9 ;;
-        $SYSTEM_BACKLIGHT_LEVEL_10) echo 10 ;;
-        *) echo 5 ;;
-    esac
-}
-
-map_brightness_to_system_value() {
+_map_backlight_to_system_value() {
     case $1 in
         0) echo $SYSTEM_BACKLIGHT_LEVEL_0 ;;
         1) echo $SYSTEM_BACKLIGHT_LEVEL_1 ;;
@@ -751,43 +700,43 @@ map_brightness_to_system_value() {
 }
 
 device_backlight_down() {
-    BRIGHTNESS_LV=$(get_brightness_level)
     extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
-    CONTRAST_LV=$(get_pyui_config_value ".contrast" 10)
+    _backlight_level=$(get_pyui_config_value '.backlight' 5)
+    _contrast_level=$(get_pyui_config_value ".contrast" 10)
 
-    if [ "$BRIGHTNESS_LV" -gt 0 ] ; then
-        BRIGHTNESS_LV=$((BRIGHTNESS_LV-1))
-        SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
-        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+    if [ "$_backlight_level" -gt 0 ] ; then
+        _backlight_level=$((_backlight_level-1))
+        _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
+        echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
+        set_pyui_config_value '.backlight' "$_backlight_level"
 
     elif [ "$extended_brightness" = "True" ]; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
-        if [ "$CONTRAST_LV" -ge 2 ]; then # never let contrast go down to 0
-            CONTRAST_LV=$((CONTRAST_LV - 1))
-            jq ".contrast = $CONTRAST_LV" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
-            INTERNAL_CONTRAST=$((CONTRAST_LV * 5))
+        if [ "$_contrast_level" -ge 2 ]; then # never let contrast go down to 0
+            _contrast_level=$((_contrast_level - 1))
+            set_pyui_config_value '.contrast' "$_contrast_level"
+            INTERNAL_CONTRAST=$((_contrast_level * 5))
             modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
         fi
     fi
 }
 
 device_backlight_up() {
-    BRIGHTNESS_LV=$(get_brightness_level)
     extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
-    CONTRAST_LV=$(get_pyui_config_value ".contrast" 10)
+    _backlight_level=$(get_pyui_config_value '.backlight' 5)
+    _contrast_level=$(get_pyui_config_value ".contrast" 10)
 
-    if [ "$BRIGHTNESS_LV" -eq 0 ] && [ "$extended_brightness" = "True" ] && [ "$CONTRAST_LV" -le 9 ]; then
-        CONTRAST_LV=$((CONTRAST_LV + 1))
-        jq ".contrast = $CONTRAST_LV" "$SYSTEM_JSON" > /tmp/system.json && mv /tmp/system.json "$SYSTEM_JSON"
-        INTERNAL_CONTRAST=$((CONTRAST_LV * 5))
+    if [ "$_backlight_level" -eq 0 ] && [ "$extended_brightness" = "True" ] && [ "$_contrast_level" -le 9 ]; then
+        _contrast_level=$((_contrast_level + 1))
+        set_pyui_config_value '.contrast' "$_contrast_level"
+        INTERNAL_CONTRAST=$((_contrast_level * 5))
         modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
 
-    elif [ "$BRIGHTNESS_LV" -lt 10 ] ; then  # if extended brightness setting not on, or contrast is at least 10
-        BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
-        SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
-        jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+    elif [ "$_backlight_level" -lt 10 ] ; then  # if extended brightness setting not on, or contrast is at least 10
+        _backlight_level=$((_backlight_level+1))
+        _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
+        echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
+        set_pyui_config_value '.backlight' "$_backlight_level"
     fi
 }
 
