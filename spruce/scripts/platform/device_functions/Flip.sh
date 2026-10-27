@@ -708,13 +708,13 @@ device_backlight_down() {
         _backlight_level=$((_backlight_level-1))
         _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
         echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
-        set_pyui_config_value '.backlight' "$_backlight_level"
+        jq ".backlight = $_backlight_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
 
     elif [ "$extended_brightness" = "True" ]; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
         if [ "$_contrast_level" -ge 2 ]; then # never let contrast go down to 0
             _contrast_level=$((_contrast_level - 1))
-            set_pyui_config_value '.contrast' "$_contrast_level"
+            jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
             INTERNAL_CONTRAST=$((_contrast_level * 5))
             modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
         fi
@@ -728,7 +728,7 @@ device_backlight_up() {
 
     if [ "$_backlight_level" -eq 0 ] && [ "$extended_brightness" = "True" ] && [ "$_contrast_level" -le 9 ]; then
         _contrast_level=$((_contrast_level + 1))
-        set_pyui_config_value '.contrast' "$_contrast_level"
+        jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
         INTERNAL_CONTRAST=$((_contrast_level * 5))
         modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
 
@@ -736,7 +736,7 @@ device_backlight_up() {
         _backlight_level=$((_backlight_level+1))
         _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
         echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"
-        set_pyui_config_value '.backlight' "$_backlight_level"
+        jq ".backlight = $_backlight_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
 

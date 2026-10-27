@@ -195,11 +195,11 @@ class MiyooFlip(MiyooDevice):
     
     def _set_lumination_to_config(self):
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
+            f.write(str(self.map_backlight_from_10_to_full_255(int(self.system_config.backlight))))
     
     def _set_contrast_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:contrast:"+str(self.system_config.contrast * 5)])
+                                     "179:contrast:"+str(int(self.system_config.contrast) * 5)])
     
     def _set_saturation_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
