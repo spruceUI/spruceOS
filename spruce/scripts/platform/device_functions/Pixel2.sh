@@ -319,6 +319,27 @@ device_exit_sleep() {
     turn_on_screen
 
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    reinit_usb_controller
+}
+
+# Deep sleep powers down the USB controller and the kernel restores it on
+# resume only while a gadget is bound, so the next host-mode plug (a Wi-Fi
+# dongle) gets an unpowered port. Reprobing the driver redoes the boot-time
+# init. Skipped while anything is attached, so a device that came through the
+# sleep is left alone.
+USB_UDC="ff300000.usb"
+
+reinit_usb_controller() {
+    # Attached devices are 1-1, 1-1.2...; usb1 and 1-0:1.0 are the root hub
+    ls /sys/bus/usb/devices | grep -qE '^[0-9]+-[0-9.]+$' && return 0
+    [ "$(cat /sys/class/udc/$USB_UDC/state 2>/dev/null)" = "not attached" ] || return 0
+    # A bound gadget (adb, USB Storage Mode) means the kernel restored it
+    [ -n "$(cat /sys/class/udc/$USB_UDC/function 2>/dev/null)" ] && return 0
+    log_message "Nothing on the USB port after wake; reprobing $USB_UDC"
+    if ! echo "$USB_UDC" >/sys/bus/platform/drivers/dwc2/unbind ||
+        ! echo "$USB_UDC" >/sys/bus/platform/drivers/dwc2/bind; then
+        log_message "Reprobing $USB_UDC failed; USB host mode may not work until reboot"
+    fi
 }
 
 device_lid_open(){
