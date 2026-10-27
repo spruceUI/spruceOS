@@ -239,6 +239,9 @@ device_exit_sleep() {
 
     touch /tmp/audio_reinit_needed
     clear_wake_alarm "$WAKE_ALARM_PATH"
+    # Suspend switches the codec DAC mixer inputs off; nothing turns them back on.
+    amixer cset name='DACL Mixer AIF1DA0L Switch' on >/dev/null 2>&1
+    amixer cset name='DACR Mixer AIF1DA0R Switch' on >/dev/null 2>&1
     unpause_emulators
 }
 
