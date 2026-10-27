@@ -74,6 +74,7 @@ class MiyooA30(MiyooDevice):
 
 
     def startup_init(self, include_wifi=True):
+        self._save_levels_as_numbers()
         self._set_lumination_to_config()
         self._set_screen_settings_to_config()
         self.init_gpio()
@@ -142,6 +143,13 @@ class MiyooA30(MiyooDevice):
         else:
             return 1
     
+    # Hotkeys from fd492bb83 saved the level as a JSON string; PyUI's +/- and dim need an int
+    def _save_levels_as_numbers(self):
+        backlight = self.system_config.backlight
+        if isinstance(backlight, str):
+            self.system_config.set_backlight(max(0, min(10, int(backlight) if backlight.isdigit() else 5)))
+            self.system_config.save_config()
+
     def _set_lumination_to_config(self):
         level = max(0, min(10, int(self.system_config.backlight)))
         try:
