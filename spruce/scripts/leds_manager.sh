@@ -91,6 +91,7 @@ is_charging(){
   else
     turn_off_led 0
     stop_blink $1
+    turn_on_led $1
   fi
 }
 
