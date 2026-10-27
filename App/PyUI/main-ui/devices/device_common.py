@@ -122,10 +122,7 @@ class DeviceCommon(AbstractDevice):
     # keeps the screen faintly visible so a lit device still reads as "on".
     #
     # Dimming changes only the in-memory level; the user's level is remembered
-    # here and written back on restore. Written back, not just re-read: the
-    # shell brightness hotkeys (buttons_watchdog) derive the level from the raw
-    # backlight value, so a key pressed while dimmed would save a level computed
-    # from the dimmed value. Restore wins over that.
+    # here and written back on restore, so it wins over a level saved meanwhile.
     SCREENSAVER_BACKLIGHT_LEVEL = 1
     _screensaver_saved_backlight = None
 
