@@ -13,7 +13,7 @@ GB_MGBA_GB_FILE=/mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GB.opt
 
 apply_overlay() {
     # Define configurations
-    GB_CFG="input_overlay = \"./.retroarch/overlay/Perfect/Perfect_DMG-EX_533/DMG/Perfect_DMG-EX_533_mugwomp93.cfg\"
+    GB_CFG="input_overlay = \"./.retroarch/overlay/640x480/Perfect/Perfect_DMG-EX_533/DMG/Perfect_DMG-EX_533_mugwomp93.cfg\"
 input_overlay_enable = \"true\"
 input_overlay_opacity = \"1.000000\"
 input_player1_analog_dpad_mode = \"0\"
