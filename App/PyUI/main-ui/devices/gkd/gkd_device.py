@@ -306,3 +306,6 @@ class GKDDevice(DeviceCommon):
     @throttle.limit_refresh(1)
     def post_present_operations(self):
         self.clear_display_cache_if_memory_full("MemAvailable", 100)
+
+    def get_image_for_activity(self, activity):
+        return MiyooTrimCommon.get_image_for_activity(activity)
