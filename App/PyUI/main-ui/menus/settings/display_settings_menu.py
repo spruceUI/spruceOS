@@ -11,21 +11,6 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
     def __init__(self):
         super().__init__()
 
-    def toggle_night_mode(self, input):
-        system_config = Device.get_device().get_system_config()
-        current_value = system_config.get_nightmode_active()
-
-        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            value = False
-        elif (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            value = True
-        elif ControllerInput.A == input:
-            value = not current_value
-        else:
-            return
-        system_config.set_nightmode_active(value)
-
-        DeviceDisplayConfigHelper.display_mode_changed()
 
     def launch_display_settings(self,input):
         if(ControllerInput.A == input):
@@ -47,17 +32,6 @@ class DisplaySettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.launch_display_settings
-                    )
-            )
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.night_mode(),
-                        value_text="<    " + str(Device.get_device().get_system_config().get_nightmode_active()) + "    >",
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.toggle_night_mode
                     )
             )
 

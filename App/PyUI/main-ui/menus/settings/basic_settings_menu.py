@@ -3,6 +3,7 @@ import os
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from devices.device_display_config_helper import DeviceDisplayConfigHelper
 from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
@@ -33,10 +34,15 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
            Device.get_device().prompt_power_down()
     
     def lumination_adjust(self, input: ControllerInput):
+        step = 0
         if(ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
-            Device.get_device().lower_lumination()
+            step = -1
         elif(ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
-            Device.get_device().raise_lumination()
+            step = 1
+
+        current_profile = "nightmode" if Device.get_device().get_system_config().get_nightmode_active() else "desired_display"
+
+        DeviceDisplayConfigHelper.adjust_display_setting(step, "backlight", current_profile, maximum=10)
         
     def volume_adjust(self, input: ControllerInput):
         if(ControllerInput.DPAD_LEFT == input):
@@ -127,6 +133,21 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if (input == ControllerInput.A):
             SoundSettings().show_menu()
 
+    def toggle_night_mode(self, input):
+        system_config = Device.get_device().get_system_config()
+        current_value = system_config.get_nightmode_active()
+
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input):
+            value = False
+        elif (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input):
+            value = True
+        elif ControllerInput.A == input:
+            value = not current_value
+        else:
+            return
+        system_config.set_nightmode_active(value)
+
+        DeviceDisplayConfigHelper.display_mode_changed()
 
     def build_options_list(self):
         option_list = []
@@ -149,6 +170,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.lumination_adjust
+                    )
+            )
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.night_mode(),
+                        value_text="<    " + str(Device.get_device().get_system_config().get_nightmode_active()) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.toggle_night_mode
                     )
             )
 

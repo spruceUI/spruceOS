@@ -21,9 +21,6 @@ class SharedDisplaySettingsMenu(settings_menu.SettingsMenu):
         config = Device.get_device().get_system_config()
         return getattr(config, f"get_{self._profile_name()}_{name}")()
 
-    def _set_profile_value(self, name, value):
-        config = Device.get_device().get_system_config()
-        getattr(config, f"set_{self._profile_name()}_{name}")(value)
 
     def _adjust_calibration(self, input, name, maximum=20):
         incrementer = 0
@@ -36,11 +33,10 @@ class SharedDisplaySettingsMenu(settings_menu.SettingsMenu):
         if incrementer == 0:
             return
 
-        value = max(0, min(maximum, int(self._get_profile_value(name)) + incrementer))
-        self._set_profile_value(name, value)
+        DeviceDisplayConfigHelper.adjust_display_setting(
+            incrementer, name, self._profile_name(), maximum=maximum
+        )
 
-        if self.is_display_mode_active():
-            DeviceDisplayConfigHelper.display_mode_changed()
 
     def backlight_adjust(self, input: ControllerInput):
         self._adjust_calibration(input, "backlight", maximum=10)
@@ -78,12 +74,9 @@ class SharedDisplaySettingsMenu(settings_menu.SettingsMenu):
             new_value = 0
         
         self._set_profile_value(name, new_value)
-        if self.is_display_mode_active():
-            DeviceDisplayConfigHelper.display_mode_changed()
 
-    def is_display_mode_active(self):
-        night_mode_active = Device.get_device().get_system_config().get_nightmode_active()
-        return night_mode_active == (self.SETTINGS_CATEGORY == "Night Mode Settings")
+        DeviceDisplayConfigHelper.adjust_display_setting(0, name, self._profile_name(), maximum=255)
+
 
     def _entry_value_text(self, name):
         return "<    " + str(self._get_profile_value(name)) + "    >"

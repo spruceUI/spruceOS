@@ -68,3 +68,23 @@ class DeviceDisplayConfigHelper:
             device._set_disp_red_to_config()
             device._set_disp_green_to_config()
             device._set_disp_blue_to_config()
+
+    def adjust_display_setting(step, name, profile, maximum=20):
+
+        device = Device.get_device()
+        system_config = device.get_system_config()
+        value = max(
+            0,
+            min(
+                maximum,
+                int(getattr(system_config, f"get_{profile}_{name}")()) + step,
+            ),
+        )
+        getattr(system_config, f"set_{profile}_{name}")(value)
+
+        night_mode_active = Device.get_device().get_system_config().get_nightmode_active()
+
+        is_active = night_mode_active == (profile == "nightmode")
+
+        if is_active:
+            DeviceDisplayConfigHelper.display_mode_changed(device)
