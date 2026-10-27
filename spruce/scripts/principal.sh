@@ -120,6 +120,9 @@ while true; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
+        # PyUI sets TZ only in its own environment; games start from here.
+        _tz="$(jq -r '.timezone // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null)"
+        [ -n "$_tz" ] && [ -f "/mnt/SDCARD/spruce/zoneinfo/$_tz" ] && export TZ=":/mnt/SDCARD/spruce/zoneinfo/$_tz"
         log_message "Running: $(cat /tmp/cmd_to_run.sh)"
         /tmp/cmd_to_run.sh >/dev/null 2>&1
         cmd_exit_code=$?
