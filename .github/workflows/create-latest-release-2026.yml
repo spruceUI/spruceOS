@@ -601,24 +601,24 @@ jobs:
             # Supported Devices
             | Device                | Support Status        | Separate TF1 Required? |
             |-----------------------|-----------------------|------------------------|
-            | Miyoo Flip            | Supported | No |
             | Miyoo A30             | Supported | No |
-            | Trimui Smart Pro      | Supported | No |
-            | Trimui Brick          | Supported | No |
-            | Trimui Smart Pro S    | Supported | No |
-            | Trimui Brick Pro      | Supported | No |
-            | Miyoo Mini Flip       | Supported | No |
-            | Miyoo Mini Plus       | Supported | No |
+            | Miyoo Flip            | Supported | Optional: [BaseOS-my355](https://github.com/apommel/baseos-my355/releases/latest) |
             | Miyoo Mini v1-4       | Supported | No |
+            | Miyoo Mini Plus       | Supported | No |
+            | Miyoo Mini Flip       | Supported | No |
+            | Trimui Brick          | Supported | No |
+            | Trimui Brick Pro      | Supported | No |
+            | Trimui Smart Pro      | Supported | No |
+            | Trimui Smart Pro S    | Supported | No |
             | Anbernic H700 devices | Supported | Yes, [BaseOS](https://github.com/pvaibhav/BaseOS/releases/latest) |
+            | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Batlexp G350          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | Powkiddy V10          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Powkiddy V10/RGB10    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | A10 Mini              | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | G350                  | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
+            | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX XU Mini M      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
