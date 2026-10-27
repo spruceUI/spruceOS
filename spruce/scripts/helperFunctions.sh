@@ -281,9 +281,10 @@ dim_screen() {
     _end_backlight="$SYSTEM_BACKLIGHT_LEVEL_0"
     delay=0.05 # 50ms delay between each step
     
-    # Start at 4 if higher (so it's faster)
-    if [ "$_start_backlight" -gt "$SYSTEM_BACKLIGHT_LEVEL_4" ]; then
-        _start_backlight="$SYSTEM_BACKLIGHT_LEVEL_4"
+    # Start at 4 if higher (so it's faster); a platform cfg may set DIM_SCREEN_START_MAX instead
+    _start_max="${DIM_SCREEN_START_MAX:-$SYSTEM_BACKLIGHT_LEVEL_4}"
+    if [ "$_start_backlight" -gt "$_start_max" ]; then
+        _start_backlight="$_start_max"
     fi
 
     # Check if another dim_screen is running
