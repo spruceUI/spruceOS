@@ -22,6 +22,7 @@ class MiyooDevice(DeviceCommon):
     SOUND_DISABLED = 0
 
     def __init__(self):
+        self.NOMAP_KEYS = [57, 29, 56, 42, 28, 97, 1, 15, 20, 14, 18, 103, 108, 105, 106]
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         super().__init__()
@@ -134,7 +135,12 @@ class MiyooDevice(DeviceCommon):
         elif(114 == key_code):
             return ControllerInput.VOLUME_DOWN
         else:
-            PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+            # Minis have all key events in the same path (/dev/input/event0) which
+            # means logging every key press that wasn't volume/power without this
+            # check, codes taken from miyoo_mini_common.py
+            if key_code not in self.NOMAP_KEYS:
+                PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+
             return None
 
     def is_wifi_enabled(self):
