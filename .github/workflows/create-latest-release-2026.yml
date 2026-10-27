@@ -497,6 +497,9 @@ jobs:
             "spruce/archives/staging/overlays_720x720.7z" \
             "RetroArch/.retroarch/overlay/720x720"
 
+          package_archive \
+            "spruce/archives/staging/overlays_1280x720.7z" \
+            "RetroArch/.retroarch/overlay/1280x720"
           
       - name: Create 7z archive
         run: |
