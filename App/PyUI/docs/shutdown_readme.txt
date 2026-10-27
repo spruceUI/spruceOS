@@ -22,11 +22,13 @@ for apps. With neither image the menu shows the text only.
 
 The request
 -----------
-save_poweroff.sh sends SIGURG to every PyUI process (pkill -f on mainui.py)
-right after taking its lock. Only the menu (main_ui_mode in mainui.py) handles
-it, from early in its startup. SIGURG is ignored by default, so any other PyUI
-(message writer, option list, button listener), or a menu not that far into
-its startup, carries on as if nothing was sent.
+save_poweroff.sh finds every PyUI process with pgrep -f on mainui.py and
+sends SIGURG with the shell's kill right after taking its lock. This works even
+on devices whose stock BusyBox has pgrep but no pkill (like A30). Only the menu
+(main_ui_mode in mainui.py) handles it, from early in its startup. SIGURG is
+ignored by default, so any other PyUI (message writer, option list, button
+listener), or a menu not that far into its startup, carries on as if nothing
+was sent.
 
 The handler only notes the request (main-ui/utils/shutdown.py). The main
 thread acts on it at its next checkpoint: Controller.get_input (in the
