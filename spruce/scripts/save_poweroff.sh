@@ -50,8 +50,13 @@ request_pyui_farewell() {
     [ "$s2_arg" = "--reboot" ] && return 0
     flag_check "forced_shutdown" && return 0
     flag_check "in_menu" || return 0
-    if pkill -URG -f '/App/PyUI/main-ui/[m]ainui[.]py'; then
-        PYUI_FAREWELL=1
+    # Not using pkill as some devices might be missing it (like A30)
+    for pyui_pid in $(pgrep -f '/App/PyUI/main-ui/[m]ainui[.]py'); do
+        if kill -s URG "$pyui_pid" 2>/dev/null; then
+            PYUI_FAREWELL=1
+        fi
+    done
+    if [ "$PYUI_FAREWELL" = 1 ]; then
         log_message "save_poweroff.sh: asked the PyUI menu for its farewell frame"
     fi
 }
