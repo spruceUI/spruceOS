@@ -410,7 +410,7 @@ work_led_on() {
 
 nearest_system_brightness() {
     input=$1
-    levels="$SYSTEM_BRIGHTNESS_0 $SYSTEM_BRIGHTNESS_1 $SYSTEM_BRIGHTNESS_2 $SYSTEM_BRIGHTNESS_3 $SYSTEM_BRIGHTNESS_4 $SYSTEM_BRIGHTNESS_5 $SYSTEM_BRIGHTNESS_6 $SYSTEM_BRIGHTNESS_7 $SYSTEM_BRIGHTNESS_8 $SYSTEM_BRIGHTNESS_9 $SYSTEM_BRIGHTNESS_10"
+    levels="$SYSTEM_BACKLIGHT_LEVEL_0 $SYSTEM_BACKLIGHT_LEVEL_1 $SYSTEM_BACKLIGHT_LEVEL_2 $SYSTEM_BACKLIGHT_LEVEL_3 $SYSTEM_BACKLIGHT_LEVEL_4 $SYSTEM_BACKLIGHT_LEVEL_5 $SYSTEM_BACKLIGHT_LEVEL_6 $SYSTEM_BACKLIGHT_LEVEL_7 $SYSTEM_BACKLIGHT_LEVEL_8 $SYSTEM_BACKLIGHT_LEVEL_9 $SYSTEM_BACKLIGHT_LEVEL_10"
 
     nearest=""
     min_diff=""
@@ -432,7 +432,7 @@ nearest_system_brightness() {
     idx=0
     for level in $levels; do
         if [ "$level" -eq "$nearest" ]; then
-            var="SYSTEM_BRIGHTNESS_$idx"
+            var="SYSTEM_BACKLIGHT_LEVEL_$idx"
             eval "echo \${$var}"
             return
         fi
@@ -441,37 +441,37 @@ nearest_system_brightness() {
 }
 
 get_brightness_level() {
-    value=$(cat "$DEVICE_BRIGHTNESS_PATH")
+    value=$(cat "$DEVICE_BACKLIGHT_PATH")
     nearest=$(nearest_system_brightness "$value")
     case $nearest in
-        $SYSTEM_BRIGHTNESS_0) echo 0 ;;
-        $SYSTEM_BRIGHTNESS_1) echo 1 ;;
-        $SYSTEM_BRIGHTNESS_2) echo 2 ;;
-        $SYSTEM_BRIGHTNESS_3) echo 3 ;;
-        $SYSTEM_BRIGHTNESS_4) echo 4 ;;
-        $SYSTEM_BRIGHTNESS_5) echo 5 ;;
-        $SYSTEM_BRIGHTNESS_6) echo 6 ;;
-        $SYSTEM_BRIGHTNESS_7) echo 7 ;;
-        $SYSTEM_BRIGHTNESS_8) echo 8 ;;
-        $SYSTEM_BRIGHTNESS_9) echo 9 ;;
-        $SYSTEM_BRIGHTNESS_10) echo 10 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_0) echo 0 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_1) echo 1 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_2) echo 2 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_3) echo 3 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_4) echo 4 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_5) echo 5 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_6) echo 6 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_7) echo 7 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_8) echo 8 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_9) echo 9 ;;
+        $SYSTEM_BACKLIGHT_LEVEL_10) echo 10 ;;
         *) echo 5 ;;
     esac
 }
 
 map_brightness_to_system_value() {
     case $1 in
-        0) echo $SYSTEM_BRIGHTNESS_0 ;;
-        1) echo $SYSTEM_BRIGHTNESS_1 ;;
-        2) echo $SYSTEM_BRIGHTNESS_2 ;;
-        3) echo $SYSTEM_BRIGHTNESS_3 ;;
-        4) echo $SYSTEM_BRIGHTNESS_4 ;;
-        5) echo $SYSTEM_BRIGHTNESS_5 ;;
-        6) echo $SYSTEM_BRIGHTNESS_6 ;;
-        7) echo $SYSTEM_BRIGHTNESS_7 ;;
-        8) echo $SYSTEM_BRIGHTNESS_8 ;;
-        9) echo $SYSTEM_BRIGHTNESS_9 ;;
-        10) echo $SYSTEM_BRIGHTNESS_10 ;;
+        0) echo $SYSTEM_BACKLIGHT_LEVEL_0 ;;
+        1) echo $SYSTEM_BACKLIGHT_LEVEL_1 ;;
+        2) echo $SYSTEM_BACKLIGHT_LEVEL_2 ;;
+        3) echo $SYSTEM_BACKLIGHT_LEVEL_3 ;;
+        4) echo $SYSTEM_BACKLIGHT_LEVEL_4 ;;
+        5) echo $SYSTEM_BACKLIGHT_LEVEL_5 ;;
+        6) echo $SYSTEM_BACKLIGHT_LEVEL_6 ;;
+        7) echo $SYSTEM_BACKLIGHT_LEVEL_7 ;;
+        8) echo $SYSTEM_BACKLIGHT_LEVEL_8 ;;
+        9) echo $SYSTEM_BACKLIGHT_LEVEL_9 ;;
+        10) echo $SYSTEM_BACKLIGHT_LEVEL_10 ;;
         *) ;;
     esac
 }
@@ -481,7 +481,7 @@ device_backlight_down() {
     if [ "$BRIGHTNESS_LV" -gt 0 ] ; then
         BRIGHTNESS_LV=$((BRIGHTNESS_LV-1))
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
+        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
         jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
@@ -491,11 +491,11 @@ device_backlight_up() {
     if [ "$BRIGHTNESS_LV" -lt 10 ] ; then
         BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))
         SYSTEM_BRIGHTNESS=$(map_brightness_to_system_value "$BRIGHTNESS_LV")
-        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BRIGHTNESS_PATH"
+        echo "$SYSTEM_BRIGHTNESS" > "$DEVICE_BACKLIGHT_PATH"
         jq ".backlight = $BRIGHTNESS_LV" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }
 
 turn_off_screen() {
-    echo 0 > "$DEVICE_BRIGHTNESS_PATH"
+    echo 0 > "$DEVICE_BACKLIGHT_PATH"
 }

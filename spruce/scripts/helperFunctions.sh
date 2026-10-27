@@ -277,14 +277,13 @@ confirm() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    # Get current brightness
-    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    end_brightness="$SYSTEM_BRIGHTNESS_0"
+    _start_backlight=$(cat "$DEVICE_BACKLIGHT_PATH")
+    _end_backlight="$SYSTEM_BACKLIGHT_LEVEL_0"
     delay=0.05 # 50ms delay between each step
     
     # Start at 4 if higher (so it's faster)
-    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
-        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    if [ "$_start_backlight" -gt "$SYSTEM_BACKLIGHT_LEVEL_4" ]; then
+        _start_backlight="$SYSTEM_BACKLIGHT_LEVEL_4"
     fi
 
     # Check if another dim_screen is running
@@ -294,15 +293,15 @@ dim_screen() {
     fi
 
     # Check if we're already at target brightness
-    if [ "$start_brightness" -le "$end_brightness" ]; then
+    if [ "$_start_backlight" -le "$_end_backlight" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
 
-    current=$start_brightness
+    current=$_start_backlight
 
-    while [ "$current" -gt "$end_brightness" ]; do
-        echo "$current" > "$DEVICE_BRIGHTNESS_PATH"
+    while [ "$current" -gt "$_end_backlight" ]; do
+        echo "$current" > "$DEVICE_BACKLIGHT_PATH"
         current=$((current - 1))
         sleep "$delay"
     done

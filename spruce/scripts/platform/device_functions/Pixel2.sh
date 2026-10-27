@@ -404,18 +404,18 @@ current_backlight() {
 # Map the MainUI Volume level to System Value
 map_mainui_brightness_to_system_value() {
     case $1 in
-        0) echo $SYSTEM_BRIGHTNESS_0 ;;
-        1) echo $SYSTEM_BRIGHTNESS_1 ;;
-        2) echo $SYSTEM_BRIGHTNESS_2 ;;
-        3) echo $SYSTEM_BRIGHTNESS_3 ;;
-        4) echo $SYSTEM_BRIGHTNESS_4 ;;
-        5) echo $SYSTEM_BRIGHTNESS_5 ;;
-        6) echo $SYSTEM_BRIGHTNESS_6 ;;
-        7) echo $SYSTEM_BRIGHTNESS_7 ;;
-        8) echo $SYSTEM_BRIGHTNESS_8 ;;
-        9) echo $SYSTEM_BRIGHTNESS_9 ;;
-        10) echo $SYSTEM_BRIGHTNESS_10 ;;
-        *) echo $SYSTEM_BRIGHTNESS_5 ;;
+        0) echo $SYSTEM_BACKLIGHT_LEVEL_0 ;;
+        1) echo $SYSTEM_BACKLIGHT_LEVEL_1 ;;
+        2) echo $SYSTEM_BACKLIGHT_LEVEL_2 ;;
+        3) echo $SYSTEM_BACKLIGHT_LEVEL_3 ;;
+        4) echo $SYSTEM_BACKLIGHT_LEVEL_4 ;;
+        5) echo $SYSTEM_BACKLIGHT_LEVEL_5 ;;
+        6) echo $SYSTEM_BACKLIGHT_LEVEL_6 ;;
+        7) echo $SYSTEM_BACKLIGHT_LEVEL_7 ;;
+        8) echo $SYSTEM_BACKLIGHT_LEVEL_8 ;;
+        9) echo $SYSTEM_BACKLIGHT_LEVEL_9 ;;
+        10) echo $SYSTEM_BACKLIGHT_LEVEL_10 ;;
+        *) echo $SYSTEM_BACKLIGHT_LEVEL_5 ;;
     esac
 }
 
@@ -423,7 +423,7 @@ set_backlight() {
     new_bl="$1"
     sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
     if [ "$new_bl" -ge 0 ] 2>/dev/null && [ "$new_bl" -le 10 ] 2>/dev/null; then
-        echo $sys_bl > $DEVICE_BRIGHTNESS_PATH
+        echo $sys_bl > $DEVICE_BACKLIGHT_PATH
         jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
     fi
 }

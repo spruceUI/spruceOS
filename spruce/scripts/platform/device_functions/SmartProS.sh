@@ -515,8 +515,8 @@ set_backlight() {
     level="$1"
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
-    eval "raw=\$SYSTEM_BRIGHTNESS_$level"
-    echo "$raw" > "$DEVICE_BRIGHTNESS_PATH"
+    eval "raw=\$SYSTEM_BACKLIGHT_LEVEL_$level"
+    echo "$raw" > "$DEVICE_BACKLIGHT_PATH"
 
     tmp="${SYSTEM_JSON}.tmp.$$"
     jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"

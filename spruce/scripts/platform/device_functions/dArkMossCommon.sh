@@ -453,8 +453,8 @@ apply_backlight() {
     level="$1"
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
-    eval "raw=\$SYSTEM_BRIGHTNESS_$level"
-    echo "$raw" > "$DEVICE_BRIGHTNESS_PATH"
+    eval "raw=\$SYSTEM_BACKLIGHT_LEVEL_$level"
+    echo "$raw" > "$DEVICE_BACKLIGHT_PATH"
     echo 0 > /sys/class/backlight/backlight/bl_power 2>/dev/null
 }
 

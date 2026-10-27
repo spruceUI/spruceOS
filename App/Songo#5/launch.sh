@@ -168,7 +168,7 @@ SONGO_SET_BRIGHTNESS_PATH="$DEFAULT_SET_BRIGHTNESS_PATH"
 NO_BRIGHT_FADE_AVAILABLE='0'
 
 # The XX line is TYPE1 but takes the default getter, not the spruce one: the
-# spruce getter needs either DEVICE_BRIGHTNESS_PATH, which AnbernicXXCommon.cfg
+# spruce getter needs either DEVICE_BACKLIGHT_PATH, which AnbernicXXCommon.cfg
 # leaves empty, or current_backlight(), which no Anbernic device_functions file
 # defines - so there it would fail through to a hard-coded 155. The default
 # getter reads /sys/class/disp, which on these devices is live, so the
