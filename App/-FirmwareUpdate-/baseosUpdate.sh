@@ -10,7 +10,6 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
-BAD_IMG="/mnt/SDCARD/spruce/imgs/notfound.png"
 SD_ROOT="/mnt/SDCARD"
 
 baseos_field() {

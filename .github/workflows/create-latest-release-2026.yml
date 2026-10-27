@@ -410,88 +410,90 @@ jobs:
           echo "Archive contents:"
           7z l "$OTA_ARCHIVE"
 
-      - name: Package NDS resource folders for preMenu auto-extract
+      - name: Package files for preMenu auto-extract
         shell: bash
         run: |
           set -euo pipefail
 
-          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
-          mkdir -p "$ARCHIVE_DIR"
+          package_archive() {
+            local archive_path="$1"
+            shift
 
-          WORKDIR="$(mktemp -d)"
-          trap 'rm -rf "$WORKDIR"' EXIT
+            local workdir
+            local src
+            local dest
+            local -a args=()
 
-          mkdir -p "$WORKDIR/mnt/SDCARD/Emu/NDS"
+            # Use an absolute path for the output archive.
+            case "$archive_path" in
+              /*) ;;
+              *) archive_path="${GITHUB_WORKSPACE}/${archive_path}" ;;
+            esac
 
-          ARGS=()
-          if [ -d "Emu/NDS/resources" ]; then
-            cp -a "Emu/NDS/resources" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
-            ARGS+=("mnt/SDCARD/Emu/NDS/resources")
-          fi
+            workdir="$(mktemp -d)"
 
-          if [ -d "Emu/NDS/res" ]; then
-            cp -a "Emu/NDS/res" "$WORKDIR/mnt/SDCARD/Emu/NDS/"
-            ARGS+=("mnt/SDCARD/Emu/NDS/res")
-          fi
+            # Stage existing inputs while preserving their target paths.
+            for src do
+              if [ ! -e "$src" ] && [ ! -L "$src" ]; then
+                echo "Skipping missing input: $src"
+                continue
+              fi
 
-          if [ "${#ARGS[@]}" -eq 0 ]; then
-            echo "No NDS resource folders found; skipping preMenu archive."
-            exit 0
-          fi
+              dest="mnt/SDCARD/$(dirname "$src")"
+              mkdir -p "$workdir/$dest"
+              cp -a "$src" "$workdir/$dest/"
+              args+=("mnt/SDCARD/$src")
+            done
 
-          ARCHIVE_PATH="$ARCHIVE_DIR/nds-resources.7z"
-          rm -f "$ARCHIVE_PATH"
+            if [ "${#args[@]}" -eq 0 ]; then
+              echo "No inputs found for $archive_path; skipping."
+              rm -rf "$workdir"
+              return 0
+            fi
 
-          if (
-            cd "$WORKDIR"
-            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
-          ); then
-            rm -rf "Emu/NDS/resources" "Emu/NDS/res"
-            echo "Created preMenu NDS archive: $ARCHIVE_PATH"
-            ls -lh "$ARCHIVE_PATH"
-          else
-            echo "ERROR: Failed to create preMenu NDS archive: $ARCHIVE_PATH"
-            exit 1
-          fi
+            rm -f "$archive_path"
 
-      - name: Package RetroArch shaders for preMenu auto-extract
-        shell: bash
-        run: |
-          set -euo pipefail
+            if (
+              cd "$workdir"
+              7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- \
+                "$archive_path" "${args[@]}"
+            ); then
+              # Only remove source files after successful archive creation.
+              for src do
+                if [ -e "$src" ] || [ -L "$src" ]; then
+                  rm -rf "$src"
+                fi
+              done
 
-          ARCHIVE_DIR="${GITHUB_WORKSPACE}/spruce/archives/preMenu"
-          mkdir -p "$ARCHIVE_DIR"
+              echo "Created archive: $archive_path"
+              ls -lh "$archive_path"
+            else
+              echo "ERROR: Failed to create archive: $archive_path" >&2
+              rm -rf "$workdir"
+              return 1
+            fi
 
-          WORKDIR="$(mktemp -d)"
-          trap 'rm -rf "$WORKDIR"' EXIT
+            rm -rf "$workdir"
+          }
 
-          mkdir -p "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch"
+          package_archive \
+            "spruce/archives/preMenu/nds-resources.7z" \
+            "Emu/NDS/resources" \
+            "Emu/NDS/res"
 
-          ARGS=()
-          if [ -d "RetroArch/.retroarch/shaders" ]; then
-            cp -a "RetroArch/.retroarch/shaders" "$WORKDIR/mnt/SDCARD/RetroArch/.retroarch/"
-            ARGS+=("mnt/SDCARD/RetroArch/.retroarch/shaders")
-          fi
+          package_archive \
+            "spruce/archives/preMenu/retroarch-shaders.7z" \
+            "RetroArch/.retroarch/shaders"
 
-          if [ "${#ARGS[@]}" -eq 0 ]; then
-            echo "No RetroArch shaders folder found; skipping preMenu archive."
-            exit 0
-          fi
+          package_archive \
+            "spruce/archives/staging/overlays_640x480.7z" \
+            "RetroArch/.retroarch/overlay/640x480"
+          
+          package_archive \
+            "spruce/archives/staging/overlays_1024x768.7z" \
+            "RetroArch/.retroarch/overlay/1024x768"
 
-          ARCHIVE_PATH="$ARCHIVE_DIR/retroarch-shaders.7z"
-          rm -f "$ARCHIVE_PATH"
 
-          if (
-            cd "$WORKDIR"
-            7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "$ARCHIVE_PATH" "${ARGS[@]}"
-          ); then
-            rm -rf "RetroArch/.retroarch/shaders"
-            echo "Created preMenu RetroArch shaders archive: $ARCHIVE_PATH"
-            ls -lh "$ARCHIVE_PATH"
-          else
-            echo "ERROR: Failed to create preMenu RetroArch shaders archive: $ARCHIVE_PATH"
-            exit 1
-          fi
           
       - name: Create 7z archive
         run: |
