@@ -470,11 +470,11 @@ apply_volume() {
     set_volume "$1" false
 }
 
-brightness_down() {
+device_backlight_down() {
     set_backlight $(( $(get_backlight_level) - 1 ))
 }
 
-brightness_up() {
+device_backlight_up() {
     set_backlight $(( $(get_backlight_level) + 1 ))
 }
 

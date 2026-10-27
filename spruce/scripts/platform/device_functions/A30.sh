@@ -476,7 +476,7 @@ map_brightness_to_system_value() {
     esac
 }
 
-brightness_down() {
+device_backlight_down() {
     BRIGHTNESS_LV=$(get_brightness_level)
     if [ "$BRIGHTNESS_LV" -gt 0 ] ; then
         BRIGHTNESS_LV=$((BRIGHTNESS_LV-1))
@@ -486,7 +486,7 @@ brightness_down() {
     fi
 }
 
-brightness_up() {
+device_backlight_up() {
     BRIGHTNESS_LV=$(get_brightness_level)
     if [ "$BRIGHTNESS_LV" -lt 10 ] ; then
         BRIGHTNESS_LV=$((BRIGHTNESS_LV+1))

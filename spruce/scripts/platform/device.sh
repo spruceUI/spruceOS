@@ -263,12 +263,12 @@ set_volume() {
     log_message "Missing set_volume function"
 }
 
-brightness_down() {
-    log_message "Missing brightness_down function"
+device_backlight_down() {
+    log_message "Missing device_backlight_down function"
 }
 
-brightness_up() {
-    log_message "Missing brightness_up function"
+device_backlight_up() {
+    log_message "Missing device_backlight_up function"
 }
 
 turn_off_screen() {

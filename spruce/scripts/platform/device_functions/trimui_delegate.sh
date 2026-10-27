@@ -337,13 +337,13 @@ current_backlight() {
     jq -r '.backlight' "$SYSTEM_JSON"
 }
 
-brightness_down() {
+device_backlight_down() {
     local backlight
     backlight=$(current_backlight)
     set_backlight $((backlight - 1))
 }
 
-brightness_up() {
+device_backlight_up() {
     local backlight
     backlight=$(current_backlight)
     set_backlight $((backlight + 1))

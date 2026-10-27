@@ -750,7 +750,7 @@ map_brightness_to_system_value() {
     esac
 }
 
-brightness_down() {
+device_backlight_down() {
     BRIGHTNESS_LV=$(get_brightness_level)
     extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
     CONTRAST_LV=$(get_pyui_config_value ".contrast" 10)
@@ -772,7 +772,7 @@ brightness_down() {
     fi
 }
 
-brightness_up() {
+device_backlight_up() {
     BRIGHTNESS_LV=$(get_brightness_level)
     extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
     CONTRAST_LV=$(get_pyui_config_value ".contrast" 10)

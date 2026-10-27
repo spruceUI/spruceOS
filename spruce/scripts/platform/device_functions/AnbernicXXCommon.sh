@@ -721,11 +721,11 @@ finally:
     jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
-brightness_down() {
+device_backlight_down() {
     set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") - 1 ))
 }
 
-brightness_up() {
+device_backlight_up() {
     set_backlight $(( $(jq -r '.backlight' "$SYSTEM_JSON") + 1 ))
 }
 

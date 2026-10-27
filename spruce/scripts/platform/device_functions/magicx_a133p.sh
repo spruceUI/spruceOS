@@ -479,7 +479,7 @@ apply_backlight() {
     magicx_disp_brightness set "$(magicx_backlight_raw "$1")" 2>/dev/null
 }
 
-# The brightness keys (buttons_watchdog -> brightness_up/down): the panel, then the level
+# The brightness keys (buttons_watchdog -> device_backlight_up/down): the panel, then the level
 # saved. Overrides a133p.sh's set_backlight (sourced above).
 set_backlight() {
     val="$1"

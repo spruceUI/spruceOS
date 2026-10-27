@@ -64,17 +64,17 @@ menu_vol_brightness_active() {
     esac
 }
 
-brightness_down_bg() {
+device_backlight_down_bg() {
     while true; do
         sleep 0.3
-        brightness_down
+        device_backlight_down
     done
 }
 
-brightness_up_bg() {
+device_backlight_up_bg() {
     while true; do
         sleep 0.3
-        brightness_up
+        device_backlight_up
     done
 }
 
@@ -192,12 +192,12 @@ getevent $EVENTS | while read line; do
         ;;
         *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
-                brightness_down
+                device_backlight_down
             fi
         ;;
         *"key $B_R1 1"*) # R1 key down
             if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
-                brightness_up
+                device_backlight_up
             fi
         ;;
         *"$SS_B1_PRESS"*) # Screenshot key 1 down
@@ -239,8 +239,8 @@ getevent $EVENTS | while read line; do
             PID_UP=""
 
             if menu_vol_brightness_active; then
-                brightness_down # ensure fire the first run
-                brightness_down_bg &
+                device_backlight_down # ensure fire the first run
+                device_backlight_down_bg &
                 PID_DOWN=$!
             else
                 volume_down # ensure fire the first run
@@ -265,8 +265,8 @@ getevent $EVENTS | while read line; do
             PID_DOWN=""
 
             if menu_vol_brightness_active; then
-                brightness_up # ensure fire the first run
-                brightness_up_bg &
+                device_backlight_up # ensure fire the first run
+                device_backlight_up_bg &
                 PID_UP=$!
             else
                 volume_up # ensure fire the first run
