@@ -32,7 +32,7 @@ class DarkmossDevice(DeviceCommon):
     MENU_KEY = None
     SELECT_KEY = 314
     START_KEY = 315
-    BATTERYPLUS_PERCENT_FILE = None
+    BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
     # volumeCmd/backlightCmd scripts, for bases with no softvol Master or another backlight range.
     VOLUME_BACKLIGHT_CMDS = False
     BACKLIGHT_TABLE = None

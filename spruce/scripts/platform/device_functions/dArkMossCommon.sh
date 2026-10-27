@@ -190,7 +190,7 @@ setup_mainui_alias() {
 #####   POWER   #####
   ###################
 
-# BatteryPlus's estimate when the device cfg names its file and it holds 0-100, else the kernel's.
+# BatteryPlus's percent when its file holds 0-100, else the kernel's.
 device_get_battery_percent() {
     if [ -n "$BATTERYPLUS_PERCENT_FILE" ]; then
         _bp=$(cat "$BATTERYPLUS_PERCENT_FILE" 2>/dev/null)
