@@ -283,17 +283,9 @@ device_init() {
     killall -9 main ### SUPER important in preventing .tmp_update suicide
     alsactl nrestore &
 
-    # Restore and monitor brightness
-    TMP_BACKLIGHT_PATH=/mnt/SDCARD/Saves/spruce/tmp_backlight
-    if [ -f "$TMP_BACKLIGHT_PATH" ]; then
-        BRIGHTNESS="$(cat $TMP_BACKLIGHT_PATH)"
-        # only set non zero brightness value
-        if [ "$BRIGHTNESS" -ne 0 ]; then 
-            echo "$BRIGHTNESS" > /sys/devices/virtual/disp/disp/attr/lcdbl
-        fi
-    else
-        echo 72 > /sys/devices/virtual/disp/disp/attr/lcdbl # = backlight setting at 5
-    fi
+    # Restore the saved backlight level (level 5 before the json exists)
+    _system_backlight_level=$(_map_backlight_to_system_value "$(get_pyui_config_value '.backlight' 5 2>/dev/null)")
+    echo "${_system_backlight_level:-$SYSTEM_BACKLIGHT_LEVEL_5}" > "$DEVICE_BACKLIGHT_PATH"
 
     # rename ttyS0 to ttyS2 so that PPSSPP cannot read the joystick raw data
     mv /dev/ttyS0 /dev/ttyS2
