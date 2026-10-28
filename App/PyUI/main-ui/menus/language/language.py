@@ -859,3 +859,6 @@ class Language:
     def useTextForLineHeight(cls):
         return cls._data.get("useTextForLineHeight","Use Text For Line Height")
 
+    @classmethod
+    def night_mode(cls):
+        return cls._data.get("nightMode","Night Mode")

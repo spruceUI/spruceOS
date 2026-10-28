@@ -41,6 +41,7 @@ script_for_action() {
         "LED off")         echo "scene-rgb-led.sh" ;;
         "Quiet Mode")      echo "scene-quiet.sh" ;;
         "Silent Mode")     echo "scene-silent.sh" ;;
+        "Night Mode")       echo "scene-night.sh" ;;
         "WiFi off")        echo "scene-wifi.sh" ;;
         "Joystick Toggle") [ "$PLATFORM" = "Brick" ] && echo "scene-joystick.sh" ;;
         *)                 echo "" ;;

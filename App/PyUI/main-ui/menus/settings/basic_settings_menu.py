@@ -3,6 +3,7 @@ import os
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from devices.device_display_config_helper import DeviceDisplayConfigHelper
 from display.display import Display
 from menus.language.language import Language
 from menus.settings import settings_menu
@@ -127,6 +128,17 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if (input == ControllerInput.A):
             SoundSettings().show_menu()
 
+    def toggle_night_mode(self, input):
+        system_config = Device.get_device().get_system_config()
+        current_value = system_config.get_nightmode_active()
+
+        if (ControllerInput.DPAD_LEFT == input or ControllerInput.L1 == input) or (ControllerInput.DPAD_RIGHT == input or ControllerInput.R1 == input) or (ControllerInput.A == input):
+            value = not current_value
+        else:
+            return
+        system_config.set_nightmode_active(value)
+
+        DeviceDisplayConfigHelper.display_mode_changed()
 
     def build_options_list(self):
         option_list = []
@@ -149,6 +161,18 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                         description=None,
                         icon=None,
                         value=self.lumination_adjust
+                    )
+            )
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.night_mode(),
+                        value_text="<    " + str(Device.get_device().get_system_config().get_nightmode_active()) + "    >",
+                        image_path=None,
+                        image_path_selected=None,
+                        description=None,
+                        icon=None,
+                        value=self.toggle_night_mode
                     )
             )
 

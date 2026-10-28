@@ -8,6 +8,21 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class DeviceUserConfig:
+    DISPLAY_PROFILE_SECTIONS = {
+        "nightmode": "nightModeSettings",
+        "desired_display": "defaultModeSettings",
+    }
+    DISPLAY_PROFILE_DEFAULTS = {
+        "backlight": 10,
+        "brightness": 10,
+        "contrast": 10,
+        "saturation": 10,
+        "hue": 10,
+        "red": 128,
+        "green": 128,
+        "blue": 128,
+    }
+
     def __init__(self, filepath):
         self._lock = threading.Lock()
         self.filepath = filepath
@@ -21,6 +36,64 @@ class DeviceUserConfig:
                     self.config = json.load(f)
             except (json.JSONDecodeError) as e:
                 raise RuntimeError(f"Failed to load config: {e}")
+        self._initialize_display_profiles()
+
+    def _initialize_display_profiles(self):
+        changed = False
+
+        if "nightMode" not in self.config:
+            self.config["nightMode"] = int(
+                str(self.config.get("nightmode_active", False)).lower()
+                in ("1", "true", "yes", "on")
+            )
+            changed = True
+
+        for legacy_name in ("desiredDisplaySettings", "default"):
+            legacy_default = self.config.pop(legacy_name, None)
+            if legacy_default is None:
+                continue
+            if not isinstance(legacy_default, dict):
+                raise RuntimeError(
+                    f"Invalid display profile section: {legacy_name}"
+                )
+            default_section = self.config.setdefault("defaultModeSettings", {})
+            if not isinstance(default_section, dict):
+                raise RuntimeError(
+                    "Invalid display profile section: defaultModeSettings"
+                )
+            for name, value in legacy_default.items():
+                default_section.setdefault(name, value)
+            changed = True
+
+        active_names = {
+            "red": "disp_red",
+            "green": "disp_green",
+            "blue": "disp_blue",
+        }
+        for profile, section_name in self.DISPLAY_PROFILE_SECTIONS.items():
+            if section_name not in self.config:
+                self.config[section_name] = {}
+                changed = True
+            section = self.config[section_name]
+            if not isinstance(section, dict):
+                raise RuntimeError(
+                    f"Invalid display profile section: {section_name}"
+                )
+
+            for name, default_value in self.DISPLAY_PROFILE_DEFAULTS.items():
+                legacy_value = self.config.get(f"{profile}_{name}")
+                active_value = self.config.get(active_names.get(name, name))
+                if name not in section:
+                    if legacy_value is not None:
+                        section[name] = legacy_value
+                    elif active_value is not None:
+                        section[name] = active_value
+                    else:
+                        section[name] = default_value
+                    changed = True
+
+        if changed:
+            self.save_config()
 
     def save_config(self):
         import tempfile
@@ -65,6 +138,158 @@ class DeviceUserConfig:
 
     def get_bgm_volume(self):
         return self.config.get("bgmvol", 0)
+
+    def _get_display_profile_value(self, profile, name):
+        default_name = {
+            "red": "disp_red",
+            "green": "disp_green",
+            "blue": "disp_blue",
+        }.get(name, name)
+        default_value = self.config.get(
+            default_name, self.DISPLAY_PROFILE_DEFAULTS[name]
+        )
+        section_name = self.DISPLAY_PROFILE_SECTIONS[profile]
+        return self.config[section_name].get(name, default_value)
+
+    def _set_display_profile_value(self, profile, name, value):
+        section_name = self.DISPLAY_PROFILE_SECTIONS[profile]
+        self.config[section_name][name] = value
+        self.save_config()
+
+    def get_nightmode_active(self):
+        value = self.config.get("nightMode", False)
+        return (
+            value
+            if isinstance(value, bool)
+            else str(value).lower() in ("1", "true", "yes", "on")
+        )
+
+    def set_nightmode_active(self, value):
+        self.config["nightMode"] = int(
+            value
+            if isinstance(value, bool)
+            else str(value).lower() in ("1", "true", "yes", "on")
+        )
+        self.save_config()
+
+    def activate_display_profile(self):
+        profile = (
+            "nightmode"
+            if self.get_nightmode_active()
+            else "desired_display"
+        )
+        active_names = {
+            "backlight": "backlight",
+            "brightness": "brightness",
+            "contrast": "contrast",
+            "saturation": "saturation",
+            "hue": "hue",
+            "red": "disp_red",
+            "green": "disp_green",
+            "blue": "disp_blue",
+        }
+
+        for name, active_name in active_names.items():
+            self.config[active_name] = self._get_display_profile_value(
+                profile, name
+            )
+        self.save_config()
+
+    def get_nightmode_backlight(self):
+        return self._get_display_profile_value("nightmode", "backlight")
+
+    def set_nightmode_backlight(self, value):
+        self._set_display_profile_value("nightmode", "backlight", value)
+
+    def get_nightmode_brightness(self):
+        return self._get_display_profile_value("nightmode", "brightness")
+
+    def set_nightmode_brightness(self, value):
+        self._set_display_profile_value("nightmode", "brightness", value)
+
+    def get_nightmode_contrast(self):
+        return self._get_display_profile_value("nightmode", "contrast")
+
+    def set_nightmode_contrast(self, value):
+        self._set_display_profile_value("nightmode", "contrast", value)
+
+    def get_nightmode_saturation(self):
+        return self._get_display_profile_value("nightmode", "saturation")
+
+    def set_nightmode_saturation(self, value):
+        self._set_display_profile_value("nightmode", "saturation", value)
+
+    def get_nightmode_hue(self):
+        return self._get_display_profile_value("nightmode", "hue")
+
+    def set_nightmode_hue(self, value):
+        self._set_display_profile_value("nightmode", "hue", value)
+
+    def get_nightmode_red(self):
+        return self._get_display_profile_value("nightmode", "red")
+
+    def set_nightmode_red(self, value):
+        self._set_display_profile_value("nightmode", "red", value)
+
+    def get_nightmode_green(self):
+        return self._get_display_profile_value("nightmode", "green")
+
+    def set_nightmode_green(self, value):
+        self._set_display_profile_value("nightmode", "green", value)
+
+    def get_nightmode_blue(self):
+        return self._get_display_profile_value("nightmode", "blue")
+
+    def set_nightmode_blue(self, value):
+        self._set_display_profile_value("nightmode", "blue", value)
+
+    def get_desired_display_backlight(self):
+        return self._get_display_profile_value("desired_display", "backlight")
+
+    def set_desired_display_backlight(self, value):
+        self._set_display_profile_value("desired_display", "backlight", value)
+
+    def get_desired_display_brightness(self):
+        return self._get_display_profile_value("desired_display", "brightness")
+
+    def set_desired_display_brightness(self, value):
+        self._set_display_profile_value("desired_display", "brightness", value)
+
+    def get_desired_display_contrast(self):
+        return self._get_display_profile_value("desired_display", "contrast")
+
+    def set_desired_display_contrast(self, value):
+        self._set_display_profile_value("desired_display", "contrast", value)
+
+    def get_desired_display_saturation(self):
+        return self._get_display_profile_value("desired_display", "saturation")
+
+    def set_desired_display_saturation(self, value):
+        self._set_display_profile_value("desired_display", "saturation", value)
+
+    def get_desired_display_hue(self):
+        return self._get_display_profile_value("desired_display", "hue")
+
+    def set_desired_display_hue(self, value):
+        self._set_display_profile_value("desired_display", "hue", value)
+
+    def get_desired_display_red(self):
+        return self._get_display_profile_value("desired_display", "red")
+
+    def set_desired_display_red(self, value):
+        self._set_display_profile_value("desired_display", "red", value)
+
+    def get_desired_display_green(self):
+        return self._get_display_profile_value("desired_display", "green")
+
+    def set_desired_display_green(self, value):
+        self._set_display_profile_value("desired_display", "green", value)
+
+    def get_desired_display_blue(self):
+        return self._get_display_profile_value("desired_display", "blue")
+
+    def set_desired_display_blue(self, value):
+        self._set_display_profile_value("desired_display", "blue", value)
 
     @property
     def brightness(self):

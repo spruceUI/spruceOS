@@ -41,3 +41,6 @@ class MagicXXU20(MagicXA133PDevice):
 
     def supports_touch(self):
         return True
+
+    def supports_night_mode(self):
+        return True
