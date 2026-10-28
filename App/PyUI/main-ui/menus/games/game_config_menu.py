@@ -176,6 +176,18 @@ class GameConfigMenu:
                     2000,
                 )
 
+    # With raBuild, show only the emulator list the launcher resolves (as get_selected_emulator)
+    def is_inactive_emulator_option(self, name, menu_options, rom_file_path):
+        ra_devices = (menu_options.get("raBuild") or {}).get("devices")
+        if not name.startswith("Emulator") or not ra_devices or not Device.supports_device(ra_devices):
+            return False
+        device = Device.get_device()
+        active = device.get_emulator_arch(menu_options, rom_file_path) or next(
+            (key for key, option in menu_options.items() if key.startswith("Emulator")
+             and any(n in (option.get("devices") or []) for n in device.get_device_names())),
+            "Emulator")
+        return name != active
+
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
         selected = Selection(None, None, 0)
@@ -213,7 +225,7 @@ class GameConfigMenu:
                 for name, option in menu_options.items():
                     devices = option.get("devices")
                     supported_device = Device.supports_device(devices)
-                    if(supported_device):
+                    if(supported_device and not self.is_inactive_emulator_option(name, menu_options, rom_file_path)):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
                         display_name = Language.menu_option_display(option.get('display'))
                         contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)

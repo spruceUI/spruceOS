@@ -138,8 +138,12 @@ use_default_emulator() {
 }
 
 get_core_override() {
-    # Determine the platform-specific key first
-    if jq -e ".menuOptions.Emulator_$PLATFORM" "$EMU_JSON_PATH" >/dev/null 2>&1; then
+    # An Emulator_32/Emulator_64 picked by raBuild wins, as in set_emu_core_from_emu_json
+    DEV_KEY="$(emu_option_key_for_device)"
+    if [ "$RA_BUILD:$DEV_KEY" = "32-bit:Emulator_32" ] || [ "$RA_BUILD:$DEV_KEY" = "64-bit:Emulator_64" ]; then
+        core_section=".menuOptions.$DEV_KEY"
+    # Then the platform-specific key
+    elif jq -e ".menuOptions.Emulator_$PLATFORM" "$EMU_JSON_PATH" >/dev/null 2>&1; then
         core_section=".menuOptions.Emulator_$PLATFORM"
     elif [ -n "$(emu_option_key_for_device)" ]; then
         # Same devices-list resolution, so a per-game override is read from the
