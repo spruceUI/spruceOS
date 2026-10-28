@@ -36,3 +36,7 @@ rgb30_blink_led() {
         sleep 0.08
     done
 }
+
+device_bluetooth_supported() {
+    return 0
+}
