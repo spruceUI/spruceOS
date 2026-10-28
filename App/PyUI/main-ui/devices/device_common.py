@@ -1146,3 +1146,9 @@ class DeviceCommon(AbstractDevice):
 
     def fix_device_font_height_calc_issues(self, height):
         return height
+
+    def map_digital_input(self, sdl_input):
+        return None
+
+    def map_analog_input(self, sdl_axis, sdl_value):
+        return None
