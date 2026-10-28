@@ -106,7 +106,7 @@ def initialize_device(device, main_ui_mode):
         Device.init(GKDPixel2(device, main_ui_mode))
     elif "SPRUCE" == device:
         from devices.env.spruce.spruce_device import SpruceDevice
-        Device.init(SpruceDevice(device, main_ui_mode))
+        Device.init(SpruceDevice(main_ui_mode))
     elif "DESKTOP" == device:
         # A window on a Mac or PC, for development: see App/PyUI/docs/desktop_readme.txt
         from devices.desktop.desktop_device import DesktopDevice

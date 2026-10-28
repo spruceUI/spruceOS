@@ -313,24 +313,31 @@ class EnvVarDevice(DeviceCommon):
             for mapping in mappings
         }
 
-        stick_axes = {
-            int(os.environ["LEFT_STICK_X_AXIS"]): HorizontalStickAxis(
+        stick_axes = {}
+
+        if "LEFT_STICK_X_AXIS" in os.environ:
+            stick_axes[int(os.environ["LEFT_STICK_X_AXIS"])] = HorizontalStickAxis(
                 ControllerInput.LEFT_STICK_LEFT,
                 ControllerInput.LEFT_STICK_RIGHT,
-            ),
-            int(os.environ["LEFT_STICK_Y_AXIS"]): VerticalStickAxis(
+            )
+
+        if "LEFT_STICK_Y_AXIS" in os.environ:
+            stick_axes[int(os.environ["LEFT_STICK_Y_AXIS"])] = VerticalStickAxis(
                 ControllerInput.LEFT_STICK_UP,
                 ControllerInput.LEFT_STICK_DOWN,
-            ),
-            int(os.environ["RIGHT_STICK_X_AXIS"]): HorizontalStickAxis(
+            )
+
+        if "RIGHT_STICK_X_AXIS" in os.environ:
+            stick_axes[int(os.environ["RIGHT_STICK_X_AXIS"])] = HorizontalStickAxis(
                 ControllerInput.RIGHT_STICK_LEFT,
                 ControllerInput.RIGHT_STICK_RIGHT,
-            ),
-            int(os.environ["RIGHT_STICK_Y_AXIS"]): VerticalStickAxis(
+            )
+
+        if "RIGHT_STICK_Y_AXIS" in os.environ:
+            stick_axes[int(os.environ["RIGHT_STICK_Y_AXIS"])] = VerticalStickAxis(
                 ControllerInput.RIGHT_STICK_UP,
                 ControllerInput.RIGHT_STICK_DOWN,
-            ),
-        }
+            )
 
         return KeyWatcherController(
             event_path=os.environ["CONTROLLER_EVENT_PATH"],
@@ -341,7 +348,6 @@ class EnvVarDevice(DeviceCommon):
             ),
             event_format=os.environ["CONTROLLER_EVENT_FORMAT"],
         )
-
 
     def are_headphones_plugged_in(self):
         cmd = os.environ.get("HEADPHONES_STATUS_CMD")
