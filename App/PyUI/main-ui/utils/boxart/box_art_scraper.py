@@ -32,15 +32,17 @@ class BoxArtScraper:
     - Roman numeral conversion includes "1" → "i"
     """
 
-    # Abbreviation mapping (expanded from Rust implementation)
     ABBREVIATIONS = {
+        "dq": "dragon quest",
         "ff": "final fantasy",
         "zelda": "legend of zelda",
+        "tloz": "legend of zelda",
         "mario": "super mario",
         "smb": "super mario bros",
         "smw": "super mario world",
         "sf": "street fighter",
         "mk": "mortal kombat",
+        "dk": "donkey kong",
         "dkc": "donkey kong country",
         "cv": "castlevania",
         "mm": "mega man",
@@ -59,13 +61,25 @@ class BoxArtScraper:
 
     # Cross-system fallbacks: try the other system's game list AND Libretro repo
     CROSS_SYSTEM_FALLBACKS = {
+        "FC": ["FDS"],
+        "FDS": ["FC"],
         "GB": ["GBC"],
         "GBC": ["GB"],
         "PCE": ["PCECD"],
         "PCECD": ["PCE"],
         "MD": ["SEGACD", "THIRTYTWOX"],
+        "NDS": ["NDSI"],
+        "NDSI": ["NDS"],
+        "NGP": ["NGPC"],
+        "NGPC": ["NGP"],
         "SEGACD": ["MD"],
+        "SATELLAVIEW": ["SFC"],
+        "SFC": ["SATELLAVIEW", "SUFAMI"],
         "THIRTYTWOX": ["MD"],
+        "ODYSSEY": ["VIDEOPAC"],
+        "VIDEOPAC": ["ODYSSEY"],
+        "WS": ["WSC"],
+        "WSC": ["WS"]
     }
     """
     Python version of the box art scraper script, converted into a class.
@@ -113,20 +127,22 @@ class BoxArtScraper:
         """Return Libretro alias name for system."""
         mapping = {
             "AMIGA": "Commodore - Amiga",
+            "ARCADE": "MAME",
+            "ARDUBOY": "Arduboy Inc - Arduboy",
             "ATARI": "Atari - 2600",
             "ATARIST": "Atari - ST",
-            "ARCADE": "MAME",
-            "CPS1": "FBNeo - Arcade Games",
-            "CPS2": "FBNeo - Arcade Games",
-            "CPS3": "FBNeo - Arcade Games",
-            "ARDUBOY": "Arduboy Inc - Arduboy",
+            "ATOMISWAVE": "Atomiswave",
             "CHAI": "ChaiLove",
             "COLECO": "Coleco - ColecoVision",
             "COMMODORE": "Commodore - 64",
             "CPC": "Amstrad - CPC",
+            "CPS1": "FBNeo - Arcade Games",
+            "CPS2": "FBNeo - Arcade Games",
+            "CPS3": "FBNeo - Arcade Games",
             "DC": "Sega - Dreamcast",
             "DOOM": "DOOM",
             "DOS": "DOS",
+            "EASYRPG": "RPG Maker",
             "EIGHTHUNDRED": "Atari - 8-bit",
             "FAIRCHILD": "Fairchild - Channel F",
             "FBNEO": "FBNeo - Arcade Games",
@@ -139,6 +155,8 @@ class BoxArtScraper:
             "GG": "Sega - Game Gear",
             "GW": "Handheld Electronic Game",
             "INTELLIVISION": "Mattel - Intellivision",
+            "JAGUAR": "Atari - Jaguar",
+            "LOOPY": "Casio - Loopy",
             "LYNX": "Atari - Lynx",
             "MAME2003PLUS": "MAME",
             "MD": "Sega - Mega Drive - Genesis",
@@ -147,12 +165,15 @@ class BoxArtScraper:
             "MSUMD": "Sega - Mega Drive - Genesis",
             "MSX": "Microsoft - MSX",
             "N64": "Nintendo - Nintendo 64",
+            "Naomi": "Sega - Naomi",
             "NDS": "Nintendo - Nintendo DS",
+            "NDSI": "Nintendo - Nintendo DSi",
             "NEOCD": "SNK - Neo Geo CD",
             "NEOGEO": "SNK - Neo Geo",
             "NGP": "SNK - Neo Geo Pocket",
             "NGPC": "SNK - Neo Geo Pocket Color",
             "ODYSSEY": "Magnavox - Odyssey2",
+            "PC98": "NEC - PC-98",
             "PCE": "NEC - PC Engine - TurboGrafx 16",
             "PCECD": "NEC - PC Engine CD - TurboGrafx-CD",
             "POKE": "Nintendo - Pokemon Mini",
