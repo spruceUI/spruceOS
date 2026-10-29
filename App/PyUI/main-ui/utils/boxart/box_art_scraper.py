@@ -257,7 +257,12 @@ class BoxArtScraper:
     def _is_arcade_system(self, sys_name: str) -> bool:
         """Check if system is an arcade-type system that uses XML for name mapping."""
         arcade_systems = {"ARCADE", "CPS1", "CPS2", "CPS3", "FBNEO", "MAME2003PLUS", "NEOGEO"}
-        return sys_name.upper() in arcade_systems
+        return sys_name.upper() in arcade_systems or self._is_disc_arcade_system(sys_name)
+
+    def _is_disc_arcade_system(self, sys_name: str) -> bool:
+        """Arcade systems whose ROMs may also be full-title disc images, so a name
+        missing from the XML falls back to filename matching instead of being skipped."""
+        return sys_name.upper() in {"ATOMISWAVE", "NAOMI"}
 
     def _parse_arcade_xml(self) -> dict:
         """
@@ -324,7 +329,7 @@ class BoxArtScraper:
             if rom_without_ext in xml_mapping:
                 search_name = xml_mapping[rom_without_ext]
                 PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} -> {search_name}")
-            else:
+            elif not self._is_disc_arcade_system(sys_name):
                 PyUiLogger.get_logger().debug(f"BoxartScraper: MAME lookup: {rom_without_ext} not found in database, skipping")
                 return None  # Skip ROMs not in MAME database
 
