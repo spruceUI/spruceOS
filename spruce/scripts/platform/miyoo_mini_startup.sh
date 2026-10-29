@@ -42,7 +42,7 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # is_mini_og in device_functions/MiyooMini.sh: axp_test ships only with the
     # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
-        sh /mnt/SDCARD/spruce/scripts/wifi.sh apply --wait
+        sh /mnt/SDCARD/spruce/scripts/network/wifi.sh apply --wait
         # Network ADB is an unauthenticated root shell: developer mode only (flag_check is not loaded yet)
         if [ -f /mnt/SDCARD/spruce/flags/developer_mode ] || [ -f /mnt/SDCARD/spruce/flags/developer_mode.lock ]; then
             adbd &

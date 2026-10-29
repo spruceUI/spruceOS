@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/sh
 
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
@@ -12,15 +12,6 @@ SYNC_TIMEOUT="${SYNC_TIMEOUT:-600}"  # Allow override, default 10 minutes
 
 check_syncthing_status() {
     if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
-        return 0
-    fi
-    return 1
-}
-
-check_device_connections() {
-    local connected_devices=$(curl -s -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/connections" | jq -r '.connections | to_entries[] | select(.value.connected == true) | .key')
-    if [ -n "$connected_devices" ]; then
-        log_message "SyncthingCheck: Devices already connected"
         return 0
     fi
     return 1
@@ -46,55 +37,6 @@ wait_for_syncthing_api() {
     done
 }
 
-smart_device_discovery() {
-    local max_attempts=3
-    local attempt=1
-    local base_timeout=5  # Start with shorter timeouts but try multiple times
-
-    while [ $attempt -le $max_attempts ]; do
-        if [ -f /tmp/sync_cancelled ]; then
-            log_message "SyncthingCheck: Discovery cancelled by user"
-            return 1
-        fi
-
-        if check_device_connections; then
-            log_message "SyncthingCheck: Devices connected on attempt $attempt"
-            return 0
-        fi
-        
-        log_message "SyncthingCheck: No devices connected, attempt $attempt of $max_attempts..."
-        force_rediscovery
-        
-        local timeout=$((base_timeout * attempt))  # Increase timeout with each attempt
-        local start_time=$(date +%s)
-        
-        while true; do
-            # Check for cancellation inside the timeout loop
-            if [ -f /tmp/sync_cancelled ]; then
-                log_message "SyncthingCheck: Discovery cancelled by user"
-                return 1
-            fi
-
-            if check_device_connections; then
-                log_message "SyncthingCheck: Devices connected after rediscovery"
-                return 0
-            fi
-            
-            if [ $(($(date +%s) - start_time)) -gt $timeout ]; then
-                log_message "SyncthingCheck: Timeout after ${timeout}s on attempt $attempt"
-                break
-            fi
-            
-            sleep 1
-        done
-        
-        attempt=$((attempt + 1))
-    done
-    
-    log_message "SyncthingCheck: Failed to connect devices after $max_attempts attempts"
-    return 1
-}
-
 start_network() {
     log_message "SyncthingCheck: Starting network interface..."
     ifconfig lo up
@@ -106,26 +48,6 @@ get_folders() {
         return 1
     fi
     echo "$folders"
-}
-
-force_rescan() {
-    log_message "SyncthingCheck: Forcing rescan of all folders for upload..."
-    local folders=$(get_folders)
-
-    echo "$folders" | while IFS='|' read -r folder_id folder_label; do
-        curl -s -X POST -H "X-API-Key: $API_KEY" "$API_ENDPOINT/db/scan?folder=$folder_id"
-        log_message "SyncthingCheck: Initiated rescan for folder: $folder_label"
-    done
-}
-
-force_rediscovery() {
-    log_message "SyncthingCheck: Forcing rediscovery of devices..."
-    local response=$(curl -s -X GET -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/discovery")
-    if [ $? -eq 0 ]; then
-        log_message "SyncthingCheck: Initiated device rediscovery"
-    else
-        log_message "SyncthingCheck: Error: Failed to initiate device rediscovery"
-    fi
 }
 
 get_devices() {

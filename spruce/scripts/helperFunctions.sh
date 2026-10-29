@@ -1520,7 +1520,7 @@ enable_wifi() {
     # the Anbernic XX line made by running dhclient beside udhcpc.
     if device_manages_own_wifi; then
         log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
+        /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
         device_extra_wifi_setup
         return 0
     fi
@@ -1595,7 +1595,7 @@ enable_wifi() {
         log_message "Launching wpa_supplicant"
     fi
     device_start_dhcp_client
-    /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
     log_message "WiFi turned on"
 
     device_extra_wifi_setup
@@ -1624,7 +1624,7 @@ wifi_available_on_device() {
 # Every radio change goes through wifi.sh, which runs them one at a time.
 # See wifi.sh for the commands; they return at once unless given --wait.
 wifi_request() {
-    sh /mnt/SDCARD/spruce/scripts/wifi.sh "$@"
+    sh /mnt/SDCARD/spruce/scripts/network/wifi.sh "$@"
 }
 
 # Is the saved WiFi setting on? PyUI writes SYSTEM_JSON from its shipped default,
@@ -1646,12 +1646,12 @@ bluetooth_setting_wanted() {
 saved_wifi_in_range() {
     grep -q '^[[:space:]]*scan_ssid=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && return 0
     _swr_saved=/tmp/wifi_saved_ssids.$$
-    /mnt/SDCARD/spruce/scripts/wifi.sh saved > "$_swr_saved" 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh saved > "$_swr_saved" 2>/dev/null
     if [ ! -s "$_swr_saved" ]; then
         rm -f "$_swr_saved"
         return 1
     fi
-    /mnt/SDCARD/spruce/scripts/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
     _swr_rc=$?
     rm -f "$_swr_saved"
     return "$_swr_rc"

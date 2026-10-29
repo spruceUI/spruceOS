@@ -308,7 +308,7 @@ disconnect_device() {
 wait_for_wifi() {
     _n=0
     while [ "$_n" -lt 60 ]; do
-        case "$(/mnt/SDCARD/spruce/scripts/wifi.sh status 2>/dev/null | sed -n 's/^link=//p')" in
+        case "$(/mnt/SDCARD/spruce/scripts/network/wifi.sh status 2>/dev/null | sed -n 's/^link=//p')" in
             connecting) ;;
             *) return 0 ;;
         esac

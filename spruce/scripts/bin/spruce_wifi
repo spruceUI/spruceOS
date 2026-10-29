@@ -1,2 +1,2 @@
 #!/bin/sh
-exec sh /mnt/SDCARD/spruce/scripts/wifi.sh "$@"
+exec sh /mnt/SDCARD/spruce/scripts/network/wifi.sh "$@"

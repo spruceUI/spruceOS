@@ -300,7 +300,7 @@ dim_screen_and_do_syncthing_check() {
             # Dimming screen before syncthing sync check
             dim_screen &
             DIM_SCREEN_PID=$!
-            /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --shutdown
+            /mnt/SDCARD/spruce/scripts/network/syncthing_sync_check.sh --shutdown
         fi
 
         flag_remove "syncthing_startup_synced"
