@@ -2,6 +2,9 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device.
+[ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
+
 runifnecessary() {
     a=$(pgrep "$1")
     if [ "$a" = "" ] ; then
@@ -73,6 +76,7 @@ case "$PLATFORM" in
         else
             DEVICE="TRIMUI_SMART_PRO"
         fi
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
