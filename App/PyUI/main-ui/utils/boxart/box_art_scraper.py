@@ -165,7 +165,7 @@ class BoxArtScraper:
             "MSUMD": "Sega - Mega Drive - Genesis",
             "MSX": "Microsoft - MSX",
             "N64": "Nintendo - Nintendo 64",
-            "Naomi": "Sega - Naomi",
+            "NAOMI": "Sega - Naomi",
             "NDS": "Nintendo - Nintendo DS",
             "NDSI": "Nintendo - Nintendo DSi",
             "NEOCD": "SNK - Neo Geo CD",
