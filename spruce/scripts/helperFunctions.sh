@@ -29,7 +29,7 @@ export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
 # clearwifi.sh has to clear them too or a "forget all networks" would simply be
 # re-imported on the next boot. Keep the two uses reading this one list.
 export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
-POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
+POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh" # used in powerbutton watchdog and sleep helper
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
@@ -49,12 +49,12 @@ if [ -e /usr/magicx ]; then
 else
     INFO=$(cat /proc/cpuinfo 2> /dev/null)
     case $INFO in
-        *sun8i*) export PLATFORM="A30" ;;           # A33
-        *TG5040*) export PLATFORM="SmartPro" ;;
-        *TG3040*) export PLATFORM="Brick" ;;
-        *TG5050*) export PLATFORM="SmartProS" ;;
-        *TG4040*) export PLATFORM="BrickPro" ;;
-        *0xd05*)                                    # RK3566
+        *sun8i*) export PLATFORM="A30";         platform_family=tina-stock ;;   # A33
+        *TG5040*) export PLATFORM="SmartPro";   platform_family=tina-stock ;;
+        *TG3040*) export PLATFORM="Brick";      platform_family=tina-stock ;;
+        *TG5050*) export PLATFORM="SmartProS";  platform_family=tina-stock ;;
+        *TG4040*) export PLATFORM="BrickPro";   platform_family=tina-stock ;;
+        *0xd05*)                                                                # RK3566
             if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
                 # dArkMoss stamps the spruce platform name into os-release
                 # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
@@ -73,10 +73,10 @@ else
                 export PLATFORM
                 platform_family=darkmoss
             else
-                export PLATFORM="Flip"
+                export PLATFORM="Flip";         platform_family=tina-stock
             fi
             ;;
-        *0xd04*)                                    # RK3326
+        *0xd04*)                                                                # RK3326
             if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
                 export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
                 # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
@@ -88,7 +88,7 @@ else
                 export PLATFORM="Pixel2"
             fi
             ;;
-        *0xd03*)                                    # H700
+        *0xd03*)                                                                # H700
             export SPRUCE_BASEOS=1
             platform_family=h700
             BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
@@ -102,8 +102,8 @@ else
                 *)                      export PLATFORM="AnbernicXX640480" ;;
             esac
             ;;
-        *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-        *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
+        *SStar*) export PLATFORM="MiyooMini";   platform_family=miyoomini ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini";         platform_family=miyoomini ;;
     esac
 fi
 
