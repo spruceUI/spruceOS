@@ -47,69 +47,71 @@ if [ -e /usr/magicx ]; then
         *)      export PLATFORM="Zero28" ;;
     esac
 else
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-
-case $INFO in
-    *sun8i*) export PLATFORM="A30" ;;           # A33
-    *TG5040*) export PLATFORM="SmartPro" ;;
-    *TG3040*) export PLATFORM="Brick" ;;
-    *TG5050*) export PLATFORM="SmartProS" ;;
-    *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*)                                    # RK3566
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # dArkMoss stamps the spruce platform name into os-release
-            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
-            # only HW_DEVICE.
-            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            if [ -z "$PLATFORM" ]; then
-                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
-                    *Miniloong*) PLATFORM="Miniloong" ;;
-                    *)           PLATFORM="RGB30" ;;
-                esac
+    INFO=$(cat /proc/cpuinfo 2> /dev/null)
+    case $INFO in
+        *sun8i*) export PLATFORM="A30" ;;           # A33
+        *TG5040*) export PLATFORM="SmartPro" ;;
+        *TG3040*) export PLATFORM="Brick" ;;
+        *TG5050*) export PLATFORM="SmartProS" ;;
+        *TG4040*) export PLATFORM="BrickPro" ;;
+        *0xd05*)                                    # RK3566
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                # dArkMoss stamps the spruce platform name into os-release
+                # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+                # only HW_DEVICE.
+                PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                if [ -z "$PLATFORM" ]; then
+                    case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                        *Miniloong*) PLATFORM="Miniloong" ;;
+                        *)           PLATFORM="RGB30" ;;
+                    esac
+                fi
+                # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
+                if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
+                    PLATFORM="RGB20SX"
+                fi
+                export PLATFORM
+                platform_family=darkmoss
+            else
+                export PLATFORM="Flip"
             fi
-            # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
-            if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
-                PLATFORM="RGB20SX"
+            ;;
+        *0xd04*)                                    # RK3326
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
+                if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
+                    export PLATFORM="A10MiniV4"
+                fi
+                platform_family=darkmoss
+            else
+                export PLATFORM="Pixel2"
             fi
-            export PLATFORM
-        else
-            export PLATFORM="Flip"
-        fi
-        ;;
-    *0xd04*)                                    # RK3326
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
-            if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
-                export PLATFORM="A10MiniV4"
-            fi
-        else
-            export PLATFORM="Pixel2"
-        fi
-        ;;
-    *0xd03*)                                    # H700
-        export SPRUCE_BASEOS=1
-        BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
-        # One platform per panel AND pad layout (Brick / Brick Pro precedent):
-        # every config ships static per platform, so models whose sticks and
-        # trigger numbering differ cannot share one. This case is the only
-        # place that names models; each platform cfg states its layout.
-        case $BASEOS_TARGET in
-            rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
-            rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
-            rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
-            rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
-            rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
-            rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
-            *)                      export PLATFORM="AnbernicXX640480" ;;
-        esac
-        ;;
-    *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-    *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
-esac
+            ;;
+        *0xd03*)                                    # H700
+            export SPRUCE_BASEOS=1
+            platform_family=h700
+            BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
+            case $BASEOS_TARGET in
+                rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
+                rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
+                rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
+                rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
+                rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
+                rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
+                *)                      export PLATFORM="AnbernicXX640480" ;;
+            esac
+            ;;
+        *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
+    esac
 fi
 
-. /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
+if [ -n "$platform_family" ]; then
+    . /mnt/SDCARD/spruce/scripts/platform/${platform_family}/${PLATFORM}.cfg
+else
+    . /mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg
+fi
 . /mnt/SDCARD/spruce/scripts/device_functions.sh
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
