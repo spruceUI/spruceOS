@@ -1,0 +1,540 @@
+#!/bin/sh
+
+# Intended to be sourced by helperFunctions.sh but NOT anywhere else
+# It relies on functions inside helperFunctions.sh to operate properly
+# (Not everything was cleanly broken apart since this is a refactor, in the future
+#  we can try to make the file import chain cleaner)
+
+. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/cpu_control_functions.sh"
+. "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/utils/sleep_functions.sh"
+
+get_sftp_service_name() {
+    echo "sftpgo"
+}
+
+get_ssh_service_name() {
+    echo "sshd"
+}
+
+get_config_path() {
+    # Return the full path
+    echo "/mnt/SDCARD/Saves/gkd-pixel2-system.json"
+}
+
+get_python_path() {
+    echo "/usr/bin/python"
+}
+
+setup_for_retroarch(){
+    export CORE_DIR="$RA_DIR/.retroarch/cores64"
+
+	if [ "$CORE" = "yabasanshiro" ]; then
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$EMU_DIR/lib64
+	fi
+
+	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+	else
+		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+	fi
+
+    echo "$RA_BIN"
+}
+
+get_spruce_ra_cfg_location() {
+    echo "/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
+}
+
+set_loading_screen() {
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        THEME_NAME=$(jq -r '.theme' "$SYSTEM_JSON")
+    else
+        THEME_NAME="SPRUCE"
+    fi
+
+    LOADING_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_merged.png"
+
+    if [ ! -f "$LOADING_IMG" ]; then
+        # Get background and last loading images
+        BG_IMG="/mnt/SDCARD/Themes/${THEME_NAME}/skin/app_loading_bg.png"
+        LAST_IMG=$(find "/mnt/SDCARD/Themes/${THEME_NAME}/skin/" -maxdepth 1 -name 'app_loading_0*.png' -type f | tail -n 1)
+
+        # If the background image doesn't exists use the default one
+        if [ ! -f "$BG_IMG" ]; then
+            BG_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_bg.png"
+        fi
+
+        # If there's no loading images use the default one
+        if [ -z "$LAST_IMG" ]; then
+            LAST_IMG="/mnt/SDCARD/Themes/SPRUCE/skin/app_loading_05.png"
+        fi
+
+        # Composite both images for the final loading image
+        magick composite -gravity center "$LAST_IMG" "$BG_IMG" "$LOADING_IMG"
+    fi
+
+    # Wait for sway socket to be available
+    while [ ! -S /var/run/0-runtime-dir/sway-ipc.0.sock ]; do
+        true
+    done
+
+    swaymsg output "*" bg "$LOADING_IMG" fill
+}
+
+disable_swap() {
+    swap_list=$(swapon -s)
+
+    if [ -n "$swap_list" ]; then
+        swapoff -a
+    fi
+}
+
+setup_network_services() {
+    systemctl start network-base
+    systemctl start systemd-resolved
+    systemctl start NetworkManager
+    systemctl start iwd
+    # NetworkManager's profiles live on /storage: a reflashed base gets the card's networks back
+    nm_import_card_networks wlan0
+
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        WIFI_STATUS=$(jq -r '.wifi' "$SYSTEM_JSON")
+    else
+        WIFI_STATUS=0
+    fi
+
+    if [ "$WIFI_STATUS" -eq 1 ]; then
+        device_wifi_power_on
+    else
+        device_wifi_power_off
+    fi
+}
+
+# Volume keys on USB input devices (headset remotes, keyboards). The rules live
+# in /run, so they last this boot only and nothing on the OS partition changes.
+install_usb_audio_rules() {
+    _run="/usr/bin/systemd-run --no-block --collect --setenv=XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/var/run/0-runtime-dir} --setenv=PATH=$PATH"
+    mkdir -p /run/udev/rules.d
+    cat > /run/udev/rules.d/90-spruce-usb-audio.rules <<EOF
+# A reader per USB input device that has keys and is not a gamepad, run by
+# systemd so udev does not kill it.
+ACTION=="add|change", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_BUS}=="usb", ENV{ID_INPUT_KEY}=="1", ENV{ID_INPUT_JOYSTICK}!="1", RUN+="$_run --unit=spruce-usb-remote-%k /bin/sh /mnt/SDCARD/spruce/scripts/usb_audio_remote.sh /dev/input/%k"
+# getevent spins rather than exits when its node is removed, and its unit would
+# hold the name the next device on this node needs.
+ACTION=="remove", SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_BUS}=="usb", ENV{ID_INPUT_JOYSTICK}!="1", RUN+="/usr/bin/systemctl stop --no-block spruce-usb-remote-%k.service"
+EOF
+    udevadm control --reload
+    # A headset already plugged in at boot. A change, not an add: every udev
+    # listener sees the event, and an add tells them a present device is new.
+    udevadm trigger --action=change --subsystem-match=input --property-match=ID_BUS=usb
+}
+
+device_init() {
+    sync_volume_level
+    install_usb_audio_rules &
+    disable_swap
+    set_loading_screen &
+    setup_network_services &
+}
+
+set_event_arg_for_idlemon() {
+    EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
+}
+
+check_if_fw_needs_update() {
+    log_message "There is only a single firmware, it was never updated" -v
+}
+
+enable_or_disable_rgb() {
+    killall -q cava 2>/dev/null
+    killall -q leds_manager.sh 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
+}
+
+prepare_for_pyui_launch(){
+    disable_dpad_mod
+    set_overclock
+    echo "performance" > "$GPU_GOVENOR_DIR/governor"
+    (
+        # SDL2 takes forever, let it initialize before going to powersave
+        sleep 5
+        set_smart
+        unlock_governor 2>/dev/null
+    ) &
+}
+
+post_pyui_exit(){
+    log_message "This doesn't need to do anything when exitting pyui" -v
+}
+
+launch_startup_watchdogs(){
+    launch_common_startup_watchdogs_v2
+    # Same per-start-of-frontend dedupe the common launcher applies to its own
+    # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
+    # not stack a second theme_watchdog / leds_manager on the first.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/theme_watchdog.sh
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/leds_manager.sh
+    /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
+}
+
+# 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
+device_get_charging_status() {
+	cat "$BATTERY/status"
+}
+
+device_get_battery_percent() {
+	cat "$BATTERY/capacity"
+}
+
+# The OS network stack started in setup_network_services owns the radio; spruce
+# must not start a wpa_supplicant or DHCP client beside it
+device_manages_own_wifi() {
+    return 0
+}
+
+device_wifi_power_on() {
+    rfkill unblock wifi
+    sleep 1
+}
+
+device_wifi_power_off() {
+    rfkill block wifi
+}
+
+# The card's wpa_supplicant.conf keeps the network too, as on every spruce device, so it outlives a reflash
+device_wifi_connect() {
+    wpa_conf_save_network "$1" "$2"
+    nm_wifi_connect "$1" "$2"
+}
+
+sync_volume_level() {
+    # SYSTEM_JSON doesn't exists yet during first boot
+    if [ -f "$SYSTEM_JSON" ]; then
+        VALUE=$(get_volume_level)
+    else
+        VALUE=10
+    fi
+
+    set_volume "$VALUE" false
+}
+
+get_volume_level() {
+    jq -r '.vol' "$SYSTEM_JSON"
+}
+
+get_current_volume() {
+    wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{ print $2 }'
+}
+
+# The level of the output playing now; the stored level can be another output's.
+get_current_volume_level() {
+    vol=$(get_current_volume)
+    [ -n "$vol" ] || { get_volume_level; return; }
+    for i in $(seq 0 20); do map_mainui_volume_to_system_value "$i"; done |
+        awk -v v="$vol" '{ d = $1 - v; if (d < 0) d = -d }
+            NR == 1 || d < best { best = d; level = NR - 1 } END { print level }'
+}
+
+set_volume() {
+    VOL_VAL="${1:-0}" # default to mute if no value supplied
+    SAVE_TO_CONFIG="${2:-true}" # Optional 2nd arg, defaults to true
+
+    # Set volume
+    SYSTEM_VOL=$(map_mainui_volume_to_system_value "$VOL_VAL")
+    wpctl set-volume @DEFAULT_AUDIO_SINK@ $SYSTEM_VOL
+
+    if [ "$SAVE_TO_CONFIG" = true ]; then
+        # Update Config file
+        save_volume_to_config_file "$VOL_VAL"
+    fi
+}
+
+volume_down() {
+    VALUE=$(get_current_volume_level)
+    if [ $VALUE -gt 0 ] ; then
+        VALUE=$((${VALUE} - 1))
+    fi
+    # Saved even at the limit: buttons_watchdog steps a held key from it.
+    set_volume "$VALUE"
+}
+
+volume_up() {
+    VALUE=$(get_current_volume_level)
+    if [ $VALUE -lt 20 ] ; then
+        VALUE=$((${VALUE} + 1))
+    fi
+    set_volume "$VALUE"
+}
+
+# Map the MainUI Volume level to System Value
+map_mainui_volume_to_system_value() {
+    case $1 in
+        0) echo $SYSTEM_VOLUME_0 ;;
+        1) echo $SYSTEM_VOLUME_1 ;;
+        2) echo $SYSTEM_VOLUME_2 ;;
+        3) echo $SYSTEM_VOLUME_3 ;;
+        4) echo $SYSTEM_VOLUME_4 ;;
+        5) echo $SYSTEM_VOLUME_5 ;;
+        6) echo $SYSTEM_VOLUME_6 ;;
+        7) echo $SYSTEM_VOLUME_7 ;;
+        8) echo $SYSTEM_VOLUME_8 ;;
+        9) echo $SYSTEM_VOLUME_9 ;;
+        10) echo $SYSTEM_VOLUME_10 ;;
+        11) echo $SYSTEM_VOLUME_11 ;;
+        12) echo $SYSTEM_VOLUME_12 ;;
+        13) echo $SYSTEM_VOLUME_13 ;;
+        14) echo $SYSTEM_VOLUME_14 ;;
+        15) echo $SYSTEM_VOLUME_15 ;;
+        16) echo $SYSTEM_VOLUME_16 ;;
+        17) echo $SYSTEM_VOLUME_17 ;;
+        18) echo $SYSTEM_VOLUME_18 ;;
+        19) echo $SYSTEM_VOLUME_19 ;;
+        20) echo $SYSTEM_VOLUME_20 ;;
+        *) echo $SYSTEM_VOLUME_10 ;;
+    esac
+}
+
+WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+
+device_enter_sleep() {
+    turn_off_screen
+
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    /usr/lib/systemd/systemd-sleep suspend
+}
+
+device_exit_sleep() {
+    backlight=$(current_backlight)
+    set_backlight $backlight
+    turn_on_screen
+
+    echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    reinit_usb_controller
+}
+
+# Deep sleep powers down the USB controller and the kernel restores it on
+# resume only while a gadget is bound, so the next host-mode plug (a Wi-Fi
+# dongle) gets an unpowered port. Reprobing the driver redoes the boot-time
+# init. Skipped while anything is attached, so a device that came through the
+# sleep is left alone.
+USB_UDC="ff300000.usb"
+
+reinit_usb_controller() {
+    # Attached devices are 1-1, 1-1.2...; usb1 and 1-0:1.0 are the root hub
+    ls /sys/bus/usb/devices | grep -qE '^[0-9]+-[0-9.]+$' && return 0
+    [ "$(cat /sys/class/udc/$USB_UDC/state 2>/dev/null)" = "not attached" ] || return 0
+    # A bound gadget (adb, USB Storage Mode) means the kernel restored it
+    [ -n "$(cat /sys/class/udc/$USB_UDC/function 2>/dev/null)" ] && return 0
+    log_message "Nothing on the USB port after wake; reprobing $USB_UDC"
+    if ! echo "$USB_UDC" >/sys/bus/platform/drivers/dwc2/unbind ||
+        ! echo "$USB_UDC" >/sys/bus/platform/drivers/dwc2/bind; then
+        log_message "Reprobing $USB_UDC failed; USB host mode may not work until reboot"
+    fi
+}
+
+device_lid_open(){
+    # device has no lid so it's always open
+    return 1
+}
+
+device_wifi_is_available() {
+    if [ -d /sys/class/net/wlan0 ] || [ -d /sys/class/net/eth0 ]; then
+        if [ "$(cat /sys/class/net/*0/operstate)" = "up" ]; then
+            return 0 # True
+        else
+            return 1 # False
+        fi
+    else
+        return 1 # False
+    fi
+}
+
+take_screenshot() {
+    screenshot_path="$1"
+    grim -o DSI-1 "${screenshot_path}"
+}
+
+vibrate() {
+    duration=50
+    intensity="$(get_config_value '.menuOptions."System Settings".rumbleIntensity.selected' "Medium")"
+
+    # Parse arguments in any order
+    while [ $# -gt 0 ]; do
+        case "$1" in
+        --intensity)
+            shift
+            intensity="$1"
+            ;;
+        [0-9]*)
+            duration="$1"
+            ;;
+        esac
+        shift
+    done
+
+
+    # "Off" is one of the four options the setting offers and it has to be
+    # honoured here. Falling through leaves it to whatever follows, which on
+    # some platforms drives the motor anyway and on others just makes noise.
+    [ "$intensity" = "Off" ] && return 0
+
+    case "$intensity" in
+            "Weak")   intensity=0x2000 ;;
+            "Medium") intensity=0x8000 ;;
+            "Strong") intensity=0xFFFF ;;
+    esac
+
+    rumble $EVENT_PATH_READ_INPUTS_SPRUCE $intensity $duration
+}
+
+current_backlight() {
+    jq -r '.backlight' "$SYSTEM_JSON"
+}
+
+# Map the MainUI Volume level to System Value
+map_mainui_brightness_to_system_value() {
+    case $1 in
+        0) echo $SYSTEM_BACKLIGHT_LEVEL_0 ;;
+        1) echo $SYSTEM_BACKLIGHT_LEVEL_1 ;;
+        2) echo $SYSTEM_BACKLIGHT_LEVEL_2 ;;
+        3) echo $SYSTEM_BACKLIGHT_LEVEL_3 ;;
+        4) echo $SYSTEM_BACKLIGHT_LEVEL_4 ;;
+        5) echo $SYSTEM_BACKLIGHT_LEVEL_5 ;;
+        6) echo $SYSTEM_BACKLIGHT_LEVEL_6 ;;
+        7) echo $SYSTEM_BACKLIGHT_LEVEL_7 ;;
+        8) echo $SYSTEM_BACKLIGHT_LEVEL_8 ;;
+        9) echo $SYSTEM_BACKLIGHT_LEVEL_9 ;;
+        10) echo $SYSTEM_BACKLIGHT_LEVEL_10 ;;
+        *) echo $SYSTEM_BACKLIGHT_LEVEL_5 ;;
+    esac
+}
+
+set_backlight() {
+    new_bl="$1"
+    sys_bl=$(map_mainui_brightness_to_system_value "$new_bl")
+    if [ "$new_bl" -ge 0 ] 2>/dev/null && [ "$new_bl" -le 10 ] 2>/dev/null; then
+        echo $sys_bl > $DEVICE_BACKLIGHT_PATH
+        jq ".backlight = $new_bl" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
+    fi
+}
+
+device_backlight_down() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight - 1))
+}
+
+device_backlight_up() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight + 1))
+}
+
+turn_off_screen() {
+    echo 1 > /sys/class/backlight/backlight/bl_power
+}
+
+turn_on_screen() {
+    echo 0 > /sys/class/backlight/backlight/bl_power
+}
+
+set_event_arg() {
+    EVENT_ARG="-e /dev/input/event2"
+}
+
+send_menu_button_to_retroarch() {
+    if pgrep "ra64.pixel2" >/dev/null; then
+        echo "MENU_TOGGLE" | socat -t 0.1 - udp:127.0.0.1:55355
+    fi
+}
+
+enable_dpad_to_analog() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @dpad @analog \
+            --map yield btn:east btn:south \
+            --map yield btn:south btn:east \
+            --map yield btn:dpad_left:0@analog abs:x:0 \
+            --map yield btn:dpad_left:1@analog abs:x:-900 \
+            --map yield btn:dpad_right:0@analog abs:x:0 \
+            --map yield btn:dpad_right:1@analog abs:x:899 \
+            --map yield btn:dpad_up:0@analog abs:y:0 \
+            --map yield btn:dpad_up:1@analog abs:y:-900 \
+            --map yield btn:dpad_down:0@analog abs:y:0 \
+            --map yield btn:dpad_down:1@analog abs:y:899 \
+            --output name="pixel2_joypad_alt" &
+}
+
+enable_dpad_to_mouse() {
+    evsieve --input /dev/input/by-path/platform-gamekiddy-joypad-event-joystick \
+            --hook btn:tl2 btn:tr2 toggle \
+            --withhold btn:tl2 btn:tr2 \
+            --toggle "" @dpad @mouse \
+            --hook btn:dpad_left:1~2 send-key=key:left \
+            --hook btn:dpad_right:1~2 send-key=key:right \
+            --hook btn:dpad_up:1~2 send-key=key:up \
+            --hook btn:dpad_down:1~2 send-key=key:down \
+            --oscillate key:left key:right key:up key:down period=0.01 \
+            --map yield key:left:1@mouse rel:x:-2 \
+            --map yield key:right:1@mouse rel:x:2 \
+            --map yield key:up:1@mouse rel:y:-2 \
+            --map yield key:down:1@mouse rel:y:2 \
+            --map yield btn:tl:0~1@mouse btn:left \
+            --map yield btn:tr:0~1@mouse btn:right \
+            --output &
+}
+
+disable_dpad_mod() {
+    pkill "evsieve"
+}
+
+set_default_ra_hotkeys() {
+    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
+
+    log_message "Resetting RetroArch hotkeys to Spruce defaults."
+
+    # Update RetroArch config with default values
+    update_ra_config_file_with_new_setting "$RA_FILE" \
+        "input_enable_hotkey_btn = \"5\"" \
+        "input_exit_emulator_btn = \"1\"" \
+        "input_fps_toggle_btn = \"3\"" \
+        "input_load_state_btn = \"9\"" \
+        "input_menu_toggle = \"escape\"" \
+        "input_menu_toggle_btn = \"2\"" \
+        "input_quit_gamepad_combo = \"4\"" \
+        "input_save_state_btn = \"10\"" \
+        "input_screenshot_btn = \"0\"" \
+        "input_shader_toggle_btn = \"11\"" \
+        "input_state_slot_decrease_btn = \"13\"" \
+        "input_state_slot_increase_btn = \"14\""
+}
+
+device_system_handles_sdcard_unmount() {
+    # return 0 = true
+    # return non-zero = false
+    return 0
+}
+
+device_needs_strict_unmount() {
+    return 1
+}
+
+device_run_reboot_cmd() {
+    systemctl reboot
+}
+
+# Through systemd like reboot, so /mnt/SDCARD is unmounted cleanly.
+run_poweroff_cmd() {
+    systemctl poweroff
+}

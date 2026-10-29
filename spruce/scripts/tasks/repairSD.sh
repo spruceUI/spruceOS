@@ -213,7 +213,7 @@ tmp_stop_frontend_service() {
 # power-off clears.
 tmp_hold_off_respawns() {
     touch /tmp/shutting_down.lock
-    _shield=/mnt/SDCARD/spruce/scripts/platform/device_functions/utils/baseos_session_shield.sh
+    _shield=/mnt/SDCARD/spruce/scripts/platform/utils/baseos_session_shield.sh
     [ -f "$_shield" ] || return 0
     command -v log_message >/dev/null 2>&1 || log_message() { echo "$1"; }
     . "$_shield"

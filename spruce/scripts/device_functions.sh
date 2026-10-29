@@ -10,7 +10,7 @@
 
 
 # Source the correct file for the detected platform
-platform_file="/mnt/SDCARD/spruce/scripts/platform/device_functions/$PLATFORM.sh"
+platform_file="/mnt/SDCARD/spruce/scripts/platform/$PLATFORM.sh"
 
 if [ -f "$platform_file" ]; then
     . "$platform_file"
