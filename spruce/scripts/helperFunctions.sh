@@ -49,11 +49,11 @@ if [ -e /usr/magicx ]; then
 else
     INFO=$(cat /proc/cpuinfo 2> /dev/null)
     case $INFO in
-        *sun8i*) export PLATFORM="A30";         platform_family=tina-stock ;;   # A33
-        *TG5040*) export PLATFORM="SmartPro";   platform_family=tina-stock ;;
-        *TG3040*) export PLATFORM="Brick";      platform_family=tina-stock ;;
-        *TG5050*) export PLATFORM="SmartProS";  platform_family=tina-stock ;;
-        *TG4040*) export PLATFORM="BrickPro";   platform_family=tina-stock ;;
+        *sun8i*) export PLATFORM="A30";         PLATFORM_FAMILY=tina-stock ;;   # A33
+        *TG5040*) export PLATFORM="SmartPro";   PLATFORM_FAMILY=tina-stock ;;
+        *TG3040*) export PLATFORM="Brick";      PLATFORM_FAMILY=tina-stock ;;
+        *TG5050*) export PLATFORM="SmartProS";  PLATFORM_FAMILY=tina-stock ;;
+        *TG4040*) export PLATFORM="BrickPro";   PLATFORM_FAMILY=tina-stock ;;
         *0xd05*)                                                                # RK3566
             if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
                 # dArkMoss stamps the spruce platform name into os-release
@@ -71,9 +71,9 @@ else
                     PLATFORM="RGB20SX"
                 fi
                 export PLATFORM
-                platform_family=darkmoss
+                PLATFORM_FAMILY=darkmoss
             else
-                export PLATFORM="Flip";         platform_family=tina-stock
+                export PLATFORM="Flip";         PLATFORM_FAMILY=tina-stock
             fi
             ;;
         *0xd04*)                                                                # RK3326
@@ -83,14 +83,14 @@ else
                 if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
                     export PLATFORM="A10MiniV4"
                 fi
-                platform_family=darkmoss
+                PLATFORM_FAMILY=darkmoss
             else
                 export PLATFORM="Pixel2"
             fi
             ;;
         *0xd03*)                                                                # H700
             export SPRUCE_BASEOS=1
-            platform_family=h700
+            PLATFORM_FAMILY=h700
             BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
             case $BASEOS_TARGET in
                 rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
@@ -102,13 +102,14 @@ else
                 *)                      export PLATFORM="AnbernicXX640480" ;;
             esac
             ;;
-        *SStar*) export PLATFORM="MiyooMini";   platform_family=miyoomini ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-        *) export PLATFORM="MiyooMini";         platform_family=miyoomini ;;
+        *SStar*) export PLATFORM="MiyooMini";   PLATFORM_FAMILY=miyoomini ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini";         PLATFORM_FAMILY=miyoomini ;;
     esac
 fi
+export PLATFORM_FAMILY
 
-if [ -n "$platform_family" ]; then
-    . /mnt/SDCARD/spruce/scripts/platform/${platform_family}/${PLATFORM}.cfg
+if [ -n "$PLATFORM_FAMILY" ]; then
+    . /mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg
 else
     . /mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg
 fi

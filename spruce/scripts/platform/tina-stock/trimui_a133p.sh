@@ -6,7 +6,7 @@
 # bind. Sourced by Brick.sh, BrickPro.sh and SmartPro.sh.
 
 . "/mnt/SDCARD/spruce/scripts/platform/a133p.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/trimui_delegate.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/tina-stock/trimui_delegate.sh"
 
 # The stock BusyBox 1.27.2 has no timeout applet, so bounded bluetoothctl calls never
 # ran and audio never reached a headset; spruce's own BusyBox has one.

@@ -2,7 +2,7 @@
 
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/trimui_delegate.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/tina-stock/trimui_delegate.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"

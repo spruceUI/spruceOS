@@ -2,7 +2,7 @@
 # Miniloong Pocket 1 device functions. Everything the base OS decides is in
 # dArkMossCommon.sh; this file holds what is particular to this unit.
 
-. "/mnt/SDCARD/spruce/scripts/platform/dArkMossCommon.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/darkmoss/dArkMossCommon.sh"
 
 # The radio is attached by the kernel (hci0 exists from boot); dArkMossCommon's
 # device_bluetooth_up/down start and stop bluetoothd and bluealsa.

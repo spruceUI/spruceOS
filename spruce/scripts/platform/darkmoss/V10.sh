@@ -2,7 +2,7 @@
 # Powkiddy V10 device functions. Everything the base OS decides is in
 # dArkMossCommon.sh; this file holds what is particular to this unit.
 
-. "/mnt/SDCARD/spruce/scripts/platform/dArkMossCommon.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/darkmoss/dArkMossCommon.sh"
 
 # The rk817 codec switches to the jack itself on the OGA 1.1 kernel, and there
 # is no jack state file for spruce to read, so the base's path is left alone.

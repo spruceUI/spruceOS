@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. /mnt/SDCARD/spruce/scripts/platform/AnbernicXXCommon.sh
+. /mnt/SDCARD/spruce/scripts/platform/h700/AnbernicXXCommon.sh
 
 # The RG28XX's radio is a USB RTL8188EU; AnbernicRG28XX.cfg selects the USB
 # radio contract in AnbernicXXCommon.sh (bus-first, bounded, no sunxi-wlan and

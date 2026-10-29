@@ -2,7 +2,7 @@
 # MagicX XU Mini M device functions. Everything the base OS decides is in
 # dArkMossCommon.sh; this file holds what is particular to this unit.
 
-. "/mnt/SDCARD/spruce/scripts/platform/dArkMossCommon.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/darkmoss/dArkMossCommon.sh"
 
 # The rk817 codec switches to the jack itself (codec-hp-det in the dts), and
 # there is no jack state for spruce to read, so the base's path is left alone.

@@ -8,9 +8,14 @@
 # Ensure all methods are defined, and just logged if missing
 . "/mnt/SDCARD/spruce/scripts/platform/device.sh"
 
-
 # Source the correct file for the detected platform
-platform_file="/mnt/SDCARD/spruce/scripts/platform/$PLATFORM.sh"
+platform_file="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.sh"
+
+if [ -n "$PLATFORM_FAMILY" ] && [ -f "$platform_file" ]; then
+    : # keep the path with the family subfolder
+else
+    platform_file="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.sh"
+fi
 
 if [ -f "$platform_file" ]; then
     . "$platform_file"

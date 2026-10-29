@@ -1,5 +1,5 @@
 #!/bin/sh
-# Charge screen for a Miyoo Mini that a charger switched on. miyoo_mini_startup.sh runs this before keymon and
+# Charge screen for a Miyoo Mini that a charger switched on. miyoomini/miyoo_mini_startup.sh runs this before keymon and
 # the rest of the boot; it returns to let the boot continue, or powers the unit off.
 #
 # How a charger start shows, by what the unit has rather than by model:

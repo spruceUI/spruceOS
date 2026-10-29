@@ -2,7 +2,7 @@
 # Powkiddy RGB30 device functions. Everything the base OS decides is in
 # dArkMossCommon.sh; this file holds what is particular to this unit.
 
-. "/mnt/SDCARD/spruce/scripts/platform/dArkMossCommon.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/darkmoss/dArkMossCommon.sh"
 
 # The RGB30 ships without a rumble motor, but the pads for one are on the board
 # (ArkOS wiki) and the singleadc-joypad driver already claims the PWM and
