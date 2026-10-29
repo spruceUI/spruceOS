@@ -29,9 +29,6 @@ class SpruceDevice(EnvVarDevice):
         # TODO base on same thing as above
         return False
     
-    def supports_image_resizing(self):
-        return True
-
     # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
     def get_core_for_game(self, game_system_config, rom_file_path):
         menu_options = game_system_config.get_menu_options()
@@ -64,4 +61,7 @@ class SpruceDevice(EnvVarDevice):
             
     def run_app(self, folder,launch):
         MiyooTrimCommon.run_app(self, folder,launch)
+
+    def get_image_for_activity(self, activity):
+        return MiyooTrimCommon.get_image_for_activity(activity)
 

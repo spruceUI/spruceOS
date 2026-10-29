@@ -1,5 +1,6 @@
 
 
+import shlex
 import subprocess
 import json
 import os
@@ -26,8 +27,23 @@ from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 
 
+# The launcher cannot start without these; every other variable is optional.
+REQUIRED_ENV_VARS = (
+    "DEFAULT_CFG_PATH", "SYSTEM_CFG_PATH", "SCREEN_WIDTH", "SCREEN_HEIGHT",
+    "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "PRIMARY_PYUI_DEVICE_NAME", "PYUI_DEVICE_NAMES",
+    "ROMS_PATH", "FAVORITES_PATH", "RECENTS_PATH", "APPS_CONFIG_PATH", "COLLECTIONS_PATH", "STATE_PATH",
+)
+DEFAULT_STICK_DEADZONE = 16000
+# struct input_event with a signed value: d-pad hats report -1.
+DEFAULT_EVENT_FORMAT = "llHHi"
+
+
 class EnvVarDevice(DeviceCommon):
     def __init__(self, main_ui_mode):
+        missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
+        if missing:
+            raise RuntimeError(f"EnvVarDevice needs these environment variables: {', '.join(missing)}")
+
         audio_player_env_var = os.environ.get("AUDIO_PLAYER", "")
 
         if audio_player_env_var == "SDL2":
@@ -36,29 +52,31 @@ class EnvVarDevice(DeviceCommon):
             self.audio_player = AudioPlayerOss()
         else:
             self.audio_player = AudioPlayerNone()
-    
+
         self.has_rgb_rings = os.getenv("HAS_RGB_RINGS", "false") == "true"
         self.has_lid_wake = os.getenv("HAS_LID_WAKE", "false") == "true"
         default_cfg_path = Path(os.environ["DEFAULT_CFG_PATH"])
         system_cfg_path = os.environ["SYSTEM_CFG_PATH"]
-        legacy_cfg_path = Path(os.environ["LEGACY_CFG_PATH"])
-        if not self._is_usable_config(system_cfg_path) and self._is_usable_config(legacy_cfg_path):
-            default_cfg_path = legacy_cfg_path
+        legacy_cfg_path = os.environ.get("LEGACY_CFG_PATH")
+        if legacy_cfg_path and not self._is_usable_config(system_cfg_path) and self._is_usable_config(legacy_cfg_path):
+            default_cfg_path = Path(legacy_cfg_path)
 
         self._load_system_config(system_cfg_path, default_cfg_path)
+        self.battery_percent = 0
+        self.status_errors_logged = set()
 
-        from controller.controller import Controller
-        self.volume_key_watcher = KeyWatcher(os.environ["VOL_KEY_WATCHER_PATH"])        
-        Controller.add_button_watcher(self.volume_key_watcher.poll_keyboard)
-        volume_key_polling_thread = threading.Thread(target=self.volume_key_watcher.poll_keyboard, daemon=True)
-        volume_key_polling_thread.start()
-        self.power_key_watcher = KeyWatcher(os.environ["POWER_KEY_WATCHER_PATH"])  
-        power_key_polling_thread = threading.Thread(target=self.power_key_watcher.poll_keyboard, daemon=True)
-        power_key_polling_thread.start()
-        self.controller_watcher = KeyWatcher(os.environ["CONTROLLER_KEY_WATCHER_PATH"])
-        Controller.add_button_watcher(self.controller_watcher.poll_keyboard)
-        controller_watching_thread = threading.Thread(target=self.controller_watcher.poll_keyboard, daemon=True)
-        controller_watching_thread.start()
+        # Resolved once, as map_key runs for every event the watchers read.
+        self.watched_key_codes = {}
+        for name, controller_input in (("VOLUME_DOWN_KEYCODE", ControllerInput.VOLUME_DOWN),
+                                       ("VOLUME_UP_KEYCODE", ControllerInput.VOLUME_UP),
+                                       ("POWER_BUTTON_KEYCODE", ControllerInput.POWER_BUTTON)):
+            if os.environ.get(name):
+                self.watched_key_codes[int(os.environ[name])] = controller_input
+
+        # In every mode, so input is ignored during special commands; a device without the path has no watcher.
+        self.volume_key_watcher = self._start_key_watcher("VOL_KEY_WATCHER_PATH", add_to_controller=True)
+        self.power_key_watcher = self._start_key_watcher("POWER_KEY_WATCHER_PATH", add_to_controller=False)
+        self.controller_watcher = self._start_key_watcher("CONTROLLER_KEY_WATCHER_PATH", add_to_controller=True)
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
@@ -69,6 +87,10 @@ class EnvVarDevice(DeviceCommon):
 
         super().__init__()
 
+        if(main_ui_mode):
+            # The shell does not restore the saved display settings at boot, so the launcher does.
+            threading.Thread(target=self.startup_init, daemon=True).start()
+
     @staticmethod
     def _is_usable_config(path):
         # Same test ConfigCopier.ensure_config applies before deciding a config
@@ -78,6 +100,50 @@ class EnvVarDevice(DeviceCommon):
             return path.exists() and path.stat().st_size > 0
         except OSError:
             return False
+
+    def _start_key_watcher(self, path_var, add_to_controller):
+        path = os.environ.get(path_var)
+        if not path:
+            return None
+        from controller.controller import Controller
+        watcher = KeyWatcher(path)
+        if add_to_controller:
+            Controller.add_button_watcher(watcher.poll_keyboard)
+        threading.Thread(target=watcher.poll_keyboard, daemon=True).start()
+        return watcher
+
+    # A *_CMD is split like a shell command line, so one script can serve several settings.
+    def _cmd(self, cmd_var):
+        cmd = os.environ.get(cmd_var)
+        return shlex.split(cmd) if cmd else None
+
+    def _run_setting_cmd(self, cmd_var, *args):
+        cmd = self._cmd(cmd_var)
+        if not cmd:
+            return
+        try:
+            subprocess.run(cmd + [str(arg) for arg in args],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=10, check=False)
+        except Exception as e:
+            PyUiLogger.get_logger().error(f"{cmd_var} failed: {e}")
+
+    # A status comes from the file named in path_var when it is set, else from cmd_var's output.
+    def _read_status(self, path_var, cmd_var):
+        path = os.environ.get(path_var)
+        if path:
+            return Path(path).read_text().strip()
+        cmd = self._cmd(cmd_var)
+        if not cmd:
+            return None
+        return subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                              text=True, timeout=5, check=False).stdout.strip()
+
+    # Statuses are polled every few seconds, so each kind of failure is logged once.
+    def _log_status_error(self, status, error):
+        if status not in self.status_errors_logged:
+            self.status_errors_logged.add(status)
+            PyUiLogger.get_logger().warning(f"Could not read {status}: {error}")
 
     def on_system_config_changed(self):
         old_volume = self.system_config.get_volume()
@@ -92,50 +158,30 @@ class EnvVarDevice(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
+    # An empty value means the device has none, which drops reboot from the power prompt.
     def power_off_cmd(self):
-        return os.environ["POWER_OFF_CMD"]
-    
+        return os.environ.get("POWER_OFF_CMD", "poweroff") or None
+
     def reboot_cmd(self):
-        return os.environ["REBOOT_CMD"]
+        return os.environ.get("REBOOT_CMD", "reboot") or None
 
     def get_fw_version(self):
-        return os.environ["FW_VERSION"]
+        return os.environ.get("FW_VERSION") or super().get_fw_version()
 
     def _set_brightness_to_config(self):
-        cmd = os.environ.get("BRIGHTNESS_CMD")
-        if cmd:
-            subprocess.run([cmd, str(self.system_config.brightness)],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
-                              
+        self._run_setting_cmd("BRIGHTNESS_CMD", self.system_config.brightness)
+
     def _set_lumination_to_config(self):
-        cmd = os.environ.get("BACKLIGHT_CMD")
-        if cmd:
-            subprocess.run([cmd, str(self.system_config.backlight)],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
+        self._run_setting_cmd("BACKLIGHT_CMD", self.system_config.backlight)
 
     def _set_contrast_to_config(self):
-        cmd = os.environ.get("CONTRAST_CMD")
-        if cmd:
-            subprocess.run([cmd, str(self.system_config.contrast)],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
-    
-    def _set_saturation_to_config(self): 
-        cmd = os.environ.get("SATURATION_CMD")
-        if cmd:
-            subprocess.run([cmd, str(self.system_config.saturation)],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
+        self._run_setting_cmd("CONTRAST_CMD", self.system_config.contrast)
 
+    def _set_saturation_to_config(self):
+        self._run_setting_cmd("SATURATION_CMD", self.system_config.saturation)
 
     def _set_hue_to_config(self):
-        cmd = os.environ.get("HUE_CMD")
-        if cmd:
-            subprocess.run([cmd, str(self.system_config.hue)],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
+        self._run_setting_cmd("HUE_CMD", self.system_config.hue)
 
     def get_volume(self):
         return self.system_config.get_volume()
@@ -144,18 +190,10 @@ class EnvVarDevice(DeviceCommon):
         DeviceCommon.prompt_power_down(self)
         
     def volume_up(self):
-        cmd = os.environ.get("VOL_UP_CMD")
-        if cmd:
-            subprocess.run([cmd],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
+        self._run_setting_cmd("VOL_UP_CMD")
 
     def volume_down(self):
-        cmd = os.environ.get("VOL_DOWN_CMD")
-        if cmd:
-            subprocess.run([cmd],
-                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                        timeout=10, check=False)        
+        self._run_setting_cmd("VOL_DOWN_CMD")
 
     def special_input(self, controller_input, length_in_seconds):
         pass # do not do for env based devicess
@@ -163,47 +201,36 @@ class EnvVarDevice(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    @throttle.limit_refresh(5)
+    # "1" (a USB online node), Charging or Full counts as charging.
+    @throttle.limit_refresh(5, background=True)
     def get_charge_status(self):
-        cmd = os.environ.get("CHARGE_STATUS_CMD")
-        if not cmd:
-            return ChargeStatus.DISCONNECTED
-
         try:
-            result = subprocess.run(
-                [cmd],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=5,
-                check=False,
-            )
-            if result.returncode == 0:
-                return ChargeStatus.CHARGING
+            status = self._read_status("CHARGE_STATUS_PATH", "CHARGE_STATUS_CMD")
+        except Exception as e:
+            self._log_status_error("the charge status", e)
             return ChargeStatus.DISCONNECTED
-        except:
-            # Battery status command unavailable
-            return ChargeStatus.DISCONNECTED        
-        
-    @throttle.limit_refresh(15)
+        if status and status.lower() in ("1", "charging", "full"):
+            return ChargeStatus.CHARGING
+        return ChargeStatus.DISCONNECTED
+
+    # A failed read keeps the last good percentage rather than drawing an empty battery.
+    @throttle.limit_refresh(15, background=True)
     def get_battery_percent(self):
-        cmd = os.environ.get("BATTERY_PERCENT_CMD")
-        if not cmd:
-            return 0
-
         try:
-            result = subprocess.run(
-                [cmd],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                text=True,
-                timeout=5,
-                check=True,
-            )
-            return int(result.stdout.strip())
-        except:
-            return 0
+            percent = self._read_status("BATTERY_PERCENT_PATH", "BATTERY_PERCENT_CMD")
+            if percent is not None:
+                self.battery_percent = int(percent)
+        except Exception as e:
+            self._log_status_error("the battery percentage", e)
+        return self.battery_percent
+
+    # Each setting is applied only when its command is set.
+    def startup_init(self, include_wifi=True):
+        self._set_lumination_to_config()
+        self._set_contrast_to_config()
+        self._set_saturation_to_config()
+        self._set_brightness_to_config()
+        self._set_hue_to_config()
 
     def perform_startup_tasks(self):
         pass
@@ -236,41 +263,41 @@ class EnvVarDevice(DeviceCommon):
         self.button_remapper.remap_buttons()
 
     def supports_wifi(self):
-        cmd = os.environ.get("CHECK_WIFI_SUPPORT_CMD")
+        if os.environ.get("SUPPORTS_WIFI"):
+            return os.environ["SUPPORTS_WIFI"].lower() == "true"
+        return self._check_wifi_support()
+
+    # The top bar asks on every frame, so the command's answer is cached.
+    @throttle.limit_refresh(30, background=True)
+    def _check_wifi_support(self):
+        cmd = self._cmd("CHECK_WIFI_SUPPORT_CMD")
         if not cmd:
             return False
-
         try:
-            result = subprocess.run(
-                [cmd],
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                timeout=10,
-                check=False,
-            )
-            return result.returncode == 0
-        except:
-            return False    
-        
+            return subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                  timeout=10, check=False).returncode == 0
+        except Exception as e:
+            self._log_status_error("WiFi support", e)
+            return False
+
     def get_roms_dir(self):
         return os.environ["ROMS_PATH"]
 
     def output_screen_width(self):
         if self.should_scale_screen():
-            return int(os.environ["OUTPUT_SCREEN_WIDTH"])
+            return int(os.environ.get("OUTPUT_SCREEN_WIDTH", self.screen_width()))
         else:
             return self.screen_width()
 
     def output_screen_height(self):
         if self.should_scale_screen():
-            return int(os.environ["OUTPUT_SCREEN_HEIGHT"])
+            return int(os.environ.get("OUTPUT_SCREEN_HEIGHT", self.screen_height()))
         else:
             return self.screen_height()
 
     def get_scale_factor(self):
         if self.is_hdmi_connected():
-            return float(os.environ["HDMI_SCALE_FACTOR"])
+            return float(os.environ.get("HDMI_SCALE_FACTOR", 1.0))
         else:
             return 1.0
         
@@ -344,9 +371,9 @@ class EnvVarDevice(DeviceCommon):
             mapping_provider=AxisKeyMappingProvider(
                 key_mappings,
                 stick_axes,
-                int(os.environ["STICK_DEADZONE"]),
+                int(os.environ.get("STICK_DEADZONE", DEFAULT_STICK_DEADZONE)),
             ),
-            event_format=os.environ["CONTROLLER_EVENT_FORMAT"],
+            event_format=os.environ.get("CONTROLLER_EVENT_FORMAT", DEFAULT_EVENT_FORMAT),
         )
 
     def are_headphones_plugged_in(self):
@@ -378,15 +405,15 @@ class EnvVarDevice(DeviceCommon):
         except:
             return False
 
-    @throttle.limit_refresh(5)
+    @throttle.limit_refresh(5, background=True)
     def is_hdmi_connected(self):
-        cmd = os.environ.get("HDMI_STATUS_CMD")
+        cmd = self._cmd("HDMI_STATUS_CMD")
         if not cmd:
             return False
 
         try:
             result = subprocess.run(
-                [cmd],
+                cmd,
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
@@ -394,45 +421,40 @@ class EnvVarDevice(DeviceCommon):
                 check=False,
             )
             return result.returncode == 0
-        except:
+        except Exception as e:
+            self._log_status_error("the HDMI status", e)
             return False
-            
-    def map_key(self, key_code):
-        key_mappings = {
-            int(os.environ["VOLUME_DOWN_KEYCODE"]): ControllerInput.VOLUME_DOWN,
-            int(os.environ["VOLUME_UP_KEYCODE"]): ControllerInput.VOLUME_UP,
-            int(os.environ["POWER_BUTTON_KEYCODE"]): ControllerInput.POWER_BUTTON,
-        }
 
-        if key_code in key_mappings:
-            return key_mappings[key_code]
+    def map_key(self, key_code):
+        if key_code in self.watched_key_codes:
+            return self.watched_key_codes[key_code]
 
         PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
         return None
 
+    # Without all three variables the framebuffer calls do nothing.
+    def _framebuffer(self):
+        names = ("FRAMEBUFFER_DEVICE", "FRAMEBUFFER_BACKUP_PATH", "FRAMEBUFFER_BLOCK_SIZE")
+        values = [os.environ.get(name) for name in names]
+        return values if all(values) else None
+
     def capture_framebuffer(self):
-        ProcessRunner.run([
-            "dd",
-            f"if={os.environ['FRAMEBUFFER_DEVICE']}",
-            f"of={os.environ['FRAMEBUFFER_BACKUP_PATH']}",
-            f"bs={os.environ['FRAMEBUFFER_BLOCK_SIZE']}",
-        ])
+        framebuffer = self._framebuffer()
+        if framebuffer:
+            device, backup_path, block_size = framebuffer
+            ProcessRunner.run(["dd", f"if={device}", f"of={backup_path}", f"bs={block_size}"])
 
     def restore_framebuffer(self):
-        ProcessRunner.run([
-            "dd",
-            f"if={os.environ['FRAMEBUFFER_BACKUP_PATH']}",
-            f"of={os.environ['FRAMEBUFFER_DEVICE']}",
-            f"bs={os.environ['FRAMEBUFFER_BLOCK_SIZE']}",
-        ])
+        framebuffer = self._framebuffer()
+        if framebuffer:
+            device, backup_path, block_size = framebuffer
+            ProcessRunner.run(["dd", f"if={backup_path}", f"of={device}", f"bs={block_size}"])
 
     def clear_framebuffer(self):
-        ProcessRunner.run([
-            "dd",
-            "if=/dev/zero",
-            f"of={os.environ['FRAMEBUFFER_DEVICE']}",
-            f"bs={os.environ['FRAMEBUFFER_BLOCK_SIZE']}",
-        ])
+        framebuffer = self._framebuffer()
+        if framebuffer:
+            device, _, block_size = framebuffer
+            ProcessRunner.run(["dd", "if=/dev/zero", f"of={device}", f"bs={block_size}"])
 
     def get_image_utils(self):
         return FfmpegImageUtils()
@@ -453,7 +475,16 @@ class EnvVarDevice(DeviceCommon):
     def uses_deinit_v2(self):
         return True
 
-                   
+    def might_require_surface_format_conversion(self):
+        return os.environ.get("REQUIRES_SURFACE_FORMAT_CONVERSION", "false").lower() == "true"
+
+    # Frees the image cache once available memory drops below this many MB.
+    @throttle.limit_refresh(1)
+    def post_present_operations(self):
+        threshold_mb = os.environ.get("CLEAR_DISPLAY_CACHE_BELOW_MB")
+        if threshold_mb:
+            self.clear_display_cache_if_memory_full("MemAvailable", int(threshold_mb))
+
     def screen_width(self):
         return int(os.environ["SCREEN_WIDTH"])
     
@@ -461,4 +492,4 @@ class EnvVarDevice(DeviceCommon):
         return int(os.environ["SCREEN_HEIGHT"])
         
     def screen_rotation(self):
-        return int(os.environ["SCREEN_ROTATION"])
+        return int(os.environ.get("SCREEN_ROTATION", 0))
