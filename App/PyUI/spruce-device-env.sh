@@ -4,7 +4,6 @@
 # EnvVarDevice reads that the cfg has not set itself is filled in from spruce's own exports:
 #   SCREEN_WIDTH/HEIGHT/ROTATION      DISPLAY_WIDTH/HEIGHT/ROTATION
 #   SYSTEM_CFG_PATH                   SYSTEM_JSON (DEFAULT_CFG_PATH, the seed, is the cfg's)
-#   PRIMARY_PYUI_DEVICE_NAME          device_names, first line
 #   PYUI_DEVICE_NAMES                 device_names, all lines
 #   CONTROLLER_EVENT_PATH             EVENT_PATH_READ_INPUTS_SPRUCE
 #   CONTROLLER_KEY_MAPPINGS           the B_* button codes
@@ -18,7 +17,10 @@
 #   BACKLIGHT_CMD                     set-backlight.sh, if the device defines apply_backlight
 #   CONTRAST/SATURATION/BRIGHTNESS/HUE_CMD  set-display.sh, if it defines apply_display_<setting>
 #   FW_VERSION                        device_get_fw_version, if defined
+#   HAS_FFMPEG                        ffmpeg on PATH, which PyUI's image resizing runs
 #   ROMS/FAVORITES/RECENTS/APPS_CONFIG/COLLECTIONS/STATE_PATH  spruce's fixed paths
+# PyUI has no default for these, so the cfg sets them: POWER_OFF_CMD, REBOOT_CMD (unset: no
+# reboot), CONTROLLER_EVENT_FORMAT, and STICK_DEADZONE when it has sticks (else PyUI ignores them).
 
 # Exports $1 with the value $2 unless the cfg already set it; an empty value stays unset.
 spruce_env_default() {
@@ -67,7 +69,6 @@ spruce_env_default SCREEN_HEIGHT "$DISPLAY_HEIGHT"
 spruce_env_default SCREEN_ROTATION "$DISPLAY_ROTATION"
 spruce_env_default SYSTEM_CFG_PATH "$SYSTEM_JSON"
 spruce_env_default AUDIO_PLAYER "SDL2"
-spruce_env_default PRIMARY_PYUI_DEVICE_NAME "$(device_names | head -n 1)"
 spruce_env_default PYUI_DEVICE_NAMES "$(device_names | tr '\n' ',' | sed 's/,$//')"
 
 spruce_env_default CONTROLLER_EVENT_PATH "$EVENT_PATH_READ_INPUTS_SPRUCE"
@@ -106,7 +107,7 @@ done
 command -v device_get_fw_version >/dev/null 2>&1 &&
     spruce_env_default FW_VERSION "$(device_get_fw_version)"
 
-spruce_env_default SUPPORTS_IMAGE_RESIZING "true"
+command -v ffmpeg >/dev/null 2>&1 && spruce_env_default HAS_FFMPEG "true"
 spruce_env_default CLEAR_DISPLAY_CACHE_BELOW_MB "100"
 spruce_env_default ROMS_PATH "/mnt/SDCARD/Roms/"
 spruce_env_default FAVORITES_PATH "/mnt/SDCARD/Saves/pyui-favorites.json"
