@@ -115,6 +115,7 @@ if [ -n "$PLATFORM_FAMILY" ]; then
 else
     . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
 fi
+. "/mnt/SDCARD/spruce/scripts/usb_audio_helpers.sh"
 . "/mnt/SDCARD/spruce/scripts/device_functions.sh"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
