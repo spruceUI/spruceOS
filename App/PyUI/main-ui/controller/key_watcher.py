@@ -69,8 +69,6 @@ class KeyWatcher:
         return (None, None)
         
     def poll_keyboard(self):
-        if self.fd is None:
-            return
         last_recorded_time = 0
         while(True):
             code, is_key_down = self.read_keyboard_input()
