@@ -151,6 +151,7 @@ _SPRUCE_OAKMOSS_PLATFORMS = {
     "xu20": "XU20",
     "v90s": "V90S",
     "v20": "V20",
+    "brick": "BrickOakMOSS",
 }
 _SPRUCE_OAKMOSS_DEFAULT = "Zero28"
 

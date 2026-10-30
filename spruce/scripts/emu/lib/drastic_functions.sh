@@ -199,6 +199,8 @@ run_drastic_XU20()   { run_drastic_magicx_a133p ; }
 # The Powkiddy V90S and V20 run the same oakMOSS base and the same builds.
 run_drastic_V90S()   { run_drastic_magicx_a133p ; }
 run_drastic_V20()    { run_drastic_magicx_a133p ; }
+# The TrimUI Brick on oakMOSS runs the stock Brick's builds.
+run_drastic_BrickOakMOSS() { run_drastic_Brick ; }
 
 
 ##### PIXEL 2 #####
