@@ -11,11 +11,7 @@ WATCHED_FILE="/config/joypad.config"
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 sleep 0.3 ### wait long enough to create the virtual joypad
-
-if [ ! -f "$WATCHED_FILE" ]; then
-    log_message "File $WATCHED_FILE does not exist. Exiting."
-    touch "$WATCHED_FILE"
-fi
+touch "$WATCHED_FILE"
 
 while true; do
 

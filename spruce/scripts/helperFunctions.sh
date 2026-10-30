@@ -46,14 +46,15 @@ if [ -e /usr/magicx ]; then
         xu20)   export PLATFORM="XU20" ;;
         *)      export PLATFORM="Zero28" ;;
     esac
+    export PLATFORM_FAMILY="oakmoss"
 else
     INFO=$(cat /proc/cpuinfo 2> /dev/null)
     case $INFO in
-        *sun8i*) export PLATFORM="A30";         PLATFORM_FAMILY=tina-stock ;;   # A33
-        *TG5040*) export PLATFORM="SmartPro";   PLATFORM_FAMILY=tina-stock ;;
-        *TG3040*) export PLATFORM="Brick";      PLATFORM_FAMILY=tina-stock ;;
-        *TG5050*) export PLATFORM="SmartProS";  PLATFORM_FAMILY=tina-stock ;;
-        *TG4040*) export PLATFORM="BrickPro";   PLATFORM_FAMILY=tina-stock ;;
+        *sun8i*) export PLATFORM="A30";         PLATFORM_FAMILY="tina-stock" ;;   # A33
+        *TG5040*) export PLATFORM="SmartPro";   PLATFORM_FAMILY="tina-stock" ;;
+        *TG3040*) export PLATFORM="Brick";      PLATFORM_FAMILY="tina-stock" ;;
+        *TG5050*) export PLATFORM="SmartProS";  PLATFORM_FAMILY="tina-stock" ;;
+        *TG4040*) export PLATFORM="BrickPro";   PLATFORM_FAMILY="tina-stock" ;;
         *0xd05*)                                                                # RK3566
             if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
                 # dArkMoss stamps the spruce platform name into os-release
@@ -71,9 +72,9 @@ else
                     PLATFORM="RGB20SX"
                 fi
                 export PLATFORM
-                PLATFORM_FAMILY=darkmoss
+                PLATFORM_FAMILY="darkmoss"
             else
-                export PLATFORM="Flip";         PLATFORM_FAMILY=tina-stock
+                export PLATFORM="Flip";         PLATFORM_FAMILY="tina-stock"
             fi
             ;;
         *0xd04*)                                                                # RK3326
@@ -83,14 +84,14 @@ else
                 if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
                     export PLATFORM="A10MiniV4"
                 fi
-                PLATFORM_FAMILY=darkmoss
+                PLATFORM_FAMILY="darkmoss"
             else
                 export PLATFORM="Pixel2"
             fi
             ;;
         *0xd03*)                                                                # H700
             export SPRUCE_BASEOS=1
-            PLATFORM_FAMILY=h700
+            PLATFORM_FAMILY="h700"
             BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
             case $BASEOS_TARGET in
                 rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
@@ -102,18 +103,18 @@ else
                 *)                      export PLATFORM="AnbernicXX640480" ;;
             esac
             ;;
-        *SStar*) export PLATFORM="MiyooMini";   PLATFORM_FAMILY=miyoomini ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-        *) export PLATFORM="MiyooMini";         PLATFORM_FAMILY=miyoomini ;;
+        *SStar*) export PLATFORM="MiyooMini";   PLATFORM_FAMILY="miyoomini" ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini";         PLATFORM_FAMILY="miyoomini" ;;
     esac
 fi
 export PLATFORM_FAMILY
 
 if [ -n "$PLATFORM_FAMILY" ]; then
-    . /mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg
+    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
 else
-    . /mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg
+    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
 fi
-. /mnt/SDCARD/spruce/scripts/device_functions.sh
+. "/mnt/SDCARD/spruce/scripts/device_functions.sh"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
