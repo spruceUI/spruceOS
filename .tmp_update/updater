@@ -34,7 +34,7 @@ case "$PLATFORM" in
 esac
 
 if [ "$PLATFORM" = "MiyooMini" ]; then
-    /mnt/SDCARD/spruce/scripts/platform/miyoo_mini_startup.sh
+    /mnt/SDCARD/spruce/scripts/platform/miyoomini/miyoo_mini_startup.sh
 elif [ "$use_session" = "1" ] && [ -f "$SESSION" ]; then
     SPRUCE_BOOT_PLATFORM="$PLATFORM" exec sh "$SESSION"
 else
