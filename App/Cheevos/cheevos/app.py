@@ -1,11 +1,12 @@
 """Composition root: wire credentials, caches, sync, lazy media and screens, then run home.
 
-Shared by the device entry point (``cheevos.__main__``) and the desktop runner, which differ
-only in the :class:`AppEnvironment` they pass (real HTTPS vs. recorded fixtures).
+Run by :func:`cheevos.native.session`, inside PyUI on a device and in the desktop runner,
+which differ only in the :class:`AppEnvironment` they pass (real HTTPS vs. recorded fixtures).
 """
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import shutil
 import threading
@@ -380,6 +381,8 @@ def run(*, started_at: float, env: AppEnvironment, game_id: int | None = None) -
         # Extracted and enlarged images live in RAM (tmpfs) on devices; give it back.
         shutil.rmtree(paths.media_scratch, ignore_errors=True)
         shutil.rmtree(paths.scaled_scratch, ignore_errors=True)
+        with contextlib.suppress(OSError):  # kept if anything else is in it
+            paths.scratch.rmdir()
 
 
 def _session_bar(ctx: AppContext, icons: Path, game_id: int | None) -> SyncBar:
