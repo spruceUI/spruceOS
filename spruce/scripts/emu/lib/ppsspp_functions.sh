@@ -211,11 +211,11 @@ configure_language() {
 }
 
 load_ppsspp_configs() {
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls-$PLATFORM.ini" "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini"
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-$PLATFORM.ini" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
+	cp -f "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/controls-%s.ini")" "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini"
+	cp -f "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-%s.ini")" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini" "$PPSSPP_LIVE_SYSTEM_DIR/controls-$PLATFORM.ini"
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-$PLATFORM.ini"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini" "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/controls-%s.ini")"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-%s.ini")"
 }

@@ -6,8 +6,8 @@
 # seeded once from the shipped Emu/ARCADE/advmame-<PLATFORM>.rc by
 # advmame_functions.sh; this puts the shipped file back. Platforms without a
 # shipped .rc (AdvanceMAME is not offered there) log and do nothing.
-LIVE_RC="/mnt/SDCARD/Saves/saves/advmame/$PLATFORM/.advance/advmame.rc"
-SHIPPED_RC="/mnt/SDCARD/Emu/ARCADE/advmame-$PLATFORM.rc"
+LIVE_RC="$(platform_path "/mnt/SDCARD/Saves/saves/advmame/%s")/.advance/advmame.rc"
+SHIPPED_RC="$(platform_path "/mnt/SDCARD/Emu/ARCADE/advmame-%s.rc")"
 
 log_message "Resetting AdvanceMAME config to default."
 mkdir -p "${LIVE_RC%/*}"

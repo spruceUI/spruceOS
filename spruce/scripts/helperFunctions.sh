@@ -117,6 +117,24 @@ fi
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 
+# This platform's name, then its parent's when its cfg makes it a variant (PLATFORM_PARENT).
+# See spruce/scripts/platform/README.md.
+platform_names() {
+    echo "$PLATFORM"
+    if [ -n "${PLATFORM_PARENT:-}" ]; then echo "$PLATFORM_PARENT"; fi
+}
+
+# platform_path TEMPLATE: TEMPLATE with %s as this platform's name when that file exists, else as
+# the parent's when that one does, else as this platform's (so a caller that creates it names its own).
+platform_path() {
+    case "$1" in *%s*) ;; *) echo "$1"; return 0 ;; esac
+    _pp_head=${1%%"%s"*}; _pp_tail=${1#*"%s"}
+    for _pp_name in $(platform_names); do
+        if [ -e "$_pp_head$_pp_name$_pp_tail" ]; then echo "$_pp_head$_pp_name$_pp_tail"; return 0; fi
+    done
+    echo "$_pp_head$PLATFORM$_pp_tail"
+}
+
 # Every name this device answers to in an Emu config.json "devices" list, most
 # specific first. Mirrors PyUI's Device.get_device_names().
 #
@@ -169,8 +187,8 @@ device_names() {
 # The live RetroArch config, seeded from the .bak when absent. The configs moved
 # out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
 ensure_ra_config_path() {
-    _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
-    _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+    _rac_live="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
+    _rac_bak="$(platform_path "/mnt/SDCARD/RetroArch/platform/retroarch-%s.cfg.bak")"
     if [ ! -f "$_rac_live" ] && [ -f "$_rac_bak" ]; then
         mkdir -p /mnt/SDCARD/Saves/ra-configs
         cp "$_rac_bak" "$_rac_live"

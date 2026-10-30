@@ -72,7 +72,7 @@ set_dram_governor() {
 # This pad's udev numbering (RetroArch autoconfig "GO-Advance Gamepad (rev 1.1)"):
 # select 12, R2 15. No stick clicks, so fast forward goes on R2.
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+    RA_FILE="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

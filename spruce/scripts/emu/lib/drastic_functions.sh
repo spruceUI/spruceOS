@@ -224,16 +224,17 @@ run_drastic_trngaje_Pixel2() {
 load_drastic_configs() {
 	CFG_DIR="$EMU_DIR/config"
 	RES_DIR="$EMU_DIR/resources"
-	cp -f "$CFG_DIR/drastic-$PLATFORM.cfg" "$CFG_DIR/drastic.cfg"
-	[ -f "$RES_DIR/settings_${PLATFORM}.json" ] && cp "$RES_DIR/settings_${PLATFORM}.json" "$RES_DIR/settings.json"
+	cp -f "$(platform_path "$CFG_DIR/drastic-%s.cfg")" "$CFG_DIR/drastic.cfg"
+	_steward="$(platform_path "$RES_DIR/settings_%s.json")"
+	[ -f "$_steward" ] && cp "$_steward" "$RES_DIR/settings.json"
 	sync
 }
 
 save_drastic_configs() {
 	CFG_DIR="$EMU_DIR/config"
 	RES_DIR="$EMU_DIR/resources"
-	cp -f "$CFG_DIR/drastic.cfg" "$CFG_DIR/drastic-$PLATFORM.cfg"
-	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$RES_DIR/settings_${PLATFORM}.json"
+	cp -f "$CFG_DIR/drastic.cfg" "$(platform_path "$CFG_DIR/drastic-%s.cfg")"
+	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$(platform_path "$RES_DIR/settings_%s.json")"
 	sync
 }
 
