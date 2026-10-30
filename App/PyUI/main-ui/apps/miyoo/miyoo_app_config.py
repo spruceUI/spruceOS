@@ -24,6 +24,7 @@ class MiyooAppConfig(AppConfig):
         self.hide = data.get("hide", False)
         self.devices = data.get("devices", [])
         self.hide_in_simple_mode = data.get("hideInSimpleMode", False)
+        self.pyui_entry = data.get("pyuiEntry")
 
     def get_label(self):
         return self.label
@@ -51,3 +52,6 @@ class MiyooAppConfig(AppConfig):
 
     def get_hide_in_simple_mode(self):
         return self.hide_in_simple_mode
+
+    def get_pyui_entry(self):
+        return self.pyui_entry
