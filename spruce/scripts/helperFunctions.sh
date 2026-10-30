@@ -905,6 +905,12 @@ start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
 
+    # PyUI runs this script and listens itself (App/PyUI/main-ui/apps/script_app.py).
+    if [ -n "$PYUI_HOSTS_MESSAGES" ]; then
+        log_message "PyUI shows this script's messages; no message writer needed."
+        return 0
+    fi
+
     ifconfig lo up
     ifconfig lo 127.0.0.1
 

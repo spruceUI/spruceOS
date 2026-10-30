@@ -1,6 +1,6 @@
 
 
-from apps import native_app
+from apps import native_app, script_app
 from apps.pyui_app import PyUiAppConfig
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
@@ -35,6 +35,8 @@ class AppMenu:
         folder = app.get_folder()
         if app.get_pyui_entry():
             native_app.run(folder, app.get_pyui_entry())
+            return
+        if app.get_launch_in_pyui() and script_app.run(folder, launch):
             return
         Display.deinit_display()
         Device.get_device().run_app(folder,launch)

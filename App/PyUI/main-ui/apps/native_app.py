@@ -10,6 +10,8 @@ PyUI's objects. PyUI then drops every module it imported from the app's folder, 
 the app stays alive. Python's allocators keep part of the freed memory for reuse (6-7 MB
 after Cheevos on a Miyoo Mini Plus): the next session reuses it, so PyUI doesn't grow from one
 session to the next, and PyUI's restart before every game gives it back.
+
+For app developers: App/PyUI/docs/apps_in_pyui_readme.txt.
 """
 
 import ctypes

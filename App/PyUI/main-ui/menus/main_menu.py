@@ -216,7 +216,8 @@ class MainMenu:
             RecentsMenuGS().run_rom_selection()
             Controller.gs_triggered = False
 
-    def check_for_boxart_resizing(self):
+    @staticmethod
+    def check_for_boxart_resizing():
         py_ui_dir = Path(__file__).resolve().parent.parent.parent
         boxart_resize_trigger_file = py_ui_dir / "pyui_resize_boxart_trigger"
         if (boxart_resize_trigger_file).exists():
