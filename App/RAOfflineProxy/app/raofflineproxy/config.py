@@ -149,6 +149,8 @@ _SPRUCE_H700_DEFAULT = "AnbernicXX640480"
 _SPRUCE_OAKMOSS_PLATFORMS = {
     "zero40": "Zero40",
     "xu20": "XU20",
+    "v90s": "V90S",
+    "v20": "V20",
 }
 _SPRUCE_OAKMOSS_DEFAULT = "Zero28"
 

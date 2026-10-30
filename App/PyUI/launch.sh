@@ -349,10 +349,10 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32)
+# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20)
 ############################################################
 
-    "Zero28" | "Zero40" | "XU20" )
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"

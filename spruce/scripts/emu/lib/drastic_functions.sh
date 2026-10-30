@@ -180,7 +180,7 @@ run_drastic_AnbernicH700() { run_drastic64 ; }
 run_drastic_DarkMoss() { run_drastic64 ; }
 
 
-##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32) #####
+##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20) #####
 
 # Same SoC as the Smart Pro, so the same two DraStic builds apply. Without these
 # `run_drastic_$PLATFORM` expanded to an undefined function and nothing launched.

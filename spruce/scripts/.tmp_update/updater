@@ -1,11 +1,13 @@
 #!/bin/sh
 
-# The MagicX A133P boards are decided by their base image's marker, not by
+# The oakMOSS boards (MagicX, Powkiddy) are decided by their base image's marker, not by
 # cpuinfo (same Cortex-A53 part id as the H700; see helperFunctions.sh).
 if [ -e /usr/magicx ]; then
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
+        v90s)   export PLATFORM="V90S" ;;
+        v20)    export PLATFORM="V20" ;;
         *)      export PLATFORM="Zero28" ;;
     esac
 else
