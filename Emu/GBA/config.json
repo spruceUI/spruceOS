@@ -20,11 +20,11 @@
     "Emulator": {
       "display": "Retroarch Core",
       "options": [
-        "mgba",
+        "armgba",
         "gpsp",
-        "armgba"
+        "mgba"
       ],
-      "selected": "gpsp",
+      "selected": "armgba",
       "overrides": {}
     }
   },
@@ -32,7 +32,7 @@
   "brand": "Nintendo",
   "type": "handheld",
   "releaseYear": 2001,
-  "default_emulator": "gpsp",
+  "default_emulator": "armgba",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": ["GAMEBOYADVANCE","gameboyadvance","gba","agb","AGB"]
 }
