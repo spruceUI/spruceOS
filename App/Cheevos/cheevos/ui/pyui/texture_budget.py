@@ -9,7 +9,8 @@ ran it dry every half minute, and a screenshot that needed one big block failed 
 :func:`install` swaps each cache's dictionary for a :class:`TextureLru`, which destroys the
 least recently drawn textures beyond a budget measured in screens' worth of pixels (a bigger
 screen gets a bigger budget). PyUI's own code is unchanged: it reads and writes ``cache`` as
-before.
+before. A session installs it when it starts and :func:`uninstall` frees it when it ends, so
+PyUI's process keeps none of the app's textures.
 """
 
 from __future__ import annotations
@@ -101,6 +102,12 @@ class TextureLru:
         self._entries.clear()
         self.used = 0
 
+    def release(self) -> None:
+        """Destroy every texture and forget it."""
+        for entry in self._entries.values():
+            self._destroy(entry.texture)
+        self.clear()
+
     def __len__(self) -> int:
         """Return the number of cached textures.
 
@@ -142,3 +149,21 @@ def install(display: Any, screen_width: int, screen_height: int) -> None:  # noq
             lru[key] = entry
         cache.cache = lru  # ty: ignore[invalid-assignment] — PyUI's cache object is untyped
         logger.debug("%s: %d KB budget", name, lru.budget // 1024)
+
+
+def uninstall(display: Any) -> None:  # noqa: ANN401 — PyUI's Display
+    """Free every budgeted texture and give PyUI back plain, empty caches.
+
+    The textures are the app's, so none are handed back: PyUI draws its own again when it
+    needs them.
+
+    Args:
+        display: PyUI's ``Display`` class.
+    """
+    for name, _ in _CACHES:
+        cache = getattr(display, name, None)
+        entries = getattr(cache, "cache", None)
+        if not isinstance(entries, TextureLru):
+            continue
+        entries.release()
+        cache.cache = {}  # ty: ignore[invalid-assignment] — PyUI's cache object is untyped

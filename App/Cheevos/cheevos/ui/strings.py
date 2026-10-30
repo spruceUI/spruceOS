@@ -292,6 +292,7 @@ HINT_CAPS = "Caps"
 EXIT = "Exit"
 
 # --- generic ----------------------------------------------------------------------------------
+APP_FAILED = "Cheevos stopped after an error. Details: {log}"
 LOADING = "Loading…"
 HINT_OK = "OK"
 JUST_NOW = "just now"

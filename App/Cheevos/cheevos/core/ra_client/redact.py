@@ -17,7 +17,7 @@ MASK = "***"
 _QUERY_KEY = re.compile(r"(?<![A-Za-z0-9_])y=[^&\s'\"]+")
 _secrets: set[str] = set()
 _lock = threading.Lock()
-_installed = False
+_installed: tuple[Callable[..., logging.LogRecord], Callable[..., logging.LogRecord]] | None = None
 
 
 def redact(text: str) -> str:
@@ -89,7 +89,7 @@ def install_redaction(api_key: str) -> None:
     with _lock:
         if api_key:
             _secrets.add(api_key)
-        if _installed:
+        if _installed is not None:
             return
         previous: Callable[..., logging.LogRecord] = logging.getLogRecordFactory()
 
@@ -100,4 +100,22 @@ def install_redaction(api_key: str) -> None:
             return record
 
         logging.setLogRecordFactory(factory)
-        _installed = True
+        _installed = (factory, previous)
+
+
+def uninstall_redaction() -> None:
+    """Put the record factory back and forget the secrets, when the app leaves PyUI's process.
+
+    The factory is process-wide: inside PyUI it would otherwise keep running this module for
+    every PyUI record after the app has gone (.agents/pyui.md, "In-process sessions"). A factory
+    wrapped again by someone else since is left in place.
+    """
+    global _installed  # noqa: PLW0603 — process-wide logging hook
+    with _lock:
+        _secrets.clear()
+        if _installed is None:
+            return
+        factory, previous = _installed
+        if logging.getLogRecordFactory() is factory:
+            logging.setLogRecordFactory(previous)
+        _installed = None
