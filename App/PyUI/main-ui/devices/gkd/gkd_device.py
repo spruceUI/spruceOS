@@ -157,7 +157,6 @@ class GKDDevice(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import psutil
         if self.is_wifi_enabled():

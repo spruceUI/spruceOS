@@ -98,6 +98,10 @@ is_charging(){
 leds_battery() {
   LOW_PERCENT="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
 
+  if [ $LOW_PERCENT = "Off" ] ; then
+    LOW_PERCENT=10
+  fi
+
   while true; do
     CAPACITY=$(device_get_battery_percent)
 
