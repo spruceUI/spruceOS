@@ -244,6 +244,24 @@ EOF
 }
 
 
+# PyUI's display commands (App/PyUI/set-display.sh) on the A133P's display engine, for the
+# env-driven device: the same scaling as TrimUIDevice. PyUI saves the levels.
+apply_display_contrast() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_contrast
+}
+
+apply_display_saturation() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_saturation
+}
+
+apply_display_brightness() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_bright
+}
+
+apply_display_hue() {
+    echo $(($1 * 5 - 50)) > /sys/devices/virtual/disp/disp/attr/color_temperature
+}
+
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
