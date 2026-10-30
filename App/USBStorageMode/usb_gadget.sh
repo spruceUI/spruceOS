@@ -27,7 +27,7 @@ usb_gadget_platform_setup() {
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
             ;;
-        "Zero28" | "Zero40" | "XU20")
+        "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS")
             # oakMOSS: the card at /mnt/SDCARD, SD2 or SD1's SPRUCEOS partition (the cfg's SD_DEV)
             STORAGE_DEVICE="$SD_DEV"
             MOUNT_POINT="/mnt/SDCARD"
@@ -126,7 +126,7 @@ usb_gadget_release() {
             echo "" > "$LUN_FILE" 2>/dev/null
             [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 0 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
             ;;
-        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20")
+        "Brick" | "BrickOakMOSS" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20" | "V90S" | "V20")
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             rm -f $USB_GADGET_PATH/configs/c.1/mass_storage.usb0
             [ -d "$USB_GADGET_PATH/configs/c.1" ] && rmdir "$USB_GADGET_PATH/configs/c.1" 2>/dev/null
@@ -202,7 +202,7 @@ usb_export_gadget() {
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             echo "musb-hdrc" > $USB_GADGET_PATH/UDC
             ;;
-        "Zero28" | "Zero40" | "XU20")
+        "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS")
             # Same A133P silicon and configfs gadget as the TrimUI arm above, but our base
             # image does not mount configfs the way their vendor init does, so mount it here.
             [ -d /sys/kernel/config/usb_gadget ] || mount -t configfs none /sys/kernel/config 2>/dev/null

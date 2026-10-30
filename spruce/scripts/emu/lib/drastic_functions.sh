@@ -196,6 +196,11 @@ run_drastic_magicx_a133p() {
 run_drastic_Zero28() { run_drastic_magicx_a133p ; }
 run_drastic_Zero40() { run_drastic_magicx_a133p ; }
 run_drastic_XU20()   { run_drastic_magicx_a133p ; }
+# The Powkiddy V90S and V20 run the same oakMOSS base and the same builds.
+run_drastic_V90S()   { run_drastic_magicx_a133p ; }
+run_drastic_V20()    { run_drastic_magicx_a133p ; }
+# The TrimUI Brick on oakMOSS runs the stock Brick's builds.
+run_drastic_BrickOakMOSS() { run_drastic_Brick ; }
 
 
 ##### PIXEL 2 #####
@@ -239,16 +244,17 @@ run_drastic_RG353M()    { run_drastic64 ; }
 load_drastic_configs() {
 	CFG_DIR="/mnt/SDCARD/Emu/NDS/config"
 	RES_DIR="/mnt/SDCARD/Emu/NDS/resources"
-	cp -f "$CFG_DIR/drastic-$PLATFORM.cfg" "$CFG_DIR/drastic.cfg"
-	[ -f "$RES_DIR/settings_${PLATFORM}.json" ] && cp "$RES_DIR/settings_${PLATFORM}.json" "$RES_DIR/settings.json"
+	cp -f "$(platform_path "$CFG_DIR/drastic-%s.cfg")" "$CFG_DIR/drastic.cfg"
+	_steward="$(platform_path "$RES_DIR/settings_%s.json")"
+	[ -f "$_steward" ] && cp "$_steward" "$RES_DIR/settings.json"
 	sync
 }
 
 save_drastic_configs() {
 	CFG_DIR="/mnt/SDCARD/Emu/NDS/config"
 	RES_DIR="/mnt/SDCARD/Emu/NDS/resources"
-	cp -f "$CFG_DIR/drastic.cfg" "$CFG_DIR/drastic-$PLATFORM.cfg"
-	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$RES_DIR/settings_${PLATFORM}.json"
+	cp -f "$CFG_DIR/drastic.cfg" "$(platform_path "$CFG_DIR/drastic-%s.cfg")"
+	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$(platform_path "$RES_DIR/settings_%s.json")"
 	sync
 }
 

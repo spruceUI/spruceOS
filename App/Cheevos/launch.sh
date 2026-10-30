@@ -99,16 +99,12 @@ case "$PLATFORM" in
         PYTHON="/usr/bin/MainUI"
         CHEEVOS_PYUI_DEVICE="GKD_PIXEL2"
         ;;
-    "Zero28" | "Zero40" | "XU20")
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS")
         RUN_DIR="/usr/magicx/bin"
         PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        case "$PLATFORM" in
-            "Zero40") CHEEVOS_PYUI_DEVICE="MAGICX_ZERO40" ;;
-            "XU20") CHEEVOS_PYUI_DEVICE="MAGICX_XU20" ;;
-            *) CHEEVOS_PYUI_DEVICE="MAGICX_ZERO28" ;;
-        esac
+        # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the SPRUCE device, below.
         ;;
     *)
         log_message "Cheevos: platform $PLATFORM is not supported yet"
@@ -116,6 +112,12 @@ case "$PLATFORM" in
         exit 1
         ;;
 esac
+
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device, as in PyUI's launch.sh.
+if [ "$PYUI_ENV_DEVICE" = "true" ]; then
+    . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
+    CHEEVOS_PYUI_DEVICE="SPRUCE"
+fi
 
 [ -n "$PYTHON" ] || PYTHON="$(get_python_path)"
 export CHEEVOS_PYUI_DEVICE

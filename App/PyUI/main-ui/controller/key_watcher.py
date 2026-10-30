@@ -69,6 +69,10 @@ class KeyWatcher:
         return (None, None)
         
     def poll_keyboard(self):
+        # A node that would not open ends the thread here, once: read_keyboard_input
+        # would catch select()'s TypeError on every pass and the loop would spin.
+        if self.fd is None:
+            return
         last_recorded_time = 0
         while(True):
             code, is_key_down = self.read_keyboard_input()

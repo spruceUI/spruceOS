@@ -208,7 +208,7 @@ load_pico8_control_profile() {
 		"MiyooMini")
 			export LD_LIBRARY_PATH="$HOME"/lib-MiyooMini:$LD_LIBRARY_PATH
 			;;
-		"Brick"* | "SmartPro" | "Zero"* | "XU20")
+		"Brick"* | "SmartPro" | "Zero"* | "XU20" | "V90S" | "V20")
 			export LD_LIBRARY_PATH="$HOME"/lib-a133p:$LD_LIBRARY_PATH
 			;;
 		"SmartProS")

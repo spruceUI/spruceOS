@@ -55,7 +55,7 @@ run_ppsspp() {
 
 	case "$PLATFORM" in
 		# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
-		"Brick"|"SmartPro"|"BrickPro"|"Zero28"|"Zero40"|"XU20")
+		"Brick"|"BrickOakMOSS"|"SmartPro"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"V90S"|"V20")
 			export SDL_VIDEODRIVER=mali
 			"$EMU_DIR/setalpha" 0
 			rm -f "$PSP_DIR/FailedGraphicsBackends.txt"
@@ -152,11 +152,11 @@ configure_retroachievements() {
 }
 
 load_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls-$PLATFORM.ini" "$PSP_DIR/controls.ini"
-	cp -f "$PSP_DIR/ppsspp-$PLATFORM.ini" "$PSP_DIR/ppsspp.ini"
+	cp -f "$(platform_path "$PSP_DIR/controls-%s.ini")" "$PSP_DIR/controls.ini"
+	cp -f "$(platform_path "$PSP_DIR/ppsspp-%s.ini")" "$PSP_DIR/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-$PLATFORM.ini"
-	cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-$PLATFORM.ini"
+	cp -f "$PSP_DIR/controls.ini" "$(platform_path "$PSP_DIR/controls-%s.ini")"
+	cp -f "$PSP_DIR/ppsspp.ini" "$(platform_path "$PSP_DIR/ppsspp-%s.ini")"
 }

@@ -349,20 +349,15 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32)
+# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20; TrimUI Brick)
 ############################################################
 
-    "Zero28" | "Zero40" | "XU20" )
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
-        if [ "$PLATFORM" = "Zero40" ]; then
-            DEVICE="MAGICX_ZERO40"
-        elif [ "$PLATFORM" = "XU20" ]; then
-            DEVICE="MAGICX_XU20"
-        else
-            DEVICE="MAGICX_ZERO28"
-        fi
+        # Every oakMOSS board runs PyUI as the env-driven SPRUCE device (its cfg sets PYUI_ENV_DEVICE=true).
+        DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -382,6 +377,12 @@ case "$PLATFORM" in
             # A crash in the SDL2 blob or the GPU stack prints nothing to pyui.log.
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
             log_message "PyUI on $PLATFORM exited with status $?"
+        fi
+
+        # The stick calibrator asks for a trimui_inputd restart; on oakMOSS its procd service owns the daemon.
+        if [ -f /tmp/trimui_inputd_restart ]; then
+            [ -x /etc/init.d/trimui-inputd ] && /etc/init.d/trimui-inputd restart
+            rm -f /tmp/trimui_inputd_restart
         fi
     ;;
 
