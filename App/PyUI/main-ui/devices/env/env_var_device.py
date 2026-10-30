@@ -105,6 +105,9 @@ class EnvVarDevice(DeviceCommon):
             return None
         from controller.controller import Controller
         watcher = KeyWatcher(path)
+        # The node would not open (KeyWatcher logs why), so no thread polls it.
+        if watcher.fd is None:
+            return None
         if add_to_controller:
             Controller.add_button_watcher(watcher.poll_keyboard)
         threading.Thread(target=watcher.poll_keyboard, daemon=True).start()
@@ -156,18 +159,15 @@ class EnvVarDevice(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    # An empty value means the device has none, which drops reboot from the power prompt.
     def power_off_cmd(self):
         return os.environ["POWER_OFF_CMD"]
-    
+
+    # Unset or empty means the device cannot reboot, which drops reboot from the power prompt.
     def reboot_cmd(self):
-        if "REBOOT_CMD" in os.environ:
-            return os.environ["REBOOT_CMD"]
-        else:
-            return None
-    
+        return os.environ.get("REBOOT_CMD") or None
+
     def get_fw_version(self):
-        return os.environ.get("OUTPUT_SCREEN_WIDTH"), "Unkown"
+        return os.environ.get("FW_VERSION") or super().get_fw_version()
         
     def _set_brightness_to_config(self):
         self._run_setting_cmd("BRIGHTNESS_CMD", self.system_config.brightness)
@@ -248,9 +248,6 @@ class EnvVarDevice(DeviceCommon):
 
     def get_state_path(self):
         return os.environ["STATE_PATH"]
-    
-    def supports_image_resizing(self):
-        return os.environ.get("SUPPORTS_IMAGE_RESIZING", "false").lower() == "true"
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
