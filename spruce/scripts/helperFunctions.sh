@@ -36,14 +36,16 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
 # Detect device and export to any script sourcing helperFunctions
 #
-# MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
-# the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
+# The oakMOSS boards (MagicX, Powkiddy V90S/V20) are decided by their /usr/magicx marker, not by
+# cpuinfo: the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
-    # /usr/magicx/device names the model (zero28 | zero40 | xu20); a base
+    # /usr/magicx/device names the model (zero28 | zero40 | xu20 | v90s | v20); a base
     # without the file (Moss-zero28, main-zero40) is treated as a Zero 28.
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
+        v90s)   export PLATFORM="V90S" ;;
+        v20)    export PLATFORM="V20" ;;
         *)      export PLATFORM="Zero28" ;;
     esac
     export PLATFORM_FAMILY="oakmoss"
@@ -169,6 +171,8 @@ device_names() {
         Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
+        V90S)             echo "POWKIDDY_V90S"; echo "MAGICX_A133P" ;;
+        V20)              echo "POWKIDDY_V20";  echo "MAGICX_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

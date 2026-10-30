@@ -99,7 +99,7 @@ case "$PLATFORM" in
         PYTHON="/usr/bin/MainUI"
         CHEEVOS_PYUI_DEVICE="GKD_PIXEL2"
         ;;
-    "Zero28" | "Zero40" | "XU20")
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20")
         RUN_DIR="/usr/magicx/bin"
         PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH

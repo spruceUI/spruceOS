@@ -196,6 +196,9 @@ run_drastic_magicx_a133p() {
 run_drastic_Zero28() { run_drastic_magicx_a133p ; }
 run_drastic_Zero40() { run_drastic_magicx_a133p ; }
 run_drastic_XU20()   { run_drastic_magicx_a133p ; }
+# The Powkiddy V90S and V20 run the same oakMOSS base and the same builds.
+run_drastic_V90S()   { run_drastic_magicx_a133p ; }
+run_drastic_V20()    { run_drastic_magicx_a133p ; }
 
 
 ##### PIXEL 2 #####
