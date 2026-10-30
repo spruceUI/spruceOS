@@ -4,7 +4,7 @@ PyUI and WiFi
 PyUI does not touch the radio. It saves the user's on/off choice in the device
 system JSON and calls one external command for everything else. The command is
 named by "wifiCmd" in py-ui-config.json; spruce sets it to
-/mnt/SDCARD/spruce/scripts/bin/spruce_wifi, which runs spruce/scripts/wifi.sh.
+/mnt/SDCARD/spruce/scripts/bin/spruce_wifi, which runs spruce/scripts/network/wifi.sh.
 With no wifiCmd configured PyUI reads the interface itself (ip, /proc/net/wireless)
 and cannot change, save or scan networks.
 
@@ -74,4 +74,4 @@ Where PyUI uses each
   RG28XX WiFi rows shown        status (radio)
 
 Commands spruce's own scripts use (not called by PyUI): restart, suspend,
-forget-all. See spruce/scripts/wifi.sh.
+forget-all. See spruce/scripts/network/wifi.sh.

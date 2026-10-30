@@ -1,0 +1,350 @@
+#!/bin/sh
+
+# Methods that seem common to TrimUI but probably aren't as more devices
+# From them get released. But we can more easily rename/call them from here
+# Without having to worry about the 'inheritance' change we are mimicing
+# via sh file order importing
+
+# ---------------------------------------------------------------------------
+# rgb_led <zones> <effect> [color] [duration_ms] [cycles] [A30/Flip led trigger]
+#
+# Controls RGB LEDs on TrimUI Brick / Smart Pro.
+#
+# PARAMETERS:
+#   <zones>        A string containing any combination of: l r m 1 2 b
+#                  (order does not matter)
+#                  Zones resolve to:
+#                     l  → left LED
+#                     r  → right LED
+#                     m  → middle LED
+#                     1  → front LED f1
+#                     2  → front LED f2
+#                     b  → rear LEDs (BrickPro)
+#                  Example: "lrm12b", "m1", "r2", "l"
+#
+#   <effect>       One of the following keywords or numeric equivalents:
+#                     0 | off | disable      → off
+#                     1 | linear | rise      → linear rise
+#                     2 | breath*            → breathing pattern
+#                     3 | sniff              → "sniff" animation
+#                     4 | static | on        → solid color
+#                     5 | blink*1            → blink pattern 1
+#                     6 | blink*2            → blink pattern 2
+#                     7 | blink*3            → blink pattern 3
+#
+#   [color]        Hex RGB color (default: "FFFFFF")
+#
+#   [duration_ms]  Animation duration in milliseconds (default: 1000)
+#
+#   [cycles]       Number of animation cycles (default: 1)
+#
+#   [led trigger]  none battery-charging-or-full battery-charging battery-full 
+#                  battery-charging-blink-full-solid usb-online ac-online 
+#                  timer heartbeat gpio default-on mmc1 mmc0
+#
+#
+# EXAMPLES:
+#   rgb_led lrm breathe FF8800 2000 3 heartbeat
+#   rgb_led m2 blink1 00FFAA
+#   rgb_led 12 static
+#   rgb_led r off
+# ---------------------------------------------------------------------------
+
+# Map the RGB LED Settings "defaultLEDcolor" name to a hex string.
+# Shared by the Smart Pro S Home "Toggle LED" action and scene-rgb-led.sh so the
+# colour table lives in one place. Pass an explicit name to override the config.
+led_color_hex() {
+    name="${1:-$(get_config_value '.menuOptions."RGB LED Settings".defaultLEDcolor.selected' "White")}"
+    case "$name" in
+        "Red")          hex=FF0000 ;;
+        "Pink")         hex=FF3333 ;;
+        "Fuchsia")      hex=FF0022 ;;
+        "Purple")       hex=FF00FF ;;
+        "Dark Purple")  hex=2200CC ;;
+        "Blue")         hex=0000FF ;;
+        "Cyan")         hex=00FFFF ;;
+        "Teal")         hex=00FF22 ;;
+        "Green")        hex=00FF00 ;;
+        "Yellow")       hex=FFFF00 ;;
+        "Orange")       hex=FF1100 ;;
+        *)              hex=FFFFFF ;;
+    esac
+    echo "$hex"
+}
+
+rgb_led_trimui() {
+
+    # early out if disabled
+	rgb_leds_enabled || return 0
+
+	# ...and if the switch or an Fn key has turned the LEDs off. That action
+	# writes black directly, which lasts only until something else writes a
+	# colour - and principal.sh calls set_rgb_in_menu on EVERY return to the
+	# menu, while led_effect re-colours them on every game launch. Both come
+	# through here, so without this the LEDs came back on the moment you left a
+	# game and stayed on until the switch was cycled.
+	#
+	# Deliberately not the enableLEDs setting itself: that is the user's own
+	# "off in all contexts" preference, and a physical switch should not
+	# silently rewrite it. /tmp, so it clears on reboot - which matches the
+	# action, since scene.sh only runs on an actual flip and nothing re-applies
+	# the switch position at boot.
+	flag_check "leds_forced_off" && return 0
+
+    LED_DIR=/sys/class/led_anim
+
+    # Get and set peak rgb brightness for each zone that exposes the setting.
+    # This comes straight from spruce-config.json, NOT from the function call.
+    max_scale="$(get_config_value '.menuOptions."RGB LED Settings".LEDmaxScale.selected' "15")"
+    _zone_config="$(led_zone_config)"
+    for _scale_zone in max_scale max_scale_lr max_scale_f1f2 max_scale_rear; do
+        if [ -e "$LED_DIR"/"$_scale_zone" ]; then
+            _scale="$max_scale"
+            _group_scale="$(echo "$_zone_config" | awk -v n="$_scale_zone" '$1 == n { print $2 }')"
+            case "$_group_scale" in
+                "" | "Default") ;;
+                *) _scale="$_group_scale" ;;
+            esac
+            chmod a+rw "$LED_DIR"/"$_scale_zone"
+            echo "$_scale" > "$LED_DIR"/"$_scale_zone"
+        fi
+    done
+
+    # parse led zones to affect from first argument
+    if [ -n "$1" ]; then
+        zones=""
+        for z in l r m 1 2 b; do
+            case "$1" in
+                *"$z"*) zones="$zones $z";;
+            esac
+        done
+    else
+        zones="l r m 1 2 b"
+    fi
+
+    # translate 1 → f1 and 2 → f2
+    new_zones=""
+    for z in $zones; do
+        case "$z" in
+            1) new_zones="$new_zones f1" ;;
+            2) new_zones="$new_zones f2" ;;
+            b) new_zones="$new_zones rear" ;;
+            *) new_zones="$new_zones $z" ;;
+        esac
+    done
+    zones="$new_zones"
+
+    # parse effect to use from second argument
+    case "$2" in
+        0|off|disable) effect=0 ;;
+        1|linear|rise) effect=1 ;;
+        2|breath*) effect=2 ;;
+        3|sniff) effect=3 ;;
+        4|static|on) effect=4 ;;
+        5|blink*1) effect=5 ;;
+        6|blink*2) effect=6 ;;
+        7|blink*3) effect=7 ;;
+        *) effect=4 ;;
+    esac
+
+    # get color, duration, and cycles literally from args 3,4,5, with fallbacks if missing
+    color=${3:-"FFFFFF"}
+    duration=${4:-1000}
+    cycles=${5:-1}
+
+    # do the things
+   	echo 1 > /sys/class/led_anim/effect_enable 2>/dev/null
+    for zone in $zones; do
+        [ -w "/sys/class/led_anim/effect_rgb_hex_$zone" ] && echo "$color" > "/sys/class/led_anim/effect_rgb_hex_$zone"
+        [ -w "/sys/class/led_anim/effect_cycles_$zone" ] && echo "$cycles" > "/sys/class/led_anim/effect_cycles_$zone"
+        [ -w "/sys/class/led_anim/effect_duration_$zone" ] && echo "$duration" > "/sys/class/led_anim/effect_duration_$zone"
+        [ -w "/sys/class/led_anim/effect_$zone" ] && echo "$effect" > "/sys/class/led_anim/effect_$zone"
+    done
+}
+
+enable_or_disable_rgb_trimui() {
+    enable_file="/sys/class/led_anim/enable"
+    if ! rgb_leds_enabled; then
+        chmod 777 "$enable_file" 2>/dev/null
+        echo 0 > "$enable_file" 2>/dev/null
+        chmod 000 "$enable_file" 2>/dev/null
+    else
+        chmod 777 "$enable_file" 2>/dev/null
+        echo 1 > "$enable_file" 2>/dev/null
+        # don't lock them back afterwards
+    fi
+
+}
+
+setup_for_retroarch() {
+
+	export CORE_DIR="$RA_DIR/.retroarch/cores64"
+
+	if [ "$CORE" = "uae4arm" ]; then
+		export LD_LIBRARY_PATH=$EMU_DIR:$LD_LIBRARY_PATH
+	elif [ "$CORE" = "easyrpg" ]; then
+		export LD_LIBRARY_PATH=$EMU_DIR/lib-trimui:$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip
+	elif [ "$CORE" = "genesis_plus_gx" ] && [ "$DISPLAY_ASPECT_RATIO" = "16:9" ]; then
+		use_gpgx_wide="$(get_config_value '.menuOptions."Emulator Settings".genesisPlusGXWide.selected' "False")"
+		[ "$use_gpgx_wide" = "True" ] && CORE="genesis_plus_gx_wide"
+	fi
+
+	if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+		export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+	else
+		export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+	fi
+
+    echo "$RA_BIN"
+
+}
+
+
+
+compare_current_version_to_version_trimui() {
+    target_version="$1"
+    current_version="$(cat /etc/version 2>/dev/null)"
+
+    [ -z "$target_version" ] && target_version="1.0.0"
+    [ -z "$current_version" ] && current_version="1.0.0"
+
+    # Split versions into components
+    C_1=$(echo "$current_version" | cut -d. -f1)
+    C_2=$(echo "$current_version" | cut -d. -f2)
+    C_3=$(echo "$current_version" | cut -d. -f3)
+    C_2=${C_2:-0}
+    C_3=${C_3:-0}
+
+    T_1=$(echo "$target_version" | cut -d. -f1)
+    T_2=$(echo "$target_version" | cut -d. -f2)
+    T_3=$(echo "$target_version" | cut -d. -f3)
+    T_2=${T_2:-0}
+    T_3=${T_3:-0}
+
+    i=1
+    while [ $i -le 3 ]; do
+        eval C=\$C_$i
+        eval T=\$T_$i
+
+        if [ "$C" -gt "$T" ]; then
+            echo "newer"
+            return 0
+        elif [ "$C" -lt "$T" ]; then
+            echo "older"
+            return 2
+        fi
+        i=$((i + 1))
+    done
+
+    echo "same"
+    return 1
+}
+
+# Should the above be merged into here?
+check_if_fw_needs_update_trimui() {
+    current_fw_is="$(compare_current_version_to_version_trimui "$TARGET_FW_VERSION")"
+    [ "$current_fw_is" != "older" ] && echo "false" || echo "true"
+}
+
+# Common startup watchdogs for every TrimUI device, plus the volume sync one.
+# Devices with extra watchdogs (the Brick and its Fn keys) override
+# launch_startup_watchdogs and call this first.
+launch_trimui_startup_watchdogs() {
+    launch_common_startup_watchdogs_v2
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+
+    # Keep spruce's stored volume in sync with whoever last wrote
+    # /tmp/system/set_volume (the stock firmware on the Brick, spruce's own hold
+    # loop on the Smart Pro and Smart Pro S) so the in-UI volume bar tracks the
+    # hardware Volume +/- keys, including while a key is held.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh
+    /mnt/SDCARD/spruce/scripts/volume_sync_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n volume_sync_watchdog.sh &
+
+    # USB WiFi dongle hot-plug (utils/usb_wifi_dongle.sh). Only the devices
+    # whose cfg points at dongle modules run it; the script itself exits at
+    # once without WIFI_USB_MODULES_DIR, but there is no point starting it.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh
+    if [ -n "$WIFI_USB_MODULES_DIR" ]; then
+        /mnt/SDCARD/spruce/scripts/usb_wifi_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n usb_wifi_watchdog.sh &
+    fi
+
+    # USB sound card hot-plug, for the devices whose volume path follows one.
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh
+    if device_usb_audio_supported; then
+        /mnt/SDCARD/spruce/scripts/usb_audio_watchdog.sh &
+        pin_cpu "$SYSTEM_CPU" -n usb_audio_watchdog.sh &
+    fi
+}
+
+launch_startup_watchdogs() {
+    launch_trimui_startup_watchdogs
+}
+
+run_trimui_blobs() {
+    blobs="$1"
+
+    cd /usr/trimui/bin || return 1
+    mkdir -p /tmp/trimui_inputd
+
+    for blob in $blobs; do
+        if [ ! -x "./$blob" ]; then
+            log_message "$blob not present on this device."
+            continue
+        fi
+
+        if ps | grep "[/]$blob" >/dev/null 2>&1; then
+            log_message "$blob already running, skipping."
+            continue
+        fi
+
+        bin="./$blob"
+        if [ "$blob" = "trimui_inputd" ] && [ -x "$TRIMUI_INPUTD_PATCHED" ]; then
+            bin="$TRIMUI_INPUTD_PATCHED"
+        fi
+
+        LD_LIBRARY_PATH=/usr/trimui/lib "$bin" &
+        log_message "Started $bin"
+        sleep 0.05
+    done
+}
+
+# For stick calibration on inputd builds without cal_update. The restart recreates
+# the pad device, so the getevent watchdogs have to reopen it too.
+restart_trimui_inputd() {
+    log_message "Restarting trimui_inputd and the button watchdogs"
+    killall -9 trimui_inputd
+    sleep 0.3
+    run_trimui_blobs "trimui_inputd"
+    sleep 1
+
+    for wd in /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh; do
+        stop_running_watchdog "$wd"
+    done
+    sleep 1
+    /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh </dev/null >/dev/null 2>&1 &
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    pin_cpu "$SYSTEM_CPU" -n menubutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
+}
+
+
+current_backlight() {
+    jq -r '.backlight' "$SYSTEM_JSON"
+}
+
+device_backlight_down() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight - 1))
+}
+
+device_backlight_up() {
+    local backlight
+    backlight=$(current_backlight)
+    set_backlight $((backlight + 1))
+}

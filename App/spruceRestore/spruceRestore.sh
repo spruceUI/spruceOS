@@ -62,6 +62,16 @@ restore_spruce_config() {
     log_message "Config restore complete."
 }
 
+restore_pyui_settings() {
+    local saved="/mnt/SDCARD/Saves/spruce/backups/pyui-settings.json"
+    local config="/mnt/SDCARD/App/PyUI/py-ui-config.json"
+
+    [ -f "$saved" ] || { log_message "No saved PyUI settings: $saved"; return 1; }
+
+    jq -s '.[0] * .[1]' "$config" "$saved" > "$config.tmp" && mv -f "$config.tmp" "$config" &&
+        log_message "Restored PyUI settings"
+}
+
 restore_theme_configs() {
     local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
     if [ ! -d "$backup_root" ]; then
@@ -186,6 +196,7 @@ restore_emu_settings
 
 log_message "Restoring compatible values from previous spruce-config.json"
 restore_spruce_config
+restore_pyui_settings
 
 log_message "Restoring theme customizations"
 restore_theme_configs

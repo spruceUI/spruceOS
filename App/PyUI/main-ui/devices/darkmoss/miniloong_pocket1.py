@@ -18,7 +18,7 @@ class MiniloongPocket1(DarkmossDevice):
     SYSTEM_JSON_NAME = "miniloong-system.json"
     MENU_KEY = 316  # BTN_MODE
 
-    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/Miniloong.cfg.
+    # Mirrors SYSTEM_BACKLIGHT_LEVEL_0..10 in spruce/scripts/platform/Miniloong.cfg.
     # The panel is black at raw 60 and below.
     BACKLIGHT_TABLE = (70, 77, 83, 90, 96, 103, 109, 116, 122, 129, 135)
     BACKLIGHT_FLOOR = 70

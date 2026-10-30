@@ -29,7 +29,7 @@ export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
 # clearwifi.sh has to clear them too or a "forget all networks" would simply be
 # re-imported on the next boot. Keep the two uses reading this one list.
 export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
-POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
+POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh" # used in powerbutton watchdog and sleep helper
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
@@ -46,71 +46,76 @@ if [ -e /usr/magicx ]; then
         xu20)   export PLATFORM="XU20" ;;
         *)      export PLATFORM="Zero28" ;;
     esac
+    export PLATFORM_FAMILY="oakmoss"
 else
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-
-case $INFO in
-    *sun8i*) export PLATFORM="A30" ;;           # A33
-    *TG5040*) export PLATFORM="SmartPro" ;;
-    *TG3040*) export PLATFORM="Brick" ;;
-    *TG5050*) export PLATFORM="SmartProS" ;;
-    *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*)                                    # RK3566
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # dArkMoss stamps the spruce platform name into os-release
-            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
-            # only HW_DEVICE.
-            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            if [ -z "$PLATFORM" ]; then
-                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
-                    *Miniloong*) PLATFORM="Miniloong" ;;
-                    *)           PLATFORM="RGB30" ;;
-                esac
+    INFO=$(cat /proc/cpuinfo 2> /dev/null)
+    case $INFO in
+        *sun8i*) export PLATFORM="A30";         PLATFORM_FAMILY="tina-stock" ;;   # A33
+        *TG5040*) export PLATFORM="SmartPro";   PLATFORM_FAMILY="tina-stock" ;;
+        *TG3040*) export PLATFORM="Brick";      PLATFORM_FAMILY="tina-stock" ;;
+        *TG5050*) export PLATFORM="SmartProS";  PLATFORM_FAMILY="tina-stock" ;;
+        *TG4040*) export PLATFORM="BrickPro";   PLATFORM_FAMILY="tina-stock" ;;
+        *0xd05*)                                                                # RK3566
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                # dArkMoss stamps the spruce platform name into os-release
+                # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+                # only HW_DEVICE.
+                PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                if [ -z "$PLATFORM" ]; then
+                    case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                        *Miniloong*) PLATFORM="Miniloong" ;;
+                        *)           PLATFORM="RGB30" ;;
+                    esac
+                fi
+                # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
+                if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
+                    PLATFORM="RGB20SX"
+                fi
+                export PLATFORM
+                PLATFORM_FAMILY="darkmoss"
+            else
+                export PLATFORM="Flip";         PLATFORM_FAMILY="tina-stock"
             fi
-            # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
-            if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
-                PLATFORM="RGB20SX"
+            ;;
+        *0xd04*)                                                                # RK3326
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
+                if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
+                    export PLATFORM="A10MiniV4"
+                fi
+                PLATFORM_FAMILY="darkmoss"
+            else
+                export PLATFORM="Pixel2"
+                PLATFORM_FAMILY="twig"
             fi
-            export PLATFORM
-        else
-            export PLATFORM="Flip"
-        fi
-        ;;
-    *0xd04*)                                    # RK3326
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
-            if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
-                export PLATFORM="A10MiniV4"
-            fi
-        else
-            export PLATFORM="Pixel2"
-        fi
-        ;;
-    *0xd03*)                                    # H700
-        export SPRUCE_BASEOS=1
-        BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
-        # One platform per panel AND pad layout (Brick / Brick Pro precedent):
-        # every config ships static per platform, so models whose sticks and
-        # trigger numbering differ cannot share one. This case is the only
-        # place that names models; each platform cfg states its layout.
-        case $BASEOS_TARGET in
-            rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
-            rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
-            rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
-            rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
-            rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
-            rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
-            *)                      export PLATFORM="AnbernicXX640480" ;;
-        esac
-        ;;
-    *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-    *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
-esac
+            ;;
+        *0xd03*)                                                                # H700
+            export SPRUCE_BASEOS=1
+            PLATFORM_FAMILY="h700"
+            BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
+            case $BASEOS_TARGET in
+                rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
+                rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
+                rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
+                rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
+                rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
+                rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
+                *)                      export PLATFORM="AnbernicXX640480" ;;
+            esac
+            ;;
+        *SStar*) export PLATFORM="MiyooMini";   PLATFORM_FAMILY="miyoomini" ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini";         PLATFORM_FAMILY="miyoomini" ;;
+    esac
 fi
+export PLATFORM_FAMILY
 
-. /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
-. /mnt/SDCARD/spruce/scripts/device_functions.sh
+if [ -n "$PLATFORM_FAMILY" ]; then
+    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
+else
+    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
+fi
+. "/mnt/SDCARD/spruce/scripts/device_functions.sh"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
@@ -277,14 +282,14 @@ confirm() {
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    # Get current brightness
-    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    end_brightness="$SYSTEM_BRIGHTNESS_0"
+    _start_backlight=$(cat "$DEVICE_BACKLIGHT_PATH")
+    _end_backlight="$SYSTEM_BACKLIGHT_LEVEL_0"
     delay=0.05 # 50ms delay between each step
     
-    # Start at 4 if higher (so it's faster)
-    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
-        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    # Start at 4 if higher (so it's faster); a platform cfg may set DIM_SCREEN_START_MAX instead
+    _start_max="${DIM_SCREEN_START_MAX:-$SYSTEM_BACKLIGHT_LEVEL_4}"
+    if [ "$_start_backlight" -gt "$_start_max" ]; then
+        _start_backlight="$_start_max"
     fi
 
     # Check if another dim_screen is running
@@ -294,15 +299,15 @@ dim_screen() {
     fi
 
     # Check if we're already at target brightness
-    if [ "$start_brightness" -le "$end_brightness" ]; then
+    if [ "$_start_backlight" -le "$_end_backlight" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
 
-    current=$start_brightness
+    current=$_start_backlight
 
-    while [ "$current" -gt "$end_brightness" ]; do
-        echo "$current" > "$DEVICE_BRIGHTNESS_PATH"
+    while [ "$current" -gt "$_end_backlight" ]; do
+        echo "$current" > "$DEVICE_BACKLIGHT_PATH"
         current=$((current - 1))
         sleep "$delay"
     done
@@ -1520,7 +1525,7 @@ enable_wifi() {
     # the Anbernic XX line made by running dhclient beside udhcpc.
     if device_manages_own_wifi; then
         log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
+        /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
         device_extra_wifi_setup
         return 0
     fi
@@ -1595,7 +1600,7 @@ enable_wifi() {
         log_message "Launching wpa_supplicant"
     fi
     device_start_dhcp_client
-    /mnt/SDCARD/spruce/scripts/networkservices.sh &
+    /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
     log_message "WiFi turned on"
 
     device_extra_wifi_setup
@@ -1624,7 +1629,7 @@ wifi_available_on_device() {
 # Every radio change goes through wifi.sh, which runs them one at a time.
 # See wifi.sh for the commands; they return at once unless given --wait.
 wifi_request() {
-    sh /mnt/SDCARD/spruce/scripts/wifi.sh "$@"
+    sh /mnt/SDCARD/spruce/scripts/network/wifi.sh "$@"
 }
 
 # Is the saved WiFi setting on? PyUI writes SYSTEM_JSON from its shipped default,
@@ -1646,12 +1651,12 @@ bluetooth_setting_wanted() {
 saved_wifi_in_range() {
     grep -q '^[[:space:]]*scan_ssid=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && return 0
     _swr_saved=/tmp/wifi_saved_ssids.$$
-    /mnt/SDCARD/spruce/scripts/wifi.sh saved > "$_swr_saved" 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh saved > "$_swr_saved" 2>/dev/null
     if [ ! -s "$_swr_saved" ]; then
         rm -f "$_swr_saved"
         return 1
     fi
-    /mnt/SDCARD/spruce/scripts/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
     _swr_rc=$?
     rm -f "$_swr_saved"
     return "$_swr_rc"

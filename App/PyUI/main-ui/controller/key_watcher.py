@@ -28,7 +28,8 @@ class KeyWatcher:
             self.fd = os.open(self.event_path, os.O_RDONLY | os.O_NONBLOCK)
         except OSError as e:
             PyUiLogger.get_logger().warning(f"Unable to open {self.event_path}: {e}")
-            return (None, None)
+            # __init__ cannot return a value (TypeError): carry on without this watcher.
+            self.fd = None
 
     def read_keyboard_input(self, timeout=1.0):
         """
@@ -68,6 +69,8 @@ class KeyWatcher:
         return (None, None)
         
     def poll_keyboard(self):
+        if self.fd is None:
+            return
         last_recorded_time = 0
         while(True):
             code, is_key_down = self.read_keyboard_input()

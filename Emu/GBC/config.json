@@ -22,7 +22,7 @@
       "options": [
         "gambatte",
         "mgba",
-        "tgbdual"
+        "armgba"
       ],
       "selected": "gambatte",
       "overrides": {}

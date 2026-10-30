@@ -2,8 +2,8 @@
 
 
 
-if [ -n "${DEVICE_BRIGHTNESS_PATH}" ] && [ -f "${DEVICE_BRIGHTNESS_PATH}" ]; then
-    DEVICE_BRIGHTNESS_VAL=$(cat "$DEVICE_BRIGHTNESS_PATH" 2>/dev/null)
+if [ -n "${DEVICE_BACKLIGHT_PATH}" ] && [ -f "${DEVICE_BACKLIGHT_PATH}" ]; then
+    DEVICE_BRIGHTNESS_VAL=$(cat "$DEVICE_BACKLIGHT_PATH" 2>/dev/null)
 
     case "$DEVICE_BRIGHTNESS_VAL" in
         ''|*[!0-9]*)
@@ -33,8 +33,8 @@ if [ "$brightness_spruce" -lt 0 ] || [ "$brightness_spruce" -gt 10 ]; then
     exit 1
 fi
 
-if [ -n "${SYSTEM_BRIGHTNESS_0+x}" ]; then
-    varname="SYSTEM_BRIGHTNESS_$brightness_spruce"
+if [ -n "${SYSTEM_BACKLIGHT_LEVEL_0+x}" ]; then
+    varname="SYSTEM_BACKLIGHT_LEVEL_$brightness_spruce"
 
     eval "mapped_val=\${$varname}"
 

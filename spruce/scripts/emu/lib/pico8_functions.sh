@@ -45,6 +45,19 @@ run_pico8() {
 		export SDL_VIDEODRIVER=mali
 		export SDL_JOYSTICKDRIVER=a30
 		PICO8_BINARY="pico8_dyn"
+		# Sound after sleep: pcmreopen (pico8-spruce) reopens the device, which it cannot do under dmix.
+		export LD_PRELOAD="$EMU_DIR/libpcmreopen.so${LD_PRELOAD:+:$LD_PRELOAD}"
+		cat > "$HOME/.asoundrc" <<EOF
+pcm.pico8 {
+    type softvol
+    slave.pcm "plughw:sndcodec,0"
+    control { name "Soft Volume Master" card sndcodec }
+    min_dB -51.0
+    max_dB 0.0
+    resolution 256
+}
+EOF
+		export AUDIODEV=pico8
 		sed 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 

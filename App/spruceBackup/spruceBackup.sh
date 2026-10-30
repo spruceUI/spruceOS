@@ -23,6 +23,15 @@ backup_spruce_config() {
     log_message "Backed up spruce-config.json"
 }
 
+# py-ui-config.json ships with spruce, so an update replaces the settings PyUI saves in it
+backup_pyui_settings() {
+    jq '{gameSystemSortMode, gameSystemSortTypePrio, gameSystemSortBrandPrio, gameSystemSortYearPrio,
+         gameSystemSortNamePrio, language, showAllGameSystems, showAmPm, syncTimeViaNetwork,
+         turboDelayMs, use24HourClock} | with_entries(select(.value != null))' \
+        "/mnt/SDCARD/App/PyUI/py-ui-config.json" > "/mnt/SDCARD/Saves/spruce/backups/pyui-settings.json" &&
+        log_message "Backed up PyUI settings"
+}
+
 backup_theme_configs() {
     local backup_root="/mnt/SDCARD/Saves/spruce/theme_backups"
     mkdir -p "$backup_root"
@@ -161,6 +170,7 @@ backup_emu_settings
 
 log_message "Backing up spruce-specific PyUI config"
 backup_spruce_config
+backup_pyui_settings
 
 log_message "Backing up theme config files"
 backup_theme_configs

@@ -9,76 +9,8 @@ START_DOWN=false
 SELECT_DOWN=false
 L3_DOWN=false
 
-nearest_system_brightness() {
-    input=$1
-    levels="$SYSTEM_BRIGHTNESS_0 $SYSTEM_BRIGHTNESS_1 $SYSTEM_BRIGHTNESS_2 $SYSTEM_BRIGHTNESS_3 $SYSTEM_BRIGHTNESS_4 $SYSTEM_BRIGHTNESS_5 $SYSTEM_BRIGHTNESS_6 $SYSTEM_BRIGHTNESS_7 $SYSTEM_BRIGHTNESS_8 $SYSTEM_BRIGHTNESS_9 $SYSTEM_BRIGHTNESS_10"
-
-    nearest=""
-    min_diff=""
-
-    for level in $levels; do
-        diff=$((input - level))
-        # absolute value
-        if [ "$diff" -lt 0 ]; then
-            diff=$(( -diff ))
-        fi
-
-        if [ -z "$min_diff" ] || [ "$diff" -lt "$min_diff" ]; then
-            min_diff=$diff
-            nearest=$level
-        fi
-    done
-
-    # Find the index of the nearest level
-    idx=0
-    for level in $levels; do
-        if [ "$level" -eq "$nearest" ]; then
-            var="SYSTEM_BRIGHTNESS_$idx"
-            eval "echo \${$var}"
-            return
-        fi
-        idx=$((idx + 1))
-    done
-}
 
 # Map the System Value to MainUI brightness level 
-get_brightness_level() {
-    value=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    nearest=$(nearest_system_brightness "$value")
-    case $nearest in
-        $SYSTEM_BRIGHTNESS_0) echo 0 ;;
-        $SYSTEM_BRIGHTNESS_1) echo 1 ;;
-        $SYSTEM_BRIGHTNESS_2) echo 2 ;;
-        $SYSTEM_BRIGHTNESS_3) echo 3 ;;
-        $SYSTEM_BRIGHTNESS_4) echo 4 ;;
-        $SYSTEM_BRIGHTNESS_5) echo 5 ;;
-        $SYSTEM_BRIGHTNESS_6) echo 6 ;;
-        $SYSTEM_BRIGHTNESS_7) echo 7 ;;
-        $SYSTEM_BRIGHTNESS_8) echo 8 ;;
-        $SYSTEM_BRIGHTNESS_9) echo 9 ;;
-        $SYSTEM_BRIGHTNESS_10) echo 10 ;;
-        *) echo 5 ;;
-    esac
-}
-
-# Map the MainUI brightness level to System Value
-map_brightness_to_system_value() {
-    case $1 in
-        0) echo $SYSTEM_BRIGHTNESS_0 ;;
-        1) echo $SYSTEM_BRIGHTNESS_1 ;;
-        2) echo $SYSTEM_BRIGHTNESS_2 ;;
-        3) echo $SYSTEM_BRIGHTNESS_3 ;;
-        4) echo $SYSTEM_BRIGHTNESS_4 ;;
-        5) echo $SYSTEM_BRIGHTNESS_5 ;;
-        6) echo $SYSTEM_BRIGHTNESS_6 ;;
-        7) echo $SYSTEM_BRIGHTNESS_7 ;;
-        8) echo $SYSTEM_BRIGHTNESS_8 ;;
-        9) echo $SYSTEM_BRIGHTNESS_9 ;;
-        10) echo $SYSTEM_BRIGHTNESS_10 ;;
-        *) ;;
-    esac
-}
-
 
 volume_down_bg() {
     trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
@@ -132,17 +64,17 @@ menu_vol_brightness_active() {
     esac
 }
 
-brightness_down_bg() {
+device_backlight_down_bg() {
     while true; do
         sleep 0.3
-        brightness_down
+        device_backlight_down
     done
 }
 
-brightness_up_bg() {
+device_backlight_up_bg() {
     while true; do
         sleep 0.3
-        brightness_up
+        device_backlight_up
     done
 }
 
@@ -260,12 +192,12 @@ getevent $EVENTS | while read line; do
         ;;
         *"key $B_L1 1"*) # L1 key down
             if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
-                brightness_down
+                device_backlight_down
             fi
         ;;
         *"key $B_R1 1"*) # R1 key down
             if [ "$START_DOWN" = true ] && start_lr_brightness_active ; then
-                brightness_up
+                device_backlight_up
             fi
         ;;
         *"$SS_B1_PRESS"*) # Screenshot key 1 down
@@ -307,8 +239,8 @@ getevent $EVENTS | while read line; do
             PID_UP=""
 
             if menu_vol_brightness_active; then
-                brightness_down # ensure fire the first run
-                brightness_down_bg &
+                device_backlight_down # ensure fire the first run
+                device_backlight_down_bg &
                 PID_DOWN=$!
             else
                 volume_down # ensure fire the first run
@@ -333,8 +265,8 @@ getevent $EVENTS | while read line; do
             PID_DOWN=""
 
             if menu_vol_brightness_active; then
-                brightness_up # ensure fire the first run
-                brightness_up_bg &
+                device_backlight_up # ensure fire the first run
+                device_backlight_up_bg &
                 PID_UP=$!
             else
                 volume_up # ensure fire the first run
@@ -363,14 +295,14 @@ getevent $EVENTS | while read line; do
                 volume_down_bg &
                 PID_DOWN=$!
             fi
-            L3_down=true
+            L3_DOWN=true
         ;;
         *"key $B_L3 0") # L3 released
             if [ "$B_VOLDOWN" = "DOESNT_EXIST" ]; then
                 [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
                 PID_UP=""
             fi
-            L3_down=false
+            L3_DOWN=false
         ;;
         *"key $B_R3 1") # L3 pressed
             if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$SELECT_DOWN" = "true" ]; then
@@ -385,7 +317,7 @@ getevent $EVENTS | while read line; do
                 volume_up_bg &
                 PID_UP=$!
             fi
-            if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$L3_down" = "true" ]; then
+            if [ "$B_VOLUP" = "DOESNT_EXIST" ] && [ "$L3_DOWN" = "true" ]; then
                 swap_dpad_analog_toggle
             fi
         ;;

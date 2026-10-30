@@ -11,8 +11,8 @@
 #   start_syncthing_process
 #
 # External binaries:
-#   /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh
-#   /mnt/SDCARD/spruce/scripts/networkservices.sh
+#   /mnt/SDCARD/spruce/scripts/network/syncthing_sync_check.sh
+#   /mnt/SDCARD/spruce/scripts/network/networkservices.sh
 #
 # Provides:
 #   handle_network_services (returns 2 when the player pressed B on the WiFi wait screen)
@@ -87,7 +87,7 @@ handle_network_services() {
 	# Handle Syncthing sync if enabled
 	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
 		start_syncthing_process
-		/mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --startup
+		/mnt/SDCARD/spruce/scripts/network/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced" --tmp
 
 	fi
@@ -99,7 +99,7 @@ handle_network_services() {
 
 	# Handle network service disabling
 	if [ "$disable_wifi_in_game" = "True" ] || [ "$disable_net_serv_in_game" = "True" ]; then
-		/mnt/SDCARD/spruce/scripts/networkservices.sh off
+		/mnt/SDCARD/spruce/scripts/network/networkservices.sh off
 
 		if [ "$disable_wifi_in_game" = "True" ]; then
 			# Off without changing the setting; the apply at game exit brings it back
