@@ -276,6 +276,9 @@ magicx_device_init() {
 
     export LD_LIBRARY_PATH="/usr/magicx/lib:/usr/lib:/lib:/mnt/SDCARD/spruce/flip/lib"
     magicx_oakmoss_libs_paths
+    # Done before the frontend or a game resumed at boot starts (PyUI applies none of these).
+    magicx_restore_display &
+    DEVICE_INIT_WAIT_PIDS="$DEVICE_INIT_WAIT_PIDS $!"
 
     init_gpio_a133p
     magicx_load_touch
@@ -483,6 +486,20 @@ magicx_backlight_raw() {
 # never be saved as the user's level.
 apply_backlight() {
     magicx_disp_brightness set "$(magicx_backlight_raw "$1")" 2>/dev/null
+}
+
+# The saved backlight and display levels at boot, through the hooks PyUI's commands use and in
+# its old startup order. A level missing from the json ("null") leaves the panel as it is.
+magicx_restore_display() {
+    # shellcheck disable=SC2046 # the five levels, one word each
+    set -- $(jq -r '.backlight, .contrast, .saturation, .brightness, .hue' "$SYSTEM_JSON" 2>/dev/null)
+    [ $# -eq 5 ] || return 0
+    case "$1" in ''|*[!0-9]*) ;; *) apply_backlight "$1" ;; esac
+    shift
+    for _setting in contrast saturation brightness hue; do
+        case "$1" in ''|*[!0-9]*) ;; *) "apply_display_$_setting" "$1" ;; esac
+        shift
+    done
 }
 
 # PyUI's About line: the oakMOSS release (a build past a tag shows as v0.5.0-beta.2+43), else
