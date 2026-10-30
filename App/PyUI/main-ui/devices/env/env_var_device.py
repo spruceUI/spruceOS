@@ -13,7 +13,7 @@ from audio.audio_player_oss import AudioPlayerOss
 from controller.controller_inputs import ControllerInput
 from controller.key_state import KeyState
 from controller.key_watcher import KeyWatcher
-from controller.key_watcher_controller import AxisKeyMappingProvider, HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
+from controller.key_watcher_controller import AxisKeyMappingProvider, DictKeyMappingProvider, HorizontalStickAxis, KeyWatcherController, VerticalStickAxis
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.charge.charge_status import ChargeStatus
 from devices.device_common import DeviceCommon
@@ -29,14 +29,18 @@ from utils.logger import PyUiLogger
 
 # The launcher cannot start without these; every other variable is optional.
 REQUIRED_ENV_VARS = (
-    "DEFAULT_CFG_PATH", "SYSTEM_CFG_PATH", "SCREEN_WIDTH", "SCREEN_HEIGHT",
-    "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "PRIMARY_PYUI_DEVICE_NAME", "PYUI_DEVICE_NAMES",
+    # Configs
+    "DEFAULT_CFG_PATH", "SYSTEM_CFG_PATH", "PYUI_DEVICE_NAMES", 
+    # Paths
     "ROMS_PATH", "FAVORITES_PATH", "RECENTS_PATH", "APPS_CONFIG_PATH", "COLLECTIONS_PATH", "STATE_PATH",
+    # Screen
+    "SCREEN_WIDTH", "SCREEN_HEIGHT", "SCREEN_ROTATION",
+    # Controller
+    "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "CONTROLLER_EVENT_FORMAT",
+    # Commands
+    "POWER_OFF_CMD", 
+    
 )
-DEFAULT_STICK_DEADZONE = 16000
-# struct input_event with a signed value: d-pad hats report -1.
-DEFAULT_EVENT_FORMAT = "llHHi"
-
 
 class EnvVarDevice(DeviceCommon):
     def __init__(self, main_ui_mode):
@@ -53,8 +57,6 @@ class EnvVarDevice(DeviceCommon):
         else:
             self.audio_player = AudioPlayerNone()
 
-        self.has_rgb_rings = os.getenv("HAS_RGB_RINGS", "false") == "true"
-        self.has_lid_wake = os.getenv("HAS_LID_WAKE", "false") == "true"
         default_cfg_path = Path(os.environ["DEFAULT_CFG_PATH"])
         system_cfg_path = os.environ["SYSTEM_CFG_PATH"]
         legacy_cfg_path = os.environ.get("LEGACY_CFG_PATH")
@@ -86,10 +88,6 @@ class EnvVarDevice(DeviceCommon):
                 system_cfg_path, self.on_system_config_changed, interval=0.2, repeat_trigger_for_mtime_granularity_issues=True)
 
         super().__init__()
-
-        if(main_ui_mode):
-            # The shell does not restore the saved display settings at boot, so the launcher does.
-            threading.Thread(target=self.startup_init, daemon=True).start()
 
     @staticmethod
     def _is_usable_config(path):
@@ -160,14 +158,17 @@ class EnvVarDevice(DeviceCommon):
 
     # An empty value means the device has none, which drops reboot from the power prompt.
     def power_off_cmd(self):
-        return os.environ.get("POWER_OFF_CMD", "poweroff") or None
-
+        return os.environ["POWER_OFF_CMD"]
+    
     def reboot_cmd(self):
-        return os.environ.get("REBOOT_CMD", "reboot") or None
-
+        if "REBOOT_CMD" in os.environ:
+            return os.environ["REBOOT_CMD"]
+        else:
+            return None
+    
     def get_fw_version(self):
-        return os.environ.get("FW_VERSION") or super().get_fw_version()
-
+        return os.environ.get("OUTPUT_SCREEN_WIDTH"), "Unkown"
+        
     def _set_brightness_to_config(self):
         self._run_setting_cmd("BRIGHTNESS_CMD", self.system_config.brightness)
 
@@ -223,14 +224,6 @@ class EnvVarDevice(DeviceCommon):
         except Exception as e:
             self._log_status_error("the battery percentage", e)
         return self.battery_percent
-
-    # Each setting is applied only when its command is set.
-    def startup_init(self, include_wifi=True):
-        self._set_lumination_to_config()
-        self._set_contrast_to_config()
-        self._set_saturation_to_config()
-        self._set_brightness_to_config()
-        self._set_hue_to_config()
 
     def perform_startup_tasks(self):
         pass
@@ -366,15 +359,22 @@ class EnvVarDevice(DeviceCommon):
                 ControllerInput.RIGHT_STICK_DOWN,
             )
 
-        return KeyWatcherController(
-            event_path=os.environ["CONTROLLER_EVENT_PATH"],
-            mapping_provider=AxisKeyMappingProvider(
-                key_mappings,
-                stick_axes,
-                int(os.environ.get("STICK_DEADZONE", DEFAULT_STICK_DEADZONE)),
-            ),
-            event_format=os.environ.get("CONTROLLER_EVENT_FORMAT", DEFAULT_EVENT_FORMAT),
-        )
+        if "STICK_DEADZONE" in os.environ:
+            return KeyWatcherController(
+                event_path=os.environ["CONTROLLER_EVENT_PATH"],
+                mapping_provider=AxisKeyMappingProvider(
+                    key_mappings,
+                    stick_axes,
+                    int(os.environ.get("STICK_DEADZONE")),
+                ),
+                event_format=os.environ.get("CONTROLLER_EVENT_FORMAT"),
+            )
+        else:
+            return KeyWatcherController(
+                event_path=os.environ["CONTROLLER_EVENT_PATH"],
+                mapping_provider=DictKeyMappingProvider(key_mappings),
+                event_format=os.environ.get("CONTROLLER_EVENT_FORMAT"),
+            )
 
     def are_headphones_plugged_in(self):
         cmd = os.environ.get("HEADPHONES_STATUS_CMD")
@@ -460,7 +460,7 @@ class EnvVarDevice(DeviceCommon):
         return FfmpegImageUtils()
 
     def get_device_name(self):
-        return os.environ["PRIMARY_PYUI_DEVICE_NAME"]
+        return "ignored" # Needs to be refactored out
 
     def get_device_names(self):
         return [
@@ -492,4 +492,7 @@ class EnvVarDevice(DeviceCommon):
         return int(os.environ["SCREEN_HEIGHT"])
         
     def screen_rotation(self):
-        return int(os.environ.get("SCREEN_ROTATION", 0))
+        return int(os.environ["SCREEN_ROTATION"])
+
+    def supports_image_resizing(self):
+        return os.environ.get("HAS_FFMPEG", "false").lower() == "true"
