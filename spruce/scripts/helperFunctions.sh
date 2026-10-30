@@ -236,13 +236,41 @@ auto_regen_tmp_update() {
     fi
 }
 
+# PyUI's Button Remapper keeps physical -> virtual pairs in SYSTEM_JSON
+# .button_mapping, both as ControllerInput numbers (A=1 B=2 X=3 Y=4). A user who
+# swapped A and B there expects the same swap in the A/B prompts that scripts
+# show (USB Storage Mode, updates, tasks), not the factory buttons (#1541).
+# Sets CONFIRM_KEY and CANCEL_KEY to the "<type> <code>" of the physical buttons
+# that act as A and B; the factory B_A / B_B without a mapping.
+set_confirm_cancel_keys() {
+    CONFIRM_KEY="$B_A"
+    CANCEL_KEY="$B_B"
+    _ccmap="$(jq -r '.button_mapping // {} | to_entries[] | "\(.key)=\(.value)"' "$SYSTEM_JSON" 2>/dev/null)"
+    for _ccm in $_ccmap; do
+        case "${_ccm%%=*}" in
+            1) _ccphys="$B_A" ;;
+            2) _ccphys="$B_B" ;;
+            3) _ccphys="$B_X" ;;
+            4) _ccphys="$B_Y" ;;
+            *) continue ;;
+        esac
+        [ -n "$_ccphys" ] || continue
+        case "${_ccm#*=}" in
+            1) CONFIRM_KEY="$_ccphys" ;;
+            2) CANCEL_KEY="$_ccphys" ;;
+        esac
+    done
+    unset _ccmap _ccm _ccphys
+}
+
 confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
     timeout_return=${2:-1}  # Default to 1 (usually 'No' or 'Cancel')
     start_time=$(date +%s)
+    set_confirm_cancel_keys
 
     rm -f /tmp/ge_out 2>/dev/null
-    
+
     # Start getevent in the background
     getevent "$EVENT_PATH_READ_INPUTS_SPRUCE" > /tmp/ge_out &
     GE_PID=$!
@@ -250,13 +278,13 @@ confirm() {
     RET_VAL=2
     while [ "$RET_VAL" -eq 2 ]; do
         # 1. Check for User Input
-        if line=$(last_key_line /tmp/ge_out "$B_A" "$B_B"); then
+        if line=$(last_key_line /tmp/ge_out "$CONFIRM_KEY" "$CANCEL_KEY"); then
             case "$line" in
-                *"key $B_A"*) 
-                    RET_VAL=0 
+                *"key $CONFIRM_KEY"*)
+                    RET_VAL=0
                 ;;
-                *"key $B_B"*) 
-                    RET_VAL=1 
+                *"key $CANCEL_KEY"*)
+                    RET_VAL=1
                 ;;
             esac
         fi
