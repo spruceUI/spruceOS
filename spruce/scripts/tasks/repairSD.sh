@@ -221,12 +221,12 @@ tmp_hold_off_respawns() {
     shield_baseos_session /sbin/nextui-session
 }
 
-# By name first, in this order: the Miyoo Mini's stock main deletes .tmp_update if it outlives
-# updater. Whatever else holds the card goes in repair_release_card.
+# By name first, in this order: oakMOSS's launcher (runmagicx.sh) before what it would react to, and
+# the Miyoo Mini's stock main deletes .tmp_update if it outlives updater. The rest: repair_release_card.
 tmp_kill_boot_scripts() {
     echo "Attempting to kill any boot scripts."
-    for script in runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
-        runmagicx.sh updater menubutton_watchdog.sh buttons_watchdog.sh idlemon \
+    for script in runmagicx.sh runtime.sh principal.sh MainUI main tee runmiyoo.sh runtrimui.sh \
+        updater menubutton_watchdog.sh buttons_watchdog.sh idlemon \
         idle_watchdog.sh battery_level_watchdog.sh theme_watchdog.sh volume_sync_watchdog.sh \
         inotifywait inotifywatch getevent sendevent ; do
         if killall -9 "$script" ; then
