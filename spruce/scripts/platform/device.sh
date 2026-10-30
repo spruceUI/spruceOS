@@ -1,9 +1,7 @@
 #!/bin/sh
 
-# Intended to be sourced by helperFunctions.sh but NOT anywhere else
-# It relies on functions inside helperFunctions.sh to operate properly
-# (Not everything was cleanly broken apart since this is a refactor, in the future
-#  we can try to make the file import chain cleaner)
+# Intended to be sourced by helperFunctions.sh but NOT anywhere else.
+# It relies on functions inside helperFunctions.sh to operate properly.
 
 get_python_path() {
     log_message "Missing get_python_path function"
@@ -158,8 +156,24 @@ setup_for_retroarch(){
     log_message "Missing setup_for_retroarch function"
 }
 
+send_virtual_key_L3() {
+    log_message "Missing send_virtual_key_L3 function"
+}
+
+send_virtual_key_L3R3() {
+    log_message "Missing send_virtual_key_L3R3 function"
+}
+
 send_menu_button_to_retroarch() {
     log_message "Missing send_menu_button_to_retroarch function"
+}
+
+pause_emulators() {
+    log_message "Missing pause_emulators function"
+}
+
+unpause_emulators() {
+    log_message "Missing unpause_emulators function"
 }
 
 prepare_for_pyui_launch(){
@@ -175,12 +189,21 @@ launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2
 }
 
+set_loading_screen() {
+    log_message "Missing set_loading_screen function"
+}
+
 A30_notify_about_FW_update_if_needed(){
     log_message "Device is not an A30. Nothing to do for A30_notify_about_FW_update_if_needed." -v
 }
 
 check_if_fw_needs_update() {
     log_message "Missing check_if_fw_needs_update function"
+}
+
+# Report the device firmware version, when the platform exposes one.
+device_get_fw_version() {
+    log_message "Missing device_get_fw_version function"
 }
 
 # The newest update file for this device's base OS put on the card by hand, if any.
@@ -194,6 +217,10 @@ take_screenshot() {
 
 get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
+}
+
+get_ssh_service_name() {
+    log_message "Missing get_ssh_service_name function"
 }
 
 # May battery_level_watchdog.sh force a shutdown when the gauge reads 1 % or less?
@@ -219,8 +246,40 @@ device_init() {
     log_message "Missing device_init function"
 }
 
+init_gpio_a133p() {
+    log_message "Missing init_gpio_a133p function"
+}
+
+device_init_a133p() {
+    log_message "Missing device_init_a133p function"
+}
+
+device_delay_then_check_trimui_blobs() {
+    log_message "Missing device_delay_then_check_trimui_blobs function"
+}
+
+device_run_tsps_blobs() {
+    log_message "Missing device_run_tsps_blobs function"
+}
+
+device_run_boot_thermal_process() {
+    log_message "Missing device_run_boot_thermal_process function"
+}
+
+device_run_thermal_process() {
+    log_message "Missing device_run_thermal_process function"
+}
+
+device_stop_thermal_process() {
+    log_message "Missing device_stop_thermal_process function"
+}
+
 set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
+}
+
+set_event_arg() {
+    log_message "Missing set_event_arg function"
 }
 
 # The pad's js node carries buttons and axes but not the rumble (EV_FF)
@@ -257,10 +316,35 @@ get_volume_level() {
     log_message "Missing get_volume_level function"
 }
 
+get_current_volume_level() {
+    log_message "Missing get_current_volume_level function"
+}
+
 # Arg1: Sets the volume on a scale of 0-20
 # Arg2: (optional) 'true' to save to config, anything else to not save
 set_volume() {
     log_message "Missing set_volume function"
+}
+
+set_volume_delta() {
+    log_message "Missing set_volume_delta function"
+}
+
+# Current device backlight value and setter, used by the brightness shortcuts.
+current_backlight() {
+    log_message "Missing current_backlight function"
+}
+
+get_backlight_level() {
+    log_message "Missing get_backlight_level function"
+}
+
+set_backlight() {
+    log_message "Missing set_backlight function"
+}
+
+device_resume_backlight() {
+    log_message "Missing device_resume_backlight function"
 }
 
 device_backlight_down() {
@@ -283,6 +367,36 @@ work_led_off() {
     log_message "Missing work_led_off function"
 }
 
+work_led_on() {
+    log_message "Missing work_led_on function"
+}
+
+# Optional hardware capability and connection probes.
+has_lid() {
+    log_message "Missing has_lid function"
+    return 1
+}
+
+has_rgb_leds() {
+    log_message "Missing has_rgb_leds function"
+    return 1
+}
+
+has_v4_screen() {
+    log_message "Missing has_v4_screen function"
+    return 1
+}
+
+device_hdmi_connected() {
+    log_message "Missing device_hdmi_connected function"
+    return 1
+}
+
+device_headphones_connected() {
+    log_message "Missing device_headphones_connected function"
+    return 1
+}
+
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
     log_message "Missing device_get_charging_status function"
@@ -294,6 +408,10 @@ device_get_battery_percent() {
 
 device_enter_sleep() {
     log_message "Missing device_enter_sleep"
+}
+
+trigger_device_sleep() {
+    log_message "Missing trigger_device_sleep function"
 }
 
 device_exit_sleep() {
@@ -378,11 +496,29 @@ device_manages_own_wifi() {
 }
 
 device_wifi_power_on() { 
-    log_message "Missing device_wifi_power_on function" -v
+    log_message "Missing device_wifi_power_on function"
 }
 
 device_wifi_power_off() {
-    log_message "Missing device_wifi_power_off function" -v
+    log_message "Missing device_wifi_power_off function"
+}
+
+device_has_wifi_radio() {
+    log_message "Missing device_has_wifi_radio function"
+    return 1
+}
+
+device_wifi_is_available() {
+    log_message "Missing device_wifi_is_available function"
+    return 1
+}
+
+device_usb_wifi_onboard_release() {
+    log_message "Missing device_usb_wifi_onboard_release function"
+}
+
+device_usb_wifi_onboard_restore() {
+    log_message "Missing device_usb_wifi_onboard_restore function"
 }
 
 # Give a device a chance to bring its wireless interface back when it is not
@@ -536,7 +672,7 @@ device_wifi_watchdog_enabled() {
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
-    log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
+    log_message "Missing device_system_handles_sdcard_unmount function; assuming it does" -v
     return 0
 }
 
@@ -807,7 +943,7 @@ device_get_hw_epoch() {
 device_extra_wifi_setup() {
     # Do these need to be unique per device? Don't have a way
     # to test currently
-    log_message "Missing device_extra_wifi_setup function" -v
+    log_message "Missing device_extra_wifi_setup function"
 }
 
 # Which DHCP client this device uses, and how to stop it.
@@ -862,13 +998,21 @@ device_stock_ui_command() {
 }
 
 treat_dpad_as_analog() {
-     log_message "Missing treat_dpad_as_analog function, assuming it does not the capability" -v
+     log_message "Missing treat_dpad_as_analog function; assuming it does not the capability" -v
 }
 
 treat_dpad_as_dpad() { 
-     log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
+     log_message "Missing treat_dpad_as_dpad function; assuming it does not the capability" -v
 }
 
 swap_dpad_analog_toggle() { 
-    log_message "Missing swap_dpad_analog_toggle function, assuming it does not the capability" -v
+    log_message "Missing swap_dpad_analog_toggle function; assuming it does not the capability" -v
+}
+
+enable_dpad_to_analog() {
+    log_message "Missing enable_dpad_to_analog function"
+}
+
+enable_dpad_to_mouse() {
+    log_message "Missing enable_dpad_to_mouse function"
 }
