@@ -349,20 +349,15 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32)
+# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32)
 ############################################################
 
     "Zero28" | "Zero40" | "XU20" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
-        if [ "$PLATFORM" = "Zero40" ]; then
-            DEVICE="MAGICX_ZERO40"
-        elif [ "$PLATFORM" = "XU20" ]; then
-            DEVICE="MAGICX_XU20"
-        else
-            DEVICE="MAGICX_ZERO28"
-        fi
+        # Every oakMOSS board runs PyUI as the env-driven SPRUCE device (its cfg sets PYUI_ENV_DEVICE=true).
+        DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \

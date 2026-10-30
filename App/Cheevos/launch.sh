@@ -104,11 +104,7 @@ case "$PLATFORM" in
         PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        case "$PLATFORM" in
-            "Zero40") CHEEVOS_PYUI_DEVICE="MAGICX_ZERO40" ;;
-            "XU20") CHEEVOS_PYUI_DEVICE="MAGICX_XU20" ;;
-            *) CHEEVOS_PYUI_DEVICE="MAGICX_ZERO28" ;;
-        esac
+        # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the SPRUCE device, below.
         ;;
     *)
         log_message "Cheevos: platform $PLATFORM is not supported yet"
