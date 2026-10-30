@@ -26,7 +26,7 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 # Detect device and export to any script sourcing helperFunctions #
 ###################################################################
 
-# The oakMOSS boards (MagicX, Powkiddy V90S/V20) are decided by their /usr/magicx marker, not by
+# The oakMOSS boards (MagicX, Powkiddy V90S/V20, TrimUI Brick) are decided by their /usr/magicx marker, not by
 # cpuinfo: the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
     # /usr/magicx/device names the model. Fall back to Z28 if missing.
@@ -35,6 +35,7 @@ if [ -e /usr/magicx ]; then
         xu20)   export PLATFORM="XU20" ;;
         v90s)   export PLATFORM="V90S" ;;
         v20)    export PLATFORM="V20" ;;
+        brick)  export PLATFORM="BrickOakMOSS" ;;   # the TrimUI Brick on oakMOSS: a variant of Brick
         *)      export PLATFORM="Zero28" ;;
     esac
     export PLATFORM_FAMILY="oakmoss"
@@ -148,6 +149,7 @@ device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
         Brick)            echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
+        BrickOakMOSS)     echo "TRIMUI_BRICK_OAKMOSS"; echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
         BrickPro)         echo "TRIMUI_BRICK_PRO"; echo "TRIMUI_A133P" ;;
         SmartPro)         echo "TRIMUI_SMART_PRO"; echo "TRIMUI_A133P" ;;
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;

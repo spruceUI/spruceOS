@@ -22,7 +22,7 @@ usb_gadget_platform_setup() {
             LUN_PATH="$USB_GADGET_PATH/lun0"
             LUN_FILE="$LUN_PATH/file"
             ;;
-        "Brick" | "SmartPro" | "BrickPro")
+        "Brick" | "BrickOakMOSS" | "SmartPro" | "BrickPro")
             STORAGE_DEVICE="/dev/mmcblk1p1"
             MOUNT_POINT="/mnt/SDCARD"
             USB_GADGET_PATH="/sys/kernel/config/usb_gadget/g1"
@@ -126,7 +126,7 @@ usb_gadget_release() {
             echo "" > "$LUN_FILE" 2>/dev/null
             [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 0 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
             ;;
-        "Brick" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20" | "V90S" | "V20")
+        "Brick" | "BrickOakMOSS" | "SmartPro" | "BrickPro" | "Zero28" | "Zero40" | "XU20" | "V90S" | "V20")
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             rm -f $USB_GADGET_PATH/configs/c.1/mass_storage.usb0
             [ -d "$USB_GADGET_PATH/configs/c.1" ] && rmdir "$USB_GADGET_PATH/configs/c.1" 2>/dev/null
@@ -187,7 +187,7 @@ usb_export_gadget() {
             sleep 1
             [ -f "/sys/class/udc/sunxi_usb_udc/soft_connect" ] && echo 1 > /sys/class/udc/sunxi_usb_udc/soft_connect 2>/dev/null
             ;;
-        "Brick" | "SmartPro" | "BrickPro")
+        "Brick" | "BrickOakMOSS" | "SmartPro" | "BrickPro")
             mkdir -p $USB_GADGET_PATH/functions/mass_storage.usb0
             echo "0x1d6b" > $USB_GADGET_PATH/idVendor
             echo "0x0104" > $USB_GADGET_PATH/idProduct

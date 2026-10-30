@@ -33,7 +33,7 @@ script_for_action() {
         "Quiet Mode")      echo "scene-quiet.sh" ;;
         "Silent Mode")     echo "scene-silent.sh" ;;
         "WiFi off")        echo "scene-wifi.sh" ;;
-        "Joystick Toggle") [ "$PLATFORM" = "Brick" ] && echo "scene-joystick.sh" ;;
+        "Joystick Toggle") [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "BrickOakMOSS" ] && echo "scene-joystick.sh" ;;
         "Fan boost")       [ "$PLATFORM" = "SmartProS" ] && echo "scene-fan.sh" ;;
         *)                 echo "" ;;
     esac
@@ -50,7 +50,7 @@ action_for_script() {
         scene-wifi.sh)                         echo "WiFi off" ;;
         scene-fan.sh)                          [ "$PLATFORM" = "SmartProS" ] && echo "Fan boost" ;;
         scene-joystick.sh|spruce_toggle_joystick.sh|com.trimui.joystick.sh|com.trimui.toggle.dpad_joystick.sh)
-                                               [ "$PLATFORM" = "Brick" ] && echo "Joystick Toggle" ;;
+                                               [ "$PLATFORM" = "Brick" ] || [ "$PLATFORM" = "BrickOakMOSS" ] && echo "Joystick Toggle" ;;
         *)                                     echo "" ;;
     esac
 }

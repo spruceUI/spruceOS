@@ -349,10 +349,10 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20)
+# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20; TrimUI Brick)
 ############################################################
 
-    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" )
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS" )
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
@@ -377,6 +377,12 @@ case "$PLATFORM" in
             # A crash in the SDL2 blob or the GPU stack prints nothing to pyui.log.
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
             log_message "PyUI on $PLATFORM exited with status $?"
+        fi
+
+        # The stick calibrator asks for a trimui_inputd restart; on oakMOSS its procd service owns the daemon.
+        if [ -f /tmp/trimui_inputd_restart ]; then
+            [ -x /etc/init.d/trimui-inputd ] && /etc/init.d/trimui-inputd restart
+            rm -f /tmp/trimui_inputd_restart
         fi
     ;;
 

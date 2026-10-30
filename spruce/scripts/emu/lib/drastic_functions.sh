@@ -21,7 +21,8 @@ run_drastic() {
 	case "$PLATFORM_FAMILY" in
 		"h700")		run_drastic_AnbernicH700 ;;
 		"darkmoss") run_drastic_DarkMoss ;;
-		"oakmoss")	run_drastic_OakMoss ;;
+		"oakmoss")	# a board's own function wins over the shared one (the Brick on oakMOSS runs the Brick's)
+			if command -v "run_drastic_$PLATFORM" >/dev/null; then run_drastic_$PLATFORM; else run_drastic_OakMoss; fi ;;
 		*)			run_drastic_$PLATFORM  ;; # shell expands this to appropriate real function
 	esac
 	save_drastic_configs
@@ -197,6 +198,9 @@ run_drastic_OakMoss() {
 		display_core_unrecognized_for_platform_message
 	fi
 }
+
+# The TrimUI Brick on oakMOSS runs the stock Brick's builds.
+run_drastic_BrickOakMOSS() { run_drastic_Brick ; }
 
 
 ##### PIXEL 2 #####
