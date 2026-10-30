@@ -109,6 +109,18 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      # The stdlib ships as lib/python310.zip.new (stored .pyc), one file per
+      # interpreter instead of ~700; the device moves it into place at boot.
+      - name: Set up Python 3.10 for the stdlib zip
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Pack the Python stdlib into python310.zip.new
+        run: |
+          python .github/scripts/pack_python_stdlib.py --remove-sources \
+            spruce/bin/python/lib spruce/flip/lib
+
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
