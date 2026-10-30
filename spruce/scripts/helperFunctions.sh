@@ -87,6 +87,7 @@ else
                 PLATFORM_FAMILY="darkmoss"
             else
                 export PLATFORM="Pixel2"
+                PLATFORM_FAMILY="twig"
             fi
             ;;
         *0xd03*)                                                                # H700

@@ -12,7 +12,7 @@
 . "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/sleep_functions.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/utils/xx_lid_wake.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/h700/xx_lid_wake.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/baseos_session_shield.sh"
 
 # The XX line has no rumble GPIO, so utils/rumble.sh's rumble_gpio is not usable

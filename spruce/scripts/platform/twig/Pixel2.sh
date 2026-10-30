@@ -153,7 +153,7 @@ check_if_fw_needs_update() {
 enable_or_disable_rgb() {
     killall -q cava 2>/dev/null
     killall -q leds_manager.sh 2>/dev/null
-    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
+    /mnt/SDCARD/spruce/scripts/platform/twig/leds_manager.sh &
 }
 
 prepare_for_pyui_launch(){
@@ -177,10 +177,10 @@ launch_startup_watchdogs(){
     # Same per-start-of-frontend dedupe the common launcher applies to its own
     # watchdogs (utils/watchdog_launcher.sh): a restart without a reboot must
     # not stack a second theme_watchdog / leds_manager on the first.
-    stop_running_watchdog /mnt/SDCARD/spruce/scripts/theme_watchdog.sh
-    stop_running_watchdog /mnt/SDCARD/spruce/scripts/leds_manager.sh
-    /mnt/SDCARD/spruce/scripts/theme_watchdog.sh &
-    /mnt/SDCARD/spruce/scripts/leds_manager.sh &
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/platform/twig/theme_watchdog.sh
+    stop_running_watchdog /mnt/SDCARD/spruce/scripts/platform/twig/leds_manager.sh
+    /mnt/SDCARD/spruce/scripts/platform/twig/theme_watchdog.sh &
+    /mnt/SDCARD/spruce/scripts/platform/twig/leds_manager.sh &
 }
 
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
