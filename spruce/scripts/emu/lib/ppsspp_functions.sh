@@ -152,11 +152,11 @@ configure_retroachievements() {
 }
 
 load_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls-$PLATFORM.ini" "$PSP_DIR/controls.ini"
-	cp -f "$PSP_DIR/ppsspp-$PLATFORM.ini" "$PSP_DIR/ppsspp.ini"
+	cp -f "$(platform_path "$PSP_DIR/controls-%s.ini")" "$PSP_DIR/controls.ini"
+	cp -f "$(platform_path "$PSP_DIR/ppsspp-%s.ini")" "$PSP_DIR/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-$PLATFORM.ini"
-	cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-$PLATFORM.ini"
+	cp -f "$PSP_DIR/controls.ini" "$(platform_path "$PSP_DIR/controls-%s.ini")"
+	cp -f "$PSP_DIR/ppsspp.ini" "$(platform_path "$PSP_DIR/ppsspp-%s.ini")"
 }

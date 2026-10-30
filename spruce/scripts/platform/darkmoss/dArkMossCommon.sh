@@ -660,7 +660,7 @@ get_config_path() {
 # this pad the same way on every dArkMoss unit; hotkey is SELECT (8). The
 # entries shipped as "nul" are reset to "nul" too.
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+    RA_FILE="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

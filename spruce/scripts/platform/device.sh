@@ -206,9 +206,9 @@ device_low_battery_shutdown_ok() {
 # Unlike its neighbours here this is a real default, not a missing-function stub:
 # every platform needs a working value, and per-platform is the right answer for
 # all but the Anbernic XX family, which overrides it to share one flag across
-# models so moving a card between them does not re-run firstboot.
+# models so moving a card between them does not re-run firstboot. A variant shares its parent's.
 get_firstboot_key() {
-    echo "$PLATFORM"
+    echo "${PLATFORM_PARENT:-$PLATFORM}"
 }
 
 device_specific_wake_from_sleep() {
