@@ -242,4 +242,5 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
       
 
+        option_list.sort(key=lambda entry: entry.get_sort_key())
         return option_list

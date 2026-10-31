@@ -2,45 +2,34 @@
 
 # TODO: add updated table of contents/function summaries here
 
-# This is a collection of functions that are used in multiple scripts
-# Please do not add any dependencies here, this file is meant to be self-contained
-# Keep methods in alphabetical order
-
+# This is a collection of functions that are used in multiple scripts.
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-######################################################################################
-# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
-######################################################################################
-
-# Loaded once per shell: runtimeHelper.sh and the network libraries source this file
-# again. The marker is not exported, so a script run as a new shell loads the file
-# itself; its value, this shell's PID, also covers a forked shell that was given it.
-# Subshells keep $$ and inherit the functions. It is set at the end of the file, so a
-# load that failed part-way is retried.
+# Load this file only once per shell.
 [ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
 
-# variables used in multiple different helperFunctions:
+# constants used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
-# Where PyUI wrote saved networks before they became card-global: all on the
-# handheld's own storage, which is why a card carrying a password from another
-# device used to arrive with nothing. enable_wifi adopts from these, and
-# clearwifi.sh has to clear them too or a "forget all networks" would simply be
-# re-imported on the next boot. Keep the two uses reading this one list.
-export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
+export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"     # Where PyUI wrote saved networks before they became card-global
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh" # used in powerbutton watchdog and sleep helper
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
-# Detect device and export to any script sourcing helperFunctions
-#
+# Sourced here specifically because some ${PLATFORM}.sh functions depend on it.
+. "/mnt/SDCARD/spruce/scripts/usb_audio_helpers.sh"
+
+
+###################################################################
+# Detect device and export to any script sourcing helperFunctions #
+###################################################################
+
 # MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
 # the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
-    # /usr/magicx/device names the model (zero28 | zero40 | xu20); a base
-    # without the file (Moss-zero28, main-zero40) is treated as a Zero 28.
+    # /usr/magicx/device names the model. Fall back to Z28 if missing.
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
@@ -110,26 +99,31 @@ else
 fi
 export PLATFORM_FAMILY
 
-if [ -n "$PLATFORM_FAMILY" ]; then
-    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
-else
-    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
+platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_config" ]; then
+    platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
 fi
-. "/mnt/SDCARD/spruce/scripts/device_functions.sh"
+[ ! -f "$platform_config" ] || . "$platform_config"
+
+# Ensure all methods are defined, and just logged if missing
+. "/mnt/SDCARD/spruce/scripts/platform/device.sh"
+
+platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.sh"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_functions" ]; then
+    platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.sh"
+fi
+[ ! -f "$platform_functions" ] || . "$platform_functions"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 
 # Every name this device answers to in an Emu config.json "devices" list, most
-# specific first. Mirrors PyUI's Device.get_device_names(): almost every device
-# answers to one name, and the Anbernic XX line also answers to a family token
-# so a single config entry covers the whole line.
+# specific first. Mirrors PyUI's Device.get_device_names().
 #
 # MUST stay in step with App/PyUI/launch.sh, which passes these same names to
 # PyUI as -device. When the two disagree, the UI writes the user's emulator
 # choice into one menuOption and the launcher reads a different one - which is
-# exactly the bug this exists to prevent. Defined here, after the device
-# functions are sourced, because the Mini resolves its variant at runtime.
+# exactly the bug this exists to prevent.
 device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
@@ -328,21 +322,6 @@ calculate_progress_percent() {
     printf '%s\n' "$percent"
 }
 
-format_firstboot_extract_progress_text() {
-    completed="${1:-0}"
-    total="${2:-0}"
-    percent="$(calculate_progress_percent "$completed" "$total")"
-    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
-}
-
-display_firstboot_extract_progress() {
-    completed="${1:-0}"
-    total="${2:-0}"
-    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
-
-    start_pyui_message_writer
-    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
-}
 
 # Add a flag
 # Usage: flag_add "flag_name"
@@ -359,35 +338,7 @@ flag_add() {
 # Check if a flag exists
 # Usage: flag_check "flag_name"
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
-# that shows a message through PortMasterDialog.txt) puts its FIFOs under
-# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
-# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
-# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
-# mounted there each boot; nothing on the device's flash is touched. No-op
-# on firmware that already mounts one (Flip, Debian bases).
-ensure_dev_fd() {
-    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
-        _dev="/dev/${_pair%%:*}"
-        [ -e "$_dev" ] && continue
-        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
-            && log_message "Linked $_dev (stock firmware had none)" \
-            || log_message "Could not create $_dev"
-    done
-}
 
-ensure_dev_shm() {
-    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
-        return 0
-    fi
-    mkdir -p /dev/shm 2>/dev/null || return 1
-    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
-        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
-    else
-        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
-        return 1
-    fi
-}
 
 # Move the contents of $1 into $2, merging shared subdirs. Rename-based.
 merge_dir() {
@@ -411,14 +362,6 @@ flag_check() {
     else
         return 1
     fi
-}
-
-# Get the full path to a flag file
-# Usage: flag_path "flag_name"
-# Returns the full path to the flag file (with .lock extension)
-flag_path() {
-    local flag_name="$1"
-    echo "$FLAGS_DIR/${flag_name}.lock"
 }
 
 # Remove a flag
@@ -1008,6 +951,12 @@ json_escape() {
         -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
 }
 
+# The UI language, saved card-wide by PyUI (PyUiConfig.get_language); empty
+# when none was picked.
+get_ui_language() {
+    jq -r '.language // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null
+}
+
 log_and_display_message(){
     log_message "$1"
     display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$(json_escape "$1")")"
@@ -1420,36 +1369,6 @@ export_sdl_gamecontroller_map() {
 
 ##### WIFI HANDLING #####
 
-disable_wifi() {
-    rm -f /tmp/wifion           2>/dev/null
-    touch /tmp/wifioff          2>/dev/null
-    # A host that owns the radio (NetworkManager on the RGB30) runs its own
-    # supplicant and DHCP client and has no ifconfig; killing its supplicant
-    # would break it, so only the power call below applies there.
-    if ! device_manages_own_wifi; then
-        ifconfig wlan0 down         2>/dev/null
-        killall -9 wpa_supplicant   2>/dev/null
-        # Stop whichever client this device actually started. Naming udhcpc here
-        # only works for as long as every device uses udhcpc; a device that
-        # overrides device_start_dhcp_client would have been left with its client
-        # still holding the interface after "WiFi off".
-        device_stop_dhcp_client
-    fi
-    log_message "WiFi turned off"
-    device_wifi_power_off
-}
-
-# Read the -c argument out of a running wpa_supplicant's cmdline. Accepts both
-# "-c /path" and "-cpath"; prints nothing if there is no -c.
-wpa_conf_path_of_pid() {
-    [ -n "$1" ] || return 0
-    tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | awk '
-        prev == "-c" { print; exit }
-        /^-c./       { sub(/^-c/, ""); print; exit }
-        { prev = $0 }
-    '
-}
-
 # Merge the network blocks of another wpa_supplicant.conf into ours, skipping
 # any SSID we already have. Used when taking the radio over from whatever
 # brought it up before us.
@@ -1504,124 +1423,7 @@ import_wpa_networks_from() {
     rm -f "$TMP_IMPORT"
 }
 
-enable_wifi() {
-    # A device without a radio has nothing to power, recover, associate or
-    # lease. Refusing here covers every path in, since they all go through wifi.sh.
-    if ! wifi_available_on_device; then
-        log_message "WiFi: enable requested on a device without a radio - ignored"
-        return 1
-    fi
 
-    device_wifi_power_on
-
-    # power_on may have just discovered the radio is unusable (a module that
-    # refuses to load marks the session radio-less); stop before building a
-    # supplicant/DHCP stack on a wlan0 that cannot exist.
-    if ! wifi_available_on_device; then
-        log_message "WiFi: radio became unavailable during power-on - stopping"
-        return 1
-    fi
-
-    # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
-    # not - the radio fails to enumerate and the interface is never created -
-    # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
-    # nothing. Give the device a chance to bring it back first.
-    if ! device_ensure_wifi_interface; then
-        log_message "WiFi: wlan0 did not come back - stopping"
-        return 1
-    fi
-
-    rm -f /tmp/wifioff          2>/dev/null
-    touch /tmp/wifion           2>/dev/null
-    ifconfig wlan0 up           2>/dev/null
-
-    # Some hosts own the radio themselves. On the RGB30 that is connman, which
-    # does association AND DHCP, so starting our own wpa_supplicant against it
-    # is two daemons fighting over one interface - the same class of mistake
-    # the Anbernic XX line made by running dhclient beside udhcpc.
-    if device_manages_own_wifi; then
-        log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
-        /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
-        device_extra_wifi_setup
-        return 0
-    fi
-
-    # Some radios take a moment to create wlan0 after their rail comes up
-    _wlan_wait=5
-    while [ ! -d /sys/class/net/wlan0 ] && [ "$_wlan_wait" -gt 0 ]; do
-        sleep 1
-        _wlan_wait=$((_wlan_wait - 1))
-    done
-    if [ ! -d /sys/class/net/wlan0 ]; then
-        log_message "WiFi: no wlan0 - not starting wpa_supplicant"
-        return 1
-    fi
-
-    # wpa_supplicant exits on a missing or unparseable config, and the menu then
-    # scans forever because wpa_cli has no daemon to ask.
-    wpa_conf_ensure
-
-    # Adopt networks from the places PyUI used to write before saved networks
-    # became card-global. Each path is somewhere on the handheld's own storage,
-    # so a card carrying a password from another device found nothing here and
-    # the user had to type it again.
-    #
-    # import_wpa_networks_from skips any SSID we already hold, so this is
-    # idempotent and runs every boot on purpose rather than once: it keeps
-    # working for someone who later joins a network through the stock firmware
-    # UI, which still writes these files. Absent paths cost nothing.
-    #
-    # Deliberately NOT including the vendor /etc/wifi/wpa_supplicant.conf - the
-    # takeover below already imports from whatever supplicant is running, and
-    # the vendor file can hold factory defaults we do not want to adopt.
-    for _legacy_conf in $WPA_LEGACY_CONFS; do
-        [ -f "$_legacy_conf" ] && import_wpa_networks_from "$_legacy_conf"
-    done
-
-    # check if WPA supplicant needs to be started or restarted
-    # pgrep can return SEVERAL pids: a stale supplicant from a previous config
-    # and a fresh one can both match. The old single-pid form redirected
-    # /proc/$WPA_PID/cmdline with a multi-word variable, which fails outright,
-    # so a wrong-config supplicant survived and the UI never associated.
-    WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
-    if [ -n "$WPA_PID" ]; then
-        WPA_CORRECT_RUNNING=0
-        for wpa_pid in $WPA_PID; do
-            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
-            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-                WPA_CORRECT_RUNNING=1
-            else
-                # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
-                # that is the OS underneath us, and it is very likely ASSOCIATED
-                # RIGHT NOW. spruce takes ownership here by design, but taking it by
-                # killing that process and starting ours against a config that may
-                # hold no networks at all just drops a working connection, and the
-                # user sees WiFi die a few seconds into boot for no reason.
-                #
-                # Carry its networks across first, then take over.
-                log_message "wpa_supplicant $wpa_pid using wrong config; taking over with $WPA_SUPPLICANT_FILE"
-                import_wpa_networks_from "$(wpa_conf_path_of_pid "$wpa_pid")"
-                kill -9 "$wpa_pid" 2>/dev/null
-            fi
-        done
-        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
-            log_message "wpa_supplicant was running with the correct conf file already"
-        else
-            sleep 1
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-            log_message "wpa_supplicant was running with the wrong conf so restarted"
-        fi
-    else    # wpa_supplicant was not running at all, so start it
-        wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-        log_message "Launching wpa_supplicant"
-    fi
-    device_start_dhcp_client
-    /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
-    log_message "WiFi turned on"
-
-    device_extra_wifi_setup
-    return 0
-}
 
 # Does this device have a WiFi radio at all? A STATIC hardware question,
 # deliberately separate from device_wifi_is_available: that older hook answers

@@ -14,6 +14,7 @@
     "cheevosRemoveCmd":"/mnt/SDCARD/spruce/scripts/raproxyRemoveCached.sh",
     "raproxyCliCmd":"/mnt/SDCARD/spruce/scripts/raproxyCli.sh",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
+    "sharedSystemConfig":"/mnt/SDCARD/Saves/spruce/shared-system.json",
     "screensaverTimeoutSec": 120,
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "shutdownImage":"/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png",

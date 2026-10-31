@@ -335,6 +335,10 @@ class Language:
         return cls._data.get("Collections","Collections")
 
     @classmethod
+    def stock_os_menu(cls):
+        return cls._data.get("stockOsMenu","Stock OS Menu")
+
+    @classmethod
     def show_app(cls):
         return cls._data.get("showApp","Show App")
 

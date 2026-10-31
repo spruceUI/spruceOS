@@ -1,9 +1,7 @@
 #!/bin/sh
 
-# Intended to be sourced by helperFunctions.sh but NOT anywhere else
-# It relies on functions inside helperFunctions.sh to operate properly
-# (Not everything was cleanly broken apart since this is a refactor, in the future
-#  we can try to make the file import chain cleaner)
+# Intended to be sourced by helperFunctions.sh but NOT anywhere else.
+# It relies on functions inside helperFunctions.sh to operate properly.
 
 get_python_path() {
     log_message "Missing get_python_path function"
@@ -158,8 +156,24 @@ setup_for_retroarch(){
     log_message "Missing setup_for_retroarch function"
 }
 
+send_virtual_key_L3() {
+    log_message "Missing send_virtual_key_L3 function"
+}
+
+send_virtual_key_L3R3() {
+    log_message "Missing send_virtual_key_L3R3 function"
+}
+
 send_menu_button_to_retroarch() {
     log_message "Missing send_menu_button_to_retroarch function"
+}
+
+pause_emulators() {
+    log_message "Missing pause_emulators function"
+}
+
+unpause_emulators() {
+    log_message "Missing unpause_emulators function"
 }
 
 prepare_for_pyui_launch(){
@@ -175,12 +189,21 @@ launch_startup_watchdogs(){
     launch_common_startup_watchdogs_v2
 }
 
+set_loading_screen() {
+    log_message "Missing set_loading_screen function"
+}
+
 A30_notify_about_FW_update_if_needed(){
     log_message "Device is not an A30. Nothing to do for A30_notify_about_FW_update_if_needed." -v
 }
 
 check_if_fw_needs_update() {
     log_message "Missing check_if_fw_needs_update function"
+}
+
+# Report the device firmware version, when the platform exposes one.
+device_get_fw_version() {
+    log_message "Missing device_get_fw_version function"
 }
 
 # The newest update file for this device's base OS put on the card by hand, if any.
@@ -194,6 +217,10 @@ take_screenshot() {
 
 get_sftp_service_name() {
     log_message "Missing get_sftp_service_name function"
+}
+
+get_ssh_service_name() {
+    log_message "Missing get_ssh_service_name function"
 }
 
 # May battery_level_watchdog.sh force a shutdown when the gauge reads 1 % or less?
@@ -219,8 +246,40 @@ device_init() {
     log_message "Missing device_init function"
 }
 
+init_gpio_a133p() {
+    log_message "Missing init_gpio_a133p function"
+}
+
+device_init_a133p() {
+    log_message "Missing device_init_a133p function"
+}
+
+device_delay_then_check_trimui_blobs() {
+    log_message "Missing device_delay_then_check_trimui_blobs function"
+}
+
+device_run_tsps_blobs() {
+    log_message "Missing device_run_tsps_blobs function"
+}
+
+device_run_boot_thermal_process() {
+    log_message "Missing device_run_boot_thermal_process function"
+}
+
+device_run_thermal_process() {
+    log_message "Missing device_run_thermal_process function"
+}
+
+device_stop_thermal_process() {
+    log_message "Missing device_stop_thermal_process function"
+}
+
 set_event_arg_for_idlemon() {
     log_message "Missing set_event_arg_for_idlemon function"
+}
+
+set_event_arg() {
+    log_message "Missing set_event_arg function"
 }
 
 # The pad's js node carries buttons and axes but not the rumble (EV_FF)
@@ -257,10 +316,35 @@ get_volume_level() {
     log_message "Missing get_volume_level function"
 }
 
+get_current_volume_level() {
+    log_message "Missing get_current_volume_level function"
+}
+
 # Arg1: Sets the volume on a scale of 0-20
 # Arg2: (optional) 'true' to save to config, anything else to not save
 set_volume() {
     log_message "Missing set_volume function"
+}
+
+set_volume_delta() {
+    log_message "Missing set_volume_delta function"
+}
+
+# Current device backlight value and setter, used by the brightness shortcuts.
+current_backlight() {
+    log_message "Missing current_backlight function"
+}
+
+get_backlight_level() {
+    log_message "Missing get_backlight_level function"
+}
+
+set_backlight() {
+    log_message "Missing set_backlight function"
+}
+
+device_resume_backlight() {
+    log_message "Missing device_resume_backlight function"
 }
 
 device_backlight_down() {
@@ -283,6 +367,36 @@ work_led_off() {
     log_message "Missing work_led_off function"
 }
 
+work_led_on() {
+    log_message "Missing work_led_on function"
+}
+
+# Optional hardware capability and connection probes.
+has_lid() {
+    log_message "Missing has_lid function"
+    return 1
+}
+
+has_rgb_leds() {
+    log_message "Missing has_rgb_leds function"
+    return 1
+}
+
+has_v4_screen() {
+    log_message "Missing has_v4_screen function"
+    return 1
+}
+
+device_hdmi_connected() {
+    log_message "Missing device_hdmi_connected function"
+    return 1
+}
+
+device_headphones_connected() {
+    log_message "Missing device_headphones_connected function"
+    return 1
+}
+
 # 'Discharging', 'Charging', or 'Full' are possible values. Mind the capitalization.
 device_get_charging_status() {
     log_message "Missing device_get_charging_status function"
@@ -294,6 +408,10 @@ device_get_battery_percent() {
 
 device_enter_sleep() {
     log_message "Missing device_enter_sleep"
+}
+
+trigger_device_sleep() {
+    log_message "Missing trigger_device_sleep function"
 }
 
 device_exit_sleep() {
@@ -378,11 +496,29 @@ device_manages_own_wifi() {
 }
 
 device_wifi_power_on() { 
-    log_message "Missing device_wifi_power_on function" -v
+    log_message "Missing device_wifi_power_on function"
 }
 
 device_wifi_power_off() {
-    log_message "Missing device_wifi_power_off function" -v
+    log_message "Missing device_wifi_power_off function"
+}
+
+device_has_wifi_radio() {
+    log_message "Missing device_has_wifi_radio function"
+    return 1
+}
+
+device_wifi_is_available() {
+    log_message "Missing device_wifi_is_available function"
+    return 1
+}
+
+device_usb_wifi_onboard_release() {
+    log_message "Missing device_usb_wifi_onboard_release function"
+}
+
+device_usb_wifi_onboard_restore() {
+    log_message "Missing device_usb_wifi_onboard_restore function"
 }
 
 # Give a device a chance to bring its wireless interface back when it is not
@@ -536,7 +672,7 @@ device_wifi_watchdog_enabled() {
 device_system_handles_sdcard_unmount() {
     # return 0 = true
     # return non-zero = false
-    log_message "Missing device_system_handles_sdcard_unmount function, assuming it does" -v
+    log_message "Missing device_system_handles_sdcard_unmount function; assuming it does" -v
     return 0
 }
 
@@ -599,129 +735,6 @@ device_on_bt_audio_route() {
 # it through App/PyUI/get-usb-audio-supported.sh. Default: off.
 device_usb_audio_supported() {
     return 1
-}
-
-# The route asound-setup.sh records: line 1 is the card as usb_audio_card sets
-# it, line 2 its volume control (may be empty). Absent when not routed to USB.
-USB_AUDIO_ROUTE=/tmp/usb_audio_route
-
-# Arg1: the card as usb_audio_card sets it, or nothing to clear the route.
-# Arg2: its volume control. Written whole, as PyUI and the volume keys read it
-# at any time.
-usb_audio_record_route() {
-    if [ -z "$1" ]; then
-        [ -e "$USB_AUDIO_ROUTE" ] && rm -f "$USB_AUDIO_ROUTE"
-        return 0
-    fi
-    printf '%s\n%s\n' "$1" "$2" > "$USB_AUDIO_ROUTE.$$" &&
-        mv "$USB_AUDIO_ROUTE.$$" "$USB_AUDIO_ROUTE"
-}
-
-# Sets usb_routed (the card as usb_audio_card sets it) and usb_routed_control;
-# both empty, and status 1, when not routed. Builtins only, as it runs on every
-# volume step and every watchdog poll.
-usb_audio_read_route() {
-    usb_routed=""
-    usb_routed_control=""
-    [ -s "$USB_AUDIO_ROUTE" ] || return 1
-    { read -r usb_routed; read -r usb_routed_control; } < "$USB_AUDIO_ROUTE"
-}
-
-# The sysfs path of the USB device a sound card belongs to: the parent of its
-# audio interface. Arg1: card.
-usb_audio_usb_device() {
-    _intf="$(readlink -f "/sys/class/sound/card$1/device" 2>/dev/null)"
-    [ -n "$_intf" ] && echo "${_intf%/*}"
-}
-
-# The input nodes of one class ("event", "js") on a USB device, space separated.
-# Arg1: the device's sysfs path. Arg2: the class.
-usb_audio_inputs() {
-    [ -n "$1" ] || return 0
-    _nodes=""
-    for _in in /sys/class/input/"$2"[0-9]*; do
-        case "$(readlink -f "$_in/device" 2>/dev/null)" in
-            "$1"/*) _nodes="$_nodes /dev/input/${_in##*/}" ;;
-        esac
-    done
-    echo "${_nodes# }"
-}
-
-# Sets usb_card to the first USB card that can play, as "<card> <device>
-# <usbbus>", or empty with status 1. A microphone has no Playback section in its
-# streamN. A gamepad with a headset jack registers a card too, so a card whose
-# USB device also has a joystick is skipped. usbbus changes on every enumeration,
-# so a replugged card differs at the same index. Polled by usb_audio_watchdog.sh:
-# with no USB card present it runs builtins only.
-# shellcheck disable=SC2034 # usb_card is for the caller
-usb_audio_card() {
-    usb_card=""
-    for _dir in /proc/asound/card[0-9]*; do
-        [ -e "$_dir/usbid" ] || continue
-        _card="${_dir##*/card}"
-        for _stream in "$_dir"/stream[0-9]*; do
-            grep -q '^Playback:' "$_stream" 2>/dev/null || continue
-            [ -n "$(usb_audio_inputs "$(usb_audio_usb_device "$_card")" js)" ] && break
-            _bus=""
-            read -r _bus < "$_dir/usbbus" 2>/dev/null
-            usb_card="$_card ${_stream##*/stream} $_bus"
-            return 0
-        done
-    done
-    return 1
-}
-
-# The card's playback volume control, found by capability because headsets name
-# it after themselves. A control named for the microphone is never taken: a "Mic"
-# with playback volume is the sidetone, and alsa-lib lists it ahead of unknown
-# names. A playback-only control is preferred, and one that also captures is the
-# fallback, as some headsets have only that.
-usb_audio_volume_control() {
-    amixer -c "$1" scontents 2>/dev/null | awk '
-        /^Simple mixer control / { sub(/^Simple mixer control /, ""); name = $0; next }
-        name != "" && /^ *Capabilities:/ {
-            play = 0; capture = 0
-            for (i = 2; i <= NF; i++) {
-                if ($i == "pvolume" || $i == "volume") play = 1
-                if ($i ~ /^c(volume|switch)/) capture = 1
-            }
-            if (play && tolower(name) !~ /mic|sidetone|monitor|capture/) {
-                if (!capture) { print name; found = 1; exit }
-                if (fallback == "") fallback = name
-            }
-            name = ""
-        }
-        END { if (!found && fallback != "") print fallback }'
-}
-
-# Arg1: card. Arg2: level 0-20. Arg3: the control, if known. Raw ranges differ
-# per device, so the level is a share of the range, and 0 also mutes where the
-# control has a switch. Writes name playback, or amixer moves a combined
-# control's capture side, the microphone gain, too.
-usb_audio_set_volume() {
-    _ctl="${3:-$(usb_audio_volume_control "$1")}"
-    [ -n "$_ctl" ] || return 0
-    _lvl="${2:-0}"
-    amixer -q -c "$1" sset "$_ctl" playback "$((_lvl * 5))%" >/dev/null 2>&1
-    if [ "$_lvl" -gt 0 ]; then
-        amixer -q -c "$1" sset "$_ctl" playback unmute >/dev/null 2>&1
-    else
-        amixer -q -c "$1" sset "$_ctl" playback mute >/dev/null 2>&1
-    fi
-    return 0
-}
-
-# The input nodes of a card's own remote (inline buttons, a crown): every input
-# device on its USB device, since some split their keys across nodes. Arg1: card.
-usb_audio_remote() {
-    usb_audio_inputs "$(usb_audio_usb_device "$1")" event
-}
-
-# Arg1: level 0-20, applied to the routed USB card, if any.
-usb_audio_follow_volume() {
-    usb_audio_read_route || return 0
-    [ -n "$usb_routed_control" ] || return 0
-    usb_audio_set_volume "${usb_routed%% *}" "$1" "$usb_routed_control"
 }
 
 # The connected audio device's MAC, if any.
@@ -807,7 +820,7 @@ device_get_hw_epoch() {
 device_extra_wifi_setup() {
     # Do these need to be unique per device? Don't have a way
     # to test currently
-    log_message "Missing device_extra_wifi_setup function" -v
+    log_message "Missing device_extra_wifi_setup function"
 }
 
 # Which DHCP client this device uses, and how to stop it.
@@ -836,7 +849,7 @@ device_stop_dhcp_client() {
 #
 # The on-card session supervisor calls these around runtime.sh. Defaults are
 # no-ops so every platform behaves exactly as before the supervisor existed;
-# a device opts in by overriding them in its device_functions file.
+# a device opts in by overriding them in its ${PLATFORM}.sh file.
 # ---------------------------------------------------------------------------
 
 # Extra preflight before runtime.sh is started. Return non-zero to refuse the
@@ -862,13 +875,21 @@ device_stock_ui_command() {
 }
 
 treat_dpad_as_analog() {
-     log_message "Missing treat_dpad_as_analog function, assuming it does not the capability" -v
+     log_message "Missing treat_dpad_as_analog function; assuming it does not the capability" -v
 }
 
 treat_dpad_as_dpad() { 
-     log_message "Missing treat_dpad_as_dpad function, assuming it does not the capability" -v
+     log_message "Missing treat_dpad_as_dpad function; assuming it does not the capability" -v
 }
 
 swap_dpad_analog_toggle() { 
-    log_message "Missing swap_dpad_analog_toggle function, assuming it does not the capability" -v
+    log_message "Missing swap_dpad_analog_toggle function; assuming it does not the capability" -v
+}
+
+enable_dpad_to_analog() {
+    log_message "Missing enable_dpad_to_analog function"
+}
+
+enable_dpad_to_mouse() {
+    log_message "Missing enable_dpad_to_mouse function"
 }

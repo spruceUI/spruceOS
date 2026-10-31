@@ -70,7 +70,7 @@ mode_clock_mhz() {
     esac
 }
 
-# Models opt in from device_functions/miyoomini/ once measured (the Mini Plus has); the rest
+# Models opt in from platform/miyoomini/ once measured (the Mini Plus has); the rest
 # drop the file spruce wrote, so a card moved from a Plus does not pin another model's clock.
 pin_ra_cpuclock() {
     if grep -qF "$RA_CPUCLOCK_MARK" "$RA_CPUCLOCK_FILE" 2>/dev/null; then
@@ -78,7 +78,7 @@ pin_ra_cpuclock() {
     fi
 }
 
-# Per-model boot quirks; device_functions/miyoomini/$MINI_MODEL.sh overrides it
+# Per-model boot quirks; platform/miyoomini/$MINI_MODEL.sh overrides it
 mini_model_init() {
     :
 }

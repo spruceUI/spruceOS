@@ -2,6 +2,22 @@
 
 FIRSTBOOT_PROGRESS_STATE_FILE="${FIRSTBOOT_PROGRESS_STATE_FILE:-/tmp/firstboot_extract_progress_state}"
 
+format_firstboot_extract_progress_text() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    percent="$(calculate_progress_percent "$completed" "$total")"
+    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
+}
+
+display_firstboot_extract_progress() {
+    completed="${1:-0}"
+    total="${2:-0}"
+    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
+
+    start_pyui_message_writer
+    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
+}
+
 firstboot_progress_write_state() {
     total_value="$1"
     completed_value="$2"

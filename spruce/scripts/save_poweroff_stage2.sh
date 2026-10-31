@@ -1,9 +1,7 @@
 #!/bin/sh
 
-# This script is intended to be copied to /tmp/ at the end of the original
-# save_poweroff.sh, and handle the final unmounting of the SD card before
-# finally shutting down.
-# Use only system binaries — NOT anything on the SD card we're about to unmount.
+# Runs from /tmp to unmount the SD card and finish shutdown.
+# Use system binaries only; the card will be unmounted.
 export PATH=/usr/bin:/usr/sbin:/bin:/sbin
 unset LD_LIBRARY_PATH
 cd /tmp
@@ -18,17 +16,9 @@ for fd in $(ls /proc/$$/fd 2>/dev/null | grep -E '^[3-9][0-9]*$'); do
     eval "exec ${fd}>&-" 2>/dev/null
 done
 
-# Everything below that departs from the shutdown spruce shipped for years is
-# gated on this. save_poweroff.sh asks the device layer and hands the answer
-# over in the environment, because by the time this script runs the card is
-# about to go and the device functions are on it.
-#
-# Default off. This is the last script that runs before the power is cut: a
-# device that had a working shutdown keeps exactly the code it had, and opts in
-# only once someone has tested the strict path on that hardware.
+# New shutdown paths are opt-in; defaults preserve existing behavior.
 STRICT_UNMOUNT="${SPRUCE_STRICT_UNMOUNT:-0}"
-# Whether init can service `poweroff`/`reboot` at all on this device (see
-# device_power_transition_bypasses_init in device.sh). Default off.
+# Whether init handles power commands on this device. Default off.
 FORCE_POWER_TRANSITION="${SPRUCE_FORCE_POWER_TRANSITION:-0}"
 # USB Storage Mode export session (App/USBStorageMode/usb_gadget.sh): after
 # the clean unmount below, export the card, wait for A or the cable, release,
@@ -40,48 +30,14 @@ SYSRQ_TRIGGER="${SPRUCE_SYSRQ_TRIGGER:-/proc/sysrq-trigger}"
 MOUNTINFO="${SPRUCE_MOUNTINFO:-/proc/self/mountinfo}"
 SYS_BLOCK="${SPRUCE_SYS_BLOCK:-/sys/block}"
 
-# ...and stdin/stdout/stderr, which that loop deliberately skips. They are
-# inherited too, and whatever launched the shutdown decides where they point -
-# the menu, the power button watchdog and an ssh session all differ. If any of
-# them lands on a file on the card then this script is itself holding the
-# filesystem open, and the umount below fails with EBUSY and degrades to a lazy
-# one that never marks the filesystem clean. That is what made the failure
-# intermittent: it depended on how the shutdown was started, not on anything
-# this script does.
-#
-# Nothing here needs them, but they must not simply be thrown away either: this
-# script sends the device to sleep for good, so if it goes wrong there is no
-# session left to ask and nothing on the card to read. Sending everything to
-# /dev/null made the whole shutdown unobservable - a report of "power off does
-# not work" could not be told apart from "the unmount failed" or "the kill loop
-# stalled".
-#
-# Log to a filesystem that is emphatically NOT the card: an open descriptor
-# there is precisely what makes the umount below fail. /data is a separate
-# partition under BaseOS and outlives the power cycle, so the next boot can fold
-# this into the spruce log and a bug report carries it; /tmp is the fallback and
-# at least survives long enough to be read over ssh.
+# In strict mode, detach inherited streams before logging: they may point to
+# the card and prevent unmounting. Keep logs on another filesystem.
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     exec </dev/null >/dev/null 2>&1
 fi
-# Where the card is actually mounted.
-#
-# This used to be guessed from /proc/cpuinfo, which is wrong wherever the mount
-# point is a symlink: on BaseOS /mnt/SDCARD is a symlink to /mnt/sdcard, and
-# every check below reads /proc/mounts, which always reports the resolved path.
-# The guess returned /mnt/SDCARD there, so `$2 == mp` matched no mount line, the
-# fd comparison matched no process, and this script killed nothing and unmounted
-# nothing while reporting success.
-#
-# Resolve it instead: take the mount point of the device we were told about,
-# preferring the shortest, since the same device can be mounted more than once
-# (spruce binds the card's own python onto .../bin/MainUI, which is a second
-# entry for the same device - remounting or unmounting that bind is not the
-# same as doing it to the filesystem).
-#
-# $SD_MOUNTPOINT and $SD_DEV are exported by the platform cfg and inherited from
-# save_poweroff.sh; the cpuinfo cases are kept only as a last resort for a device
-# that somehow reaches here with neither set.
+# Resolve the card's actual mount point from its device, preferring the shortest
+# match because the same device may also have bind mounts. Fall back to the
+# configured path, then cpuinfo for older callers without exported values.
 resolve_sd_mountpoint() {
     if [ -n "$SD_DEV" ]; then
         _m=$(awk -v d="$SD_DEV" '$1 == d {print length($2), $2}' /proc/mounts \
@@ -89,8 +45,7 @@ resolve_sd_mountpoint() {
         [ -n "$_m" ] && { echo "$_m"; return; }
     fi
 
-    # Fall back to the configured path, resolved through any symlink, but only
-    # if the kernel agrees it is a mount point.
+    # Resolve symlinks and accept the path only if it is a mount point.
     if [ -n "$SD_MOUNTPOINT" ]; then
         _r=$(readlink -f "$SD_MOUNTPOINT" 2>/dev/null)
         if [ -n "$_r" ] && awk -v m="$_r" '$2 == m {found=1} END{exit !found}' /proc/mounts; then
@@ -106,9 +61,7 @@ resolve_sd_mountpoint() {
     esac
 }
 
-# Who still holds the card. Only ever called after a failed clean umount, so
-# the cost is irrelevant and the answer is the whole point: without it a
-# "clean umount FAILED" line names nothing (SPR-MED-199).
+# Report remaining card holders when a clean unmount fails.
 stage2_dump_holders() {
     _re="$(stage2_card_maps_re)"
     echo "stage2: holders of $SD_MOUNTPOINT after the sweep:"
@@ -140,7 +93,7 @@ stage2_dump_holders() {
         case "$_why" in "" | " (stage2 itself)") ;; *)
             echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) $(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)$_why" ;;
         esac
-        # A killed process stuck exiting (in a driver, say) can hold the card with no readable links.
+        # Blocked or exiting processes may still hold the card without visible links.
         readlink "$_pp/exe" >/dev/null 2>&1 || continue
         case "$(awk '/^State/{print $2}' "$_pp/status" 2>/dev/null)" in D|Z|X)
             echo "  pid $_pid $(cat "$_pp/comm" 2>/dev/null) exiting/blocked, wchan $(cat "$_pp/wchan" 2>/dev/null)" ;;
@@ -152,8 +105,7 @@ stage2_dump_holders() {
         echo "  loop /dev/$_l ($_d) <- $(cat "$SYS_BLOCK/$_l/loop/backing_file" 2>/dev/null)"
     done
     stage2_dependent_mounts | sed 's/^/  dependent mount /'
-    # What is still alive at all: a holder through a detached mount (an overlay
-    # whose upper sits on a card loop) shows no card path anywhere.
+    # Include live processes that hold the card through detached mounts.
     for _pp in /proc/[0-9]*; do
         _e=$(readlink "$_pp/exe" 2>/dev/null) || continue
         echo "  proc ${_pp#/proc/} ppid $(awk '/^PPid/{print $2}' "$_pp/status" 2>/dev/null) $(cat "$_pp/comm" 2>/dev/null) exe=$_e cwd=$(readlink "$_pp/cwd" 2>/dev/null)"
@@ -161,8 +113,7 @@ stage2_dump_holders() {
     echo "stage2: end of holders"
 }
 
-# True when a path resolves onto the card's device (stock Flip: /data -> userdata,
-# which spruce binds from the card). Longest mount prefix wins; the last of equals is on top.
+# True if a path resolves to the card's device. The longest mount prefix wins.
 stage2_on_card() {
     _p=$(readlink -f "$1" 2>/dev/null) || return 1
     awk -v p="$_p/" -v mp="$SD_MOUNTPOINT" '
@@ -171,8 +122,7 @@ stage2_on_card() {
         END { exit !(card != "" && src == card) }' /proc/mounts
 }
 
-# Mirror a line into the kernel log: stock Flips keep it across a warm reboot
-# (console-ramoops). <2> so it reaches the console past device_init's printk level 3.
+# Mirror lines to the kernel log, which survives warm reboot on stock Flip.
 stage2_kmsg() {
     echo "<2>spruce stage2: $*" > /dev/kmsg 2>/dev/null
 }
@@ -186,7 +136,7 @@ stage2_wait() {
     done
 }
 
-# Uptime in hundredths of a second ("1" + the decimals - 100: no octal from a leading zero).
+# Uptime in hundredths of a second, avoiding octal parsing of leading zeros.
 stage2_uptime_cs() {
     read -r _w_up _w_rest < /proc/uptime
     echo $(( ${_w_up%.*} * 100 + 1${_w_up#*.} - 100 ))
@@ -206,8 +156,7 @@ stage2_card_loops() {
     done
 }
 
-# The card's device and its loops' devices as maps prints them (hex major:minor),
-# joined for grep -E. Finds files mapped through binds, e.g. the glibc on /usr/lib.
+# Regex of the card and loop device IDs, as shown in process maps.
 stage2_card_maps_re() {
     {
         awk -v mp="$SD_MOUNTPOINT" '$5 == mp {print $3; exit}' "$MOUNTINFO" 2>/dev/null
@@ -215,9 +164,7 @@ stage2_card_maps_re() {
     } | awk -F: 'NF == 2 {printf "%s%02x:%02x", (n++ ? "|" : ""), $1, $2}'
 }
 
-# Mount points that keep the card busy, newest first: mounts inside it, other
-# mounts of its device, loop filesystems backed by its files, overlays using it,
-# and everything mounted on top of those (by parent id, so same-path binds elsewhere stay).
+# Card-dependent mount points, newest first, including stacked mounts.
 stage2_dependent_mounts() {
     _loops=" $(stage2_card_loops | awk '{printf "/dev/%s ", $1}')"
     awk -v mp="$SD_MOUNTPOINT" -v dev="$SD_DEV" -v loops="$_loops" -v what="$1" '
@@ -242,8 +189,7 @@ stage2_dependent_mounts() {
         }' "$MOUNTINFO" 2>/dev/null
 }
 
-# Pids whose exe or cwd was reached through a mount in $STAGE2_DEP_IDS: opened here, the link carries
-# that mount and our own fdinfo names it. Builtins only; a failed open just skips, quietly: 2>/dev/null comes first.
+# Find processes whose executable or cwd belongs to a dependent mount.
 stage2_link_mnt_pids() {
     for _pp in /proc/[0-9]*; do
         for _link in exe cwd; do
@@ -257,11 +203,7 @@ stage2_link_mnt_pids() {
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     SD_MOUNTPOINT="$(resolve_sd_mountpoint)"
 else
-    # The original guess, unchanged. Correct on every device that was shipping
-    # this before the XX work: their configured mount point is not behind a
-    # symlink, so what cpuinfo returns is what /proc/mounts reports.
-    #
-    # Flip and TSPS have nonstandard mount points.
+    # Preserve the legacy cpuinfo-based mount-point selection.
     INFO=$(cat /proc/cpuinfo 2> /dev/null)
     case $INFO in
         *"TG5050"*)	 SD_MOUNTPOINT="/mnt/sdcard/mmcblk1p1"	;;
@@ -270,8 +212,7 @@ else
     esac
 fi
 
-# Inherited fds on the card would make this process its own holder. The loop at the
-# top skips 10 and up because the shell reads this script through one of those.
+# Close inherited card fds so this process does not hold the mount open.
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     for _fd in /proc/$$/fd/*; do
         _n="${_fd##*/}"
@@ -280,10 +221,8 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     done
 fi
 
-# This process must not pin what it tears down: a dynamic shell maps the libc bound
-# from a card loop, and on the BaseOS Flip even a static one runs out of the /usr
-# overlay whose upper is a card loop. Re-run under a static copy in /tmp.
-# Named busybox: it takes its applet from argv[1] only under that name.
+# Re-run from a static BusyBox copy in /tmp so this process does not pin the card
+# through its shell, libraries, or the BaseOS /usr overlay.
 STAGE2_BUSYBOX=/tmp/save_poweroff_stage2/busybox
 if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
     if mkdir -p "${STAGE2_BUSYBOX%/*}" && cp "$SD_MOUNTPOINT/spruce/bin64/busybox" "$STAGE2_BUSYBOX" 2>/dev/null &&
@@ -293,14 +232,8 @@ if [ "$STRICT_UNMOUNT" = "1" ] && [ -z "$STAGE2_STATIC_SHELL" ]; then
     fi
 fi
 
-# Now that the card's mount point is known, reopen stdout/stderr on a log
-# file that is NOT on the card - chosen here rather than above precisely so it
-# can be checked against the mount point. On every path, strict or not: a
-# shutdown that leaves no trace cannot be told apart from one that never ran,
-# and "did the umount succeed" is the one fact the next boot needs
-# (SPR-MED-199). /data and /mnt/data are separate partitions under BaseOS,
-# /mnt/UDISK is the TrimUI eMMC; /tmp is the fallback and at least survives
-# long enough to be read over ssh.
+# Log off-card so the descriptor cannot block unmounting; use /tmp if no
+# separate writable filesystem is available.
 STAGE2_LOG=/tmp/save_poweroff_stage2.log
 for _d in /data /mnt/data /mnt/UDISK; do
     case "$_d" in "$SD_MOUNTPOINT"|"$SD_MOUNTPOINT"/*) continue ;; esac
@@ -323,22 +256,9 @@ if [ -n "$STAGE2_STATIC_SHELL" ]; then
     echo "stage2: re-run under $STAGE2_STATIC_SHELL"
     stage2_kmsg "re-run under $STAGE2_STATIC_SHELL, log $STAGE2_LOG"
 fi
-# Anything that pins the filesystem has to go, or the umount below silently
-# degrades to a lazy one: `umount -l` detaches the mount from the namespace, so
-# /proc/mounts looks clean, but the superblock lives on until the last reference
-# drops - which means fat_put_super never runs and the dirty bit is never
-# cleared. It looks exactly like success and is not.
-#
-# An open file descriptor is only one way to pin it. A process *executing* a
-# binary from the card - dropbearmulti, darkhttpd, anything spruce launched -
-# holds it through its exe mapping with no fd at all, and a process merely
-# sitting in a directory holds it through cwd. Checking only fd/ misses both,
-# which is why the plain umount kept failing.
-# The sweep, as a function: the strict path runs it again between umount
-# retries, because a holder can appear AFTER the first pass - a watchdog's
-# getevent respawned in the instant between its parent being killed and
-# the loop reaching it (measured on the Smart Pro S, 2026-09-05: the one
-# holder left after the sweep was an orphaned getevent with no card fd).
+# Kill processes holding the card through open files, cwd, or executable
+# mappings; otherwise unmount may fall back to lazy detach and leave it dirty.
+# Strict mode repeats the sweep between retries to catch newly spawned holders.
 stage2_kill_holders() {
     if [ "$STRICT_UNMOUNT" = "1" ]; then
         # Logged even when the umount then succeeds: which processes held the card.
@@ -357,7 +277,7 @@ stage2_kill_holders() {
     for pidpath in /proc/[0-9]*; do
         pid="${pidpath#/proc/}"
 
-        # Never kill init (pid 1) or ourselves
+        # Never kill init or this script.
         [ "$pid" -le 1 ] && continue
         [ "$pid" = "$$" ] && continue
 
@@ -370,9 +290,7 @@ stage2_kill_holders() {
     done
 }
 
-# Pids holding the card by open fd, cwd, exe or a mapped file. Strict path only.
-# One ls and one grep for every process; the loop above forked per process and
-# took ~5 s a pass on the Smart Pro S, and it runs at least twice.
+# Find strict-mode holders by fd, cwd, executable, or mapped file.
 stage2_holder_pids() {
     {
         ls -l /proc/[0-9]*/cwd /proc/[0-9]*/exe /proc/[0-9]*/root /proc/[0-9]*/fd/ 2>/dev/null | awk -v mp="$SD_MOUNTPOINT/" -v root="$SD_MOUNTPOINT" '
@@ -389,7 +307,7 @@ stage2_holder_pids() {
         grep -l " $SD_MOUNTPOINT/" /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
         _re="$(stage2_card_maps_re)"
         [ -n "$_re" ] && grep -l -E " ($_re) " /proc/[0-9]*/maps 2>/dev/null | awk -F/ '{print $3}'
-        # Through a mount that depends on the card (spruce's /usr overlay): no card path, only its mnt_id.
+        # Dependent mounts may expose only their mount ID, not a card path.
         if [ -n "$STAGE2_DEP_IDS" ]; then
             grep -l -E "^mnt_id:[[:space:]]+($(echo $STAGE2_DEP_IDS | tr ' ' '|'))\$" /proc/[0-9]*/fdinfo/* 2>/dev/null | awk -F/ '{print $3}'
             stage2_link_mnt_pids
@@ -416,9 +334,8 @@ awk -v mp="$SD_MOUNTPOINT/" 'NR > 1 && index($1, mp) == 1 {print $1}' /proc/swap
     swapoff "$swap" 2>/dev/null
 done
 
-# Strict: tear down by mountinfo parentage, newest first, so stacked mounts go
-# before their parents; whatever stays busy is detached lazily. Measured on a
-# BaseOS Flip (2026-10-17): the steps below left the 32-bit chroot, muOS and ext4 loops.
+# Strict mode removes dependent mounts newest-first, then lazily detaches any
+# remaining mounts and releases their loop devices.
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     for _pass in 1 2 3; do
         stage2_dependent_mounts | while read -r mnt; do umount "$mnt" 2>/dev/null; done
@@ -435,14 +352,8 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
     # (while still in use) let the kernel clear it on last close.
     stage2_card_loops | while read -r _l _d; do losetup -d "/dev/$_l" 2>/dev/null; done
 else
-# Tear down all mounts that depend on the SD card.
-# On the Flip, this includes:
-#   - ~25 squashfs loop mounts from /mnt/sdcard/spruce/flip/*.sqsh → /usr/lib/*
-#   - An overlay on /usr with upperdir on /mnt/SDCARD/Persistent/...
-#   - A duplicate mount of the same device at /userdata
-# All of these must be removed before the SD card can be cleanly unmounted.
-# 1. Squashfs loop mounts whose source file is on the SD card
-#    (also check /mnt/SDCARD in case of symlinks)
+# Legacy teardown of mounts backed by or sharing the SD card.
+# 1. Loop mounts whose source is on the card.
 awk '$1 ~ "^/mnt/sdcard/" || $1 ~ "^/mnt/SDCARD/" {print $2}' /proc/mounts | \
     sort -r | while read -r mnt; do
     umount "$mnt" 2>/dev/null || umount -l "$mnt" 2>/dev/null
@@ -460,23 +371,11 @@ if [ -n "$SD_DEV" ]; then
     done
 fi
 fi
-# 4. Now remount the SD card read-only (clears the filesystem dirty flag)
-#    and perform the final unmount.
+# 4. Remount read-only to clear the dirty flag, then unmount.
 mount -o remount,ro "$SD_MOUNTPOINT" 2>/dev/null
 sync
-# Plain umount first, and say so if it fails. The lazy fallback keeps the boot
-# path sane but does NOT flush or mark the filesystem clean, so a shutdown that
-# reaches it has not achieved what this script exists for.
-# Retry rather than giving up after one attempt. Killing a process with -9 does
-# not release its file references synchronously - the kernel tears the process
-# down in its own time - so an umount fired immediately after the kill loop can
-# fail with EBUSY on holders that are already dying. That timing is why the same
-# code produced a clean unmount on one shutdown and a lazy fallback on the next
-# with nothing else changed.
-#
-# The lazy fallback stays as the last resort so the power command is never
-# blocked, but it does NOT flush or mark the filesystem clean - it only detaches
-# the mount - so reaching it means the card is left dirty and we say so.
+# Retry clean unmounts because killed processes may still be releasing file
+# references. Lazy detach is only a fallback; it does not mark the card clean.
 if [ "$STRICT_UNMOUNT" = "1" ]; then
     umount_tries=0
     umount_ok=0
@@ -501,9 +400,7 @@ if [ "$STRICT_UNMOUNT" = "1" ]; then
         umount -l "$SD_MOUNTPOINT"
     fi
 else
-    # The original single attempt. Up to three seconds of retries is cheap
-    # insurance on a device that needs it and a delay on every shutdown for one
-    # that does not.
+    # Preserve the legacy single-attempt behavior.
     if umount "$SD_MOUNTPOINT" 2>/dev/null; then
         umount_ok=1
         echo "stage2: unmounted $SD_MOUNTPOINT cleanly (single attempt)"
@@ -515,15 +412,11 @@ else
     fi
 fi
 
-# USB Storage Mode: the card is unmounted and clean, nothing is left that runs
-# from it. Export it now and hold here until the user is done; the reboot
-# below is the exit. A session that cannot run (nothing staged, card still
-# mounted) falls straight through to the reboot rather than exporting.
+# Export only after a clean unmount; the USB session blocks until exit, then
+# shutdown reboots the device.
 if [ "$USB_EXPORT" = "1" ]; then
     echo "stage2: USB Storage Mode export session from $USB_SESSION_DIR"
-    # A lazy fallback takes the card out of /proc/mounts while its superblock
-    # lives on in whatever still holds it - exporting then is the very hazard
-    # this session exists to remove. Only a clean umount earns the export.
+    # Never export after lazy detach; the card may still be in use.
     if [ "${umount_ok:-0}" != "1" ]; then
         echo "stage2: the card did not unmount cleanly, not exporting it"
     elif [ -f "$USB_SESSION_DIR/usb_gadget.sh" ]; then
@@ -538,19 +431,9 @@ if [ "$USB_EXPORT" = "1" ]; then
     fi
 fi
 
-# Cut the power, and do not take "maybe" for an answer.
-#
-# `poweroff` and `reboot` only signal init and return; init then runs its
-# ::shutdown: actions and calls reboot(2). If any part of that wedges, this
-# script has already remounted the card read-only and unmounted it, AND every
-# path that would normally undo that is deliberately switched off - the
-# shutting_down flag makes runtime.sh exit at startup, and the shim keeps
-# BaseOS's session from remounting the card. The device is then on, blank, and
-# unable to write to its own storage until the user holds the power button.
-# "Power off does not work" and "card stuck read-only" are the same failure
-# reported twice, so escalate rather than trust the first command.
-#
-# MM v1-4 require the reboot command to power off properly.
+# Escalate if the power command fails: the card is already unmounted, and the
+# shutdown flags prevent the normal session from restoring it.
+# MM v1-4 require reboot to power off.
 if [ -d /customer/app ] && [ ! -e /customer/app/axp_test ]; then
     WANT_REBOOT=1
 elif [ "$1" = "--reboot" ] || [ "$USB_EXPORT" = "1" ]; then
@@ -560,14 +443,8 @@ else
 fi
 
 if [ "$FORCE_POWER_TRANSITION" = "1" ]; then
-    # init cannot service the plain applets here (Miniloong: rcS is held by the
-    # boot supervisor for the whole session), so `poweroff`/`reboot` would return
-    # having done nothing and the 10 s waits below would just be 10 s of a device
-    # that looks hung with its card unmounted. Take the filesystems down the
-    # REISUB way - enable sysrq, Sync, emergency remount-ro (works on a busy
-    # FAT where `mount -o remount,ro` returns EBUSY), Sync - then call the forced
-    # form, which is reboot(2) straight to the kernel. Sequence per Jawaka's
-    # device_mlp1.c, which measured FAT corruption on this board without it.
+    # Init cannot service power commands here. Use sysrq to sync and remount
+    # filesystems, then force the requested power transition.
     echo 1 > "$SYSRQ_CTL" 2>/dev/null
     sync
     echo s > "$SYSRQ_TRIGGER" 2>/dev/null
@@ -589,10 +466,7 @@ if [ "$FORCE_POWER_TRANSITION" = "1" ]; then
     fi
     stage2_wait 5
 elif [ "$STRICT_UNMOUNT" != "1" ]; then
-    # The original: issue the command and let init take it from there. Every
-    # device on this branch has been powering off this way for years, and the
-    # escalation below is only worth its risk where the recovery it protects
-    # against - a card left read-only by a wedged init - is reachable.
+    # Preserve the original init-managed power transition.
     if [ "$WANT_REBOOT" -eq 1 ]; then
         echo "stage2: rebooting (original path)"
         reboot
@@ -630,10 +504,7 @@ else
 fi
 fi
 
-# Still running. Recover rather than leave the user holding a device that cannot
-# write to its card: drop the shutdown flag so runtime.sh stops exiting at
-# startup and the shim steps aside on its next respawn, and put the card back
-# read-write ourselves in case the umount failed and only the remount took.
+# If all power commands fail, restore write access and clear the shutdown flag.
 echo "stage2: every power command failed - recovering so the card is not left read-only"
 mount -o remount,rw "$SD_MOUNTPOINT" 2>/dev/null
 rm -f /tmp/shutting_down.lock

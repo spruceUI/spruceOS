@@ -1171,6 +1171,7 @@ class Display:
             cls._copy_canvas_to_window(fade)
             cls.pace_frame()
             cls.renderer.present()
+            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
             cls._frame_presented()
             elapsed_ms = (time.perf_counter() - cls.start) * 1000
             present_elapsed_ms = (time.perf_counter() - present_start) * 1000
@@ -1202,8 +1203,10 @@ class Display:
             if(rotated_texture is not None):
                 sdl2.SDL_RenderCopy(cls.renderer.sdlrenderer, rotated_texture, None, None)
                 sdl2.SDL_DestroyTexture(rotated_texture)  # free GPU memory
-
-        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+        # Deliberately NOT resetting the render target to the canvas here: on SDL's
+        # opengl+wayland driver, switching the target away from the window before the swap
+        # stops the buffer from being committed, so the compositor never maps the window.
+        # Each caller presents first and resets to the canvas after presenting.
 
     @classmethod
     def present_farewell(cls):
@@ -1224,6 +1227,7 @@ class Display:
         )
         cls._copy_canvas_to_window()
         cls.renderer.present()
+        sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
 
     @classmethod
     def render_image_and_text(cls, image_path, text, height_percent, image_y_percent, text_y_percent):

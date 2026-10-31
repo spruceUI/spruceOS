@@ -169,7 +169,7 @@ NO_BRIGHT_FADE_AVAILABLE='0'
 
 # The XX line is TYPE1 but takes the default getter, not the spruce one: the
 # spruce getter needs either DEVICE_BACKLIGHT_PATH, which AnbernicXXCommon.cfg
-# leaves empty, or current_backlight(), which no Anbernic device_functions file
+# leaves empty, or current_backlight(), which no Anbernic ${PLATFORM}.sh file
 # defines - so there it would fail through to a hard-coded 155. The default
 # getter reads /sys/class/disp, which on these devices is live, so the
 # staleness the spruce getter exists to work around does not apply.
