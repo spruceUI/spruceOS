@@ -45,3 +45,7 @@ class AppConfig(ABC):
     def get_pyui_entry(self):
         """The "<module>:<function>" PyUI runs in its own process (apps/native_app.py), or None."""
         return None
+
+    def get_launch_in_pyui(self):
+        """Whether PyUI runs the launch script itself and shows its messages (apps/script_app.py)."""
+        return False
