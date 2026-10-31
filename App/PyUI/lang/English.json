@@ -482,6 +482,10 @@
     "patchingThemeAssets": "Patching theme to faster assets",
     "noCoreFound": "No core found",
     "menuOptionValues": {
+        "TEXT_LEFT_IMAGE_RIGHT": "Text left, image right",
+        "TEXT_RIGHT_IMAGE_LEFT": "Text right, image left",
+        "TEXT_ABOVE_IMAGE": "Text above image",
+        "TEXT_BELOW_IMAGE": "Text below image",
         "Off": "Off",
         "On": "On",
         "Disabled": "Disabled",
