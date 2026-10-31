@@ -30,7 +30,7 @@ CG_FB=/dev/fb0
 CG_FB_SYS=/sys/class/graphics/fb0
 CG_PWRKEY=/sys/devices/soc0/soc/soc:gpio_keys/pwrkeyval
 CG_GPIO=/sys/class/gpio
-# The same nodes as device_functions/MiyooMini.sh, which only helperFunctions.sh may source and which is not
+# The same nodes as platform/MiyooMini.sh, which only helperFunctions.sh may source and which is not
 # loaded this early
 CG_LID=/sys/devices/soc0/soc/soc:hall-mh248/hallvalue
 CG_PWM=/sys/devices/soc0/soc/1f003400.pwm/pwm/pwmchip0

@@ -2,45 +2,34 @@
 
 # TODO: add updated table of contents/function summaries here
 
-# This is a collection of functions that are used in multiple scripts
-# Please do not add any dependencies here, this file is meant to be self-contained
-# Keep methods in alphabetical order
-
+# This is a collection of functions that are used in multiple scripts.
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-######################################################################################
-# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
-######################################################################################
-
-# Loaded once per shell: runtimeHelper.sh and the network libraries source this file
-# again. The marker is not exported, so a script run as a new shell loads the file
-# itself; its value, this shell's PID, also covers a forked shell that was given it.
-# Subshells keep $$ and inherit the functions. It is set at the end of the file, so a
-# load that failed part-way is retried.
+# Load this file only once per shell.
 [ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
 
-# variables used in multiple different helperFunctions:
+# constants used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
-# Where PyUI wrote saved networks before they became card-global: all on the
-# handheld's own storage, which is why a card carrying a password from another
-# device used to arrive with nothing. enable_wifi adopts from these, and
-# clearwifi.sh has to clear them too or a "forget all networks" would simply be
-# re-imported on the next boot. Keep the two uses reading this one list.
-export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
+export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"     # Where PyUI wrote saved networks before they became card-global
 POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh" # used in powerbutton watchdog and sleep helper
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
-# Detect device and export to any script sourcing helperFunctions
-#
+# Sourced here specifically because some ${PLATFORM}.sh functions depend on it.
+. "/mnt/SDCARD/spruce/scripts/usb_audio_helpers.sh"
+
+
+###################################################################
+# Detect device and export to any script sourcing helperFunctions #
+###################################################################
+
 # MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
 # the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
-    # /usr/magicx/device names the model (zero28 | zero40 | xu20); a base
-    # without the file (Moss-zero28, main-zero40) is treated as a Zero 28.
+    # /usr/magicx/device names the model. Fall back to Z28 if missing.
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
@@ -110,27 +99,31 @@ else
 fi
 export PLATFORM_FAMILY
 
-if [ -n "$PLATFORM_FAMILY" ]; then
-    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
-else
-    . "/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
+platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_config" ]; then
+    platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
 fi
-. "/mnt/SDCARD/spruce/scripts/usb_audio_helpers.sh"
-. "/mnt/SDCARD/spruce/scripts/device_functions.sh"
+[ ! -f "$platform_config" ] || . "$platform_config"
+
+# Ensure all methods are defined, and just logged if missing
+. "/mnt/SDCARD/spruce/scripts/platform/device.sh"
+
+platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.sh"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_functions" ]; then
+    platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.sh"
+fi
+[ ! -f "$platform_functions" ] || . "$platform_functions"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 
 # Every name this device answers to in an Emu config.json "devices" list, most
-# specific first. Mirrors PyUI's Device.get_device_names(): almost every device
-# answers to one name, and the Anbernic XX line also answers to a family token
-# so a single config entry covers the whole line.
+# specific first. Mirrors PyUI's Device.get_device_names().
 #
 # MUST stay in step with App/PyUI/launch.sh, which passes these same names to
 # PyUI as -device. When the two disagree, the UI writes the user's emulator
 # choice into one menuOption and the launcher reads a different one - which is
-# exactly the bug this exists to prevent. Defined here, after the device
-# functions are sourced, because the Mini resolves its variant at runtime.
+# exactly the bug this exists to prevent.
 device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;

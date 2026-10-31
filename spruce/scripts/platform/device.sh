@@ -849,7 +849,7 @@ device_stop_dhcp_client() {
 #
 # The on-card session supervisor calls these around runtime.sh. Defaults are
 # no-ops so every platform behaves exactly as before the supervisor existed;
-# a device opts in by overriding them in its device_functions file.
+# a device opts in by overriding them in its ${PLATFORM}.sh file.
 # ---------------------------------------------------------------------------
 
 # Extra preflight before runtime.sh is started. Return non-zero to refuse the
