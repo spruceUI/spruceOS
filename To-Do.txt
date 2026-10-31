@@ -13,7 +13,7 @@
 - Mini splore update from tenlevels
 - Miyoo Mini: every model shares Saves/miyoo-mini-system.json. Can be broken out into separate per-device jsons later if needed.
 - RA spruce menu: add customization options for hiding Retroarch as an option, add FF speed etc etc. Probably add this to the igm.cfg?
-- "I feel like we need a separate channel for achievements-related stuff 😅 
+
 Just found one interesting issue - started one PS ROM, received RA warning saying something about inability to generate achievements hash.
 Dug a bit, our RA is built without Deflate (cdzl) and FLAC (cdfl) flags. Any particular reason for that?
 And our PCSX-ReARMed core is a bit dated and without Zstandard decoder support.
