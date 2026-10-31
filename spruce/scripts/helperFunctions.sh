@@ -935,6 +935,12 @@ json_escape() {
         -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
 }
 
+# The UI language, saved card-wide by PyUI (PyUiConfig.get_language); empty
+# when none was picked.
+get_ui_language() {
+    jq -r '.language // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null
+}
+
 log_and_display_message(){
     log_message "$1"
     display_message "$(printf '{"cmd":"MESSAGE","args":["%s"]}' "$(json_escape "$1")")"
