@@ -167,7 +167,7 @@ class EnvVarDevice(DeviceCommon):
         return os.environ.get("REBOOT_CMD") or None
 
     def get_fw_version(self):
-        return os.environ.get("OUTPUT_SCREEN_WIDTH"), "Unkown"
+        return os.environ.get("FW_VERSION", "UNKNOWN")
         
     def _set_brightness_to_config(self):
         self._run_setting_cmd("BRIGHTNESS_CMD", self.system_config.brightness)
