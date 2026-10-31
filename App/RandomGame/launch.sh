@@ -2,20 +2,25 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 ICON="/mnt/SDCARD/spruce/imgs/random.png"
-display --icon "$ICON" -t "Selecting random game - please wait a moment"
+start_pyui_message_writer
+display_image_and_text "$ICON" 35 25 "Selecting random game - please wait a moment" 75
 
 GAME="$("$(get_python_path)" "$(dirname "$0")/pick_game.py")"
 if [ -z "$GAME" ]; then
-    display --icon "$ICON" -t "No eligible games found. Add some games first!" -d 3
+    display_image_and_text "$ICON" 35 25 "No eligible games found. Add some games first!" 75
+    sleep 3
+    stop_pyui_message_writer
     exit 1
 fi
 
 SYSTEM="$(basename "$(dirname "$GAME")")"
 BOX_ART="$(dirname "$GAME")/Imgs/$(basename "$GAME" | sed 's/\.[^.]*$/.png/')"
 if [ -f "$BOX_ART" ]; then
-    display -i "$BOX_ART" -d 2
-    kill $(jobs -p)
+    log_message "Display image $BOX_ART"
+    display_message "$(printf '{"cmd":"RENDER_IMAGE","args":["%s"]}' "$(json_escape "$BOX_ART")")"
+    sleep 3
 fi
+stop_pyui_message_writer
 
 # standard_launch.sh takes EMU_NAME from its own path, so it has to be reached
 # through Emu/<system>/. button_actions.sh greps that string back out of

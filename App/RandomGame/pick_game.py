@@ -18,16 +18,22 @@ def system_filter(system):
     except (OSError, ValueError):
         return None
     exts = {"." + e.lower() for e in (cfg.get("extlist") or "").split("|") if e}
-    return exts, set(cfg.get("ignoreList") or [])
+    return exts, set(cfg.get("ignoreList") or []), cfg.get("scanSubfolders", True)
 
 
-def games(folder, exts, ignore):
+def games(folder, exts, ignore, scan_subfolders=True):
     found = []
     try:
         with os.scandir(folder) as entries:
             for entry in entries:
                 name = entry.name
-                if name.startswith(".") or name in ignore or not entry.is_file():
+                if name.startswith("."):
+                    continue
+                if entry.is_dir():
+                    if scan_subfolders and name != "Imgs":
+                        found.extend(games(entry.path, exts, ignore, scan_subfolders))
+                    continue
+                if name in ignore or not entry.is_file():
                     continue
                 suffix = os.path.splitext(name)[1].lower()
                 if exts:
