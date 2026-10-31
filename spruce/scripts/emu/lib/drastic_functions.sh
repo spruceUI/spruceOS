@@ -117,24 +117,23 @@ run_drastic_trngaje_Flip() {
 run_drastic_MiyooMini() {
 	export CORE="DraStic-Steward"
 
-	nds_emu_dir=/mnt/SDCARD/Emu/NDS
-	export HOME=$nds_emu_dir
-	export PATH=$nds_emu_dir:$PATH
-	export LD_LIBRARY_PATH=$nds_emu_dir/libs_MiyooMini:"$EMU_DIR"/lib32-common:$LD_LIBRARY_PATH
+	export HOME="$EMU_DIR"
+	export PATH="$EMU_DIR:$PATH"
+	export LD_LIBRARY_PATH="$EMU_DIR/libs_MiyooMini:$EMU_DIR/lib32-common:$LD_LIBRARY_PATH"
 	export SDL_VIDEODRIVER=mmiyoo
 	export SDL_AUDIODRIVER=mmiyoo
 	export EGL_VIDEODRIVER=mmiyoo
 
-	cp -f $nds_emu_dir/resources/overlay/grid-empty.png $nds_emu_dir/resources/overlay/grid.png
+	cp -f "$EMU_DIR/resources/overlay/grid-empty.png" "$EMU_DIR/resources/overlay/grid.png"
 
 	killall audioserver
 
-	sv=`cat /proc/sys/vm/swappiness`
+	sv=$(cat /proc/sys/vm/swappiness)
 
 	# 60 by default
 	echo 10 > /proc/sys/vm/swappiness
 
-	cd $nds_emu_dir
+	cd "$EMU_DIR"
 
 	set_performance
 	log_message "Running DraStic-Steward on MiyooMini"
@@ -237,16 +236,16 @@ run_drastic_RG353M()    { run_drastic64 ; }
 # Configs are set PER-DEVICE, but are currently shared by all variants of DraStic on that device.
 
 load_drastic_configs() {
-	CFG_DIR="/mnt/SDCARD/Emu/NDS/config"
-	RES_DIR="/mnt/SDCARD/Emu/NDS/resources"
+	CFG_DIR="$EMU_DIR/config"
+	RES_DIR="$EMU_DIR/resources"
 	cp -f "$CFG_DIR/drastic-$PLATFORM.cfg" "$CFG_DIR/drastic.cfg"
 	[ -f "$RES_DIR/settings_${PLATFORM}.json" ] && cp "$RES_DIR/settings_${PLATFORM}.json" "$RES_DIR/settings.json"
 	sync
 }
 
 save_drastic_configs() {
-	CFG_DIR="/mnt/SDCARD/Emu/NDS/config"
-	RES_DIR="/mnt/SDCARD/Emu/NDS/resources"
+	CFG_DIR="$EMU_DIR/config"
+	RES_DIR="$EMU_DIR/resources"
 	cp -f "$CFG_DIR/drastic.cfg" "$CFG_DIR/drastic-$PLATFORM.cfg"
 	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$RES_DIR/settings_${PLATFORM}.json"
 	sync
@@ -260,11 +259,7 @@ save_drastic_configs() {
 # All original and trngaje versions should use the 64-bit states.
 
 # DraStic keeps saves and states in $EMU_DIR/backup; the folder of the arch not
-# in use waits as backup-32 / backup-64. A plain "mv backup-64 backup" is only a
-# rename while backup/ does not exist. The release ships backup/ (a .gitkeep),
-# so a fresh install, a full update or a run that died before the stash leaves
-# it there, and mv then moves the saves INTO it (backup/backup-64/): DraStic
-# starts with no saves and the next stash buries them one level deeper.
+# in use waits as backup-32 / backup-64.
 #
 # move_drastic_saves FROM TO: rename when TO is absent; otherwise move each entry
 # of FROM that TO lacks, never overwriting, and leave FROM holding only the
@@ -291,27 +286,11 @@ move_drastic_saves() {
 	rmdir "$_from" 2>/dev/null
 }
 
-# Saves an earlier nested mv buried one level down (backup-64/backup-64, ...)
-# come back up, without overwriting anything made since. Files that clash stay
-# in a "recovered-..." folder next to them, where a user can still find them.
-unnest_drastic_saves() {
-	for _d in backup backup-32 backup-64; do
-		for _n in backup backup-32 backup-64; do
-			[ -d "$EMU_DIR/$_d/$_n" ] || continue
-			move_drastic_saves "$_d/$_n" "$_d"
-			[ -d "$EMU_DIR/$_d/$_n" ] && [ ! -e "$EMU_DIR/$_d/recovered-$_n" ] && \
-				mv "$EMU_DIR/$_d/$_n" "$EMU_DIR/$_d/recovered-$_n"
-		done
-	done
-}
-
 ready_arch_64_states() {
-	unnest_drastic_saves
 	move_drastic_saves backup-64 backup
 }
 
 ready_arch_32_states() {
-	unnest_drastic_saves
 	move_drastic_saves backup-32 backup
 }
 

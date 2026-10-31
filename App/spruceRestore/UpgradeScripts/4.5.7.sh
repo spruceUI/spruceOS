@@ -43,6 +43,70 @@ for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce
     log_message "Menu hold time set to $_to in $_cfg"
 done
 
+# Recover DraStic saves and states buried by the old architecture-folder moves.
+# Keep colliding files in a recovered folder rather than overwriting either copy.
+NDS_EMU_DIR=/mnt/SDCARD/Emu/NDS
+move_drastic_saves() {
+    _from="$NDS_EMU_DIR/$1"
+    _to="$NDS_EMU_DIR/$2"
+    [ -d "$_from" ] || return 0
+    if [ ! -e "$_to" ]; then
+        if mv "$_from" "$_to"; then
+            return 0
+        fi
+        log_message "4.5.7: failed to move DraStic $1 to $2"
+        return 1
+    fi
+    for _f in "$_from"/* "$_from"/.[!.]*; do
+        [ -e "$_f" ] || continue
+        _name="${_f##*/}"
+        if [ "$_name" = ".gitkeep" ]; then
+            if ! rm -f "$_f"; then
+                log_message "4.5.7: failed to remove DraStic placeholder $1/$_name"
+                return 1
+            fi
+        elif [ ! -e "$_to/$_name" ]; then
+            if ! mv "$_f" "$_to/"; then
+                log_message "4.5.7: failed to recover DraStic $1/$_name into $2"
+                return 1
+            fi
+        else
+            log_message "4.5.7: DraStic $1/$_name conflicts with $2/$_name; keeping it apart"
+        fi
+    done
+    rmdir "$_from" 2>/dev/null || true
+}
+
+if [ -d "$NDS_EMU_DIR" ]; then
+    while :; do
+        _found_nested=0
+        for _dir in backup backup-32 backup-64; do
+            for _nested in backup backup-32 backup-64; do
+                [ -d "$NDS_EMU_DIR/$_dir/$_nested" ] || continue
+                _found_nested=1
+                if ! move_drastic_saves "$_dir/$_nested" "$_dir"; then
+                    exit 1
+                fi
+                if [ -d "$NDS_EMU_DIR/$_dir/$_nested" ]; then
+                    _recovered="$NDS_EMU_DIR/$_dir/recovered-$_nested"
+                    _suffix=1
+                    while [ -e "$_recovered" ]; do
+                        _recovered="$NDS_EMU_DIR/$_dir/recovered-$_nested.$_suffix"
+                        _suffix=$((_suffix + 1))
+                    done
+                    if mv "$NDS_EMU_DIR/$_dir/$_nested" "$_recovered"; then
+                        log_message "4.5.7: kept conflicting DraStic files in ${_recovered##*/}"
+                    else
+                        log_message "4.5.7: failed to preserve conflicting DraStic files in $_dir/$_nested"
+                        exit 1
+                    fi
+                fi
+            done
+        done
+        [ "$_found_nested" -eq 1 ] || break
+    done
+fi
+
 # Overlay packs moved from overlay/ (640x480) and overlay/Brick (1024x768) into a folder per
 # resolution. Move each pack the old archives unpacked, or drop it where an install already put
 # the new copy, then point RetroArch configs at the new paths.

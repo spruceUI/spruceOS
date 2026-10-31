@@ -123,6 +123,11 @@ case $EMU_NAME in
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
 
+		elif [ "$EMU_NAME" = "NDSI" ]; then
+			log_message "Unsupported core '$CORE' for NDSI; falling back to DSperate"
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate
+
 		else
 			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
 			run_drastic
