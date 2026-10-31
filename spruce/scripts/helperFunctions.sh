@@ -901,6 +901,10 @@ get_config_value() {
 ###########################################################
 ##########     PYUI MESSAGE WRITER     ##########
 
+# The writer's socket. PyUI's menu listens on it too, as "realtimeMessagePort" in
+# App/PyUI/py-ui-config.json, so the two must match.
+PYUI_MESSAGE_PORT=50980
+
 start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
@@ -921,8 +925,8 @@ start_pyui_message_writer() {
     fi
     
     rm -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt
-    log_message "Starting Real Time message listener on port 50980"
-    /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
+    log_message "Starting Real Time message listener on port $PYUI_MESSAGE_PORT"
+    /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort "$PYUI_MESSAGE_PORT" &
 
     if [ "$wait_for_listener" != "0" ]; then
         log_message "Waiting for realtime_message_network_listener to appear..."
@@ -961,8 +965,13 @@ kill_pyui_message_writer() {
 }
 
 stop_pyui_message_writer() {
+    # PyUI runs this script and keeps showing its messages: there is no writer to stop, and
+    # freemma would blank the menu's screen and free video memory the menu still uses.
+    if [ -n "$PYUI_HOSTS_MESSAGES" ]; then
+        return 0
+    fi
     kill_pyui_message_writer
-    freemma >/dev/null 2>&1 # I don't think we have this bin on any spruce devices
+    freemma >/dev/null 2>&1 # where a device has it (the Miyoo Mini)
 }
 
 display_message() {
@@ -970,17 +979,18 @@ display_message() {
     [ -z "$message" ] && return 0
 
     # We use double quotes for the -c string so we can use single quotes inside.
-    # We pass "$message" as the final argument which Python picks up as sys.argv[1]
+    # We pass "$message" and the port as the final arguments, which Python picks up as
+    # sys.argv[1] and sys.argv[2]
     "$(get_python_path)" -c 'import socket, sys;
 try:
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.settimeout(0.5)
-    s.connect(b"\x0050980")
+    s.connect(b"\0" + sys.argv[2].encode())
     s.sendall((sys.argv[1] + "\n").encode("utf-8"))
     s.close()
 except Exception as e:
     print(f"Sender Error: {e}", file=sys.stderr)
-' "$message"
+' "$message" "$PYUI_MESSAGE_PORT"
 }
 
 json_escape() {

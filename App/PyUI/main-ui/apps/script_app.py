@@ -1,11 +1,13 @@
 """Run an app's launch script while PyUI stays up and shows the script's messages.
 
 An app opts in with "launchInPyUI": true next to its "launch" script in config.json. Instead
-of exiting so principal.sh can run the script, PyUI runs it through
-spruce/scripts/run_app_in_pyui.sh and listens on the realtime message socket itself: the one
+of exiting so the CFW can run the script, PyUI runs it through the CFW's runner
+("launchInPyUiCmd" in py-ui-config.json; spruce's is spruce/scripts/run_app_in_pyui.sh) and
+listens itself on the CFW's realtime message port ("realtimeMessagePort"), the one spruce's
 start_pyui_message_writer otherwise starts a second PyUI for. The menu needs no restart and
-the script no changes; with PYUI_HOSTS_MESSAGES set, start_pyui_message_writer leaves the
-socket to the menu.
+the script no changes; with PYUI_HOSTS_MESSAGES set,
+start_pyui_message_writer leaves the socket to the menu. Without both keys the script runs
+after PyUI exits, as before.
 
 For scripts that show progress, maybe ask through an option list, and return. Not for ones
 that need PyUI gone: unmounting the card, replacing PyUI's files, restoring settings PyUI keeps
@@ -20,31 +22,32 @@ import subprocess
 
 from controller.controller import Controller
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 from utils.realtime_message_network_listener import RealtimeMessageNetworkListener
 
-RUNNER = "/mnt/SDCARD/spruce/scripts/run_app_in_pyui.sh"
-MESSAGE_PORT = 50980  # start_pyui_message_writer's
 HOSTED_ENV = "PYUI_HOSTS_MESSAGES"
 
 
 def run(folder, launch):
     """Run the app's script and show its messages. False if PyUI can't host it."""
     logger = PyUiLogger.get_logger()
-    if not os.path.isfile(RUNNER):
+    runner = PyUiConfig.get_launch_in_pyui_cmd()
+    port = PyUiConfig.get_realtime_message_port()
+    if not runner or not port or not os.path.isfile(runner):
         return False
-    listener = RealtimeMessageNetworkListener(MESSAGE_PORT, hosted=True)
+    listener = RealtimeMessageNetworkListener(port, hosted=True)
     try:
         listener.bind()
     except OSError:
         # A message writer from elsewhere holds the socket: leave the script to principal.sh.
-        logger.warning(f"Message socket {MESSAGE_PORT} is taken; running {launch} after PyUI exits")
+        logger.warning(f"Message socket {port} is taken; running {launch} after PyUI exits")
         listener.stop()
         return False
 
     env = _launcher_environment()
     env[HOSTED_ENV] = "1"
     process = subprocess.Popen(
-        ["/bin/sh", RUNNER, folder, launch], env=env,
+        ["/bin/sh", runner, folder, launch], env=env,
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     logger.info(f"Running {launch} inside PyUI (pid {process.pid})")
     try:

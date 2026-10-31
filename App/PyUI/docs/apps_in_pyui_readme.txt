@@ -73,14 +73,28 @@ Shell apps: "launchInPyUI"
         "description": "Check out the latest themes for your device!"
     }
 
-PyUI runs the "launch" script through spruce/scripts/run_app_in_pyui.sh, listens
-on the message socket itself until the script exits, then shows the Apps menu
-again. The script needs no changes. PyUI sets PYUI_HOSTS_MESSAGES, so
+PyUI runs the "launch" script through the CFW's runner, listens on the message
+socket itself until the script exits, then shows the Apps menu again. The CFW
+names both in py-ui-config.json:
+
+  "launchInPyUiCmd"
+      The runner, called as `sh <runner> <app folder> <launch script>`.
+      spruce's is /mnt/SDCARD/spruce/scripts/run_app_in_pyui.sh.
+  "realtimeMessagePort"
+      The port the CFW's scripts send messages to. spruce's is 50980, which
+      must match PYUI_MESSAGE_PORT in spruce/scripts/helperFunctions.sh.
+
+Without both, "launchInPyUI" is ignored and the script runs after PyUI exits.
+
+The script needs no changes. PyUI sets PYUI_HOSTS_MESSAGES, so
 start_pyui_message_writer returns at once, and everything that talks to the
 writer works as before: log_and_display_message,
 display_text_with_percentage_bar, display_image_and_text, display_option_list
 (the choice still arrives in App/PyUI/selection.txt), stop_pyui_message_writer.
 EXIT_APP is ignored; the menu stops listening when the script exits.
+stop_pyui_message_writer does nothing under PyUI: there is no writer to stop,
+and its freemma would blank the menu and free video memory the menu still uses
+(on the Miyoo Mini). For the same reason, don't run freemma yourself.
 
 run_app_in_pyui.sh does for the script what principal.sh does for a command it
 runs:

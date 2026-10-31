@@ -18,6 +18,8 @@
     "poweroffCmd":"/mnt/SDCARD/spruce/scripts/save_poweroff.sh",
     "shutdownImage":"/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png",
     "longTaskCmd":"/mnt/SDCARD/spruce/scripts/long_task.sh",
+    "launchInPyUiCmd":"/mnt/SDCARD/spruce/scripts/run_app_in_pyui.sh",
+    "realtimeMessagePort": 50980,
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
