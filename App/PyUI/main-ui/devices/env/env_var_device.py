@@ -67,7 +67,7 @@ class EnvVarDevice(DeviceCommon):
         self.battery_percent = 0
         self.status_errors_logged = set()
 
-        # Resolved once, as map_key runs for every event the watchers read.
+        # The watched key codes, read from the environment once.
         self.watched_key_codes = {}
         for name, controller_input in (("VOLUME_DOWN_KEYCODE", ControllerInput.VOLUME_DOWN),
                                        ("VOLUME_UP_KEYCODE", ControllerInput.VOLUME_UP),
@@ -75,7 +75,7 @@ class EnvVarDevice(DeviceCommon):
             if os.environ.get(name):
                 self.watched_key_codes[int(os.environ[name])] = controller_input
 
-        # In every mode, so input is ignored during special commands; a device without the path has no watcher.
+        # A watcher per path variable that is set; an unset one means no watcher.
         self.volume_key_watcher = self._start_key_watcher("VOL_KEY_WATCHER_PATH", add_to_controller=True)
         self.power_key_watcher = self._start_key_watcher("POWER_KEY_WATCHER_PATH", add_to_controller=False)
         self.controller_watcher = self._start_key_watcher("CONTROLLER_KEY_WATCHER_PATH", add_to_controller=True)
@@ -105,6 +105,9 @@ class EnvVarDevice(DeviceCommon):
             return None
         from controller.controller import Controller
         watcher = KeyWatcher(path)
+        # The node would not open (KeyWatcher logs why), so no thread polls it.
+        if watcher.fd is None:
+            return None
         if add_to_controller:
             Controller.add_button_watcher(watcher.poll_keyboard)
         threading.Thread(target=watcher.poll_keyboard, daemon=True).start()
@@ -137,7 +140,7 @@ class EnvVarDevice(DeviceCommon):
         return subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                               text=True, timeout=5, check=False).stdout.strip()
 
-    # Statuses are polled every few seconds, so each kind of failure is logged once.
+    # Each kind of status failure is logged once.
     def _log_status_error(self, status, error):
         if status not in self.status_errors_logged:
             self.status_errors_logged.add(status)
@@ -156,16 +159,13 @@ class EnvVarDevice(DeviceCommon):
     def should_scale_screen(self):
         return self.is_hdmi_connected()
 
-    # An empty value means the device has none, which drops reboot from the power prompt.
     def power_off_cmd(self):
         return os.environ["POWER_OFF_CMD"]
-    
+
+    # Unset or empty: no reboot command (None).
     def reboot_cmd(self):
-        if "REBOOT_CMD" in os.environ:
-            return os.environ["REBOOT_CMD"]
-        else:
-            return None
-    
+        return os.environ.get("REBOOT_CMD") or None
+
     def get_fw_version(self):
         return os.environ.get("OUTPUT_SCREEN_WIDTH"), "Unkown"
         
@@ -214,7 +214,7 @@ class EnvVarDevice(DeviceCommon):
             return ChargeStatus.CHARGING
         return ChargeStatus.DISCONNECTED
 
-    # A failed read keeps the last good percentage rather than drawing an empty battery.
+    # A failed read keeps the last good percentage.
     @throttle.limit_refresh(15, background=True)
     def get_battery_percent(self):
         try:
@@ -248,9 +248,6 @@ class EnvVarDevice(DeviceCommon):
 
     def get_state_path(self):
         return os.environ["STATE_PATH"]
-    
-    def supports_image_resizing(self):
-        return os.environ.get("SUPPORTS_IMAGE_RESIZING", "false").lower() == "true"
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
@@ -260,7 +257,7 @@ class EnvVarDevice(DeviceCommon):
             return os.environ["SUPPORTS_WIFI"].lower() == "true"
         return self._check_wifi_support()
 
-    # The top bar asks on every frame, so the command's answer is cached.
+    # The command's answer is cached for 30 s.
     @throttle.limit_refresh(30, background=True)
     def _check_wifi_support(self):
         cmd = self._cmd("CHECK_WIFI_SUPPORT_CMD")
