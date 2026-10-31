@@ -11,28 +11,41 @@
 #   log_message
 #
 # Provides:
-#   move_dotconfig_into_place
 #   run_ppsspp
-#   load_ppsspp_configs
-#   save_ppsspp_configs
-#   move_screenshots_if_present
 
-SS_DIR="/mnt/SDCARD/Saves/screenshots/PPSSPP"
-PSP_SS_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SCREENSHOT"
-PSP_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
+
+PPSSPP_DEFAULT_CONFIG_DIR="/mnt/SDCARD/Emu/PSP/default_configs"
+PPSSPP_SCREENSHOT_UPPER_DIR="/mnt/SDCARD/Saves/screenshots/PPSSPP"
+PPSSPP_SCREENSHOT_LOWER_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SCREENSHOT"
+PPSSPP_LIVE_CONFIG_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP"
+PPSSPP_LIVE_SYSTEM_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
 
 set_up_default_configs_if_needed() {
-	if [ ! -d "/mnt/SDCARD/Saves/.config/ppsspp/PSP" ]; then
-		mkdir -p "/mnt/SDCARD/Saves/.config/ppsspp/"
-		cp -rf "/mnt/SDCARD/Emu/PSP/default_configs" "/mnt/SDCARD/Saves/.config/ppsspp/PSP" && log_message "Copied .config folder into Saves folder."
-	else
-		log_message "WARNING!!! No .config folder found!"
+	if [ ! -d "$PPSSPP_DEFAULT_CONFIG_DIR" ]; then
+		log_message "ERROR: PPSSPP default config directory not found: $PPSSPP_DEFAULT_CONFIG_DIR"
+		return 1
 	fi
+	if ! mkdir -p "$PPSSPP_LIVE_CONFIG_DIR"; then
+		log_message "ERROR: Could not create PPSSPP config directory: $PPSSPP_LIVE_CONFIG_DIR"
+		return 1
+	fi
+
+	find "$PPSSPP_DEFAULT_CONFIG_DIR" -type f | while IFS= read -r _default_file; do
+		_relative_file="${_default_file#"$PPSSPP_DEFAULT_CONFIG_DIR"/}"
+		_live_file="$PPSSPP_LIVE_CONFIG_DIR/$_relative_file"
+		if [ -e "$_live_file" ]; then
+			continue
+		fi
+		if ! mkdir -p "$(dirname "$_live_file")" || ! cp -p "$_default_file" "$_live_file"; then
+			log_message "ERROR: Could not seed PPSSPP config: $_live_file"
+			exit 1
+		fi
+	done
 }
 
 move_screenshots_if_present() {
-	if [ -n "$(ls -A $PSP_SS_DIR/*.png 2>/dev/null)" ]; then
-		mv $PSP_SS_DIR/*.png "$SS_DIR" 2>/dev/null
+	if [ -n "$(ls -A $PPSSPP_SCREENSHOT_LOWER_DIR/*.png 2>/dev/null)" ]; then
+		mv $PPSSPP_SCREENSHOT_LOWER_DIR/*.png "$PPSSPP_SCREENSHOT_UPPER_DIR" 2>/dev/null
 	fi
 }
 
@@ -45,11 +58,11 @@ run_ppsspp() {
 	export HOME=/mnt/SDCARD/Saves
 	cd $EMU_DIR
 
-	mkdir -p "$PSP_SS_DIR"
-	mkdir -p "$SS_DIR"
+	mkdir -p "$PPSSPP_SCREENSHOT_LOWER_DIR"
+	mkdir -p "$PPSSPP_SCREENSHOT_UPPER_DIR"
 
 	move_screenshots_if_present
-	mount -o bind "$SS_DIR" "$PSP_SS_DIR"
+	mount -o bind "$PPSSPP_SCREENSHOT_UPPER_DIR" "$PPSSPP_SCREENSHOT_LOWER_DIR"
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
@@ -58,7 +71,7 @@ run_ppsspp() {
 		"Brick"|"SmartPro"|"BrickPro"|"Zero28"|"Zero40"|"XU20")
 			export SDL_VIDEODRIVER=mali
 			"$EMU_DIR/setalpha" 0
-			rm -f "$PSP_DIR/FailedGraphicsBackends.txt"
+			rm -f "$PPSSPP_LIVE_SYSTEM_DIR/FailedGraphicsBackends.txt"
 			;;
 		# The Anbernic pad has no SDL gamecontroller mapping on this rootfs, so
 		# PPSSPP falls back to raw joystick indices and every button lands wrong
@@ -92,7 +105,7 @@ run_ppsspp() {
 		LD_PRELOAD="$(vk_display_preload)" "$PPSSPPSDL" "$ROM_FILE" --fullscreen --pause-menu-exit > "$(emu_log_file)" 2>&1
 	fi
 
-	umount "$PSP_SS_DIR"
+	umount "$PPSSPP_SCREENSHOT_LOWER_DIR"
 	save_ppsspp_configs
 }
 
@@ -105,8 +118,8 @@ configure_retroachievements() {
 		"Disabled")
 			# disable cheevos but leave everything else alone
 			TMP_CFG="$(mktemp)"
-			if sed -e "s|^AchievementsEnable.*|AchievementsEnable = False|" "$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
-				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			if sed -e "s|^AchievementsEnable.*|AchievementsEnable = False|" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 			else
 				rm -f "$TMP_CFG"
 			fi
@@ -117,8 +130,8 @@ configure_retroachievements() {
 				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
 				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = False|" \
 				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
-			"$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
-				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			"$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 			else
 				rm -f "$TMP_CFG"
 			fi
@@ -129,8 +142,8 @@ configure_retroachievements() {
 				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
 				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = True|" \
 				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
-			"$PSP_DIR/ppsspp.ini" > "$TMP_CFG"; then
-				mv "$TMP_CFG" "$PSP_DIR/ppsspp.ini"
+			"$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
+				mv "$TMP_CFG" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 			else
 				rm -f "$TMP_CFG"
 			fi
@@ -142,8 +155,8 @@ configure_retroachievements() {
 	# or just create it if it's missing
 	case "$rac_mode" in
 		Casual|Softcore|Hardcore)
-			ini_user="$(grep '^AchievementsUserName' "$PSP_DIR/ppsspp.ini" | sed 's/.*= *"\(.*\)".*/\1/')"
-			if [ "$ini_user" != "$rac_user" ] || [ ! -f "$PSP_DIR/ppsspp_retroachievements.dat" ]; then
+			ini_user="$(grep '^AchievementsUserName' "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" | sed 's/.*= *"\(.*\)".*/\1/')"
+			if [ "$ini_user" != "$rac_user" ] || [ ! -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp_retroachievements.dat" ]; then
 				rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 				/mnt/SDCARD/spruce/scripts/emu/psp_rac_auth.sh "$rac_user" "$rac_pass"
 			fi
@@ -152,11 +165,11 @@ configure_retroachievements() {
 }
 
 load_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls-$PLATFORM.ini" "$PSP_DIR/controls.ini"
-	cp -f "$PSP_DIR/ppsspp-$PLATFORM.ini" "$PSP_DIR/ppsspp.ini"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls-$PLATFORM.ini" "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-$PLATFORM.ini" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
-	cp -f "$PSP_DIR/controls.ini" "$PSP_DIR/controls-$PLATFORM.ini"
-	cp -f "$PSP_DIR/ppsspp.ini" "$PSP_DIR/ppsspp-$PLATFORM.ini"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini" "$PPSSPP_LIVE_SYSTEM_DIR/controls-$PLATFORM.ini"
+	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-$PLATFORM.ini"
 }
