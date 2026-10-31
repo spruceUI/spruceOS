@@ -8,3 +8,5 @@ sync.bat
 spruce/www/services.txt
 CLAUDE.md
 stats/*
+# Local-only: agent scratch tracker + local tests
+.scratch/
