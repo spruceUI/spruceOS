@@ -124,7 +124,7 @@ while true; do
         # gets it, so this shell's log lines stay in UTC like the rest of the log.
         _tz="$(jq -r '.timezone // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null)"
         [ -n "$_tz" ] && [ -f "/mnt/SDCARD/spruce/zoneinfo/$_tz" ] || _tz=""
-        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
+        log_message "Running: $cmd"
         if [ -n "$_tz" ]; then
             TZ=":/mnt/SDCARD/spruce/zoneinfo/$_tz" /tmp/cmd_to_run.sh >/dev/null 2>&1
         else

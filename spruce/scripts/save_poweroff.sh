@@ -219,10 +219,7 @@ close_forcefully_all_emus() {
     done
 }
 
-# Is the thing we are shutting down out of a game, rather than an app? Apps and
-# games both run from cmd_to_run.sh and both leave the menu, so "not in_menu" is
-# not the question - an app shutdown was announcing "Saving and shutting down"
-# and waiting on emulators that were never running.
+# Is the thing we are shutting down out of a game, rather than an app? Both run from cmd_to_run.sh.
 current_cmd_is_game() {
     [ -f /tmp/cmd_to_run.sh ] || return 1
     grep -q -e '/mnt/SDCARD/Emu' -e '/media/sdcard0/Emu' -e '/mnt/SDCARD/Emus' /tmp/cmd_to_run.sh
@@ -353,14 +350,9 @@ clean_up_flags() {
     flag_remove "setting_cpu" # in case one of the set_cpu_mode() functions got interrupted
 }
 
-# Stage 2 must be copied off the card BEFORE anything is unmounted. On the
-# Miniloong the card is at /mnt/sdcard and /mnt/SDCARD is a separate BIND mount
-# (the Flip's /mnt/SDCARD is a symlink), so unmount_all - which spares only
-# $SD_MOUNTPOINT - takes /mnt/SDCARD away and the copy below found nothing:
-# stage 2 never ran there, the fallback ran the power-off command for a
-# reboot too, and three shutdown attempts left the device on its unmounted
-# card (SPR-HIGH-051, 2026-08-28 and 2026-09-04). Called right after the
-# starting breadcrumb, while every path is still mounted.
+# Copy stage 2 to /tmp before unmounting: on Miniloong, unmount_all removes
+# the separate /mnt/SDCARD bind mount, making the script inaccessible. Call
+# this while the card is still mounted.
 stage_shutdown_stage_2() {
     if [ -e "$STAGE_2_SD_PATH" ]; then
         if cp "$STAGE_2_SD_PATH" "$STAGE_2_TMP_PATH" 2>/dev/null; then
@@ -380,14 +372,9 @@ usb_storage_exit() {
 
 # Release the USB mass-storage gadget on behalf of App/USBStorageMode.
 #
-# Closing the LUN closes the card's block device, and on TrimUI stock udev's
-# block `watch` rule turns that close into a synthesized `change` uevent that
-# /sbin/mdev answers with /etc/mdev/sdcard_remove: `umount -l` of the card,
-# `rm -rf` of its mount point, `rm -f /mnt/SDCARD` (SPR-HIGH-053, measured on
-# the Smart Pro S). From that instant nothing on the card can be reached by
-# path. So this runs only after stage 2 is staged into /tmp and every helper
-# that needs the card has had its turn; what follows it (unmount_all, the
-# stage-2 hand-off) works from memory and /tmp.
+# Closing the LUN triggers TrimUI's udev rule to unmount and remove the card
+# mount point, making its files inaccessible. Release it only after staging
+# stage 2 and finishing card-dependent helpers; later shutdown steps use /tmp.
 usb_storage_release_gadget() {
     hook=/mnt/SDCARD/App/USBStorageMode/usb_gadget.sh
     if [ ! -f "$hook" ]; then
@@ -476,21 +463,13 @@ request_pyui_farewell
 ################### MAIN ######################
                   ########
 
-# BaseOS runs the frontend session from an inittab respawn entry, so killing
-# runtime.sh below only makes init start another one - and that fresh session
-# races this shutdown. It is not merely noise: its read_only_check sees the card
-# we just remounted read-only and runs `mount -o remount,rw` to "repair" it,
-# undoing the clean unmount seconds before the power command. Observed exactly
-# that - the respawned session logged two lines, went silent as the card went
-# read-only, and the next boot still reported a dirty filesystem.
+# BaseOS respawns the frontend when runtime.sh exits. A new session can race
+# shutdown and remount the read-only card read-write, undoing the clean unmount.
 #
-# Raise a flag runtime.sh checks on startup so the respawned session exits at
-# once. It lives in /tmp, so a real boot never sees it.
+# Tell runtime.sh to exit on startup; the /tmp flag won't persist across boots.
 #
-# Only where the strict path applies. Nothing else in the fleet respawns its
-# frontend from init, so the flag would never be read there - and a flag that is
-# never read is still a flag that can be left behind by an aborted shutdown and
-# make the next runtime.sh exit for no reason.
+# Only set this on devices that respawn the frontend from init, so an aborted
+# shutdown can't leave an unused flag behind.
 if device_needs_strict_unmount; then
     flag_add "shutting_down" --tmp
 fi
@@ -522,13 +501,8 @@ if ! usb_storage_exit && ! flag_check "in_menu"; then
     close_forcefully_all_emus
 fi
 
+# USB Storage Mode can't be resumed, so clear its last-game record and treat shutdown as coming from the menu.
 if usb_storage_exit; then
-    # The app is what cmd_to_run.sh launched, so principal.sh recorded it as
-    # the last game. It is not resumable: a boot that auto-resumed into USB
-    # Storage Mode sat in the app with no network services up (measured on
-    # the TSPS, 2026-09-05). Drop the lastgame record now, the way a
-    # non-emulator command is dropped, and let clean_up_flags treat this as a
-    # shutdown from the menu so save_active is cleared rather than set.
     close_non_emu_cmd_to_run
     rm -f -- "${FLAGS_DIR}/lastgame.lock"
 else
