@@ -636,7 +636,7 @@ if upload_report; then
     log_message "bugReport.sh: uploaded as $report_code"
 
     gh_qr_code="$(qr_code -t "https://github.com/spruceUI/spruceOS/issues/new?template=bug_report.yml&report-code=$report_code&version=$SPRUCE_VERSION")"
-    display_image_and_text "$gh_qr_code" 50 5 "Bug report sent. Your code is: SPR-MENR7V\nScan the QR code to create a GitHub issue or use the report code in our Discord to receive support.\n\nPress A to continue." 58
+    display_image_and_text "$gh_qr_code" 50 5 "Bug report sent. Your code is: $report_code\nScan the QR code to create a GitHub issue or use the report code in our Discord to receive support.\n\nPress A to continue." 58
 else
     log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in a GitHub issue or in our Discord to receive support.\n\nPress A to continue."
 fi
