@@ -12,6 +12,36 @@ DEVICE_INIT_WAIT_PIDS=""
 # Pids of device_init jobs holding the display.
 DEVICE_INIT_DISPLAY_PIDS=""
 
+# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
+# that shows a message through PortMasterDialog.txt) puts its FIFOs under
+# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
+# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
+# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
+# mounted there each boot; nothing on the device's flash is touched. No-op
+# on firmware that already mounts one (Flip, Debian bases).
+ensure_dev_fd() {
+    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
+        _dev="/dev/${_pair%%:*}"
+        [ -e "$_dev" ] && continue
+        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
+            && log_message "Linked $_dev (stock firmware had none)" \
+            || log_message "Could not create $_dev"
+    done
+}
+
+ensure_dev_shm() {
+    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+        return 0
+    fi
+    mkdir -p /dev/shm 2>/dev/null || return 1
+    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
+        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
+    else
+        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
+        return 1
+    fi
+}
+
 # Waits for the device_init jobs that must finish before the frontend starts; returns 0.
 # With --except-display, the display jobs are left running; the caller's frontend
 # must then wait for the display itself.
@@ -268,12 +298,12 @@ check_for_update() {
             flag_add "update_prompted"
             # Line 1: version prompted; line 2: its build (nightly commit), so
             # a same-day rebuild of an already prompted nightly prompts again.
-            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
-            echo "$TARGET_VERSION" > "$(flag_path update_available)"
+            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$FLAGS_DIR/update_prompted.lock"
+            echo "$TARGET_VERSION" > "$FLAGS_DIR/update_available.lock"
         else
             # Get version (and build) from previous prompt
-            prompted_version=$(head -n 1 "$(flag_path update_prompted)" | tr -d '[:space:]')
-            prompted_build=$(sed -n '2p' "$(flag_path update_prompted)" | tr -d '[:space:]')
+            prompted_version=$(head -n 1 "$FLAGS_DIR/update_prompted.lock" | tr -d '[:space:]')
+            prompted_build=$(sed -n '2p' "$FLAGS_DIR/update_prompted.lock" | tr -d '[:space:]')
 
             # Compare versions (using same logic as above)
             prompted_base_version=$(echo "$prompted_version" | cut -d'-' -f1)
@@ -293,8 +323,8 @@ check_for_update() {
             if [ $newer_than_prompted -eq 1 ]; then
                 # New version (or build) is newer than previously prompted
                 flag_add "update_available"
-                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
-                echo "$TARGET_VERSION" > "$(flag_path update_available)"
+                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$FLAGS_DIR/update_prompted.lock"
+                echo "$TARGET_VERSION" > "$FLAGS_DIR/update_available.lock"
             fi
         fi
         return 0
