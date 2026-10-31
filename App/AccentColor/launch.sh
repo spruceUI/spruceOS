@@ -114,6 +114,12 @@ case "$PLATFORM" in
         ;;
 esac
 
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device, as in PyUI's launch.sh.
+if [ "$PYUI_ENV_DEVICE" = "true" ]; then
+    . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
+    ACCENT_PYUI_DEVICE="SPRUCE"
+fi
+
 [ -n "$PYTHON" ] || PYTHON="$(get_python_path)"
 export ACCENT_PYUI_DEVICE
 export PLATFORM
