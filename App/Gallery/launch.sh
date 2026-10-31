@@ -24,31 +24,20 @@ else
 
     export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
 
-    # gallery64 links libSDL_image-1.2 and libSDL_ttf-2.0 - SDL 1.2 era - but
-    # lib64/ here only carries libSDL-1.2 itself. The other aarch64 devices get
-    # those two from their firmware; BaseOS has neither, and nor does the stock
-    # Anbernic image, so the loader fails before any code runs.
-    #
-    # They come from spruce/h700/lib64, shared with the E-Reader, which needs
-    # exactly the same set. That directory is never on a global path - only the
-    # XX app launchers that need it prepend it - so it cannot shadow the
-    # firmware copies on Brick, Flip or SmartPro.
-    case "$PLATFORM" in
-        "Anbernic"*)
+    # gallery64 needs libSDL_image-1.2 and libSDL_ttf-2.0, absent from its
+    # lib64/ and from BaseOS/stock Anbernic firmware. Use the copies shared
+    # with E-Reader under spruce/h700/lib64, scoped here so they don't shadow
+    # firmware libraries on Brick, Flip or SmartPro.
+    case "$PLATFORM_FAMILY" in
+        "h700")
             export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH"
-
-            # gptokeyb reads the pad through SDL_GameController, and without a
-            # mapping it sees a plain joystick and translates nothing - gallery
-            # gets no keys and the app looks frozen.
-            #
-            # Positional rather than the default label-named form: gallery.gptk
-            # speaks SDL's own vocabulary, where "a" is the South button, and on
-            # the other devices SDL gets that from a stock mapping which is
-            # positional. The label-named map would put every binding in the
-            # .gptk on the wrong physical key.
+            # gptokeyb needs a GameController mapping to translate pad input.
+            # Use positional mapping: gallery.gptk uses SDL names ("a" = South),
+            # matching the stock mappings on other devices; label-named mapping
+            # would bind its controls to the wrong physical buttons.
             export_sdl_gamecontroller_map positional
             ;;
-        "RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"XUMiniM"|"G350"|"V10"|"RG353M")
+        "darkmoss")
             export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH"
             ;;
     esac
@@ -61,14 +50,16 @@ else
 
     sleep 0.3
 
-    # gallery64's libSDL-1.2 is sdl12-compat, so the keys gptokeyb injects
-    # arrive through SDL2's evdev backend. That SDL2 is built without libudev,
-    # and BaseOS runs no udevd anyway, so it has no reliable way to discover the
-    # virtual keyboard gptokeyb creates. SDL_EVDEV_DEVICES names the node
-    # outright and skips discovery; the node number is not fixed, so find it by
-    # the name gptokeyb gives it.
-    case "$PLATFORM" in
-        "Anbernic"*)
+    # gallery64 uses sdl12-compat, so drawing and injected keys go through SDL2.
+    # BaseOS has no udevd, and its SDL2 lacks libudev; locate gptokeyb's virtual
+    # keyboard by name and set SDL_EVDEV_DEVICES to bypass discovery.
+    #
+    # Run gallery64 with the vendor SDL2 build: it supports both Mali video
+    # (gallery has no framebuffer backend) and generic SDL_EVDEV_Poll. Keep
+    # gptokeyb on dll-mali, which has NextUI's H700 joystick classification
+    # patch. Scope the alternate SDL2 to gallery64 so it can't affect gptokeyb.
+    case "$PLATFORM_FAMILY" in
+        "h700")
             i=0
             while [ "$i" -lt 20 ]; do
                 for d in /sys/class/input/event*; do
@@ -82,29 +73,14 @@ else
                 i=$((i + 1))
                 sleep 0.1
             done
-            ;;
-    esac
 
-    # gallery64 gets its own SDL2, and only gallery64. Everything - drawing and
-    # keys - goes through SDL2 underneath sdl12-compat. The mali-fbdev SDL2 in
-    # dll-mali draws fine but never delivers the keystrokes gptokeyb injects:
-    # its only evdev pump is DUMMY_EVDEV_Poll, wired to the dummy video driver,
-    # and gallery64 needs mali because it has no framebuffer code of its own.
-    # This 2.0.12 build is the stock Anbernic vendor's own, which has both the
-    # mali video driver and the generic SDL_EVDEV_Poll.
-    #
-    # gptokeyb deliberately keeps dll-mali: it needs to *see* the pad, and only
-    # that build carries NextUI's H700 joystick classification patch. So the two
-    # processes run on different SDL2s, which is why this is scoped to the
-    # command rather than exported.
-    case "$PLATFORM" in
-        "Anbernic"*)
             LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH ./gallery64 > "$LOG_PATH" 2>&1
             ;;
         *)
             ./gallery64 > "$LOG_PATH" 2>&1
             ;;
     esac
+
     sync
-    kill -9 "$(pidof gptokeyb)"
+    kill -9 "$(pidof gptokeyb)" 2>/dev/null
 fi
