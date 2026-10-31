@@ -6,5 +6,10 @@
 current.txt
 sync.bat
 spruce/www/services.txt
-CLAUDE.md
 stats/*
+
+# AI coding agents: each developer's own notes, tests and settings, kept out of the repo
+AGENTS.md
+CLAUDE.md
+.agents/
+.claude/
