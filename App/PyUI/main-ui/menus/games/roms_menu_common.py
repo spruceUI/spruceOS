@@ -13,6 +13,7 @@ from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -132,7 +133,7 @@ class RomsMenuCommon(ABC):
     def create_view(self, page_name, rom_list, selected):
         return ViewCreator.create_view(
                         view_type=self.get_view_type(),
-                        top_bar_text=page_name,
+                        top_bar_text=Language.translate("pageTitles", page_name),
                         options=rom_list,
                         selected_index=selected.get_index(),
                         rows=self.get_game_select_row_count(),
