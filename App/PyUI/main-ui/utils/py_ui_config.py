@@ -329,6 +329,10 @@ class PyUiConfig:
         return cls.get("padRestartedCmd",None)
 
     @classmethod
+    def get_input_daemon_restart_cmd(cls):
+        return cls.get("inputDaemonRestartCmd",None)
+
+    @classmethod
     def get_volume_cmd(cls):
         return cls.get("volumeCmd",None)
 
