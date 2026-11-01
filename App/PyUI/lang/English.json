@@ -360,8 +360,6 @@
         "Control Profile": "Control Profile",
         "Steward Mode (overrides control profile)": "Steward Mode (overrides control profile)",
         "Controller Mode": "Controller Mode",
-        "Menu Hold Time": "Menu Hold Time",
-        "Vibrate on Menu Hold": "Vibrate on Menu Hold",
         "Power indicator LED mode": "Power indicator LED mode",
         "Low power warning percent": "Low power warning percent",
         "Shutdown after sleeping": "Shutdown after sleeping",
@@ -450,7 +448,13 @@
         "Wait for WiFi at game launch": "Wait for WiFi at game launch",
         "In-game Menu & Save States": "In-game Menu & Save States",
         "DSperate: Video Effect": "DSperate: Video Effect",
-        "Video Effect": "Video Effect"
+        "Video Effect": "Video Effect",
+        "Global sceenshot hotkey": "Global sceenshot hotkey",
+        "Hold Menu button action": "Hold Menu button action",
+        "Tap Menu button action": "Tap Menu button action",
+        "Menu button hold Time": "Menu button hold Time",
+        "Vibrate on Menu hold": "Vibrate on Menu hold",
+        "RAOfflineProxy": "RAOfflineProxy"
     },
     "governorOptions": {
         "Smart": "Smart",
@@ -698,7 +702,11 @@
         "For the Cheevos app: retroachievements.org > Settings > Applications": "For the Cheevos app: retroachievements.org > Settings > Applications",
         "Earn Casual Cheevos Offline": "Earn Casual Cheevos Offline",
         "Sends app version, device, cache counts and a hashed user ID daily": "Sends app version, device, cache counts and a hashed user ID daily",
-        "Headphone Audio Multiplier": "Headphone Audio Multiplier"
+        "Headphone Audio Multiplier": "Headphone Audio Multiplier",
+        "Allow contrast adjustment at minimum brightness": "Allow contrast adjustment at minimum brightness",
+        "Themes may override this": "Themes may override this",
+        "seconds before triggering hold action": "seconds before triggering hold action",
+        "when hold action triggered": "when hold action triggered"
     },
     "gameSystems": {
         "MEDIA": "Media"

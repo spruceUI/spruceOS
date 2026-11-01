@@ -382,8 +382,6 @@
         "Control Profile": "Perfil de control",
         "Steward Mode (overrides control profile)": "Mode Steward (substitueix el perfil de control)",
         "Controller Mode": "Mode del comandament",
-        "Menu Hold Time": "Temps per mantenir premut Menú",
-        "Vibrate on Menu Hold": "Vibra en mantenir premut Menú",
         "Power indicator LED mode": "Mode del LED d'engegada",
         "Low power warning percent": "Avís de bateria baixa (%)",
         "Shutdown after sleeping": "Apaga després de suspendre",
@@ -471,7 +469,14 @@
         "Wait for WiFi at game launch": "Espera la WiFi en iniciar un joc",
         "In-game Menu & Save States": "Menú en joc i estats desats",
         "DSperate: Video Effect": "DSperate: efecte de vídeo",
-        "Video Effect": "Efecte de vídeo"
+        "Video Effect": "Efecte de vídeo",
+        "Enable network ADB": "Activa l'ADB per xarxa",
+        "Global sceenshot hotkey": "Drecera global de captura de pantalla",
+        "Hold Menu button action": "Acció en mantenir premut el botó Menú",
+        "Tap Menu button action": "Acció en prémer el botó Menú",
+        "Menu button hold Time": "Temps per mantenir premut el botó Menú",
+        "Vibrate on Menu hold": "Vibra en mantenir premut Menú",
+        "RAOfflineProxy": "RAOfflineProxy"
     },
     "governorOptions": {
         "Smart": "Intel·ligent",
@@ -648,7 +653,12 @@
         "For the Cheevos app: retroachievements.org > Settings > Applications": "Per a l'app Cheevos: retroachievements.org > Settings > Applications",
         "Earn Casual Cheevos Offline": "Aconsegueix assoliments en mode Casual sense connexió",
         "Sends app version, device, cache counts and a hashed user ID daily": "Envia cada dia la versió de l'app, el dispositiu, els recomptes de la memòria cau i un ID d'usuari amb hash",
-        "Headphone Audio Multiplier": "Multiplicador d'àudio dels auriculars"
+        "Headphone Audio Multiplier": "Multiplicador d'àudio dels auriculars",
+        "Allow contrast adjustment at minimum brightness": "Permet ajustar el contrast amb la brillantor al mínim",
+        "Passwordless root access over WiFi. Trusted networks only": "Accés root sense contrasenya per WiFi. Només en xarxes de confiança",
+        "Themes may override this": "Els temes ho poden canviar",
+        "seconds before triggering hold action": "segons abans d'activar l'acció de mantenir premut",
+        "when hold action triggered": "quan s'activa l'acció de mantenir premut"
     },
     "menuOptionValues": {
         "Off": "Desactivat",
