@@ -259,6 +259,22 @@ runtime_mounts_SmartProS() {
     mount --bind /mnt/SDCARD/spruce/flip/bin/python3.10 /mnt/SDCARD/spruce/flip/bin/MainUI
 }
 
+# The kernel hard-codes timing that runs this panel at 62.94 Hz, and restores it whenever it
+# enables the display. A longer vertical total gives 60.01 Hz; the back porch must not move.
+set_panel_timing() {
+    _dsi_vt="$(devmem 0x0550801C 32)"
+    _tcon_vt="$(devmem 0x05502050 32)"
+    [ "$_dsi_vt" = "0x055D0500" ] && [ "$_tcon_vt" = "0x0ABA000C" ] && return 0
+    if grep -q 'lcd=er68576' /proc/cmdline && [ "$_dsi_vt" = "0x051D0500" ] && [ "$_tcon_vt" = "0x0A3A000C" ]; then
+        devmem 0x0550801C 32 0x055D0500
+        devmem 0x05502050 32 0x0ABA000C
+        log_message "Panel timing set to 60 Hz"
+        return 0
+    fi
+    # Everything needed to add this panel later.
+    log_message "Panel timing skipped: $(grep -o 'lcd=[^ ]*' /proc/cmdline) dsi18=$(devmem 0x05508018 32) dsi1c=$_dsi_vt tcon44=$(devmem 0x05502044 32) tcon48=$(devmem 0x05502048 32) tcon4c=$(devmem 0x0550204C 32) tcon50=$_tcon_vt tcon54=$(devmem 0x05502054 32)"
+}
+
 device_init() {
     runtime_mounts_SmartProS
 
@@ -269,7 +285,10 @@ device_init() {
     echo 1 > /sys/class/drm/card0-DSI-1/force_rotate
     # The first userspace modeset after boot re-runs the whole panel init;
     # do it here, off the frontend's first frame.
-    "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1 &
+    (
+        "$(get_python_path)" /mnt/SDCARD/spruce/scripts/platform/utils/smartpros/early_panel_modeset.py >/dev/null 2>&1
+        set_panel_timing
+    ) &
     # DRM master while it runs: no other display client may start before it exits.
     DEVICE_INIT_DISPLAY_PIDS="$DEVICE_INIT_DISPLAY_PIDS $!"
 
@@ -404,6 +423,7 @@ device_exit_sleep(){
         sleep 10
         restore_cores_online
     ) &
+    set_panel_timing
     clear_wake_alarm $WAKE_ALARM_PATH
 }
 
