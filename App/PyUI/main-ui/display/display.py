@@ -715,15 +715,13 @@ class Display:
         return result
 
     @classmethod
-    def requires_fallback_font(cls, text, purpose):
+    def font_covers(cls, text, purpose):
+        """Whether the theme's font for purpose can draw every char of text."""
         primary_font = cls.fonts[purpose]
-        if all(
+        return all(
             cls._font_has_glyph(primary_font.font, char)
             for char in text
-        ):
-            return False
-        else:
-            return True
+        )
 
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose,
