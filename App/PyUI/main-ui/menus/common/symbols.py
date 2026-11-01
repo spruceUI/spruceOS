@@ -48,3 +48,14 @@ def button_labels(text):
     if current:
         segments.append((False, current))
     return segments
+
+
+def glyph_runs(glyphs):
+    """Turn a bare sequence of button glyphs into segments, one press per run,
+    separated by a single space - the shape button_labels() returns."""
+    segments = []
+    for glyph in glyphs:
+        if segments:
+            segments.append((False, " "))
+        segments.append((True, glyph))
+    return segments
