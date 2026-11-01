@@ -15,6 +15,16 @@ INTER_WORD_GAP=1.4
 
 ##### FUNCTIONS #####
 
+# Run in the background: waiting for a button here would hold up the forced shutdown.
+show_low_battery_warning() {
+    start_pyui_message_writer 1
+    log_and_display_message "Battery has $current_battery_percent% left. Charge or shutdown your device."
+    sleep 1
+    acknowledge
+    sleep 0.5
+    stop_pyui_message_writer
+}
+
 morse_code_sos() {
 
     _do_vibrate=$1
@@ -91,13 +101,9 @@ while true; do
                 vibrate_count=$((vibrate_count + 1))
             else
                 if [ "$flag_added" = false ]; then
-                    if flag_check "in_menu"; then
-                        start_pyui_message_writer 1
-                        log_and_display_message "Battery has $current_battery_percent% left. Charge or shutdown your device."
-                        sleep 1
-                        acknowledge
-                        sleep 0.5
-                        stop_pyui_message_writer
+                    # On the Mini, starting a writer runs freemma, which clears the running menu.
+                    if flag_check "in_menu" && [ "$PLATFORM" != "MiyooMini" ]; then
+                        show_low_battery_warning &
                     else
                         flag_add "low_battery" --tmp
                     fi
