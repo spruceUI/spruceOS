@@ -325,6 +325,10 @@ class PyUiConfig:
         return cls.get("backlightCmd",None)
 
     @classmethod
+    def get_pad_restarted_cmd(cls):
+        return cls.get("padRestartedCmd",None)
+
+    @classmethod
     def get_volume_cmd(cls):
         return cls.get("volumeCmd",None)
 

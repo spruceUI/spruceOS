@@ -24,6 +24,7 @@
     "rebootCmd":"/mnt/SDCARD/App/PyUI/reboot-spruce.sh",
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
+    "padRestartedCmd":"/mnt/SDCARD/App/PyUI/restart-pad-readers.sh",
     "volumeCmd":"/mnt/SDCARD/App/PyUI/set-volume.sh",
     "btAudioDeviceCmd":"/mnt/SDCARD/App/PyUI/get-bt-audio-device.sh",
     "usbAudioSupportedCmd":"/mnt/SDCARD/App/PyUI/get-usb-audio-supported.sh",

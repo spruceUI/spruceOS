@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -190,6 +191,10 @@ class MiyooDevice(DeviceCommon):
                                 stdin=subprocess.DEVNULL,
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
+        restart_cmd = PyUiConfig.get_pad_restarted_cmd()
+        if restart_cmd and os.path.exists(restart_cmd):
+            subprocess.run([restart_cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=30)
         Controller.re_init_controller()
     
     def remap_buttons(self):

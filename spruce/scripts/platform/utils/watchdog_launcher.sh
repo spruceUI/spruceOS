@@ -66,6 +66,22 @@ stop_running_watchdog() {
     unset _swd_script _swd_pid _swd_ge
 }
 
+# For when a pad daemon restart recreated the input node: getevent and idlemon stay on the dead fd.
+restart_pad_readers() {
+    for _wd in /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh; do
+        stop_running_watchdog "$_wd"
+    done
+    unset _wd
+    sleep 1
+    /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/buttons_watchdog.sh </dev/null >/dev/null 2>&1 &
+    /mnt/SDCARD/spruce/scripts/idle_watchdog.sh </dev/null >/dev/null 2>&1 &
+
+    SYSTEM_CPU=${DEVICE_MAX_CORES_ONLINE%"${DEVICE_MAX_CORES_ONLINE#?}"}
+    pin_cpu "$SYSTEM_CPU" -n menubutton_watchdog.sh &
+    pin_cpu "$SYSTEM_CPU" -n buttons_watchdog.sh &
+}
+
 launch_common_startup_watchdogs_v2() {
     log_message "Launching common startup watchdogs"
     HAS_LID="${1:-false}" 
