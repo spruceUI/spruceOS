@@ -13,9 +13,54 @@ MAX_SIZE=62234
 DIR="$(dirname "$0")"
 cd "$DIR" || exit 1
 
-display_logo() {
-    display -i "$DIR/$1.png" -d 3
+show_bootlogo_message() {
+    _image="$1"
+    _text="$2"
+    _delay="${3:-0}"
+    display_image_and_text "$_image" 35 25 "$_text" 75
+    [ "$_delay" -gt 0 ] && sleep "$_delay"
 }
+
+show_bootlogo_error() {
+    show_bootlogo_message "$ERROR_IMAGE_PATH" "$1" 2
+}
+
+show_bootlogo_image() {
+    _image="$1"
+    _delay="${2:-0}"
+    display_message "$(printf '{"cmd":"RENDER_IMAGE","args":["%s"]}' "$(json_escape "$_image")")"
+    [ "$_delay" -gt 0 ] && sleep "$_delay"
+}
+
+show_fitted_bootlogo_image() {
+    _preview="/tmp/bootlogo-preview-$$.png"
+
+    case "$DISPLAY_WIDTH:$DISPLAY_HEIGHT" in
+        *[!0-9:]*|:*|*:)
+            log_message "Error: invalid display dimensions ($DISPLAY_WIDTH x $DISPLAY_HEIGHT)."
+            return 1
+            ;;
+    esac
+    if [ "$DISPLAY_WIDTH" -le 0 ] || [ "$DISPLAY_HEIGHT" -le 0 ]; then
+        log_message "Error: invalid display dimensions ($DISPLAY_WIDTH x $DISPLAY_HEIGHT)."
+        return 1
+    fi
+
+    if ! ffmpeg -y -i "$1" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -frames:v 1 "$_preview" > /dev/null 2>&1; then
+        log_message "Error: could not fit the boot logo preview to ${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}."
+        rm -f "$_preview"
+        show_bootlogo_error "Could not display boot logo preview."
+        return 1
+    fi
+
+    show_bootlogo_image "$_preview" 5
+    _result=$?
+    rm -f "$_preview"
+    return "$_result"
+}
+
+start_pyui_message_writer 1
+trap 'stop_pyui_message_writer' EXIT
 
 log_message "--Debug-- PATH = $PATH"
 log_message "--Debug-- LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
@@ -31,7 +76,7 @@ elif [ -f "${LOGO_PATH}.png" ]; then
     LOGO_PATH="${LOGO_PATH}.png"
 else
     log_message "Error: Neither $LOGO_NAME.bmp nor $LOGO_NAME.png exist in the directory: $DIR"
-    display --icon "$ERROR_IMAGE_PATH" -t "Boot logo not found. Cancelling boot logo swap." -d 1
+    show_bootlogo_error "Boot logo not found. Cancelling boot logo swap."
     exit 1
 fi
 
@@ -60,7 +105,7 @@ if [ "$SKIP_GENERIC_CONVERT" = "0" ]; then
         ffmpeg -y -i "$LOGO_PATH" -vf "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to convert image to BMP format. Ensure FFmpeg is installed and the image path is correct."
-            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Cannot convert image. Cancelling boot logo swap."
             exit 1
         fi
         LOGO_PATH="$TEMP_BMP"
@@ -91,7 +136,7 @@ case "$PLATFORM" in
         ffmpeg -i "$LOGO_PATH" -vf "transpose=2" -pix_fmt bgra "$PROCESSED_NAME" > /dev/null 2>&1
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to process image with FFmpeg."
-            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Cannot convert image. Cancelling boot logo swap."
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
         fi
@@ -104,7 +149,7 @@ case "$PLATFORM" in
         # Check dimensions of compressed image
         if [ "$LOGO_SIZE" -gt "$MAX_SIZE" ]; then
             log_message "Error: Compressed file is larger than 62 KB ($LOGO_SIZE bytes)."
-            display --icon "$ERROR_IMAGE_PATH" -t "Image is too large. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Image is too large. Cancelling boot logo swap."
             rm "$PROCESSED_PATH" boot0 boot0-suffix
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
@@ -115,7 +160,7 @@ case "$PLATFORM" in
         cp /dev/mtdblock0 boot0
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to create a backup of the partition."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't back up boot partition. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't back up boot partition. Cancelling boot logo swap."
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             exit 1
         fi
@@ -125,7 +170,7 @@ case "$PLATFORM" in
         OFFSET_PATH="res/offset-$VERSION"
         if [ ! -f "$OFFSET_PATH" ]; then
             log_message "Error: Offset not found for firmware version ($VERSION)."
-            display --icon "$ERROR_IMAGE_PATH" -t "Firmware is not compatible. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Firmware is not compatible. Cancelling boot logo swap."
             rm -f "$TEMP_BMP" "$PROCESSED_NAME"
             rm "$PROCESSED_PATH" boot0
             exit 1
@@ -134,7 +179,7 @@ case "$PLATFORM" in
 
         # Display update image
         log_message "Displaying update image..."
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
 
         # Update bootlogo in memory
         log_message "Updating BootLogo..."
@@ -147,7 +192,7 @@ case "$PLATFORM" in
         mtd write "$DIR/boot0" boot > /dev/null 2>&1
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to write updated partition."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write updated partition. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't write updated partition. Cancelling boot logo swap."
             rm "$PROCESSED_PATH" "$PROCESSED_NAME" "$TEMP_BMP" boot0 boot0-suffix
             exit 1
         fi
@@ -156,7 +201,7 @@ case "$PLATFORM" in
         ;;
     "Flip")
 
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
 
         # Setting up environment
         log_message "Preparing system..."
@@ -165,7 +210,7 @@ case "$PLATFORM" in
         cp -r payload/* /tmp
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to write to disk."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't create needed folders. Cancelling boot logo swap."
             rm -f "$TEMP_BMP"
             exit 1
         fi        
@@ -185,7 +230,7 @@ case "$PLATFORM" in
         mkdir -p bootres
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to write to disk."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't create needed folders. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't create needed folders. Cancelling boot logo swap."
             rm -f "$TEMP_BMP"
             exit 1
         fi
@@ -213,7 +258,7 @@ case "$PLATFORM" in
         mkbootimg --kernel bootimg/boot.img-kernel --second bootimg/boot-second --base 0x10000000 --kernel_offset 0x00008000 --ramdisk_offset 0xf0000000 --second_offset 0x00f00000 --pagesize 2048 --hashtype sha1 -o boot.img
         if [ $? -ne 0 ]; then
             log_message "Error: Unable to create new boot image."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't pack new boot image. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't pack new boot image. Cancelling boot logo swap."
             rm -f "$TEMP_BMP"
             exit 1
         fi
@@ -232,18 +277,18 @@ case "$PLATFORM" in
         # A much faster and more simple implementation than Miyoo's devices
         # TrimUI devices are much more lenient with regards to bootlogo size, mostly as a result of the larger eMMC flash (8GB vs 16MB for A30 and 128MB for Flip)
         if [ $(wc -c < "$LOGO_PATH") -ge $((6 * 1024 * 1024)) ]; then
-            display --icon "$ERROR_IMAGE_PATH" -t "Image is too large, must be less than 6MB. 
-            Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Image is too large, must be less than 6MB.
+            Cancelling boot logo swap."
             rm -f "$TEMP_BMP"
             exit 1
         fi
 
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
         BOOT_PATH="/mnt/boot"
         [ ! -d $BOOT_PATH ] && mkdir $BOOT_PATH
         mount -t vfat /dev/mmcblk0p1 $BOOT_PATH
         if ! cp $LOGO_PATH $BOOT_PATH/bootlogo.bmp; then
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't write boot logo. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP" "$BOOT_PATH"
             exit 1
@@ -279,17 +324,17 @@ case "$PLATFORM" in
 
         if [ ! -b "$BOOT_DEV" ]; then
             log_message "Error: $BOOT_DEV not present."
-            display --icon "$ERROR_IMAGE_PATH" -t "Boot partition not found. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Boot partition not found. Cancelling boot logo swap."
             rm -f "$TEMP_BMP"
             exit 1
         fi
 
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
 
         mkdir -p "$BOOT_PATH"
         if ! mount -t vfat "$BOOT_DEV" "$BOOT_PATH" 2>/dev/null; then
             log_message "Error: could not mount $BOOT_DEV."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't open boot partition. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't open boot partition. Cancelling boot logo swap."
             rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -300,7 +345,7 @@ case "$PLATFORM" in
             # Rule 1. Without an existing file there is no known-good geometry
             # and no way to write without allocating - so decline entirely.
             log_message "Error: no existing bootlogo.bmp on $BOOT_DEV; refusing to create one."
-            display --icon "$ERROR_IMAGE_PATH" -t "No boot logo to replace. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "No boot logo to replace. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null; rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -313,7 +358,7 @@ case "$PLATFORM" in
 
         if [ -z "$BL_W" ] || [ -z "$BL_H" ] || [ "$BL_W" -le 0 ] || [ "$BL_H" -le 0 ]; then
             log_message "Error: could not read dimensions from the existing bootlogo."
-            display --icon "$ERROR_IMAGE_PATH" -t "Boot logo unreadable. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Boot logo unreadable. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null; rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -336,7 +381,7 @@ case "$PLATFORM" in
         # aspect ratios are never stretched.
         if ! ffmpeg -y -i "$ORIG_LOGO_PATH" -vf "scale='if(gt(iw/ih,$TW/$TH),$TW,-1)':'if(gt(iw/ih,$TW/$TH),-1,$TH)',pad=$TW:$TH:($TW-iw)/2:($TH-ih)/2:black${ROT_VF}" -pix_fmt bgr24 "$TEMP_BMP" > /dev/null 2>&1; then
             log_message "Error: could not convert the image to ${BL_W}x${BL_H} BMP."
-            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Cannot convert image. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null; rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -348,7 +393,7 @@ case "$PLATFORM" in
         NEW_SIZE="$(wc -c < "$TEMP_BMP")"
         if [ "$NEW_SIZE" != "$TARGET_SIZE" ]; then
             log_message "Error: converted logo is $NEW_SIZE bytes, expected $TARGET_SIZE. Refusing to write."
-            display --icon "$ERROR_IMAGE_PATH" -t "Converted logo is the wrong size. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Converted logo is the wrong size. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null; rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -362,7 +407,7 @@ case "$PLATFORM" in
         log_message "Writing boot logo in place..."
         if ! dd if="$TEMP_BMP" of="$TARGET_BMP" conv=notrunc 2>/dev/null; then
             log_message "Error: could not write the boot logo."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot logo. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't write boot logo. Cancelling boot logo swap."
             umount "$BOOT_PATH" 2>/dev/null; rmdir "$BOOT_PATH" 2>/dev/null
             rm -f "$TEMP_BMP"
             exit 1
@@ -385,24 +430,24 @@ case "$PLATFORM" in
         BACKUP="/mnt/SDCARD/App/BootLogo/resource-backup.img"
         if [ ! -b "$RES_DEV" ]; then
             log_message "Error: resource partition not found."
-            display --icon "$ERROR_IMAGE_PATH" -t "Boot partition not found. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Boot partition not found. Cancelling boot logo swap."
             exit 1
         fi
         RES_SIZE="$(blockdev --getsize64 "$RES_DEV" 2>/dev/null || echo 4194304)"
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
         rm -rf "$WORK"
         mkdir -p "$WORK/unpacked"
         cp -r payload/* /tmp
         if ! ffmpeg -y -i "$ORIG_LOGO_PATH" -filter_complex "scale='if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),$DISPLAY_WIDTH,-1)':'if(gt(iw/ih,$DISPLAY_WIDTH/$DISPLAY_HEIGHT),-1,$DISPLAY_HEIGHT)',pad=$DISPLAY_WIDTH:$DISPLAY_HEIGHT:($DISPLAY_WIDTH-iw)/2:($DISPLAY_HEIGHT-ih)/2:black,transpose=2,split[a][b];[a]palettegen=max_colors=256[p];[b][p]paletteuse=dither=none" -pix_fmt pal8 "$WORK/logo.bmp" > /dev/null 2>&1; then
             log_message "Error: could not convert the image to a portrait 8-bit BMP."
-            display --icon "$ERROR_IMAGE_PATH" -t "Cannot convert image. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Cannot convert image. Cancelling boot logo swap."
             rm -rf "$WORK"
             exit 1
         fi
         log_message "Reading resource partition $RES_DEV..."
         if ! dd if="$RES_DEV" of="$WORK/resource.img" bs=512 2>/dev/null; then
             log_message "Error: could not read $RES_DEV."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't read boot partition. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't read boot partition. Cancelling boot logo swap."
             rm -rf "$WORK"
             exit 1
         fi
@@ -411,7 +456,7 @@ case "$PLATFORM" in
         rsce_tool -u ../resource.img > /dev/null 2>&1
         if [ ! -f logo.bmp ] || [ ! -f logo_kernel.bmp ]; then
             log_message "Error: resource image did not unpack to the expected files."
-            display --icon "$ERROR_IMAGE_PATH" -t "Unexpected boot partition layout. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Unexpected boot partition layout. Cancelling boot logo swap."
             rm -rf "$WORK"
             exit 1
         fi
@@ -425,14 +470,14 @@ case "$PLATFORM" in
         NEW_SIZE="$(wc -c < boot-second 2>/dev/null || echo 0)"
         if [ "$NEW_SIZE" -le 0 ] || [ "$NEW_SIZE" -gt "$RES_SIZE" ]; then
             log_message "Error: repacked resource image is $NEW_SIZE bytes, partition is $RES_SIZE."
-            display --icon "$ERROR_IMAGE_PATH" -t "New boot image does not fit. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "New boot image does not fit. Cancelling boot logo swap."
             rm -rf "$WORK"
             exit 1
         fi
         log_message "Writing resource partition..."
         if ! dd if=boot-second of="$RES_DEV" bs=512 conv=fsync 2>/dev/null; then
             log_message "Error: could not write $RES_DEV."
-            display --icon "$ERROR_IMAGE_PATH" -t "Couldn't write boot partition. Cancelling boot logo swap." -d 1
+            show_bootlogo_error "Couldn't write boot partition. Cancelling boot logo swap."
             rm -rf "$WORK"
             exit 1
         fi
@@ -441,7 +486,7 @@ case "$PLATFORM" in
         rm -rf "$WORK" /tmp/bin
         ;;
     "Pixel2")
-        display --icon "$IMAGE_PATH" -t "Updating boot logo, please wait..."
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
 
         mount -o remount,rw /flash
         magick $LOGO_PATH -colorspace sRGB -alpha off -resize 640x480\> -rotate 270 /flash/logo.bmp
@@ -454,7 +499,7 @@ esac
 # Clean up temporary files
 
 log_message "Bootlogo updated successfully!"
-display --icon "$IMAGE_PATH" -t "Boot logo updated successfully!" -d 1
+show_bootlogo_message "$IMAGE_PATH" "Boot logo updated successfully!" 2
 
 # Visualizza immagine finale
-display_logo "$LOGO_NAME"
+show_fitted_bootlogo_image "$ORIG_LOGO_PATH"
