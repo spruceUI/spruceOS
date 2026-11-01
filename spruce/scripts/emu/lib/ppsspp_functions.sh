@@ -54,6 +54,7 @@ run_ppsspp() {
 	set_up_default_configs_if_needed
 	load_ppsspp_configs
 	configure_retroachievements
+	configure_language
 
 	export HOME=/mnt/SDCARD/Saves
 	cd $EMU_DIR
@@ -162,6 +163,51 @@ configure_retroachievements() {
 			fi
 			;;
 	esac
+}
+
+# PPSSPP's menu language (a file in Emu/PSP/assets/lang) for a PyUI language
+# file name; empty when PPSSPP has no such language or none is set.
+ppsspp_language_for_ui_language() {
+	case "$1" in
+		"Azerbaijani") echo az_AZ ;;
+		"Catalan") echo ca_ES ;;
+		"Chinese (S)") echo zh_CN ;;
+		"Chinese (T)") echo zh_TW ;;
+		"Croatian") echo hr_HR ;;
+		"English") echo en_US ;;
+		"French") echo fr_FR ;;
+		"German") echo de_DE ;;
+		"Greek") echo gr_EL ;;
+		"Italian") echo it_IT ;;
+		"Japanese") echo ja_JP ;;
+		"Korean") echo ko_KR ;;
+		"Lao") echo lo_LA ;;
+		"Polish") echo pl_PL ;;
+		"Portuguese (BR)") echo pt_BR ;;
+		"Portuguese (Eur)") echo pt_PT ;;
+		"Romanian") echo ro_RO ;;
+		"Russian") echo ru_RU ;;
+		"Spanish") echo es_ES ;;
+		"Tagalog") echo tg_PH ;;
+		"Thai") echo th_TH ;;
+		"Turkish") echo tr_TR ;;
+		"Ukrainian") echo uk_UA ;;
+		"Vietnamese") echo vi_VN ;;
+	esac
+}
+
+# Show PPSSPP's menus in the UI language. Only the [General] locale line
+# (Language = xx_YY) changes; [SystemParam] Language is the PSP's own setting.
+configure_language() {
+	ppsspp_language="$(ppsspp_language_for_ui_language "$(get_ui_language)")"
+	[ -z "$ppsspp_language" ] && return
+	[ -f "$EMU_DIR/assets/lang/$ppsspp_language.ini" ] || return
+	TMP_CFG="$(mktemp)"
+	if sed -e "s|^Language = [a-z][a-z]_[A-Z][A-Z]|Language = $ppsspp_language|" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
+		mv "$TMP_CFG" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
+	else
+		rm -f "$TMP_CFG"
+	fi
 }
 
 load_ppsspp_configs() {
