@@ -48,8 +48,30 @@ class GameSelectMenuPopup:
         if ControllerInput.A != input_value:
             return
 
-        # Filter out directories
-        roms_only = [rom for rom in rom_list if not os.path.isdir(rom.get_value().rom_file_path)]
+        roms_only = []
+        folders_to_scan = []
+        for rom in rom_list:
+            rom_info = rom.get_value()
+            if os.path.isdir(rom_info.rom_file_path):
+                folders_to_scan.append((rom_info.game_system, rom_info.rom_file_path))
+            else:
+                roms_only.append(rom)
+
+        builder = get_rom_select_options_builder()
+        scanned_folders = set()
+        while folders_to_scan:
+            game_system, folder = folders_to_scan.pop()
+            folder = os.path.realpath(folder)
+            if folder in scanned_folders:
+                continue
+            scanned_folders.add(folder)
+
+            for rom in builder.build_rom_list(game_system, subfolder=folder):
+                rom_info = rom.get_value()
+                if os.path.isdir(rom_info.rom_file_path):
+                    folders_to_scan.append((rom_info.game_system, rom_info.rom_file_path))
+                else:
+                    roms_only.append(rom)
 
         if not roms_only:
             Display.display_message(Language.label("noValidRomsToLaunch", "No valid ROMs available to launch."), duration_ms=2000)
