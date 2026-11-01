@@ -646,7 +646,7 @@
         "follows defaults if set to False": "segueix els valors per defecte si està desactivat",
         "during emulation": "durant l'emulació",
         "For the Cheevos app: retroachievements.org > Settings > Applications": "Per a l'app Cheevos: retroachievements.org > Settings > Applications",
-        "Earn Casual Cheevos Offline": "Aconsegueix assoliments en mode informal sense connexió",
+        "Earn Casual Cheevos Offline": "Aconsegueix assoliments en mode Casual sense connexió",
         "Sends app version, device, cache counts and a hashed user ID daily": "Envia cada dia la versió de l'app, el dispositiu, els recomptes de la memòria cau i un ID d'usuari amb hash",
         "Headphone Audio Multiplier": "Multiplicador d'àudio dels auriculars"
     },
@@ -717,7 +717,7 @@
         "blink 3": "parpelleig 3",
         "rainbow": "arc iris",
         "rainbow multi": "arc iris múltiple",
-        "Casual": "Informal",
+        "Casual": "Casual",
         "Hardcore": "Hardcore"
     },
     "gameSystems": {
