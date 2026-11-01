@@ -26,12 +26,7 @@ extract_game_dir(){
 }
 
 is_retroarch_port() {
-    # Check if the file contains "retroarch"
-    if grep -q "retroarch" "$ROM_FILE"; then
-        return 1;
-    else
-        return 0;
-    fi
+    grep -q "retroarch" "$ROM_FILE"
 }
 
 set_port_abxy_scheme() {
@@ -95,8 +90,7 @@ run_port() {
     export PATH="/mnt/SDCARD/spruce/flip/bin/:$PATH"
 
     set_port_abxy_scheme
-    is_retroarch_port
-    if [ $? -eq 1 ]; then
+    if is_retroarch_port; then
         log_message "Launching RA port $ROM_FILE"
         cd /mnt/SDCARD/RetroArch/
         "$ROM_FILE" > /mnt/SDCARD/Saves/spruce/port.log 2>&1 &
@@ -126,15 +120,31 @@ run_port() {
 
 run_A30_port() {
 
-    # ensure correct RA bin and config are available
+    # ensure the A30 RA config is available
     . /mnt/SDCARD/spruce/scripts/emu/lib/ra_functions.sh
-    touch /mnt/SDCARD/RetroArch/retroarch
-    mount -o bind /mnt/SDCARD/RetroArch/ra32.a30 /mnt/SDCARD/RetroArch/retroarch
     prepare_ra_config 2>/dev/null
 
-    cd /mnt/SDCARD/Roms/A30PORTS
-    /bin/sh "$ROM_FILE" 
+    launch_script="$ROM_FILE"
+    if is_retroarch_port; then
+        tmp_launch_script=$(mktemp "${ROM_FILE}.a30.XXXXXX") || {
+            log_message "Unable to create temporary A30 port launch script for $ROM_FILE"
+            return 1
+        }
+        if ! sed -E '
+            /^[[:space:]]*#/! {
+                /[[:space:]](-c|--config)(=|[[:space:]])/! s#(^[[:space:]]*|[;&|][[:space:]]*)(exec[[:space:]]+)?([^[:space:];|&]*/)?retroarch([[:space:]]|$)#\1\2/mnt/SDCARD/RetroArch/ra32.a30 -c /mnt/SDCARD/Saves/ra-configs/retroarch-A30.cfg\4#
+            }
+        ' "$ROM_FILE" > "$tmp_launch_script"; then
+            log_message "Unable to rewrite RetroArch invocation in $ROM_FILE for A30"
+            rm -f "$tmp_launch_script"
+            return 1
+        fi
+        launch_script="$tmp_launch_script"
+    fi
 
-    # clean up and back up any RA config modifications
-    umount /mnt/SDCARD/RetroArch/retroarch
+    cd /mnt/SDCARD/Roms/A30PORTS
+    /bin/sh "$launch_script"
+    if [ "$launch_script" != "$ROM_FILE" ]; then
+        rm -f "$launch_script"
+    fi
 }
