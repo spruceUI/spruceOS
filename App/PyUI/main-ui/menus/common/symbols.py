@@ -10,26 +10,23 @@ the Unicode arrow "d". The upstream index is the only authority here - the
 Unicode name of the codepoint says nothing about what the font draws.
 """
 
-# Face buttons: promptfont draws a four-button cluster with the pressed one
-# filled. The layout is promptfont's generic (Xbox) one: A bottom, B right,
-# X left, Y top - which does not match Miyoo/Trimui's A-right hardware, so
-# these read as "which button", not as a positional match to the shell.
-BTN_A = "↧"   # U+21A7 gamepad-a, vòng dưới tô
-BTN_B = "↦"   # U+21A6 gamepad-b, vòng phải tô
-BTN_X = "↤"   # U+21A4 gamepad-x
-BTN_Y = "↥"   # U+21A5 gamepad-y
+# Face buttons: promptfont's Xbox set - each letter inside a circle. These are
+# the lettered buttons, not U+21A4-A7, which are the generic four-circle
+# cluster that only shows which position is pressed and carries no letter.
+BTN_A = "⇓"   # U+21D3 xbox-a
+BTN_B = "⇒"   # U+21D2 xbox-b
+BTN_X = "⇐"   # U+21D0 xbox-x
+BTN_Y = "⇑"   # U+21D1 xbox-y
 BTN_START = "⇸"    # U+21F8 gamepad-start
 BTN_SELECT = "⇷"   # U+21F7 gamepad-select
 BTN_HOME = "⇹"     # U+21F9 gamepad-home
 
-# D-pad: promptfont draws the d-pad cross with the pressed arm filled, the
-# same "cluster with one highlighted" style as the face buttons above. Use
-# these for on-screen directions - the plain arrows below are much heavier
-# and do not sit at the same visual weight.
-DPAD_UP = "↟"     # U+219F dpad-up
-DPAD_DOWN = "↡"   # U+21A1 dpad-down
-DPAD_LEFT = "↞"   # U+219E dpad-left
-DPAD_RIGHT = "↠"  # U+21A0 dpad-right
+# D-pad: promptfont's Xbox set, matching the Xbox face buttons above.
+DPAD_LEFT = "≺"   # U+227A xbox-dpad-left
+DPAD_UP = "≻"     # U+227B xbox-dpad-up
+DPAD_RIGHT = "≼"  # U+227C xbox-dpad-right
+DPAD_DOWN = "≽"   # U+227D xbox-dpad-down
+DPAD = "⊄"        # U+2284 xbox-dpad, unpressed
 
 # Plain arrows. Kept in the symbol set because a theme font may omit them and
 # they turn into tofu, but prefer the d-pad glyphs when drawing a direction.
