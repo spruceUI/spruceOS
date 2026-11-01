@@ -52,12 +52,13 @@ ARROW_RIGHT = "→" # U+2192
 # check-mark is U+2714.
 CHECK = "✔"
 
-KONAMI_ARROWS = (DPAD_UP * 2 + DPAD_DOWN * 2
-                 + DPAD_LEFT + DPAD_RIGHT + DPAD_LEFT + DPAD_RIGHT)
+# The Konami sequence, one press per run of the line. Every press is separated
+# by a single space - including the arrows, so the whole line reads as a
+# sequence rather than a tight arrow blob followed by loose buttons.
+KONAMI_ARROWS = " ".join([DPAD_UP, DPAD_UP, DPAD_DOWN, DPAD_DOWN,
+                          DPAD_LEFT, DPAD_RIGHT, DPAD_LEFT, DPAD_RIGHT])
 
-# B A START SELECT, space-separated, all as glyphs.
-KONAMI = (KONAMI_ARROWS + " " + BTN_B + " " + BTN_A
-          + " " + BTN_START + " " + BTN_SELECT)
+KONAMI = " ".join([KONAMI_ARROWS, BTN_B, BTN_A, BTN_START, BTN_SELECT])
 
 # Every glyph that must be drawn with FontPurpose.SYMBOL.
 SYMBOL_GLYPHS = frozenset([
