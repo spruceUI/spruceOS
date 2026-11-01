@@ -213,7 +213,7 @@ class RomSelectOptionsBuilder:
                         Display.display_message_multiline([
                             Language.label("optimizeBoxartPrompt1", "Would you like to optimize boxart?"),
                             Language.label("optimizeBoxartPrompt2", "Originals will be converted, be sure to backup!"),
-                            symbols.button_labels(Language.label("optimizeBoxartPrompt3", "A = Yes, B = No, X/Y = Never Prompt")),
+                            symbols.button_labels(Language.label("optimizeBoxartPrompt3", "{A} Yes {B} No {X}/{Y} Never Prompt")),
                             "",
                             Language.label("optimizeBoxartPrompt4", "You can manually do this in:"),
                             Language.label("optimizeBoxartPrompt5", "Settings -> Tasks -> Optimize Boxart"),

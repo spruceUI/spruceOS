@@ -12,7 +12,6 @@ class FontPurpose(Enum):
     LIST_INDEX = auto()
     LIST_TOTAL = auto()
     ON_SCREEN_KEYBOARD = auto()
-    SYMBOL = auto()
     SHADOWED = auto()
     SHADOWED_BACKDROP = auto()
     SHADOWED_SMALL = auto()

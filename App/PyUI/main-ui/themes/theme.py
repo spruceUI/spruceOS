@@ -558,12 +558,6 @@ class Theme():
                     font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
                 case FontPurpose.SHADOWED_BACKDROP_SMALL:
                     font = os.path.join(cls._path,cls._data["shadowed"]["font"]) 
-                case FontPurpose.SYMBOL:
-                    # Bundled symbol font (promptfont.ttf, SIL OFL - see
-                    # Licenses/fonts/promptfont.txt). Hardwired: themes must not
-                    # re-skin button/key glyphs, and it is the only bundled font
-                    # that guarantees the arrows a theme font may omit.
-                    font = os.path.join(os.path.abspath(sys.path[0]), "utils", "promptfont.ttf")
                 case _:
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
                 
@@ -633,10 +627,6 @@ class Theme():
                     except Exception as e:
                         #PyUiLogger.get_logger().warning(f"Theme is missing [\"shadowed\"][\"shadowedFontBackdropSmallSize\"] ")
                         return int(26 * cls._default_multiplier)
-                case FontPurpose.SYMBOL:
-                    # Same size as the surrounding list text so a symbol sits on
-                    # the same baseline as the words it labels.
-                    return cls._data.get("listFontSize",cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case _:
                     return cls._data["list"]["font"]
         except Exception as e:

@@ -10,7 +10,6 @@ from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
-from menus.common import symbols
 from menus.language.language import Language
 import sdl2
 from display import sdl_backend
@@ -101,11 +100,21 @@ class TextTextureCache:
         for entry in self.cache.values():
             sdl2.SDL_DestroyTexture(entry.texture)
         self.cache.clear()
-        
+
+
+# Breathing room around glyph runs, in px at 480 height: a glyph sits tight to the words
+# it labels, and one button group is kept clearly apart from the next.
+SYMBOL_TIGHT_GAP_PX = 2
+SYMBOL_GROUP_GAP_PX = 8
+
+
 class Display:
     debug = False
     renderer = None
     fonts = {}
+    # Cache key for the bundled symbol font inside cls.fonts. Not a FontPurpose: themes
+    # do not pick it, the renderer hardwires it.
+    SYMBOL_FONT_KEY = "promptfont"
     bg_canvas = None
     render_canvas = None
     bg_path = ""
@@ -815,24 +824,91 @@ class Display:
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
     @classmethod
-    def render_centered_line_with_symbols(cls, line, center_x, y, color):
-        # Lines holding UI symbols (Konami arrows, face-button glyphs) draw each
-        # symbol run with the symbol font and the rest with the list font,
-        # centered as one row. Plain lines take the single-render path, so the
-        # common case costs one glyph-membership scan and nothing else.
-        runs = symbols.split_symbol_runs(line)
-        if not runs or (len(runs) == 1 and not runs[0][0]):
-            Display.render_text_centered(line, center_x, y, color, purpose=FontPurpose.LIST)
+    def _promptfont(cls):
+        """Open the bundled symbol font once, at the list font's size so a glyph sits on
+        the same baseline as the words it labels.
+
+        promptfont.ttf (SIL OFL - see Licenses/fonts/promptfont.txt). Hardwired: themes
+        must not re-skin button/key glyphs, and it is the only bundled font that carries
+        every glyph codepoint the prompts use.
+        """
+        font = cls.fonts.get(cls.SYMBOL_FONT_KEY)
+        if font is not None:
+            return font
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "utils", "promptfont.ttf")
+        size = Theme.get_font_size(FontPurpose.LIST)
+        ttf = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"), size)
+        if not ttf:
+            raise RuntimeError(
+                f"Could not load font {path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+        font = LoadedFont(ttf, sdl2.sdlttf.TTF_FontHeight(ttf), path)
+        cls.fonts[cls.SYMBOL_FONT_KEY] = font
+        return font
+
+    @classmethod
+    def render_symbol_run(cls, text, x, y, color):
+        """Draw one run of UI glyphs with the bundled symbol font."""
+        cls._frame_draws.append(("text", text, x, y, color, cls.SYMBOL_FONT_KEY,
+                                 RenderMode.TOP_LEFT_ALIGNED, None, None, None))
+        return cls.render_text_using_font(cls._promptfont(), text, x, y, color,
+                                          cls.SYMBOL_FONT_KEY, RenderMode.TOP_LEFT_ALIGNED)
+
+    @classmethod
+    def _gap_between(cls, left, right, tight, group):
+        """The space between two runs of a line.
+
+        A bare-space separator adds nothing - the line already carries its own spacing,
+        so the Konami sequence stays a tight row of presses. A glyph sits tight to the
+        words it labels; a new button group starts further apart; a punctuation
+        connector such as the / of {X}/{Y} stays tight to both glyphs.
+        """
+        left_is_symbol, left_run = left
+        right_is_symbol, right_run = right
+        if left_run.isspace() or right_run.isspace():
+            return 0
+        if left_is_symbol == right_is_symbol:
+            return group  # glyph -> glyph: a new button starts
+        if left_is_symbol:
+            return tight  # glyph -> the words it labels
+        # words -> glyph: real text opens a group, a single connector does not
+        return tight if not any(ch.isspace() for ch in left_run) else group
+
+    @classmethod
+    def render_centered_line(cls, line, center_x, y, color):
+        # A centered row of text and UI glyphs: a plain string, or the (is_symbol, run)
+        # segments symbols.button_labels() and the Konami line are built from. Glyph runs
+        # draw with the bundled symbol font, tight to the words they label
+        # (SYMBOL_TIGHT_GAP_PX) and further apart from the next button group
+        # (SYMBOL_GROUP_GAP_PX); the rest draws with the list font. A plain line takes the
+        # single-render path, so the common case costs one isinstance and nothing else.
+        segments = line if isinstance(line, list) else [(False, line)]
+        if not segments:
             return
+        if len(segments) == 1 and not segments[0][0]:
+            Display.render_text_centered(segments[0][1], center_x, y, color, purpose=FontPurpose.LIST)
+            return
+        symbol_font = cls._promptfont()
+        scale = max(1, Device.get_device().screen_height() // 480)
+        tight = SYMBOL_TIGHT_GAP_PX * scale
+        group = SYMBOL_GROUP_GAP_PX * scale
         widths = []
-        for is_symbol, run in runs:
-            run_w, _ = Display.get_text_dimensions(
-                FontPurpose.SYMBOL if is_symbol else FontPurpose.LIST, run)
+        for is_symbol, run in segments:
+            run_w, _ = (cls.get_text_dimensions_using_font(symbol_font.font, run) if is_symbol
+                        else cls.get_text_dimensions(FontPurpose.LIST, run))
             widths.append(run_w)
-        x = center_x - sum(widths) // 2
-        for (is_symbol, run), run_w in zip(runs, widths):
-            Display.render_text(run, x, y, color,
-                                FontPurpose.SYMBOL if is_symbol else FontPurpose.LIST,
+        # The gap before a run, from the pair it follows. No gap before the first.
+        gaps = [0]
+        for left, right in zip(segments, segments[1:]):
+            gaps.append(cls._gap_between(left, right, tight, group))
+        x = center_x - (sum(widths) + sum(gaps)) // 2
+        for (is_symbol, run), run_w, gap in zip(segments, widths, gaps):
+            x += gap
+            if is_symbol:
+                cls.render_symbol_run(run, x, y, color)
+            else:
+                cls.render_text(run, x, y, color, FontPurpose.LIST,
                                 RenderMode.TOP_LEFT_ALIGNED)
             x += run_w
 
@@ -1611,7 +1687,7 @@ class Display:
 
         for i, line in enumerate(split_message):
             y = starting_height + i * height_per_line
-            cls.render_centered_line_with_symbols(f"{line}",
+            cls.render_centered_line(line,
                                                    Device.get_device().screen_width()//2, y,
                                                    Theme.text_color(FontPurpose.LIST))
 
@@ -1624,7 +1700,7 @@ class Display:
 
         for i, line in enumerate(split_message):
             y = starting_height + i * height_per_line
-            cls.render_centered_line_with_symbols(f"{line}",
+            cls.render_centered_line(line,
                                                    Device.get_device().screen_width()//2, y,
                                                    Theme.text_color(FontPurpose.LIST))
 
