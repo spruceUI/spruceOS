@@ -59,6 +59,43 @@ maximize the chances of getting your contributions merged.
   devices needs to be handled with care.
 
 
+# Traps
+
+- **Do not add defaults for optional functions in `device.sh`:** some callers
+  use `command -v` to check whether a function exists, so a default changes
+  what they do. Before adding one, search for the function's name.
+
+- **Upgrade scripts run again on every full update:** the updater deletes
+  `.lastUpdate`, so every script in `UpgradeScripts/` re-runs. They must be safe
+  to repeat, and anything they set overrides a change the user made since.
+
+- **`default_configs` only reach new installs:** those files are only copied
+  when missing. Existing users need an upgrade script to get a change.
+
+- **Keep a file's line endings:** some files are CRLF. Check the diff size before
+  committing: a small change showing hundreds of lines means they were rewritten.
+
+- **Do not log success without checking for it:** a log line that always says a
+  step worked hides the failure when it does not.
+
+
+# Branches, versions and releases
+
+- **`Development`:** the working branch. Nightlies are built from here.
+
+- **`main`:** a snapshot of the current stable release. Stable releases are built
+  from here.
+
+- **Versions:** even is stable and odd is nightly, e.g. 4.5.6 and 4.5.7. The
+  current version is in `spruce/spruce`.
+
+- **Pull requests:** changes to `App/PyUI/main-ui` and `.github/` need review from
+  their code owners (see `.github/CODEOWNERS`).
+
+- **Packages:** tracked files ship on the card unless excluded in the workflows
+  under `.github/workflows/`. If a file should not reach users, exclude it there.
+
+
 # Onboarding a new device
 
 Before a new device is considered supported, make sure its identity and behavior
