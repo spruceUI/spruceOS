@@ -1,3 +1,36 @@
+# Where things live
+
+Paths are relative to the root of the card.
+
+| What | Where |
+|------|-------|
+| Boot entry points | `.tmp_update/`, `miyoo/`, `miyoo355/`, `trimui/` |
+| Runtime and helper scripts | `spruce/scripts/` (`helperFunctions.sh` is the shared library) |
+| Per-device code and config | `spruce/scripts/platform/<family>/<PLATFORM>.sh` and `.cfg` |
+| Emulator launch scripts | `spruce/scripts/emu/` (per-emulator code in `lib/`) |
+| Network services | `spruce/scripts/network/` |
+| Settings change commands | `spruce/scripts/applySetting/` |
+| Task scripts | `spruce/scripts/tasks/` |
+| Binaries, 32-bit | `spruce/bin/` |
+| Binaries, 64-bit | `spruce/bin64/` |
+| Device-specific binaries and libraries | `spruce/<device>/` (`a30`, `flip`, `h700`, ...) |
+| Flags | `spruce/flags/` |
+| Archives unpacked on the device | `spruce/archives/` |
+| Apps | `App/<name>/` |
+| Frontend | `App/PyUI/` (code in `main-ui/`) |
+| Upgrade scripts | `App/spruceRestore/UpgradeScripts/<version>.sh` |
+| Emulators and their config | `Emu/<SYSTEM>/` |
+| RetroArch | `RetroArch/` (default configs in `platform/*.cfg.bak`) |
+| Default settings | `Saves/spruce/spruce-config.json` |
+| User data: saves, states, screenshots | `Saves/` |
+| Live RetroArch configs | `Saves/ra-configs/` |
+| Backups of settings | `Saves/spruce/backups/` |
+| Logs | `Saves/spruce/` |
+| Games and box art | `Roms/<SYSTEM>/` and `Roms/<SYSTEM>/Imgs/` |
+| Themes | `Themes/` |
+
+Anything that must survive an update belongs in `Saves/`. Only settings merges and upgrade scripts change it.
+
 # Design primitives
 
 Generally the spruceOS team plays it "fast and loose" about incorporating new
