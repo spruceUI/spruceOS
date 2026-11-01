@@ -18,7 +18,12 @@ run_drastic() {
 	export HOME="$EMU_DIR"
 	cd "$EMU_DIR"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
-	run_drastic_$PLATFORM   # shell expands this to appropriate real function
+	case "$PLATFORM_FAMILY" in
+		"h700")		run_drastic_AnbernicH700 ;;
+		"darkmoss") run_drastic_DarkMoss ;;
+		"oakmoss")	run_drastic_OakMoss ;;
+		*)			run_drastic_$PLATFORM  ;; # shell expands this to appropriate real function
+	esac
 	save_drastic_configs
 }
 
@@ -49,18 +54,6 @@ display_core_unrecognized_for_platform_message() {
 	stop_pyui_message_writer
 }
 
-#### Anbernic H700 #####
-
-# H700 only have access to vanilla 64-bit drastic under spruce.
-
-run_drastic_AnbernicH700()			   { run_drastic64 ; }
-run_drastic_AnbernicRGCubeXX()		   { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicXX720480()		   { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicRG28XX()		   { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicXX640480()		   { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicXX640480NoStick()  { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicXX640480OneStick() { run_drastic_AnbernicH700 ; }
-run_drastic_AnbernicXX720480NoStick()  { run_drastic_AnbernicH700 ; }
 
 ##### A30 #####
 
@@ -174,11 +167,24 @@ run_drastic_SmartPro(){
 }
 
 
+#### Anbernic H700 #####
+
+# H700 only have access to vanilla 64-bit drastic under spruce.
+run_drastic_AnbernicH700() { run_drastic64 ; }
+
+
+##### DARKMOSS #####
+
+# The unmodified 64-bit DraStic. It draws through the system SDL, which already
+# turns the picture on the rotated panels (A10 Mini V4, V10, XU Mini M).
+run_drastic_DarkMoss() { run_drastic64 ; }
+
+
 ##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32) #####
 
 # Same SoC as the Smart Pro, so the same two DraStic builds apply. Without these
 # `run_drastic_$PLATFORM` expanded to an undefined function and nothing launched.
-run_drastic_magicx_a133p() {
+run_drastic_OakMoss() {
 	if [ "$CORE" = "DraStic-original" ]; then
 		export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib64_SmartPro_original"
 		export SDL_AUDIODRIVER=dsp
@@ -191,10 +197,6 @@ run_drastic_magicx_a133p() {
 		display_core_unrecognized_for_platform_message
 	fi
 }
-
-run_drastic_Zero28() { run_drastic_magicx_a133p ; }
-run_drastic_Zero40() { run_drastic_magicx_a133p ; }
-run_drastic_XU20()   { run_drastic_magicx_a133p ; }
 
 
 ##### PIXEL 2 #####
@@ -213,22 +215,6 @@ run_drastic_trngaje_Pixel2() {
 	./drastic "$ROM_FILE" > $(emu_log_file) 2>&1
 	stash_arch_64_states
 }
-
-
-##### DARKMOSS #####
-
-# The unmodified 64-bit DraStic. It draws through the system SDL, which already
-# turns the picture on the rotated panels (A10 Mini V4, V10, XU Mini M).
-
-run_drastic_RGB30()     { run_drastic64 ; }
-run_drastic_RGB20SX()   { run_drastic64 ; }
-run_drastic_Miniloong() { run_drastic64 ; }
-run_drastic_A10Mini()   { run_drastic64 ; }
-run_drastic_A10MiniV4() { run_drastic64 ; }
-run_drastic_G350()      { run_drastic64 ; }
-run_drastic_V10()       { run_drastic64 ; }
-run_drastic_XUMiniM()   { run_drastic64 ; }
-run_drastic_RG353M()    { run_drastic64 ; }
 
 
 ##### CONFIG HANDLING #####
