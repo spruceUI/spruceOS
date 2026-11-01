@@ -20,19 +20,14 @@ DPAD_RIGHT = "≼"   # U+227C xbox-dpad-right
 BTN_START = "⇸"    # U+21F8 gamepad-start
 BTN_SELECT = "⇷"   # U+21F7 gamepad-select
 
-_SEQUENCE = [DPAD_UP, DPAD_UP, DPAD_DOWN, DPAD_DOWN,
-             DPAD_LEFT, DPAD_RIGHT, DPAD_LEFT, DPAD_RIGHT,
-             symbols.BTN_B, symbols.BTN_A, BTN_START, BTN_SELECT]
-
 # The sequence as button segments, one press per run: every press separated by a single
 # space - including the arrows, so the whole line reads as a sequence rather than a tight
 # arrow blob followed by loose buttons.
-KONAMI = []
-for _press in _SEQUENCE:
-    if KONAMI:
-        KONAMI.append((False, " "))
-    KONAMI.append((True, _press))
-del _press, _SEQUENCE
+KONAMI = symbols.glyph_runs([
+    DPAD_UP, DPAD_UP, DPAD_DOWN, DPAD_DOWN,
+    DPAD_LEFT, DPAD_RIGHT, DPAD_LEFT, DPAD_RIGHT,
+    symbols.BTN_B, symbols.BTN_A, BTN_START, BTN_SELECT,
+])
 
 class ModesMenu(settings_menu.SettingsMenu):
     def __init__(self):

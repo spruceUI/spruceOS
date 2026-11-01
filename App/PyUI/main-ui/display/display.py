@@ -1679,30 +1679,29 @@ class Display:
         cls._screen_changed()
 
     @classmethod
-    def write_message_multiline(cls,split_message, middle_height):
-        text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+    def _line_height(cls):
+        _, text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+        return text_h + int(5 * Device.get_device().screen_height()/480)
 
-        height_per_line = text_h + int(5 * Device.get_device().screen_height()/480)
-        starting_height = middle_height - (len(split_message) * height_per_line)//2
-
+    @classmethod
+    def _write_message_lines(cls, split_message, starting_height):
+        height_per_line = cls._line_height()
         for i, line in enumerate(split_message):
             y = starting_height + i * height_per_line
             cls.render_centered_line(line,
-                                                   Device.get_device().screen_width()//2, y,
-                                                   Theme.text_color(FontPurpose.LIST))
+                                     Device.get_device().screen_width()//2, y,
+                                     Theme.text_color(FontPurpose.LIST))
+
+    @classmethod
+    def write_message_multiline(cls,split_message, middle_height):
+        height_per_line = cls._line_height()
+        starting_height = middle_height - (len(split_message) * height_per_line)//2
+        cls._write_message_lines(split_message, starting_height)
 
 
     @classmethod
     def write_message_multiline_starting_height_specified(cls,split_message, starting_height):
-        text_w,text_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
-
-        height_per_line = text_h + int(5 * Device.get_device().screen_height()/480)
-
-        for i, line in enumerate(split_message):
-            y = starting_height + i * height_per_line
-            cls.render_centered_line(line,
-                                                   Device.get_device().screen_width()//2, y,
-                                                   Theme.text_color(FontPurpose.LIST))
+        cls._write_message_lines(split_message, starting_height)
 
 
     @classmethod
