@@ -476,22 +476,12 @@ device_wifi_power_off() {
     log_message "Missing device_wifi_power_off function"
 }
 
-device_has_wifi_radio() {
-    log_message "Missing device_has_wifi_radio function"
-    return 1
-}
+# device_has_wifi_radio and device_usb_wifi_onboard_release/restore must stay
+# undefined here: callers use command -v to choose their default behaviour.
 
 device_wifi_is_available() {
     log_message "Missing device_wifi_is_available function"
     return 1
-}
-
-device_usb_wifi_onboard_release() {
-    log_message "Missing device_usb_wifi_onboard_release function"
-}
-
-device_usb_wifi_onboard_restore() {
-    log_message "Missing device_usb_wifi_onboard_restore function"
 }
 
 # Give a device a chance to bring its wireless interface back when it is not
