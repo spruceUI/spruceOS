@@ -815,7 +815,7 @@ class Display:
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
     @classmethod
-    def _render_centered_line_with_symbols(cls, line, center_x, y, color):
+    def render_centered_line_with_symbols(cls, line, center_x, y, color):
         # Lines holding UI symbols (Konami arrows, face-button glyphs) draw each
         # symbol run with the symbol font and the rest with the list font,
         # centered as one row. Plain lines take the single-render path, so the
@@ -1611,7 +1611,7 @@ class Display:
 
         for i, line in enumerate(split_message):
             y = starting_height + i * height_per_line
-            cls._render_centered_line_with_symbols(f"{line}",
+            cls.render_centered_line_with_symbols(f"{line}",
                                                    Device.get_device().screen_width()//2, y,
                                                    Theme.text_color(FontPurpose.LIST))
 
@@ -1624,7 +1624,7 @@ class Display:
 
         for i, line in enumerate(split_message):
             y = starting_height + i * height_per_line
-            cls._render_centered_line_with_symbols(f"{line}",
+            cls.render_centered_line_with_symbols(f"{line}",
                                                    Device.get_device().screen_width()//2, y,
                                                    Theme.text_color(FontPurpose.LIST))
 

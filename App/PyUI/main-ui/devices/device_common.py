@@ -19,6 +19,7 @@ from devices.wifi.wifi_scanner import WiFiNetwork, WiFiScanner
 from devices.wifi.wifi_status import WifiStatus
 from display.display import Display
 from display.font_purpose import FontPurpose
+from menus.common import symbols
 from menus.settings.button_remapper import ButtonRemapper
 from menus.settings.wifi_menu import WifiMenu
 from utils import throttle
@@ -43,9 +44,9 @@ class DeviceCommon(AbstractDevice):
             Display.clear("Power")
             Display.render_text_centered(Language.label("powerDownPrompt", "Would you like to power down?"),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             if(self.reboot_cmd() is not None):
-                Display.render_text_centered(Language.label("powerDownOptionsWithReboot", "A = Power Down, X = Reboot, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_centered_line_with_symbols(symbols.button_labels(Language.label("powerDownOptionsWithReboot", "A = Power Down, X = Reboot, B = Cancel")),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST))
             else:
-                Display.render_text_centered(Language.label("powerDownOptions", "A = Power Down, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+                Display.render_centered_line_with_symbols(symbols.button_labels(Language.label("powerDownOptions", "A = Power Down, B = Cancel")),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST))
             Display.present()
             if(Controller.get_input()):
                 if(Controller.last_input() == ControllerInput.A):
