@@ -74,7 +74,7 @@ log_message "Starting upgrade to version $TARGET_VERSION"
 
 MINI_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-MiyooMini.cfg"
 
-# Matched literally, single spaces and all, the way 4.1.2.sh and 4.3.3.sh match
+# Matched literally, single spaces and all, the way 4.3.3.sh matches
 # keys in these files. Every upgrade script that has actually run on these
 # devices sticks to plain anchored text and none of them use character classes,
 # so this stays on the idiom that is known to work rather than betting on what
