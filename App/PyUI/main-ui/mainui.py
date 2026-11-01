@@ -126,7 +126,7 @@ def check_for_msg_display(args):
                 PyUiLogger.get_logger().error(f"Error parsing message duration: ", exc_info=True)
 
         try:
-            Display.display_message(args.msgDisplay, duration)
+            Display.display_message(Language.shell_message(args.msgDisplay), duration)
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error displaying message: ", exc_info=True)
 
@@ -157,7 +157,7 @@ def check_for_msg_display_realtime(args):
                     from option_select_ui import OptionSelectUI
                     OptionSelectUI.display_option_list("",option_list_file, False)
                 else:
-                    Display.display_message(message)
+                    Display.display_message(Language.shell_message(message))
                     
         except Exception as e:
             PyUiLogger.get_logger().error("Error processing messages: ", exc_info=True)
