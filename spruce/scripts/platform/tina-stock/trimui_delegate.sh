@@ -356,7 +356,7 @@ device_backlight_up() {
                     return 1
                     ;;
             esac
-            if [ "$contrast" -lt 20 ]; then
+            if [ "$contrast" -lt 10 ]; then
                 device_contrast_up
                 return $?
             fi
