@@ -43,6 +43,9 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # AXP223 (WiFi) models.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
         sh /mnt/SDCARD/spruce/scripts/network/wifi.sh apply --wait
+        if [ "$(jq -r '.menuOptions."Network Settings".enableNetworkADB.selected // "False"' /mnt/SDCARD/Saves/spruce/spruce-config.json 2>/dev/null)" = "True" ]; then
+            adbd &
+        fi
     fi
 ) &
 

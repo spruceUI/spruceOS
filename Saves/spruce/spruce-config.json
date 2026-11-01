@@ -466,6 +466,17 @@
                 "selected":"False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
+            "enableNetworkADB": {
+                "devices": ["MIYOO_MINI_PLUS", "MIYOO_MINI_FLIP"],
+                "display": "Enable network ADB",
+                "description": "Passwordless root access over WiFi. Trusted networks only",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkAdb.sh"
+            },
             "enableWaitingToConnect": {
                 "display": "Wait for WiFi at game launch",
                 "description": "When cheevos or Syncthing need it",
