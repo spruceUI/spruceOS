@@ -356,8 +356,8 @@ case "$PLATFORM" in
 
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
-        # Every oakMOSS board runs PyUI as the env-driven SPRUCE device (its cfg sets PYUI_ENV_DEVICE=true).
-        DEVICE="SPRUCE"
+        # Every oakMOSS cfg sets PYUI_ENV_DEVICE=true: PyUI has no other device class for these boards.
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -377,12 +377,6 @@ case "$PLATFORM" in
             # A crash in the SDL2 blob or the GPU stack prints nothing to pyui.log.
             "$@" >> /mnt/SDCARD/App/PyUI/run.txt 2>&1
             log_message "PyUI on $PLATFORM exited with status $?"
-        fi
-
-        # The stick calibrator asks for a trimui_inputd restart; on oakMOSS its procd service owns the daemon.
-        if [ -f /tmp/trimui_inputd_restart ]; then
-            [ -x /etc/init.d/trimui-inputd ] && /etc/init.d/trimui-inputd restart
-            rm -f /tmp/trimui_inputd_restart
         fi
     ;;
 
