@@ -36,6 +36,13 @@ if [ -f "$HOME/config.ini" ]; then
     sed -i -e 's/^ScreenWidth=.*/ScreenWidth=0/' \
            -e 's/^ScreenHeight=.*/ScreenHeight=0/' \
            -e 's/^Rotation=.*/Rotation=0/' "$HOME/config.ini"
+
+    # Follow the UI language when vtree has a file for it (lang/<Language>.ini
+    # uses the same names as PyUI's lang/<Language>.json).
+    ui_language="$(get_ui_language)"
+    if [ -n "$ui_language" ] && [ -f "$HOME/lang/$ui_language.ini" ]; then
+        sed -i "s/^Language=.*/Language=$ui_language/" "$HOME/config.ini"
+    fi
 fi
 
 case "$PLATFORM_FAMILY" in

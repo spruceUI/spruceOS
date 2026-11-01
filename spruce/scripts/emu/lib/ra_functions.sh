@@ -170,7 +170,43 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
+	# Show RetroArch's menu in the UI language when it has one
+	ra_language="$(ra_language_for_ui_language "$(get_ui_language)")"
+	if [ -n "$ra_language" ]; then
+		TMP_CFG="$(mktemp)"
+		if sed "s|^user_language = .*|user_language = \"$ra_language\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+		else
+			rm -f "$TMP_CFG"
+		fi
+	fi
+
 	sync
+}
+
+# RetroArch's user_language (enum retro_language in libretro.h) for a PyUI
+# language file name; empty when RetroArch has no such language or none is set.
+ra_language_for_ui_language() {
+	case "$1" in
+		"English") echo 0 ;;
+		"Japanese") echo 1 ;;
+		"French") echo 2 ;;
+		"Spanish") echo 3 ;;
+		"German") echo 4 ;;
+		"Italian") echo 5 ;;
+		"Portuguese (BR)") echo 7 ;;
+		"Portuguese (Eur)") echo 8 ;;
+		"Russian") echo 9 ;;
+		"Korean") echo 10 ;;
+		"Chinese (T)") echo 11 ;;
+		"Chinese (S)") echo 12 ;;
+		"Polish") echo 14 ;;
+		"Vietnamese") echo 15 ;;
+		"Greek") echo 17 ;;
+		"Turkish") echo 18 ;;
+		"Ukrainian") echo 26 ;;
+		"Catalan") echo 29 ;;
+	esac
 }
 
 # Anbernic RG XX under BaseOS. The platform cfg carries the sdl2 drivers and
