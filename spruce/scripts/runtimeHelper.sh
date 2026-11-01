@@ -147,10 +147,10 @@ check_for_update() {
 
     timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     check_interval=86400  # 24 hours in seconds
-    # Developer/tester devices follow nightlies, which can be rebuilt several
-    # times a day; waiting 24 h after a prompt would flag a rebuild a day
-    # late. Check on every boot instead (one small fetch with mirrors).
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
+    # Nightlies can be rebuilt several times a day; waiting 24 h after a prompt
+    # would flag a rebuild a day late. Check on every boot instead (one small
+    # fetch with mirrors).
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
         check_interval=0
     fi
 
@@ -386,44 +386,6 @@ check_and_hide_update_app() {
     else
         jq 'if ."#label" then .label = ."#label" | del(."#label") else . end' "/mnt/SDCARD/App/-Updater/config.json" > "/mnt/SDCARD/App/-Updater/config.json.tmp" && mv "/mnt/SDCARD/App/-Updater/config.json.tmp" "/mnt/SDCARD/App/-Updater/config.json"
         log_message "Update file found; Updater app is visible"
-    fi
-}
-
-# networkservices.sh starts SSH and Samba once Wi-Fi connects; this task also covers
-# a network it does not wait for (eth0, Wi-Fi off). It polls slowly: each
-# network_is_connected pass forks about seven processes, and polling every 0.2 s
-# competed with the first menu frame for the CPU.
-DEV_MODE_FAST_POLLS=30		# 30 x 2 s = first minute
-DEV_MODE_FAST_INTERVAL=2
-DEV_MODE_SLOW_INTERVAL=10
-
-developer_mode_task() {
-    if flag_check "developer_mode"; then
-        samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
-        ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
-        ssh_service=$(get_ssh_service_name)
-
-        if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            _dev_polls=0
-            while ! network_is_connected true; do
-                if [ "$_dev_polls" -lt "$DEV_MODE_FAST_POLLS" ]; then
-                    sleep "$DEV_MODE_FAST_INTERVAL"
-                    _dev_polls=$((_dev_polls + 1))
-                else
-                    sleep "$DEV_MODE_SLOW_INTERVAL"
-                fi
-            done
-
-            if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
-                log_message "Dev Mode: Samba starting..."
-                start_samba_process
-            fi
-
-            if [ "$ssh_enabled" = "True" ] && ! pgrep "$ssh_service" > /dev/null; then
-                log_message "Dev Mode: $ssh_service starting..."
-                start_ssh_process
-            fi
-        fi
     fi
 }
 

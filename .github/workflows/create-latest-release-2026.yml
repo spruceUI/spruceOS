@@ -206,9 +206,6 @@ jobs:
               create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
-              spruce/flags/developer_mode)
-                return 0
-                ;;
               App/adbd|App/adbd/*)
                 return 0
                 ;;
@@ -511,7 +508,6 @@ jobs:
             -x!.gitattributes \
             -x!create_spruce_release.bat \
             -x!create_spruce_release.sh \
-            -x!spruce/flags/developer_mode \
             -xr!App/adbd \
             -x!To-Do.txt \
             -x!.ota_manifest \

@@ -130,7 +130,6 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-developer_mode_task &
 update_checker &
 
 # Set up the boot_to action prior to getting into the principal loop

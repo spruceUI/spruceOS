@@ -265,9 +265,6 @@ jobs:
               create_spruce_release.bat|create_spruce_release.sh|To-Do.txt)
                 return 0
                 ;;
-              spruce/flags/developer_mode)
-                return 0
-                ;;
               commits_nightly.txt)
                 return 0
                 ;;

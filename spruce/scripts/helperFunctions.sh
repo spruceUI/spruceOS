@@ -772,13 +772,11 @@ run_upgrade_scripts() {
         return 0
     fi
 
-    is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
-    is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
     allow_same_version=0
 
-    if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
         allow_same_version=1
-        log_message "Upgrade scripts: dev/tester mode detected, allowing same version upgrades"
+        log_message "Upgrade scripts: nightly channel, allowing same version upgrades"
     fi
 
     cd "$UPGRADE_SCRIPTS_DIR" || return 1

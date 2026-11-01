@@ -40,13 +40,9 @@ mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
     # V4 do not, and the template's wifi=1 would otherwise send them through
     # insmod / axp_test / wpa_supplicant for nothing. Same discriminator as
     # is_mini_og in platform/MiyooMini.sh: axp_test ships only with the
-    # AXP223 (WiFi) models. adbd stays inside - on the Mini it is network ADB.
+    # AXP223 (WiFi) models.
     if [ -e /customer/app/axp_test ] && [ "${wifi_enabled:-0}" = "1" ]; then
         sh /mnt/SDCARD/spruce/scripts/network/wifi.sh apply --wait
-        # Network ADB is an unauthenticated root shell: developer mode only (flag_check is not loaded yet)
-        if [ -f /mnt/SDCARD/spruce/flags/developer_mode ] || [ -f /mnt/SDCARD/spruce/flags/developer_mode.lock ]; then
-            adbd &
-        fi
     fi
 ) &
 
