@@ -84,6 +84,59 @@ run_sd_card_fix_if_triggered() {
     fi
 }
 
+# Releases ship each stdlib as lib/python310.zip.new, because an update must not
+# overwrite the zip a running Python (the updater) imports from. Move it into
+# place here, before anything starts Python, then drop the loose stdlib it
+# replaces. A zip that fails to open makes Python fall through to the loose
+# tree, so nothing is deleted unless the zip tests good. Runs every boot: a step
+# that could not finish is retried.
+
+# The entries the zip does not replace, as in .github/scripts/pack_python_stdlib.py.
+# That list also keeps __pycache__; here it is stale bytecode and is deleted.
+_stdlib_entry_stays_loose() {
+    case "$1" in
+        os.py|lib-dynload|site-packages|config-3.10*) return 0 ;;
+    esac
+    return 1
+}
+
+# Whether any entry the zip replaces is still loose. Pruning deletes one entry
+# at a time, so an interrupted run can leave any of them behind.
+_stdlib_has_loose_entries() {
+    for _entry in "$1/python3.10"/*; do
+        [ -e "$_entry" ] || continue
+        _stdlib_entry_stays_loose "${_entry##*/}" || return 0
+    done
+    return 1
+}
+
+# The 3.10 names here are fixed: a Python version change needs an upgrade script to clean up the old zip and tree.
+activate_python_stdlib_zip() {
+    for _lib in /mnt/SDCARD/spruce/bin/python/lib /mnt/SDCARD/spruce/flip/lib; do
+        if [ -f "$_lib/python310.zip.new" ]; then
+            if 7zr t "$_lib/python310.zip.new" >/dev/null 2>&1; then
+                mv -f "$_lib/python310.zip.new" "$_lib/python310.zip" &&
+                    log_message "Installed $_lib/python310.zip"
+            else
+                # Renamed so it is not re-tested every boot; the next update ships a new one.
+                mv -f "$_lib/python310.zip.new" "$_lib/python310.zip.bad"
+                log_message "Not installing $_lib/python310.zip.new: it does not test as a zip; kept as python310.zip.bad"
+            fi
+        fi
+
+        [ -s "$_lib/python310.zip" ] && _stdlib_has_loose_entries "$_lib" || continue
+        if ! 7zr t "$_lib/python310.zip" >/dev/null 2>&1; then
+            log_message "Keeping the loose stdlib in $_lib: python310.zip does not test as a zip"
+            continue
+        fi
+        for _entry in "$_lib/python3.10"/*; do
+            [ -e "$_entry" ] || continue
+            _stdlib_entry_stays_loose "${_entry##*/}" || rm -rf "$_entry"
+        done
+        log_message "Removed the loose stdlib replaced by $_lib/python310.zip"
+    done
+}
+
 # Read by PortMaster's device_info.txt. In /tmp because the card moves between devices.
 write_device_info() {
     cat > /tmp/spruce_device_info.env <<EOF
