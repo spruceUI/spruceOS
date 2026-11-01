@@ -10,6 +10,13 @@ API_KEY=""
 SYNC_TIMEOUT="${SYNC_TIMEOUT:-600}"  # Allow override, default 10 minutes
 [ "$DISPLAY_ASPECT_RATIO" = "16:9" ] && BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree_wide.png" || BG_TREE="/mnt/SDCARD/spruce/imgs/bg_tree.png"
 
+show_sync_message() {
+    start_pyui_message_writer 1
+    display_image_and_text "$BG_TREE" 35 25 "$1" 75
+}
+
+trap 'stop_pyui_message_writer' EXIT
+
 check_syncthing_status() {
     if curl -s -o /dev/null -w "%{http_code}" -H "X-API-Key: $API_KEY" "$API_ENDPOINT/system/status" | grep -q "200"; then
         return 0
@@ -148,8 +155,8 @@ monitor_sync_status() {
     # Check folders first
     if [ $ret -ne 0 ] || [ -z "$folders" ]; then
         log_message "SyncthingCheck: No folders configured. Exiting sync check."
-        display -t "Syncthing Check:
-No folders configured" -i "$BG_TREE"
+        show_sync_message "Syncthing Check:
+No folders configured"
         sleep 1
         return 1
     fi
@@ -158,8 +165,8 @@ No folders configured" -i "$BG_TREE"
     # Then check devices
     if [ -z "$devices" ]; then
         log_message "SyncthingCheck: No devices configured. Exiting sync check."
-        display -t "Syncthing Check:
-No devices configured" -i "$BG_TREE"
+        show_sync_message "Syncthing Check:
+No devices configured"
         sleep 1
         return 1
     fi
@@ -167,14 +174,14 @@ No devices configured" -i "$BG_TREE"
     rm -f /tmp/sync_cancelled
     
     log_message "SyncthingCheck: Monitoring sync status in $mode mode"
-    display -t "Syncthing Check:
-Press START to cancel" -i "$BG_TREE"
+    show_sync_message "Syncthing Check:
+Press START to cancel"
 
     # Make sure we clean up properly on any exit
     # Kill the getevent reader as well as the subshell holding it: killing only
     # $monitor_pid orphans the reader, which then holds the input node for the
     # rest of the shutdown (save_poweroff.sh clears readers BEFORE this runs).
-    trap 'kill $monitor_pid 2>/dev/null; kill "$(cat /tmp/syncthing_getevent.pid 2>/dev/null)" 2>/dev/null; rm -f /tmp/syncthing_getevent.pid /tmp/ge_out /tmp/sync_cancelled; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
+    trap 'kill $monitor_pid 2>/dev/null; kill "$(cat /tmp/syncthing_getevent.pid 2>/dev/null)" 2>/dev/null; rm -f /tmp/syncthing_getevent.pid /tmp/ge_out /tmp/sync_cancelled; stop_pyui_message_writer; log_message "SyncthingCheck: Cleanup triggered"' EXIT INT TERM
 
     # Start the monitor in background
     monitor_start_button &
@@ -184,7 +191,7 @@ Press START to cancel" -i "$BG_TREE"
         # Check for manual cancellation
         if [ -f /tmp/sync_cancelled ]; then
             log_message "SyncthingCheck: Sync cancelled by user"
-            display -t "Sync cancelled" -i "$BG_TREE"
+            show_sync_message "Sync cancelled"
             sleep 1
             return 1
         fi
@@ -195,7 +202,7 @@ Press START to cancel" -i "$BG_TREE"
         # Check for overall timeout
         if [ $elapsed -gt $timeout ]; then
             log_message "SyncthingCheck: Sync timed out after ${timeout} seconds"
-            display -t "Sync timed out after ${timeout}s" -i "$BG_TREE"
+            show_sync_message "Sync timed out after ${timeout}s"
             sleep 1
             return 1
         fi
@@ -203,8 +210,8 @@ Press START to cancel" -i "$BG_TREE"
         # Check for stall timeout
         if [ $stall_time -gt $stall_timeout ]; then
             log_message "SyncthingCheck: Sync stalled - no progress for ${stall_timeout} seconds"
-            display -t "Sync stalled
-No progress for ${stall_timeout}s" -i "$BG_TREE"
+            show_sync_message "Sync stalled
+No progress for ${stall_timeout}s"
             sleep 1
             return 1
         fi
@@ -249,8 +256,8 @@ No progress for ${stall_timeout}s" -i "$BG_TREE"
         previous_status="$current_status"
 
         status_content=$(cat /tmp/sync_display.txt)
-        display -t "$status_content
-Press START to cancel" -i "$BG_TREE"
+        show_sync_message "$status_content
+Press START to cancel"
 
         if [ ! -f /tmp/sync_status ]; then
             log_message "SyncthingCheck: All folders synchronized"
@@ -278,7 +285,7 @@ set_api_key() {
 
 main() {
     if ! set_api_key; then
-        display -t "Error: Unable to find API key" -i "$BG_TREE"
+        show_sync_message "Error: Unable to find API key"
         sleep 1
         exit 1
     fi
@@ -288,7 +295,7 @@ main() {
     if ! check_syncthing_status; then
         log_message "SyncthingCheck: Syncthing not responsive, waiting for startup..."
         if ! wait_for_syncthing_api; then
-            display -t "Failed to connect to Syncthing API" -i "$BG_TREE"
+            show_sync_message "Failed to connect to Syncthing API"
             sleep 1
             exit 1
         fi
