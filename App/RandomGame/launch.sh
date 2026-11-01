@@ -13,8 +13,12 @@ if [ -z "$GAME" ]; then
     exit 1
 fi
 
-SYSTEM="$(basename "$(dirname "$GAME")")"
-BOX_ART="$(dirname "$GAME")/Imgs/$(basename "$GAME" | sed 's/\.[^.]*$/.png/')"
+SYSTEM="${GAME#/mnt/SDCARD/Roms/}"
+SYSTEM="${SYSTEM%%/*}"
+ROM_PATH="${GAME#/mnt/SDCARD/Roms/$SYSTEM/}"
+ROM_PATH="${ROM_PATH%.*}"
+BOX_ART="/mnt/SDCARD/Roms/$SYSTEM/Imgs/$ROM_PATH.png"
+[ -f "$BOX_ART" ] || BOX_ART="/mnt/SDCARD/Roms/$SYSTEM/Imgs/${ROM_PATH##*/}.png"
 if [ -f "$BOX_ART" ]; then
     log_message "Display image $BOX_ART"
     display_message "$(printf '{"cmd":"RENDER_IMAGE","args":["%s"]}' "$(json_escape "$BOX_ART")")"
