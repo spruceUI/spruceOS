@@ -125,6 +125,7 @@ run_A30_port() {
     prepare_ra_config 2>/dev/null
 
     launch_script="$ROM_FILE"
+    tmp_launch_script=""
     if is_retroarch_port; then
         tmp_launch_script=$(mktemp "${ROM_FILE}.a30.XXXXXX") || {
             log_message "Unable to create temporary A30 port launch script for $ROM_FILE"
@@ -144,7 +145,5 @@ run_A30_port() {
 
     cd /mnt/SDCARD/Roms/A30PORTS
     /bin/sh "$launch_script"
-    if [ "$launch_script" != "$ROM_FILE" ]; then
-        rm -f "$launch_script"
-    fi
+    rm -f "$tmp_launch_script" 2>/dev/null
 }
