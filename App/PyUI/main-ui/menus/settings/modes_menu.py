@@ -10,23 +10,14 @@ from views.grid_or_list_entry import GridOrListEntry
 
 from menus.language.language import Language
 
-# The Konami sequence's own glyphs: the D-pad and Start/Select of promptfont's Xbox set,
-# matching symbols.BTN_A / symbols.BTN_B (codepoints follow promptfont's glyphs.json, not
-# the Unicode names - see menus/common/symbols.py).
-DPAD_UP = "≻"      # U+227B xbox-dpad-up
-DPAD_DOWN = "≽"    # U+227D xbox-dpad-down
-DPAD_LEFT = "≺"    # U+227A xbox-dpad-left
-DPAD_RIGHT = "≼"   # U+227C xbox-dpad-right
-BTN_START = "⇸"    # U+21F8 gamepad-start
-BTN_SELECT = "⇷"   # U+21F7 gamepad-select
-
-# The sequence as button segments, one press per run: every press separated by a single
-# space - including the arrows, so the whole line reads as a sequence rather than a tight
-# arrow blob followed by loose buttons.
+# The Konami sequence as button segments, one press per run: every press separated by a
+# single space - including the arrows, so the whole line reads as a sequence rather than a
+# tight arrow blob followed by loose buttons. The glyphs themselves live in
+# menus/common/symbols.py with the other button codepoints.
 KONAMI = symbols.glyph_runs([
-    DPAD_UP, DPAD_UP, DPAD_DOWN, DPAD_DOWN,
-    DPAD_LEFT, DPAD_RIGHT, DPAD_LEFT, DPAD_RIGHT,
-    symbols.BTN_B, symbols.BTN_A, BTN_START, BTN_SELECT,
+    symbols.DPAD_UP, symbols.DPAD_UP, symbols.DPAD_DOWN, symbols.DPAD_DOWN,
+    symbols.DPAD_LEFT, symbols.DPAD_RIGHT, symbols.DPAD_LEFT, symbols.DPAD_RIGHT,
+    symbols.BTN_B, symbols.BTN_A, symbols.BTN_START, symbols.BTN_SELECT,
 ])
 
 class ModesMenu(settings_menu.SettingsMenu):

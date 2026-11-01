@@ -19,6 +19,15 @@ BTN_B = "⇒"   # U+21D2 xbox-b
 BTN_X = "⇐"   # U+21D0 xbox-x
 BTN_Y = "⇑"   # U+21D1 xbox-y
 
+# The D-pad of the same Xbox set, matching the circled face buttons above.
+DPAD_UP = "≻"      # U+227B xbox-dpad-up
+DPAD_DOWN = "≽"    # U+227D xbox-dpad-down
+DPAD_LEFT = "≺"    # U+227A xbox-dpad-left
+DPAD_RIGHT = "≼"   # U+227C xbox-dpad-right
+
+BTN_START = "⇸"    # U+21F8 gamepad-start
+BTN_SELECT = "⇷"   # U+21F7 gamepad-select
+
 # A translator swaps the letters for their own words and may reorder them freely;
 # button_labels() does the rest at render time.
 BUTTON_PLACEHOLDERS = {"{A}": BTN_A, "{B}": BTN_B, "{X}": BTN_X, "{Y}": BTN_Y}
