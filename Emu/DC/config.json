@@ -31,7 +31,7 @@
         "Flycast-standalone",
         "Flycast-libretro"
       ],
-      "selected": "Flycast-libretro",
+      "selected": "Flycast-standalone",
       "overrides": {}
     },
     "Emulator_A30": {
