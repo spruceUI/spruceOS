@@ -4,7 +4,11 @@ https://shinmera.com/promptfont
 Copyright 2018-2026, Yukari Hafner
 Copyright 2011-2016, Severin Meyer
 
+Based on the Xolonium font by Severin Meyer.
+Source: npm package promptfont@1.15.0 (mirror of https://codeberg.org/shinmera/promptfont).
+
 Licensed under the SIL Open Font License, Version 1.1
+https://openfontlicense.org
 
 ---
 
@@ -20,7 +24,7 @@ with others.
 
 The OFL allows the licensed fonts to be used, studied, modified and
 redistributed freely as long as they are not sold by themselves. The
-fonts, including any derivative works, can be bundled, embedded, 
+fonts, including any derivative works, can be bundled, embedded,
 redistributed and/or sold with any software provided that any reserved
 names are not used by derivative works. The fonts and derivatives,
 however, cannot be released under any other type of license. The

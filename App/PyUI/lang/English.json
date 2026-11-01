@@ -969,7 +969,7 @@
     "patchingMainAssets": "Patching main assets",
     "patchingIcons": "Patching icons",
     "patchingFile": "Patching {name}",
-    "yesNoPrompt": "A = Yes, B = No",
+    "yesNoPrompt": "↧ Yes, ↦ No",
     "usbWifiAdapterNotConnected": "USB adapter not connected.\nConnect a compatible adapter to use WiFi.",
     "colorNames": {
         "Black": "Black",

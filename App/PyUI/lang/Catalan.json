@@ -991,7 +991,7 @@
     "patchingMainAssets": "S'estan adaptant els recursos principals",
     "patchingIcons": "S'estan adaptant les icones",
     "patchingFile": "S'està adaptant {name}",
-    "yesNoPrompt": "A = Sí, B = No",
+    "yesNoPrompt": "↧ Sí, ↦ No",
     "usbWifiAdapterNotConnected": "L'adaptador USB no està connectat.\nConnecta un adaptador compatible per usar la WiFi.",
     "colorNames": {
         "Black": "Negre",
