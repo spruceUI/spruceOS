@@ -6,7 +6,11 @@
 current.txt
 sync.bat
 spruce/www/services.txt
-CLAUDE.md
 stats/*
-# Local-only: agent scratch tracker + local tests
+
+# AI coding agents: each developer's own notes, tests and settings, kept out of the repo
+AGENTS.md
+CLAUDE.md
+.agents/
+.claude/
 .scratch/

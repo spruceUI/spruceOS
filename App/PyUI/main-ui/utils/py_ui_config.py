@@ -297,6 +297,14 @@ class PyUiConfig:
         return cls.get("longTaskCmd",None)
 
     @classmethod
+    def get_launch_in_pyui_cmd(cls):
+        return cls.get("launchInPyUiCmd",None)
+
+    @classmethod
+    def get_realtime_message_port(cls):
+        return cls.get("realtimeMessagePort",None)
+
+    @classmethod
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
 
