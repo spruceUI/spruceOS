@@ -10,6 +10,7 @@ from display.x_render_option import XRenderOption
 from display.y_render_option import YRenderOption
 from menus.common.bottom_bar import BottomBar
 from menus.common.top_bar import TopBar
+from menus.common import symbols
 from menus.language.language import Language
 import sdl2
 from display import sdl_backend
@@ -105,7 +106,6 @@ class Display:
     debug = False
     renderer = None
     fonts = {}
-    fallback_fonts = []
     bg_canvas = None
     render_canvas = None
     bg_path = ""
@@ -274,7 +274,6 @@ class Display:
         # Most screens use only a few purposes, and ASCII text needs no fallback.
         # In particular, do not open all 30 fonts before the first menu is shown.
         cls.fonts = FontCache()
-        cls.fallback_fonts = FontCache(PyUiConfig.get_fallback_font())
 
     @classmethod
     def _init_display(cls):
@@ -392,10 +391,6 @@ class Display:
             sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
         cls.fonts.clear()
 
-        for loaded_font in cls.fallback_fonts.values():
-            sdl2.sdlttf.TTF_CloseFont(loaded_font.font)
-        cls.fallback_fonts.clear()
-        
         cls._glyph_cache.clear()
         cls._glyph_advances.clear()
 
@@ -724,20 +719,14 @@ class Display:
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose,
                     render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                    crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=False):
+                    crop_w=None, crop_h=None, alpha=None):
         #with log_timing("Display.render_text", PyUiLogger.get_logger()):    
             cls._frame_draws.append(("text", text, x, y, color, purpose, render_mode,
-                                     crop_w, crop_h, alpha, allow_fallback_font_for_missing_glyphs))
+                                     crop_w, crop_h, alpha))
             start = time.perf_counter()
 
-            primary_font = cls.fonts[purpose]
-            # Don't allow fallback -> Just render normally
-            if(not allow_fallback_font_for_missing_glyphs or not cls.requires_fallback_font(text, purpose)):
-                w,h = cls.render_text_using_font(primary_font, text,x,y,color,purpose,render_mode,crop_w,crop_h,alpha)
-            else:
-                fallback_font = cls.fallback_fonts[purpose]
-                w,h = cls.render_text_using_font(fallback_font, text,x,y,color,purpose,render_mode,crop_w,crop_h,alpha)
-            
+            w,h = cls.render_text_using_font(cls.fonts[purpose], text,x,y,color,purpose,render_mode,crop_w,crop_h,alpha)
+
             elapsed_ms = (time.perf_counter() - start) * 1000
             cls.text_render_timer += elapsed_ms
             return w,h
@@ -824,6 +813,28 @@ class Display:
     @classmethod
     def render_text_centered(cls, text, x, y, color, purpose: FontPurpose):
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
+
+    @classmethod
+    def _render_centered_line_with_symbols(cls, line, center_x, y, color):
+        # Lines holding UI symbols (Konami arrows, face-button glyphs) draw each
+        # symbol run with the symbol font and the rest with the list font,
+        # centered as one row. Plain lines take the single-render path, so the
+        # common case costs one glyph-membership scan and nothing else.
+        runs = symbols.split_symbol_runs(line)
+        if not runs or (len(runs) == 1 and not runs[0][0]):
+            Display.render_text_centered(line, center_x, y, color, purpose=FontPurpose.LIST)
+            return
+        widths = []
+        for is_symbol, run in runs:
+            run_w, _ = Display.get_text_dimensions(
+                FontPurpose.SYMBOL if is_symbol else FontPurpose.LIST, run)
+            widths.append(run_w)
+        x = center_x - sum(widths) // 2
+        for (is_symbol, run), run_w in zip(runs, widths):
+            Display.render_text(run, x, y, color,
+                                FontPurpose.SYMBOL if is_symbol else FontPurpose.LIST,
+                                RenderMode.TOP_LEFT_ALIGNED)
+            x += run_w
 
     @classmethod
     def image_load(cls, image_path):
@@ -1404,11 +1415,8 @@ class Display:
         return cls._cached_space_dimensions
     
     @classmethod
-    def get_text_dimensions(cls, purpose, text="A", allow_fallback_font_for_missing_glyphs=False):
-        if allow_fallback_font_for_missing_glyphs and cls.requires_fallback_font(text, purpose):
-            return cls.get_text_dimensions_using_font(cls.fallback_fonts[purpose].font, text)
-        else:
-            return cls.get_text_dimensions_using_font(cls.fonts[purpose].font, text)
+    def get_text_dimensions(cls, purpose, text="A"):
+        return cls.get_text_dimensions_using_font(cls.fonts[purpose].font, text)
 
     @classmethod
     def get_text_dimensions_using_font(cls, font, text):
@@ -1602,8 +1610,10 @@ class Display:
         starting_height = middle_height - (len(split_message) * height_per_line)//2
 
         for i, line in enumerate(split_message):
-            Display.render_text_centered(f"{line}",Device.get_device().screen_width()//2, starting_height + i * height_per_line,
-                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            y = starting_height + i * height_per_line
+            cls._render_centered_line_with_symbols(f"{line}",
+                                                   Device.get_device().screen_width()//2, y,
+                                                   Theme.text_color(FontPurpose.LIST))
 
 
     @classmethod
@@ -1613,8 +1623,10 @@ class Display:
         height_per_line = text_h + int(5 * Device.get_device().screen_height()/480)
 
         for i, line in enumerate(split_message):
-            Display.render_text_centered(f"{line}",Device.get_device().screen_width()//2, starting_height + i * height_per_line,
-                                         Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
+            y = starting_height + i * height_per_line
+            cls._render_centered_line_with_symbols(f"{line}",
+                                                   Device.get_device().screen_width()//2, y,
+                                                   Theme.text_color(FontPurpose.LIST))
 
 
     @classmethod

@@ -3,6 +3,7 @@
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from menus.settings import settings_menu
+from menus.common import symbols
 from utils.user_prompt import UserPrompt
 from views.grid_or_list_entry import GridOrListEntry
 
@@ -19,7 +20,7 @@ class ModesMenu(settings_menu.SettingsMenu):
                                         [Language.label("gameOnlyModePrompt1", "Would you like to enter game selection only mode?"),
                                          Language.label("gameOnlyModePrompt2", "Boot straight into the game selection screen"),
                                          Language.label("gameOnlyModePrompt3", "To exit enter the Konami Code"), 
-                                         "↑↑↓↓←→←→BA,START,SELECT"]):
+                                         symbols.KONAMI]):
                 Device.get_device().get_system_config().set_game_selection_only_mode_enabled(True)
                 Device.get_device().exit_pyui()
             else:
@@ -31,7 +32,7 @@ class ModesMenu(settings_menu.SettingsMenu):
                                         [Language.label("simpleModePrompt1", "Would you like to enter simple mode?"),
                                          Language.label("simpleModePrompt2", "It has restricted access to settings"),
                                          Language.label("simpleModePrompt3", "To exit enter the Konami Code"), 
-                                         "↑↑↓↓←→←→BA,START,SELECT"]):
+                                         symbols.KONAMI]):
                 Device.get_device().get_system_config().set_simple_mode_enabled(True)
                 Device.get_device().exit_pyui()
             else:
