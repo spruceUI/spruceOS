@@ -214,13 +214,14 @@ usb_export_gadget() {
             mkdir -p $USB_GADGET_PATH/configs/c.1
             ln -s $USB_GADGET_PATH/functions/mass_storage.usb0 $USB_GADGET_PATH/configs/c.1/
             mkdir -p $USB_GADGET_PATH/strings/0x409
-            echo "MagicX" > $USB_GADGET_PATH/strings/0x409/manufacturer
-            echo "MagicX Device" > $USB_GADGET_PATH/strings/0x409/product
+            # The board's own brand, as the TrimUI arm names TrimUI.
+            echo "$BRAND" > $USB_GADGET_PATH/strings/0x409/manufacturer
+            echo "$BRAND Device" > $USB_GADGET_PATH/strings/0x409/product
             echo "1234567890" > $USB_GADGET_PATH/strings/0x409/serialnumber
             echo "" > $USB_GADGET_PATH/UDC 2>/dev/null
             # Bind whichever UDC the kernel registered rather than assuming its name.
-            _magicx_udc="$(ls /sys/class/udc 2>/dev/null | head -1)"
-            echo "${_magicx_udc:-musb-hdrc}" > $USB_GADGET_PATH/UDC
+            _oakmoss_udc="$(ls /sys/class/udc 2>/dev/null | head -1)"
+            echo "${_oakmoss_udc:-musb-hdrc}" > $USB_GADGET_PATH/UDC
             ;;
         "Flip")
             mkdir -p "$USB_GADGET_PATH/functions/mass_storage.0/lun.0" 2>/dev/null

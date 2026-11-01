@@ -181,7 +181,7 @@ run_drastic_AnbernicH700() { run_drastic64 ; }
 run_drastic_DarkMoss() { run_drastic64 ; }
 
 
-##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20) #####
+##### OAKMOSS A133P (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20; TrimUI Brick) #####
 
 # Same SoC as the Smart Pro, so the same two DraStic builds apply. Without these
 # `run_drastic_$PLATFORM` expanded to an undefined function and nothing launched.
@@ -193,7 +193,7 @@ run_drastic_OakMoss() {
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
 		# trngaje's newer build (touchscreen through udev); it needs libudev.so.1, which
 		# the TrimUI boards have not been checked for, so they keep lib64_A133P_trngaje's.
-		run_drastic_trngaje_a133p "$HOME/lib64_MagicX_trngaje"
+		run_drastic_trngaje_a133p "$HOME/lib64_oakMOSS_trngaje"
 	else
 		display_core_unrecognized_for_platform_message
 	fi

@@ -36,7 +36,7 @@
       "devices": [
         "TRIMUI_SMART_PRO_S",
         "TRIMUI_A133P",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "MIYOO_FLIP"
       ],
       "options": [
@@ -85,7 +85,7 @@
         "GKD_PIXEL2",
         "DARKMOSS",
         "MIYOO_A30",
-        "MAGICX_A133P"
+        "OAKMOSS_A133P"
       ],
       "options": [
         "None",

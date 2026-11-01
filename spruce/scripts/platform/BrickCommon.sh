@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # The TrimUI Brick's own functions, over a vendor layer the board file sources first: Brick.sh (TrimUI's
-# firmware, trimui_a133p.sh) and its variant BrickOakMOSS.sh (oakMOSS, trimui_oakmoss.sh).
+# firmware, trimui_a133p.sh) and its variant BrickOakMOSS.sh (oakMOSS, oakMOSSCommon.sh).
 
 get_config_path() {
     # Return the full path

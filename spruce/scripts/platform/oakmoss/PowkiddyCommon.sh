@@ -1,11 +1,11 @@
 #!/bin/sh
 
-# Powkiddy V90S and V20 on oakMOSS. The base is the MagicX boards' (our Tina on SD1), so
-# everything comes from oakmoss_a133p.sh except what differs on these boards: the pad
+# Powkiddy V90S and V20 on oakMOSS: the Powkiddy boards' layer. Everything comes from the oakMOSS
+# base (oakMOSSCommon.sh, our Tina on SD1) except what differs on these boards: the pad
 # (oakMOSS's adc-joypad, named per board), the volume keys on their own LRADC device, the
 # RetroArch pad profiles, the rumble, the speaker route and WiFi, which is a USB dongle or nothing.
 
-. "/mnt/SDCARD/spruce/scripts/platform/oakmoss/oakmoss_a133p.sh"
+. "/mnt/SDCARD/spruce/scripts/platform/oakmoss/oakMOSSCommon.sh"
 
 get_config_path() {
     echo "$SYSTEM_JSON"
@@ -19,16 +19,16 @@ device_has_wifi_radio() {
 
 # The pad by its board name (POWKIDDY_PAD_NAME, from the cfg), the volume keys on the LRADC,
 # the AXP2202 power key. These boards have no touch panel.
-magicx_resolve_event_paths() {
-    pad=$(magicx_find_event_by_name "$POWKIDDY_PAD_NAME" "*[Gg]amepad*" "*joypad*")
+oakmoss_resolve_event_paths() {
+    pad=$(oakmoss_find_event_by_name "$POWKIDDY_PAD_NAME" "*[Gg]amepad*" "*joypad*")
     if [ -n "$pad" ]; then
         export EVENT_PATH_SEND_TO_DRASTIC="$pad"
         export EVENT_PATH_SEND_TO_RA_AND_PPSSPP="$pad"
         export EVENT_PATH_READ_INPUTS_SPRUCE="$pad"
     fi
-    vol=$(magicx_find_event_by_name "sunxi-keyboard" "*keyboard*")
+    vol=$(oakmoss_find_event_by_name "sunxi-keyboard" "*keyboard*")
     [ -n "$vol" ] && export EVENT_PATH_VOLUME="$vol"
-    pwr=$(magicx_find_event_by_name "*axp*pek*" "*[Pp]ower*" "*pwr*")
+    pwr=$(oakmoss_find_event_by_name "*axp*pek*" "*[Pp]ower*" "*pwr*")
     [ -n "$pwr" ] && export EVENT_PATH_POWER="$pwr"
     log_message "Powkiddy input nodes: pad=${EVENT_PATH_READ_INPUTS_SPRUCE} volume=${EVENT_PATH_VOLUME} power=${EVENT_PATH_POWER}"
 }
@@ -41,11 +41,11 @@ stage_ra_autoconfig() {
 
 # The speaker sits behind the codec's LINEOUT, which Knulli switches on for these two boards
 # alone (its S00audio-setup); the codec drives the amplifier pin (PH6) itself.
-magicx_init_audio() {
+oakmoss_init_audio() {
     amixer sset 'Headphone' 0 >/dev/null 2>&1
     amixer sset 'Soft Volume Master' 255 >/dev/null 2>&1
     amixer sset 'LINEOUT' on >/dev/null 2>&1
-    magicx_apply_volume "$(get_volume_level 2>/dev/null)"
+    oakmoss_apply_volume "$(get_volume_level 2>/dev/null)"
 }
 
 # The V90S's motor hangs off the pad as force feedback (PWM2); the V20 has none, which its

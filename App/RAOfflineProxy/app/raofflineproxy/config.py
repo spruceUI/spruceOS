@@ -28,7 +28,7 @@ SPRUCE_RA_CONFIG_DIR = Path("/mnt/SDCARD/Saves/ra-configs")
 SPRUCE_CONFIG_JSON = Path("/mnt/SDCARD/Saves/spruce/spruce-config.json")
 SPRUCE_SETTINGS_MENU = "RetroAchievements Settings"
 CPUINFO_PATH = Path("/proc/cpuinfo")
-MAGICX_MARKER = Path("/usr/magicx")
+OAKMOSS_MARKER = Path("/usr/magicx")
 BASEOS_RELEASE_PATH = Path("/etc/baseos-release")
 LOONG_DAEMON = Path("/loong/loong_daemon")
 SDCARD_RETROARCH_CFG_CANDIDATES = (
@@ -171,7 +171,7 @@ def _baseos_target() -> str:
 
 def _oakmoss_board() -> str:
     try:
-        return (MAGICX_MARKER / "device").read_text(encoding="utf-8", errors="replace").strip()
+        return (OAKMOSS_MARKER / "device").read_text(encoding="utf-8", errors="replace").strip()
     except OSError:
         return ""
 
@@ -214,7 +214,7 @@ def spruce_platform() -> str:
     if "0xd03" in info:
         return _SPRUCE_H700_PLATFORMS.get(_baseos_target(), _SPRUCE_H700_DEFAULT)
 
-    if MAGICX_MARKER.exists():
+    if OAKMOSS_MARKER.exists():
         return _SPRUCE_OAKMOSS_PLATFORMS.get(_oakmoss_board(), _SPRUCE_OAKMOSS_DEFAULT)
 
     return "MiyooMini"

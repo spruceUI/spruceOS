@@ -2,7 +2,7 @@
 
 # Allwinner A133P (sun50iw10p1): the functions that belong to the SoC, not to a
 # vendor's userland. Sourced by trimui_a133p.sh (Brick, Brick Pro, Smart Pro,
-# which add TrimUI's daemons, OSD and RGB LEDs on top) and by oakmoss_a133p.sh
+# which add TrimUI's daemons, OSD and RGB LEDs on top) and by oakmoss/oakmoss_a133p.sh
 # (the oakMOSS boards, on our own Tina base). Anything that needs
 # /usr/trimui, trimui_inputd or the TrimUI OSD stays out of this file.
 
@@ -461,7 +461,7 @@ EOF
 # dongle whose module will not load, means the onboard radio exactly as before.
 #
 # Defined only for a cfg that opted in (the platform cfg is sourced before
-# this file). oakmoss_a133p.sh sources this file too and the MagicX cfgs set no
+# this file). oakmoss/oakmoss_a133p.sh sources this file too and the MagicX cfgs set no
 # dongle variables, so that family keeps device.sh's defaults; an unconditional
 # definition here would shadow them. (The RGB30 only mentions the A133P file in
 # a comment and keeps its own nmcli hooks.)

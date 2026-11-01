@@ -98,7 +98,7 @@ case "$PLATFORM" in
         ;;
     "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS")
         RUN_DIR="/usr/magicx/bin"
-        PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
+        PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
         # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the SPRUCE device, below.

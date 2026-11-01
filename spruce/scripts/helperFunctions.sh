@@ -164,11 +164,11 @@ device_names() {
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
-        Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
-        Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
-        XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
-        V90S)             echo "POWKIDDY_V90S"; echo "MAGICX_A133P" ;;
-        V20)              echo "POWKIDDY_V20";  echo "MAGICX_A133P" ;;
+        Zero28)           echo "MAGICX_ZERO28"; echo "OAKMOSS_A133P" ;;
+        Zero40)           echo "MAGICX_ZERO40"; echo "OAKMOSS_A133P" ;;
+        XU20)             echo "MAGICX_XU20";   echo "OAKMOSS_A133P" ;;
+        V90S)             echo "POWKIDDY_V90S"; echo "OAKMOSS_A133P" ;;
+        V20)              echo "POWKIDDY_V20";  echo "OAKMOSS_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;

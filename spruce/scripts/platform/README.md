@@ -6,6 +6,22 @@
 A family shares one file that each board's file sources: `AnbernicXXCommon.cfg`, `dArkMossCommon.sh`, `a133p.sh`
 and so on.
 
+## oakMOSS: base, chip and brand
+
+oakMOSS is a base OS that runs on more than one chip and carries more than one brand, so its boards stack three
+layers, each sourcing the one below:
+
+- the board, `oakmoss/<PLATFORM>.{cfg,sh}`: its cfg names its chip, `export PLATFORM_CHIP="a133p"`;
+- the brand, `oakmoss/<Brand>Common.sh` (`MagicXCommon.sh`, `PowkiddyCommon.sh`; the single Brick keeps its
+  brand's part in `BrickOakMOSS.sh`): what that brand's boards share on any chip, such as the pad;
+- the base, `oakmoss/oakMOSSCommon.sh`: what every oakMOSS board shares. It first sources the chip's oakMOSS
+  layer, `oakmoss/oakmoss_<chip>.sh` (`oakmoss_a133p.sh`), which holds what depends on the chip and the base image
+  built for it and sources the chip file other bases share (`platform/a133p.sh`).
+
+A board on a new chip adds `oakmoss_<chip>.sh` and, where no other base has one yet, `platform/<chip>.sh`. Its
+boards report `OAKMOSS_<CHIP>` (`OAKMOSS_A133P`) after their own name in `device_names`, for the Emu and App
+config lists, since builds differ by chip.
+
 ## Variants
 
 A variant is a platform that is another one with a few differences: the same board on a different base, say.

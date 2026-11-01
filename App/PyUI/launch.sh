@@ -355,7 +355,7 @@ case "$PLATFORM" in
     "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS" )
 
         cd /usr/magicx/bin
-        export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
+        export PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         # Every oakMOSS cfg sets PYUI_ENV_DEVICE=true: PyUI has no other device class for these boards.
         [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
 
