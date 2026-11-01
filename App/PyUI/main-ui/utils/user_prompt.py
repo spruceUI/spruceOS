@@ -10,7 +10,7 @@ class UserPrompt():
 
     @staticmethod
     def prompt_yes_no(title, messages):
-        messages.extend(["", f"{symbols.BTN_A} Yes, {symbols.BTN_B} No"])
+        messages.extend(["", f"{symbols.BTN_A} Yes {symbols.BTN_B} No"])
         while(True):
             Display.clear(title)
             Display.display_message_multiline(messages)
