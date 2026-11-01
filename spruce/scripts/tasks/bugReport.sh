@@ -184,6 +184,16 @@ redact_ip6() {
     echo "--- /proc/mi_modules/common/pq_info ---"
     head -c 2000 /proc/mi_modules/common/pq_info 2>/dev/null || echo "  <unreadable>"
 
+    if [ "$PLATFORM" = "SmartProS" ]; then
+        echo
+        echo "==== panel timing (dsi1c 0x055D0500 and tcon50 0x0ABA000C = 60 Hz) ===="
+        grep -o 'lcd=[^ ]*' /proc/cmdline
+        for _reg in dsi18:0x05508018 dsi1c:0x0550801C tcon44:0x05502044 tcon48:0x05502048 tcon4c:0x0550204C tcon50:0x05502050 tcon54:0x05502054; do
+            echo "${_reg%%:*} = $(devmem "${_reg#*:}" 32 2>&1)"
+        done
+        dmesg 2>/dev/null | grep -E 'lcd panel init|sw en=' | tail -6
+    fi
+
     echo
     echo "==== kernel log tail (may show rejected display commands) ===="
     # Redacted like every other dump: the radio driver prints both the adapter
