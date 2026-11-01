@@ -92,7 +92,12 @@ while true; do
             else
                 if [ "$flag_added" = false ]; then
                     if flag_check "in_menu"; then
-                        display -t "Battery has $current_battery_percent% left. Charge or shutdown your device." --okay &
+                        start_pyui_message_writer 1
+                        log_and_display_message "Battery has $current_battery_percent% left. Charge or shutdown your device."
+                        sleep 1
+                        acknowledge
+                        sleep 0.5
+                        stop_pyui_message_writer
                     else
                         flag_add "low_battery" --tmp
                     fi
