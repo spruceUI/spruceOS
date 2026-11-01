@@ -407,6 +407,7 @@ device_cleanup_after_ports_run() {
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
 
 device_exit_sleep(){
+    set_panel_timing
     restore_cores_online
     # Sleep turned the radio off without changing the setting, so the setting says whether WiFi was on
     if [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON" 2>/dev/null)" = 1 ]; then
@@ -423,7 +424,6 @@ device_exit_sleep(){
         sleep 10
         restore_cores_online
     ) &
-    set_panel_timing
     clear_wake_alarm $WAKE_ALARM_PATH
 }
 
