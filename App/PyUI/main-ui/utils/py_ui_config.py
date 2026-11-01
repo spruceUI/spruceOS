@@ -96,10 +96,6 @@ class PyUiConfig:
         return cls._data.get("enableButtonWatchers", True)
 
     @classmethod
-    def get_fallback_font(cls):
-        return cls._data.get("fallbackFontPath", cls._current_dir / "promptfont.ttf")
-
-    @classmethod
     def get_main_menu_title(cls):
         return cls._data.get("mainMenuTitle", "PyUI")
 

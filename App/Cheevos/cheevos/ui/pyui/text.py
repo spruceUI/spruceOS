@@ -76,7 +76,7 @@ def _has_glyph(role: Text, char: str) -> bool:
 
     if not getattr(Display, "fonts", None):
         return True
-    return not Display.requires_fallback_font(char, font_purpose(role))
+    return Display.font_covers(char, font_purpose(role))
 
 
 def displayable(value: str, role: Text = Text.BODY) -> str:
