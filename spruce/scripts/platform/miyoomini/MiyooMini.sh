@@ -187,14 +187,6 @@ vibrate() {
     echo 1 > $_g/value
 }
 
-display_kill() {
-    log_message "Only PyUI is supported on Miyoo Mini for display functionality" -v
-}
-
-display() {
-    log_message "Only PyUI is supported on Miyoo Mini for display functionality" -v
-}
-
 rgb_led() {
     log_message "rgb led not supported on miyoo mini" -v
 }

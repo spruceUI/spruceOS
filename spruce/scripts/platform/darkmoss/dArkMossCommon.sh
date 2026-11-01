@@ -6,12 +6,11 @@
 #   - nmcli owns association and DHCP, so the DHCP hooks are deliberately empty.
 #   - TF2 is mounted at /mnt/SDCARD by the base and unmounted by systemd on the
 #     way down; spruce must not fight it.
-#   - display (bin64/display_text.elf) cannot open a window on this Mali blob,
-#     which only offers GLES configs. legacy_display is sourced for display_kill.
+#   - display_text.elf cannot open a window on this Mali blob, which only offers
+#     GLES configs. PyUI handles all on-screen messages.
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/cpu_control_functions.sh"
-. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/sleep_functions.sh"

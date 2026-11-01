@@ -162,8 +162,8 @@ tmp_debug_info() {
 
 }
 
-# Best effort: the Mini stubs display() out, and the RGB30's display_text.elf
-# dies at SDL_CreateWindow on its Mali blob. On BaseOS it runs, but nothing it draws reaches the
+# Best effort: the RGB30's display_text.elf dies at SDL_CreateWindow on its
+# Mali blob. On BaseOS it runs, but nothing it draws reaches the
 # panel, even with the SDL2 PyUI draws with, so BaseOS's own splash shows the short text ($2)
 # instead: one line, none narrower than the last, whose pill edges would show.
 tmp_display() {

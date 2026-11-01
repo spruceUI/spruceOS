@@ -218,7 +218,6 @@ acknowledge() {
     done
 
     kill "$GE_PID" 2>/dev/null
-    display_kill
 }
 
 auto_regen_tmp_update() {
@@ -269,7 +268,6 @@ confirm() {
     done
 
     kill "$GE_PID" 2>/dev/null
-    display_kill
     return "$RET_VAL"
 }
 
@@ -686,7 +684,6 @@ hide_or_unhide_AccentColor_app() {
 # Usage: qr_code -t "text" -s "size" -l "level" -o "output"
 # If no output is provided, the QR code will be saved to /tmp/tmp/qr.png
 #   QR_CODE=$(qr_code -t "https://www.google.com")
-#   display -i "$QR_CODE" -t "DT: QR Code" -d 5
 qr_code() {
     text=""
     size=3

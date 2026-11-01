@@ -51,7 +51,6 @@ while true; do
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
-        display_kill &          # This is to kill leftover display processes that may be running
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so

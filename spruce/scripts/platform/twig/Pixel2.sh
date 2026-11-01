@@ -5,7 +5,6 @@
 # (Not everything was cleanly broken apart since this is a refactor, in the future
 #  we can try to make the file import chain cleaner)
 
-. "/mnt/SDCARD/spruce/scripts/platform/utils/legacy_display.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/watchdog_launcher.sh"
 . "/mnt/SDCARD/spruce/scripts/platform/utils/cpu_control_functions.sh"
 . "/mnt/SDCARD/spruce/scripts/retroarch_utils.sh"
