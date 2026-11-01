@@ -316,6 +316,18 @@ device_backlight_up() {
     log_message "Missing device_backlight_up function"
 }
 
+device_contrast_down() {
+    log_message "Missing device_contrast_down function"
+}
+
+device_contrast_up() {
+    log_message "Missing device_contrast_up function"
+}
+
+device_supports_contrast_controls() {
+    return 1
+}
+
 turn_off_screen() {
     log_message "Missing turn_off_screen function"
 }

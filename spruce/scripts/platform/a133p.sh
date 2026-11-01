@@ -310,13 +310,98 @@ current_backlight() {
 device_backlight_down() {
     local backlight
     backlight=$(current_backlight)
+    if [ "$backlight" -le 1 ]; then
+        local extended_brightness
+        extended_brightness=$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")
+        if [ "$extended_brightness" = "True" ]; then
+            device_contrast_down
+            return $?
+        fi
+    fi
     set_backlight $((backlight - 1))
 }
 
 device_backlight_up() {
     local backlight
     backlight=$(current_backlight)
+    if [ "$backlight" -le 1 ]; then
+        local extended_brightness
+        extended_brightness=$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")
+        if [ "$extended_brightness" = "True" ]; then
+            local contrast
+            contrast=$(current_contrast) || return 1
+            case "$contrast" in
+                ''|*[!0-9]*)
+                    log_message "Invalid saved contrast level: $contrast"
+                    return 1
+                    ;;
+            esac
+            if [ "$contrast" -lt 20 ]; then
+                device_contrast_up
+                return $?
+            fi
+        fi
+    fi
     set_backlight $((backlight + 1))
+}
+
+device_supports_contrast_controls() {
+    return 0
+}
+
+current_contrast() {
+    jq -r '.contrast // 10' "$SYSTEM_JSON"
+}
+
+device_set_contrast() {
+    local contrast="$1"
+    local tmp="${SYSTEM_JSON}.tmp.$$"
+    case "$contrast" in
+        ''|*[!0-9]*)
+            log_message "Invalid contrast level: $contrast"
+            return 1
+            ;;
+    esac
+    if [ "$contrast" -lt 1 ] || [ "$contrast" -gt 20 ]; then
+        log_message "Contrast level out of range: $contrast"
+        return 1
+    fi
+
+    if ! jq ".contrast = $contrast" "$SYSTEM_JSON" > "$tmp" || ! mv "$tmp" "$SYSTEM_JSON"; then
+        rm -f "$tmp"
+        log_message "Failed to save contrast level $contrast to $SYSTEM_JSON"
+        return 1
+    fi
+    if ! echo "$((contrast * 5))" > /sys/devices/virtual/disp/disp/attr/enhance_contrast; then
+        log_message "Failed to apply contrast level $contrast"
+        return 1
+    fi
+}
+
+device_contrast_down() {
+    local contrast
+    contrast=$(current_contrast) || return 1
+    case "$contrast" in
+        ''|*[!0-9]*)
+            log_message "Invalid saved contrast level: $contrast"
+            return 1
+            ;;
+    esac
+    [ "$contrast" -gt 1 ] || return 0
+    device_set_contrast "$((contrast - 1))"
+}
+
+device_contrast_up() {
+    local contrast
+    contrast=$(current_contrast) || return 1
+    case "$contrast" in
+        ''|*[!0-9]*)
+            log_message "Invalid saved contrast level: $contrast"
+            return 1
+            ;;
+    esac
+    [ "$contrast" -lt 20 ] || return 0
+    device_set_contrast "$((contrast + 1))"
 }
 
 turn_off_screen() {

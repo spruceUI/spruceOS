@@ -698,10 +698,31 @@ _map_backlight_to_system_value() {
     esac
 }
 
+device_contrast_down() {
+    _contrast_level=$(get_pyui_config_value ".contrast" 10)
+    if [ "$_contrast_level" -ge 2 ]; then
+        _contrast_level=$((_contrast_level - 1))
+        jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" &&
+            mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON" || return 1
+        INTERNAL_CONTRAST=$((_contrast_level * 5))
+        modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
+    fi
+}
+
+device_contrast_up() {
+    _contrast_level=$(get_pyui_config_value ".contrast" 10)
+    if [ "$_contrast_level" -le 9 ]; then
+        _contrast_level=$((_contrast_level + 1))
+        jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" &&
+            mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON" || return 1
+        INTERNAL_CONTRAST=$((_contrast_level * 5))
+        modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
+    fi
+}
+
 device_backlight_down() {
     extended_brightness="$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")"
     _backlight_level=$(get_pyui_config_value '.backlight' 5)
-    _contrast_level=$(get_pyui_config_value ".contrast" 10)
 
     if [ "$_backlight_level" -gt 0 ] ; then
         _backlight_level=$((_backlight_level-1))
@@ -711,12 +732,7 @@ device_backlight_down() {
 
     elif [ "$extended_brightness" = "True" ]; then   ### also, brightness is <= 0 from failing previous condition
         # if brightness is already at minimum, start tweaking contrast
-        if [ "$_contrast_level" -ge 2 ]; then # never let contrast go down to 0
-            _contrast_level=$((_contrast_level - 1))
-            jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
-            INTERNAL_CONTRAST=$((_contrast_level * 5))
-            modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
-        fi
+        device_contrast_down
     fi
 }
 
@@ -726,12 +742,11 @@ device_backlight_up() {
     _contrast_level=$(get_pyui_config_value ".contrast" 10)
 
     if [ "$_backlight_level" -eq 0 ] && [ "$extended_brightness" = "True" ] && [ "$_contrast_level" -le 9 ]; then
-        _contrast_level=$((_contrast_level + 1))
-        jq ".contrast = $_contrast_level" "$SYSTEM_JSON" > "$SYSTEM_JSON.tmp" && mv "$SYSTEM_JSON.tmp" "$SYSTEM_JSON"
-        INTERNAL_CONTRAST=$((_contrast_level * 5))
-        modetest -M rockchip -a -w 179:contrast:$INTERNAL_CONTRAST
+        device_contrast_up
+        return $?
+    fi
 
-    elif [ "$_backlight_level" -lt 10 ] ; then  # if extended brightness setting not on, or contrast is at least 10
+    if [ "$_backlight_level" -lt 10 ] ; then
         _backlight_level=$((_backlight_level+1))
         _system_backlight_level=$(_map_backlight_to_system_value "$_backlight_level")
         echo "$_system_backlight_level" > "$DEVICE_BACKLIGHT_PATH"

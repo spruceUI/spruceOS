@@ -330,11 +330,37 @@ current_backlight() {
 device_backlight_down() {
     local backlight
     backlight=$(current_backlight)
+    if [ "$backlight" -le 1 ]; then
+        local extended_brightness
+        extended_brightness=$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")
+        if [ "$extended_brightness" = "True" ] && device_supports_contrast_controls; then
+            device_contrast_down
+            return $?
+        fi
+    fi
     set_backlight $((backlight - 1))
 }
 
 device_backlight_up() {
     local backlight
     backlight=$(current_backlight)
+    if [ "$backlight" -le 1 ]; then
+        local extended_brightness
+        extended_brightness=$(get_config_value '.menuOptions."System Settings".extendedBrightness.selected' "False")
+        if [ "$extended_brightness" = "True" ] && device_supports_contrast_controls; then
+            local contrast
+            contrast=$(current_contrast) || return 1
+            case "$contrast" in
+                ''|*[!0-9]*)
+                    log_message "Invalid saved contrast level: $contrast"
+                    return 1
+                    ;;
+            esac
+            if [ "$contrast" -lt 20 ]; then
+                device_contrast_up
+                return $?
+            fi
+        fi
+    fi
     set_backlight $((backlight + 1))
 }
