@@ -348,7 +348,7 @@
     "selectBoxArtTitle": "Tria la caràtula",
     "optimizeBoxartPrompt1": "Vols optimitzar les caràtules?",
     "optimizeBoxartPrompt2": "Els originals es convertiran: fes-ne una còpia!",
-    "optimizeBoxartPrompt3": "A = Sí, B = No, X/Y = No ho tornis a preguntar",
+    "optimizeBoxartPrompt3": "{A} Sí, {B} No, {X}/{Y} No ho tornis a preguntar",
     "optimizeBoxartPrompt4": "Pots fer-ho manualment a:",
     "optimizeBoxartPrompt5": "Configuració -> Tasques -> Optimitza les caràtules",
     "selectAnOption": "Selecciona: {name}",

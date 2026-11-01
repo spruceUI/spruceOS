@@ -21,6 +21,19 @@ BTN_START = "⇸"    # U+21F8 gamepad-start
 BTN_SELECT = "⇷"   # U+21F7 gamepad-select
 BTN_HOME = "⇹"     # U+21F9 gamepad-home
 
+# Button placeholders in the translated prompts: "{A} Power Down, {B} Cancel".
+# A translator swaps the letters for their own words and may reorder them
+# freely; button_labels() replaces them with the glyphs at render time, so no
+# lang file ever has to carry a font's codepoints.
+BUTTON_PLACEHOLDERS = {"{A}": BTN_A, "{B}": BTN_B, "{X}": BTN_X, "{Y}": BTN_Y}
+
+
+def button_labels(text):
+    """Substitute the {A}/{B}/{X}/{Y} placeholders with the button glyphs."""
+    for placeholder, glyph in BUTTON_PLACEHOLDERS.items():
+        text = text.replace(placeholder, glyph)
+    return text
+
 # D-pad: promptfont's Xbox set, matching the Xbox face buttons above.
 DPAD_LEFT = "≺"   # U+227A xbox-dpad-left
 DPAD_UP = "≻"     # U+227B xbox-dpad-up
