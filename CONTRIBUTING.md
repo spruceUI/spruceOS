@@ -1,3 +1,31 @@
+# Design primitives
+
+Generally the spruceOS team plays it "fast and loose" about incorporating new
+features; however, certain design elements should be kept in mind, in order to
+maximize the chances of getting your contributions merged.
+
+- **Human-first design:** New features should serve our users, our devs, or
+  both. Libraries and binaries may be kept on older versions if the newer ones
+  would degrade the user experience, e.g. we tried newer Python versions than
+  what we presently use, but did not implement them due to slower loading.
+
+- **Expressed opinions should favor minimalism:** Overlays and shaders should
+  always be opt-in. Visuals in general are very subject to individual variations
+  in taste; we should strive to ship defaults that are the least offensive to
+  the greatest proportion of users. This usually equates to "less".
+
+- **Distracting features should be opt-in:** LEDs should be off by default. On-
+  screen displays should be off by default when they convey information that
+  can already be understood without them, e.g. no OSD for backlight level, as
+  the panel already conveys this information. 
+
+- **The spruce card should remain portable:** One of the definining features of
+  spruceOS is that the same SD card can be loaded into any of dozens of devices
+  and "just work". Features that are tightly coupled to a particular piece of
+  hardware need to be appropriately contained. Code shared between multiple
+  devices needs to be handled with care.
+
+
 # Onboarding a new device
 
 Before a new device is considered supported, make sure its identity and behavior
@@ -68,7 +96,7 @@ only where needed.
     existing one, and wire it into `spruce/scripts/emu/lib/dsperate_functions.sh`.
 
   - Update the relevant existing `Emu/<SYSTEM>/config.json` device lists or
-    mappings when required.
+    mappings when required; Check for `PLATFORM` checks in the scripts found in `spruce\scripts\emu\lib` and add new cases where needed. 
 
 - **Validate on the actual device:** test a clean install and an upgrade, boot
   and shutdown/suspend/resume, controls and hotkeys, display/orientation,
