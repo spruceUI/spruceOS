@@ -1,4 +1,4 @@
-
+import json
 import os
 import subprocess
 from controller.controller import Controller
@@ -49,17 +49,27 @@ class RomsMenuCommon(ABC):
             PyUiLogger.get_logger().error(f"Error extracting subdirectory after 'Roms' for {rom_path}: {e}")
         return None  # "Roms" not found or no subdirectory after it
 
-        emu_root = "/mnt/SDCARD/Emu"
+    def _get_system_display_name(self, system):
+        """Return the friendly emulator label for a ROM-system folder.
 
+        The ROM path gives us the technical folder name (for example ``PS`` or
+        ``SFC``).  Prefer the corresponding Emu/<system>/config.json ``label``
+        for display, while keeping the technical name as a safe fallback.
+        """
+        if not system:
+            return "Unknown"
+
+        emu_root = "/mnt/SDCARD/Emu"
         emu_folder = os.path.join(emu_root, system)
 
+        # Normally Emu and Roms use the same folder name.  Keep a
+        # case-insensitive fallback so a casing difference does not prevent us
+        # from finding the config.
         if not os.path.isdir(emu_folder):
             try:
                 system_lower = system.lower()
-
                 for entry in os.listdir(emu_root):
                     candidate = os.path.join(emu_root, entry)
-
                     if os.path.isdir(candidate) and entry.lower() == system_lower:
                         emu_folder = candidate
                         break
@@ -67,6 +77,7 @@ class RomsMenuCommon(ABC):
                 PyUiLogger.get_logger().error(
                     f"Error searching emulator folder for '{system}' in {emu_root}: {e}"
                 )
+                return system
 
         config_path = os.path.join(emu_folder, "config.json")
 
@@ -75,17 +86,17 @@ class RomsMenuCommon(ABC):
                 config = json.load(f)
 
             label = config.get("label")
-
             if isinstance(label, str) and label.strip():
+                # Spaces are part of the string and need no special handling.
                 return label.strip()
-
         except (OSError, json.JSONDecodeError) as e:
             PyUiLogger.get_logger().error(
-                f"Error reading label from {config_path}: {e}"
+                f"Error reading system label from {config_path}: {e}"
             )
 
         return system
-        
+
+    
     @abstractmethod
     def _get_rom_list(self) -> list[GridOrListEntry]:
         pass
@@ -119,12 +130,14 @@ class RomsMenuCommon(ABC):
             # unreadable as a result.
             game_entry = builder.get_game_entry(rom_info)
             display_name = builder.resolve_display_name(rom_info, game_entry)
+            system = self._extract_game_system(rom_info.rom_file_path)
+            system_display_name = self._get_system_display_name(system)
             rom_list.append(
                     RomGridOrListEntry(
                             # No _remove_extension here: resolve_display_name never returns
                             # one, and splitext on a real title cuts it at the
                             # first period - "Mr. Do!" became "Mr".
-                            display_name=display_name  +" (" + self._extract_game_system(rom_info.rom_file_path)+")",
+                            display_name=f"{display_name} ({system_display_name})",
                             folder_name=collection,
                             game_system=rom_info.game_system,
                             rom_file_path=rom_info.rom_file_path,
