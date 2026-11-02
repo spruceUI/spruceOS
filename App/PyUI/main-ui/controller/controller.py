@@ -417,9 +417,6 @@ class Controller:
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
                     should_launch_gs = True
 
-                    # Only enforce menuHoldTime when Game Switcher is configured as the
-                    # hold action. If GS is the tap action (or the setting is unavailable),
-                    # preserve the original 4.5.6 immediate PyUI behaviour.
                     if Controller.game_switcher_uses_hold_action():
                         # menu_press_started_at is captured on the first MENU event, before
                         # hotkey detection. This makes the configured delay measure the real
