@@ -299,8 +299,8 @@ getevent $EVENTS | while read line; do
         ;;
         *"key $B_L3 0") # L3 released
             if [ "$B_VOLDOWN" = "DOESNT_EXIST" ]; then
-                [ -n "$PID_UP" ] && kill "$PID_UP" 2>/dev/null
-                PID_UP=""
+                [ -n "$PID_DOWN" ] && kill "$PID_DOWN" 2>/dev/null
+                PID_DOWN=""
             fi
             L3_DOWN=false
         ;;
