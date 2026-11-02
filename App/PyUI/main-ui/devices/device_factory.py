@@ -71,6 +71,9 @@ def initialize_device(device, main_ui_mode):
     elif "RG353M" == device:
         from devices.darkmoss.rg353m import Rg353m
         Device.init(Rg353m(device))
+    elif "E5PLUS" == device:
+        from devices.darkmoss.e5plus import E5Plus
+        Device.init(E5Plus(device))
     elif "RGB30" == device:
         from devices.darkmoss.rgb30 import Rgb30
         Device.init(Rgb30(device))
