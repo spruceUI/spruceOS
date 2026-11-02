@@ -214,7 +214,9 @@ get_ppsspp_config_suffix() {
 	if [ "$PLATFORM_FAMILY" = "h700" ]; then
 		_suffix="h700"
 	else
-		_suffix="$(platform_path %s)"
+		_suffix="$(platform_path "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-%s.ini")"
+		_suffix="${_suffix##*/ppsspp-}"
+		_suffix="${_suffix%.ini}"
 	fi
 	echo "$_suffix"
 }
@@ -222,11 +224,11 @@ get_ppsspp_config_suffix() {
 load_ppsspp_configs() {
 	suffix="$(get_ppsspp_config_suffix)"
 	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/controls-${suffix}.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/controls.ini"
-	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
 	suffix="$(get_ppsspp_config_suffix)"
 	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/controls.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/controls-${suffix}.ini"
-	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}.ini"
 }

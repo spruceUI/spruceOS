@@ -482,11 +482,11 @@ ready_architecture_dependent_states() {
     esac
 
     # List of cores to handle
-    for CORE in ${CORE_LIST}; do
+    for CUR_CORE in ${CORE_LIST}; do
 	    # Loop over both STATES and SAVES
         for BASE in "$STATES" "$SAVES"; do
-            DIR_SUFFIX="$BASE/$CORE-$SUFFIX"
-            DIR_BASE="$BASE/$CORE"
+            DIR_SUFFIX="$BASE/$CUR_CORE-$SUFFIX"
+            DIR_BASE="$BASE/$CUR_CORE"
 
             # Only for SAVES: copy existing base files into SUFFIX dir if empty
 			# This is because we used to have a common saves dir, so if it's the
@@ -508,10 +508,10 @@ stash_architecture_dependent_states() {
     SAVES="/mnt/SDCARD/Saves/saves"
 
     # List of cores to handle
-    for CORE in $CORE_LIST; do
+    for CUR_CORE in $CORE_LIST; do
 		for BASE in "$STATES" "$SAVES"; do
-			mkdir -p "$BASE/$CORE-$SUFFIX"
-			umount "$BASE/$CORE"
+			mkdir -p "$BASE/$CUR_CORE-$SUFFIX"
+			umount "$BASE/$CUR_CORE"
         done
     done
 }
