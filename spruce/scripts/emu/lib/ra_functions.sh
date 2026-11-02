@@ -39,7 +39,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		"SmartPro"|"Brick"|"BrickPro"|"Flip")
+		"SmartPro"|"Brick"|"BrickOakMOSS"|"BrickPro"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
@@ -47,7 +47,7 @@ setup_rumble_env() {
 
 prepare_ra_config() {
 
-	export PLATFORM_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
+	export PLATFORM_CFG="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
 	if [ ! -f "$PLATFORM_CFG" ]; then
 		log_message "No retroarch-${PLATFORM}.cfg found."
@@ -234,7 +234,7 @@ apply_baseos_ra_overlay() {
 		ra32.*) ;;
 		*) return 0 ;;
 	esac
-	overlay="$RA_DIR/platform/retroarch-$PLATFORM-32bit.cfg"
+	overlay="$(platform_path "$RA_DIR/platform/retroarch-%s-32bit.cfg")"
 	[ -f "$overlay" ] || return 0
 	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
 		"Select") modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
@@ -551,7 +551,7 @@ backup_rac_creds_to_spruce_cfg() {
 load_n64_controller_profile() {
 	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
 	case "$profile" in
-		*"Spruce"*) profile_name="Spruce-$PLATFORM" ;;	# the board's own layout
+		*"Spruce"*) profile_name="$(basename "$(platform_path "/mnt/SDCARD/Emu/N64/remaps/Spruce-%s.rmp")" .rmp)" ;;	# the board's own layout
 		*"Classic"*) profile_name="Classic" ;;
 		*"Action"*) profile_name="Action" ;;
 		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected

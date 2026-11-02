@@ -23,7 +23,7 @@ run_yabasanshiro() {
 		"Flip")
 			GUID=030000005e0400008e02000014010000
 			;;
-		"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
+		"Brick"|"BrickOakMOSS"|"BrickPro"|"SmartPro"|"SmartProS")
 			GUID=0300a3845e0400008e02000014010000
 			;;
 		"Pixel2")
@@ -62,7 +62,7 @@ seed_xx_yaba_keymap() {
 	if jq -e --arg key "$key" 'has($key) and .player1.deviceName == "ANBERNIC-keys"' "$KEYMAP_FILE" >/dev/null 2>&1; then
 		return 0
 	fi
-	src="$EMU_DIR/xx-pad/keymap-$PLATFORM.json"
+	src="$(platform_path "$EMU_DIR/xx-pad/keymap-%s.json")"
 	if [ -f "$src" ]; then
 		jq --slurpfile seed "$src" '. + $seed[0] | .player1.deviceName = "ANBERNIC-keys"' "$KEYMAP_FILE" > "${KEYMAP_FILE}.tmp" && mv "${KEYMAP_FILE}.tmp" "$KEYMAP_FILE"
 	else

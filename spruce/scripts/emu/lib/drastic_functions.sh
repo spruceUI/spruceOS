@@ -21,7 +21,8 @@ run_drastic() {
 	case "$PLATFORM_FAMILY" in
 		"h700")		run_drastic_AnbernicH700 ;;
 		"darkmoss") run_drastic_DarkMoss ;;
-		"oakmoss")	run_drastic_OakMoss ;;
+		"oakmoss")	# a board's own function wins over the shared one (the Brick on oakMOSS runs the Brick's)
+			if command -v "run_drastic_$PLATFORM" >/dev/null; then run_drastic_$PLATFORM; else run_drastic_OakMoss; fi ;;
 		*)			run_drastic_$PLATFORM  ;; # shell expands this to appropriate real function
 	esac
 	save_drastic_configs
@@ -180,7 +181,7 @@ run_drastic_AnbernicH700() { run_drastic64 ; }
 run_drastic_DarkMoss() { run_drastic64 ; }
 
 
-##### MAGICX A133P (Mini Zero 28, Zero 40, XU20 V32) #####
+##### OAKMOSS A133P (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20; TrimUI Brick) #####
 
 # Same SoC as the Smart Pro, so the same two DraStic builds apply. Without these
 # `run_drastic_$PLATFORM` expanded to an undefined function and nothing launched.
@@ -192,11 +193,14 @@ run_drastic_OakMoss() {
 	elif [ "$CORE" = "DraStic-trngaje" ]; then
 		# trngaje's newer build (touchscreen through udev); it needs libudev.so.1, which
 		# the TrimUI boards have not been checked for, so they keep lib64_A133P_trngaje's.
-		run_drastic_trngaje_a133p "$HOME/lib64_MagicX_trngaje"
+		run_drastic_trngaje_a133p "$HOME/lib64_oakMOSS_trngaje"
 	else
 		display_core_unrecognized_for_platform_message
 	fi
 }
+
+# The TrimUI Brick on oakMOSS runs the stock Brick's builds.
+run_drastic_BrickOakMOSS() { run_drastic_Brick ; }
 
 
 ##### PIXEL 2 #####
@@ -224,16 +228,17 @@ run_drastic_trngaje_Pixel2() {
 load_drastic_configs() {
 	CFG_DIR="$EMU_DIR/config"
 	RES_DIR="$EMU_DIR/resources"
-	cp -f "$CFG_DIR/drastic-$PLATFORM.cfg" "$CFG_DIR/drastic.cfg"
-	[ -f "$RES_DIR/settings_${PLATFORM}.json" ] && cp "$RES_DIR/settings_${PLATFORM}.json" "$RES_DIR/settings.json"
+	cp -f "$(platform_path "$CFG_DIR/drastic-%s.cfg")" "$CFG_DIR/drastic.cfg"
+	_steward="$(platform_path "$RES_DIR/settings_%s.json")"
+	[ -f "$_steward" ] && cp "$_steward" "$RES_DIR/settings.json"
 	sync
 }
 
 save_drastic_configs() {
 	CFG_DIR="$EMU_DIR/config"
 	RES_DIR="$EMU_DIR/resources"
-	cp -f "$CFG_DIR/drastic.cfg" "$CFG_DIR/drastic-$PLATFORM.cfg"
-	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$RES_DIR/settings_${PLATFORM}.json"
+	cp -f "$CFG_DIR/drastic.cfg" "$(platform_path "$CFG_DIR/drastic-%s.cfg")"
+	[ -f "$RES_DIR/settings.json" ] && cp "$RES_DIR/settings.json" "$(platform_path "$RES_DIR/settings_%s.json")"
 	sync
 }
 

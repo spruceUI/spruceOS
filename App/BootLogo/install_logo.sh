@@ -494,6 +494,13 @@ case "$PLATFORM" in
 
         mount -o remount,ro /flash
         ;;
+    *)
+        # No writable boot logo here (a card that boots the vendor's own boot chain, say): leave it alone.
+        log_message "BootLogo: no boot logo path for $PLATFORM; not writing a logo"
+        display --icon "$ERROR_IMAGE_PATH" -t "This device's boot logo can't be changed here. Boot logo not changed." -d 3
+        rm -f "$TEMP_BMP"
+        exit 1
+        ;;
 esac
 
 # Clean up temporary files

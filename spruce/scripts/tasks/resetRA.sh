@@ -5,8 +5,8 @@
 
 log_message "Resetting RetroArch config for $PLATFORM to default."
 
-LIVE_RA_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
-BAK_RA_CFG="/mnt/SDCARD/RetroArch/platform/retroarch-$PLATFORM.cfg.bak"
+LIVE_RA_CFG="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
+BAK_RA_CFG="$(platform_path "/mnt/SDCARD/RetroArch/platform/retroarch-%s.cfg.bak")"
 
 if [ -f "$LIVE_RA_CFG" ]; then
     if rm "$LIVE_RA_CFG" ; then

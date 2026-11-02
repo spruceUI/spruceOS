@@ -60,7 +60,7 @@ handle_network_services() {
 		Disabled)          cheevos_wanted=false ;;
 		*)
 			cheevos_wanted=false
-			grep -q 'cheevos_enable = "true"' "/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg" 2>/dev/null && cheevos_wanted=true
+			grep -q 'cheevos_enable = "true"' "$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")" 2>/dev/null && cheevos_wanted=true
 			;;
 	esac
 	if [ "$disable_wifi_in_game" = "False" ] && [ "$cheevos_wanted" = true ]; then
