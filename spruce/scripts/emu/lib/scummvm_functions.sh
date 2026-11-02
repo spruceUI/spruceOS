@@ -21,7 +21,7 @@ _set_scummvm_platform() {
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-tsps/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			;;
-		"Brick")
+		"Brick"|"BrickOakMOSS")
 			SCUMMVM_CONFIG="/mnt/SDCARD/Saves/.config/scummvm-brick/scummvm.ini"
 			export LD_LIBRARY_PATH="$EMU_DIR/lib:$LD_LIBRARY_PATH"
 			touch /tmp/trimui_inputd/input_no_dpad /tmp/trimui_inputd/input_dpad_to_joystick

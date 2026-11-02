@@ -26,13 +26,16 @@ export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 # Detect device and export to any script sourcing helperFunctions #
 ###################################################################
 
-# MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
-# the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
+# The oakMOSS boards (MagicX, Powkiddy V90S/V20, TrimUI Brick) are decided by their /usr/magicx marker, not by
+# cpuinfo: the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
     # /usr/magicx/device names the model. Fall back to Z28 if missing.
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
+        v90s)   export PLATFORM="V90S" ;;
+        v20)    export PLATFORM="V20" ;;
+        brick)  export PLATFORM="BrickOakMOSS" ;;   # the TrimUI Brick on oakMOSS: a variant of Brick
         *)      export PLATFORM="Zero28" ;;
     esac
     export PLATFORM_FAMILY="oakmoss"
@@ -117,6 +120,24 @@ fi
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 
+# This platform's name, then its parent's when its cfg makes it a variant (PLATFORM_PARENT).
+# See spruce/scripts/platform/README.md.
+platform_names() {
+    echo "$PLATFORM"
+    if [ -n "${PLATFORM_PARENT:-}" ]; then echo "$PLATFORM_PARENT"; fi
+}
+
+# platform_path TEMPLATE: TEMPLATE with %s as this platform's name when that file exists, else as
+# the parent's when that one does, else as this platform's (so a caller that creates it names its own).
+platform_path() {
+    case "$1" in *%s*) ;; *) echo "$1"; return 0 ;; esac
+    _pp_head=${1%%"%s"*}; _pp_tail=${1#*"%s"}
+    for _pp_name in $(platform_names); do
+        if [ -e "$_pp_head$_pp_name$_pp_tail" ]; then echo "$_pp_head$_pp_name$_pp_tail"; return 0; fi
+    done
+    echo "$_pp_head$PLATFORM$_pp_tail"
+}
+
 # Every name this device answers to in an Emu config.json "devices" list, most
 # specific first. Mirrors PyUI's Device.get_device_names().
 #
@@ -128,6 +149,7 @@ device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
         Brick)            echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
+        BrickOakMOSS)     echo "TRIMUI_BRICK_OAKMOSS"; echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
         BrickPro)         echo "TRIMUI_BRICK_PRO"; echo "TRIMUI_A133P" ;;
         SmartPro)         echo "TRIMUI_SMART_PRO"; echo "TRIMUI_A133P" ;;
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
@@ -142,9 +164,11 @@ device_names() {
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
-        Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
-        Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
-        XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
+        Zero28)           echo "MAGICX_ZERO28"; echo "OAKMOSS_A133P" ;;
+        Zero40)           echo "MAGICX_ZERO40"; echo "OAKMOSS_A133P" ;;
+        XU20)             echo "MAGICX_XU20";   echo "OAKMOSS_A133P" ;;
+        V90S)             echo "POWKIDDY_V90S"; echo "OAKMOSS_A133P" ;;
+        V20)              echo "POWKIDDY_V20";  echo "OAKMOSS_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
@@ -169,8 +193,8 @@ device_names() {
 # The live RetroArch config, seeded from the .bak when absent. The configs moved
 # out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
 ensure_ra_config_path() {
-    _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
-    _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+    _rac_live="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
+    _rac_bak="$(platform_path "/mnt/SDCARD/RetroArch/platform/retroarch-%s.cfg.bak")"
     if [ ! -f "$_rac_live" ] && [ -f "$_rac_bak" ]; then
         mkdir -p /mnt/SDCARD/Saves/ra-configs
         cp "$_rac_bak" "$_rac_live"

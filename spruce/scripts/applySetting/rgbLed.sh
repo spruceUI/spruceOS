@@ -9,7 +9,7 @@
 
     # Only run on devices with RGB LEDs
     case "$PLATFORM" in
-        "Brick"|"BrickPro"|"SmartPro"|"SmartProS"|"Miniloong"|"AnbernicRG"*|"AnbernicXX"*)
+        "Brick"|"BrickOakMOSS"|"BrickPro"|"SmartPro"|"SmartProS"|"Miniloong"|"AnbernicRG"*|"AnbernicXX"*)
             set_rgb_in_menu
             ;;
         *)

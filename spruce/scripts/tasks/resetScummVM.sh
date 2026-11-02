@@ -11,7 +11,7 @@ case "$PLATFORM" in
     "Flip")       SCUMMVM_TARGET="flip" ;;
     "SmartPro")   SCUMMVM_TARGET="tsp" ;;
     "SmartProS")  SCUMMVM_TARGET="tsps" ;;
-    "Brick")      SCUMMVM_TARGET="brick" ;;
+    "Brick"|"BrickOakMOSS") SCUMMVM_TARGET="brick" ;;
     "BrickPro")   SCUMMVM_TARGET="brickpro" ;;
     "Pixel2")     SCUMMVM_TARGET="pixel2" ;;
     "Anbernic"*)  SCUMMVM_TARGET="anbernic" ;;

@@ -2,8 +2,8 @@
 
 # Allwinner A133P (sun50iw10p1): the functions that belong to the SoC, not to a
 # vendor's userland. Sourced by trimui_a133p.sh (Brick, Brick Pro, Smart Pro,
-# which add TrimUI's daemons, OSD and RGB LEDs on top) and by magicx_a133p.sh
-# (Mini Zero 28, Zero 40, XU20 V32 on our own Tina base). Anything that needs
+# which add TrimUI's daemons, OSD and RGB LEDs on top) and by oakmoss/oakmoss_a133p.sh
+# (the oakMOSS boards, on our own Tina base). Anything that needs
 # /usr/trimui, trimui_inputd or the TrimUI OSD stays out of this file.
 
 . "/mnt/SDCARD/spruce/scripts/platform/common64bit.sh"
@@ -159,7 +159,7 @@ set_event_arg_for_idlemon() {
 
 set_default_ra_hotkeys() {
         
-    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+    RA_FILE="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
     #TODO Are these right for TrimUI A133P?
@@ -242,6 +242,24 @@ EOF
     jq ".backlight = $val" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
 
+
+# PyUI's display commands (App/PyUI/set-display.sh) on the A133P's display engine, for the
+# env-driven device: the same scaling as TrimUIDevice. PyUI saves the levels.
+apply_display_contrast() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_contrast
+}
+
+apply_display_saturation() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_saturation
+}
+
+apply_display_brightness() {
+    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_bright
+}
+
+apply_display_hue() {
+    echo $(($1 * 5 - 50)) > /sys/devices/virtual/disp/disp/attr/color_temperature
+}
 
 device_system_handles_sdcard_unmount() {
     # return 0 = true
@@ -443,8 +461,8 @@ EOF
 # dongle whose module will not load, means the onboard radio exactly as before.
 #
 # Defined only for a cfg that opted in (the platform cfg is sourced before
-# this file). magicx_a133p.sh sources this file too and its cfgs set no dongle
-# variables, so that family keeps device.sh's defaults; an unconditional
+# this file). oakmoss/oakmoss_a133p.sh sources this file too and the MagicX cfgs set no
+# dongle variables, so that family keeps device.sh's defaults; an unconditional
 # definition here would shadow them. (The RGB30 only mentions the A133P file in
 # a comment and keeps its own nmcli hooks.)
 if [ -n "$WIFI_USB_MODULES_DIR" ]; then

@@ -110,7 +110,7 @@
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "MAGICX_A133P"
+        "OAKMOSS_A133P"
       ],
       "selected": "yabasanshiro_generic_libretro",
       "overrides": {}

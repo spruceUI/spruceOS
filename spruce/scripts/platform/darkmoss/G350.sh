@@ -30,7 +30,7 @@ device_get_charging_status() {
 
 # The common defaults with this pad's udev numbering: select 12, L3 14.
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+    RA_FILE="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

@@ -16,7 +16,7 @@
         "MIYOO_A30",
         "ANBERNIC_RGXX",
         "MIYOO_MINI_FAMILY",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "DARKMOSS"
       ]
     }
@@ -44,7 +44,7 @@
         "TRIMUI_SMART_PRO_S",
         "ANBERNIC_RGXX",
         "DARKMOSS",
-        "MAGICX_A133P"
+        "OAKMOSS_A133P"
       ],
       "options": [
         "gvu",

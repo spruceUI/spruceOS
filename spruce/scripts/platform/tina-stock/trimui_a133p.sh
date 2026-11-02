@@ -221,8 +221,8 @@ device_init_a133p() {
     ) &
 }
 
-# PyUI's backlight and display commands (App/PyUI/set-backlight.sh, set-display.sh) for the
-# env-driven device: the panel only, PyUI saves the levels. Same curves as TrimUIDevice.
+# PyUI's backlight command (App/PyUI/set-backlight.sh) for the env-driven device: the panel
+# only, PyUI saves the level. Same curve as TrimUIDevice; the display commands are a133p.sh's.
 apply_backlight() {
     local raw
     case "$1" in
@@ -235,22 +235,6 @@ apply_backlight() {
 fd = os.open('/dev/disp', os.O_RDWR)
 fcntl.ioctl(fd, 0x102, (ctypes.c_ulong * 4)(0, $raw, 0, 0))
 os.close(fd)"
-}
-
-apply_display_contrast() {
-    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_contrast
-}
-
-apply_display_saturation() {
-    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_saturation
-}
-
-apply_display_brightness() {
-    echo $(($1 * 5)) > /sys/devices/virtual/disp/disp/attr/enhance_bright
-}
-
-apply_display_hue() {
-    echo $(($1 * 5 - 50)) > /sys/devices/virtual/disp/disp/attr/color_temperature
 }
 
 device_get_fw_version() {
