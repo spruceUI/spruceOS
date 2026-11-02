@@ -9,6 +9,7 @@ from dataclasses import dataclass, replace
 from cheevos.core.models import Achievement, AchievementType, GameDetail, PendingAward
 from cheevos.core.sync.detail_fetch import FetchState, FetchStatus
 from cheevos.core.sync.progress import Failure
+from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
 from cheevos.ui.pyui.badge_grid import Details
@@ -284,7 +285,7 @@ def _why_not(status: FetchStatus | None, now: float) -> list[str]:
         return [strings.NO_DETAILS, strings.SYNC_AUTH]
     if failure is Failure.RATE_LIMITED and status is not None and status.retry_at is not None:
         minutes = max(math.ceil((status.retry_at - now) / 60), 1)
-        return [strings.NO_DETAILS, strings.SYNC_RATE_LIMITED.format(minutes=minutes)]
+        return [strings.NO_DETAILS, fmt.count(strings.SYNC_RATE_LIMITED, minutes)]
     return [strings.NO_DETAILS, strings.LOAD_ERROR]
 
 

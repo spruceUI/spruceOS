@@ -57,8 +57,7 @@ def describe(award: Award, events: Mapping[int, EventInfo]) -> AwardText:
         info = events.get(award.data)
         badge = event_badge(award, info)
         if badge.points is not None:
-            template = strings.EVENT_POINT if badge.points == 1 else strings.EVENT_POINTS
-            text = template.format(points=fmt.number(badge.points))
+            text = fmt.count(strings.EVENT_POINTS, badge.points)
         else:
             text = strings.EVENT_COMPLETED if badge.known else strings.EVENT_AWARD
         return AwardText(badge.title, text, date, Frame.GOLD, award_image(award, info))
@@ -77,19 +76,18 @@ def _site_text(award: Award) -> tuple[str, str]:
         ``(title, description)``.
     """
     count = threshold(award)
-    shown = fmt.number(count) if count is not None else ""
     if award.type is AwardType.PLAYTEST:
         return strings.PLAYTEST, award.title
     if award.type is AwardType.UNLOCKS_YIELD:
-        text = strings.UNLOCKS_YIELD_TEXT.format(count=shown) if shown else strings.DEVELOPER_TEXT
+        text = fmt.count(strings.UNLOCKS_YIELD_TEXT, count) if count else strings.DEVELOPER_TEXT
         return strings.UNLOCKS_YIELD, text
     if award.type is AwardType.POINTS_YIELD:
-        text = strings.POINTS_YIELD_TEXT.format(count=shown) if shown else strings.DEVELOPER_TEXT
+        text = fmt.count(strings.POINTS_YIELD_TEXT, count) if count else strings.DEVELOPER_TEXT
         return strings.POINTS_YIELD, text
     if award.type is AwardType.PATREON:
         tier = award.extra == _PATREON_TIER
         return strings.PATREON, strings.PATREON_TIER_TEXT if tier else strings.PATREON_TEXT
     if award.type is AwardType.MEDIA:
-        text = strings.MEDIA_TEXT.format(count=shown) if shown else strings.MEDIA_ANY_TEXT
+        text = fmt.count(strings.MEDIA_TEXT, count) if count else strings.MEDIA_ANY_TEXT
         return strings.MEDIA, text
     return strings.LEGEND, strings.LEGEND_TEXT

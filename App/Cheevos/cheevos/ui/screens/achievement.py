@@ -153,7 +153,8 @@ class _Card:
             ui.text(line, self._x, self._y, Text.TITLE, accent=True)
             self._y += ui.line_height(Text.TITLE)
         meta = strings.DETAIL_META.format(
-            points=fmt.points(achievement.points), retro=fmt.number(achievement.retro_points)
+            points=fmt.points(achievement.points),
+            retro=fmt.count(strings.RETRO_POINTS, achievement.retro_points),
         )
         if achievement.type is not None:
             meta += " · " + strings.TYPE_LABELS[achievement.type.value]
@@ -231,10 +232,13 @@ class _Card:
         ui.image(shown, right, top, width, height, Align.TOP_RIGHT)
 
     def _line(self, text: str) -> None:
-        """Draw one body line in the right column and advance.
+        """Draw a detail line in the right column and advance, wrapped if it's too long for it.
+
+        English fits on one line; a longer language may need two.
 
         Args:
             text: Line text.
         """
-        ui.text(text, self._x, self._y)
-        self._y += ui.line_height(Text.BODY)
+        for line in ui.wrap(text, Text.BODY, self._area.width - self._x - PADDING):
+            ui.text(line, self._x, self._y)
+            self._y += ui.line_height(Text.BODY)
