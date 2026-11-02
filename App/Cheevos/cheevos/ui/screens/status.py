@@ -22,13 +22,24 @@ from cheevos.ui.pyui.status_bar import BarStatus
 
 RESULT_SECONDS = 5.0  # a finished sync's result stays on every screen this long
 
-_FAILURES = {
-    Failure.OFFLINE: (strings.SYNC_OFFLINE, "cloud"),
-    Failure.AUTH: (strings.SYNC_AUTH, "lock"),
-    Failure.NETWORK: (strings.SYNC_UNAVAILABLE, "cloud"),
-    Failure.RATE_LIMITED: (strings.SYNC_UNAVAILABLE, "cloud"),
-    Failure.ERROR: (strings.SYNC_ERROR, "debug"),
-}
+
+def _failure(failure: Failure) -> tuple[str, str]:
+    """Describe a failed sync.
+
+    Args:
+        failure: Why it failed.
+
+    Returns:
+        ``(message, icon name)``.
+    """
+    failures = {
+        Failure.OFFLINE: (strings.SYNC_OFFLINE, "cloud"),
+        Failure.AUTH: (strings.SYNC_AUTH, "lock"),
+        Failure.NETWORK: (strings.SYNC_UNAVAILABLE, "cloud"),
+        Failure.RATE_LIMITED: (strings.SYNC_UNAVAILABLE, "cloud"),
+        Failure.ERROR: (strings.SYNC_ERROR, "debug"),
+    }
+    return failures[failure]
 
 
 def progress_text(status: SyncStatus) -> str:
@@ -125,11 +136,11 @@ class SyncBar:
             The bar status.
         """
         if state.phase is Phase.FAILED and state.failure is not None:
-            text, icon = _FAILURES[state.failure]
+            text, icon = _failure(state.failure)
             action = strings.ENTER_KEY if state.failure is Failure.AUTH else strings.SYNC_RETRY
             wait = self._rate_limit_wait(state)
             if wait is not None:  # retrying before RA's time is up would fail again
-                text, action = strings.SYNC_RATE_LIMITED.format(minutes=wait), ""
+                text, action = fmt.count(strings.SYNC_RATE_LIMITED, wait), ""
             return BarStatus(text, self._icon(icon), action if detailed else "")
         action = strings.SYNC if detailed else ""
         if state.phase is Phase.CANCELLED and fresh:

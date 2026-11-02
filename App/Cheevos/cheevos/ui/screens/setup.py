@@ -22,13 +22,19 @@ from cheevos.ui.screens.common import busy, message, prompt
 # (username, key) -> True (accepted), False (rejected), None (couldn't reach RA).
 KeyValidator = Callable[[str, str], bool | None]
 
-# PyUI's keyboard: A types the highlighted key, and these do the rest.
-KEYBOARD_HINTS = (
-    (Button.START, strings.HINT_DONE),
-    (Button.B, strings.HINT_DELETE),
-    (Button.L1, strings.HINT_SHIFT),
-    (Button.R1, strings.HINT_CAPS),
-)
+
+def keyboard_hints() -> list[tuple[Button, str]]:
+    """List the hints for PyUI's keyboard: A types the highlighted key, and these do the rest.
+
+    Returns:
+        ``(button, label)`` pairs, in the session's language.
+    """
+    return [
+        (Button.START, strings.HINT_DONE),
+        (Button.B, strings.HINT_DELETE),
+        (Button.L1, strings.HINT_SHIFT),
+        (Button.R1, strings.HINT_CAPS),
+    ]
 
 
 def ensure_credentials(paths: Paths, validate: KeyValidator) -> Credentials | None:
@@ -105,7 +111,7 @@ def enter_key(paths: Paths, username: str, validate: KeyValidator) -> str | None
     Returns:
         The saved key, or ``None`` if cancelled, malformed or rejected.
     """
-    entered = ui.ask_text(strings.KEY_PROMPT, secret=True, hints=KEYBOARD_HINTS)
+    entered = ui.ask_text(strings.KEY_PROMPT, secret=True, hints=keyboard_hints())
     if entered is None:
         return None
     key = entered.strip()

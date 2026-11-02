@@ -47,7 +47,7 @@ def _items(ctx: AppContext) -> list[MenuItem]:
         ),
         MenuItem(
             strings.RECENT_WINDOW,
-            strings.RECENT_DAYS.format(days=settings.recent_days),
+            fmt.count(strings.RECENT_DAYS, settings.recent_days),
             ctx.icon("calendar"),
             key="recent",
         ),
@@ -111,7 +111,9 @@ def _proxy_rows(ctx: AppContext) -> list[MenuItem]:
     )
     waiting = len(ctx.pending_awards())
     status = strings.PROXY_STATUS.format(
-        state=state, waiting=waiting, cached=len(ctx.proxy.cached_game_ids())
+        state=state,
+        waiting=fmt.count(strings.PROXY_WAITING, waiting),
+        cached=fmt.count(strings.PROXY_CACHED, len(ctx.proxy.cached_game_ids())),
     )
     return [MenuItem(strings.PROXY, status, ctx.icon("cloud"), str(waiting or ""), "proxy")]
 
@@ -156,7 +158,7 @@ def _change_recent(ctx: AppContext) -> None:
     Args:
         ctx: App context.
     """
-    options = {str(days): strings.RECENT_DAYS.format(days=days) for days in RECENT_DAYS_CHOICES}
+    options = {str(days): fmt.count(strings.RECENT_DAYS, days) for days in RECENT_DAYS_CHOICES}
     chosen = pick(strings.RECENT_WINDOW, options, str(ctx.settings.recent_days))
     if chosen:
         ctx.update_settings(dataclasses.replace(ctx.settings, recent_days=int(chosen)))

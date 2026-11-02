@@ -31,6 +31,7 @@ from cheevos.core.sync.detail_fetch import DetailFetcher, DetailSession
 from cheevos.core.sync.lazy_media import LazyMediaFetcher, MediaSession
 from cheevos.platform.paths import Paths
 from cheevos.ui.context import AppContext
+from cheevos.ui.language import LANG_DIR
 from cheevos.ui.media import MediaResolver
 from cheevos.ui.pyui import generated, primitives, redraw, status_bar, title_bar, visible_images
 from cheevos.ui.screens.home import Home
@@ -112,6 +113,9 @@ class AppEnvironment:
         auto_sync: Overrides the "sync when the app opens" setting when not ``None``.
         api_interval: Seconds between Web API requests, shared by every client (recorded
             fixtures need no pacing).
+        language: The app's language, as PyUI names its language files; ``None`` follows
+            Spruce's setting.
+        lang_dir: Where the translations are.
     """
 
     paths: Paths
@@ -120,6 +124,8 @@ class AppEnvironment:
     clock: Callable[[], float] = network_clock.now
     auto_sync: bool | None = None
     api_interval: float = API_INTERVAL
+    language: str | None = None
+    lang_dir: Path = LANG_DIR
 
 
 def _icons_dir(*, bar: bool = False) -> Path:

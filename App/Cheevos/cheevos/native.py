@@ -22,7 +22,7 @@ from cheevos import app
 from cheevos.core.credentials import RA_SETTINGS_SECTION, read_api_key
 from cheevos.core.ra_client.redact import uninstall_redaction
 from cheevos.platform.paths import Paths
-from cheevos.ui import strings
+from cheevos.ui import language, strings
 from cheevos.ui.pyui import host
 
 logger = logging.getLogger(__name__)
@@ -67,6 +67,7 @@ def session(env: app.AppEnvironment, *, started_at: float, game_id: int | None =
     with contextlib.ExitStack() as cleanup:  # undone in reverse, each step even if one fails
         cleanup.callback(uninstall_redaction)  # last: the workers may still log the key
         cleanup.callback(_await_workers)
+        language.use(env.language or host.language(), env.lang_dir)
         host.enter()
         cleanup.callback(host.leave)
         cleanup.callback(_share_api_key, env.paths)

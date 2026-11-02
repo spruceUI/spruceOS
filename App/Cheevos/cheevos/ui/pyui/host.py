@@ -1,9 +1,9 @@
 """What a session asks of the PyUI process it runs in (.agents/pyui.md, "In-process sessions").
 
 PyUI is already up when a session starts: Spruce's menus run the app inside PyUI's own process.
-The session borrows its texture caches and gives them back empty, shows a message when it
-fails, and changes Spruce's settings through PyUI, which keeps them in memory and would
-otherwise write its own copy over a change made to the file.
+The session reads Spruce's UI language from it, borrows its texture caches and gives them back
+empty, shows a message when it fails, and changes Spruce's settings through PyUI, which keeps
+them in memory and would otherwise write its own copy over a change made to the file.
 """
 
 from __future__ import annotations
@@ -29,6 +29,17 @@ def leave() -> None:
     from display.display import Display
 
     texture_budget.uninstall(Display)
+
+
+def language() -> str:
+    """Return the language Spruce's UI is set to.
+
+    Returns:
+        Its name as PyUI names its language files, e.g. ``"Catalan"``.
+    """
+    from utils.py_ui_config import PyUiConfig
+
+    return PyUiConfig.get_language() or "English"
 
 
 def show_message(text: str, seconds: float) -> None:
