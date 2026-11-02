@@ -35,7 +35,7 @@ class GameConfigMenu:
         for index, opt in enumerate(options):
             option_list.append(
                 GridOrListEntry(
-                    primary_text=opt,
+                    primary_text=Language.menu_option_value(opt),
                     value=index
                 )
             )
@@ -57,7 +57,7 @@ class GameConfigMenu:
             elif (ControllerInput.B == selected.get_input()):
                 return None
             
-    def change_indexed_array_option(self, entry_name, input, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override):
+    def change_indexed_array_option(self, entry_name, input, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name=None):
         try:
             selected_index = all_options.index(current_value)
         except:
@@ -84,7 +84,7 @@ class GameConfigMenu:
                     selected_index = 0
             elif(ControllerInput.A == input):
                 #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-                selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
+                selected_index = self.get_selected_index(Language.select_option_prompt(display_name or entry_name), all_options)
 
             PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -245,8 +245,9 @@ class GameConfigMenu:
                                         value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
                                         all_options=option.get('options', []), current_value=effective_value,
                                             update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
-                                            remove_override=self.game_system.game_system_config.delete_menu_override
-                                            : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
+                                            remove_override=self.game_system.game_system_config.delete_menu_override,
+                                            display_name=Language.menu_option_display(option.get('display'))
+                                            : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name)
                                 )
                         )
 

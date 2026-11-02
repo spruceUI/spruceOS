@@ -67,17 +67,17 @@ class SettingsMenu(ABC):
         next_index = (current_index + direction) % len(all_entries)
         return all_entries[next_index]
 
-    def onscreen_keyboard_option(self, category, entry_name, input, current_value, update_value):
+    def onscreen_keyboard_option(self, category, entry_name, input, current_value, update_value, display_name=None):
         if(ControllerInput.A == input):
             new_value = self.on_screen_keyboard.get_input(
-                title_text=entry_name,
+                title_text=display_name or entry_name,
                 starting_text=str(current_value)
             )
             PyUiLogger.get_logger().info(f"Updating {entry_name} to {new_value}")
             update_value(category, entry_name, new_value)
 
 
-    def change_indexed_array_option_for_menu_options_list(self, category, entry_name, input, all_options, current_value, update_value):
+    def change_indexed_array_option_for_menu_options_list(self, category, entry_name, input, all_options, current_value, update_value, display_name=None):
         try:
             selected_index = all_options.index(current_value)
         except:
@@ -95,7 +95,7 @@ class SettingsMenu(ABC):
             if(selected_index == len(all_options)):
                 selected_index = 0
         elif(ControllerInput.A == input):
-            selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
+            selected_index = self.get_selected_index(Language.select_option_prompt(display_name or entry_name), all_options)
 
         PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -170,8 +170,9 @@ class SettingsMenu(ABC):
                                 entry_name=name, 
                                 category=category,
                                 current_value=selected_value,
-                                update_value=CfwSystemConfig.set_menu_option
-                                : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value)
+                                update_value=CfwSystemConfig.set_menu_option,
+                                display_name=display_name
+                                : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value, display_name)
                         )
                     )
                 else:
@@ -188,8 +189,9 @@ class SettingsMenu(ABC):
                                         entry_name=name, 
                                         category=category,
                                         all_options=self.resolve_options_for_device(option),
-                                        current_value=selected_value,update_value=CfwSystemConfig.set_menu_option
-                                        : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, all_options, current_value, update_value)
+                                        current_value=selected_value,update_value=CfwSystemConfig.set_menu_option,
+                                        display_name=display_name
+                                        : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, all_options, current_value, update_value, display_name)
                             )
                         )
         return option_list
@@ -203,7 +205,7 @@ class SettingsMenu(ABC):
 
         return GridOrListEntry(
             primary_text=primary_text,
-            value_text="<    " + str(current_value) + "    >",
+            value_text="<    " + Language.menu_option_value(current_value) + "    >",
             image_path=None,
             image_path_selected=None,
             description=None,
@@ -354,7 +356,7 @@ class SettingsMenu(ABC):
         for index, opt in enumerate(options):
             option_list.append(
                 GridOrListEntry(
-                    primary_text=opt,
+                    primary_text=Language.menu_option_value(opt),
                     value=index
                 )
             )
