@@ -415,40 +415,42 @@ class Controller:
                 was_hotkey = called_from_check_for_hotkey or Controller.check_for_hotkey()
 
                 if(not was_hotkey and not Controller.gs_triggered and Controller.allow_pyui_game_switcher()):
-                    # menu_press_started_at is captured on the first MENU event, before
-                    # hotkey detection. This makes the configured delay measure the real
-                    # physical hold time rather than starting after the hotkey checks.
-                    if menu_press_started_at is None:
-                        menu_press_started_at = time.monotonic()
+                    should_launch_gs = True
 
-                    menu_hold_time = Controller.menu_hold_time_seconds()
+                    # Only enforce menuHoldTime when Game Switcher is configured as the
+                    # hold action. If GS is the tap action (or the setting is unavailable),
+                    # preserve the original 4.5.6 immediate PyUI behaviour.
+                    if Controller.game_switcher_uses_hold_action():
+                        # menu_press_started_at is captured on the first MENU event, before
+                        # hotkey detection. This makes the configured delay measure the real
+                        # physical hold time rather than starting after the hotkey checks.
+                        if menu_press_started_at is None:
+                            menu_press_started_at = time.monotonic()
 
-                    # Delay only the PyUI Game Switcher. Hotkeys have already been checked
-                    # above, and releasing MENU before the configured time cancels GS.
-                    while (
-                        Controller.still_held_down()
-                        and (time.monotonic() - menu_press_started_at) < menu_hold_time
-                    ):
-                        shutdown.checkpoint()
-                        Controller.controller_interface.force_refresh()
-                        time.sleep(POLL_INTERVAL_SECONDS)
+                        menu_hold_time = Controller.menu_hold_time_seconds()
 
-                    if (
-                        Controller.still_held_down()
-                        and (time.monotonic() - menu_press_started_at) >= menu_hold_time
-                    ):
-                    Controller.gs_triggered = True
-                    Controller.first_check_after_gs_triggered = True
-                    from menus.games.recents_menu_gs import RecentsMenuGS
-                    Controller.clear_last_input()
-                        PyUiLogger.get_logger().info(
-                            f"Starting GS after MENU held for "
-                            f"{time.monotonic() - menu_press_started_at:.2f}s "
-                            f"(configured: {menu_hold_time}s)"
+                        while (
+                            Controller.still_held_down()
+                            and (time.monotonic() - menu_press_started_at) < menu_hold_time
+                        ):
+                            shutdown.checkpoint()
+                            Controller.controller_interface.force_refresh()
+                            time.sleep(POLL_INTERVAL_SECONDS)
+
+                        should_launch_gs = (
+                            Controller.still_held_down()
+                            and (time.monotonic() - menu_press_started_at) >= menu_hold_time
                         )
-                    RecentsMenuGS().run_rom_selection()
-                    Controller.clear_last_input()
-                    Controller.gs_triggered = False
+
+                    if should_launch_gs:
+                        Controller.gs_triggered = True
+                        Controller.first_check_after_gs_triggered = True
+                        from menus.games.recents_menu_gs import RecentsMenuGS
+                        Controller.clear_last_input()
+                        PyUiLogger.get_logger().info("Starting GS().run_rom_selection()")
+                        RecentsMenuGS().run_rom_selection()
+                        Controller.clear_last_input()
+                        Controller.gs_triggered = False
 
         Controller.last_input_time = time.monotonic()
         if Controller.last_controller_input is not None:
@@ -511,6 +513,14 @@ class Controller:
             return float(value)
         except (TypeError, ValueError):
             return 2.0
+
+    @staticmethod
+    def game_switcher_uses_hold_action():
+        from utils.cfw_system_config import CfwSystemConfig
+        return CfwSystemConfig.get_selected_value(
+            "Emulator Settings",
+            "holdHomeAction"
+        ) == "Game Switcher"
     
     @staticmethod
     def allow_pyui_game_switcher():
