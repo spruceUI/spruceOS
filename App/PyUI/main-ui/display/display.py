@@ -170,22 +170,7 @@ class Display:
             cls._glyph_supports_32bit = False
 
 
-        with log_timing("sdl2 create render canvas", PyUiLogger.get_logger()):    
-            cls.render_canvas = sdl2.SDL_CreateTexture(
-                cls.renderer.renderer,
-                sdl2.SDL_PIXELFORMAT_ARGB1555,
-                sdl2.SDL_TEXTUREACCESS_TARGET,
-                Device.get_device().screen_width(),
-                Device.get_device().screen_height()
-            )
-            cls.log_sdl_error_if_any()
-
-        with log_timing("sdl2.SDL_SetRenderTarget", PyUiLogger.get_logger()):    
-            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
-            cls.log_sdl_error_if_any()
-        with log_timing("sdl2.SDL_SetRenderDrawBlendMode", PyUiLogger.get_logger()):    
-            sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
-            cls.log_sdl_error_if_any()
+        cls._create_render_canvas()
 
         if(Device.get_device().double_init_sdl_display()):
             # reinitialize() already tears the display down.
@@ -310,6 +295,27 @@ class Display:
             cls.renderer = sdl_backend.Renderer(cls.window, flags=sdl2.SDL_RENDERER_ACCELERATED)
 
     @classmethod
+    def _create_render_canvas(cls):
+        # Every frame is drawn into this canvas and copied to the window on present.
+        # lock_current_image keeps it as the background behind a popup.
+        with log_timing("sdl2 create render canvas", PyUiLogger.get_logger()):    
+            cls.render_canvas = sdl2.SDL_CreateTexture(
+                cls.renderer.renderer,
+                sdl2.SDL_PIXELFORMAT_ARGB1555,
+                sdl2.SDL_TEXTUREACCESS_TARGET,
+                Device.get_device().screen_width(),
+                Device.get_device().screen_height()
+            )
+            cls.log_sdl_error_if_any()
+
+        with log_timing("sdl2.SDL_SetRenderTarget", PyUiLogger.get_logger()):    
+            sdl2.SDL_SetRenderTarget(cls.renderer.renderer, cls.render_canvas)
+            cls.log_sdl_error_if_any()
+        with log_timing("sdl2.SDL_SetRenderDrawBlendMode", PyUiLogger.get_logger()):    
+            sdl2.SDL_SetRenderDrawBlendMode(cls.renderer.renderer, sdl2.SDL_BLENDMODE_BLEND)
+            cls.log_sdl_error_if_any()
+
+    @classmethod
     def deinit_display(cls):
         if(Device.get_device().uses_deinit_v2()):
             cls.deinit_display_v2()
@@ -404,6 +410,9 @@ class Display:
         cls.deinit_display()
         cls._unload_bg_texture()
         cls._init_display()
+        # deinit_display destroyed the canvas; without a new one, frames go straight
+        # to the window and a popup opened afterwards has no background to keep.
+        cls._create_render_canvas()
         cls.init_fonts()
         cls.restore_bg(bg)
         cls.clear("")
