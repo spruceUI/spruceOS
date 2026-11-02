@@ -1,0 +1,19 @@
+# armGBA LCD Grid: the Game Boy Pocket, measured colors.
+shaders = 1
+shader0 = shaders/armgba-lcd.glsl
+filter_linear0 = true
+scale_type0 = viewport
+
+parameters = "GAP_SHARE;GAP_ACROSS;GAP_DOWN;GAP_RED;GAP_GREEN;GAP_BLUE;KEEP_BRIGHTNESS;UNLIT_RED;UNLIT_GREEN;UNLIT_BLUE;SHADOW;SHADOW_WAY"
+GAP_SHARE = 0.15
+GAP_ACROSS = 1
+GAP_DOWN = 1
+GAP_RED = 163
+GAP_GREEN = 178
+GAP_BLUE = 163
+KEEP_BRIGHTNESS = 1
+UNLIT_RED = 194
+UNLIT_GREEN = 207
+UNLIT_BLUE = 168
+SHADOW = 0.25
+SHADOW_WAY = 4
