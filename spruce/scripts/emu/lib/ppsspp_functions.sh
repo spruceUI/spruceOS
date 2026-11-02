@@ -210,12 +210,23 @@ configure_language() {
 	fi
 }
 
+get_ppsspp_config_suffix() {
+	if [ "$PLATFORM_FAMILY" = "h700" ]; then
+		_suffix="h700"
+	else
+		_suffix="$(platform_path %s)"
+	fi
+	echo "$_suffix"
+}
+
 load_ppsspp_configs() {
-	cp -f "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/controls-%s.ini")" "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini"
-	cp -f "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-%s.ini")" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
+	suffix="$(get_ppsspp_config_suffix)"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/controls-${suffix}.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/controls.ini"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini"
 }
 
 save_ppsspp_configs() {
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/controls.ini" "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/controls-%s.ini")"
-	cp -f "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" "$(platform_path "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp-%s.ini")"
+	suffix="$(get_ppsspp_config_suffix)"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/controls.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/controls-${suffix}.ini"
+	cp -f "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp.ini" "${PPSSPP_LIVE_SYSTEM_DIR}/ppsspp-${suffix}"
 }
