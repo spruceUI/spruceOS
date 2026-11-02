@@ -48,7 +48,44 @@ class RomsMenuCommon(ABC):
         except (ValueError, IndexError) as e:
             PyUiLogger.get_logger().error(f"Error extracting subdirectory after 'Roms' for {rom_path}: {e}")
         return None  # "Roms" not found or no subdirectory after it
-    
+
+        emu_root = "/mnt/SDCARD/Emu"
+
+        emu_folder = os.path.join(emu_root, system)
+
+        if not os.path.isdir(emu_folder):
+            try:
+                system_lower = system.lower()
+
+                for entry in os.listdir(emu_root):
+                    candidate = os.path.join(emu_root, entry)
+
+                    if os.path.isdir(candidate) and entry.lower() == system_lower:
+                        emu_folder = candidate
+                        break
+            except OSError as e:
+                PyUiLogger.get_logger().error(
+                    f"Error searching emulator folder for '{system}' in {emu_root}: {e}"
+                )
+
+        config_path = os.path.join(emu_folder, "config.json")
+
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+
+            label = config.get("label")
+
+            if isinstance(label, str) and label.strip():
+                return label.strip()
+
+        except (OSError, json.JSONDecodeError) as e:
+            PyUiLogger.get_logger().error(
+                f"Error reading label from {config_path}: {e}"
+            )
+
+        return system
+        
     @abstractmethod
     def _get_rom_list(self) -> list[GridOrListEntry]:
         pass
