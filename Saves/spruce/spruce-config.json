@@ -596,7 +596,7 @@
             "enableLEDs": {
                 "display": "RGB LEDs",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
-                "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
+                "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1", "E5PLUS"],
                 "description": "applies immediately",
                 "options": [
                     "On",

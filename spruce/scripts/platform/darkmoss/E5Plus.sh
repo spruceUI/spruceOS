@@ -50,8 +50,7 @@ vibrate() {
     darkmoss_vibrate "$@"
 }
 
-# Blink, then leave the LED as it was: the Joystick Lights ports may have
-# turned the button backlights off.
+# Blink, then leave the LED as it was (the button backlights may be off).
 e5plus_blink_led() {
     _was="$(cat "${LED_PATH}/brightness" 2>/dev/null)"
     for _i in 0 1 2 ; do
@@ -103,4 +102,25 @@ take_screenshot() {
 device_exit_sleep() {
     darkmoss_exit_sleep
     apply_backlight "$(get_backlight_level)"
+}
+
+# The light rings round both sticks, from Settings > RGB LED Settings > RGB
+# LEDs, as on the RG40XXH (off by default). They are plain on/off gpio-leds, so
+# only the on/off setting applies. Through dArkMoss's e5plus-lights helper when
+# present, so its boot-time restore and charging screen agree with the setting.
+E5PLUS_LIGHTS_HELPER="/usr/local/bin/e5plus-lights.sh"
+
+has_rgb_leds() {
+    [ -w /sys/class/leds/left_joystick/brightness ]
+}
+
+enable_or_disable_rgb() {
+    has_rgb_leds || return 0
+    if rgb_leds_enabled; then _mode=on; _val=1; else _mode=sticks-off; _val=0; fi
+    if [ -f "$E5PLUS_LIGHTS_HELPER" ]; then
+        sh "$E5PLUS_LIGHTS_HELPER" "$_mode" >/dev/null 2>&1 && return 0
+    fi
+    for _l in left_joystick right_joystick; do
+        echo "$_val" > "/sys/class/leds/$_l/brightness" 2>/dev/null
+    done
 }

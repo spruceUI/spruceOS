@@ -614,7 +614,6 @@ jobs:
             | Trimui Smart Pro S    | Supported | No |
             | Anbernic H700 devices | Supported | Yes, [BaseOS](https://github.com/pvaibhav/BaseOS/releases/latest) |
             | Anbernic RG353M       | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | GameMT E5 Plus        | In development | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Batlexp G350          | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB30        | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Powkiddy RGB20SX      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
@@ -628,7 +627,7 @@ jobs:
 
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
-            > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M, Anbernic RG353M and GameMT E5 Plus:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
+            > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M and Anbernic RG353M:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
