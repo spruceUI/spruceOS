@@ -2,6 +2,7 @@
 import os
 import shutil
 import sys
+from apps import script_app
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
@@ -122,16 +123,18 @@ class GameConfigMenu:
             # it not being 1:1 it should work out
             game_file_name = os.path.basename(self.game.rom_file_path)
             miyoo_game_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, "../../Roms", self.game_system.folder_name, game_file_name)
-            Display.deinit_display()
-
-            app_path = launch_option
+            folder = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name)
+            app_path = launch_option.get("launch")
             if(not os.path.isfile(app_path)):
-                app_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, launch_option)
+                app_path = os.path.join(folder, app_path)
 
-            Device.get_device().run_app(os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name), app_path + " \"" +miyoo_game_path +"\"")
-            # TODO Once we remove the display_kill and popups from launch.sh we can remove this
-            # For a good speedup
-            Display.reinitialize()
+            if not (launch_option.get("launchInPyUI") is True
+                    and script_app.run(folder, app_path, miyoo_game_path)):
+                Display.deinit_display()
+                Device.get_device().run_app(folder, app_path + " \"" +miyoo_game_path +"\"")
+                # TODO Once we remove the display_kill and popups from launch.sh we can remove this
+                # For a good speedup
+                Display.reinitialize()
             self.game_system.game_system_config.reload_config()
 
     def delete_rom(self, input_value):
@@ -210,7 +213,7 @@ class GameConfigMenu:
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=lambda input_value, launch_option=config_option.get('launch')
+                            value=lambda input_value, launch_option=config_option
                                         : self.run_launch_option(input_value,launch_option)
 
 
