@@ -49,7 +49,7 @@
       "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset DSperate config": [
@@ -59,7 +59,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset PPSSPP config": [
@@ -69,7 +69,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset Flycast config": [
@@ -79,7 +79,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset Mupen64plus config": [
@@ -89,7 +89,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset YabaSanshiro config": [
@@ -99,7 +99,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset AdvanceMAME config": [
@@ -109,7 +109,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset BigPEmu config": [
@@ -119,7 +119,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ]
   }

@@ -8,12 +8,14 @@
 #   CONTROLLER_EVENT_PATH             EVENT_PATH_READ_INPUTS_SPRUCE
 #   CONTROLLER_KEY_MAPPINGS           the B_* button codes
 #   LEFT/RIGHT_STICK_X/Y_AXIS         STICK_LEFT/UP and STICK_LEFT_2/UP_2, per DEVICE_NUM_ANALOG_STICKS
+#   STICK_INVERT_X/Y                  true when STICK_LEFT/UP's value is positive
+#   TOUCH_EVENT_PATH                  EVENT_PATH_TOUCH
 #   POWER_KEY_WATCHER_PATH            EVENT_PATH_POWER
 #   VOL_KEY_WATCHER_PATH              EVENT_PATH_VOLUME, else the pad
 #   POWER_BUTTON/VOLUME_UP/DOWN_KEYCODE  B_POWER, B_VOLUP, B_VOLDOWN
-#   BATTERY_PERCENT_PATH              $BATTERY/capacity
-#   CHARGE_STATUS_PATH                $BATTERY/status
-#   SUPPORTS_WIFI                     wifi_available_on_device
+#   BATTERY_PERCENT_PATH              $BATTERY/capacity, unless the cfg sets BATTERY_PERCENT_CMD
+#   CHARGE_STATUS_PATH                $BATTERY/status, unless the cfg sets CHARGE_STATUS_CMD
+#   SUPPORTS_WIFI                     wifi_available_on_device, unless the cfg sets CHECK_WIFI_SUPPORT_CMD
 #   BACKLIGHT_CMD                     set-backlight.sh, if the device defines apply_backlight
 #   CONTRAST/SATURATION/BRIGHTNESS/HUE_CMD  set-display.sh, if it defines apply_display_<setting>
 #   FW_VERSION                        device_get_fw_version, if defined
@@ -36,6 +38,14 @@ spruce_env_default() {
 spruce_env_code() {
     case "$2" in
         "$1 "*) _rest="${2#"$1 "}"; echo "${_rest%% *}" ;;
+    esac
+}
+
+# "true" when a stick definition's value is positive: its left (or up) is the positive end.
+spruce_env_inverted() {
+    case "$1" in
+        "3 "*" "[0-9]*) echo true ;;
+        "3 "*) echo false ;;
     esac
 }
 
@@ -76,22 +86,28 @@ spruce_env_default CONTROLLER_KEY_MAPPINGS "$(spruce_env_key_mappings)"
 if [ "${DEVICE_NUM_ANALOG_STICKS:-0}" -ge 1 ]; then
     spruce_env_default LEFT_STICK_X_AXIS "$(spruce_env_code 3 "$STICK_LEFT")"
     spruce_env_default LEFT_STICK_Y_AXIS "$(spruce_env_code 3 "$STICK_UP")"
+    spruce_env_default STICK_INVERT_X "$(spruce_env_inverted "$STICK_LEFT")"
+    spruce_env_default STICK_INVERT_Y "$(spruce_env_inverted "$STICK_UP")"
 fi
 if [ "${DEVICE_NUM_ANALOG_STICKS:-0}" -ge 2 ]; then
     spruce_env_default RIGHT_STICK_X_AXIS "$(spruce_env_code 3 "$STICK_LEFT_2")"
     spruce_env_default RIGHT_STICK_Y_AXIS "$(spruce_env_code 3 "$STICK_UP_2")"
 fi
 spruce_env_default POWER_KEY_WATCHER_PATH "$EVENT_PATH_POWER"
+spruce_env_default TOUCH_EVENT_PATH "$EVENT_PATH_TOUCH"
 spruce_env_default VOL_KEY_WATCHER_PATH "${EVENT_PATH_VOLUME:-$EVENT_PATH_READ_INPUTS_SPRUCE}"
 spruce_env_default POWER_BUTTON_KEYCODE "$(spruce_env_code 1 "$B_POWER")"
 spruce_env_default VOLUME_UP_KEYCODE "$(spruce_env_code 1 "$B_VOLUP")"
 spruce_env_default VOLUME_DOWN_KEYCODE "$(spruce_env_code 1 "$B_VOLDOWN")"
 
+# A cfg command (get-device-status.sh) replaces the file read or the answer fixed at launch.
 if [ -n "$BATTERY" ]; then
-    spruce_env_default BATTERY_PERCENT_PATH "$BATTERY/capacity"
-    spruce_env_default CHARGE_STATUS_PATH "$BATTERY/status"
+    [ -n "$BATTERY_PERCENT_CMD" ] || spruce_env_default BATTERY_PERCENT_PATH "$BATTERY/capacity"
+    [ -n "$CHARGE_STATUS_CMD" ] || spruce_env_default CHARGE_STATUS_PATH "$BATTERY/status"
 fi
-if wifi_available_on_device; then
+if [ -n "$CHECK_WIFI_SUPPORT_CMD" ]; then
+    :
+elif wifi_available_on_device; then
     spruce_env_default SUPPORTS_WIFI "true"
 else
     spruce_env_default SUPPORTS_WIFI "false"

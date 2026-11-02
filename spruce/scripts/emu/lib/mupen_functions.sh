@@ -102,10 +102,11 @@ build_mupen_args() {
 # The --set overrides live in run_mupen_standalone, appended to the
 # positional parameters after $ARGS is split, because "Joy Mapping Stop"
 # carries spaces and cannot travel through a word-split string.
-# The board's pad table, pad/InputAutoCfg-<PLATFORM>.ini (or the variant its cfg names in
-# MUPEN_PAD_TABLE), copied over the live InputAutoCfg.ini at each launch; 1 when it ships none.
+# The board's pad table, pad/InputAutoCfg-<PLATFORM>.ini (a variant platform's: else its parent's;
+# or the table its cfg names in MUPEN_PAD_TABLE), copied over the live InputAutoCfg.ini; 1 when none.
 apply_mupen_pad_table() {
-	src="$HOME/pad/InputAutoCfg-${MUPEN_PAD_TABLE:-$PLATFORM}.ini"
+	src="$(platform_path "$HOME/pad/InputAutoCfg-%s.ini")"
+	[ -n "${MUPEN_PAD_TABLE:-}" ] && src="$HOME/pad/InputAutoCfg-$MUPEN_PAD_TABLE.ini"
 	[ -f "$src" ] || return 1
 	cp -f "$src" "$HOME/InputAutoCfg.ini"
 }
@@ -133,7 +134,7 @@ apply_xx_mupen_pad() {
 	# apply_mupen_pad_table has copied the platform's table in; without one, fix up
 	# the one trigger that moves. Not reached while pad/ ships one per platform.
 	AC="$HOME/InputAutoCfg.ini"
-	if [ ! -f "$HOME/pad/InputAutoCfg-$PLATFORM.ini" ] && [ -f "$AC" ]; then
+	if [ ! -f "$(platform_path "$HOME/pad/InputAutoCfg-%s.ini")" ] && [ -f "$AC" ]; then
 		log_message "xx mupen pad: no shipped InputAutoCfg for $PLATFORM, rewriting Z Trig as a fallback"
 		case "$XX_PAD_LAYOUT" in
 			nostick) ztrig="button(12)" ;;

@@ -28,7 +28,7 @@ SPRUCE_RA_CONFIG_DIR = Path("/mnt/SDCARD/Saves/ra-configs")
 SPRUCE_CONFIG_JSON = Path("/mnt/SDCARD/Saves/spruce/spruce-config.json")
 SPRUCE_SETTINGS_MENU = "RetroAchievements Settings"
 CPUINFO_PATH = Path("/proc/cpuinfo")
-MAGICX_MARKER = Path("/usr/magicx")
+OAKMOSS_MARKER = Path("/usr/magicx")
 BASEOS_RELEASE_PATH = Path("/etc/baseos-release")
 LOONG_DAEMON = Path("/loong/loong_daemon")
 SDCARD_RETROARCH_CFG_CANDIDATES = (
@@ -145,6 +145,15 @@ _SPRUCE_H700_PLATFORMS = {
     "rg40xxv": "AnbernicXX640480OneStick",
 }
 _SPRUCE_H700_DEFAULT = "AnbernicXX640480"
+# /usr/magicx/device names the oakMOSS board; a base without the file is a Zero 28 (helperFunctions.sh).
+_SPRUCE_OAKMOSS_PLATFORMS = {
+    "zero40": "Zero40",
+    "xu20": "XU20",
+    "v90s": "V90S",
+    "v20": "V20",
+    "brick": "BrickOakMOSS",
+}
+_SPRUCE_OAKMOSS_DEFAULT = "Zero28"
 
 
 def _baseos_target() -> str:
@@ -158,6 +167,13 @@ def _baseos_target() -> str:
             return line.split("=", 1)[1].strip()
 
     return ""
+
+
+def _oakmoss_board() -> str:
+    try:
+        return (OAKMOSS_MARKER / "device").read_text(encoding="utf-8", errors="replace").strip()
+    except OSError:
+        return ""
 
 
 def _spruce_rk3566_platform() -> str:
@@ -198,8 +214,8 @@ def spruce_platform() -> str:
     if "0xd03" in info:
         return _SPRUCE_H700_PLATFORMS.get(_baseos_target(), _SPRUCE_H700_DEFAULT)
 
-    if MAGICX_MARKER.exists():
-        return "Zero28"
+    if OAKMOSS_MARKER.exists():
+        return _SPRUCE_OAKMOSS_PLATFORMS.get(_oakmoss_board(), _SPRUCE_OAKMOSS_DEFAULT)
 
     return "MiyooMini"
 

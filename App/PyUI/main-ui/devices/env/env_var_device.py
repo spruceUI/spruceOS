@@ -89,6 +89,9 @@ class EnvVarDevice(DeviceCommon):
 
         super().__init__()
 
+        if(main_ui_mode and self.supports_touch()):
+            self._start_touch_watcher()
+
     @staticmethod
     def _is_usable_config(path):
         # Same test ConfigCopier.ensure_config applies before deciding a config
@@ -98,6 +101,15 @@ class EnvVarDevice(DeviceCommon):
             return path.exists() and path.stat().st_size > 0
         except OSError:
             return False
+
+    def _start_touch_watcher(self):
+        path = os.environ["TOUCH_EVENT_PATH"]
+        if not os.path.exists(path):
+            PyUiLogger.get_logger().warning(f"No touchscreen node at {path}; touch off")
+            return
+        from controller.touch_watcher import TouchWatcher
+        self.touch_watcher = TouchWatcher(path, self)
+        threading.Thread(target=self.touch_watcher.poll, daemon=True).start()
 
     def _start_key_watcher(self, path_var, add_to_controller):
         path = os.environ.get(path_var)
@@ -249,6 +261,9 @@ class EnvVarDevice(DeviceCommon):
     def get_state_path(self):
         return os.environ["STATE_PATH"]
 
+    def supports_touch(self):
+        return bool(os.environ.get("TOUCH_EVENT_PATH"))
+
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
 
@@ -330,28 +345,38 @@ class EnvVarDevice(DeviceCommon):
             for mapping in mappings
         }
 
+        # STICK_INVERT_X/Y flip the directions, for sticks whose axes run the other way.
+        invert_x = os.environ.get("STICK_INVERT_X", "false").lower() == "true"
+        invert_y = os.environ.get("STICK_INVERT_Y", "false").lower() == "true"
+
+        def horizontal(left, right):
+            return HorizontalStickAxis(right, left) if invert_x else HorizontalStickAxis(left, right)
+
+        def vertical(up, down):
+            return VerticalStickAxis(down, up) if invert_y else VerticalStickAxis(up, down)
+
         stick_axes = {}
 
         if "LEFT_STICK_X_AXIS" in os.environ:
-            stick_axes[int(os.environ["LEFT_STICK_X_AXIS"])] = HorizontalStickAxis(
+            stick_axes[int(os.environ["LEFT_STICK_X_AXIS"])] = horizontal(
                 ControllerInput.LEFT_STICK_LEFT,
                 ControllerInput.LEFT_STICK_RIGHT,
             )
 
         if "LEFT_STICK_Y_AXIS" in os.environ:
-            stick_axes[int(os.environ["LEFT_STICK_Y_AXIS"])] = VerticalStickAxis(
+            stick_axes[int(os.environ["LEFT_STICK_Y_AXIS"])] = vertical(
                 ControllerInput.LEFT_STICK_UP,
                 ControllerInput.LEFT_STICK_DOWN,
             )
 
         if "RIGHT_STICK_X_AXIS" in os.environ:
-            stick_axes[int(os.environ["RIGHT_STICK_X_AXIS"])] = HorizontalStickAxis(
+            stick_axes[int(os.environ["RIGHT_STICK_X_AXIS"])] = horizontal(
                 ControllerInput.RIGHT_STICK_LEFT,
                 ControllerInput.RIGHT_STICK_RIGHT,
             )
 
         if "RIGHT_STICK_Y_AXIS" in os.environ:
-            stick_axes[int(os.environ["RIGHT_STICK_Y_AXIS"])] = VerticalStickAxis(
+            stick_axes[int(os.environ["RIGHT_STICK_Y_AXIS"])] = vertical(
                 ControllerInput.RIGHT_STICK_UP,
                 ControllerInput.RIGHT_STICK_DOWN,
             )

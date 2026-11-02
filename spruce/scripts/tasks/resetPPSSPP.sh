@@ -2,10 +2,10 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-LIVE_PPSSPP_CONFIG="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-$PLATFORM.ini"
-LIVE_PPSSPP_CONTROLS="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/controls-$PLATFORM.ini"
-DEFAULT_PPSSPP_CONFIG="/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM/ppsspp-$PLATFORM.ini"
-DEFAULT_PPSSPP_CONTROLS="/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM/controls-$PLATFORM.ini"
+LIVE_PPSSPP_CONFIG="$(platform_path "/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-%s.ini")"
+LIVE_PPSSPP_CONTROLS="$(platform_path "/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/controls-%s.ini")"
+DEFAULT_PPSSPP_CONFIG="$(platform_path "/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM/ppsspp-%s.ini")"
+DEFAULT_PPSSPP_CONTROLS="$(platform_path "/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM/controls-%s.ini")"
 
 log_message "Resetting PPSSPP config to default."
 mkdir -p "${LIVE_PPSSPP_CONFIG%/*}"

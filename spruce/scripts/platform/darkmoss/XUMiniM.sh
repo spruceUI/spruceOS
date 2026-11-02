@@ -31,7 +31,7 @@ device_get_charging_status() {
 # xu10-joypad's own raw codes: select 8, L3 10 (see XUMiniM.cfg's sorted
 # button-index map).
 set_default_ra_hotkeys() {
-    RA_FILE="/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg"
+    RA_FILE="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
     log_message "Resetting RetroArch hotkeys to Spruce defaults."
 

@@ -53,7 +53,7 @@ jobs:
           # follow NIGHTLY_LINK, neither of which cares what the tag is called.
           TAG="v${FULL_VERSION}"
           n=1
-          while gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${TAG}" >/dev/null 2>&1; do
+          while gh api "repos/spruceUI/spruceOSNightlies/git/ref/tags/${TAG}" >/dev/null 2>&1; do
             n=$((n + 1))
             TAG="v${FULL_VERSION}.${n}"
           done
@@ -663,14 +663,12 @@ jobs:
         run: |
           # Keep only the five most recent nightly releases. Each RUN makes its
           # own release now, so a day with reruns uses more than one.
-          RELEASES=$(gh api repos/spruceUI/spruceOSNightlies/releases --paginate | \
-            jq -r '.[] | .id')
-
-          COUNT=0
-          for RELEASE_ID in $RELEASES; do
-            COUNT=$((COUNT + 1))
-
-            if [ $COUNT -gt 5 ]; then
-              gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
-            fi
+          # Sort by published_at: created_at is the tagged commit's date, the
+          # same for every release here, so the API's order is not by age.
+          gh api repos/spruceUI/spruceOSNightlies/releases --paginate \
+            --jq '.[] | "\(.published_at) \(.id)"' |
+          sort -r |
+          awk 'NR > 5 { print $2 }' |
+          while read -r RELEASE_ID; do
+            gh api repos/spruceUI/spruceOSNightlies/releases/$RELEASE_ID -X DELETE
           done

@@ -91,12 +91,14 @@ set_emu_core_from_emu_json() {
             ;;
     esac
 
-    # Try to use platform-specific emulator if it exists
-    CORE_PATH=".menuOptions.Emulator_$PLATFORM.selected"
-    if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
-        export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
-        return
-    fi
+    # Try to use platform-specific emulator if it exists (a variant's, else its parent's)
+    for _gf_name in $(platform_names); do
+        CORE_PATH=".menuOptions.Emulator_$_gf_name.selected"
+        if jq -e "$CORE_PATH" "$EMU_JSON_PATH" >/dev/null 2>&1; then
+            export CORE="$(jq -r "$CORE_PATH" "$EMU_JSON_PATH")"
+            return
+        fi
+    done
 
     # Match the "devices" list the way PyUI does, before falling back on the
     # architecture suffix. Without this the Anbernic XX line never resolved:
@@ -140,11 +142,15 @@ use_default_emulator() {
 get_core_override() {
     # An Emulator_32/Emulator_64 picked by raBuild wins, as in set_emu_core_from_emu_json
     DEV_KEY="$(emu_option_key_for_device)"
+    _gf_key=""
+    for _gf_name in $(platform_names); do
+        jq -e ".menuOptions.Emulator_$_gf_name" "$EMU_JSON_PATH" >/dev/null 2>&1 && { _gf_key="Emulator_$_gf_name"; break; }
+    done
     if [ "$RA_BUILD:$DEV_KEY" = "32-bit:Emulator_32" ] || [ "$RA_BUILD:$DEV_KEY" = "64-bit:Emulator_64" ]; then
         core_section=".menuOptions.$DEV_KEY"
-    # Then the platform-specific key
-    elif jq -e ".menuOptions.Emulator_$PLATFORM" "$EMU_JSON_PATH" >/dev/null 2>&1; then
-        core_section=".menuOptions.Emulator_$PLATFORM"
+    # Then the platform-specific key (a variant's, else its parent's)
+    elif [ -n "$_gf_key" ]; then
+        core_section=".menuOptions.$_gf_key"
     elif [ -n "$(emu_option_key_for_device)" ]; then
         # Same devices-list resolution, so a per-game override is read from the
         # key the UI actually wrote it to. The NDS arm below sent every non-Flip

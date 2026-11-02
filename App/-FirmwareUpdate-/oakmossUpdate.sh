@@ -12,7 +12,7 @@
 SD_ROOT="/mnt/SDCARD"
 API="https://api.github.com/repos/spruceUI/oakMOSS/releases/latest"
 MANUAL_HELP="Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card."
-BOARD="$(magicx_model)"
+BOARD="$(oakmoss_model)"
 
 bail() {
     log_and_display_message "$1"
