@@ -1,6 +1,6 @@
-"""Run an app's launch script while PyUI stays up and shows the script's messages.
+"""Run a launch script while PyUI stays up and shows the script's messages.
 
-An app opts in with "launchInPyUI": true next to its "launch" script in config.json. Instead
+An app or launchlist entry opts in with "launchInPyUI": true next to its "launch" script. Instead
 of exiting so the CFW can run the script, PyUI runs it through the CFW's runner
 ("launchInPyUiCmd" in py-ui-config.json; spruce's is spruce/scripts/run_app_in_pyui.sh) and
 listens itself on the CFW's realtime message port ("realtimeMessagePort"), the one spruce's
@@ -28,8 +28,8 @@ from utils.realtime_message_network_listener import RealtimeMessageNetworkListen
 HOSTED_ENV = "PYUI_HOSTS_MESSAGES"
 
 
-def run(folder, launch):
-    """Run the app's script and show its messages. False if PyUI can't host it."""
+def run(folder, launch, *args):
+    """Run a script with its arguments and show its messages. False if PyUI can't host it."""
     logger = PyUiLogger.get_logger()
     runner = PyUiConfig.get_launch_in_pyui_cmd()
     port = PyUiConfig.get_realtime_message_port()
@@ -47,7 +47,7 @@ def run(folder, launch):
     env = _launcher_environment()
     env[HOSTED_ENV] = "1"
     process = subprocess.Popen(
-        ["/bin/sh", runner, folder, launch], env=env,
+        ["/bin/sh", runner, folder, launch, *args], env=env,
         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     logger.info(f"Running {launch} inside PyUI (pid {process.pid})")
     try:

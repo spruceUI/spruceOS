@@ -78,7 +78,7 @@ socket itself until the script exits, then shows the Apps menu again. The CFW
 names both in py-ui-config.json:
 
   "launchInPyUiCmd"
-      The runner, called as `sh <runner> <app folder> <launch script>`.
+      The runner, called as `sh <runner> <folder> <launch script> [args...]`.
       spruce's is /mnt/SDCARD/spruce/scripts/run_app_in_pyui.sh.
   "realtimeMessagePort"
       The port the CFW's scripts send messages to. spruce's is 50980, which
@@ -124,6 +124,32 @@ device. pyui.log shows "Running <script> inside PyUI" and "<script> exited with
 status N"; spruce.log shows "PyUI shows this script's messages" from the script.
 
 
+Game-menu scripts: "launchlist"
+-------------------------------
+
+An action in a system's Emu/<system>/config.json can opt in individually:
+
+    "launchlist": [
+        {
+            "name": "Generate namelist",
+            "launch": "gamelist.sh",
+            "launchInPyUI": true
+        }
+    ]
+
+The game configuration menu uses the same runner and message listener as the
+Apps menu. The working directory stays the emulator folder, and the selected
+ROM path is passed as the first argument, as on the normal launch path. Paths
+with spaces or shell characters are passed as a single argument. The script
+can use an absolute launch path or one relative to the emulator folder.
+
+The flag belongs to each launchlist entry. Leave it off for actions that open
+an emulator's own screen, such as "Open ScummVM Menu". Missing CFW hooks or an
+occupied message socket fall back to the normal launch path. After a hosted
+action returns, the system config is reloaded; leaving the configuration menu
+rebuilds the game list so newly generated names and playlists appear.
+
+
 Measured
 --------
 
@@ -157,6 +183,6 @@ Apps-menu scripts that use the message writer, as of this change:
   Need PyUI out of the way, so they stay as they are:
       USBStorageMode, -OTA, -FirmwareUpdate-, spruceRestore.
 
-Not covered: the game menu's system actions (Emu/FBNEO and Emu/SCUMMVM
-gamelist.sh, Emu/PICO8 import.sh) start through another menu, and scripts PyUI
-doesn't start (game launch, boot, shutdown) keep the standalone message writer.
+No launchlist actions opt in by default. App authors can enable individual
+actions and test them on their devices. Scripts PyUI doesn't start (game
+launch, boot, shutdown) keep the standalone message writer.
