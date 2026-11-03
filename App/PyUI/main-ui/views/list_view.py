@@ -106,11 +106,37 @@ class ListView(View):
                 hit = self.row_at_touch_point(Controller.take_touch_point())
                 if hit is not None:
                     self.selected = hit
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_UP:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_DOWN:
+                self.scroll_touch_by(-1)
 
         return Selection(self.get_selected_option(), None, self.selected)
 
     def touch_index_at(self, point):
         return self.row_at_touch_point(point)
+
+    def touch_scroll_step_size(self):
+        return self.get_row_geometry()[1]
+
+    def touch_scroll_selection_offset(self):
+        return self.selected - self.current_top
+
+    def scroll_touch_by(self, amount, selection_offset=None):
+        visible = self.current_bottom - self.current_top
+        if visible <= 0 or not self.options:
+            return
+
+        if selection_offset is None:
+            selection_offset = self.touch_scroll_selection_offset()
+
+        max_top = max(0, len(self.options) - visible)
+        self.current_top = max(0, min(max_top, self.current_top + amount))
+        self.current_bottom = min(len(self.options), self.current_top + visible)
+        self.selected = min(
+            self.current_top + selection_offset,
+            self.current_bottom - 1,
+        )
 
     def row_at_touch_point(self, point):
         """Index of the visible row under a logical-space tap, or None."""

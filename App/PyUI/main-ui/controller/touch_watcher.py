@@ -126,6 +126,9 @@ class TouchWatcher:
         self.touch_drag_view = None
         self.touch_drag_index = None
         self.direct_drag = False
+        self.touch_scroll_view = None
+        self.touch_scroll_step_size = 0
+        self.touch_scroll_distance = 0
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -172,6 +175,9 @@ class TouchWatcher:
         if index == view.selected:
             self.touch_drag_view = view
             self.touch_drag_index = index
+        elif index is not None and hasattr(view, "touch_scroll_step_size"):
+            self.touch_scroll_view = view
+            self.touch_scroll_step_size = max(1, view.touch_scroll_step_size())
 
     def _update_swipe(self, previous_point, point):
         dx = point[0] - previous_point[0]
@@ -182,6 +188,20 @@ class TouchWatcher:
                 return
             self.direct_drag = True
             self._update_touch_drag(point)
+            return
+
+        if self.touch_scroll_view is not None:
+            sx, sy, _t0 = self.start
+            if math.hypot(point[0] - sx, point[1] - sy) >= TAP_MAX_MOVE_PX:
+                self.direct_drag = True
+            if abs(dy) > abs(dx):
+                self.touch_scroll_distance -= dy
+                while self.touch_scroll_distance >= self.touch_scroll_step_size:
+                    self._inject(ControllerInput.TOUCH_SCROLL_UP)
+                    self.touch_scroll_distance -= self.touch_scroll_step_size
+                while self.touch_scroll_distance <= -self.touch_scroll_step_size:
+                    self._inject(ControllerInput.TOUCH_SCROLL_DOWN)
+                    self.touch_scroll_distance += self.touch_scroll_step_size
             return
 
         if dx == 0 and dy == 0:

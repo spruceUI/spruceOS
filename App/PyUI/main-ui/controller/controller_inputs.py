@@ -36,4 +36,6 @@ class ControllerInput(Enum):
     # A drag that began on the selected item; list/grid views move selection
     # directly to the item under Controller.take_touch_point().
     TOUCH_DRAG = auto()
+    TOUCH_SCROLL_UP = auto()
+    TOUCH_SCROLL_DOWN = auto()
     UNKNOWN = auto()
