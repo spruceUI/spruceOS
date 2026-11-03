@@ -144,6 +144,33 @@ find /mnt/SDCARD/RetroArch -name '*.cfg' ! -path "$OVERLAY_DIR/*" 2>/dev/null | 
     log_message "Pointed overlays in $_cfg at their new folders"
 done
 
+# Existing DSperate profiles predate the GBA paths and analog cheat database.
+# Add only missing keys so user-defined paths remain unchanged; per-game INIs
+# under the games/ subdirectory are intentionally left alone.
+add_dsperate_path() {
+    _ini=$1
+    _key=$2
+    _value=$3
+    grep -q "^[[:space:]]*${_key}[[:space:]]*=" "$_ini" && return 0
+    if ! grep -q '^[[:space:]]*\[paths\][[:space:]]*$' "$_ini"; then
+        log_message "4.5.7: no [paths] section in $_ini; cannot add $_key"
+        return 1
+    fi
+    if sed -i "/^[[:space:]]*\\[paths\\][[:space:]]*$/a ${_key} = ${_value}" "$_ini"; then
+        log_message "4.5.7: added $_key to $_ini"
+    else
+        log_message "4.5.7: failed to add $_key to $_ini"
+        return 1
+    fi
+}
+
+for _ini in /mnt/SDCARD/Saves/dsperate/*.ini; do
+    [ -f "$_ini" ] || continue
+    add_dsperate_path "$_ini" gba_games /mnt/SDCARD/Roms/GBA || exit 1
+    add_dsperate_path "$_ini" gba_saves /mnt/SDCARD/Saves/saves/armGBA || exit 1
+    add_dsperate_path "$_ini" analog_cheats /mnt/SDCARD/Emu/NDS/cheats/usrcheat-analog.dat || exit 1
+done
+
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
