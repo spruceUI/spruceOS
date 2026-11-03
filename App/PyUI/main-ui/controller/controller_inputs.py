@@ -33,4 +33,9 @@ class ControllerInput(Enum):
     # A finger tap; the point is on Controller.take_touch_point(). Views that
     # know their item rectangles turn it into a selection (see ListView/GridView).
     TOUCH_TAP = auto()
+    # A drag that began on the selected item; list/grid views move selection
+    # directly to the item under Controller.take_touch_point().
+    TOUCH_DRAG = auto()
+    TOUCH_SCROLL_UP = auto()
+    TOUCH_SCROLL_DOWN = auto()
     UNKNOWN = auto()

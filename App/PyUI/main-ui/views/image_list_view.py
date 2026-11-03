@@ -145,6 +145,39 @@ class ImageListView(NonDescriptiveListView):
             #Assume left as default?
             return self.img_offset_x
 
+    def point_is_over_game_art(self, point):
+        if point is None or not self.options or not 0 <= self.selected < len(self.options):
+            return False
+        if self.options[self.selected].get_image_path() is None:
+            return False
+
+        x, y = point
+        if XRenderOption.LEFT == self.image_render_mode.x_mode:
+            left = self.img_offset_x
+        elif XRenderOption.RIGHT == self.image_render_mode.x_mode:
+            left = self.img_offset_x - self.img_width
+        else:
+            left = self.img_offset_x - self.img_width // 2
+
+        if YRenderOption.TOP == self.image_render_mode.y_mode:
+            top = self.img_offset_y
+        elif YRenderOption.BOTTOM == self.image_render_mode.y_mode:
+            top = self.img_offset_y - self.img_height
+        else:
+            top = self.img_offset_y - self.img_height // 2
+
+        return left <= x < left + self.img_width and top <= y < top + self.img_height
+
+    def tap_index_at(self, point):
+        if self.point_is_over_game_art(point):
+            return self.selected
+        return self.row_at_touch_point(point)
+
+    def touch_starts_scroll(self, point):
+        return self.point_is_over_game_art(point) or super().touch_starts_scroll(point)
+
+    def touch_uses_dpad_swipe(self, point):
+        return self.point_is_over_game_art(point)
 
     def is_y_coord_in_img_box(self, y):
         img_y_min = self.img_offset_y

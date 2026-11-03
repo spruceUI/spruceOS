@@ -278,9 +278,11 @@ class GridView(View):
             return None
 
     def get_selection(self, select_controller_inputs=[ControllerInput.A]):
+        Controller.touch_navigation_view = self
         self._render()
+        has_input = Controller.get_input()
 
-        if (Controller.get_input()):
+        if has_input:
             if Controller.last_input() == ControllerInput.DPAD_LEFT:
                 self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_RIGHT:
@@ -324,8 +326,16 @@ class GridView(View):
                         return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
                     self.selected = hit
                     self.correct_selected_for_off_list()
+            elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
+                hit = self.cell_at_touch_point(Controller.take_touch_point())
+                if hit is not None:
+                    self.selected = hit
+                    self.correct_selected_for_off_list()
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def touch_index_at(self, point):
+        return self.cell_at_touch_point(point)
 
     def cell_at_touch_point(self, point):
         """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""

@@ -11,6 +11,7 @@ from utils.py_ui_state import PyUiState
 from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
+from views.view_type import ViewType
 
 
 class LazySettingsMenu:
@@ -279,9 +280,19 @@ class MainMenu:
             view =  self.build_main_menu_view(image_text_list, selected)        
                 
             expected_inputs = [ControllerInput.A, ControllerInput.MENU]
+            from controller.controller import Controller
             while(True):      
 
-                if((selected := view.get_selection(expected_inputs)) is not None):       
+                Controller.ignore_vertical_touch_swipes = (
+                    Theme.get_view_type_for_main_menu() == ViewType.GRID
+                    and Theme.get_main_menu_row_count() == 1
+                )
+                try:
+                    selected = view.get_selection(expected_inputs)
+                finally:
+                    Controller.ignore_vertical_touch_swipes = False
+
+                if(selected is not None):
                     if(ControllerInput.A == selected.get_input()): 
                         self.launch_selection(selected.get_selection().get_value())
                     elif(ControllerInput.MENU == selected.get_input()):
