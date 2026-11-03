@@ -33,7 +33,8 @@ class TouchWatcher:
 
     Reads /dev/input/eventN directly, like KeyWatcher does for keys, so it does
     not depend on SDL seeing the touchscreen (the A133P PyUI builds take input
-    from evdev, not SDL). Gestures, decided when the finger lifts:
+    from evdev, not SDL). Swipe navigation is dispatched as the drag crosses
+    its thresholds; taps and long presses are decided when the finger lifts:
 
       tap         -> ControllerInput.TOUCH_TAP with the point stored on the
                      Controller; list and grid views select the tapped item and
@@ -118,6 +119,8 @@ class TouchWatcher:
         self.start = None      # (lx, ly, t)
         self.last = None       # (lx, ly)
         self.pending_up = False
+        self.swipe_direction = None
+        self.swipe_steps = 0
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -144,12 +147,36 @@ class TouchWatcher:
             if self.start is None:
                 self.start = (point[0], point[1], time.monotonic())
             self.last = point
+            self._update_swipe()
         if self.pending_up:
             if self.start is not None and self.last is not None:
                 self._gesture()
             self._reset_contact()
 
+    def _update_swipe(self):
+        sx, sy, _t0 = self.start
+        lx, ly = self.last
+        dx, dy = lx - sx, ly - sy
+        dist = math.hypot(dx, dy)
+        if dist < TAP_MAX_MOVE_PX:
+            return
+
+        if self.swipe_direction is None:
+            if abs(dx) >= abs(dy):
+                # Content follows the finger: dragging right reveals what is to the left.
+                self.swipe_direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+            else:
+                self.swipe_direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+
+        steps = max(1, int(dist // SWIPE_STEP_PX))
+        while self.swipe_steps < steps:
+            self._inject(self.swipe_direction)
+            self.swipe_steps += 1
+
     def _gesture(self):
+        if self.swipe_steps:
+            return
+
         sx, sy, t0 = self.start
         lx, ly = self.last
         dx, dy = lx - sx, ly - sy
@@ -162,15 +189,6 @@ class TouchWatcher:
             else:
                 Controller.set_touch_point(lx, ly)
                 self._inject(ControllerInput.TOUCH_TAP)
-            return
-        steps = max(1, int(dist // SWIPE_STEP_PX))
-        if abs(dx) >= abs(dy):
-            # content follows the finger: dragging right reveals what is to the left
-            direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
-        else:
-            direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
-        for _ in range(steps):
-            self._inject(direction)
 
     def _inject(self, controller_input):
         from controller.controller import Controller

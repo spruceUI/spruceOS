@@ -297,6 +297,7 @@ class KeyWatcherController(ControllerInterface):
         # never shows up in still_held_down.
         with self.lock:
             self.input_queue.append(controller_input)
+            self.input_ready.notify_all()
 
     def init_controller(self):
         pass
