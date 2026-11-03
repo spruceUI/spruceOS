@@ -172,12 +172,19 @@ class TouchWatcher:
         if view is None:
             return
         index = view.touch_index_at(point)
-        if index == view.selected:
-            self.touch_drag_view = view
-            self.touch_drag_index = index
-        elif index is not None and hasattr(view, "touch_scroll_step_size"):
+        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
+            return
+        starts_scroll = (
+            view.touch_starts_scroll(point)
+            if hasattr(view, "touch_starts_scroll")
+            else index is not None and index != view.selected
+        )
+        if starts_scroll and hasattr(view, "touch_scroll_step_size"):
             self.touch_scroll_view = view
             self.touch_scroll_step_size = max(1, view.touch_scroll_step_size())
+        elif index == view.selected:
+            self.touch_drag_view = view
+            self.touch_drag_index = index
 
     def _update_swipe(self, previous_point, point):
         dx = point[0] - previous_point[0]

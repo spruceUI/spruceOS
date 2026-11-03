@@ -96,7 +96,7 @@ class ListView(View):
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.TOUCH_TAP:
-                hit = self.row_at_touch_point(Controller.take_touch_point())
+                hit = self.tap_index_at(Controller.take_touch_point())
                 if hit is not None:
                     if hit == self.selected:
                         self.selection_made()
@@ -114,6 +114,16 @@ class ListView(View):
         return Selection(self.get_selected_option(), None, self.selected)
 
     def touch_index_at(self, point):
+        return self.row_at_touch_point(point)
+
+    def touch_starts_scroll(self, point):
+        index = self.touch_index_at(point)
+        return index is not None and index != self.selected
+
+    def touch_uses_dpad_swipe(self, point):
+        return False
+
+    def tap_index_at(self, point):
         return self.row_at_touch_point(point)
 
     def touch_scroll_step_size(self):
