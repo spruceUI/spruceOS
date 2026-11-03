@@ -121,6 +121,8 @@ class TouchWatcher:
         self.pending_up = False
         self.swipe_direction = None
         self.swipe_steps = 0
+        self.swipe_distance = 0
+        self.next_swipe_step_distance = TAP_MAX_MOVE_PX
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -146,32 +148,43 @@ class TouchWatcher:
             point = self._to_logical(self.raw_x, self.raw_y)
             if self.start is None:
                 self.start = (point[0], point[1], time.monotonic())
+                previous_point = None
+            else:
+                previous_point = self.last
             self.last = point
-            self._update_swipe()
+            if previous_point is not None:
+                self._update_swipe(previous_point, point)
         if self.pending_up:
             if self.start is not None and self.last is not None:
                 self._gesture()
             self._reset_contact()
 
-    def _update_swipe(self):
-        sx, sy, _t0 = self.start
-        lx, ly = self.last
-        dx, dy = lx - sx, ly - sy
-        dist = math.hypot(dx, dy)
-        if dist < TAP_MAX_MOVE_PX:
+    def _update_swipe(self, previous_point, point):
+        dx = point[0] - previous_point[0]
+        dy = point[1] - previous_point[1]
+        if dx == 0 and dy == 0:
             return
 
-        if self.swipe_direction is None:
-            if abs(dx) >= abs(dy):
-                # Content follows the finger: dragging right reveals what is to the left.
-                self.swipe_direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
-            else:
-                self.swipe_direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+        if abs(dx) >= abs(dy):
+            # Content follows the finger: dragging right reveals what is to the left.
+            direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+        else:
+            direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
 
-        steps = max(1, int(dist // SWIPE_STEP_PX))
-        while self.swipe_steps < steps:
-            self._inject(self.swipe_direction)
+        if direction != self.swipe_direction:
+            self.swipe_direction = direction
+            self.swipe_distance = 0
+            self.next_swipe_step_distance = TAP_MAX_MOVE_PX
+
+        self.swipe_distance += math.hypot(dx, dy)
+        while self.swipe_distance >= self.next_swipe_step_distance:
             self.swipe_steps += 1
+            self._inject(direction)
+            self.next_swipe_step_distance = (
+                2 * SWIPE_STEP_PX
+                if self.next_swipe_step_distance == TAP_MAX_MOVE_PX
+                else self.next_swipe_step_distance + SWIPE_STEP_PX
+            )
 
     def _gesture(self):
         if self.swipe_steps:
