@@ -123,6 +123,9 @@ class TouchWatcher:
         self.swipe_steps = 0
         self.swipe_distance = 0
         self.next_swipe_step_distance = TAP_MAX_MOVE_PX
+        self.touch_drag_view = None
+        self.touch_drag_index = None
+        self.direct_drag = False
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -149,6 +152,7 @@ class TouchWatcher:
             if self.start is None:
                 self.start = (point[0], point[1], time.monotonic())
                 previous_point = None
+                self._begin_touch_drag(point)
             else:
                 previous_point = self.last
             self.last = point
@@ -159,9 +163,27 @@ class TouchWatcher:
                 self._gesture()
             self._reset_contact()
 
+    def _begin_touch_drag(self, point):
+        from controller.controller import Controller
+        view = Controller.touch_navigation_view
+        if view is None:
+            return
+        index = view.touch_index_at(point)
+        if index == view.selected:
+            self.touch_drag_view = view
+            self.touch_drag_index = index
+
     def _update_swipe(self, previous_point, point):
         dx = point[0] - previous_point[0]
         dy = point[1] - previous_point[1]
+        if self.touch_drag_view is not None:
+            sx, sy, _t0 = self.start
+            if not self.direct_drag and math.hypot(point[0] - sx, point[1] - sy) < TAP_MAX_MOVE_PX:
+                return
+            self.direct_drag = True
+            self._update_touch_drag(point)
+            return
+
         if dx == 0 and dy == 0:
             return
 
@@ -186,8 +208,16 @@ class TouchWatcher:
                 else self.next_swipe_step_distance + SWIPE_STEP_PX
             )
 
+    def _update_touch_drag(self, point):
+        index = self.touch_drag_view.touch_index_at(point)
+        if index is None or index == self.touch_drag_index:
+            return
+
+        self._inject(ControllerInput.TOUCH_DRAG, point)
+        self.touch_drag_index = index
+
     def _gesture(self):
-        if self.swipe_steps:
+        if self.swipe_steps or self.direct_drag:
             return
 
         sx, sy, t0 = self.start
@@ -195,15 +225,13 @@ class TouchWatcher:
         dx, dy = lx - sx, ly - sy
         dist = math.hypot(dx, dy)
         held = time.monotonic() - t0
-        from controller.controller import Controller
         if dist < TAP_MAX_MOVE_PX:
             if held >= LONG_PRESS_SECONDS:
                 self._inject(ControllerInput.B)
             else:
-                Controller.set_touch_point(lx, ly)
-                self._inject(ControllerInput.TOUCH_TAP)
+                self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
 
-    def _inject(self, controller_input):
+    def _inject(self, controller_input, touch_point=None):
         from controller.controller import Controller
         if (
             Controller.ignore_vertical_touch_swipes
@@ -213,7 +241,10 @@ class TouchWatcher:
         interface = Controller.controller_interface
         if interface is None:
             return
-        interface.inject_input(controller_input)
+        if touch_point is None:
+            interface.inject_input(controller_input)
+        else:
+            interface.inject_touch_input(controller_input, touch_point)
 
     # ----- thread body -----
     def poll(self):

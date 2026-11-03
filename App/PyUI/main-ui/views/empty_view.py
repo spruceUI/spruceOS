@@ -22,6 +22,7 @@ class EmptyView(View):
         
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
+        Controller.touch_navigation_view = None
         self._render()
         if(Controller.get_input()):
             return Selection(None,Controller.last_input(), None)

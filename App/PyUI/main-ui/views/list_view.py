@@ -59,9 +59,12 @@ class ListView(View):
         pass
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
+        Controller.touch_navigation_view = self
         self._render_common()
         #PyUiLogger.get_logger().error("".join(traceback.format_stack()))
-        if(Controller.get_input()):
+        has_input = Controller.get_input()
+
+        if has_input:
             if Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_DOWN:
@@ -99,8 +102,15 @@ class ListView(View):
                         self.selection_made()
                         return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
                     self.selected = hit
+            elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
+                hit = self.row_at_touch_point(Controller.take_touch_point())
+                if hit is not None:
+                    self.selected = hit
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def touch_index_at(self, point):
+        return self.row_at_touch_point(point)
 
     def row_at_touch_point(self, point):
         """Index of the visible row under a logical-space tap, or None."""
