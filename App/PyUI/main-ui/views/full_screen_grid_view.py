@@ -289,6 +289,7 @@ class FullScreenGridView(View):
             return None
 
     def get_selection(self, select_controller_inputs=[ControllerInput.A]):
+        Controller.touch_navigation_view = None
         self._render()
 
         if (Controller.get_input()):

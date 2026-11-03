@@ -26,6 +26,9 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
+EDGE_SCROLL_INTERVAL_SECONDS = 0.35
+EDGE_SCROLL_MARGIN_RATIO = 0.10
+EDGE_SCROLL_MIN_MARGIN_PX = 24
 
 
 class TouchWatcher:
@@ -33,7 +36,8 @@ class TouchWatcher:
 
     Reads /dev/input/eventN directly, like KeyWatcher does for keys, so it does
     not depend on SDL seeing the touchscreen (the A133P PyUI builds take input
-    from evdev, not SDL). Gestures, decided when the finger lifts:
+    from evdev, not SDL). Swipe navigation is dispatched as the drag crosses
+    its thresholds; taps and long presses are decided when the finger lifts:
 
       tap         -> ControllerInput.TOUCH_TAP with the point stored on the
                      Controller; list and grid views select the tapped item and
@@ -118,6 +122,19 @@ class TouchWatcher:
         self.start = None      # (lx, ly, t)
         self.last = None       # (lx, ly)
         self.pending_up = False
+        self.swipe_direction = None
+        self.swipe_steps = 0
+        self.swipe_distance = 0
+        self.next_swipe_step_distance = TAP_MAX_MOVE_PX
+        self.touch_drag_view = None
+        self.touch_drag_index = None
+        self.direct_drag = False
+        self.touch_scroll_view = None
+        self.touch_scroll_step_size = 0
+        self.touch_scroll_distance = 0
+        self.touch_edge_scroll_enabled = False
+        self.touch_edge_direction = None
+        self.next_touch_edge_scroll_time = None
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -143,41 +160,162 @@ class TouchWatcher:
             point = self._to_logical(self.raw_x, self.raw_y)
             if self.start is None:
                 self.start = (point[0], point[1], time.monotonic())
+                previous_point = None
+                self._begin_touch_drag(point)
+            else:
+                previous_point = self.last
             self.last = point
+            if previous_point is not None:
+                self._update_swipe(previous_point, point)
         if self.pending_up:
             if self.start is not None and self.last is not None:
                 self._gesture()
             self._reset_contact()
 
+    def _begin_touch_drag(self, point):
+        from controller.controller import Controller
+        view = Controller.touch_navigation_view
+        if view is None:
+            return
+        index = view.touch_index_at(point)
+        self.touch_edge_scroll_enabled = not hasattr(view, "rows") or view.rows > 1
+        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
+            return
+        starts_scroll = (
+            view.touch_starts_scroll(point)
+            if hasattr(view, "touch_starts_scroll")
+            else index is not None and index != view.selected
+        )
+        if starts_scroll and hasattr(view, "touch_scroll_step_size"):
+            self.touch_scroll_view = view
+            self.touch_scroll_step_size = max(1, view.touch_scroll_step_size())
+        elif index == view.selected:
+            self.touch_drag_view = view
+            self.touch_drag_index = index
+
+    def _update_swipe(self, previous_point, point):
+        dx = point[0] - previous_point[0]
+        dy = point[1] - previous_point[1]
+        if self.touch_drag_view is not None:
+            sx, sy, _t0 = self.start
+            if not self.direct_drag and math.hypot(point[0] - sx, point[1] - sy) < TAP_MAX_MOVE_PX:
+                return
+            self.direct_drag = True
+            self._update_touch_drag(point)
+            self._update_touch_edge_scroll(point)
+            return
+
+        if self.touch_scroll_view is not None:
+            sx, sy, _t0 = self.start
+            if math.hypot(point[0] - sx, point[1] - sy) >= TAP_MAX_MOVE_PX:
+                self.direct_drag = True
+            if abs(dy) > abs(dx):
+                self.touch_scroll_distance -= dy
+                while self.touch_scroll_distance >= self.touch_scroll_step_size:
+                    self._inject(ControllerInput.TOUCH_SCROLL_UP)
+                    self.touch_scroll_distance -= self.touch_scroll_step_size
+                while self.touch_scroll_distance <= -self.touch_scroll_step_size:
+                    self._inject(ControllerInput.TOUCH_SCROLL_DOWN)
+                    self.touch_scroll_distance += self.touch_scroll_step_size
+            return
+
+        if dx == 0 and dy == 0:
+            return
+
+        if abs(dx) >= abs(dy):
+            # Content follows the finger: dragging right reveals what is to the left.
+            direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+        else:
+            direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+
+        if direction != self.swipe_direction:
+            self.swipe_direction = direction
+            self.swipe_distance = 0
+            self.next_swipe_step_distance = TAP_MAX_MOVE_PX
+
+        self.swipe_distance += math.hypot(dx, dy)
+        while self.swipe_distance >= self.next_swipe_step_distance:
+            self.swipe_steps += 1
+            self._inject(direction)
+            self.next_swipe_step_distance = (
+                2 * SWIPE_STEP_PX
+                if self.next_swipe_step_distance == TAP_MAX_MOVE_PX
+                else self.next_swipe_step_distance + SWIPE_STEP_PX
+            )
+
+    def _update_touch_drag(self, point):
+        index = self.touch_drag_view.touch_index_at(point)
+        if index is None or index == self.touch_drag_index:
+            return
+
+        self._inject(ControllerInput.TOUCH_DRAG, point)
+        self.touch_drag_index = index
+
+    def _update_touch_edge_scroll(self, point):
+        if not self.touch_edge_scroll_enabled:
+            return
+
+        screen_height = self.device.screen_height()
+        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_height * EDGE_SCROLL_MARGIN_RATIO))
+        if point[1] < margin:
+            direction = ControllerInput.DPAD_UP
+        elif point[1] >= screen_height - margin:
+            direction = ControllerInput.DPAD_DOWN
+        else:
+            direction = None
+
+        if direction != self.touch_edge_direction:
+            self.touch_edge_direction = direction
+            self.next_touch_edge_scroll_time = (
+                time.monotonic() + EDGE_SCROLL_INTERVAL_SECONDS
+                if direction is not None
+                else None
+            )
+
+    def _maybe_scroll_at_touch_edge(self):
+        if (
+            not self.down
+            or not self.direct_drag
+            or self.touch_drag_view is None
+            or self.touch_edge_direction is None
+            or self.next_touch_edge_scroll_time is None
+        ):
+            return
+
+        now = time.monotonic()
+        if now >= self.next_touch_edge_scroll_time:
+            self._inject(self.touch_edge_direction)
+            self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
+
     def _gesture(self):
+        if self.swipe_steps or self.direct_drag:
+            return
+
         sx, sy, t0 = self.start
         lx, ly = self.last
         dx, dy = lx - sx, ly - sy
         dist = math.hypot(dx, dy)
         held = time.monotonic() - t0
-        from controller.controller import Controller
         if dist < TAP_MAX_MOVE_PX:
             if held >= LONG_PRESS_SECONDS:
                 self._inject(ControllerInput.B)
             else:
-                Controller.set_touch_point(lx, ly)
-                self._inject(ControllerInput.TOUCH_TAP)
-            return
-        steps = max(1, int(dist // SWIPE_STEP_PX))
-        if abs(dx) >= abs(dy):
-            # content follows the finger: dragging right reveals what is to the left
-            direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
-        else:
-            direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
-        for _ in range(steps):
-            self._inject(direction)
+                self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
 
-    def _inject(self, controller_input):
+    def _inject(self, controller_input, touch_point=None):
         from controller.controller import Controller
+        if (
+            Controller.ignore_vertical_touch_swipes
+            and controller_input in (ControllerInput.DPAD_UP, ControllerInput.DPAD_DOWN)
+        ):
+            return
         interface = Controller.controller_interface
         if interface is None:
             return
-        interface.inject_input(controller_input)
+        if touch_point is None:
+            interface.inject_input(controller_input)
+        else:
+            interface.inject_touch_input(controller_input, touch_point)
 
     # ----- thread body -----
     def poll(self):
@@ -188,8 +326,15 @@ class TouchWatcher:
                 self._open()
                 continue
             try:
-                rlist, _, _ = select.select([self.fd], [], [], 1.0)
+                timeout = 1.0
+                if self.next_touch_edge_scroll_time is not None:
+                    timeout = max(
+                        0.0,
+                        min(timeout, self.next_touch_edge_scroll_time - time.monotonic()),
+                    )
+                rlist, _, _ = select.select([self.fd], [], [], timeout)
                 if not rlist:
+                    self._maybe_scroll_at_touch_edge()
                     continue
                 data = os.read(self.fd, self.event_size * 64)
             except OSError as e:
@@ -209,3 +354,4 @@ class TouchWatcher:
                     self._handle(event_type, code, value)
                 except Exception as e:
                     logger.exception(f"Error processing touch event: {e}")
+            self._maybe_scroll_at_touch_edge()

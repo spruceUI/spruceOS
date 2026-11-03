@@ -59,9 +59,12 @@ class ListView(View):
         pass
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
+        Controller.touch_navigation_view = self
         self._render_common()
         #PyUiLogger.get_logger().error("".join(traceback.format_stack()))
-        if(Controller.get_input()):
+        has_input = Controller.get_input()
+
+        if has_input:
             if Controller.last_input() == ControllerInput.DPAD_UP:
                 self.adjust_selected(-1, skip_by_letter=False)
             elif Controller.last_input() == ControllerInput.DPAD_DOWN:
@@ -93,14 +96,57 @@ class ListView(View):
                 self.selection_made()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
             elif Controller.last_input() == ControllerInput.TOUCH_TAP:
-                hit = self.row_at_touch_point(Controller.take_touch_point())
+                hit = self.tap_index_at(Controller.take_touch_point())
                 if hit is not None:
                     if hit == self.selected:
                         self.selection_made()
                         return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
                     self.selected = hit
+            elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
+                hit = self.row_at_touch_point(Controller.take_touch_point())
+                if hit is not None:
+                    self.selected = hit
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_UP:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_DOWN:
+                self.scroll_touch_by(-1)
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def touch_index_at(self, point):
+        return self.row_at_touch_point(point)
+
+    def touch_starts_scroll(self, point):
+        index = self.touch_index_at(point)
+        return index is not None and index != self.selected
+
+    def touch_uses_dpad_swipe(self, point):
+        return False
+
+    def tap_index_at(self, point):
+        return self.row_at_touch_point(point)
+
+    def touch_scroll_step_size(self):
+        return self.get_row_geometry()[1]
+
+    def touch_scroll_selection_offset(self):
+        return self.selected - self.current_top
+
+    def scroll_touch_by(self, amount, selection_offset=None):
+        visible = self.current_bottom - self.current_top
+        if visible <= 0 or not self.options:
+            return
+
+        if selection_offset is None:
+            selection_offset = self.touch_scroll_selection_offset()
+
+        max_top = max(0, len(self.options) - visible)
+        self.current_top = max(0, min(max_top, self.current_top + amount))
+        self.current_bottom = min(len(self.options), self.current_top + visible)
+        self.selected = min(
+            self.current_top + selection_offset,
+            self.current_bottom - 1,
+        )
 
     def row_at_touch_point(self, point):
         """Index of the visible row under a logical-space tap, or None."""
