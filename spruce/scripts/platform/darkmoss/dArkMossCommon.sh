@@ -700,13 +700,31 @@ device_needs_strict_unmount() {
     return 1
 }
 
-device_run_reboot_cmd() {
-    systemctl reboot
+# Through systemd, so /mnt/SDCARD is unmounted cleanly. By the time these run,
+# save_poweroff has stopped the frontend, so a refused request leaves a black
+# screen with the backlight on. logind refuses one while another power action
+# is still finishing ("Action suspend already in progress"), so retry for a
+# while, then start the target directly: the same clean shutdown, without
+# logind's check (what systemctl itself does when logind is not there).
+darkmoss_power_action() {
+    _n=0
+    while :; do
+        _out="$(systemctl "$1" 2>&1)" && return 0
+        _n=$((_n + 1))
+        log_message "$PLATFORM: systemctl $1 refused (try $_n): $_out"
+        [ "$_n" -ge 10 ] && break
+        sleep 1
+    done
+    log_message "$PLATFORM: starting $1.target directly"
+    systemctl start "$1.target" --job-mode=replace-irreversibly --no-block
 }
 
-# Through systemd like reboot, so /mnt/SDCARD is unmounted cleanly.
+device_run_reboot_cmd() {
+    darkmoss_power_action reboot
+}
+
 run_poweroff_cmd() {
-    systemctl poweroff
+    darkmoss_power_action poweroff
 }
 
 # save_poweroff.sh kills runtime.sh, which is spruce-launch.service's MainPID.
