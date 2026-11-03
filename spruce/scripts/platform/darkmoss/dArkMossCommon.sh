@@ -267,8 +267,19 @@ device_get_hw_epoch() {
 trigger_device_sleep() {
     systemctl suspend >/dev/null 2>&1 || return 1
     sleep 2
-    while systemctl is-active --quiet systemd-suspend.service; do
-        sleep 0.5
+    # systemd-suspend.service is oneshot: it stays "activating" for the whole
+    # suspend, the system-sleep hooks after resume included, and is never
+    # "active", so is-active returned at once. Until it finishes, logind
+    # refuses any new power action ("Action suspend already in progress"): a
+    # timed wake that went straight on to save_poweroff had its poweroff
+    # refused and was left with the frontend gone and the backlight on.
+    # Capped at 30 s of waiting so a stuck hook cannot hang the wake.
+    _n=0
+    while [ "$_n" -lt 60 ]; do
+        case "$(systemctl show -p ActiveState --value systemd-suspend.service 2>/dev/null)" in
+            activating|active|deactivating) sleep 0.5; _n=$((_n + 1)) ;;
+            *) break ;;
+        esac
     done
 }
 
