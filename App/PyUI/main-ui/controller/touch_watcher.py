@@ -26,6 +26,9 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
+EDGE_SCROLL_INTERVAL_SECONDS = 0.35
+EDGE_SCROLL_MARGIN_RATIO = 0.10
+EDGE_SCROLL_MIN_MARGIN_PX = 24
 
 
 class TouchWatcher:
@@ -129,6 +132,9 @@ class TouchWatcher:
         self.touch_scroll_view = None
         self.touch_scroll_step_size = 0
         self.touch_scroll_distance = 0
+        self.touch_edge_scroll_enabled = False
+        self.touch_edge_direction = None
+        self.next_touch_edge_scroll_time = None
 
     def _handle(self, event_type, code, value):
         if event_type == EV_ABS:
@@ -172,6 +178,7 @@ class TouchWatcher:
         if view is None:
             return
         index = view.touch_index_at(point)
+        self.touch_edge_scroll_enabled = not hasattr(view, "rows") or view.rows > 1
         if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
             return
         starts_scroll = (
@@ -195,6 +202,7 @@ class TouchWatcher:
                 return
             self.direct_drag = True
             self._update_touch_drag(point)
+            self._update_touch_edge_scroll(point)
             return
 
         if self.touch_scroll_view is not None:
@@ -243,6 +251,42 @@ class TouchWatcher:
         self._inject(ControllerInput.TOUCH_DRAG, point)
         self.touch_drag_index = index
 
+    def _update_touch_edge_scroll(self, point):
+        if not self.touch_edge_scroll_enabled:
+            return
+
+        screen_height = self.device.screen_height()
+        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_height * EDGE_SCROLL_MARGIN_RATIO))
+        if point[1] < margin:
+            direction = ControllerInput.DPAD_UP
+        elif point[1] >= screen_height - margin:
+            direction = ControllerInput.DPAD_DOWN
+        else:
+            direction = None
+
+        if direction != self.touch_edge_direction:
+            self.touch_edge_direction = direction
+            self.next_touch_edge_scroll_time = (
+                time.monotonic() + EDGE_SCROLL_INTERVAL_SECONDS
+                if direction is not None
+                else None
+            )
+
+    def _maybe_scroll_at_touch_edge(self):
+        if (
+            not self.down
+            or not self.direct_drag
+            or self.touch_drag_view is None
+            or self.touch_edge_direction is None
+            or self.next_touch_edge_scroll_time is None
+        ):
+            return
+
+        now = time.monotonic()
+        if now >= self.next_touch_edge_scroll_time:
+            self._inject(self.touch_edge_direction)
+            self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
+
     def _gesture(self):
         if self.swipe_steps or self.direct_drag:
             return
@@ -282,8 +326,15 @@ class TouchWatcher:
                 self._open()
                 continue
             try:
-                rlist, _, _ = select.select([self.fd], [], [], 1.0)
+                timeout = 1.0
+                if self.next_touch_edge_scroll_time is not None:
+                    timeout = max(
+                        0.0,
+                        min(timeout, self.next_touch_edge_scroll_time - time.monotonic()),
+                    )
+                rlist, _, _ = select.select([self.fd], [], [], timeout)
                 if not rlist:
+                    self._maybe_scroll_at_touch_edge()
                     continue
                 data = os.read(self.fd, self.event_size * 64)
             except OSError as e:
@@ -303,3 +354,4 @@ class TouchWatcher:
                     self._handle(event_type, code, value)
                 except Exception as e:
                     logger.exception(f"Error processing touch event: {e}")
+            self._maybe_scroll_at_touch_edge()
