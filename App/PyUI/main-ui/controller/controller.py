@@ -39,8 +39,10 @@ class Controller:
     # Long jobs with no button presses (box art optimizing/downloading) keep the
     # screensaver off while they run: see hold_screensaver().
     _screensaver_holds = 0
-    # Logical-space point of the last TOUCH_TAP, set by the touch watcher
+    # Logical-space point of the last touch tap/drag, set by the touch watcher
     touch_point = None
+    touch_navigation_view = None
+    ignore_vertical_touch_swipes = False
     # A screen that changes, or was just used, is redrawn as often as its view
     # asks (Display paces that to 60 frames a second). Once it has looked the same
     # for IDLE_AFTER_SECONDS (longer than the 1 s before a long title starts to

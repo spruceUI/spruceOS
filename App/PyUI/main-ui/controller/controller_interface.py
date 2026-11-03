@@ -50,6 +50,11 @@ class ControllerInterface(ABC):
     def inject_input(self, controller_input):
         pass
 
+    def inject_touch_input(self, controller_input, point):
+        from controller.controller import Controller
+        Controller.set_touch_point(*point)
+        self.inject_input(controller_input)
+
     # End a get_input() wait early, from any thread, without an input: it
     # returns None as on a timeout (Controller.request_redraw). Interfaces that
     # cannot be woken ignore it, and their wait runs to its timeout.
