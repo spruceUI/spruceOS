@@ -205,6 +205,11 @@ class TouchWatcher:
 
     def _inject(self, controller_input):
         from controller.controller import Controller
+        if (
+            Controller.ignore_vertical_touch_swipes
+            and controller_input in (ControllerInput.DPAD_UP, ControllerInput.DPAD_DOWN)
+        ):
+            return
         interface = Controller.controller_interface
         if interface is None:
             return
