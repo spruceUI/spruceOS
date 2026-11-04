@@ -98,17 +98,27 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
     def build_options_list(self):
         option_list = []
         
-        option_list.append(
-                GridOrListEntry(
-                        primary_text=Language.display_settings(),
-                        value_text=None,
-                        image_path=None,
-                        image_path_selected=None,
-                        description=None,
-                        icon=None,
-                        value=self.launch_display_settings
-                    )
-            )
+        device = Device.get_device()
+
+        # Only show display settings if the device supports any calibration features
+        if (
+            device.supports_brightness_calibration()
+            or device.supports_contrast_calibration()
+            or device.supports_saturation_calibration()
+            or device.supports_hue_calibration()
+            or device.supports_rgb_calibration()
+        ):
+            option_list.append(
+                    GridOrListEntry(
+                            primary_text=Language.display_settings(),
+                            value_text=None,
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=self.launch_display_settings
+                        )
+                )
 
         option_list.append(
                 GridOrListEntry(
