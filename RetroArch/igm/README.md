@@ -148,7 +148,8 @@ theme's — see below.
 it from those toggles if it is missing. Editing it by hand works too, and the
 toggles keep a hand-made order. Backup and restore carry it. Unknown ids are
 skipped and a repeated id appears once; an empty or broken file gets the
-binary's built-in list. B always resumes, whatever the list.
+binary's built-in list. Resume, when listed, is always first and Exit always
+last. B always resumes, whatever the list.
 
 Ids: `resume`, `save`, `load`, `ff_speed`, `reset`, `retroarch`, `exit`, `disc`,
 `screenshot`, `undo_save`, `undo_load`, `show_fps`, `mute`, `rewind`, `shader`.

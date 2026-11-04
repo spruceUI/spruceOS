@@ -2,6 +2,7 @@
 # changeCmd for the in-game menu entry toggles: rewrite RetroArch/igm_items.json.
 # A hand-edited order survives: entries turned off are dropped, entries turned
 # on go in after the nearest entry that comes before them in the default order.
+# Resume is always first and Exit always last.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
@@ -33,6 +34,8 @@ igm_items_write() {
             . as $r
             | ([range(0; $r | length) | select(pos($r[.]) < pos($add))] | last) as $p
             | if $p == null then [$add] + $r else $r[:$p + 1] + [$add] + $r[$p + 1:] end)
+        | ([.[] | select(. == "resume")] + [.[] | select(. != "resume" and . != "exit")]
+           + [.[] | select(. == "exit")])
         | {items: (if length == 0 then ["resume"] else . end)}
     ' > "$ITEMS_FILE.tmp" && mv -f "$ITEMS_FILE.tmp" "$ITEMS_FILE"
 }
