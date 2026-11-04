@@ -122,6 +122,8 @@ class TouchWatcher:
         self.start = None      # (lx, ly, t)
         self.last = None       # (lx, ly)
         self.pending_up = False
+        self.long_press_triggered = False
+        self.next_long_press_time = None
         self.swipe_direction = None
         self.swipe_steps = 0
         self.swipe_distance = 0
@@ -169,6 +171,7 @@ class TouchWatcher:
             self.last = point
             if previous_point is not None:
                 self._update_swipe(previous_point, point)
+        self._maybe_trigger_long_press()
         if self.pending_up:
             if self.start is not None and self.last is not None:
                 self._gesture()
@@ -358,8 +361,36 @@ class TouchWatcher:
             self._inject(edge_scroll_input)
             self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
 
+    def _maybe_trigger_long_press(self):
+        if (
+            not self.down
+            or self.start is None
+            or self.last is None
+            or self.swipe_steps
+            or self.direct_drag
+        ):
+            self.next_long_press_time = None
+            return
+
+        sx, sy, started_at = self.start
+        lx, ly = self.last
+        if math.hypot(lx - sx, ly - sy) >= TAP_MAX_MOVE_PX:
+            self.next_long_press_time = None
+            return
+
+        if self.next_long_press_time is None:
+            if self.long_press_triggered:
+                return
+            self.next_long_press_time = started_at + LONG_PRESS_SECONDS
+
+        now = time.monotonic()
+        if now >= self.next_long_press_time:
+            self.long_press_triggered = True
+            self._inject(ControllerInput.B)
+            self.next_long_press_time = now + LONG_PRESS_SECONDS
+
     def _gesture(self):
-        if self.swipe_steps or self.direct_drag:
+        if self.swipe_steps or self.direct_drag or self.long_press_triggered:
             return
 
         sx, sy, t0 = self.start
@@ -402,6 +433,17 @@ class TouchWatcher:
                 continue
             try:
                 timeout = 1.0
+                if (
+                    self.down
+                    and self.start is not None
+                    and self.next_long_press_time is not None
+                    and not self.swipe_steps
+                    and not self.direct_drag
+                ):
+                    timeout = max(
+                        0.0,
+                        min(timeout, self.next_long_press_time - time.monotonic()),
+                    )
                 if self.next_touch_edge_scroll_time is not None:
                     timeout = max(
                         0.0,
@@ -409,6 +451,7 @@ class TouchWatcher:
                     )
                 rlist, _, _ = select.select([self.fd], [], [], timeout)
                 if not rlist:
+                    self._maybe_trigger_long_press()
                     self._maybe_scroll_at_touch_edge()
                     continue
                 data = os.read(self.fd, self.event_size * 64)
