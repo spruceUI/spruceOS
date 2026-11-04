@@ -29,6 +29,8 @@ move_setting "Game Switcher Settings" "Button Settings" menuHoldTime
 move_setting "Game Switcher Settings" "Button Settings" menuShouldVibrate
 move_setting "Emulator Settings" "Button Settings" tapHomeAction tapMenuAction
 move_setting "Emulator Settings" "Button Settings" holdHomeAction holdMenuAction
+move_setting "Emulator Settings" "In-Game Menu Settings" raInGameMenu
+move_setting "Emulator Settings" "In-Game Menu Settings" raIgmColorway
 
 # Menu hold time lost its 0 and 4 options: keep the nearest choice.
 _hold='.menuOptions."Button Settings".menuHoldTime.selected'
