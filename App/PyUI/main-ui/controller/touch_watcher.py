@@ -26,6 +26,8 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
+DOUBLE_TAP_SECONDS = 0.35
+DOUBLE_TAP_MAX_DISTANCE_PX = 48
 EDGE_SCROLL_INTERVAL_SECONDS = 0.30
 EDGE_SCROLL_MARGIN_RATIO = 0.15
 EDGE_SCROLL_MIN_MARGIN_PX = 24
@@ -42,6 +44,9 @@ class TouchWatcher:
       tap         -> ControllerInput.TOUCH_TAP with the point stored on the
                      Controller; list and grid views select the tapped item and
                      confirm it when it was already selected
+      double tap in a top/bottom bar -> ControllerInput.A (confirm selection)
+      double tap in game selection content -> ControllerInput.A without changing
+                     the selected game; a single tap does not change selection
       swipe       -> DPAD presses in the direction the content should move
                      (one press per SWIPE_STEP_PX)
       long press  -> ControllerInput.B (back)
@@ -61,6 +66,8 @@ class TouchWatcher:
         self._open()
         self.x_range = self._abs_range(ABS_MT_POSITION_X) or self._abs_range(ABS_X) or (0, max(1, self._panel_size()[0] - 1))
         self.y_range = self._abs_range(ABS_MT_POSITION_Y) or self._abs_range(ABS_Y) or (0, max(1, self._panel_size()[1] - 1))
+        self.last_scroll_bar_tap = None
+        self.pending_game_selection_tap = None
         self._reset_contact()
         PyUiLogger.get_logger().info(
             f"Touch on {event_path}: x {self.x_range} y {self.y_range} rotation {device.screen_rotation()}")
@@ -399,6 +406,8 @@ class TouchWatcher:
 
     def _gesture(self):
         if self.swipe_steps or self.direct_drag or self.long_press_triggered:
+            self._clear_pending_game_selection_tap()
+            self.last_scroll_bar_tap = None
             return
 
         sx, sy, t0 = self.start
@@ -408,13 +417,94 @@ class TouchWatcher:
         held = time.monotonic() - t0
         if dist < TAP_MAX_MOVE_PX:
             if held >= LONG_PRESS_SECONDS:
+                self._clear_pending_game_selection_tap()
                 self._inject(ControllerInput.B)
+                self.last_scroll_bar_tap = None
             else:
-                is_tab_tap, tab_input = self._top_bar_tab_input((lx, ly))
+                point = (lx, ly)
+                is_tab_tap, tab_input = self._top_bar_tab_input(point)
+                region = self._scroll_bar_region(point)
+                if is_tab_tap:
+                    self._clear_pending_game_selection_tap()
+                    self.last_scroll_bar_tap = None
+                elif region is not None:
+                    self._clear_pending_game_selection_tap()
+                    now = time.monotonic()
+                    previous_tap = self.last_scroll_bar_tap
+                    if (
+                        previous_tap is not None
+                        and previous_tap[0] == region
+                        and now - previous_tap[2] <= DOUBLE_TAP_SECONDS
+                        and math.hypot(
+                            point[0] - previous_tap[1][0],
+                            point[1] - previous_tap[1][1],
+                        ) <= DOUBLE_TAP_MAX_DISTANCE_PX
+                    ):
+                        self.last_scroll_bar_tap = None
+                        self._inject(ControllerInput.A)
+                        return
+                    self.last_scroll_bar_tap = (region, point, now)
+                else:
+                    self.last_scroll_bar_tap = None
+                    if self._is_game_selection_content_tap():
+                        now = time.monotonic()
+                        previous_tap = self.pending_game_selection_tap
+                        if (
+                            previous_tap is not None
+                            and previous_tap[0] is self._touch_navigation_view()
+                            and now - previous_tap[2] <= DOUBLE_TAP_SECONDS
+                            and math.hypot(
+                                point[0] - previous_tap[1][0],
+                                point[1] - previous_tap[1][1],
+                            ) <= DOUBLE_TAP_MAX_DISTANCE_PX
+                        ):
+                            self.pending_game_selection_tap = None
+                            self._inject(ControllerInput.A)
+                            return
+                        self._clear_pending_game_selection_tap()
+                        self.pending_game_selection_tap = (
+                            self._touch_navigation_view(),
+                            point,
+                            now,
+                        )
+                        return
+                    self._clear_pending_game_selection_tap()
+
                 if not is_tab_tap:
-                    self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
+                    self._inject(ControllerInput.TOUCH_TAP, point)
                 elif tab_input is not None:
                     self._inject(tab_input)
+        else:
+            self._clear_pending_game_selection_tap()
+            self.last_scroll_bar_tap = None
+
+    @staticmethod
+    def _touch_navigation_view():
+        from controller.controller import Controller
+
+        return Controller.touch_navigation_view
+
+    def _is_game_selection_content_tap(self):
+        from utils.py_ui_state import PyUiState
+
+        view = self._touch_navigation_view()
+        return (
+            PyUiState.get_in_game_selection_screen()
+            and view is not None
+        )
+
+    def _clear_pending_game_selection_tap(self):
+        self.pending_game_selection_tap = None
+
+    def _scroll_bar_region(self, point):
+        from display.display import Display
+
+        y = point[1]
+        if y < Display.top_bar.get_top_bar_height():
+            return "top"
+        if y >= self.device.screen_height() - Display.bottom_bar.get_bottom_bar_height():
+            return "bottom"
+        return None
 
     @staticmethod
     def _top_bar_tab_input(point):
@@ -482,10 +572,21 @@ class TouchWatcher:
                         0.0,
                         min(timeout, self.next_touch_edge_scroll_time - time.monotonic()),
                     )
+                if self.pending_game_selection_tap is not None:
+                    timeout = max(
+                        0.0,
+                        min(
+                            timeout,
+                            self.pending_game_selection_tap[2]
+                            + DOUBLE_TAP_SECONDS
+                            - time.monotonic(),
+                        ),
+                    )
                 rlist, _, _ = select.select([self.fd], [], [], timeout)
                 if not rlist:
                     self._maybe_trigger_long_press()
                     self._maybe_scroll_at_touch_edge()
+                    self._flush_expired_game_selection_tap()
                     continue
                 data = os.read(self.fd, self.event_size * 64)
             except OSError as e:
@@ -506,3 +607,11 @@ class TouchWatcher:
                 except Exception as e:
                     logger.exception(f"Error processing touch event: {e}")
             self._maybe_scroll_at_touch_edge()
+            self._flush_expired_game_selection_tap()
+
+    def _flush_expired_game_selection_tap(self):
+        if (
+            self.pending_game_selection_tap is not None
+            and time.monotonic() - self.pending_game_selection_tap[2] >= DOUBLE_TAP_SECONDS
+        ):
+            self._clear_pending_game_selection_tap()
