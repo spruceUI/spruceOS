@@ -410,7 +410,32 @@ class TouchWatcher:
             if held >= LONG_PRESS_SECONDS:
                 self._inject(ControllerInput.B)
             else:
-                self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
+                is_tab_tap, tab_input = self._top_bar_tab_input((lx, ly))
+                if not is_tab_tap:
+                    self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
+                elif tab_input is not None:
+                    self._inject(tab_input)
+
+    @staticmethod
+    def _top_bar_tab_input(point):
+        from display.display import Display
+        from themes.theme import Theme
+        if not Theme.skip_main_menu():
+            return False, None
+
+        top_bar = Display.top_bar
+        tab = top_bar.touch_tab_at(point)
+        if tab is None:
+            return False, None
+        if tab == top_bar.selected_tab:
+            return True, None
+
+        transitions = {
+            "Game": {"App": ControllerInput.R1, "Setting": ControllerInput.L1},
+            "App": {"Game": ControllerInput.L1, "Setting": ControllerInput.R1},
+            "Setting": {"Game": ControllerInput.R1, "App": ControllerInput.L1},
+        }
+        return True, transitions.get(top_bar.selected_tab, {}).get(tab)
 
     def _inject(self, controller_input, touch_point=None):
         from controller.controller import Controller
