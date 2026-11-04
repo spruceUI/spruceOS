@@ -289,7 +289,7 @@ class FullScreenGridView(View):
             return None
 
     def get_selection(self, select_controller_inputs=[ControllerInput.A]):
-        Controller.touch_navigation_view = None
+        Controller.touch_navigation_view = self
         self._render()
 
         if (Controller.get_input()):
@@ -319,6 +319,14 @@ class FullScreenGridView(View):
                 self.adjust_selected(+5, skip_by_letter=True if not Theme.skip_main_menu() else Device.get_device().get_system_config().get_skip_by_letter())
 
         return Selection(self.get_selected_option(), None, self.selected)
+
+    def touch_index_at(self, point):
+        return None
+
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dx) >= abs(dy):
+            return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+        return ControllerInput.DPAD_DOWN if dy > 0 else ControllerInput.DPAD_UP
     
     def adjust_selected(self, amount, skip_by_letter):
         amount = self.calculate_amount_to_move_by(amount, skip_by_letter)

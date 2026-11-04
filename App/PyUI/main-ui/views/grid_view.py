@@ -322,20 +322,126 @@ class GridView(View):
             elif Controller.last_input() == ControllerInput.TOUCH_TAP:
                 hit = self.cell_at_touch_point(Controller.take_touch_point())
                 if hit is not None:
-                    if hit == self.selected:
-                        return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
                     self.selected = hit
                     self.correct_selected_for_off_list()
+                    return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
             elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
-                hit = self.cell_at_touch_point(Controller.take_touch_point())
+                hit = self.touch_drag_index_at(Controller.take_touch_point())
                 if hit is not None:
                     self.selected = hit
                     self.correct_selected_for_off_list()
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_UP:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_DOWN:
+                self.scroll_touch_by(-1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_LEFT:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_RIGHT:
+                self.scroll_touch_by(-1)
 
         return Selection(self.get_selected_option(), None, self.selected)
 
     def touch_index_at(self, point):
         return self.cell_at_touch_point(point)
+
+    def touch_drag_index_at(self, point):
+        if self.rows == 1 and self.touch_follows_finger_from_anywhere() and point is not None:
+            return self.cell_at_touch_point((point[0], Display.get_top_bar_height()))
+        return self.touch_index_at(point)
+
+    def touch_follows_finger_from_anywhere(self):
+        return len(self.options) <= self.rows * self.cols
+
+    def touch_uses_dpad_swipe(self, point):
+        if self.rows == 1 or point is None:
+            return False
+        y = point[1]
+        screen_height = Device.get_device().screen_height()
+        return (
+            y < Display.get_top_bar_height()
+            or y >= screen_height - Display.bottom_bar.get_bottom_bar_height()
+        )
+
+    def touch_starts_scroll(self, point):
+        index = self.touch_index_at(point)
+        return len(self.options) > self.rows * self.cols and index is not None and index != self.selected
+
+    def touch_scroll_axis(self):
+        return "horizontal" if self.rows == 1 else "vertical"
+
+    def touch_scroll_other_axis_follows_finger(self):
+        return self.rows > 1
+
+    def touch_scroll_step_size(self):
+        if self.rows == 1:
+            return self.usable_width / self.cols
+        return Display.get_usable_screen_height() / self.rows
+
+    def touch_can_scroll(self, direction):
+        if self.rows == 1:
+            max_left = max(0, len(self.options) - self.cols)
+            if direction in (ControllerInput.DPAD_LEFT, ControllerInput.DPAD_UP):
+                return self.current_left > 0
+            return self.current_left < max_left
+
+        max_left = max(
+            0,
+            ((len(self.options) - self.rows * self.cols + self.cols - 1) // self.cols) * self.cols,
+        )
+        if direction in (ControllerInput.DPAD_UP, ControllerInput.DPAD_LEFT):
+            return self.current_left > 0
+        return self.current_left < max_left
+
+    def scroll_touch_by(self, amount, selection_offset=None):
+        if not self.options or len(self.options) <= self.rows * self.cols:
+            return
+
+        if selection_offset is None:
+            selection_offset = (
+                (self.selected - self.current_left) % len(self.options)
+                if self.rows == 1 and self.wrap_around_single_row
+                else self.selected - self.current_left
+            )
+
+        if self.rows == 1:
+            max_left = max(0, len(self.options) - self.cols)
+            if self.wrap_around_single_row and self.current_left > max_left:
+                if amount > 0:
+                    return
+                self.current_left = max(0, self.current_left + amount)
+                self.current_right = (self.current_left + self.cols) % len(self.options)
+                self.selected = (self.current_left + selection_offset) % len(self.options)
+                return
+            self.current_left = max(0, min(max_left, self.current_left + amount))
+            self.current_right = min(len(self.options), self.current_left + self.cols)
+            self.selected = min(self.current_left + selection_offset, self.current_right - 1)
+            return
+
+        visible_capacity = self.rows * self.cols
+        max_left = max(
+            0,
+            ((len(self.options) - visible_capacity + self.cols - 1) // self.cols) * self.cols,
+        )
+        self.current_left = max(
+            0,
+            min(max_left, self.current_left + amount * self.cols),
+        )
+        self.current_right = min(len(self.options), self.current_left + visible_capacity)
+        self.selected = min(
+            self.current_left + selection_offset,
+            self.current_right - 1,
+        )
+
+    def touch_edge_scroll_axis(self):
+        return "horizontal" if self.rows == 1 else "vertical"
+
+    def touch_ignores_vertical_swipes(self):
+        return self.rows == 1
+
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dy) > abs(dx):
+            return None
+        return ControllerInput.DPAD_RIGHT if dx > 0 else ControllerInput.DPAD_LEFT
 
     def cell_at_touch_point(self, point):
         """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""

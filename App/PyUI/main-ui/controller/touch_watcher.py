@@ -26,8 +26,8 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
-EDGE_SCROLL_INTERVAL_SECONDS = 0.35
-EDGE_SCROLL_MARGIN_RATIO = 0.10
+EDGE_SCROLL_INTERVAL_SECONDS = 0.30
+EDGE_SCROLL_MARGIN_RATIO = 0.15
 EDGE_SCROLL_MIN_MARGIN_PX = 24
 
 
@@ -122,6 +122,8 @@ class TouchWatcher:
         self.start = None      # (lx, ly, t)
         self.last = None       # (lx, ly)
         self.pending_up = False
+        self.long_press_triggered = False
+        self.next_long_press_time = None
         self.swipe_direction = None
         self.swipe_steps = 0
         self.swipe_distance = 0
@@ -132,7 +134,9 @@ class TouchWatcher:
         self.touch_scroll_view = None
         self.touch_scroll_step_size = 0
         self.touch_scroll_distance = 0
+        self.touch_scroll_axis = None
         self.touch_edge_scroll_enabled = False
+        self.touch_edge_scroll_axis = None
         self.touch_edge_direction = None
         self.next_touch_edge_scroll_time = None
 
@@ -167,6 +171,7 @@ class TouchWatcher:
             self.last = point
             if previous_point is not None:
                 self._update_swipe(previous_point, point)
+        self._maybe_trigger_long_press()
         if self.pending_up:
             if self.start is not None and self.last is not None:
                 self._gesture()
@@ -178,8 +183,17 @@ class TouchWatcher:
         if view is None:
             return
         index = view.touch_index_at(point)
-        self.touch_edge_scroll_enabled = not hasattr(view, "rows") or view.rows > 1
+        if hasattr(view, "touch_edge_scroll_axis"):
+            self.touch_edge_scroll_axis = view.touch_edge_scroll_axis()
+            self.touch_edge_scroll_enabled = self.touch_edge_scroll_axis is not None
         if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
+            return
+        if (
+            hasattr(view, "touch_follows_finger_from_anywhere")
+            and view.touch_follows_finger_from_anywhere()
+        ):
+            self.touch_drag_view = view
+            self.touch_drag_index = view.selected
             return
         starts_scroll = (
             view.touch_starts_scroll(point)
@@ -189,6 +203,11 @@ class TouchWatcher:
         if starts_scroll and hasattr(view, "touch_scroll_step_size"):
             self.touch_scroll_view = view
             self.touch_scroll_step_size = max(1, view.touch_scroll_step_size())
+            self.touch_scroll_axis = (
+                view.touch_scroll_axis()
+                if hasattr(view, "touch_scroll_axis")
+                else "vertical"
+            )
         elif index == view.selected:
             self.touch_drag_view = view
             self.touch_drag_index = index
@@ -209,14 +228,42 @@ class TouchWatcher:
             sx, sy, _t0 = self.start
             if math.hypot(point[0] - sx, point[1] - sy) >= TAP_MAX_MOVE_PX:
                 self.direct_drag = True
-            if abs(dy) > abs(dx):
-                self.touch_scroll_distance -= dy
-                while self.touch_scroll_distance >= self.touch_scroll_step_size:
-                    self._inject(ControllerInput.TOUCH_SCROLL_UP)
-                    self.touch_scroll_distance -= self.touch_scroll_step_size
-                while self.touch_scroll_distance <= -self.touch_scroll_step_size:
-                    self._inject(ControllerInput.TOUCH_SCROLL_DOWN)
-                    self.touch_scroll_distance += self.touch_scroll_step_size
+            if self.touch_scroll_axis == "horizontal" and abs(dy) > abs(dx):
+                if (
+                    hasattr(self.touch_scroll_view, "touch_scroll_other_axis_follows_finger")
+                    and self.touch_scroll_view.touch_scroll_other_axis_follows_finger()
+                ):
+                    self.touch_drag_view = self.touch_scroll_view
+                    self.touch_drag_index = self._touch_drag_index_at(
+                        self.touch_scroll_view, self.start[:2]
+                    )
+                    self.touch_scroll_view = None
+                    self._update_touch_drag(point)
+                return
+            if self.touch_scroll_axis == "vertical" and abs(dx) > abs(dy):
+                if (
+                    hasattr(self.touch_scroll_view, "touch_scroll_other_axis_follows_finger")
+                    and self.touch_scroll_view.touch_scroll_other_axis_follows_finger()
+                ):
+                    self.touch_drag_view = self.touch_scroll_view
+                    self.touch_drag_index = self.touch_scroll_view.touch_index_at(self.start[:2])
+                    self.touch_scroll_view = None
+                    self._update_touch_drag(point)
+                return
+            delta = dx if self.touch_scroll_axis == "horizontal" else dy
+            self.touch_scroll_distance -= delta
+            if self.touch_scroll_axis == "horizontal":
+                forward_input = ControllerInput.TOUCH_SCROLL_LEFT
+                backward_input = ControllerInput.TOUCH_SCROLL_RIGHT
+            else:
+                forward_input = ControllerInput.TOUCH_SCROLL_UP
+                backward_input = ControllerInput.TOUCH_SCROLL_DOWN
+            while self.touch_scroll_distance >= self.touch_scroll_step_size:
+                self._inject(forward_input)
+                self.touch_scroll_distance -= self.touch_scroll_step_size
+            while self.touch_scroll_distance <= -self.touch_scroll_step_size:
+                self._inject(backward_input)
+                self.touch_scroll_distance += self.touch_scroll_step_size
             return
 
         if dx == 0 and dy == 0:
@@ -227,6 +274,13 @@ class TouchWatcher:
             direction = ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
         else:
             direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+
+        from controller.controller import Controller
+        view = Controller.touch_navigation_view
+        if view is not None and hasattr(view, "touch_swipe_direction"):
+            direction = view.touch_swipe_direction(dx, dy)
+        if direction is None:
+            return
 
         if direction != self.swipe_direction:
             self.swipe_direction = direction
@@ -244,23 +298,39 @@ class TouchWatcher:
             )
 
     def _update_touch_drag(self, point):
-        index = self.touch_drag_view.touch_index_at(point)
+        index = self._touch_drag_index_at(self.touch_drag_view, point)
         if index is None or index == self.touch_drag_index:
             return
 
         self._inject(ControllerInput.TOUCH_DRAG, point)
         self.touch_drag_index = index
 
+    @staticmethod
+    def _touch_drag_index_at(view, point):
+        if hasattr(view, "touch_drag_index_at"):
+            return view.touch_drag_index_at(point)
+        return view.touch_index_at(point)
+
     def _update_touch_edge_scroll(self, point):
         if not self.touch_edge_scroll_enabled:
             return
 
-        screen_height = self.device.screen_height()
-        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_height * EDGE_SCROLL_MARGIN_RATIO))
-        if point[1] < margin:
-            direction = ControllerInput.DPAD_UP
-        elif point[1] >= screen_height - margin:
-            direction = ControllerInput.DPAD_DOWN
+        if self.touch_edge_scroll_axis == "horizontal":
+            position = point[0]
+            screen_size = self.device.screen_width()
+            leading_direction = ControllerInput.DPAD_LEFT
+            trailing_direction = ControllerInput.DPAD_RIGHT
+        else:
+            position = point[1]
+            screen_size = self.device.screen_height()
+            leading_direction = ControllerInput.DPAD_UP
+            trailing_direction = ControllerInput.DPAD_DOWN
+
+        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_size * EDGE_SCROLL_MARGIN_RATIO))
+        if position < margin:
+            direction = leading_direction
+        elif position >= screen_size - margin:
+            direction = trailing_direction
         else:
             direction = None
 
@@ -284,11 +354,51 @@ class TouchWatcher:
 
         now = time.monotonic()
         if now >= self.next_touch_edge_scroll_time:
-            self._inject(self.touch_edge_direction)
+            if (
+                hasattr(self.touch_drag_view, "touch_can_scroll")
+                and not self.touch_drag_view.touch_can_scroll(self.touch_edge_direction)
+            ):
+                self.next_touch_edge_scroll_time = None
+                return
+            edge_scroll_input = {
+                ControllerInput.DPAD_UP: ControllerInput.TOUCH_SCROLL_DOWN,
+                ControllerInput.DPAD_DOWN: ControllerInput.TOUCH_SCROLL_UP,
+                ControllerInput.DPAD_LEFT: ControllerInput.TOUCH_SCROLL_RIGHT,
+                ControllerInput.DPAD_RIGHT: ControllerInput.TOUCH_SCROLL_LEFT,
+            }[self.touch_edge_direction]
+            self._inject(edge_scroll_input)
             self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
 
+    def _maybe_trigger_long_press(self):
+        if (
+            not self.down
+            or self.start is None
+            or self.last is None
+            or self.swipe_steps
+            or self.direct_drag
+        ):
+            self.next_long_press_time = None
+            return
+
+        sx, sy, started_at = self.start
+        lx, ly = self.last
+        if math.hypot(lx - sx, ly - sy) >= TAP_MAX_MOVE_PX:
+            self.next_long_press_time = None
+            return
+
+        if self.next_long_press_time is None:
+            if self.long_press_triggered:
+                return
+            self.next_long_press_time = started_at + LONG_PRESS_SECONDS
+
+        now = time.monotonic()
+        if now >= self.next_long_press_time:
+            self.long_press_triggered = True
+            self._inject(ControllerInput.B)
+            self.next_long_press_time = now + LONG_PRESS_SECONDS
+
     def _gesture(self):
-        if self.swipe_steps or self.direct_drag:
+        if self.swipe_steps or self.direct_drag or self.long_press_triggered:
             return
 
         sx, sy, t0 = self.start
@@ -300,12 +410,41 @@ class TouchWatcher:
             if held >= LONG_PRESS_SECONDS:
                 self._inject(ControllerInput.B)
             else:
-                self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
+                is_tab_tap, tab_input = self._top_bar_tab_input((lx, ly))
+                if not is_tab_tap:
+                    self._inject(ControllerInput.TOUCH_TAP, (lx, ly))
+                elif tab_input is not None:
+                    self._inject(tab_input)
+
+    @staticmethod
+    def _top_bar_tab_input(point):
+        from display.display import Display
+        from themes.theme import Theme
+        if not Theme.skip_main_menu():
+            return False, None
+
+        top_bar = Display.top_bar
+        tab = top_bar.touch_tab_at(point)
+        if tab is None:
+            return False, None
+        if tab == top_bar.selected_tab:
+            return True, None
+
+        transitions = {
+            "Game": {"App": ControllerInput.R1, "Setting": ControllerInput.L1},
+            "App": {"Game": ControllerInput.L1, "Setting": ControllerInput.R1},
+            "Setting": {"Game": ControllerInput.R1, "App": ControllerInput.L1},
+        }
+        return True, transitions.get(top_bar.selected_tab, {}).get(tab)
 
     def _inject(self, controller_input, touch_point=None):
         from controller.controller import Controller
+        view = Controller.touch_navigation_view
         if (
             Controller.ignore_vertical_touch_swipes
+            and view is not None
+            and hasattr(view, "touch_ignores_vertical_swipes")
+            and view.touch_ignores_vertical_swipes()
             and controller_input in (ControllerInput.DPAD_UP, ControllerInput.DPAD_DOWN)
         ):
             return
@@ -327,6 +466,17 @@ class TouchWatcher:
                 continue
             try:
                 timeout = 1.0
+                if (
+                    self.down
+                    and self.start is not None
+                    and self.next_long_press_time is not None
+                    and not self.swipe_steps
+                    and not self.direct_drag
+                ):
+                    timeout = max(
+                        0.0,
+                        min(timeout, self.next_long_press_time - time.monotonic()),
+                    )
                 if self.next_touch_edge_scroll_time is not None:
                     timeout = max(
                         0.0,
@@ -334,6 +484,7 @@ class TouchWatcher:
                     )
                 rlist, _, _ = select.select([self.fd], [], [], timeout)
                 if not rlist:
+                    self._maybe_trigger_long_press()
                     self._maybe_scroll_at_touch_edge()
                     continue
                 data = os.read(self.fd, self.event_size * 64)

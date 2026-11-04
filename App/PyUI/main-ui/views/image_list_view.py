@@ -1,5 +1,6 @@
 import time
 from typing import List
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from display.font_purpose import FontPurpose
@@ -145,13 +146,7 @@ class ImageListView(NonDescriptiveListView):
             #Assume left as default?
             return self.img_offset_x
 
-    def point_is_over_game_art(self, point):
-        if point is None or not self.options or not 0 <= self.selected < len(self.options):
-            return False
-        if self.options[self.selected].get_image_path() is None:
-            return False
-
-        x, y = point
+    def game_art_bounds(self):
         if XRenderOption.LEFT == self.image_render_mode.x_mode:
             left = self.img_offset_x
         elif XRenderOption.RIGHT == self.image_render_mode.x_mode:
@@ -166,18 +161,41 @@ class ImageListView(NonDescriptiveListView):
         else:
             top = self.img_offset_y - self.img_height // 2
 
-        return left <= x < left + self.img_width and top <= y < top + self.img_height
+        return left, top, left + self.img_width, top + self.img_height
+
+    def point_is_in_game_art_area(self, point):
+        if point is None:
+            return False
+        x, y = point
+        left, top, right, bottom = self.game_art_bounds()
+        return left <= x < right and top <= y < bottom
+
+    def point_is_over_game_art(self, point):
+        if (
+            point is None
+            or not self.options
+            or not 0 <= self.selected < len(self.options)
+            or self.options[self.selected].get_image_path() is None
+        ):
+            return False
+        return self.point_is_in_game_art_area(point)
 
     def tap_index_at(self, point):
         if self.point_is_over_game_art(point):
             return self.selected
-        return self.row_at_touch_point(point)
+        hit = self.row_at_touch_point(point)
+        return hit if hit != self.selected else None
 
     def touch_starts_scroll(self, point):
-        return self.point_is_over_game_art(point) or super().touch_starts_scroll(point)
+        return self.point_is_in_game_art_area(point) or super().touch_starts_scroll(point)
 
     def touch_uses_dpad_swipe(self, point):
-        return self.point_is_over_game_art(point)
+        return self.point_is_in_game_art_area(point)
+
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dx) >= abs(dy):
+            return super().touch_swipe_direction(dx, dy)
+        return ControllerInput.DPAD_DOWN if dy > 0 else ControllerInput.DPAD_UP
 
     def is_y_coord_in_img_box(self, y):
         img_y_min = self.img_offset_y

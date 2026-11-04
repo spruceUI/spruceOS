@@ -502,7 +502,7 @@ class CarouselView(View):
             return None
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
-        Controller.touch_navigation_view = None
+        Controller.touch_navigation_view = self
         self._render()
         
         if(Controller.get_input()):
@@ -537,11 +537,76 @@ class CarouselView(View):
             elif Controller.last_input() in select_controller_inputs:
                 Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
+            elif Controller.last_input() == ControllerInput.TOUCH_TAP:
+                hit = self.touch_option_at_point(Controller.take_touch_point())
+                if hit is not None:
+                    self.selected = hit
+                    Display.restore_bg()
+                    return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
             elif Controller.last_input() == ControllerInput.B:
                 Display.restore_bg()
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 
         return Selection(self.get_selected_option(),None, self.selected)
+
+    def touch_index_at(self, point):
+        return None
+
+    def touch_swipe_direction(self, dx, dy):
+        if self.veritcal_carousel:
+            if abs(dx) >= abs(dy):
+                return None
+            return ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+        if abs(dy) > abs(dx):
+            return None
+        return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+
+    def touch_option_at_point(self, point):
+        if point is None or self.prev_visible_options is None:
+            return None
+
+        visible_indices = [
+            self._visible_option_index(index)
+            for index in range(len(self.prev_visible_options))
+        ]
+        if self.veritcal_carousel:
+            positions = self.prev_y_offsets
+            sizes = self.prev_heights
+            coordinate = point[1]
+        else:
+            if not (
+                Display.get_top_bar_height()
+                <= point[1]
+                < Device.get_device().screen_height() - Display.get_bottom_bar_height()
+            ):
+                return None
+            positions = self.prev_x_offsets
+            sizes = self.prev_widths
+            coordinate = point[0]
+
+        selected_visible_index = next(
+            (i for i, index in enumerate(visible_indices) if index == self.selected),
+            None,
+        )
+        hit_order = list(reversed(range(len(visible_indices))))
+        if selected_visible_index is not None:
+            hit_order.remove(selected_visible_index)
+            hit_order.insert(0, selected_visible_index)
+
+        for visible_index in hit_order:
+            center = positions[visible_index]
+            half_size = sizes[visible_index] / 2
+            if center - half_size <= coordinate <= center + half_size:
+                return visible_indices[visible_index]
+        return None
+
+    def _visible_option_index(self, visible_index):
+        half = self.cols // 2
+        if self.sides_hang_off_edge and not self.shrink_further_away:
+            start = (self.selected - half - 1) % len(self.options)
+        else:
+            start = (self.selected - half) % len(self.options)
+        return (start + visible_index + self.selected_offset) % len(self.options)
 
     def adjust_selected(self, amount, skip_by_letter):
         amount = self.calculate_amount_to_move_by(amount, skip_by_letter)
