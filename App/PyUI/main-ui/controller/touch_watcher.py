@@ -196,14 +196,14 @@ class TouchWatcher:
         if hasattr(view, "touch_edge_scroll_axis"):
             self.touch_edge_scroll_axis = view.touch_edge_scroll_axis()
             self.touch_edge_scroll_enabled = self.touch_edge_scroll_axis is not None
-        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
-            return
         if (
             hasattr(view, "touch_follows_finger_from_anywhere")
             and view.touch_follows_finger_from_anywhere(point)
         ):
             self.touch_drag_view = view
             self.touch_drag_index = view.selected
+            return
+        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
             return
         starts_scroll = (
             view.touch_starts_scroll(point)

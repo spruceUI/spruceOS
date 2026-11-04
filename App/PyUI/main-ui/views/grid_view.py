@@ -349,7 +349,7 @@ class GridView(View):
             return self.cell_at_touch_point((point[0], Display.get_top_bar_height()))
         return self.touch_index_at(point)
 
-    def touch_follows_finger_from_anywhere(self):
+    def touch_follows_finger_from_anywhere(self, point=None):
         return len(self.options) <= self.rows * self.cols
 
     def touch_uses_dpad_swipe(self, point):
