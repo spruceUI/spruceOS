@@ -426,7 +426,7 @@ class GridView(View):
     def touch_swipe_direction(self, dx, dy):
         if abs(dy) > abs(dx):
             return None
-        return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+        return ControllerInput.DPAD_RIGHT if dx > 0 else ControllerInput.DPAD_LEFT
 
     def cell_at_touch_point(self, point):
         """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""

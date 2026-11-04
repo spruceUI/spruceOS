@@ -126,6 +126,11 @@ class ListView(View):
     def touch_uses_dpad_swipe(self, point):
         return False
 
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dx) >= abs(dy):
+            return ControllerInput.DPAD_DOWN if dx > 0 else ControllerInput.DPAD_UP
+        return ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+
     def tap_index_at(self, point):
         return self.row_at_touch_point(point)
 

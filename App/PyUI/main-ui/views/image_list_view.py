@@ -194,7 +194,7 @@ class ImageListView(NonDescriptiveListView):
 
     def touch_swipe_direction(self, dx, dy):
         if abs(dx) >= abs(dy):
-            return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
+            return super().touch_swipe_direction(dx, dy)
         return ControllerInput.DPAD_DOWN if dy > 0 else ControllerInput.DPAD_UP
 
     def is_y_coord_in_img_box(self, y):
