@@ -307,7 +307,12 @@ class TouchWatcher:
             self.swipe_distance = 0
             self.next_swipe_step_distance = TAP_MAX_MOVE_PX
 
-        self.swipe_distance += math.hypot(dx, dy)
+        sensitivity = (
+            view.touch_swipe_sensitivity()
+            if view is not None and hasattr(view, "touch_swipe_sensitivity")
+            else 1
+        )
+        self.swipe_distance += math.hypot(dx, dy) * sensitivity
         while self.swipe_distance >= self.next_swipe_step_distance:
             self.swipe_steps += 1
             self._inject(direction)
@@ -456,6 +461,17 @@ class TouchWatcher:
             else:
                 point = (lx, ly)
                 view = self._touch_navigation_view()
+                if getattr(view, "touch_tap_activates_item", False):
+                    self._clear_pending_game_selection_tap()
+                    self.last_popup_outside_tap = None
+                    self.last_scroll_bar_tap = None
+                    if hasattr(view, "touch_tap_input"):
+                        controller_input = view.touch_tap_input(point)
+                        if controller_input is not None:
+                            self._inject(controller_input)
+                            return
+                    self._inject(ControllerInput.TOUCH_TAP, point)
+                    return
                 if hasattr(view, "touch_point_is_inside_popup"):
                     self._clear_pending_game_selection_tap()
                     if view.touch_point_is_inside_popup(point):
