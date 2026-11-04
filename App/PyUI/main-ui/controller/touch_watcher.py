@@ -51,7 +51,7 @@ class TouchWatcher:
       swipe       -> DPAD presses in the direction the content should move
                      (one press per SWIPE_STEP_PX)
       long press -> ControllerInput.MENU on the left third of the top bar,
-                    otherwise ControllerInput.B (back)
+                    ControllerInput.X on the middle third, otherwise B (back)
 
     Raw coordinates are scaled to the panel from the device's reported ABS
     range and then mapped through the inverse of the rotation Display applies
@@ -227,7 +227,7 @@ class TouchWatcher:
         dy = point[1] - previous_point[1]
         if (
             self.start is not None
-            and self._is_top_bar_menu_area(self.start[:2])
+            and self._top_bar_long_press_input(self.start[:2]) is not None
             and math.hypot(
                 point[0] - self.start[0],
                 point[1] - self.start[1],
@@ -409,7 +409,7 @@ class TouchWatcher:
         lx, ly = self.last
         max_move = (
             MENU_LONG_PRESS_MAX_MOVE_PX
-            if self._is_top_bar_menu_area((sx, sy))
+            if self._top_bar_long_press_input((sx, sy)) is not None
             else TAP_MAX_MOVE_PX
         )
         if math.hypot(lx - sx, ly - sy) >= max_move:
@@ -424,21 +424,26 @@ class TouchWatcher:
         now = time.monotonic()
         if now >= self.next_long_press_time:
             self.long_press_triggered = True
-            if self._is_top_bar_menu_area((sx, sy)):
-                self._inject(ControllerInput.MENU)
+            top_bar_input = self._top_bar_long_press_input((sx, sy))
+            if top_bar_input is not None:
+                self._inject(top_bar_input)
                 self.next_long_press_time = None
             else:
                 self._inject(ControllerInput.B)
                 self.next_long_press_time = now + LONG_PRESS_SECONDS
 
-    def _is_top_bar_menu_area(self, point):
+    def _top_bar_long_press_input(self, point):
         from display.display import Display
 
         x, y = point
-        return (
-            0 <= x < self.device.screen_width() / 3
-            and 0 <= y < Display.top_bar.get_top_bar_height()
-        )
+        if not 0 <= y < Display.top_bar.get_top_bar_height():
+            return None
+        screen_width = self.device.screen_width()
+        if 0 <= x < screen_width / 3:
+            return ControllerInput.MENU
+        if screen_width / 3 <= x < 2 * screen_width / 3:
+            return ControllerInput.X
+        return None
 
     def _gesture(self):
         if self.swipe_steps or self.direct_drag or self.long_press_triggered:
