@@ -322,10 +322,9 @@ class GridView(View):
             elif Controller.last_input() == ControllerInput.TOUCH_TAP:
                 hit = self.cell_at_touch_point(Controller.take_touch_point())
                 if hit is not None:
-                    if hit == self.selected:
-                        return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
                     self.selected = hit
                     self.correct_selected_for_off_list()
+                    return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
             elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
                 hit = self.cell_at_touch_point(Controller.take_touch_point())
                 if hit is not None:
