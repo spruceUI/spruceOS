@@ -132,6 +132,11 @@ class ListView(View):
     def touch_scroll_step_size(self):
         return self.get_row_geometry()[1]
 
+    def touch_can_scroll(self, direction):
+        if direction in (ControllerInput.DPAD_UP, ControllerInput.DPAD_LEFT):
+            return self.current_top > 0
+        return self.current_top < max(0, len(self.options) - (self.current_bottom - self.current_top))
+
     def touch_scroll_selection_offset(self):
         return self.selected - self.current_top
 

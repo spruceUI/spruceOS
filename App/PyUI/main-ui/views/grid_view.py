@@ -362,26 +362,44 @@ class GridView(View):
             return self.usable_width / self.cols
         return Display.get_usable_screen_height() / self.rows
 
+    def touch_can_scroll(self, direction):
+        if self.rows == 1:
+            max_left = max(0, len(self.options) - self.cols)
+            if direction in (ControllerInput.DPAD_LEFT, ControllerInput.DPAD_UP):
+                return self.current_left > 0
+            return self.current_left < max_left
+
+        max_left = max(
+            0,
+            ((len(self.options) - self.rows * self.cols + self.cols - 1) // self.cols) * self.cols,
+        )
+        if direction in (ControllerInput.DPAD_UP, ControllerInput.DPAD_LEFT):
+            return self.current_left > 0
+        return self.current_left < max_left
+
     def scroll_touch_by(self, amount, selection_offset=None):
         if not self.options or len(self.options) <= self.rows * self.cols:
             return
 
         if selection_offset is None:
-            if self.rows == 1 and self.wrap_around_single_row:
-                selection_offset = (self.selected - self.current_left) % len(self.options)
-            else:
-                selection_offset = self.selected - self.current_left
+            selection_offset = (
+                (self.selected - self.current_left) % len(self.options)
+                if self.rows == 1 and self.wrap_around_single_row
+                else self.selected - self.current_left
+            )
 
         if self.rows == 1:
-            if self.wrap_around_single_row:
-                self.current_left = (self.current_left + amount) % len(self.options)
+            max_left = max(0, len(self.options) - self.cols)
+            if self.wrap_around_single_row and self.current_left > max_left:
+                if amount > 0:
+                    return
+                self.current_left = max(0, self.current_left + amount)
                 self.current_right = (self.current_left + self.cols) % len(self.options)
                 self.selected = (self.current_left + selection_offset) % len(self.options)
-            else:
-                max_left = max(0, len(self.options) - self.cols)
-                self.current_left = max(0, min(max_left, self.current_left + amount))
-                self.current_right = min(len(self.options), self.current_left + self.cols)
-                self.selected = min(self.current_left + selection_offset, self.current_right - 1)
+                return
+            self.current_left = max(0, min(max_left, self.current_left + amount))
+            self.current_right = min(len(self.options), self.current_left + self.cols)
+            self.selected = min(self.current_left + selection_offset, self.current_right - 1)
             return
 
         visible_capacity = self.rows * self.cols
@@ -404,6 +422,11 @@ class GridView(View):
 
     def touch_ignores_vertical_swipes(self):
         return self.rows == 1
+
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dy) > abs(dx):
+            return None
+        return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
 
     def cell_at_touch_point(self, point):
         """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""

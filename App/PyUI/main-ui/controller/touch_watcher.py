@@ -26,7 +26,7 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
-EDGE_SCROLL_INTERVAL_SECONDS = 0.25
+EDGE_SCROLL_INTERVAL_SECONDS = 0.30
 EDGE_SCROLL_MARGIN_RATIO = 0.15
 EDGE_SCROLL_MIN_MARGIN_PX = 24
 
@@ -274,6 +274,8 @@ class TouchWatcher:
         view = Controller.touch_navigation_view
         if view is not None and hasattr(view, "touch_swipe_direction"):
             direction = view.touch_swipe_direction(dx, dy)
+        if direction is None:
+            return
 
         if direction != self.swipe_direction:
             self.swipe_direction = direction
@@ -341,7 +343,19 @@ class TouchWatcher:
 
         now = time.monotonic()
         if now >= self.next_touch_edge_scroll_time:
-            self._inject(self.touch_edge_direction)
+            if (
+                hasattr(self.touch_drag_view, "touch_can_scroll")
+                and not self.touch_drag_view.touch_can_scroll(self.touch_edge_direction)
+            ):
+                self.next_touch_edge_scroll_time = None
+                return
+            edge_scroll_input = {
+                ControllerInput.DPAD_UP: ControllerInput.TOUCH_SCROLL_DOWN,
+                ControllerInput.DPAD_DOWN: ControllerInput.TOUCH_SCROLL_UP,
+                ControllerInput.DPAD_LEFT: ControllerInput.TOUCH_SCROLL_RIGHT,
+                ControllerInput.DPAD_RIGHT: ControllerInput.TOUCH_SCROLL_LEFT,
+            }[self.touch_edge_direction]
+            self._inject(edge_scroll_input)
             self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
 
     def _gesture(self):
