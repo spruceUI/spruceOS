@@ -284,6 +284,8 @@ run_retroarch() {
 	else
 		rm -f "$IGM_FLAG"
 	fi
+	[ -f /mnt/SDCARD/RetroArch/igm_items.json ] ||
+		/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh --now
 
 	export_spruce_theme_dir
 

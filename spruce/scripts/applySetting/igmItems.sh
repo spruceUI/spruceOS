@@ -25,7 +25,7 @@ igm_items_write() {
         | ($cfg[0].menuOptions."In-Game Menu Settings" // {}) as $opts
         | [$map[] | select(($opts[.[1]].selected // "True") == "True") | .[0]] as $on
         | (if ($cur | type) == "array" and ($cur | length) > 0 then $cur
-           else ["resume","save","load","ff_speed","reset","retroarch","exit"] end) as $base
+           else ["resume","save","load","reset","retroarch","exit"] end) as $base
         | def has($a; $x): any($a[]; . == $x);
           def pos($x): $canon | to_entries | map(select(.value == $x)) | .[0].key;
           [$base[] | select(has($on; .))] as $kept

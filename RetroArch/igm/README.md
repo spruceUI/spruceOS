@@ -141,13 +141,14 @@ theme's — see below.
 `RetroArch/igm_items.json` lists the entries in display order:
 
 ```json
-{ "items": ["resume", "save", "load", "ff_speed", "reset", "retroarch", "exit"] }
+{ "items": ["resume", "save", "load", "reset", "retroarch", "exit"] }
 ```
 
-That list is also the built-in default, used when the file is missing, empty or
-broken. **Settings → In-Game Menu Settings** writes this file; editing it by hand
-works too, and the Settings toggles keep a hand-made order. Unknown ids are
-skipped and a repeated id appears once. B always resumes, whatever the list.
+**Settings → In-Game Menu Settings** writes this file, and a game launch creates
+it from those toggles if it is missing. Editing it by hand works too, and the
+toggles keep a hand-made order. Backup and restore carry it. Unknown ids are
+skipped and a repeated id appears once; an empty or broken file gets the
+binary's built-in list. B always resumes, whatever the list.
 
 Ids: `resume`, `save`, `load`, `ff_speed`, `reset`, `retroarch`, `exit`, `disc`,
 `screenshot`, `undo_save`, `undo_load`, `show_fps`, `mute`, `rewind`, `shader`.
@@ -168,7 +169,7 @@ rather than rows off the screen.
 
 The device scale is `1.0` everywhere except **Pixel2 and RGDS, where it is 1.2**,
 so the same `item_h_pct` fits fewer rows on those two. At the default of `8.0`
-all seven default entries fit everywhere.
+all six default entries fit everywhere.
 
 Explicit `panel_x_pct` / `panel_y_pct` are *not* multiplied by the device scale,
 while the sizes are — "put it at 40% of the screen" should mean that everywhere.
