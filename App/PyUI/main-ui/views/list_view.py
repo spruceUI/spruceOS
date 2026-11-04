@@ -116,6 +116,9 @@ class ListView(View):
     def touch_index_at(self, point):
         return self.row_at_touch_point(point)
 
+    def touch_edge_scroll_axis(self):
+        return "vertical"
+
     def touch_starts_scroll(self, point):
         index = self.touch_index_at(point)
         return index is not None and index != self.selected

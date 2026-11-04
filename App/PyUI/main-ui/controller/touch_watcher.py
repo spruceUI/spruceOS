@@ -133,6 +133,7 @@ class TouchWatcher:
         self.touch_scroll_step_size = 0
         self.touch_scroll_distance = 0
         self.touch_edge_scroll_enabled = False
+        self.touch_edge_scroll_axis = None
         self.touch_edge_direction = None
         self.next_touch_edge_scroll_time = None
 
@@ -178,7 +179,16 @@ class TouchWatcher:
         if view is None:
             return
         index = view.touch_index_at(point)
-        self.touch_edge_scroll_enabled = not hasattr(view, "rows") or view.rows > 1
+        if hasattr(view, "touch_edge_scroll_axis"):
+            self.touch_edge_scroll_axis = view.touch_edge_scroll_axis()
+            self.touch_edge_scroll_enabled = self.touch_edge_scroll_axis is not None
+        if (
+            hasattr(view, "touch_follows_finger_from_anywhere")
+            and view.touch_follows_finger_from_anywhere()
+        ):
+            self.touch_drag_view = view
+            self.touch_drag_index = view.selected
+            return
         if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
             return
         starts_scroll = (
@@ -255,12 +265,22 @@ class TouchWatcher:
         if not self.touch_edge_scroll_enabled:
             return
 
-        screen_height = self.device.screen_height()
-        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_height * EDGE_SCROLL_MARGIN_RATIO))
-        if point[1] < margin:
-            direction = ControllerInput.DPAD_UP
-        elif point[1] >= screen_height - margin:
-            direction = ControllerInput.DPAD_DOWN
+        if self.touch_edge_scroll_axis == "horizontal":
+            position = point[0]
+            screen_size = self.device.screen_width()
+            leading_direction = ControllerInput.DPAD_LEFT
+            trailing_direction = ControllerInput.DPAD_RIGHT
+        else:
+            position = point[1]
+            screen_size = self.device.screen_height()
+            leading_direction = ControllerInput.DPAD_UP
+            trailing_direction = ControllerInput.DPAD_DOWN
+
+        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_size * EDGE_SCROLL_MARGIN_RATIO))
+        if position < margin:
+            direction = leading_direction
+        elif position >= screen_size - margin:
+            direction = trailing_direction
         else:
             direction = None
 
