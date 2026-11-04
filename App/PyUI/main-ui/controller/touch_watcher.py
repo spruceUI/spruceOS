@@ -270,6 +270,11 @@ class TouchWatcher:
         else:
             direction = ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
 
+        from controller.controller import Controller
+        view = Controller.touch_navigation_view
+        if view is not None and hasattr(view, "touch_swipe_direction"):
+            direction = view.touch_swipe_direction(dx, dy)
+
         if direction != self.swipe_direction:
             self.swipe_direction = direction
             self.swipe_distance = 0
