@@ -25,7 +25,8 @@ ABS_MT_TRACKING_ID = 0x39
 # Gesture thresholds, in logical (UI) pixels and seconds
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
-LONG_PRESS_SECONDS = 0.6
+LONG_PRESS_SECONDS = 0.5
+MENU_LONG_PRESS_MAX_MOVE_PX = 48
 DOUBLE_TAP_SECONDS = 0.35
 DOUBLE_TAP_MAX_DISTANCE_PX = 48
 EDGE_SCROLL_INTERVAL_SECONDS = 0.30
@@ -49,7 +50,8 @@ class TouchWatcher:
                      the selected game; a single tap does not change selection
       swipe       -> DPAD presses in the direction the content should move
                      (one press per SWIPE_STEP_PX)
-      long press  -> ControllerInput.B (back)
+      long press -> ControllerInput.MENU on the left third of the top bar,
+                    otherwise ControllerInput.B (back)
 
     Raw coordinates are scaled to the panel from the device's reported ABS
     range and then mapped through the inverse of the rotation Display applies
@@ -67,6 +69,7 @@ class TouchWatcher:
         self.x_range = self._abs_range(ABS_MT_POSITION_X) or self._abs_range(ABS_X) or (0, max(1, self._panel_size()[0] - 1))
         self.y_range = self._abs_range(ABS_MT_POSITION_Y) or self._abs_range(ABS_Y) or (0, max(1, self._panel_size()[1] - 1))
         self.last_scroll_bar_tap = None
+        self.last_popup_outside_tap = None
         self.pending_game_selection_tap = None
         self._reset_contact()
         PyUiLogger.get_logger().info(
@@ -197,7 +200,7 @@ class TouchWatcher:
             return
         if (
             hasattr(view, "touch_follows_finger_from_anywhere")
-            and view.touch_follows_finger_from_anywhere()
+            and view.touch_follows_finger_from_anywhere(point)
         ):
             self.touch_drag_view = view
             self.touch_drag_index = view.selected
@@ -222,6 +225,16 @@ class TouchWatcher:
     def _update_swipe(self, previous_point, point):
         dx = point[0] - previous_point[0]
         dy = point[1] - previous_point[1]
+        if (
+            self.start is not None
+            and self._is_top_bar_menu_area(self.start[:2])
+            and math.hypot(
+                point[0] - self.start[0],
+                point[1] - self.start[1],
+            ) < MENU_LONG_PRESS_MAX_MOVE_PX
+        ):
+            return
+
         if self.touch_drag_view is not None:
             sx, sy, _t0 = self.start
             if not self.direct_drag and math.hypot(point[0] - sx, point[1] - sy) < TAP_MAX_MOVE_PX:
@@ -389,7 +402,12 @@ class TouchWatcher:
 
         sx, sy, started_at = self.start
         lx, ly = self.last
-        if math.hypot(lx - sx, ly - sy) >= TAP_MAX_MOVE_PX:
+        max_move = (
+            MENU_LONG_PRESS_MAX_MOVE_PX
+            if self._is_top_bar_menu_area((sx, sy))
+            else TAP_MAX_MOVE_PX
+        )
+        if math.hypot(lx - sx, ly - sy) >= max_move:
             self.next_long_press_time = None
             return
 
@@ -401,12 +419,26 @@ class TouchWatcher:
         now = time.monotonic()
         if now >= self.next_long_press_time:
             self.long_press_triggered = True
-            self._inject(ControllerInput.B)
-            self.next_long_press_time = now + LONG_PRESS_SECONDS
+            if self._is_top_bar_menu_area((sx, sy)):
+                self._inject(ControllerInput.MENU)
+                self.next_long_press_time = None
+            else:
+                self._inject(ControllerInput.B)
+                self.next_long_press_time = now + LONG_PRESS_SECONDS
+
+    def _is_top_bar_menu_area(self, point):
+        from display.display import Display
+
+        x, y = point
+        return (
+            0 <= x < self.device.screen_width() / 3
+            and 0 <= y < Display.top_bar.get_top_bar_height()
+        )
 
     def _gesture(self):
         if self.swipe_steps or self.direct_drag or self.long_press_triggered:
             self._clear_pending_game_selection_tap()
+            self.last_popup_outside_tap = None
             self.last_scroll_bar_tap = None
             return
 
@@ -418,10 +450,35 @@ class TouchWatcher:
         if dist < TAP_MAX_MOVE_PX:
             if held >= LONG_PRESS_SECONDS:
                 self._clear_pending_game_selection_tap()
+                self.last_popup_outside_tap = None
                 self._inject(ControllerInput.B)
                 self.last_scroll_bar_tap = None
             else:
                 point = (lx, ly)
+                view = self._touch_navigation_view()
+                if hasattr(view, "touch_point_is_inside_popup"):
+                    self._clear_pending_game_selection_tap()
+                    if view.touch_point_is_inside_popup(point):
+                        self.last_popup_outside_tap = None
+                        self.last_scroll_bar_tap = None
+                        self._inject(ControllerInput.TOUCH_TAP, point)
+                        return
+
+                    now = time.monotonic()
+                    previous_tap = self.last_popup_outside_tap
+                    if (
+                        previous_tap is not None
+                        and previous_tap[0] is view
+                        and now - previous_tap[1] <= DOUBLE_TAP_SECONDS
+                    ):
+                        self.last_popup_outside_tap = None
+                        self._inject(ControllerInput.A)
+                        return
+
+                    self.last_popup_outside_tap = (view, now)
+                    return
+
+                self.last_popup_outside_tap = None
                 is_tab_tap, tab_input = self._top_bar_tab_input(point)
                 region = self._scroll_bar_region(point)
                 if is_tab_tap:
@@ -476,6 +533,7 @@ class TouchWatcher:
                     self._inject(tab_input)
         else:
             self._clear_pending_game_selection_tap()
+            self.last_popup_outside_tap = None
             self.last_scroll_bar_tap = None
 
     @staticmethod
