@@ -186,14 +186,14 @@ class TouchWatcher:
         if hasattr(view, "touch_edge_scroll_axis"):
             self.touch_edge_scroll_axis = view.touch_edge_scroll_axis()
             self.touch_edge_scroll_enabled = self.touch_edge_scroll_axis is not None
+        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
+            return
         if (
             hasattr(view, "touch_follows_finger_from_anywhere")
             and view.touch_follows_finger_from_anywhere()
         ):
             self.touch_drag_view = view
             self.touch_drag_index = view.selected
-            return
-        if hasattr(view, "touch_uses_dpad_swipe") and view.touch_uses_dpad_swipe(point):
             return
         starts_scroll = (
             view.touch_starts_scroll(point)
@@ -234,7 +234,9 @@ class TouchWatcher:
                     and self.touch_scroll_view.touch_scroll_other_axis_follows_finger()
                 ):
                     self.touch_drag_view = self.touch_scroll_view
-                    self.touch_drag_index = self.touch_scroll_view.touch_index_at(self.start[:2])
+                    self.touch_drag_index = self._touch_drag_index_at(
+                        self.touch_scroll_view, self.start[:2]
+                    )
                     self.touch_scroll_view = None
                     self._update_touch_drag(point)
                 return
@@ -296,12 +298,18 @@ class TouchWatcher:
             )
 
     def _update_touch_drag(self, point):
-        index = self.touch_drag_view.touch_index_at(point)
+        index = self._touch_drag_index_at(self.touch_drag_view, point)
         if index is None or index == self.touch_drag_index:
             return
 
         self._inject(ControllerInput.TOUCH_DRAG, point)
         self.touch_drag_index = index
+
+    @staticmethod
+    def _touch_drag_index_at(view, point):
+        if hasattr(view, "touch_drag_index_at"):
+            return view.touch_drag_index_at(point)
+        return view.touch_index_at(point)
 
     def _update_touch_edge_scroll(self, point):
         if not self.touch_edge_scroll_enabled:

@@ -326,7 +326,7 @@ class GridView(View):
                     self.correct_selected_for_off_list()
                     return Selection(self.get_selected_option(), ControllerInput.A, self.selected)
             elif Controller.last_input() == ControllerInput.TOUCH_DRAG:
-                hit = self.cell_at_touch_point(Controller.take_touch_point())
+                hit = self.touch_drag_index_at(Controller.take_touch_point())
                 if hit is not None:
                     self.selected = hit
                     self.correct_selected_for_off_list()
@@ -344,8 +344,23 @@ class GridView(View):
     def touch_index_at(self, point):
         return self.cell_at_touch_point(point)
 
+    def touch_drag_index_at(self, point):
+        if self.rows == 1 and self.touch_follows_finger_from_anywhere() and point is not None:
+            return self.cell_at_touch_point((point[0], Display.get_top_bar_height()))
+        return self.touch_index_at(point)
+
     def touch_follows_finger_from_anywhere(self):
         return len(self.options) <= self.rows * self.cols
+
+    def touch_uses_dpad_swipe(self, point):
+        if self.rows == 1 or point is None:
+            return False
+        y = point[1]
+        screen_height = Device.get_device().screen_height()
+        return (
+            y < Display.get_top_bar_height()
+            or y >= screen_height - Display.bottom_bar.get_bottom_bar_height()
+        )
 
     def touch_starts_scroll(self, point):
         index = self.touch_index_at(point)
