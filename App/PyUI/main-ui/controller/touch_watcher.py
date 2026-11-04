@@ -361,8 +361,12 @@ class TouchWatcher:
 
     def _inject(self, controller_input, touch_point=None):
         from controller.controller import Controller
+        view = Controller.touch_navigation_view
         if (
             Controller.ignore_vertical_touch_swipes
+            and view is not None
+            and hasattr(view, "touch_ignores_vertical_swipes")
+            and view.touch_ignores_vertical_swipes()
             and controller_input in (ControllerInput.DPAD_UP, ControllerInput.DPAD_DOWN)
         ):
             return

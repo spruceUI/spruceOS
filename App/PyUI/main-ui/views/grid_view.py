@@ -402,6 +402,9 @@ class GridView(View):
     def touch_edge_scroll_axis(self):
         return "horizontal" if self.rows == 1 else "vertical"
 
+    def touch_ignores_vertical_swipes(self):
+        return self.rows == 1
+
     def cell_at_touch_point(self, point):
         """Option index under a logical-space tap, or None (columns and rows as _render_cell lays them out)."""
         if point is None or not self.options:
