@@ -1,55 +1,31 @@
 #!/usr/bin/env python3
 """
 MiyooGamelist Generator — generates miyoogamelist.xml files for ROM systems.
-
-Replaces generate.sh + functions.sh with portable Python 3.10 code.
-Sends progress messages to PyUI via TCP socket on port 50980.
 """
 
 import json
 import os
 import re
-import socket
+import csv
+import time
+import shutil
 from html import escape as html_escape
 
+from display.display import Display
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 
-# ---------------------------------------------------------------------------
-# PyUI Messenger — progress display via TCP socket
-# ---------------------------------------------------------------------------
+def display_image_and_text(
+    image_path: str,
+    text: str,
+    size: int = 35,
+    img_y: int = 25,
+    text_y: int = 75,
+) -> None:
 
-class PyUiMessenger:
-    """Sends display messages to the PyUI realtime listener on port 50980."""
-
-    SOCKET_ADDR = b"\x0050980"
-
-    def send_message(self, json_str: str) -> None:
-        try:
-            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            s.settimeout(0.5)
-            s.connect(self.SOCKET_ADDR)
-            s.sendall((json_str + "\n").encode("utf-8"))
-            s.close()
-        except Exception:
-            pass
-
-    def display_image_and_text(
-        self,
-        image_path: str,
-        text: str,
-        size: int = 35,
-        img_y: int = 25,
-        text_y: int = 75,
-    ) -> None:
-        msg = json.dumps({
-            "cmd": "IMAGE_AND_TEXT",
-            "args": [image_path, text, str(size), str(img_y), str(text_y)],
-        })
-        self.send_message(msg)
-
-    def display_text(self, text: str) -> None:
-        msg = json.dumps({"cmd": "MESSAGE", "args": [text]})
-        self.send_message(msg)
-
+    Display.clear("")
+    Display.render_image_and_text(image_path, text, size, img_y, text_y)
+    Display.present()
 
 # ---------------------------------------------------------------------------
 # ROM Name Cleaner
@@ -149,25 +125,27 @@ class GamelistGenerator:
     """Generates miyoogamelist.xml files for all ROM systems."""
 
     EXCLUDED_SYSTEMS = {
-        "PORTS", "FBNEO", "MAME2003PLUS", "ARCADE", "NEOGEO",
+        "PORTS", "MAME2003PLUS", "ARCADE", "NEOGEO",
         "CPS1", "CPS2", "CPS3", "NAOMI", "ATOMISWAVE", "FFPLAY",
         "EASYRPG", "MSUMD", "SCUMMVM", "WOLF", "QUAKE", "DOOM",
     }
 
+    SPECIAL_SYSTEMS = {
+        "FBNEO",
+    }
+
     # Patterns used by delete_gamelist_files to skip certain directories
-    _DELETE_SKIP_PATTERNS = {".gamelists"} | EXCLUDED_SYSTEMS
+    _DELETE_SKIP_PATTERNS = {".gamelists"} | EXCLUDED_SYSTEMS | SPECIAL_SYSTEMS
 
     def __init__(
         self,
         roms_dir: str,
         emu_dir: str,
-        messenger: PyUiMessenger,
         image_path: str = "",
         log_path: str = "",
     ) -> None:
         self.roms_dir = roms_dir
         self.emu_dir = emu_dir
-        self.messenger = messenger
         self.image_path = image_path
         self.log_path = log_path
         self._log_lines: list[str] = []
@@ -191,7 +169,7 @@ class GamelistGenerator:
         self._log("MiyooGamelist Generator")
         self._log("=" * 40)
 
-        self.messenger.display_image_and_text(
+        display_image_and_text(
             self.image_path,
             "Generating miyoogamelist.xml files...\n\n"
             "Please be patient, as this can take a few minutes.",
@@ -203,7 +181,7 @@ class GamelistGenerator:
         try:
             emu_entries = sorted(os.listdir(self.emu_dir))
         except FileNotFoundError:
-            self.messenger.display_text("Error: Emu directory not found")
+            Display.display_message("Error: Emu directory not found", 500)
             self._log("ERROR: Emu directory not found")
             self._write_log()
             return
@@ -213,6 +191,7 @@ class GamelistGenerator:
             system_path = os.path.join(self.emu_dir, system_name)
             if not os.path.isdir(system_path):
                 continue
+
             if system_name in self.EXCLUDED_SYSTEMS:
                 self._log(f"SKIP {system_name}: excluded system")
                 continue
@@ -231,7 +210,7 @@ class GamelistGenerator:
 
             for rom_path in rom_dirs:
                 folder = os.path.basename(rom_path)
-                self.messenger.display_image_and_text(
+                display_image_and_text(
                     self.image_path,
                     f"Generating miyoogamelist.xml for {folder}...",
                 )
@@ -243,10 +222,12 @@ class GamelistGenerator:
         self._log(f"Done. Generated gamelists for {generated} systems.")
         self._write_log()
 
-        self.messenger.display_image_and_text(
+        display_image_and_text(
             self.image_path,
             f"Done! Generated gamelists for {generated} systems.",
         )
+
+        time.sleep(2)
 
     # ---- cleanup -----------------------------------------------------------
 
@@ -326,6 +307,10 @@ class GamelistGenerator:
             rom_path, rom_path, "./Imgs", extlist, rom_entries, name_count
         )
 
+        # Process special systems
+        if system_name in self.SPECIAL_SYSTEMS:
+            return self._generate_special(output_path, system_name, rom_entries)
+
         # Pass 2: write entries, using raw filename for ALL duplicates
         writer = GamelistXmlWriter()
         for file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned in rom_entries:
@@ -399,6 +384,59 @@ class GamelistGenerator:
 
             rom_entries.append((file_rel_path, img_rel_path, dedup_key, filename_no_ext, cleaned))
 
+    def _generate_special(
+        self, output_path: str, system_name: str, rom_entries: str
+    ) -> int:
+
+        cancelled = False
+        if os.path.exists(output_path):
+            self._log(f"WAIT {system_name}: waiting for user input")
+
+            while(True):
+                Display.display_message(f"{system_name} gamelist file detected.\nDo you want to overwrite it?\n\nA = Accept, B = Cancel", 1)
+
+                if(Controller.get_input()):
+                    if(Controller.last_input() == ControllerInput.A):
+                        # Backup last gamelist file, just in case
+                        shutil.copy(output_path, f"{output_path}.bak")
+                        break
+                    if(Controller.last_input() == ControllerInput.B):
+                        cancelled = True
+                        break
+
+        if cancelled:
+            self._log(f"SKIP {system_name}: cancelled by user")
+            return -1
+        else:
+            match system_name:
+                case "FBNEO":
+                    return self._generate_for_fbneo(output_path, rom_entries)
+                case _:
+                    return 0
+
+    def _generate_for_fbneo(self, output_path: str, rom_entries: str) -> int:
+        fbneo_csv = "/mnt/SDCARD/Emu/FBNEO/fbneo.csv"
+
+        csvgames = {}
+        with open(fbneo_csv, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+
+            for row in reader:
+                csvgames[row[0]] = row[1]
+
+        games_c = 0
+        game_writer = GamelistXmlWriter()
+        for file_rel_path, img_rel_path, _, filename_no_ext, _ in rom_entries:
+            try:
+                display_name = csvgames[f"{filename_no_ext}.zip"]
+                game_writer.add_entry(file_rel_path, display_name, img_rel_path)
+                games_c += 1
+            except KeyError:
+                continue
+
+        game_writer.write(output_path)
+
+        return games_c
 
 # ---------------------------------------------------------------------------
 # Entry point
@@ -408,12 +446,10 @@ def main() -> None:
     image_path = "/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
     roms_dir = "/mnt/SDCARD/Roms"
     emu_dir = "/mnt/SDCARD/Emu"
-
     log_path = "/mnt/SDCARD/App/MiyooGamelist/generate.log"
-    messenger = PyUiMessenger()
-    generator = GamelistGenerator(roms_dir, emu_dir, messenger, image_path, log_path)
-    generator.generate_all()
 
+    generator = GamelistGenerator(roms_dir, emu_dir, image_path, log_path)
+    generator.generate_all()
 
 if __name__ == "__main__":
     main()

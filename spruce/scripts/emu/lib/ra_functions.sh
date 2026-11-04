@@ -275,7 +275,7 @@ run_retroarch() {
 		"64-bit") export RA_BIN="${RA_BIN_64:-ra64.universal}" ;;
 	esac
 
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
+	use_igm="$(get_config_value '.menuOptions."In-Game Menu Settings".raInGameMenu.selected' "True")"
 
 	# Sync IGM flag file with config setting
 	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
@@ -284,6 +284,8 @@ run_retroarch() {
 	else
 		rm -f "$IGM_FLAG"
 	fi
+	[ -f /mnt/SDCARD/RetroArch/igm_items.json ] ||
+		/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh --now
 
 	export_spruce_theme_dir
 

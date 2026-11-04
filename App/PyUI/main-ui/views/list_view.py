@@ -116,6 +116,9 @@ class ListView(View):
     def touch_index_at(self, point):
         return self.row_at_touch_point(point)
 
+    def touch_edge_scroll_axis(self):
+        return "vertical"
+
     def touch_starts_scroll(self, point):
         index = self.touch_index_at(point)
         return index is not None and index != self.selected
@@ -123,11 +126,21 @@ class ListView(View):
     def touch_uses_dpad_swipe(self, point):
         return False
 
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dx) >= abs(dy):
+            return ControllerInput.DPAD_DOWN if dx > 0 else ControllerInput.DPAD_UP
+        return ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+
     def tap_index_at(self, point):
         return self.row_at_touch_point(point)
 
     def touch_scroll_step_size(self):
         return self.get_row_geometry()[1]
+
+    def touch_can_scroll(self, direction):
+        if direction in (ControllerInput.DPAD_UP, ControllerInput.DPAD_LEFT):
+            return self.current_top > 0
+        return self.current_top < max(0, len(self.options) - (self.current_bottom - self.current_top))
 
     def touch_scroll_selection_offset(self):
         return self.selected - self.current_top

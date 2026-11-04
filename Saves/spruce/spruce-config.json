@@ -306,28 +306,6 @@
             }
         },
         "Emulator Settings": {
-            "raInGameMenu": {
-                "display": "RA: use in-game menu",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "raIgmColorway": {
-                "display": "RA: in-game menu colors",
-                "description": "Themes may override this",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
-                "options": [
-                    "spruce",
-                    "mono",
-                    "red",
-                    "blue",
-                    "green",
-                    "purple"
-                ],
-                "selected": "spruce"
-            },
             "keepSavesBetweenCores": {
                 "display": "Transfer saves between cores",
                 "options": [
@@ -404,6 +382,167 @@
                 "devices": ["TRIMUI_SMART_PRO", "TRIMUI_SMART_PRO_S"],
                 "display": "Genesis Plus GX: enable widescreen",
                 "description": "use widescreen hacked core when available",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            }
+        },
+        "In-Game Menu Settings": {
+            "raInGameMenu": {
+                "display": "RA: use in-game menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "raIgmColorway": {
+                "display": "RA: in-game menu colors",
+                "description": "Themes may override this",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
+                "options": [
+                    "spruce",
+                    "mono",
+                    "red",
+                    "blue",
+                    "green",
+                    "purple"
+                ],
+                "selected": "spruce"
+            },
+            "igmResume": {
+                "display": "Show Resume",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmSave": {
+                "display": "Show Save state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmLoad": {
+                "display": "Show Load state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmFfSpeed": {
+                "display": "Show Fast-forward speed",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmReset": {
+                "display": "Show Reset",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmRetroarch": {
+                "display": "Show RetroArch menu",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmExit": {
+                "display": "Show Exit game",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmDisc": {
+                "display": "Show Disc swap",
+                "description": "Multi-disc games only",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmScreenshot": {
+                "display": "Show Screenshot",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmUndoSave": {
+                "display": "Show Undo save state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmUndoLoad": {
+                "display": "Show Undo load state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmShowFps": {
+                "display": "Show FPS toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmMute": {
+                "display": "Show Mute toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmRewind": {
+                "display": "Show Rewind toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmShader": {
+                "display": "Show Shader toggle",
+                "description": "Not on Miyoo Mini",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
                 "options": [
                     "True",
                     "False"
