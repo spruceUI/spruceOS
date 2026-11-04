@@ -196,6 +196,19 @@ class SettingsMenu(ABC):
                         )
         return option_list
 
+    @classmethod
+    def related_config_categories(cls, settings_name):
+        return [
+            category
+            for category in CfwSystemConfig.get_categories()
+            if category == settings_name or Language.settings_category(category) == settings_name
+        ]
+
+    def build_options_list_from_related_config_categories(self, settings_name):
+        option_list = []
+        for category in self.related_config_categories(settings_name):
+            option_list.extend(self.build_options_list_from_config_menu_options(category))
+        return option_list
 
 
 

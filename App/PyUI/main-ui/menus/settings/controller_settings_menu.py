@@ -53,4 +53,7 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
                 set_value_func=Device.get_device().get_system_config().set_input_rate_limit_ms,
             )
         )
+        option_list.extend(
+            self.build_options_list_from_related_config_categories(Language.controller_settings())
+        )
         return option_list
