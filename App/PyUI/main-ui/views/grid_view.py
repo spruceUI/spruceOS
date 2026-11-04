@@ -330,6 +330,14 @@ class GridView(View):
                 if hit is not None:
                     self.selected = hit
                     self.correct_selected_for_off_list()
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_UP:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_DOWN:
+                self.scroll_touch_by(-1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_LEFT:
+                self.scroll_touch_by(1)
+            elif Controller.last_input() == ControllerInput.TOUCH_SCROLL_RIGHT:
+                self.scroll_touch_by(-1)
 
         return Selection(self.get_selected_option(), None, self.selected)
 
@@ -337,7 +345,59 @@ class GridView(View):
         return self.cell_at_touch_point(point)
 
     def touch_follows_finger_from_anywhere(self):
-        return True
+        return len(self.options) <= self.rows * self.cols
+
+    def touch_starts_scroll(self, point):
+        index = self.touch_index_at(point)
+        return len(self.options) > self.rows * self.cols and index is not None and index != self.selected
+
+    def touch_scroll_axis(self):
+        return "horizontal" if self.rows == 1 else "vertical"
+
+    def touch_scroll_other_axis_follows_finger(self):
+        return self.rows > 1
+
+    def touch_scroll_step_size(self):
+        if self.rows == 1:
+            return self.usable_width / self.cols
+        return Display.get_usable_screen_height() / self.rows
+
+    def scroll_touch_by(self, amount, selection_offset=None):
+        if not self.options or len(self.options) <= self.rows * self.cols:
+            return
+
+        if selection_offset is None:
+            if self.rows == 1 and self.wrap_around_single_row:
+                selection_offset = (self.selected - self.current_left) % len(self.options)
+            else:
+                selection_offset = self.selected - self.current_left
+
+        if self.rows == 1:
+            if self.wrap_around_single_row:
+                self.current_left = (self.current_left + amount) % len(self.options)
+                self.current_right = (self.current_left + self.cols) % len(self.options)
+                self.selected = (self.current_left + selection_offset) % len(self.options)
+            else:
+                max_left = max(0, len(self.options) - self.cols)
+                self.current_left = max(0, min(max_left, self.current_left + amount))
+                self.current_right = min(len(self.options), self.current_left + self.cols)
+                self.selected = min(self.current_left + selection_offset, self.current_right - 1)
+            return
+
+        visible_capacity = self.rows * self.cols
+        max_left = max(
+            0,
+            ((len(self.options) - visible_capacity + self.cols - 1) // self.cols) * self.cols,
+        )
+        self.current_left = max(
+            0,
+            min(max_left, self.current_left + amount * self.cols),
+        )
+        self.current_right = min(len(self.options), self.current_left + visible_capacity)
+        self.selected = min(
+            self.current_left + selection_offset,
+            self.current_right - 1,
+        )
 
     def touch_edge_scroll_axis(self):
         return "horizontal" if self.rows == 1 else "vertical"

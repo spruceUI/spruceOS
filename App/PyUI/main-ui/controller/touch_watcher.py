@@ -26,8 +26,8 @@ ABS_MT_TRACKING_ID = 0x39
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
 LONG_PRESS_SECONDS = 0.6
-EDGE_SCROLL_INTERVAL_SECONDS = 0.35
-EDGE_SCROLL_MARGIN_RATIO = 0.10
+EDGE_SCROLL_INTERVAL_SECONDS = 0.25
+EDGE_SCROLL_MARGIN_RATIO = 0.15
 EDGE_SCROLL_MIN_MARGIN_PX = 24
 
 
@@ -132,6 +132,7 @@ class TouchWatcher:
         self.touch_scroll_view = None
         self.touch_scroll_step_size = 0
         self.touch_scroll_distance = 0
+        self.touch_scroll_axis = None
         self.touch_edge_scroll_enabled = False
         self.touch_edge_scroll_axis = None
         self.touch_edge_direction = None
@@ -199,6 +200,11 @@ class TouchWatcher:
         if starts_scroll and hasattr(view, "touch_scroll_step_size"):
             self.touch_scroll_view = view
             self.touch_scroll_step_size = max(1, view.touch_scroll_step_size())
+            self.touch_scroll_axis = (
+                view.touch_scroll_axis()
+                if hasattr(view, "touch_scroll_axis")
+                else "vertical"
+            )
         elif index == view.selected:
             self.touch_drag_view = view
             self.touch_drag_index = index
@@ -219,14 +225,40 @@ class TouchWatcher:
             sx, sy, _t0 = self.start
             if math.hypot(point[0] - sx, point[1] - sy) >= TAP_MAX_MOVE_PX:
                 self.direct_drag = True
-            if abs(dy) > abs(dx):
-                self.touch_scroll_distance -= dy
-                while self.touch_scroll_distance >= self.touch_scroll_step_size:
-                    self._inject(ControllerInput.TOUCH_SCROLL_UP)
-                    self.touch_scroll_distance -= self.touch_scroll_step_size
-                while self.touch_scroll_distance <= -self.touch_scroll_step_size:
-                    self._inject(ControllerInput.TOUCH_SCROLL_DOWN)
-                    self.touch_scroll_distance += self.touch_scroll_step_size
+            if self.touch_scroll_axis == "horizontal" and abs(dy) > abs(dx):
+                if (
+                    hasattr(self.touch_scroll_view, "touch_scroll_other_axis_follows_finger")
+                    and self.touch_scroll_view.touch_scroll_other_axis_follows_finger()
+                ):
+                    self.touch_drag_view = self.touch_scroll_view
+                    self.touch_drag_index = self.touch_scroll_view.touch_index_at(self.start[:2])
+                    self.touch_scroll_view = None
+                    self._update_touch_drag(point)
+                return
+            if self.touch_scroll_axis == "vertical" and abs(dx) > abs(dy):
+                if (
+                    hasattr(self.touch_scroll_view, "touch_scroll_other_axis_follows_finger")
+                    and self.touch_scroll_view.touch_scroll_other_axis_follows_finger()
+                ):
+                    self.touch_drag_view = self.touch_scroll_view
+                    self.touch_drag_index = self.touch_scroll_view.touch_index_at(self.start[:2])
+                    self.touch_scroll_view = None
+                    self._update_touch_drag(point)
+                return
+            delta = dx if self.touch_scroll_axis == "horizontal" else dy
+            self.touch_scroll_distance -= delta
+            if self.touch_scroll_axis == "horizontal":
+                forward_input = ControllerInput.TOUCH_SCROLL_LEFT
+                backward_input = ControllerInput.TOUCH_SCROLL_RIGHT
+            else:
+                forward_input = ControllerInput.TOUCH_SCROLL_UP
+                backward_input = ControllerInput.TOUCH_SCROLL_DOWN
+            while self.touch_scroll_distance >= self.touch_scroll_step_size:
+                self._inject(forward_input)
+                self.touch_scroll_distance -= self.touch_scroll_step_size
+            while self.touch_scroll_distance <= -self.touch_scroll_step_size:
+                self._inject(backward_input)
+                self.touch_scroll_distance += self.touch_scroll_step_size
             return
 
         if dx == 0 and dy == 0:
