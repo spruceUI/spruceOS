@@ -1,7 +1,7 @@
 {
   "label": "Gamelist.xml",
   "icon": "gamelist.png",
-  "launch": "launch.sh",
+  "pyuiEntry": "generate:main",
   "description": "Clean up displayed rom names",
   "hideInSimpleMode": true
 }
