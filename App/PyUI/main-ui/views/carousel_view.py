@@ -502,7 +502,7 @@ class CarouselView(View):
             return None
 
     def get_selection(self, select_controller_inputs = [ControllerInput.A]):
-        Controller.touch_navigation_view = None
+        Controller.touch_navigation_view = self
         self._render()
         
         if(Controller.get_input()):
@@ -548,6 +548,18 @@ class CarouselView(View):
                 return Selection(self.get_selected_option(),Controller.last_input(), self.selected)
                 
         return Selection(self.get_selected_option(),None, self.selected)
+
+    def touch_index_at(self, point):
+        return None
+
+    def touch_swipe_direction(self, dx, dy):
+        if self.veritcal_carousel:
+            if abs(dx) >= abs(dy):
+                return None
+            return ControllerInput.DPAD_UP if dy > 0 else ControllerInput.DPAD_DOWN
+        if abs(dy) > abs(dx):
+            return None
+        return ControllerInput.DPAD_LEFT if dx > 0 else ControllerInput.DPAD_RIGHT
 
     def touch_option_at_point(self, point):
         if point is None or self.prev_visible_options is None:
