@@ -11,6 +11,7 @@
     "ignoreMenuCombinationPresses": true,
     "gameSwitcherPath": "/mnt/SDCARD/Saves/gameswitcher.json",
     "cfwTasks": "/mnt/SDCARD/App/PyUI/spruce-tasks.json",
+    "verboseLoggingSetting": ["System Settings", "verbosePyuiLogging"],
     "cheevosRemoveCmd":"/mnt/SDCARD/spruce/scripts/raproxyRemoveCached.sh",
     "raproxyCliCmd":"/mnt/SDCARD/spruce/scripts/raproxyCli.sh",
     "activityLogPath":"/mnt/SDCARD/Saves/spruce/activity.jsonl",
@@ -57,6 +58,10 @@
             "displayKey":"aboutDsperateVersion",
             "cmd":"/mnt/SDCARD/App/PyUI/about-entries/get-dsperate-version.sh",
             "devices": ["MIYOO_A30", "MIYOO_FLIP", "TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "DARKMOSS", "ANBERNIC_RGXX", "OAKMOSS_A133P", "GKD_PIXEL2"]
+        },
+        {
+            "display": "Cheevos version",
+            "cmd": "sed -n 's/^__version__ = \"\\([^\"]*\\)\"$/\\1/p' /mnt/SDCARD/App/Cheevos/cheevos/__init__.py"
         },
         {
             "display":"SD Card usage",

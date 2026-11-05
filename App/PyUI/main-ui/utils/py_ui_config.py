@@ -301,6 +301,10 @@ class PyUiConfig:
         return cls.get("launchInPyUiCmd",None)
 
     @classmethod
+    def get_verbose_logging_setting(cls):
+        return cls.get("verboseLoggingSetting", None)
+
+    @classmethod
     def get_realtime_message_port(cls):
         return cls.get("realtimeMessagePort",None)
 

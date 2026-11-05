@@ -1,8 +1,10 @@
 import json
+import logging
 import shlex
 import subprocess
 
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 class CfwSystemConfig():
     _data = {}
@@ -21,6 +23,18 @@ class CfwSystemConfig():
                     cls._data = json.load(f)
         except Exception:
             cls._data = {}
+
+        level = cls.get_log_level()
+        if level is not None:
+            PyUiLogger.set_level(level)
+
+    @classmethod
+    def get_log_level(cls):
+        setting = PyUiConfig.get_verbose_logging_setting()
+        if setting is None:
+            return None
+        category, name = setting
+        return logging.DEBUG if cls.get_selected_value(category, name) == "True" else logging.WARNING
 
     @classmethod
     def save_config(cls):
