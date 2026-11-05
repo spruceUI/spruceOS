@@ -441,14 +441,14 @@ class DeviceUserConfig:
         self.save_config()
 
     def game_selection_only_mode_enabled(self):
-        return self.config.get("gameSelectionOnlyMode", False)
+        return self.config.get("gameSelectionOnlyMode", False) or self.kid_mode_enabled()
 
     def set_game_selection_only_mode_enabled(self,value):
         self.config["gameSelectionOnlyMode"] = value
         self.save_config()
 
     def simple_mode_enabled(self):
-        return self.config.get("simpleMode", False) or self.kid_mode_enabled()
+        return self.config.get("simpleMode", False)
 
     def set_simple_mode_enabled(self,value):
         self.config["simpleMode"] = value

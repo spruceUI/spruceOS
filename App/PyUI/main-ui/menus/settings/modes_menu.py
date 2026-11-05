@@ -41,7 +41,7 @@ class ModesMenu(settings_menu.SettingsMenu):
         if(ControllerInput.A == input):
             if UserPrompt.prompt_yes_no(Language.label("kidModeTitle", "Kid Mode"),
                                         [Language.label("kidModePrompt1", "Would you like to enter kid mode?"),
-                                         Language.label("kidModePrompt2", "Simple mode with games shown by box art"),
+                                         Language.label("kidModePrompt2", "Boot straight into games shown by box art"),
                                          Language.label("kidModePrompt3", "To exit enter the Konami Code"), 
                                          "↑↑↓↓←→←→BA,START,SELECT"]):
                 Device.get_device().get_system_config().set_kid_mode_enabled(True)
