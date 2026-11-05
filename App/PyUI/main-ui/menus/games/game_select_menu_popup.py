@@ -87,6 +87,8 @@ class GameSelectMenuPopup:
             return SearchGamesForSystemMenu(game_system, search_txt.upper()).run_rom_selection()
 
     def toggle_view(self):
+        if Device.get_device().get_system_config().kid_mode_enabled():
+            return
         CYCLE_VIEWS = [
             ViewType.TEXT_ONLY,
             ViewType.TEXT_AND_IMAGE,

@@ -448,10 +448,17 @@ class DeviceUserConfig:
         self.save_config()
 
     def simple_mode_enabled(self):
-        return self.config.get("simpleMode", False)
+        return self.config.get("simpleMode", False) or self.kid_mode_enabled()
 
     def set_simple_mode_enabled(self,value):
         self.config["simpleMode"] = value
+        self.save_config()
+
+    def kid_mode_enabled(self):
+        return self.config.get("kidMode", False)
+
+    def set_kid_mode_enabled(self,value):
+        self.config["kidMode"] = value
         self.save_config()
 
     def get_preferred_region(self):
