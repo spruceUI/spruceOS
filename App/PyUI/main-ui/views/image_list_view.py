@@ -36,6 +36,15 @@ class ImageListView(NonDescriptiveListView):
         self.selected_same_entry_time = time.time()
         self.space_width, self.char_height = Display.get_text_dimensions(FontPurpose.LIST," ")
 
+    def get_row_geometry(self):
+        if self.text_to_image_relationship == TextToImageRelationship.BELOW_IMAGE:
+            y_pad = 20
+            return (
+                Display.get_top_bar_height() + y_pad * 2 + self.img_height,
+                self.line_height
+            )
+        return super().get_row_geometry()
+
     def _render_text(self, visible_options):
         for visible_index, (imageTextPair) in enumerate(visible_options):
             actual_index = self.current_top + visible_index
@@ -178,21 +187,31 @@ class ImageListView(NonDescriptiveListView):
             return self.img_offset_x
 
     def game_art_bounds(self):
+        art_width = self.img_width
+        art_height = self.img_height
+        if self.options and 0 <= self.selected < len(self.options):
+            image_path = self.options[self.selected].get_image_path_ideal(self.img_width, self.img_height)
+            source_width, source_height = Display.get_image_dimensions(image_path)
+            if source_width > 0 and source_height > 0:
+                scale = min(self.img_width / source_width, self.img_height / source_height)
+                art_width = int(source_width * scale)
+                art_height = int(source_height * scale)
+
         if XRenderOption.LEFT == self.image_render_mode.x_mode:
             left = self.img_offset_x
         elif XRenderOption.RIGHT == self.image_render_mode.x_mode:
-            left = self.img_offset_x - self.img_width
+            left = self.img_offset_x - art_width
         else:
-            left = self.img_offset_x - self.img_width // 2
+            left = self.img_offset_x - art_width // 2
 
         if YRenderOption.TOP == self.image_render_mode.y_mode:
             top = self.img_offset_y
         elif YRenderOption.BOTTOM == self.image_render_mode.y_mode:
-            top = self.img_offset_y - self.img_height
+            top = self.img_offset_y - art_height
         else:
-            top = self.img_offset_y - self.img_height // 2
+            top = self.img_offset_y - art_height // 2
 
-        return left, top, left + self.img_width, top + self.img_height
+        return left, top, left + art_width, top + art_height
 
     def point_is_in_game_art_area(self, point):
         if point is None:
