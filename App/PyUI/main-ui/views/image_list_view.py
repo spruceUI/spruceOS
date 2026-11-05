@@ -242,6 +242,20 @@ class ImageListView(NonDescriptiveListView):
     def touch_uses_dpad_swipe(self, point):
         return self.point_is_in_game_art_area(point)
 
+    def touch_edge_scroll_bounds(self):
+        if self.text_to_image_relationship == TextToImageRelationship.BELOW_IMAGE:
+            row_top, line_height = self.get_row_geometry()
+            return (
+                self.img_offset_y + self.img_height,
+                row_top + (self.current_bottom - self.current_top) * line_height
+            )
+        if self.text_to_image_relationship == TextToImageRelationship.ABOVE_IMAGE:
+            return (
+                self.base_y_offset,
+                self.img_offset_y - self.img_height
+            )
+        return None
+
     def touch_swipe_direction(self, dx, dy):
         if abs(dx) >= abs(dy):
             return super().touch_swipe_direction(dx, dy)
