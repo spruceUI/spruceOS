@@ -20,6 +20,15 @@
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
 	[ "$disable_wifi_in_game" = "True" ] || return 0
+	# Only RetroArch goes through the proxy, and only for systems RetroAchievements supports
+	case "$CORE" in *standalone*) return 0 ;; esac
+	case "$EMU_NAME" in
+		ARCADE|ARDUBOY|ATARI|COLECO|CPC|CPS1|CPS2|CPS3|DC|FAIRCHILD|FBNEO|FC|FDS|GB|GBA|GBC|GG|\
+		INTELLIVISION|JAGUAR|LYNX|MAME2003PLUS|MD|MEGADUCK|MS|MSU1|MSUMD|MSX|N64|NEOCD|NEOGEO|\
+		NGP|NGPC|ODYSSEY|PCE|PCECD|POKE|PS|SATELLAVIEW|SATURN|SEGACD|SEGASGONE|SEVENTYEIGHTHUNDRED|\
+		SFC|SGB|SGFX|SUFAMI|SUPERVISION|THIRTYTWOX|VB|VECTREX|VIDEOPAC|WS|WSC) ;;
+		*) return 0 ;;
+	esac
 	. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 	raproxy_rom_is_cached "$ROM_FILE" && return 0
 
