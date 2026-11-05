@@ -12,8 +12,8 @@ from utils.logger import PyUiLogger
 class ViewCreator:
 
     @staticmethod
-    def get_usable_height_for_text_above_or_below_image(img_height, y_pad):
-        return Display.get_usable_screen_height() - y_pad - img_height
+    def get_usable_height_for_text_above_or_below_image(img_height, y_pad, y_pad_count=1):
+        return Display.get_usable_screen_height() - y_pad * y_pad_count - img_height
 
     @staticmethod
     def create_view(view_type: ViewType,
@@ -110,7 +110,7 @@ class ViewCreator:
                     img_offset_y = Display.get_top_bar_height() + y_pad
                     image_render = RenderMode.TOP_CENTER_ALIGNED
                     text_to_image_relationship = TextToImageRelationship.BELOW_IMAGE
-                    usable_height = ViewCreator.get_usable_height_for_text_above_or_below_image(img_height, y_pad)
+                    usable_height = ViewCreator.get_usable_height_for_text_above_or_below_image(img_height, y_pad, 2)
 
                 elif text_and_image_list_view_mode == "TEXT_ABOVE_IMAGE":
                     img_height = Theme.get_img_height_for_top_bottom_view()
