@@ -78,6 +78,17 @@ fi
 
 WIFI_IFACE="wlan0"
 
+# On the TSPS a start straight after the driver creates wlan0 can fail
+start_wpa_supplicant() {
+    _try=0
+    until _err="$(wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE" 2>&1)"; do
+        _try=$((_try + 1))
+        log_message "wpa_supplicant failed to start (try $_try): $(echo "$_err" | tr '\n' ' ')"
+        [ "$_try" -ge 5 ] && return 1
+        sleep 1
+    done
+}
+
 enable_wifi() {
     # A device without a radio has nothing to power, recover, associate or
     # lease. Refusing here covers every path in, since they all go through wifi.sh.
@@ -182,11 +193,11 @@ enable_wifi() {
             log_message "wpa_supplicant was running with the correct conf file already"
         else
             sleep 1
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+            start_wpa_supplicant
             log_message "wpa_supplicant was running with the wrong conf so restarted"
         fi
     else    # wpa_supplicant was not running at all, so start it
-        wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
+        start_wpa_supplicant
         log_message "Launching wpa_supplicant"
     fi
     device_start_dhcp_client
