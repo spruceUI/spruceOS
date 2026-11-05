@@ -73,7 +73,7 @@ class ImageListView(NonDescriptiveListView):
                 text_available_width = self.get_img_x_starting() - text_pad*2
 
             y_value += visible_index * self.line_height
-            text_x_value = x_value + text_pad
+            text_x_value = x_value if render_mode.x_mode == XRenderOption.CENTER else x_value + text_pad
             selected_x_value = 0
 
             #Do these work?
@@ -126,12 +126,34 @@ class ImageListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            if(imageTextPair.get_icon() is not None):
-                icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
-                text_x_value += icon_width + 5 #TODO get 5 from somewhere
-                text_available_width -= icon_width
+            display_text = self.scroll_string(imageTextPair.get_primary_text(), scroll_amt, text_available_width)
+            icon = imageTextPair.get_icon()
+            if icon is not None:
+                if render_mode.x_mode == XRenderOption.CENTER:
+                    icon_width, _ = Display.get_image_dimensions(icon)
+                    text_width, _ = Display.get_text_dimensions(FontPurpose.LIST, display_text)
+                    text_is_clipped = text_available_width is not None and text_width > text_available_width
+                    if text_available_width is not None:
+                        text_width = min(text_width, text_available_width)
+                    icon_x = x_value - text_width // 2 - 5 - icon_width
+                    icon_shift = max(0, text_pad - icon_x)
+                    if text_is_clipped:
+                        icon_shift = (icon_shift + 1) // 2
+                    icon_x += icon_shift
+                    text_x_value += icon_shift
+                    if icon_shift and text_available_width is not None:
+                        screen_width = Device.get_device().screen_width()
+                        right_text_width = max(0, 2 * (screen_width - text_pad - text_x_value))
+                        text_available_width = min(text_available_width, right_text_width)
+                    if text_is_clipped:
+                        icon_x = text_x_value - text_available_width // 2 - 5 - icon_width
+                    Display.render_image(icon, icon_x, y_value, RenderMode.MIDDLE_LEFT_ALIGNED)
+                else:
+                    icon_width, _ = Display.render_image(icon, text_x_value, y_value, render_mode)
+                    text_x_value += icon_width + 5 #TODO get 5 from somewhere
+                    text_available_width -= icon_width
 
-            Display.render_text(self.scroll_string(imageTextPair.get_primary_text(),scroll_amt, text_available_width), text_x_value, y_value, color, FontPurpose.LIST,
+            Display.render_text(display_text, text_x_value, y_value, color, FontPurpose.LIST,
                                     render_mode, crop_w=text_available_width, crop_h=None)
         self.prev_index = self.selected
 
