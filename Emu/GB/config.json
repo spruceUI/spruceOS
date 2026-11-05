@@ -20,9 +20,10 @@
     "Emulator": {
       "display": "Retroarch Core",
       "options": [
+        "armgba",
         "gambatte",
         "mgba",
-        "armgba"
+        "pokedaisy"
       ],
       "selected": "gambatte",
       "overrides": {}

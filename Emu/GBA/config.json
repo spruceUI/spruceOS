@@ -22,7 +22,8 @@
       "options": [
         "armgba",
         "gpsp",
-        "mgba"
+        "mgba",
+        "pokedaisy"
       ],
       "selected": "armgba",
       "overrides": {}
