@@ -30,7 +30,7 @@ ensure_dev_fd() {
 }
 
 ensure_dev_shm() {
-    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+    if [ -d /dev/shm ] && grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
         return 0
     fi
     mkdir -p /dev/shm 2>/dev/null || return 1
