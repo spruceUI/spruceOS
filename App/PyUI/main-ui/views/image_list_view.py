@@ -11,6 +11,7 @@ from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
+from views.text_utils import TextUtils
 
 class ImageListView(NonDescriptiveListView):
     def __init__(self, top_bar_text,
@@ -126,12 +127,20 @@ class ImageListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            display_text = self.scroll_string(imageTextPair.get_primary_text(), scroll_amt, text_available_width)
+            primary_text = imageTextPair.get_primary_text()
+            if render_mode.x_mode == XRenderOption.CENTER and Theme.scroll_rom_selection_text():
+                display_text = TextUtils.scroll_string_centered(
+                    primary_text,
+                    scroll_amt,
+                    text_available_width
+                )
+            else:
+                display_text = self.scroll_string(primary_text, scroll_amt, text_available_width)
             icon = imageTextPair.get_icon()
             if icon is not None:
                 if render_mode.x_mode == XRenderOption.CENTER:
                     icon_width, _ = Display.get_image_dimensions(icon)
-                    text_width, _ = Display.get_text_dimensions(FontPurpose.LIST, display_text)
+                    text_width, _ = Display.get_text_dimensions(FontPurpose.LIST, primary_text)
                     text_is_clipped = text_available_width is not None and text_width > text_available_width
                     if text_available_width is not None:
                         text_width = min(text_width, text_available_width)
