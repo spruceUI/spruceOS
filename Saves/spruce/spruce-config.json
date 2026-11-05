@@ -1188,6 +1188,15 @@
             }
         },
         "System Settings": {
+            "verbosePyuiLogging": {
+                "display": "Verbose PyUI logging",
+                "description": "off: warnings and errors; on: debug details",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
             "ledMode": {
                 "display": "Power indicator LED mode",
                 "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "OAKMOSS_A133P", "RGB30", "RGB20SX", "RG353M"],
