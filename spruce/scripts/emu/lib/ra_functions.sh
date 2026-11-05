@@ -276,6 +276,8 @@ run_retroarch() {
 	esac
 
 	use_igm="$(get_config_value '.menuOptions."In-Game Menu Settings".raInGameMenu.selected' "True")"
+	simple_mode="$(jq -r '(.simpleMode // false) or (.kidMode // false)' "$SYSTEM_JSON" 2>/dev/null)"
+	[ "$simple_mode" = "true" ] && use_igm="True"
 
 	# Sync IGM flag file with config setting
 	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
@@ -284,8 +286,18 @@ run_retroarch() {
 	else
 		rm -f "$IGM_FLAG"
 	fi
-	[ -f /mnt/SDCARD/RetroArch/igm_items.json ] ||
+	IGM_ITEMS="/mnt/SDCARD/RetroArch/igm_items.json"
+	[ -f "$IGM_ITEMS" ] ||
 		/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh --now
+	# Simple and Kid Mode hide the RetroArch Menu entry; the user's list waits in .simple.
+	if [ "$simple_mode" = "true" ]; then
+		[ -f "$IGM_ITEMS.simple" ] || cp -f "$IGM_ITEMS" "$IGM_ITEMS.simple"
+		_items="$(jq -c '[.items[] | select(. != "retroarch")]' "$IGM_ITEMS.simple" 2>/dev/null)"
+		case "$_items" in ""|"[]") _items='["resume","save","load","reset","exit"]' ;; esac
+		echo "{\"items\":$_items}" > "$IGM_ITEMS.tmp" && mv -f "$IGM_ITEMS.tmp" "$IGM_ITEMS"
+	elif [ -f "$IGM_ITEMS.simple" ]; then
+		mv -f "$IGM_ITEMS.simple" "$IGM_ITEMS"
+	fi
 
 	export_spruce_theme_dir
 
