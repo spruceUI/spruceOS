@@ -173,6 +173,19 @@ for _ini in /mnt/SDCARD/Saves/dsperate/*.ini; do
     add_dsperate_path "$_ini" analog_cheats /mnt/SDCARD/Emu/NDS/cheats/usrcheat-analog.dat || exit 1
 done
 
+# Touch now reaches the RetroArch menu on the XU20 and Zero40: pointer on, mouse off.
+# Once per card, as nightlies rerun this script and the user may turn the mouse back on.
+_ra_touch_done=/mnt/SDCARD/Saves/spruce/.ra-menu-touch-set
+if [ ! -f "$_ra_touch_done" ]; then
+    for _cfg in /mnt/SDCARD/Saves/ra-configs/retroarch-XU20.cfg /mnt/SDCARD/Saves/ra-configs/retroarch-Zero40.cfg; do
+        [ -f "$_cfg" ] || continue
+        sed -i -e 's/^menu_pointer_enable = "false"$/menu_pointer_enable = "true"/' \
+            -e 's/^menu_mouse_enable = "true"$/menu_mouse_enable = "false"/' "$_cfg"
+        log_message "4.5.7: RetroArch menu touch on in $_cfg"
+    done
+    touch "$_ra_touch_done"
+fi
+
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
