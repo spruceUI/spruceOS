@@ -33,6 +33,7 @@ log_message "---------Starting up---------"
 write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
+activate_python_stdlib_zip      # before anything starts Python
 
 # Extra cores stay up through the boot; the first set_smart offlines them.
 set_performance --no-offline
