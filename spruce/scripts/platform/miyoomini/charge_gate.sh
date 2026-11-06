@@ -15,14 +15,12 @@
 #   CG_IDLE_TICKS without a press       darken the screen and wait, as the stock charge screen does; on the boards
 #                                       without a PMIC USB holds the board up, so a power-off would only start it again
 #
-# Opt-in for now: only with spruce/flags/charge_gate present. Anything missing or unexpected means the boot continues
-# as if this script did not exist.
+# Anything missing or unexpected means the boot continues as if this script did not exist.
 
 CG_SD=/mnt/SDCARD
 CG_AXP_READ="$CG_SD/spruce/miyoomini/bin/axp_read"
 CG_GETEVENT="$CG_SD/spruce/miyoomini/bin/getevent"
 CG_FRAMES="$CG_SD/spruce/miyoomini/charge"
-CG_FLAG="$CG_SD/spruce/flags/charge_gate"
 CG_LOG="$CG_SD/Saves/spruce/charge_gate.log"
 CG_STATE=/tmp/charge_gate
 CG_KEYS=/dev/input/event0
@@ -376,7 +374,6 @@ cg_run() {
 }
 
 cg_main() {
-    [ -f "$CG_FLAG" ] || return 0
     cg_reg 0x00 >/dev/null && CG_PMIC=1
     cg_charger_started || return 0
     cg_pick_frames || return 0
