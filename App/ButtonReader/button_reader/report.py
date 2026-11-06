@@ -5,7 +5,7 @@ import os
 import time
 
 from button_reader import VERSION, emulator_maps
-from button_reader.names import EV_ABS, EV_KEY, HAT_FIRST, HAT_LAST, abs_name, key_name
+from button_reader.names import EV_ABS, EV_KEY, HAT_FIRST, HAT_LAST, abs_name, face_print_text, key_name
 
 ENV_PREFIXES = ("B_", "STICK_", "EVENT_PATH_", "DEVICE_NUM_ANALOG_STICKS", "SDL_GAMECONTROLLER",
                 "PLATFORM", "PYUI_", "CONTROLLER_")
@@ -52,6 +52,7 @@ class Report:
         self.line(f"Button Reader {VERSION} report (verbose)")
         self.line(f"date (device clock): {time.strftime('%Y-%m-%d %H:%M:%S')}   uptime: {(_read('/proc/uptime') or '?').strip()}")
         self.line(f"platform: {session.platform}   PyUI device: {session.device_desc}")
+        self.line(f"face buttons: {face_print_text(session.platform)} (the step prompts name both)")
         model = (_read("/proc/device-tree/model", "rb") or b"?").rstrip(b"\0").decode("utf-8", "replace")
         self.line(f"model: {model}   kernel: {os.uname().release} {os.uname().machine}")
         for path in ["/sys/firmware/fdt"] + sorted(glob.glob("/boot/*.dtb*")):
@@ -134,7 +135,7 @@ class Report:
 
     def finish(self, session):
         self.line()
-        self.line("--- steps (positions are spruce's: A right, B bottom, X top, Y left)")
+        self.line("--- steps (the cfg is by position: B_A right, B_B bottom, B_X top, B_Y left)")
         for result in session.step_results:
             self.line(f"{result['verdict']:9} {result['prompt']:46} expected {result['want']}; got {result['got']}")
         self.line()

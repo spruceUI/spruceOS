@@ -48,6 +48,12 @@ LABELS = {"A": "A", "B": "B", "X": "X", "Y": "Y", "DPAD_UP": "Up", "DPAD_DOWN": 
           "DPAD_LEFT": "Left", "DPAD_RIGHT": "Right", "L1": "L1", "R1": "R1", "L2": "L2",
           "R2": "R2", "L3": "L3", "R3": "R3", "SELECT": "Select", "START": "Start", "MENU": "Menu",
           "HOME": "Home", "VOLUME_UP": "Vol+", "VOLUME_DOWN": "Vol-", "POWER_BUTTON": "Power"}
+# The letter printed at each face position. Nintendo unless the platform is listed in XBOX_PRINT;
+# the codes and the cfg stay by position either way.
+FACE_DIRECTION = {"BOTTOM": "SOUTH", "RIGHT": "EAST", "TOP": "NORTH", "LEFT": "WEST"}
+FACE_PRINT = {"nintendo": {"BOTTOM": "B", "RIGHT": "A", "TOP": "X", "LEFT": "Y"},
+              "xbox": {"BOTTOM": "A", "RIGHT": "B", "TOP": "Y", "LEFT": "X"}}
+XBOX_PRINT = {"XU10"}
 # (stick, cfg variable for right, cfg variable for down, default X axis, default Y axis)
 STICKS = [("LEFT", "STICK_RIGHT", "STICK_DOWN", 0, 1), ("RIGHT", "STICK_RIGHT_2", "STICK_DOWN_2", 3, 4)]
 PYUI_STICK = {"LEFT_STICK_LEFT": ("LEFT", "x", -1), "LEFT_STICK_RIGHT": ("LEFT", "x", 1),
@@ -70,6 +76,21 @@ def control_name(control):
     if etype == EV_KEY:
         return key_name(code)
     return f"{abs_name(code)}{'+' if sign > 0 else '-'}"
+
+
+def face_print(platform):
+    return "xbox" if platform in XBOX_PRINT else "nintendo"
+
+
+def face_print_text(platform):
+    """'nintendo print: B bottom, A right, X top, Y left'."""
+    letters = FACE_PRINT[face_print(platform)]
+    return f"{face_print(platform)} print: " + ", ".join(f"{letters[s]} {s.lower()}" for s in FACE_DIRECTION)
+
+
+def face_prompt(slot, platform):
+    """'Press FACE_NORTH/X': the position, then the letter this device prints there."""
+    return f"Press FACE_{FACE_DIRECTION[slot]}/{FACE_PRINT[face_print(platform)][slot]}"
 
 
 def signed(value):

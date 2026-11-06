@@ -9,8 +9,8 @@ import time
 
 from button_reader import VERSION, evdev, hardware, picture
 from button_reader.names import (EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS,
-                                 STICKS, SW_NAMES, Names, abs_name, cfg_spec, pyui_tables, sign,
-                                 spec_control, stick_axis)
+                                 STICKS, SW_NAMES, Names, abs_name, cfg_spec, face_print_text, face_prompt,
+                                 pyui_tables, sign, spec_control, stick_axis)
 
 EXIT_HOLD = 10.0
 COUNTDOWN_AFTER = 3.0
@@ -24,8 +24,8 @@ MIN_FRAME = 1 / 30.0
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXIT_HINT = "Exit: hold a button 10 s, or Select+Start"
 
-KEY_STEPS = [("BOTTOM", "Press the BOTTOM face button"), ("RIGHT", "Press the RIGHT face button"),
-             ("TOP", "Press the TOP face button"), ("LEFT", "Press the LEFT face button"),
+# A face step's prompt (None here) is names.face_prompt: FACE_SOUTH/B, or FACE_SOUTH/A on an Xbox print.
+KEY_STEPS = [("BOTTOM", None), ("RIGHT", None), ("TOP", None), ("LEFT", None),
              ("DPAD_UP", "Press D-pad UP"), ("DPAD_DOWN", "Press D-pad DOWN"),
              ("DPAD_LEFT", "Press D-pad LEFT"), ("DPAD_RIGHT", "Press D-pad RIGHT"),
              ("L1", "Press L1 (upper left shoulder)"), ("R1", "Press R1 (upper right shoulder)"),
@@ -181,7 +181,8 @@ class Session:
     # --- logging
 
     def log_inventory(self):
-        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {self.platform} ({self.device_desc})")
+        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {self.platform} ({self.device_desc}), "
+                      f"{face_print_text(self.platform)}")
         for info in self.infos:
             node = info.node
             self.log.info(f"Button Reader: {info.summary()}")
@@ -319,6 +320,7 @@ class Session:
         for slot, prompt in KEY_STEPS:
             if slot in names.absent or (slot == "HOME" and not names.controls_of("HOME")):
                 continue
+            prompt = prompt or face_prompt(slot, self.platform)
             steps.append(("key", slot, prompt, SLOT_VAR[slot], spec_control(cfg_spec(SLOT_VAR[slot], self.env))))
         count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
         sticks = int(count) if count.isdigit() else sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
