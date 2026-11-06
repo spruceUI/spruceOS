@@ -17,6 +17,7 @@ COUNTDOWN_AFTER = 3.0
 START_WINDOW = 3.0
 STEP_TIMEOUT = 15.0
 SETTLE_MAX = 3.0
+SETTLE_QUIET = 0.1  # at rest this long before the next step asks: outlasts a switch's release bounce
 RELEASE_WAIT = 3.0
 RESCAN_SECONDS = 2.0
 REDRAW_SECONDS = 0.25
@@ -170,6 +171,7 @@ class Session:
         self.pad_paths = {os.path.realpath(p) for p in pad_paths if p and os.path.exists(p)}
         self.exit_hold, self.countdown_after, self.start_window = EXIT_HOLD, COUNTDOWN_AFTER, START_WINDOW
         self.step_timeout, self.settle_max, self.release_wait = STEP_TIMEOUT, SETTLE_MAX, RELEASE_WAIT
+        self.settle_quiet, self.rest_since = SETTLE_QUIET, None
         self.started = self.clock()
         self.mode, self.mode_since = "start", self.started
         self.verbose, self.report, self.report_path = False, None, None
@@ -359,8 +361,13 @@ class Session:
 
     def tick_steps(self, now):
         if self.phase == "settle":
-            if self.at_rest() or now - self.phase_since > self.settle_max:
-                self.phase, self.phase_since, self.dirty = "ask", now, True
+            if not self.at_rest():
+                self.rest_since = None
+            elif self.rest_since is None:
+                self.rest_since = now
+            quiet = self.rest_since is not None and now - self.rest_since >= self.settle_quiet
+            if quiet or now - self.phase_since > self.settle_max:
+                self.phase, self.phase_since, self.dirty, self.rest_since = "ask", now, True, None
                 self.event_line(f"step {self.step_i + 1}: {self.steps[self.step_i][2]}")
             return
         kind, role, _prompt, _var, _expected = self.steps[self.step_i]
