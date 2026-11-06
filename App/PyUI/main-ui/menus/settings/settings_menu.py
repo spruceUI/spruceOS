@@ -247,7 +247,7 @@ class SettingsMenu(ABC):
                 input, get_value_func, set_value_func)
         )
     
-    def build_numeric_entry(self, primary_text, get_value_func, set_value_func, min=1, max=sys.maxsize) -> GridOrListEntry:
+    def build_numeric_entry(self, primary_text, get_value_func, set_value_func, min=1, max=sys.maxsize, step=1) -> GridOrListEntry:
 
         return GridOrListEntry(
             primary_text=primary_text,
@@ -257,7 +257,7 @@ class SettingsMenu(ABC):
             description=None,
             icon=None,
             value=lambda input: self.change_numeric(
-                input, get_value_func, set_value_func, min, max)
+                input, get_value_func, set_value_func, min, max, step)
         )
 
     def build_percent_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
@@ -342,7 +342,7 @@ class SettingsMenu(ABC):
 
         set_value_func(value)
 
-    def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize):
+    def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize, step=1):
         value = get_value_func()
         if(value is None):
             value = 0
@@ -359,7 +359,8 @@ class SettingsMenu(ABC):
         else:
             return  # No change for other inputs
 
-        value += delta
+        decimal_places = len(str(step).partition(".")[2])
+        value = round(value + delta * step, decimal_places)
         if(min <= value <= max):
             set_value_func(value)
 
