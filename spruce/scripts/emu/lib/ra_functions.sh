@@ -8,6 +8,8 @@
 #   EMU_DIR
 #   ROM_FILE
 #   EMU_JSON_PATH
+#   DISPLAY_WIDTH
+#   DISPLAY_HEIGHT
 #   DISPLAY_ASPECT_RATIO
 #   LD_LIBRARY_PATH
 #
@@ -264,7 +266,10 @@ export_spruce_theme_dir() {
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
-	seed_pokedaisy_ini 2>/dev/null
+	if [ "$CORE" = "pokedaisy" ]; then
+		seed_pokedaisy_ini 2>/dev/null
+		set_pokedaisy_panel
+	fi
 
 	# Apply per-game or system-wide RA build selection. The binary names are
 	# device-overridable because "64-bit" is not always the universal build -
@@ -631,5 +636,35 @@ seed_pokedaisy_ini() {
 	if [ -f "$src" ] && [ ! -f "$dst" ]; then
 		mkdir -p "$(dirname "$dst")" 2>/dev/null
 		cp "$src" "$dst" && log_message "Seeded PokeDaisy settings.ini from $src to $dst"
+	fi
+}
+
+set_pokedaisy_panel() {
+	case "${DISPLAY_WIDTH:-}" in
+		""|*[!0-9]*) log_message "Cannot set PokeDaisy panel: invalid DISPLAY_WIDTH '$DISPLAY_WIDTH'"; return 1 ;;
+	esac
+	case "${DISPLAY_HEIGHT:-}" in
+		""|*[!0-9]*) log_message "Cannot set PokeDaisy panel: invalid DISPLAY_HEIGHT '$DISPLAY_HEIGHT'"; return 1 ;;
+	esac
+
+	opt_file="/mnt/SDCARD/RetroArch/.retroarch/config/PokeDaisy/PokeDaisy.opt"
+	if [ ! -f "$opt_file" ]; then
+		log_message "Cannot set PokeDaisy panel: options file not found at $opt_file"
+		return 1
+	fi
+	panel="${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}"
+	if grep -Fxq "pokedaisy_panel = \"$panel\"" "$opt_file"; then
+		return 0
+	fi
+	if ! grep -q '^pokedaisy_panel[[:space:]]*=' "$opt_file"; then
+		log_message "Cannot set PokeDaisy panel: setting not found in $opt_file"
+		return 1
+	fi
+
+	if sed -i "s|^pokedaisy_panel[[:space:]]*=.*|pokedaisy_panel = \"$panel\"|" "$opt_file"; then
+		log_message "Set PokeDaisy panel to $panel"
+	else
+		log_message "Failed to set PokeDaisy panel in $opt_file"
+		return 1
 	fi
 }
