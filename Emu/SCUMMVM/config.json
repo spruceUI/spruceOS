@@ -35,21 +35,6 @@
         "OAKMOSS_A133P",
         "DARKMOSS"
       ]
-    },
-    {
-      "name": "Generate namelist",
-      "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
-      "devices": [
-        "TRIMUI_A133P",
-        "TRIMUI_SMART_PRO_S",
-        "MIYOO_FLIP",
-        "MIYOO_A30",
-        "GKD_PIXEL2",
-        "ANBERNIC_RGXX",
-        "MIYOO_MINI_FAMILY",
-        "OAKMOSS_A133P",
-        "DARKMOSS"
-      ]
     }
   ],
   "menuOptions": {

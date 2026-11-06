@@ -127,11 +127,11 @@ class GamelistGenerator:
     EXCLUDED_SYSTEMS = {
         "PORTS", "MAME2003PLUS", "ARCADE", "NEOGEO",
         "CPS1", "CPS2", "CPS3", "NAOMI", "ATOMISWAVE", "FFPLAY",
-        "EASYRPG", "MSUMD", "SCUMMVM", "WOLF", "QUAKE", "DOOM",
+        "EASYRPG", "MSUMD", "WOLF", "QUAKE", "DOOM",
     }
 
     SPECIAL_SYSTEMS = {
-        "FBNEO",
+        "FBNEO", "SCUMMVM",
     }
 
     # Patterns used by delete_gamelist_files to skip certain directories
@@ -408,17 +408,24 @@ class GamelistGenerator:
             self._log(f"SKIP {system_name}: cancelled by user")
             return -1
         else:
-            match system_name:
-                case "FBNEO":
-                    return self._generate_for_fbneo(output_path, rom_entries)
-                case _:
-                    return 0
+            if system_name in ["FBNEO", "SCUMMVM"]:
+                return self._generate_from_csv(output_path, rom_entries, system_name)
+            else:
+                return 0
 
-    def _generate_for_fbneo(self, output_path: str, rom_entries: str) -> int:
-        fbneo_csv = "/mnt/SDCARD/Emu/FBNEO/fbneo.csv"
+    def _generate_from_csv(self, output_path: str, rom_entries: str, system_name: str) -> int:
+        csv_file = None
+
+        if system_name == "FBNEO":
+            csv_file = "/mnt/SDCARD/Emu/FBNEO/fbneo.csv"
+        if system_name == "SCUMMVM":
+            csv_file = "/mnt/SDCARD/Emu/SCUMMVM/scummvm.csv"
+
+        if csv_file is None:
+            return 0
 
         csvgames = {}
-        with open(fbneo_csv, newline='') as csvfile:
+        with open(csv_file, newline='') as csvfile:
             reader = csv.reader(csvfile)
 
             for row in reader:
@@ -428,7 +435,12 @@ class GamelistGenerator:
         game_writer = GamelistXmlWriter()
         for file_rel_path, img_rel_path, _, filename_no_ext, _ in rom_entries:
             try:
-                display_name = csvgames[f"{filename_no_ext}.zip"]
+                ckey = filename_no_ext
+
+                if system_name == "FBNEO":
+                    ckey = f"{filename_no_ext}.zip"
+
+                display_name = csvgames[ckey]
                 game_writer.add_entry(file_rel_path, display_name, img_rel_path)
                 games_c += 1
             except KeyError:
