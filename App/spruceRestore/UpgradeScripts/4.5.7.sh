@@ -45,6 +45,16 @@ for _cfg in /mnt/SDCARD/Saves/spruce/spruce-config.json /mnt/SDCARD/Saves/spruce
     log_message "Menu hold time set to $_to in $_cfg"
 done
 
+# GB, GBC and GBA split the Minis off into Emulator_MiyooMini (no pokedaisy):
+# give it the core the user had picked under Emulator.
+for _sys in GB GBC GBA; do
+    _cfg="/mnt/SDCARD/Saves/spruce/emu_backups/$_sys.json"
+    [ -f "$_cfg" ] || continue
+    jq -e '.menuOptions.Emulator_MiyooMini' "$_cfg" >/dev/null 2>&1 && continue
+    jq '.menuOptions.Emulator_MiyooMini.selected = .menuOptions.Emulator.selected' "$_cfg" > "$_cfg.tmp" &&
+        mv -f "$_cfg.tmp" "$_cfg" && log_message "$_sys: Emulator_MiyooMini set from Emulator"
+done
+
 # Recover DraStic saves and states buried by the old architecture-folder moves.
 # Keep colliding files in a recovered folder rather than overwriting either copy.
 NDS_EMU_DIR=/mnt/SDCARD/Emu/NDS
