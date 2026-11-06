@@ -351,13 +351,27 @@ class TouchWatcher:
             leading_direction = ControllerInput.DPAD_UP
             trailing_direction = ControllerInput.DPAD_DOWN
 
-        margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_size * EDGE_SCROLL_MARGIN_RATIO))
-        if position < margin:
-            direction = leading_direction
-        elif position >= screen_size - margin:
-            direction = trailing_direction
+        edge_bounds = (
+            self.touch_drag_view.touch_edge_scroll_bounds()
+            if hasattr(self.touch_drag_view, "touch_edge_scroll_bounds")
+            else None
+        )
+        if edge_bounds is not None and self.touch_edge_scroll_axis == "vertical":
+            leading_edge, trailing_edge = edge_bounds
+            if position < leading_edge:
+                direction = leading_direction
+            elif position >= trailing_edge:
+                direction = trailing_direction
+            else:
+                direction = None
         else:
-            direction = None
+            margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_size * EDGE_SCROLL_MARGIN_RATIO))
+            if position < margin:
+                direction = leading_direction
+            elif position >= screen_size - margin:
+                direction = trailing_direction
+            else:
+                direction = None
 
         if direction != self.touch_edge_direction:
             self.touch_edge_direction = direction

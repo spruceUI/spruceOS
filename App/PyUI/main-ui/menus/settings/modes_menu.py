@@ -37,6 +37,18 @@ class ModesMenu(settings_menu.SettingsMenu):
             else:
                 return
 
+    def prompt_kid_mode(self,input):
+        if(ControllerInput.A == input):
+            if UserPrompt.prompt_yes_no(Language.label("kidModeTitle", "Kid Mode"),
+                                        [Language.label("kidModePrompt1", "Would you like to enter kid mode?"),
+                                         Language.label("kidModePrompt2", "Boot straight into games shown by box art"),
+                                         Language.label("kidModePrompt3", "To exit enter the Konami Code"), 
+                                         "↑↑↓↓←→←→BA,START,SELECT"]):
+                Device.get_device().get_system_config().set_kid_mode_enabled(True)
+                Device.get_device().exit_pyui()
+            else:
+                return
+
     def build_options_list(self):
         option_list = []
         
@@ -61,6 +73,17 @@ class ModesMenu(settings_menu.SettingsMenu):
                 description=None,
                 icon=None,
                 value=self.prompt_simple_mode
+                )
+            )
+        option_list.append(
+            GridOrListEntry(
+                primary_text=Language.enter_kid_mode(),
+                value_text=None,
+                image_path=None,
+                image_path_selected=None,
+                description=None,
+                icon=None,
+                value=self.prompt_kid_mode
                 )
             )
 

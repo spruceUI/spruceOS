@@ -37,7 +37,7 @@ else
             # would bind its controls to the wrong physical buttons.
             export_sdl_gamecontroller_map positional
             ;;
-        "darkmoss")
+        "darkmoss"|"oakmoss")
             export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH"
             ;;
     esac

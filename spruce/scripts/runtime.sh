@@ -33,6 +33,7 @@ log_message "---------Starting up---------"
 write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
+manage_ds_bootmenu_stubs
 
 # Extra cores stay up through the boot; the first set_smart offlines them.
 set_performance --no-offline

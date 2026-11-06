@@ -209,6 +209,7 @@ class Controller:
                 PyUiLogger().get_logger().info(f"Secret code entered")
                 Device.get_device().get_system_config().set_game_selection_only_mode_enabled(False)
                 Device.get_device().get_system_config().set_simple_mode_enabled(False)
+                Device.get_device().get_system_config().set_kid_mode_enabled(False)
                 Device.get_device().exit_pyui()
 
 

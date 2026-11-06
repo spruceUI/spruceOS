@@ -315,6 +315,15 @@
                 ],
                 "selected": "Prompt"
             },
+            "showDSBootMenuStubs": {
+                "display": "Show DS firmware boot entries",
+                "description": "applies on reboot",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",

@@ -656,6 +656,10 @@ class Language:
         return cls._data.get("enterSimpleMode","Enter Simple Mode")
 
     @classmethod
+    def enter_kid_mode(cls):
+        return cls._data.get("enterKidMode","Enter Kid Mode")
+
+    @classmethod
     def year(cls):
         return cls._data.get("Year","Year")
 

@@ -84,6 +84,52 @@ run_sd_card_fix_if_triggered() {
     fi
 }
 
+manage_ds_bootmenu_stubs() {
+    _show_stubs="$(get_config_value '.menuOptions."Emulator Settings".showDSBootMenuStubs.selected' "True")"
+    _nds_dir="/mnt/SDCARD/Roms/NDS"
+    _ndsi_dir="/mnt/SDCARD/Roms/NDSI"
+    _nds_stub="$_nds_dir/BootMenu.nds"
+    _ndsi_stub="$_ndsi_dir/BootMenuDSi.nds"
+
+    log_message "User preference: show DS firmware boot entries = $_show_stubs" -v
+
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        _show_stubs="False"
+        log_message "MiyooMini does not have DSperate; hiding DS firmware boot entries." -v
+    fi
+
+    if [ "$_show_stubs" = "False" ]; then
+        rm -f "$_nds_stub" "$_ndsi_stub"
+    else
+        mkdir -p "$_nds_dir" "$_ndsi_dir"
+
+        # if no other NDS files exist, don't create the stub
+        if _nds_other_file="$(find "$_nds_dir" \
+            \( -type d \( -name '.*' -o -path "$_nds_dir/Imgs" \) -prune \) -o \
+            \( -name '.*' -prune \) -o \
+            \( -type f ! -path "$_nds_stub" -print -quit \))"; then
+            if [ -n "$_nds_other_file" ]; then
+                touch "$_nds_stub"
+            else
+                rm -f "$_nds_stub"
+            fi
+        else
+            touch "$_nds_stub" # If find fails, still create the stub
+        fi
+
+        touch "$_ndsi_stub"
+    fi
+
+    _shown_stubs=""
+    [ -f "$_nds_stub" ] && _shown_stubs="BootMenu.nds"
+    if [ -f "$_ndsi_stub" ]; then
+        [ -n "$_shown_stubs" ] && _shown_stubs="$_shown_stubs, "
+        _shown_stubs="${_shown_stubs}BootMenuDSi.nds"
+    fi
+    [ -n "$_shown_stubs" ] || _shown_stubs="neither"
+    log_message "DS firmware boot entries that exist and will be shown: $_shown_stubs"
+}
+
 # Read by PortMaster's device_info.txt. In /tmp because the card moves between devices.
 write_device_info() {
     cat > /tmp/spruce_device_info.env <<EOF
@@ -646,10 +692,12 @@ set_up_boot_action() {
                 ;;
             "NDS firmware")
                 log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
+                touch "/mnt/SDCARD/Roms/NDS/BootMenu.nds"
                 echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
                 ;;
             "DSi firmware")
                 log_message "Attempting to boot into Nintendo DSi firmware via DSperate BootMenuDSi.nds"
+                touch "/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds"
                 echo "\"/mnt/SDCARD/Emu/NDSI/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds\"" > /tmp/cmd_to_run.sh
                 ;;
             "PPSSPP")

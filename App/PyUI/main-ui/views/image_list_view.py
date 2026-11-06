@@ -11,6 +11,7 @@ from themes.theme import Theme
 from views.grid_or_list_entry import GridOrListEntry
 from views.non_descriptive_list_view import NonDescriptiveListView
 from views.text_to_image_relationship import TextToImageRelationship
+from views.text_utils import TextUtils
 
 class ImageListView(NonDescriptiveListView):
     def __init__(self, top_bar_text,
@@ -34,6 +35,15 @@ class ImageListView(NonDescriptiveListView):
         self.scroll_text_amount = 0
         self.selected_same_entry_time = time.time()
         self.space_width, self.char_height = Display.get_text_dimensions(FontPurpose.LIST," ")
+
+    def get_row_geometry(self):
+        if self.text_to_image_relationship == TextToImageRelationship.BELOW_IMAGE:
+            y_pad = 20
+            return (
+                Display.get_top_bar_height() + y_pad * 2 + self.img_height,
+                self.line_height
+            )
+        return super().get_row_geometry()
 
     def _render_text(self, visible_options):
         for visible_index, (imageTextPair) in enumerate(visible_options):
@@ -73,7 +83,7 @@ class ImageListView(NonDescriptiveListView):
                 text_available_width = self.get_img_x_starting() - text_pad*2
 
             y_value += visible_index * self.line_height
-            text_x_value = x_value + text_pad
+            text_x_value = x_value if render_mode.x_mode == XRenderOption.CENTER else x_value + text_pad
             selected_x_value = 0
 
             #Do these work?
@@ -126,12 +136,42 @@ class ImageListView(NonDescriptiveListView):
             else:
                 color = Theme.text_color(FontPurpose.LIST)
 
-            if(imageTextPair.get_icon() is not None):
-                icon_width, icon_height = Display.render_image(imageTextPair.get_icon(),text_x_value, y_value, render_mode)
-                text_x_value += icon_width + 5 #TODO get 5 from somewhere
-                text_available_width -= icon_width
+            primary_text = imageTextPair.get_primary_text()
+            if render_mode.x_mode == XRenderOption.CENTER and Theme.scroll_rom_selection_text():
+                display_text = TextUtils.scroll_string_centered(
+                    primary_text,
+                    scroll_amt,
+                    text_available_width
+                )
+            else:
+                display_text = self.scroll_string(primary_text, scroll_amt, text_available_width)
+            icon = imageTextPair.get_icon()
+            if icon is not None:
+                if render_mode.x_mode == XRenderOption.CENTER:
+                    icon_width, _ = Display.get_image_dimensions(icon)
+                    text_width, _ = Display.get_text_dimensions(FontPurpose.LIST, primary_text)
+                    text_is_clipped = text_available_width is not None and text_width > text_available_width
+                    if text_available_width is not None:
+                        text_width = min(text_width, text_available_width)
+                    icon_x = x_value - text_width // 2 - 5 - icon_width
+                    icon_shift = max(0, text_pad - icon_x)
+                    if text_is_clipped:
+                        icon_shift = (icon_shift + 1) // 2
+                    icon_x += icon_shift
+                    text_x_value += icon_shift
+                    if icon_shift and text_available_width is not None:
+                        screen_width = Device.get_device().screen_width()
+                        right_text_width = max(0, 2 * (screen_width - text_pad - text_x_value))
+                        text_available_width = min(text_available_width, right_text_width)
+                    if text_is_clipped:
+                        icon_x = text_x_value - text_available_width // 2 - 5 - icon_width
+                    Display.render_image(icon, icon_x, y_value, RenderMode.MIDDLE_LEFT_ALIGNED)
+                else:
+                    icon_width, _ = Display.render_image(icon, text_x_value, y_value, render_mode)
+                    text_x_value += icon_width + 5 #TODO get 5 from somewhere
+                    text_available_width -= icon_width
 
-            Display.render_text(self.scroll_string(imageTextPair.get_primary_text(),scroll_amt, text_available_width), text_x_value, y_value, color, FontPurpose.LIST,
+            Display.render_text(display_text, text_x_value, y_value, color, FontPurpose.LIST,
                                     render_mode, crop_w=text_available_width, crop_h=None)
         self.prev_index = self.selected
 
@@ -147,21 +187,31 @@ class ImageListView(NonDescriptiveListView):
             return self.img_offset_x
 
     def game_art_bounds(self):
+        art_width = self.img_width
+        art_height = self.img_height
+        if self.options and 0 <= self.selected < len(self.options):
+            image_path = self.options[self.selected].get_image_path_ideal(self.img_width, self.img_height)
+            source_width, source_height = Display.get_image_dimensions(image_path)
+            if source_width > 0 and source_height > 0:
+                scale = min(self.img_width / source_width, self.img_height / source_height)
+                art_width = int(source_width * scale)
+                art_height = int(source_height * scale)
+
         if XRenderOption.LEFT == self.image_render_mode.x_mode:
             left = self.img_offset_x
         elif XRenderOption.RIGHT == self.image_render_mode.x_mode:
-            left = self.img_offset_x - self.img_width
+            left = self.img_offset_x - art_width
         else:
-            left = self.img_offset_x - self.img_width // 2
+            left = self.img_offset_x - art_width // 2
 
         if YRenderOption.TOP == self.image_render_mode.y_mode:
             top = self.img_offset_y
         elif YRenderOption.BOTTOM == self.image_render_mode.y_mode:
-            top = self.img_offset_y - self.img_height
+            top = self.img_offset_y - art_height
         else:
-            top = self.img_offset_y - self.img_height // 2
+            top = self.img_offset_y - art_height // 2
 
-        return left, top, left + self.img_width, top + self.img_height
+        return left, top, left + art_width, top + art_height
 
     def point_is_in_game_art_area(self, point):
         if point is None:
@@ -191,6 +241,20 @@ class ImageListView(NonDescriptiveListView):
 
     def touch_uses_dpad_swipe(self, point):
         return self.point_is_in_game_art_area(point)
+
+    def touch_edge_scroll_bounds(self):
+        if self.text_to_image_relationship == TextToImageRelationship.BELOW_IMAGE:
+            row_top, line_height = self.get_row_geometry()
+            return (
+                self.img_offset_y + self.img_height,
+                row_top + (self.current_bottom - self.current_top) * line_height
+            )
+        if self.text_to_image_relationship == TextToImageRelationship.ABOVE_IMAGE:
+            return (
+                self.base_y_offset,
+                self.img_offset_y - self.img_height
+            )
+        return None
 
     def touch_swipe_direction(self, dx, dy):
         if abs(dx) >= abs(dy):

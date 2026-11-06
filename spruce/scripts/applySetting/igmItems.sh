@@ -11,6 +11,8 @@ SPRUCE_CFG="${SPRUCE_CFG:-/mnt/SDCARD/Saves/spruce/spruce-config.json}"
 
 igm_items_write() {
     _cur='null'
+    # A Simple Mode copy left by ra_functions.sh holds the user's real list.
+    [ -f "$ITEMS_FILE.simple" ] && mv -f "$ITEMS_FILE.simple" "$ITEMS_FILE"
     [ -f "$ITEMS_FILE" ] && _cur="$(jq -c '.items // null' "$ITEMS_FILE" 2>/dev/null)"
     [ -n "$_cur" ] || _cur='null'
 
