@@ -264,6 +264,7 @@ export_spruce_theme_dir() {
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
+	seed_pokedaisy_ini 2>/dev/null
 
 	# Apply per-game or system-wide RA build selection. The binary names are
 	# device-overridable because "64-bit" is not always the universal build -
@@ -622,4 +623,13 @@ save_custom_n64_controller_profile() {
 	esac
 
 	cp -f "${REMAP_DIR}/${core_name}/${core_name}.rmp" "$REMAP_BACKUP"
+}
+
+seed_pokedaisy_ini() {
+	src="/mnt/SDCARD/Emu/GBA/pokedaisy/default.ini"
+	dst="/mnt/SDCARD/Saves/saves/PokeDaisy/pokedaisy/settings.ini"
+	if [ -f "$src" ] && [ ! -f "$dst" ]; then
+		mkdir -p "$(dirname "$dst")" 2>/dev/null
+		cp "$src" "$dst" && log_message "Seeded PokeDaisy settings.ini from $src to $dst"
+	fi
 }
