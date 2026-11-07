@@ -25,12 +25,8 @@ ABS_MT_TRACKING_ID = 0x39
 # Gesture thresholds, in logical (UI) pixels and seconds
 TAP_MAX_MOVE_PX = 24
 SWIPE_STEP_PX = 90
-LONG_PRESS_SECONDS = 0.5
 MENU_LONG_PRESS_MAX_MOVE_PX = 48
-DOUBLE_TAP_SECONDS = 0.35
 DOUBLE_TAP_MAX_DISTANCE_PX = 48
-EDGE_SCROLL_INTERVAL_SECONDS = 0.30
-EDGE_SCROLL_MARGIN_RATIO = 0.15
 EDGE_SCROLL_MIN_MARGIN_PX = 24
 
 
@@ -62,6 +58,7 @@ class TouchWatcher:
     def __init__(self, event_path, device, event_format='llHHi'):
         self.event_path = event_path
         self.device = device
+        self.system_config = device.get_system_config()
         self.event_format = event_format
         self.event_size = struct.calcsize(event_format)
         self.fd = None
@@ -365,7 +362,10 @@ class TouchWatcher:
             else:
                 direction = None
         else:
-            margin = max(EDGE_SCROLL_MIN_MARGIN_PX, int(screen_size * EDGE_SCROLL_MARGIN_RATIO))
+            margin = max(
+                EDGE_SCROLL_MIN_MARGIN_PX,
+                int(screen_size * self.system_config.get_touch_edge_scroll_margin_ratio())
+            )
             if position < margin:
                 direction = leading_direction
             elif position >= screen_size - margin:
@@ -376,7 +376,7 @@ class TouchWatcher:
         if direction != self.touch_edge_direction:
             self.touch_edge_direction = direction
             self.next_touch_edge_scroll_time = (
-                time.monotonic() + EDGE_SCROLL_INTERVAL_SECONDS
+                time.monotonic() + self.system_config.get_touch_edge_scroll_interval_seconds()
                 if direction is not None
                 else None
             )
@@ -406,7 +406,7 @@ class TouchWatcher:
                 ControllerInput.DPAD_RIGHT: ControllerInput.TOUCH_SCROLL_LEFT,
             }[self.touch_edge_direction]
             self._inject(edge_scroll_input)
-            self.next_touch_edge_scroll_time = now + EDGE_SCROLL_INTERVAL_SECONDS
+            self.next_touch_edge_scroll_time = now + self.system_config.get_touch_edge_scroll_interval_seconds()
 
     def _maybe_trigger_long_press(self):
         if (
@@ -433,7 +433,7 @@ class TouchWatcher:
         if self.next_long_press_time is None:
             if self.long_press_triggered:
                 return
-            self.next_long_press_time = started_at + LONG_PRESS_SECONDS
+            self.next_long_press_time = started_at + self.system_config.get_touch_long_press_seconds()
 
         now = time.monotonic()
         if now >= self.next_long_press_time:
@@ -444,7 +444,7 @@ class TouchWatcher:
                 self.next_long_press_time = None
             else:
                 self._inject(ControllerInput.B)
-                self.next_long_press_time = now + LONG_PRESS_SECONDS
+                self.next_long_press_time = now + self.system_config.get_touch_long_press_seconds()
 
     def _top_bar_long_press_input(self, point):
         from display.display import Display
@@ -472,7 +472,7 @@ class TouchWatcher:
         dist = math.hypot(dx, dy)
         held = time.monotonic() - t0
         if dist < TAP_MAX_MOVE_PX:
-            if held >= LONG_PRESS_SECONDS:
+            if held >= self.system_config.get_touch_long_press_seconds():
                 self._clear_pending_game_selection_tap()
                 self.last_popup_outside_tap = None
                 self._inject(ControllerInput.B)
@@ -504,7 +504,7 @@ class TouchWatcher:
                     if (
                         previous_tap is not None
                         and previous_tap[0] is view
-                        and now - previous_tap[1] <= DOUBLE_TAP_SECONDS
+                        and now - previous_tap[1] <= self.system_config.get_touch_double_tap_seconds()
                     ):
                         self.last_popup_outside_tap = None
                         self._inject(ControllerInput.A)
@@ -526,7 +526,7 @@ class TouchWatcher:
                     if (
                         previous_tap is not None
                         and previous_tap[0] == region
-                        and now - previous_tap[2] <= DOUBLE_TAP_SECONDS
+                        and now - previous_tap[2] <= self.system_config.get_touch_double_tap_seconds()
                         and math.hypot(
                             point[0] - previous_tap[1][0],
                             point[1] - previous_tap[1][1],
@@ -544,7 +544,7 @@ class TouchWatcher:
                         if (
                             previous_tap is not None
                             and previous_tap[0] is self._touch_navigation_view()
-                            and now - previous_tap[2] <= DOUBLE_TAP_SECONDS
+                            and now - previous_tap[2] <= self.system_config.get_touch_double_tap_seconds()
                             and math.hypot(
                                 point[0] - previous_tap[1][0],
                                 point[1] - previous_tap[1][1],
@@ -671,7 +671,7 @@ class TouchWatcher:
                         min(
                             timeout,
                             self.pending_game_selection_tap[2]
-                            + DOUBLE_TAP_SECONDS
+                            + self.system_config.get_touch_double_tap_seconds()
                             - time.monotonic(),
                         ),
                     )
@@ -705,6 +705,7 @@ class TouchWatcher:
     def _flush_expired_game_selection_tap(self):
         if (
             self.pending_game_selection_tap is not None
-            and time.monotonic() - self.pending_game_selection_tap[2] >= DOUBLE_TAP_SECONDS
+            and time.monotonic() - self.pending_game_selection_tap[2]
+            >= self.system_config.get_touch_double_tap_seconds()
         ):
             self._clear_pending_game_selection_tap()

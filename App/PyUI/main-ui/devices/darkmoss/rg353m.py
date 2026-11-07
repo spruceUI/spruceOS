@@ -41,3 +41,6 @@ class Rg353m(DarkmossDevice):
 
     def screen_height(self):
         return 480
+
+    def supports_touch(self):
+        return hasattr(self, "touch_watcher")

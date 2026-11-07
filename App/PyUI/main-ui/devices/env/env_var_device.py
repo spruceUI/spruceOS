@@ -103,7 +103,10 @@ class EnvVarDevice(DeviceCommon):
             return False
 
     def _start_touch_watcher(self):
-        path = os.environ["TOUCH_EVENT_PATH"]
+        path = os.environ.get("TOUCH_EVENT_PATH")
+        if not path:
+            PyUiLogger.get_logger().warning("No touchscreen event path configured; touch off")
+            return
         if not os.path.exists(path):
             PyUiLogger.get_logger().warning(f"No touchscreen node at {path}; touch off")
             return

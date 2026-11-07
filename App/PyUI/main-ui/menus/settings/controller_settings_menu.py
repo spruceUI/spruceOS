@@ -53,6 +53,45 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
                 set_value_func=Device.get_device().get_system_config().set_input_rate_limit_ms,
             )
         )
+
+        device = Device.get_device()
+        if device.supports_touch():
+            system_config = device.get_system_config()
+            option_list.extend((
+                self.build_numeric_entry(
+                    primary_text=Language.label("touchLongPressSeconds", "Touch Long Press (s)"),
+                    get_value_func=system_config.get_touch_long_press_seconds,
+                    set_value_func=system_config.set_touch_long_press_seconds,
+                    min=0.2,
+                    max=2.0,
+                    step=0.1,
+                ),
+                self.build_numeric_entry(
+                    primary_text=Language.label("touchDoubleTapSeconds", "Touch Double Tap (s)"),
+                    get_value_func=system_config.get_touch_double_tap_seconds,
+                    set_value_func=system_config.set_touch_double_tap_seconds,
+                    min=0.10,
+                    max=1.0,
+                    step=0.05,
+                ),
+                self.build_numeric_entry(
+                    primary_text=Language.label("touchEdgeScrollIntervalSeconds", "Touch Edge Scroll Interval (s)"),
+                    get_value_func=system_config.get_touch_edge_scroll_interval_seconds,
+                    set_value_func=system_config.set_touch_edge_scroll_interval_seconds,
+                    min=0.10,
+                    max=1.0,
+                    step=0.05,
+                ),
+                self.build_numeric_entry(
+                    primary_text=Language.label("touchEdgeScrollMarginRatio", "Touch Edge Scroll Margin Ratio"),
+                    get_value_func=system_config.get_touch_edge_scroll_margin_ratio,
+                    set_value_func=system_config.set_touch_edge_scroll_margin_ratio,
+                    min=0.05,
+                    max=0.25,
+                    step=0.01,
+                ),
+            ))
+
         option_list.extend(
             self.build_options_list_from_related_config_categories(Language.controller_settings())
         )
