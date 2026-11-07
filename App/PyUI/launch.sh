@@ -2,6 +2,9 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device.
+[ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
+
 runifnecessary() {
     a=$(pgrep "$1")
     if [ "$a" = "" ] ; then
@@ -73,6 +76,7 @@ case "$PLATFORM" in
         else
             DEVICE="TRIMUI_SMART_PRO"
         fi
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -212,7 +216,7 @@ case "$PLATFORM" in
 ############################################################
 # Rockchip RK3566 or RK3326 devices, under dArkMoss
 ############################################################
-    "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" )
+    "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" | "E5Plus" )
         # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
         # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
         # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM
@@ -345,20 +349,15 @@ case "$PLATFORM" in
     ;;
 
 ############################################################
-# MagicX A133P family (Mini Zero 28, Zero 40, XU20 V32)
+# oakMOSS A133P boards (MagicX Mini Zero 28, Zero 40, XU20 V32; Powkiddy V90S, V20; TrimUI Brick)
 ############################################################
 
-    "Zero28" | "Zero40" | "XU20" )
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS" )
 
         cd /usr/magicx/bin
-        export PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
-        if [ "$PLATFORM" = "Zero40" ]; then
-            DEVICE="MAGICX_ZERO40"
-        elif [ "$PLATFORM" = "XU20" ]; then
-            DEVICE="MAGICX_XU20"
-        else
-            DEVICE="MAGICX_ZERO28"
-        fi
+        export PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
+        # Every oakMOSS cfg sets PYUI_ENV_DEVICE=true: PyUI has no other device class for these boards.
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \

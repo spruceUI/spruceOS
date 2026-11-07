@@ -5,7 +5,7 @@
 
 run_advmame() {
 	COMMON_DIR="/mnt/SDCARD/Saves/saves/advmame"
-	export HOME="/mnt/SDCARD/Saves/saves/advmame/${PLATFORM}"
+	export HOME="$(platform_path "/mnt/SDCARD/Saves/saves/advmame/%s")"
 	mkdir -p "$HOME/.advance"
 	
 	for file in cheat.dat event.dat hiscore.dat history.dat; do
@@ -19,7 +19,7 @@ run_advmame() {
 		fi
 	done
 
-	DEF_RC=$EMU_DIR/advmame-${PLATFORM}.rc
+	DEF_RC="$(platform_path "$EMU_DIR/advmame-%s.rc")"
 	RC_FILE=$HOME/.advance/advmame.rc
 
 	if [ ! -f "$RC_FILE" ] && [ -f "$DEF_RC" ]; then
@@ -31,7 +31,7 @@ run_advmame() {
 
 	cd "$EMU_DIR"
 	case "$PLATFORM" in
-		"SmartPro"|"Brick"|"BrickPro")
+		"SmartPro"|"Brick"|"BrickOakMOSS"|"BrickPro")
 			[ -f "$EMU_DIR/advmame.log" ] && rm "$EMU_DIR/advmame.log"
 			export LD_LIBRARY_PATH="/mnt/SDCARD/Persistent/portmaster/PortMaster:$LD_LIBRARY_PATH"
 			export SDL_GAMECONTROLLERCONFIG="/Persistent/portmaster/PortMaster/gamecontrollerdb.txt"

@@ -123,17 +123,22 @@ spruceOS is a volunteer community effort, with a very fluid team structure. It w
    - [Chrisj951](https://github.com/chrisj951) - Discord @chrisbastion
    - [Diego Mussi](https://github.com/Dmussi)
    - [duyquang6](https://github.com/duyquang6)
-   - [Hario](https://github.com/Hairo)
+   - [Guillem Roca](https://github.com/GuillemRoca)
+   - [Hairo](https://github.com/Hairo)
    - [KitFox](https://github.com/orgs/spruceUI/people/KitFox0618)
    - [KMFDManic](https://github.com/KMFDManic)
    - [Lonko](https://github.com/orgs/spruceUI/people/LonkoDeLonk)
    - [LuigiSmith](https://github.com/luigismith)
+   - [Magnominus](https://github.com/MagnominusGit)
+   - [Mars](https://github.com/MarsInsanity)
    - [Maxim Gorin](https://github.com/mxmgorin)
    - [Mike Kendall](https://github.com/zenkalia)
    - [Noxwell](https://github.com/beebono)
+   - [Pablo Sobrado](https://github.com/pmsobrado)
    - [RDWilliamson](https://github.com/orgs/spruceUI/people/robertdw1974-byte)
    - [Ryan "Ry" Sartor](https://github.com/ryanmsartor)
    - [SundownerSport](https://github.com/Sundownersport)
+   - [The 99's Puppycat](https://github.com/huyhoang160593)
    - [Wild Emu](https://github.com/WildEmu)
    
 

@@ -6,7 +6,7 @@ class Rgb30(DarkmossDevice):
 
     JOYPAD_NODE = "/dev/input/by-path/platform-singleadc-joypad-event-joystick"
     SYSTEM_JSON_NAME = "rgb30-system.json"
-    # Mirrors SYSTEM_BRIGHTNESS_0..10 in spruce/scripts/platform/RGB30.cfg.
+    # Mirrors SYSTEM_BACKLIGHT_LEVEL_0..10 in spruce/scripts/platform/RGB30.cfg.
     BACKLIGHT_TABLE = (4, 6, 10, 16, 32, 48, 64, 96, 128, 192, 255)
 
     def screen_width(self):

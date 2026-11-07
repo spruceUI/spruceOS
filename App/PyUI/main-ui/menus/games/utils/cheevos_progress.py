@@ -2,24 +2,23 @@
 
 import json
 import os
-import shlex
 import signal
 import subprocess
 import tempfile
 import time
 
+from apps import native_app
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
-from devices.device import Device
 from display.display import Display
 from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
 from menus.language.language import Language
 
 APP_DIR = "/mnt/SDCARD/App/Cheevos"
-LAUNCH_SCRIPT = os.path.join(APP_DIR, "launch.sh")
 # Cheevos's headless helper: saved path matches, then RAOfflineProxy's hasher and RA.
 IDENTIFY_SCRIPT = os.path.join(APP_DIR, "identify-rom.sh")
-# config.json "gameProgress": 1 opens --game-id N; 2 also ships identify-rom.sh.
+# config.json "gameProgress": 1 opens a game (its "pyuiEntry" takes game_id); 2 also ships
+# identify-rom.sh.
 IDENTIFY_CONTRACT = 2
 WORK_DIR = "/mnt/SDCARD/Saves/cheevos/cache/identify-work"
 IDENTIFY_TIMEOUT = 60
@@ -32,20 +31,31 @@ SAVED_MAX_BYTES = 256 * 1024
 VIRTUAL_GAME_ID_BASE = 1_000_000_000
 
 
-def available():
-    """Require a Cheevos package that ships the identification helper and game-ID launches."""
+def _config():
+    """Cheevos's config.json, or None when it is missing or malformed."""
     try:
         with open(os.path.join(APP_DIR, "config.json")) as source:
             config = json.load(source)
-        return (
-            isinstance(config, dict)
-            and type(config.get("gameProgress")) is int
-            and config["gameProgress"] >= IDENTIFY_CONTRACT
-            and os.path.isfile(LAUNCH_SCRIPT)
-            and os.path.isfile(IDENTIFY_SCRIPT)
-        )
-    except (OSError, ValueError, TypeError):
-        return False
+    except (OSError, ValueError):
+        return None
+    return config if isinstance(config, dict) else None
+
+
+def _entry(config):
+    """Cheevos's entry point inside PyUI (apps/native_app.py), or None."""
+    entry = config.get("pyuiEntry") if config is not None else None
+    return entry if isinstance(entry, str) and entry else None
+
+
+def available():
+    """Require a Cheevos package that ships the identification helper and opens one game."""
+    config = _config()
+    return (
+        _entry(config) is not None
+        and type(config.get("gameProgress")) is int
+        and config["gameProgress"] >= IDENTIFY_CONTRACT
+        and os.path.isfile(IDENTIFY_SCRIPT)
+    )
 
 
 def _stop(process):
@@ -202,7 +212,9 @@ def show_progress(rom_info):
     if result.get("status") != "matched" or type(game_id) is not int or game_id <= 0:
         Display.display_message(_error_message(result), duration_ms=3500)
         return
-    # The quoted executable uses MiyooTrimCommon.run_app's command-with-arguments path.
-    launch = '"' + LAUNCH_SCRIPT + '" --game-id ' + shlex.quote(str(game_id))
-    Display.deinit_display()
-    Device.get_device().run_app(APP_DIR, launch)
+    entry = _entry(_config())
+    if entry is None:
+        Display.display_message(_error_message({}), duration_ms=3500)
+        return
+    # Inside PyUI, like the Apps menu; B comes back to this game menu.
+    native_app.run(APP_DIR, entry, game_id=game_id)

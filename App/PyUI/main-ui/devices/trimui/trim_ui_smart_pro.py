@@ -15,6 +15,7 @@ from utils import throttle
 from utils.config_copier import ConfigCopier
 
 from utils.ffmpeg_image_utils import FfmpegImageUtils
+from utils.py_ui_config import PyUiConfig
 
 class TrimUISmartPro(TrimUIDevice):
     TRIMUI_STOCK_CONFIG_LOCATION = "/mnt/UDISK/system.json"
@@ -110,7 +111,10 @@ class TrimUISmartPro(TrimUIDevice):
 
     # This inputd has no cal_update; it only reads joypad*.config at startup.
     def apply_stick_calibration(self):
-        subprocess.run(["/bin/sh", "-c", f". {self.SPRUCE_HELPER_FUNCTIONS} && restart_trimui_inputd"],
+        restart_cmd = PyUiConfig.get_input_daemon_restart_cmd()
+        if not restart_cmd or not os.path.exists(restart_cmd):
+            raise RuntimeError(f"Input daemon restart command not available: {restart_cmd}")
+        subprocess.run([restart_cmd],
                        stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                        timeout=30, check=True)
         watcher = getattr(self, "volume_key_watcher", None)

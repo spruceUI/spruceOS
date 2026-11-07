@@ -110,11 +110,52 @@ apply_system_icons() {
     done
 }
 
+find_highest_resolution_icon_dir() {
+    local theme_root="$1"
+    local icon_dir dimensions width height area max_area=0 highest_dir=""
+
+    for icon_dir in "${theme_root}"/icons_*x*; do
+        [ -d "$icon_dir" ] || continue
+        dimensions="${icon_dir##*/icons_}"
+        case "$dimensions" in
+            *x*) width="${dimensions%x*}"; height="${dimensions#*x}" ;;
+            *) continue ;;
+        esac
+        case "$width:$height" in
+            *[!0-9:]*|:*|*:) continue ;;
+        esac
+
+        width="${width#"${width%%[!0]*}"}"
+        height="${height#"${height%%[!0]*}"}"
+        [ -n "$width" ] && [ -n "$height" ] || continue
+        [ "$width" -gt 0 ] && [ "$height" -gt 0 ] || continue
+        area=$((width * height))
+        if [ "$area" -gt "$max_area" ]; then
+            max_area="$area"
+            highest_dir="$icon_dir"
+        fi
+    done
+
+    [ -n "$highest_dir" ] || return 1
+    printf '%s\n' "$highest_dir"
+}
+
+find_first_existing_icon() {
+    local candidate
+    for candidate in "$@"; do
+        if [ -e "$candidate" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
 get_system_icon_from_theme() {
     local category="$1"
     local systems_file="$CONFIG_DIR/systems.json"
-    local current_theme icon_name emu_name selected_icon ext
-    local theme_dir fallback_dir dest_path
+    local current_theme icon_name emu_name selected_icon="" ext
+    local theme_root theme_dir resolution_theme_dir fallback_dir dest_path
     local config
     config=$(get_config_path)
 
@@ -134,21 +175,46 @@ get_system_icon_from_theme() {
         return 1
     fi
 
-    theme_dir="/mnt/SDCARD/Themes/${current_theme}/icons"
+    theme_root="/mnt/SDCARD/Themes/${current_theme}"
+    theme_dir="${theme_root}/icons"
+    resolution_theme_dir="$(find_highest_resolution_icon_dir "$theme_root")"
+    if [ -n "$resolution_theme_dir" ]; then
+        log_message "Game Nursery: Using highest-resolution theme icon folder '$resolution_theme_dir'"
+    fi
     fallback_dir="/mnt/SDCARD/Emu/${emu_name}"
 
-    if   [ -e "${theme_dir}/sel/${icon_name}.qoi" ]; then selected_icon="${theme_dir}/sel/${icon_name}.qoi"
-    elif [ -e "${theme_dir}/sel/${icon_name}.png" ]; then selected_icon="${theme_dir}/sel/${icon_name}.png"
-    elif [ -e "${theme_dir}/${icon_name}.qoi" ];     then selected_icon="${theme_dir}/${icon_name}.qoi"
-    elif [ -e "${theme_dir}/${icon_name}.png" ];     then selected_icon="${theme_dir}/${icon_name}.png"
-    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}_sel.qoi" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.qoi"
-    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}_sel.png" ]; then selected_icon="${fallback_dir}/${icon_name}_sel.png"
-    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}.qoi" ];  then selected_icon="${fallback_dir}/${icon_name}.qoi"
-    elif [ -n "$emu_name" ] && [ -e "${fallback_dir}/${icon_name}.png" ];  then selected_icon="${fallback_dir}/${icon_name}.png"
-    elif [ -e "${theme_dir}/app/${icon_name}.qoi" ]; then selected_icon="${theme_dir}/app/${icon_name}.qoi"
-    elif [ -e "${theme_dir}/app/${icon_name}.png" ]; then selected_icon="${theme_dir}/app/${icon_name}.png"
-    else return 1
+    if [ -n "$resolution_theme_dir" ]; then
+        selected_icon="$(find_first_existing_icon \
+            "${resolution_theme_dir}/sel/${icon_name}.qoi" \
+            "${resolution_theme_dir}/sel/${icon_name}.png" \
+            "${resolution_theme_dir}/${icon_name}.qoi" \
+            "${resolution_theme_dir}/${icon_name}.png")"
     fi
+    if [ -z "$selected_icon" ]; then
+        selected_icon="$(find_first_existing_icon \
+            "${theme_dir}/sel/${icon_name}.qoi" \
+            "${theme_dir}/sel/${icon_name}.png" \
+            "${theme_dir}/${icon_name}.qoi" \
+            "${theme_dir}/${icon_name}.png")"
+    fi
+    if [ -z "$selected_icon" ] && [ -n "$emu_name" ]; then
+        selected_icon="$(find_first_existing_icon \
+            "${fallback_dir}/${icon_name}_sel.qoi" \
+            "${fallback_dir}/${icon_name}_sel.png" \
+            "${fallback_dir}/${icon_name}.qoi" \
+            "${fallback_dir}/${icon_name}.png")"
+    fi
+    if [ -z "$selected_icon" ] && [ -n "$resolution_theme_dir" ]; then
+        selected_icon="$(find_first_existing_icon \
+            "${resolution_theme_dir}/app/${icon_name}.qoi" \
+            "${resolution_theme_dir}/app/${icon_name}.png")"
+    fi
+    if [ -z "$selected_icon" ]; then
+        selected_icon="$(find_first_existing_icon \
+            "${theme_dir}/app/${icon_name}.qoi" \
+            "${theme_dir}/app/${icon_name}.png")"
+    fi
+    [ -n "$selected_icon" ] || return 1
 
     ext="${selected_icon##*.}"
     dest_path="/mnt/SDCARD/Saves/GameNursery/Imgs/${category}.${ext}"
@@ -199,4 +265,3 @@ while true; do
 done
 
 touch /mnt/SDCARD/App/PyUI/pyui_resize_boxart_trigger
-

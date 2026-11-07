@@ -1,41 +1,26 @@
 {
     "menuOptions": {
-        "Game Switcher Settings": {
-            "menuHoldTime": {
-                "display": "Menu Hold Time",
-                "description": "seconds before GS launch from menu",
+        "Audio Settings": {
+            "headphoneMultiplier": {
+                "display": "Headphone Audio Multiplier",
+                "devices": ["MIYOO_FLIP"],
+                "description": "Headphone Audio Multiplier",
                 "options": [
-                    "0",
+                    "0.1",
+                    "0.2",
+                    "0.3",
+                    "0.4",
                     "0.5",
-                    "1",
-                    "2",
-                    "3",
-                    "4"
+                    "0.6",
+                    "0.7",
+                    "0.8",
+                    "0.9",
+                    "1.0"
                 ],
-                "selected": "1"
-            },
-            "menuShouldVibrate": {
-                "display": "Vibrate on Menu Hold",
-                "description": "when launching GS from menu",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
+                "selected": "1.0"
             }
         },
         "Battery Settings": {
-            "ledMode": {
-                "display": "Power indicator LED mode",
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "MAGICX_A133P", "RGB30", "RGB20SX", "RG353M"],
-                "description": "for non-red status LED",
-                "options": [
-                    "Always off",
-                    "On in menu only",
-                    "Always on"
-                ],
-                "selected": "Always off"
-            },
             "lowPowerWarningPercent": {
                 "display": "Low power warning percent",
                 "description": "flash LED below threshold",
@@ -160,152 +145,6 @@
                 "selected": "False"
             }
         },
-        "System Settings": {
-            "checkForUpdates": {
-                "display": "Check for spruce updates on startup",
-                "description": "if connected to Wi-Fi",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "bootTo": {
-                "display": "Launch application on startup",
-                "description": "if not autoresuming last game",
-                "options": [
-                    "spruceUI",
-                    "Random Game",
-                    "Game Switcher",
-                    "Splore",
-                    "NDS firmware",
-                    "DSi firmware",
-                    "PPSSPP",
-                    "Songo#5",
-                    "Apotris (GBA)",
-                    "Mega Mode"
-                ],
-                "selected": "spruceUI"
-            },
-            "randomThemeAtBoot": {
-                "display": "Randomize theme at boot",
-                "description": "just for you Puppycat",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False"
-            },
-            "rumbleIntensity": {
-                "display": "Rumble intensity",
-                "description": "for system notifications",
-                "options": [
-                    "Off",
-                    "Weak",
-                    "Medium",
-                    "Strong"
-                ],
-                "selected": "Medium"
-            },
-            "extendedBrightness": {
-                "devices": ["MIYOO_FLIP"],
-                "display": "Extended brightness controls",
-                "description": "Start + L/R change contrast at minimum brightness",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False"
-            },
-            "disableJoystick": {
-                "devices": ["MIYOO_A30"],
-                "display": "Disable joystick",
-                "description": "can help with stick delete mod bugs",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False"
-            },
-            "enableLidSensor": {
-                "devices": ["MIYOO_FLIP", "MIYOO_MINI_FLIP"],
-                "display": "Enable Lid Sensor",
-                "description":"shut device to enter sleep",
-                "options":[
-                    "True",
-                    "Only when unplugged",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "useZRAM":{
-                "devices": [
-                    "MIYOO_A30",
-                    "MIYOO_FLIP",
-                    "GKD_PIXEL2",
-                    "MAGICX_A133P",
-                    "TRIMUI_A133P",
-                    "TRIMUI_SMART_PRO_S",
-                    "DARKMOSS"
-                ],
-                "display": "Enable ZRAM",
-                "description": "50% of device RAM; reboot to apply",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "swapfileSize":{
-                "display": "SD card swapfile",
-                "description": "reboot to apply",
-                "options": [
-                    "Off",
-                    "128MB",
-                    "256MB",
-                    "512MB"
-                ],
-                "selected": "Off"
-            },
-            "overclockSpeedMiyooMini": {
-                "devices": ["MIYOO_MINI_FAMILY"],
-                "display": "Overclock Speed",
-                "description": "Clockspeed to use for overclocking",
-                "options": [
-                    "1500",
-                    "1600",
-                    "1700",
-                    "1800"
-                ],
-                "selected": "1600"
-            },
-            "overclockSpeedA30": {
-                "devices": ["MIYOO_A30"],
-                "display": "Overclock Speed",
-                "description": "caution: high values may freeze device",
-                "options": [
-                    "1392",
-                    "1440",
-                    "1488",
-                    "1512"
-                ],
-                "selected": "1392"
-            },
-            "customThermals": {
-                "devices": ["TRIMUI_SMART_PRO_S"],
-                "display": "Fan Speed",
-                "description": "cooling fan profiles",
-                "options": [
-                    "Off",
-                    "Adaptive",
-                    "Low",
-                    "Medium",
-                    "High"
-                ],
-                "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
-                "selected": "Adaptive"
-            }
-        },
         "Button Settings": {
             "brightnessHotkey": {
                 "display": "Brightness hotkey",
@@ -317,6 +156,69 @@
                     "Off"
                 ],
                 "selected": "Both"
+            },
+            "globalScreenshotShortcut": {
+                "display": "Global sceenshot hotkey",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "L2+R2+Y",
+                    "L2+R2+X",
+                    "L2+R2+DOWN"
+                ],
+                "selected": "L2+R2+Y"
+            },
+            "menuButton": {
+                "devices": ["RGB30", "POWKIDDY_V10"],
+                "display": "Menu button",
+                "description": "Which stick click opens the menu",
+                "options": [
+                    "L3",
+                    "R3"
+                ],
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
+                "selected": "L3"
+            },
+            "tapMenuAction": {
+                "display": "Tap Menu button action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Emulator menu"
+            },
+            "holdMenuAction": {
+                "display": "Hold Menu button action",
+                "options": [
+                    "Emulator menu",
+                    "Game Switcher",
+                    "Exit game",
+                    "Nothing"
+                ],
+                "selected": "Game Switcher"
+            },
+            "menuHoldTime": {
+                "display": "Menu button hold Time",
+                "description": "seconds before triggering hold action",
+                "options": [
+                    "0.2",
+                    "0.5",
+                    "1",
+                    "2",
+                    "3"
+                ],
+                "selected": "1"
+            },
+            "menuShouldVibrate": {
+                "display": "Vibrate on Menu hold",
+                "description": "when hold action triggered",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
             },
             "powerButtonHoldTime": {
                 "display": "Power button hold time",
@@ -344,28 +246,6 @@
                     "Nothing"
                 ],
                 "selected": "Game Switcher"
-            },
-            "menuButton": {
-                "devices": ["RGB30", "POWKIDDY_V10"],
-                "display": "Menu button",
-                "description": "Which stick click opens the menu",
-                "options": [
-                    "L3",
-                    "R3"
-                ],
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/menuButton.sh",
-                "selected": "L3"
-            },
-            "volumeButtons": {
-                "devices": ["RGB30", "RGB20SX"],
-                "display": "Volume buttons",
-                "description": "Swap up and down if your rocker is fitted the other way",
-                "options": [
-                    "Standard",
-                    "Swapped"
-                ],
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
-                "selected": "Standard"
             },
             "fnF1Action": {
                 "devices": ["TRIMUI_BRICK", "TRIMUI_BRICK_PRO"],
@@ -413,60 +293,19 @@
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/FN_Button/apply-switch-action",
                 "selected": "LED off"
             },
-            "globalScreenshotShortcut": {
-                "display": "Global sceenshot shortcut",
-                "description": "reboot to apply",
+            "volumeButtons": {
+                "devices": ["RGB30", "RGB20SX"],
+                "display": "Volume buttons",
+                "description": "Swap up and down if your rocker is fitted the other way",
                 "options": [
-                    "Off",
-                    "L2+R2+Y",
-                    "L2+R2+X",
-                    "L2+R2+DOWN"
+                    "Standard",
+                    "Swapped"
                 ],
-                "selected": "L2+R2+Y"
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/volumeButtons.sh",
+                "selected": "Standard"
             }
         },
         "Emulator Settings": {
-            "tapHomeAction": {
-                "display": "Tap home key action",
-                "options": [
-                    "Emulator menu",
-                    "Game Switcher",
-                    "Exit game",
-                    "Nothing"
-                ],
-                "selected": "Emulator menu"
-            },
-            "holdHomeAction": {
-                "display": "Hold home key action",
-                "options": [
-                    "Emulator menu",
-                    "Game Switcher",
-                    "Exit game",
-                    "Nothing"
-                ],
-                "selected": "Game Switcher"
-            },
-            "raInGameMenu": {
-                "display": "RA: use in-game menu",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "raIgmColorway": {
-                "display": "RA: in-game menu colors",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
-                "options": [
-                    "spruce",
-                    "mono",
-                    "red",
-                    "blue",
-                    "green",
-                    "purple"
-                ],
-                "selected": "spruce"
-            },
             "keepSavesBetweenCores": {
                 "display": "Transfer saves between cores",
                 "options": [
@@ -475,6 +314,15 @@
                     "Never"
                 ],
                 "selected": "Prompt"
+            },
+            "showDSBootMenuStubs": {
+                "display": "Show DS firmware boot entries",
+                "description": "applies on reboot",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
             },
             "raHotkeyMiyoo": {
                 "display": "RA: hotkey enable button",
@@ -491,7 +339,7 @@
             "raHotkeyTrimUI": {
                 "display": "RA: hotkey enable button",
                 "description": "custom allows to set in RA itself",
-                "devices": ["TRIMUI_A133P", "GKD_PIXEL2", "MAGICX_A133P"],
+                "devices": ["TRIMUI_A133P", "GKD_PIXEL2", "OAKMOSS_A133P"],
                 "options": [
                     "Select",
                     "Start",
@@ -521,7 +369,7 @@
                 "selected": "Custom"
             },
             "perfectOverlays": {
-                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20", "RG353M"],
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI", "MIYOO_MINI_PLUS", "GKD_PIXEL2", "ANBERNIC_RG28XX", "ANBERNIC_RGXX640480", "TRIMUI_BRICK", "TRIMUI_BRICK_PRO", "MAGICX_ZERO28", "MAGICX_XU20", "POWKIDDY_V90S", "POWKIDDY_V20", "RG353M"],
                 "display": "GB[C/A]: use Perfect Overlays",
                 "description": "provided by 1PlayerInsertCoin and Mugwomp93",
                 "options": [
@@ -548,6 +396,181 @@
                     "False"
                 ],
                 "selected": "False"
+            }
+        },
+        "In-Game Menu Settings": {
+            "raInGameMenu": {
+                "display": "RA: use in-game menu",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "raIgmColorway": {
+                "display": "RA: in-game menu colors",
+                "description": "Themes may override this",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmColorway.sh",
+                "options": [
+                    "spruce",
+                    "mono",
+                    "red",
+                    "blue",
+                    "green",
+                    "purple"
+                ],
+                "selected": "spruce"
+            },
+            "igmResume": {
+                "display": "Show Resume",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmSave": {
+                "display": "Show Save state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmLoad": {
+                "display": "Show Load state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmFfSpeed": {
+                "display": "Show Fast-forward speed",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmReset": {
+                "display": "Show Reset",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmRetroarch": {
+                "display": "Show RetroArch menu",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmExit": {
+                "display": "Show Exit game",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "igmDisc": {
+                "display": "Show Disc swap",
+                "description": "Multi-disc games only",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmScreenshot": {
+                "display": "Show Screenshot",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmUndoSave": {
+                "display": "Show Undo save state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmUndoLoad": {
+                "display": "Show Undo load state",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmShowFps": {
+                "display": "Show FPS toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmMute": {
+                "display": "Show Mute toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmRewind": {
+                "display": "Show Rewind toggle",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "igmShader": {
+                "display": "Show Shader toggle",
+                "description": "Not on Miyoo Mini",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            }
+        },
+        "LEDs Settings": {
+            "LEDsMode": {
+                "display": "LEDs mode",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
+                "devices": ["GKD_PIXEL2"],
+                "description": "applies immediately",
+                "options": [
+                    "Off",
+                    "Battery",
+                    "Audio"
+                ],
+                "selected": "Battery"
             }
         },
         "Network Settings": {
@@ -590,6 +613,17 @@
                 ],
                 "selected":"False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
+            },
+            "enableNetworkADB": {
+                "devices": ["MIYOO_MINI_PLUS", "MIYOO_MINI_FLIP"],
+                "display": "Enable network ADB",
+                "description": "Passwordless root access over WiFi. Trusted networks only",
+                "options":[
+                    "True",
+                    "False"
+                ],
+                "selected":"False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkAdb.sh"
             },
             "enableWaitingToConnect": {
                 "display": "Wait for WiFi at game launch",
@@ -657,25 +691,60 @@
                 "selected": "http"
             }
         },
-        "LEDs Settings": {
-            "LEDsMode": {
-                "display": "LEDs mode",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
-                "devices": ["GKD_PIXEL2"],
-                "description": "applies immediately",
+        "RetroAchievements Settings": {
+            "modeToggle": {
+                "display": "Retroachivements mode",
                 "options": [
-                    "Off",
-                    "Battery",
-                    "Audio"
+                    "Manual",
+                    "Disabled",
+                    "Casual",
+                    "Hardcore"
                 ],
-                "selected": "Battery"
+                "selected": "Manual"
+            },
+            "username": {
+                "display": "Username",
+                "type": "freeText",
+                "selected": ""
+            },
+            "password": {
+                "display": "Password",
+                "type": "freeText",
+                "selected": ""
+            },
+            "webApiKey": {
+                "display": "Web API Key",
+                "description": "For the Cheevos app: retroachievements.org > Settings > Applications",
+                "type": "freeText",
+                "selected": "",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
+            },
+            "enableOfflineProxy": {
+                "display": "RAOfflineProxy",
+                "description": "Earn Casual Cheevos Offline",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
+            },
+            "raproxyUsageStats": {
+                "display": "Share RAOfflineProxy statistics",
+                "description": "Sends app version, device, cache counts and a hashed user ID daily",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/raproxyUsageStats.sh"
             }
         },
         "RGB LED Settings": {
             "enableLEDs": {
                 "display": "RGB LEDs",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/rgbLed.sh",
-                "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1"],
+                "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "ANBERNIC_RGXX_RGB", "MINILOONG_POCKET1", "E5PLUS"],
                 "description": "applies immediately",
                 "options": [
                     "On",
@@ -1127,73 +1196,161 @@
                 "selected": "4000"
             }
         },
-        "RetroAchievements Settings": {
-            "modeToggle": {
-                "display": "Retroachivements mode",
-                "options": [
-                    "Manual",
-                    "Disabled",
-                    "Casual",
-                    "Hardcore"
-                ],
-                "selected": "Manual"
-            },
-            "username": {
-                "display": "Username",
-                "type": "freeText",
-                "selected": ""
-            },
-            "password": {
-                "display": "Password",
-                "type": "freeText",
-                "selected": ""
-            },
-            "webApiKey": {
-                "display": "Web API Key",
-                "description": "For the Cheevos app: retroachievements.org > Settings > Applications",
-                "type": "freeText",
-                "selected": "",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
-            },
-            "enableOfflineProxy": {
-                "display": "RAOfflineProxy",
-                "description": "Earn Casual Cheevos Offline",
+        "System Settings": {
+            "verbosePyuiLogging": {
+                "display": "Verbose PyUI logging",
+                "description": "off: warnings and errors; on: debug details",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
+                "selected": "False"
             },
-            "raproxyUsageStats": {
-                "display": "Share RAOfflineProxy statistics",
-                "description": "Sends app version, device, cache counts and a hashed user ID daily",
+            "ledMode": {
+                "display": "Power indicator LED mode",
+                "devices": ["MIYOO_A30", "MIYOO_FLIP", "MIYOO_MINI_FAMILY", "OAKMOSS_A133P", "RGB30", "RGB20SX", "RG353M"],
+                "description": "for non-red status LED",
+                "options": [
+                    "Always off",
+                    "On in menu only",
+                    "Always on"
+                ],
+                "selected": "Always off"
+            },
+            "bootTo": {
+                "display": "Launch application on startup",
+                "description": "if not autoresuming last game",
+                "options": [
+                    "spruceUI",
+                    "Random Game",
+                    "Game Switcher",
+                    "Splore",
+                    "NDS firmware",
+                    "DSi firmware",
+                    "PPSSPP",
+                    "Songo#5",
+                    "Apotris (GBA)",
+                    "Mega Mode"
+                ],
+                "selected": "spruceUI"
+            },
+            "randomThemeAtBoot": {
+                "display": "Randomize theme at boot",
+                "description": "just for you Puppycat",
                 "options": [
                     "True",
                     "False"
                 ],
-                "selected": "False",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/raproxyUsageStats.sh"
-            }
-        },
-        "Audio Settings": {
-            "headphoneMultiplier": {
-                "display": "Headphone Audio Multiplier",
-                "devices": ["MIYOO_FLIP"],
-                "description": "Headphone Audio Multiplier",
+                "selected": "False"
+            },
+            "rumbleIntensity": {
+                "display": "Rumble intensity",
+                "description": "for system notifications",
                 "options": [
-                    "0.1",
-                    "0.2",
-                    "0.3",
-                    "0.4",
-                    "0.5",
-                    "0.6",
-                    "0.7",
-                    "0.8",
-                    "0.9",
-                    "1.0"
+                    "Off",
+                    "Weak",
+                    "Medium",
+                    "Strong"
                 ],
-                "selected": "1.0"
+                "selected": "Medium"
+            },
+            "extendedBrightness": {
+                "devices": ["MIYOO_FLIP", "TRIMUI_A133P", "OAKMOSS_A133P"],
+                "display": "Extended brightness controls",
+                "description": "Allow contrast adjustment at minimum brightness",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "disableJoystick": {
+                "devices": ["MIYOO_A30"],
+                "display": "Disable joystick",
+                "description": "can help with stick delete mod bugs",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
+            },
+            "enableLidSensor": {
+                "devices": ["MIYOO_FLIP", "MIYOO_MINI_FLIP"],
+                "display": "Enable Lid Sensor",
+                "description":"shut device to enter sleep",
+                "options":[
+                    "True",
+                    "Only when unplugged",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "useZRAM":{
+                "devices": [
+                    "MIYOO_A30",
+                    "MIYOO_FLIP",
+                    "GKD_PIXEL2",
+                    "OAKMOSS_A133P",
+                    "TRIMUI_A133P",
+                    "TRIMUI_SMART_PRO_S",
+                    "DARKMOSS"
+                ],
+                "display": "Enable ZRAM",
+                "description": "50% of device RAM; reboot to apply",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "True"
+            },
+            "swapfileSize":{
+                "display": "SD card swapfile",
+                "description": "reboot to apply",
+                "options": [
+                    "Off",
+                    "128MB",
+                    "256MB",
+                    "512MB"
+                ],
+                "selected": "Off"
+            },
+            "overclockSpeedMiyooMini": {
+                "devices": ["MIYOO_MINI_FAMILY"],
+                "display": "Overclock Speed",
+                "description": "Clockspeed to use for overclocking",
+                "options": [
+                    "1500",
+                    "1600",
+                    "1700",
+                    "1800"
+                ],
+                "selected": "1600"
+            },
+            "overclockSpeedA30": {
+                "devices": ["MIYOO_A30"],
+                "display": "Overclock Speed",
+                "description": "caution: high values may freeze device",
+                "options": [
+                    "1392",
+                    "1440",
+                    "1488",
+                    "1512"
+                ],
+                "selected": "1392"
+            },
+            "customThermals": {
+                "devices": ["TRIMUI_SMART_PRO_S"],
+                "display": "Fan Speed",
+                "description": "cooling fan profiles",
+                "options": [
+                    "Off",
+                    "Adaptive",
+                    "Low",
+                    "Medium",
+                    "High"
+                ],
+                "changeCmd":"/mnt/SDCARD/spruce/smartpros/bin/update-thermal-watchdog-to-setting",
+                "selected": "Adaptive"
             }
         }
     }

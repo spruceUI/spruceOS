@@ -6,7 +6,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 (
-    name="$(get_config_value '.menuOptions."Emulator Settings".raIgmColorway.selected' "spruce")"
+    name="$(get_config_value '.menuOptions."In-Game Menu Settings".raIgmColorway.selected' "spruce")"
     src="/mnt/SDCARD/RetroArch/igm/${name}.json"
     [ -f "$src" ] || src="/mnt/SDCARD/RetroArch/igm/spruce.json"
     [ -f "$src" ] && cp -f "$src" "/mnt/SDCARD/RetroArch/igm.json"

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from cheevos.core.sync.detail_fetch import FetchState
 from cheevos.core.sync.progress import Failure
+from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
 from cheevos.ui.pyui.status_bar import BarStatus
@@ -46,9 +47,7 @@ class GameSyncBar(SyncBar):
         if state.failure is Failure.RATE_LIMITED and state.retry_at is not None:
             left = math.ceil((state.retry_at - self._ctx.clock()) / 60)
             if left > 0:
-                return BarStatus(
-                    strings.SYNC_RATE_LIMITED.format(minutes=left), self._icon("cloud")
-                )
+                return BarStatus(fmt.count(strings.SYNC_RATE_LIMITED, left), self._icon("cloud"))
         return BarStatus(strings.GAME_REFRESH_FAILED, self._icon("cloud"), strings.SYNC_RETRY)
 
     def press_start(self) -> None:

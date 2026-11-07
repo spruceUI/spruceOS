@@ -74,8 +74,7 @@ fi
 GBA_CFG_FILES="/mnt/SDCARD/RetroArch/.retroarch/config/gpSP/GBA.cfg
 /mnt/SDCARD/RetroArch/.retroarch/config/mGBA/GBA.cfg"
 
-# Matched literally, single spaces and all, the way 4.1.2.sh matches this very
-# key. Every upgrade script that has actually run on these devices sticks to
+# Matched literally, single spaces and all. Every upgrade script that has actually run on these devices sticks to
 # plain anchored text and none of them use character classes, so this stays on
 # the idiom that is known to work rather than betting on what the device's
 # busybox was compiled with. update_config_file writes the line with echo, so

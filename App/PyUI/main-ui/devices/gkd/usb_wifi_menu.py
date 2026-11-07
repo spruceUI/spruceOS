@@ -21,6 +21,5 @@ class USBWifiMenu(WifiMenu):
             super().show_wifi_menu()
         else:
             message = "USB adapter not connected.\n" \
-                    "Connect a compatible adapter to use WiFi.\n" \
-                    "The device must be restarted to use WiFi after using sleep."
+                    "Connect a compatible adapter to use WiFi."
             Display.display_message(message, 5000)

@@ -31,8 +31,8 @@ else
 	# spruce already ships is SONAME libwebp.so.7 - a different ABI, not a
 	# substitute. Its remaining deps resolve already: libfreetype from BaseOS's
 	# harvest, libpng16/libjpeg/libtiff from spruce/flip/lib.
-	case "$PLATFORM" in
-		"Anbernic"*)
+    case "$PLATFORM_FAMILY" in
+        "h700")
 			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
 
 			# gptokeyb reads the pad through SDL_GameController, and without a
@@ -46,7 +46,7 @@ else
 			# .gptk on the wrong physical key.
 			export_sdl_gamecontroller_map positional
 			;;
-		"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"XUMiniM"|"G350"|"V10"|"RG353M")
+        "darkmoss"|"oakmoss")
 			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
 			;;
 	esac

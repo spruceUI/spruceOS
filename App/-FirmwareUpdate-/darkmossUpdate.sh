@@ -33,9 +33,6 @@ if [ -n "$LOCAL" ]; then
     LATEST="$(printf '%s' "$ASSET_NAME" | sed "s/^dArkMoss_${UNIT}_//; s/\\.dmupd$//; s/^[vV]//")"
     log_message "darkmossUpdate.sh: found $LOCAL"
 else
-    log_and_display_message "dArkMoss ${INSTALLED:-(unknown version)} is installed. Checking for a newer one. Press A to continue."
-    acknowledge
-
     if [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
         bail "WiFi is off, so the update cannot be downloaded. Please enable WiFi from spruce settings and try again."
     fi

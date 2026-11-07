@@ -11,8 +11,8 @@ Start by copying `spruce.json` — it lists every key with its default value.
 The binary looks in three places and uses the first one it finds:
 
 1. `Themes/<your theme>/igm.json` — shipped with a theme
-2. `RetroArch/igm.json` — written by **Settings → Emulator Settings → RA: in-game
-   menu colors**
+2. `RetroArch/igm.json` — written by **Settings → In-Game Menu Settings →
+   Colors**
 3. `RetroArch/igm/spruce.json` — the shipped default
 
 **A theme's file wins outright.** If your theme ships an `igm.json`, the user's
@@ -108,17 +108,55 @@ not look broken, so check the log if your font seems to be ignored.
 | `text.title` | `"spruceOS Menu"` |
 | `text.auto` | `"Auto"` |
 | `text.slot` | `"Slot"` |
+| `text.max` | `"Max"` |
+| `text.on` / `text.off` | `"On"` / `"Off"` |
 | `text.arrow_left` / `text.arrow_right` | `"<"` / `">"` |
 | `labels.resume` | `"Resume"` |
 | `labels.save` | `"Save"` |
 | `labels.load` | `"Load"` |
+| `labels.ff_speed` | `"FF Speed"` |
 | `labels.reset` | `"Reset"` |
 | `labels.retroarch` | `"RetroArch Menu"` |
 | `labels.exit` | `"Exit Game"` |
+| `labels.disc` | `"Disc"` |
+| `labels.screenshot` | `"Screenshot"` |
+| `labels.undo_save` | `"Undo Save"` |
+| `labels.undo_load` | `"Undo Load"` |
+| `labels.show_fps` | `"Show FPS"` |
+| `labels.mute` | `"Mute"` |
+| `labels.rewind` | `"Rewind"` |
+| `labels.shader` | `"Shader"` |
 
 The Save and Load rows read `"<labels.save> <text.slot> 3"`, or
 `"<labels.save> <text.auto>"` on the auto slot. You supply the words; the menu
-assembles them. There are always six rows and you cannot add or remove any.
+assembles them. The FF Speed row reads `"<labels.ff_speed> 3x"`, or
+`"<labels.ff_speed> <text.max>"` when uncapped. The Disc row reads
+`"<labels.disc> 2/3"`, and the toggles read `"<labels.show_fps>: <text.on>"`.
+
+A theme only sets the words. Which rows appear is the player's choice, not the
+theme's — see below.
+
+## Which entries appear
+
+`RetroArch/igm_items.json` lists the entries in display order:
+
+```json
+{ "items": ["resume", "save", "load", "reset", "retroarch", "exit"] }
+```
+
+**Settings → In-Game Menu Settings** writes this file, and a game launch creates
+it from those toggles if it is missing. Editing it by hand works too, and the
+toggles keep a hand-made order. Backup and restore carry it. Unknown ids are
+skipped and a repeated id appears once; an empty or broken file gets the
+binary's built-in list. Resume, when listed, is always first and Exit always
+last. B always resumes, whatever the list.
+
+Ids: `resume`, `save`, `load`, `ff_speed`, `reset`, `retroarch`, `exit`, `disc`,
+`screenshot`, `undo_save`, `undo_load`, `show_fps`, `mute`, `rewind`, `shader`.
+
+`disc` only appears in games with more than one disc. `shader` never appears on
+the Miyoo Mini. FF speed, Show FPS, Rewind and Shader changes are saved to the
+RetroArch config; Mute lasts until the game closes.
 
 Setting `text.title` to `""` hides the title but keeps its row height — set
 `title_h_pct` to `0` to reclaim the space.
@@ -126,17 +164,13 @@ Setting `text.title` to `""` hides the title but keeps its row height — set
 ## Two things that will catch you out
 
 **Nothing is range-checked.** Values are applied exactly as written, on purpose.
-The menu is how a player exits a game, so the number that matters is the panel
-height:
+The menu shows as many rows as fit on screen and scrolls the rest, with a
+scrollbar on the panel's right edge. Bigger rows therefore mean more scrolling
+rather than rows off the screen.
 
-```
-(6 x item_h_pct + title_h_pct) x device scale  must stay under 100
-```
-
-The device scale is `1.0` everywhere except **Pixel2 and RGDS, where it is 1.2**.
-So with the default `title_h_pct`, the ceiling for `item_h_pct` is about **14.2**
-on most devices but only **11.9** on those two. Go over and rows render off the
-screen, on a device you may not own. The default of `8.0` leaves plenty of room.
+The device scale is `1.0` everywhere except **Pixel2 and RGDS, where it is 1.2**,
+so the same `item_h_pct` fits fewer rows on those two. At the default of `8.0`
+all six default entries fit everywhere.
 
 Explicit `panel_x_pct` / `panel_y_pct` are *not* multiplied by the device scale,
 while the sizes are — "put it at 40% of the screen" should mean that everywhere.

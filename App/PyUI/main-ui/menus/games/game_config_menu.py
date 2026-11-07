@@ -2,6 +2,7 @@
 import os
 import shutil
 import sys
+from apps import script_app
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
@@ -35,7 +36,7 @@ class GameConfigMenu:
         for index, opt in enumerate(options):
             option_list.append(
                 GridOrListEntry(
-                    primary_text=opt,
+                    primary_text=Language.menu_option_value(opt),
                     value=index
                 )
             )
@@ -57,7 +58,7 @@ class GameConfigMenu:
             elif (ControllerInput.B == selected.get_input()):
                 return None
             
-    def change_indexed_array_option(self, entry_name, input, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override):
+    def change_indexed_array_option(self, entry_name, input, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name=None):
         try:
             selected_index = all_options.index(current_value)
         except:
@@ -84,7 +85,7 @@ class GameConfigMenu:
                     selected_index = 0
             elif(ControllerInput.A == input):
                 #selected_index = ThemeSelectionMenu().get_selected_theme_index(theme_folders)
-                selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
+                selected_index = self.get_selected_index(Language.select_option_prompt(display_name or entry_name), all_options)
 
             PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -122,16 +123,18 @@ class GameConfigMenu:
             # it not being 1:1 it should work out
             game_file_name = os.path.basename(self.game.rom_file_path)
             miyoo_game_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, "../../Roms", self.game_system.folder_name, game_file_name)
-            Display.deinit_display()
-
-            app_path = launch_option
+            folder = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name)
+            app_path = launch_option.get("launch")
             if(not os.path.isfile(app_path)):
-                app_path = os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name, launch_option)
+                app_path = os.path.join(folder, app_path)
 
-            Device.get_device().run_app(os.path.join("/mnt/SDCARD/Emu", self.game_system.folder_name), app_path + " \"" +miyoo_game_path +"\"")
-            # TODO Once we remove the display_kill and popups from launch.sh we can remove this
-            # For a good speedup
-            Display.reinitialize()
+            if not (launch_option.get("launchInPyUI") is True
+                    and script_app.run(folder, app_path, miyoo_game_path)):
+                Display.deinit_display()
+                Device.get_device().run_app(folder, app_path + " \"" +miyoo_game_path +"\"")
+                # TODO Once we remove the display_kill and popups from launch.sh we can remove this
+                # For a good speedup
+                Display.reinitialize()
             self.game_system.game_system_config.reload_config()
 
     def delete_rom(self, input_value):
@@ -176,6 +179,18 @@ class GameConfigMenu:
                     2000,
                 )
 
+    # With raBuild, show only the emulator list the launcher resolves (as get_selected_emulator)
+    def is_inactive_emulator_option(self, name, menu_options, rom_file_path):
+        ra_devices = (menu_options.get("raBuild") or {}).get("devices")
+        if not name.startswith("Emulator") or not ra_devices or not Device.supports_device(ra_devices):
+            return False
+        device = Device.get_device()
+        active = device.get_emulator_arch(menu_options, rom_file_path) or next(
+            (key for key, option in menu_options.items() if key.startswith("Emulator")
+             and any(n in (option.get("devices") or []) for n in device.get_device_names())),
+            "Emulator")
+        return name != active
+
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
         selected = Selection(None, None, 0)
@@ -198,7 +213,7 @@ class GameConfigMenu:
                             image_path_selected=None,
                             description=None,
                             icon=None,
-                            value=lambda input_value, launch_option=config_option.get('launch')
+                            value=lambda input_value, launch_option=config_option
                                         : self.run_launch_option(input_value,launch_option)
 
 
@@ -213,7 +228,7 @@ class GameConfigMenu:
                 for name, option in menu_options.items():
                     devices = option.get("devices")
                     supported_device = Device.supports_device(devices)
-                    if(supported_device):
+                    if(supported_device and not self.is_inactive_emulator_option(name, menu_options, rom_file_path)):
                         effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
                         display_name = Language.menu_option_display(option.get('display'))
                         contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
@@ -233,8 +248,9 @@ class GameConfigMenu:
                                         value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
                                         all_options=option.get('options', []), current_value=effective_value,
                                             update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
-                                            remove_override=self.game_system.game_system_config.delete_menu_override
-                                            : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override)
+                                            remove_override=self.game_system.game_system_config.delete_menu_override,
+                                            display_name=Language.menu_option_display(option.get('display'))
+                                            : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name)
                                 )
                         )
 

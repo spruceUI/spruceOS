@@ -1,27 +1,13 @@
 #!/bin/sh
 
-# The MagicX A133P boards are decided by their base image's marker, not by
-# cpuinfo (same Cortex-A53 part id as the H700; see helperFunctions.sh).
-if [ -e /usr/magicx ]; then
-    case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
-        zero40) export PLATFORM="Zero40" ;;
-        xu20)   export PLATFORM="XU20" ;;
-        *)      export PLATFORM="Zero28" ;;
-    esac
-else
+# This entry point only needs to distinguish among MiyooMini, Flip, and devices that use runtime.sh.
 INFO=$(cat /proc/cpuinfo 2> /dev/null)
 case $INFO in
-    *"sun8i"*) export PLATFORM="A30" ;;
-    *"TG5040"*)	export PLATFORM="SmartPro" ;;
-    *"TG3040"*)	export PLATFORM="Brick"	;;
-    *"TG5050"*)	export PLATFORM="SmartProS"	;;
-    *"TG4040"*)	export PLATFORM="BrickPro"	;;
-    *"0xd05"*) export PLATFORM="Flip" ;;          # RK3566; dArkMoss units never run the updater
-    *"0xd04"*) export PLATFORM="Pixel2" ;;
-    *) export PLATFORM="MiyooMini" ;;
+    *"0xd05"*) boot_route="Flip" ;; # RK3566; dArkMoss units never hit this exec path.
+    *"SStar"*) boot_route="MiyooMini" ;;
+    *)         boot_route="Other" ;;
 esac
-fi
-
+[ "$boot_route" = "Other" ] && [ -d /customer/app ] && boot_route="MiyooMini"
 
 # The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh
 # with a crash-loop guard and a hand-off to the vendor UI. On the Flip it is
@@ -29,14 +15,14 @@ fi
 # asked for it boots exactly as before.
 SESSION=/mnt/SDCARD/spruce/scripts/boot/session.sh
 use_session=0
-case "$PLATFORM" in
+case "$boot_route" in
     Flip) [ -e /mnt/SDCARD/spruce/flags/boot_session_enabled ] && use_session=1 ;;
 esac
 
-if [ "$PLATFORM" = "MiyooMini" ]; then
-    /mnt/SDCARD/spruce/scripts/platform/miyoo_mini_startup.sh
+if [ "$boot_route" = "MiyooMini" ]; then
+    /mnt/SDCARD/spruce/scripts/platform/miyoomini/miyoo_mini_startup.sh
 elif [ "$use_session" = "1" ] && [ -f "$SESSION" ]; then
-    SPRUCE_BOOT_PLATFORM="$PLATFORM" exec sh "$SESSION"
+    SPRUCE_BOOT_PLATFORM="$boot_route" exec sh "$SESSION"
 else
     cd /mnt/SDCARD/spruce/scripts
     ./runtime.sh

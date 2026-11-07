@@ -17,7 +17,7 @@
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
         "MIYOO_MINI_FAMILY",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "DARKMOSS"
       ]
     },
@@ -32,22 +32,7 @@
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
         "MIYOO_MINI_FAMILY",
-        "MAGICX_A133P",
-        "DARKMOSS"
-      ]
-    },
-    {
-      "name": "Generate namelist",
-      "launch": "/mnt/SDCARD/Emu/SCUMMVM/gamelist.sh",
-      "devices": [
-        "TRIMUI_A133P",
-        "TRIMUI_SMART_PRO_S",
-        "MIYOO_FLIP",
-        "MIYOO_A30",
-        "GKD_PIXEL2",
-        "ANBERNIC_RGXX",
-        "MIYOO_MINI_FAMILY",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "DARKMOSS"
       ]
     }
@@ -96,7 +81,7 @@
         "MIYOO_FLIP",
         "GKD_PIXEL2",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "DARKMOSS"
       ],
       "selected": "scummvm-standalone",
@@ -112,7 +97,7 @@
     "ANBERNIC_RGXX",
     "MIYOO_MINI_",
     "DARKMOSS",
-    "MAGICX_A133P"
+    "OAKMOSS_A133P"
   ],
   "sortOrder": 5600,
   "brand": "modernengine",

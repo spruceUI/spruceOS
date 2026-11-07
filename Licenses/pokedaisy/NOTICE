@@ -1,0 +1,105 @@
+PokeDaisy
+Copyright (C) 2026 Lidor Itzhari
+https://github.com/lidor30/pokedaisy
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 (see LICENSE), with the additional term below.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+ADDITIONAL TERM (GNU GPL version 3, section 7(b))
+
+Anyone who conveys this program, or any work based on it, in source or
+compiled form, must preserve the following attribution:
+
+    Based on PokeDaisy by Lidor Itzhari - https://github.com/lidor30/pokedaisy
+
+It must appear (1) in this NOTICE file, kept with the source; (2) in the
+work's README or equivalent documentation; and (3) where the work shows
+credits, an "About" screen or other Appropriate Legal Notices, there too.
+
+THIRD-PARTY COMPONENTS
+
+The app shows every license below in full under Settings > LICENSES.
+
+- mGBA (third_party/mgba), Copyright (c) 2013-2022 Jeffrey Pfau and
+  contributors, Mozilla Public License 2.0 - https://github.com/mgba-emu/mgba
+  (source: https://github.com/mgba-emu/mgba/tree/0.10.5). Built with two of
+  its bundled libraries: blip_buf (GNU LGPL 2.1) and inih (BSD).
+  app/src/main/cpp/pk_rewind.c is adapted from mGBA's src/core/rewind.c and
+  stays under the MPL 2.0 (its header says so).
+- rcheevos (third_party/rcheevos), Copyright (c) 2018 RetroAchievements.org,
+  MIT License - https://github.com/RetroAchievements/rcheevos
+- melonDS (third_party/melonds), Copyright (c) melonDS team, GNU GPL 3.0 -
+  https://github.com/melonDS-emu/melonDS (source: the submodule's pinned commit,
+  with PokeDaisy's changes in third_party/patches/melonds-pokedaisy.patch). Built
+  with its bundled FatFs (ChaN, FatFs license), Teakra (MIT), xxHash (Yann
+  Collet, BSD 2-Clause; third_party/licenses/xxHash-BSD-2-Clause.txt),
+  tiny-AES-c (The Unlicense), SHA-1 by Steve Reid (public domain), blip_buf
+  (GNU LGPL 2.1) and Dolphin's ARM64 emitter (GNU GPL 2.0 or later).
+- Shaders (app/src/main/kotlin/com/pokedaisy/app/ScreenShaders.kt): LCD and
+  scanlines adapted from mGBA's, Copyright (C) 2017 Dominus Iniquitatis, MIT
+  License (the full notice is in third_party/mgba/res/shaders/lcd.shader/lcd.fs);
+  GBA colours from mGBA's gba-color shader by Pokefan531 and hunterk. LCD PAPER
+  follows RetroArch's simpletex_lcd (jdgleaver, GPL-2.0-or-later) and its grid
+  curve zfast_lcd (Copyright Greg Hogan (SoltanGris42), GPL-2.0-or-later).
+- Edge-smoothing shaders (app/src/main/assets/shaders, SHADERS > SMOOTHING), from
+  libretro's glsl-shaders (https://github.com/libretro/glsl-shaders), unmodified:
+  xBR level 2 and xBRZ freescale's xBR code, Copyright (C) 2011-2016 Hyllian, MIT
+  License; xBRZ, Copyright (C) Zenju, GNU GPL 3.0 (from HqMAME); ScaleFX,
+  Copyright (c) 2016 Sp00kyFox, MIT License
+  (third_party/licenses/libretro-shaders.txt).
+- Pixel Operator font (app/src/main/assets/fonts), by Jayvee Enaguas,
+  CC0 1.0 (public domain dedication).
+- Atkinson Hyperlegible (app/src/main/assets/fonts, website/public/fonts: the manual's
+  reading text), Copyright 2020 Braille Institute of America, Inc., SIL Open Font
+  License 1.1 (app/src/main/assets/fonts/LICENSE-AtkinsonHyperlegible.txt).
+- PixelMplus10 (app/src/main/assets/fonts/PixelMplusJP.ttf), by itouhiro,
+  M+ FONT LICENSE (app/src/main/assets/fonts/LICENSE-PixelMplus.txt); cut to
+  Japanese and rescaled by scripts/gen_jp_font.py.
+- PokeAPI (https://pokeapi.co), BSD 3-Clause: the National Dex species list
+  (third_party/licenses/PokeAPI-BSD-3-Clause.txt).
+- AndroidX, Jetpack Compose, Kotlin, kotlinx.coroutines and Apache Commons
+  Compress (with Commons IO, Codec and Lang), Apache License 2.0
+  (third_party/licenses/Apache-2.0.txt; their NOTICE files in
+  third_party/licenses/Apache-Commons-NOTICE.txt); XZ for Java, BSD Zero
+  Clause (third_party/licenses/XZ-Java-0BSD.txt).
+- Firebase Crashlytics (with -ndk, Firebase Sessions, Installations and their
+  support libraries), Apache License 2.0 - active only in builds made with the
+  project's Firebase config (the official releases), and sending nothing until
+  the player turns CRASH REPORTS on. They pull in
+  Google Play services' play-services-basement and play-services-tasks, under
+  the Android Software Development Kit License
+  (https://developer.android.com/studio/terms).
+- Some decoders and layouts follow the community decompilations of the games
+  (pret's pokered / pokeyellow / pokegold / pokecrystal / pokefirered /
+  pokeemerald / pokeruby / pokeplatinum / pokeheartgold, pokeemerald-expansion,
+  Rangi42's polishedcrystal and Vortyne's pureRGB), which publish no license of
+  their own: the Gen 1 picture decompressor (and PureRGB's icon and Pokedex
+  layouts), the Gen 2 LZ decompressor (with Polished
+  Crystal's variant and its text compression), expansion's "smol"
+  decompressor, the DS games' text, archive and picture decoding and the
+  trainer card's layout are re-implemented from them in Kotlin.
+
+GAMES AND TRADEMARKS
+
+Pokemon and all related names are trademarks of Nintendo, Game Freak,
+Creatures and The Pokemon Company. Game Boy, Game Boy Color, Game Boy
+Advance and Nintendo DS are trademarks of Nintendo. AYN, Retroid, Anbernic and other device
+names belong to their makers. ScreenScraper, RetroAchievements and
+SteamGridDB are separate services. PokeDaisy is not affiliated with or
+endorsed by any of them. ROM hacks belong to their creators.
+
+No ROMs, BIOS files, saves or game graphics are included: players supply their
+own legally dumped ROMs, and the pictures and descriptive text the companion
+shows are read from the player's ROM while it runs. To recognise and label what
+it reads, the app carries reference data about the supported games: names of
+Pokemon, moves, items, types and places, numeric tables (stats, type matchups,
+map layouts, memory addresses) and checksums of ROM data, extracted from the
+games, the ROM hacks and the decompilation projects for interoperability.
+The unit tests' fixtures (app/src/test/resources/fixtures) are snapshots of
+the emulated console's RAM while a game ran; like any RAM dump they hold a
+few kilobytes the game copied there from its ROM. They aren't in the app.

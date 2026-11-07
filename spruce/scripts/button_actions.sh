@@ -109,15 +109,6 @@ kill_gvu() {
 	killall -q -15 gvu
 }
 
-kill_pcsx() {
-	log_message "button_actions.sh: Saving and killing PCSX-ReARMed!"
-    # Send SIGUSR1 to trigger save-state-and-quit
-    killall -q -USR1 pcsx_64 pcsx_a30 pcsx_mini
-    sleep 2
-    # SIGTERM as fallback in case it didn't exit
-    killall -q -15 pcsx_64 pcsx_a30 pcsx_mini
-}
-
 kill_ra_and_standard_emulators() {
 	log_message "button_actions.sh: Killing miscelaneous emus!"
     _emus="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 ra64.h700 ra32.h700 retroarch pico8_dyn pico8_64 flycast flycast2024 yabasanshiro yabasanshiro.trimui GameTankEmulator"
@@ -179,8 +170,6 @@ kill_emulator() {
         kill_scummvm
     elif pgrep -f "\./mupen64plus" >/dev/null; then
         kill_mupen
-    elif pgrep -f "pcsx_64|pcsx_a30|pcsx_mini" >/dev/null; then
-        kill_pcsx
     elif pgrep "gvu" >/dev/null; then
         kill_gvu
     elif pgrep dsperate >/dev/null; then
@@ -315,8 +304,6 @@ perform_action() {
     "Emulator menu")
         if pgrep -f "./PPSSPPSDL" >/dev/null; then
             killall -q -USR2 PPSSPPSDL_TrimUI PPSSPPSDL_SmartProS PPSSPPSDL_Flip PPSSPPSDL_A30 PPSSPPSDL_Pixel2 PPSSPPSDL_h700 ${PSP_BIN}
-        elif pgrep -f "pcsx_64|pcsx_a30|pcsx_mini" >/dev/null; then
-            killall -q -USR2 pcsx_64 pcsx_a30 pcsx_mini
         elif pgrep -f "\./mupen64plus" >/dev/null; then
             killall -q -USR2 mupen64plus
         elif [ -f /tmp/pico8_igm ] && pgrep -f "pico8_64|pico8_dyn" >/dev/null; then

@@ -2,133 +2,154 @@
 
 # TODO: add updated table of contents/function summaries here
 
-# This is a collection of functions that are used in multiple scripts
-# Please do not add any dependencies here, this file is meant to be self-contained
-# Keep methods in alphabetical order
-
+# This is a collection of functions that are used in multiple scripts.
 # Gain access to the helper variables by adding this to the top of your script:
 # . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-######################################################################################
-# !!! DO NOT USE EXECUTE ANYTHING DIRECTLY INSIDE THIS SCRIPT, INCLUDING LOGGING !!! #
-######################################################################################
-
-# Loaded once per shell: runtimeHelper.sh and the network libraries source this file
-# again. The marker is not exported, so a script run as a new shell loads the file
-# itself; its value, this shell's PID, also covers a forked shell that was given it.
-# Subshells keep $$ and inherit the functions. It is set at the end of the file, so a
-# load that failed part-way is retried.
+# Load this file only once per shell.
 [ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
 
-# variables used in multiple different helperFunctions:
+# constants used in multiple different helperFunctions:
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
-# Where PyUI wrote saved networks before they became card-global: all on the
-# handheld's own storage, which is why a card carrying a password from another
-# device used to arrive with nothing. enable_wifi adopts from these, and
-# clearwifi.sh has to clear them too or a "forget all networks" would simply be
-# re-imported on the next boot. Keep the two uses reading this one list.
-export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"
-POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh"
+export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"     # Where PyUI wrote saved networks before they became card-global
+POWER_OFF_SCRIPT="/mnt/SDCARD/spruce/scripts/save_poweroff.sh" # used in powerbutton watchdog and sleep helper
 
 # Export for enabling SSL support in CURL
 export SSL_CERT_FILE=/mnt/SDCARD/spruce/etc/ca-certificates.crt
 
-# Detect device and export to any script sourcing helperFunctions
-#
-# MagicX A133P boards are decided by their /usr/magicx marker, not by cpuinfo:
-# the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
+# Sourced here specifically because some ${PLATFORM}.sh functions depend on it.
+. "/mnt/SDCARD/spruce/scripts/usb_audio_helpers.sh"
+
+
+###################################################################
+# Detect device and export to any script sourcing helperFunctions #
+###################################################################
+
+# The oakMOSS boards (MagicX, Powkiddy V90S/V20, TrimUI Brick) are decided by their /usr/magicx marker, not by
+# cpuinfo: the A133P shares the H700's Cortex-A53 part id (0xd03) and fell into its arm.
 if [ -e /usr/magicx ]; then
-    # /usr/magicx/device names the model (zero28 | zero40 | xu20); a base
-    # without the file (Moss-zero28, main-zero40) is treated as a Zero 28.
+    # /usr/magicx/device names the model. Fall back to Z28 if missing.
     case "$(tr -d '\r\n' < /usr/magicx/device 2>/dev/null)" in
         zero40) export PLATFORM="Zero40" ;;
         xu20)   export PLATFORM="XU20" ;;
+        v90s)   export PLATFORM="V90S" ;;
+        v20)    export PLATFORM="V20" ;;
+        brick)  export PLATFORM="BrickOakMOSS" ;;   # the TrimUI Brick on oakMOSS: a variant of Brick
         *)      export PLATFORM="Zero28" ;;
     esac
+    export PLATFORM_FAMILY="oakmoss"
 else
-INFO=$(cat /proc/cpuinfo 2> /dev/null)
-
-case $INFO in
-    *sun8i*) export PLATFORM="A30" ;;           # A33
-    *TG5040*) export PLATFORM="SmartPro" ;;
-    *TG3040*) export PLATFORM="Brick" ;;
-    *TG5050*) export PLATFORM="SmartProS" ;;
-    *TG4040*) export PLATFORM="BrickPro" ;;
-    *0xd05*)                                    # RK3566
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            # dArkMoss stamps the spruce platform name into os-release
-            # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
-            # only HW_DEVICE.
-            PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            if [ -z "$PLATFORM" ]; then
-                case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
-                    *Miniloong*) PLATFORM="Miniloong" ;;
-                    *)           PLATFORM="RGB30" ;;
-                esac
+    INFO=$(cat /proc/cpuinfo 2> /dev/null)
+    case $INFO in
+        *sun8i*) export PLATFORM="A30";         PLATFORM_FAMILY="tina-stock" ;;   # A33
+        *TG5040*) export PLATFORM="SmartPro";   PLATFORM_FAMILY="tina-stock" ;;
+        *TG3040*) export PLATFORM="Brick";      PLATFORM_FAMILY="tina-stock" ;;
+        *TG5050*) export PLATFORM="SmartProS";  PLATFORM_FAMILY="tina-stock" ;;
+        *TG4040*) export PLATFORM="BrickPro";   PLATFORM_FAMILY="tina-stock" ;;
+        *0xd05*)                                                                # RK3566
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                # dArkMoss stamps the spruce platform name into os-release
+                # (setup_spruce_handoff-rk3566.sh). Images before that stamp carry
+                # only HW_DEVICE.
+                PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                if [ -z "$PLATFORM" ]; then
+                    case "$(sed -n 's/^HW_DEVICE="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)" in
+                        *Miniloong*) PLATFORM="Miniloong" ;;
+                        *)           PLATFORM="RGB30" ;;
+                    esac
+                fi
+                # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
+                if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
+                    PLATFORM="RGB20SX"
+                fi
+                export PLATFORM
+                PLATFORM_FAMILY="darkmoss"
+            else
+                export PLATFORM="Flip";         PLATFORM_FAMILY="tina-stock"
             fi
-            # The RGB20SX boots the RGB30 image; its RTL8723DS gives it away.
-            if [ "$PLATFORM" = "RGB30" ] && grep -qs "SDIO_ID=024C:D723" /sys/bus/sdio/devices/*/uevent; then
-                PLATFORM="RGB20SX"
+            ;;
+        *0xd04*)                                                                # RK3326
+            if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
+                export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
+                # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
+                if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
+                    export PLATFORM="A10MiniV4"
+                fi
+                PLATFORM_FAMILY="darkmoss"
+            else
+                export PLATFORM="Pixel2"
+                PLATFORM_FAMILY="twig"
             fi
-            export PLATFORM
-        else
-            export PLATFORM="Flip"
-        fi
-        ;;
-    *0xd04*)                                    # RK3326
-        if grep -q '^OS_NAME="DARKMOSS"' /etc/os-release 2>/dev/null; then
-            export PLATFORM="$(sed -n 's/^SPRUCE_PLATFORM="\(.*\)"/\1/p' /etc/os-release 2>/dev/null)"
-            # The A10 Mini image boots the V4 too, with the V4 dtb ("... V4").
-            if [ "$PLATFORM" = "A10Mini" ] && grep -qas "V4" /proc/device-tree/model; then
-                export PLATFORM="A10MiniV4"
-            fi
-        else
-            export PLATFORM="Pixel2"
-        fi
-        ;;
-    *0xd03*)                                    # H700
-        export SPRUCE_BASEOS=1
-        BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
-        # One platform per panel AND pad layout (Brick / Brick Pro precedent):
-        # every config ships static per platform, so models whose sticks and
-        # trigger numbering differ cannot share one. This case is the only
-        # place that names models; each platform cfg states its layout.
-        case $BASEOS_TARGET in
-            rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
-            rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
-            rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
-            rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
-            rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
-            rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
-            *)                      export PLATFORM="AnbernicXX640480" ;;
-        esac
-        ;;
-    *SStar*) export PLATFORM="MiyooMini" ;;     # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
-    *) export PLATFORM="MiyooMini" ;;           # unrecognised boards have always landed here
-esac
+            ;;
+        *0xd03*)                                                                # H700
+            export SPRUCE_BASEOS=1
+            PLATFORM_FAMILY="h700"
+            BASEOS_TARGET=$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null)
+            case $BASEOS_TARGET in
+                rg28xx)                 export PLATFORM="AnbernicRG28XX" ;;
+                rgcubexx)               export PLATFORM="AnbernicRGCubeXX" ;;
+                rg34xxsp)               export PLATFORM="AnbernicXX720480" ;;
+                rg34xx|rgsp)            export PLATFORM="AnbernicXX720480NoStick" ;;
+                rg35xxplus|rg35xxsp)    export PLATFORM="AnbernicXX640480NoStick" ;;
+                rg40xxv)                export PLATFORM="AnbernicXX640480OneStick" ;;
+                *)                      export PLATFORM="AnbernicXX640480" ;;
+            esac
+            ;;
+        *SStar*) export PLATFORM="MiyooMini";   PLATFORM_FAMILY="miyoomini" ;;    # SSD202D: Mini, Mini V4, Mini Plus, Mini Flip
+        *) export PLATFORM="MiyooMini";         PLATFORM_FAMILY="miyoomini" ;;
+    esac
 fi
+export PLATFORM_FAMILY
 
-. /mnt/SDCARD/spruce/scripts/platform/$PLATFORM.cfg
-. /mnt/SDCARD/spruce/scripts/device_functions.sh
+platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.cfg"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_config" ]; then
+    platform_config="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.cfg"
+fi
+[ ! -f "$platform_config" ] || . "$platform_config"
+
+# Ensure all methods are defined, and just logged if missing
+. "/mnt/SDCARD/spruce/scripts/platform/device.sh"
+
+platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM_FAMILY}/${PLATFORM}.sh"
+if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_functions" ]; then
+    platform_functions="/mnt/SDCARD/spruce/scripts/platform/${PLATFORM}.sh"
+fi
+[ ! -f "$platform_functions" ] || . "$platform_functions"
 
 # Stock busybox on some devices has no timeout applet; spruce's does.
 command -v timeout >/dev/null 2>&1 || timeout() { busybox timeout "$@"; }
 
+# This platform's name, then its parent's when its cfg makes it a variant (PLATFORM_PARENT).
+# See spruce/scripts/platform/README.md.
+platform_names() {
+    echo "$PLATFORM"
+    if [ -n "${PLATFORM_PARENT:-}" ]; then echo "$PLATFORM_PARENT"; fi
+}
+
+# platform_path TEMPLATE: TEMPLATE with %s as this platform's name when that file exists, else as
+# the parent's when that one does, else as this platform's (so a caller that creates it names its own).
+platform_path() {
+    case "$1" in *%s*) ;; *) echo "$1"; return 0 ;; esac
+    _pp_head=${1%%"%s"*}; _pp_tail=${1#*"%s"}
+    for _pp_name in $(platform_names); do
+        if [ -e "$_pp_head$_pp_name$_pp_tail" ]; then echo "$_pp_head$_pp_name$_pp_tail"; return 0; fi
+    done
+    echo "$_pp_head$PLATFORM$_pp_tail"
+}
+
 # Every name this device answers to in an Emu config.json "devices" list, most
-# specific first. Mirrors PyUI's Device.get_device_names(): almost every device
-# answers to one name, and the Anbernic XX line also answers to a family token
-# so a single config entry covers the whole line.
+# specific first. Mirrors PyUI's Device.get_device_names().
 #
 # MUST stay in step with App/PyUI/launch.sh, which passes these same names to
 # PyUI as -device. When the two disagree, the UI writes the user's emulator
 # choice into one menuOption and the launcher reads a different one - which is
-# exactly the bug this exists to prevent. Defined here, after the device
-# functions are sourced, because the Mini resolves its variant at runtime.
+# exactly the bug this exists to prevent.
 device_names() {
     case "$PLATFORM" in
         A30)              echo "MIYOO_A30" ;;
         Brick)            echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
+        BrickOakMOSS)     echo "TRIMUI_BRICK_OAKMOSS"; echo "TRIMUI_BRICK"; echo "TRIMUI_A133P" ;;
         BrickPro)         echo "TRIMUI_BRICK_PRO"; echo "TRIMUI_A133P" ;;
         SmartPro)         echo "TRIMUI_SMART_PRO"; echo "TRIMUI_A133P" ;;
         SmartProS)        echo "TRIMUI_SMART_PRO_S" ;;
@@ -137,15 +158,18 @@ device_names() {
         RGB30)            echo "RGB30";   echo "DARKMOSS" ;;
         RGB20SX)          echo "RGB20SX"; echo "DARKMOSS" ;;
         RG353M)           echo "RG353M"; echo "DARKMOSS" ;;
+        E5Plus)           echo "E5PLUS"; echo "DARKMOSS" ;;
         Miniloong)        echo "MINILOONG_POCKET1"; echo "DARKMOSS" ;;
         A10Mini)          echo "A10MINI"; echo "DARKMOSS" ;;
         A10MiniV4)        echo "A10MINIV4"; echo "DARKMOSS" ;;
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
-        Zero28)           echo "MAGICX_ZERO28"; echo "MAGICX_A133P" ;;
-        Zero40)           echo "MAGICX_ZERO40"; echo "MAGICX_A133P" ;;
-        XU20)             echo "MAGICX_XU20";   echo "MAGICX_A133P" ;;
+        Zero28)           echo "MAGICX_ZERO28"; echo "OAKMOSS_A133P" ;;
+        Zero40)           echo "MAGICX_ZERO40"; echo "OAKMOSS_A133P" ;;
+        XU20)             echo "MAGICX_XU20";   echo "OAKMOSS_A133P" ;;
+        V90S)             echo "POWKIDDY_V90S"; echo "OAKMOSS_A133P" ;;
+        V20)              echo "POWKIDDY_V20";  echo "OAKMOSS_A133P" ;;
         MiyooMini)        get_miyoo_mini_variant 2>/dev/null ; echo "MIYOO_MINI_FAMILY" ;;
         AnbernicXX640480) echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
         AnbernicXX640480NoStick)  echo "ANBERNIC_RGXX640480"; echo "ANBERNIC_RGXX" ;;
@@ -170,8 +194,8 @@ device_names() {
 # The live RetroArch config, seeded from the .bak when absent. The configs moved
 # out of RetroArch/platform in 4.4.2; that folder now holds only seeds.
 ensure_ra_config_path() {
-    _rac_live="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
-    _rac_bak="/mnt/SDCARD/RetroArch/platform/retroarch-${PLATFORM}.cfg.bak"
+    _rac_live="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
+    _rac_bak="$(platform_path "/mnt/SDCARD/RetroArch/platform/retroarch-%s.cfg.bak")"
     if [ ! -f "$_rac_live" ] && [ -f "$_rac_bak" ]; then
         mkdir -p /mnt/SDCARD/Saves/ra-configs
         cp "$_rac_bak" "$_rac_live"
@@ -219,7 +243,6 @@ acknowledge() {
     done
 
     kill "$GE_PID" 2>/dev/null
-    display_kill
 }
 
 auto_regen_tmp_update() {
@@ -270,21 +293,20 @@ confirm() {
     done
 
     kill "$GE_PID" 2>/dev/null
-    display_kill
     return "$RET_VAL"
 }
 
 # Call this to dim the screen
 # Call it as a background process
 dim_screen() {
-    # Get current brightness
-    start_brightness=$(cat "$DEVICE_BRIGHTNESS_PATH")
-    end_brightness="$SYSTEM_BRIGHTNESS_0"
+    _start_backlight=$(cat "$DEVICE_BACKLIGHT_PATH")
+    _end_backlight="$SYSTEM_BACKLIGHT_LEVEL_0"
     delay=0.05 # 50ms delay between each step
     
-    # Start at 4 if higher (so it's faster)
-    if [ "$start_brightness" -gt "$SYSTEM_BRIGHTNESS_4" ]; then
-        start_brightness="$SYSTEM_BRIGHTNESS_4"
+    # Start at 4 if higher (so it's faster); a platform cfg may set DIM_SCREEN_START_MAX instead
+    _start_max="${DIM_SCREEN_START_MAX:-$SYSTEM_BACKLIGHT_LEVEL_4}"
+    if [ "$_start_backlight" -gt "$_start_max" ]; then
+        _start_backlight="$_start_max"
     fi
 
     # Check if another dim_screen is running
@@ -294,15 +316,15 @@ dim_screen() {
     fi
 
     # Check if we're already at target brightness
-    if [ "$start_brightness" -le "$end_brightness" ]; then
+    if [ "$_start_backlight" -le "$_end_backlight" ]; then
         log_message "Screen already at target brightness" -v
         return 0
     fi
 
-    current=$start_brightness
+    current=$_start_backlight
 
-    while [ "$current" -gt "$end_brightness" ]; do
-        echo "$current" > "$DEVICE_BRIGHTNESS_PATH"
+    while [ "$current" -gt "$_end_backlight" ]; do
+        echo "$current" > "$DEVICE_BACKLIGHT_PATH"
         current=$((current - 1))
         sleep "$delay"
     done
@@ -323,21 +345,6 @@ calculate_progress_percent() {
     printf '%s\n' "$percent"
 }
 
-format_firstboot_extract_progress_text() {
-    completed="${1:-0}"
-    total="${2:-0}"
-    percent="$(calculate_progress_percent "$completed" "$total")"
-    printf 'Sprucing up your device...\\nExtracting files: %s%%' "$percent"
-}
-
-display_firstboot_extract_progress() {
-    completed="${1:-0}"
-    total="${2:-0}"
-    icon="${3:-/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png}"
-
-    start_pyui_message_writer
-    display_image_and_text "$icon" 35 25 "$(format_firstboot_extract_progress_text "$completed" "$total")" 75
-}
 
 # Add a flag
 # Usage: flag_add "flag_name"
@@ -354,35 +361,7 @@ flag_add() {
 # Check if a flag exists
 # Usage: flag_check "flag_name"
 # Returns 0 if the flag exists (with or without .lock extension), 1 if it doesn't
-# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
-# that shows a message through PortMasterDialog.txt) puts its FIFOs under
-# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
-# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
-# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
-# mounted there each boot; nothing on the device's flash is touched. No-op
-# on firmware that already mounts one (Flip, Debian bases).
-ensure_dev_fd() {
-    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
-        _dev="/dev/${_pair%%:*}"
-        [ -e "$_dev" ] && continue
-        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
-            && log_message "Linked $_dev (stock firmware had none)" \
-            || log_message "Could not create $_dev"
-    done
-}
 
-ensure_dev_shm() {
-    if grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
-        return 0
-    fi
-    mkdir -p /dev/shm 2>/dev/null || return 1
-    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
-        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
-    else
-        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
-        return 1
-    fi
-}
 
 # Move the contents of $1 into $2, merging shared subdirs. Rename-based.
 merge_dir() {
@@ -406,14 +385,6 @@ flag_check() {
     else
         return 1
     fi
-}
-
-# Get the full path to a flag file
-# Usage: flag_path "flag_name"
-# Returns the full path to the flag file (with .lock extension)
-flag_path() {
-    local flag_name="$1"
-    echo "$FLAGS_DIR/${flag_name}.lock"
 }
 
 # Remove a flag
@@ -738,7 +709,6 @@ hide_or_unhide_AccentColor_app() {
 # Usage: qr_code -t "text" -s "size" -l "level" -o "output"
 # If no output is provided, the QR code will be saved to /tmp/tmp/qr.png
 #   QR_CODE=$(qr_code -t "https://www.google.com")
-#   display -i "$QR_CODE" -t "DT: QR Code" -d 5
 qr_code() {
     text=""
     size=3
@@ -827,13 +797,11 @@ run_upgrade_scripts() {
         return 0
     fi
 
-    is_developer_mode=$(flag_check "developer_mode" && echo "true" || echo "false")
-    is_tester_mode=$(flag_check "tester_mode" && echo "true" || echo "false")
     allow_same_version=0
 
-    if [ "$is_developer_mode" = "true" ] || [ "$is_tester_mode" = "true" ]; then
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
         allow_same_version=1
-        log_message "Upgrade scripts: dev/tester mode detected, allowing same version upgrades"
+        log_message "Upgrade scripts: nightly channel, allowing same version upgrades"
     fi
 
     cd "$UPGRADE_SCRIPTS_DIR" || return 1
@@ -896,9 +864,19 @@ get_config_value() {
 ###########################################################
 ##########     PYUI MESSAGE WRITER     ##########
 
+# The writer's socket. PyUI's menu listens on it too, as "realtimeMessagePort" in
+# App/PyUI/py-ui-config.json, so the two must match.
+PYUI_MESSAGE_PORT=50980
+
 start_pyui_message_writer() {
     # $1 = 0 to not wait, anything else to wait
     wait_for_listener="$1"
+
+    # PyUI runs this script and listens itself (App/PyUI/main-ui/apps/script_app.py).
+    if [ -n "$PYUI_HOSTS_MESSAGES" ]; then
+        log_message "PyUI shows this script's messages; no message writer needed."
+        return 0
+    fi
 
     ifconfig lo up
     ifconfig lo 127.0.0.1
@@ -910,8 +888,8 @@ start_pyui_message_writer() {
     fi
     
     rm -f /mnt/SDCARD/App/PyUI/realtime_message_network_listener.txt
-    log_message "Starting Real Time message listener on port 50980"
-    /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort 50980 &
+    log_message "Starting Real Time message listener on port $PYUI_MESSAGE_PORT"
+    /mnt/SDCARD/App/PyUI/launch.sh -msgDisplayRealtimePort "$PYUI_MESSAGE_PORT" &
 
     if [ "$wait_for_listener" != "0" ]; then
         log_message "Waiting for realtime_message_network_listener to appear..."
@@ -950,8 +928,13 @@ kill_pyui_message_writer() {
 }
 
 stop_pyui_message_writer() {
+    # PyUI runs this script and keeps showing its messages: there is no writer to stop, and
+    # freemma would blank the menu's screen and free video memory the menu still uses.
+    if [ -n "$PYUI_HOSTS_MESSAGES" ]; then
+        return 0
+    fi
     kill_pyui_message_writer
-    freemma >/dev/null 2>&1 # I don't think we have this bin on any spruce devices
+    freemma >/dev/null 2>&1 # where a device has it (the Miyoo Mini)
 }
 
 display_message() {
@@ -959,17 +942,18 @@ display_message() {
     [ -z "$message" ] && return 0
 
     # We use double quotes for the -c string so we can use single quotes inside.
-    # We pass "$message" as the final argument which Python picks up as sys.argv[1]
+    # We pass "$message" and the port as the final arguments, which Python picks up as
+    # sys.argv[1] and sys.argv[2]
     "$(get_python_path)" -c 'import socket, sys;
 try:
     s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     s.settimeout(0.5)
-    s.connect(b"\x0050980")
+    s.connect(b"\0" + sys.argv[2].encode())
     s.sendall((sys.argv[1] + "\n").encode("utf-8"))
     s.close()
 except Exception as e:
     print(f"Sender Error: {e}", file=sys.stderr)
-' "$message"
+' "$message" "$PYUI_MESSAGE_PORT"
 }
 
 json_escape() {
@@ -985,6 +969,12 @@ json_escape() {
     printf '%s' "$1" | sed -e 's/\\n/\
 /g' -e 's/\\/\\\\/g' -e 's/"/\\"/g' \
         -e 's/\t/\\t/g' -e 's/\r/\\r/g' | awk 'NR>1{printf "\\n"} {printf "%s", $0} END{}'
+}
+
+# The UI language, saved card-wide by PyUI (PyUiConfig.get_language); empty
+# when none was picked.
+get_ui_language() {
+    jq -r '.language // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null
 }
 
 log_and_display_message(){
@@ -1399,36 +1389,6 @@ export_sdl_gamecontroller_map() {
 
 ##### WIFI HANDLING #####
 
-disable_wifi() {
-    rm -f /tmp/wifion           2>/dev/null
-    touch /tmp/wifioff          2>/dev/null
-    # A host that owns the radio (NetworkManager on the RGB30) runs its own
-    # supplicant and DHCP client and has no ifconfig; killing its supplicant
-    # would break it, so only the power call below applies there.
-    if ! device_manages_own_wifi; then
-        ifconfig wlan0 down         2>/dev/null
-        killall -9 wpa_supplicant   2>/dev/null
-        # Stop whichever client this device actually started. Naming udhcpc here
-        # only works for as long as every device uses udhcpc; a device that
-        # overrides device_start_dhcp_client would have been left with its client
-        # still holding the interface after "WiFi off".
-        device_stop_dhcp_client
-    fi
-    log_message "WiFi turned off"
-    device_wifi_power_off
-}
-
-# Read the -c argument out of a running wpa_supplicant's cmdline. Accepts both
-# "-c /path" and "-cpath"; prints nothing if there is no -c.
-wpa_conf_path_of_pid() {
-    [ -n "$1" ] || return 0
-    tr '\0' '\n' < "/proc/$1/cmdline" 2>/dev/null | awk '
-        prev == "-c" { print; exit }
-        /^-c./       { sub(/^-c/, ""); print; exit }
-        { prev = $0 }
-    '
-}
-
 # Merge the network blocks of another wpa_supplicant.conf into ours, skipping
 # any SSID we already have. Used when taking the radio over from whatever
 # brought it up before us.
@@ -1483,124 +1443,7 @@ import_wpa_networks_from() {
     rm -f "$TMP_IMPORT"
 }
 
-enable_wifi() {
-    # A device without a radio has nothing to power, recover, associate or
-    # lease. Refusing here covers every path in, since they all go through wifi.sh.
-    if ! wifi_available_on_device; then
-        log_message "WiFi: enable requested on a device without a radio - ignored"
-        return 1
-    fi
 
-    device_wifi_power_on
-
-    # power_on may have just discovered the radio is unusable (a module that
-    # refuses to load marks the session radio-less); stop before building a
-    # supplicant/DHCP stack on a wlan0 that cannot exist.
-    if ! wifi_available_on_device; then
-        log_message "WiFi: radio became unavailable during power-on - stopping"
-        return 1
-    fi
-
-    # Everything below assumes wlan0 exists. On SDIO parts it sometimes does
-    # not - the radio fails to enumerate and the interface is never created -
-    # and then wpa_supplicant, udhcpc and the WiFi menu all quietly operate on
-    # nothing. Give the device a chance to bring it back first.
-    if ! device_ensure_wifi_interface; then
-        log_message "WiFi: wlan0 did not come back - stopping"
-        return 1
-    fi
-
-    rm -f /tmp/wifioff          2>/dev/null
-    touch /tmp/wifion           2>/dev/null
-    ifconfig wlan0 up           2>/dev/null
-
-    # Some hosts own the radio themselves. On the RGB30 that is connman, which
-    # does association AND DHCP, so starting our own wpa_supplicant against it
-    # is two daemons fighting over one interface - the same class of mistake
-    # the Anbernic XX line made by running dhclient beside udhcpc.
-    if device_manages_own_wifi; then
-        log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
-        device_extra_wifi_setup
-        return 0
-    fi
-
-    # Some radios take a moment to create wlan0 after their rail comes up
-    _wlan_wait=5
-    while [ ! -d /sys/class/net/wlan0 ] && [ "$_wlan_wait" -gt 0 ]; do
-        sleep 1
-        _wlan_wait=$((_wlan_wait - 1))
-    done
-    if [ ! -d /sys/class/net/wlan0 ]; then
-        log_message "WiFi: no wlan0 - not starting wpa_supplicant"
-        return 1
-    fi
-
-    # wpa_supplicant exits on a missing or unparseable config, and the menu then
-    # scans forever because wpa_cli has no daemon to ask.
-    wpa_conf_ensure
-
-    # Adopt networks from the places PyUI used to write before saved networks
-    # became card-global. Each path is somewhere on the handheld's own storage,
-    # so a card carrying a password from another device found nothing here and
-    # the user had to type it again.
-    #
-    # import_wpa_networks_from skips any SSID we already hold, so this is
-    # idempotent and runs every boot on purpose rather than once: it keeps
-    # working for someone who later joins a network through the stock firmware
-    # UI, which still writes these files. Absent paths cost nothing.
-    #
-    # Deliberately NOT including the vendor /etc/wifi/wpa_supplicant.conf - the
-    # takeover below already imports from whatever supplicant is running, and
-    # the vendor file can hold factory defaults we do not want to adopt.
-    for _legacy_conf in $WPA_LEGACY_CONFS; do
-        [ -f "$_legacy_conf" ] && import_wpa_networks_from "$_legacy_conf"
-    done
-
-    # check if WPA supplicant needs to be started or restarted
-    # pgrep can return SEVERAL pids: a stale supplicant from a previous config
-    # and a fresh one can both match. The old single-pid form redirected
-    # /proc/$WPA_PID/cmdline with a multi-word variable, which fails outright,
-    # so a wrong-config supplicant survived and the UI never associated.
-    WPA_PID=$(pgrep -f "wpa_supplicant.*wlan0")
-    if [ -n "$WPA_PID" ]; then
-        WPA_CORRECT_RUNNING=0
-        for wpa_pid in $WPA_PID; do
-            WPA_CMDLINE=$(tr '\0' ' ' < "/proc/$wpa_pid/cmdline" 2>/dev/null)
-            if echo "$WPA_CMDLINE" | grep -q -- "-c $WPA_SUPPLICANT_FILE"; then
-                WPA_CORRECT_RUNNING=1
-            else
-                # Somebody else's wpa_supplicant owns the radio - on BaseOS devices
-                # that is the OS underneath us, and it is very likely ASSOCIATED
-                # RIGHT NOW. spruce takes ownership here by design, but taking it by
-                # killing that process and starting ours against a config that may
-                # hold no networks at all just drops a working connection, and the
-                # user sees WiFi die a few seconds into boot for no reason.
-                #
-                # Carry its networks across first, then take over.
-                log_message "wpa_supplicant $wpa_pid using wrong config; taking over with $WPA_SUPPLICANT_FILE"
-                import_wpa_networks_from "$(wpa_conf_path_of_pid "$wpa_pid")"
-                kill -9 "$wpa_pid" 2>/dev/null
-            fi
-        done
-        if [ "$WPA_CORRECT_RUNNING" -eq 1 ]; then
-            log_message "wpa_supplicant was running with the correct conf file already"
-        else
-            sleep 1
-            wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-            log_message "wpa_supplicant was running with the wrong conf so restarted"
-        fi
-    else    # wpa_supplicant was not running at all, so start it
-        wpa_supplicant -B -D nl80211 -i wlan0 -c "$WPA_SUPPLICANT_FILE"
-        log_message "Launching wpa_supplicant"
-    fi
-    device_start_dhcp_client
-    /mnt/SDCARD/spruce/scripts/networkservices.sh &
-    log_message "WiFi turned on"
-
-    device_extra_wifi_setup
-    return 0
-}
 
 # Does this device have a WiFi radio at all? A STATIC hardware question,
 # deliberately separate from device_wifi_is_available: that older hook answers
@@ -1624,7 +1467,7 @@ wifi_available_on_device() {
 # Every radio change goes through wifi.sh, which runs them one at a time.
 # See wifi.sh for the commands; they return at once unless given --wait.
 wifi_request() {
-    sh /mnt/SDCARD/spruce/scripts/wifi.sh "$@"
+    sh /mnt/SDCARD/spruce/scripts/network/wifi.sh "$@"
 }
 
 # Is the saved WiFi setting on? PyUI writes SYSTEM_JSON from its shipped default,
@@ -1646,12 +1489,12 @@ bluetooth_setting_wanted() {
 saved_wifi_in_range() {
     grep -q '^[[:space:]]*scan_ssid=1' "$WPA_SUPPLICANT_FILE" 2>/dev/null && return 0
     _swr_saved=/tmp/wifi_saved_ssids.$$
-    /mnt/SDCARD/spruce/scripts/wifi.sh saved > "$_swr_saved" 2>/dev/null
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh saved > "$_swr_saved" 2>/dev/null
     if [ ! -s "$_swr_saved" ]; then
         rm -f "$_swr_saved"
         return 1
     fi
-    /mnt/SDCARD/spruce/scripts/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
+    /mnt/SDCARD/spruce/scripts/network/wifi.sh scan 2>/dev/null | cut -f1 | grep -qxFf "$_swr_saved"
     _swr_rc=$?
     rm -f "$_swr_saved"
     return "$_swr_rc"

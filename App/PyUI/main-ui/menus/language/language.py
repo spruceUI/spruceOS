@@ -335,6 +335,10 @@ class Language:
         return cls._data.get("Collections","Collections")
 
     @classmethod
+    def stock_os_menu(cls):
+        return cls._data.get("stockOsMenu","Stock OS Menu")
+
+    @classmethod
     def show_app(cls):
         return cls._data.get("showApp","Show App")
 
@@ -650,6 +654,10 @@ class Language:
     @classmethod
     def enter_simple_mode(cls):
         return cls._data.get("enterSimpleMode","Enter Simple Mode")
+
+    @classmethod
+    def enter_kid_mode(cls):
+        return cls._data.get("enterKidMode","Enter Kid Mode")
 
     @classmethod
     def year(cls):

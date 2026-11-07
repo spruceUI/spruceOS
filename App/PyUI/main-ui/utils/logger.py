@@ -25,7 +25,7 @@ class PyUiLogger:
     _logger = None  # Class-level cache for the logger
 
     @classmethod
-    def init(cls, log_dir, logger_name):
+    def init(cls, log_dir, logger_name, level=logging.DEBUG):
         if cls._logger is not None:
             return cls._logger
 
@@ -33,7 +33,7 @@ class PyUiLogger:
             cls.rotate_logs(log_dir)  # Ensure logs are rotated before initializing logger
 
             logger = logging.getLogger(logger_name)
-            logger.setLevel(logging.DEBUG)
+            logger.setLevel(level)
 
             if not logger.handlers:
                 formatter = logging.Formatter(
@@ -42,7 +42,7 @@ class PyUiLogger:
 
                 # Console handler (explicit stdout)
                 console_handler = logging.StreamHandler(sys.__stdout__)
-                console_handler.setLevel(logging.DEBUG)
+                console_handler.setLevel(level)
                 console_handler.setFormatter(formatter)
 
                 # File handler
@@ -51,7 +51,7 @@ class PyUiLogger:
                     maxBytes=1024 * 1024,
                     backupCount=5
                 )
-                file_handler.setLevel(logging.DEBUG)
+                file_handler.setLevel(level)
                 file_handler.setFormatter(formatter)
 
                 logger.addHandler(console_handler)
@@ -67,7 +67,7 @@ class PyUiLogger:
         except Exception as e:
             # --- Fallback logger ---
             fallback = logging.getLogger(f"{logger_name}_fallback")
-            fallback.setLevel(logging.DEBUG)
+            fallback.setLevel(level)
 
             if not fallback.handlers:
                 formatter = logging.Formatter(
@@ -77,7 +77,7 @@ class PyUiLogger:
                 out_handler = logging.StreamHandler(sys.__stdout__)
                 err_handler = logging.StreamHandler(sys.__stderr__)
 
-                out_handler.setLevel(logging.INFO)
+                out_handler.setLevel(level)
                 err_handler.setLevel(logging.ERROR)
 
                 out_handler.setFormatter(formatter)
@@ -119,6 +119,13 @@ class PyUiLogger:
         except Exception as e:
             print("Error rotating logs (likely RO filesystem): %s" % e)
 
+
+    @classmethod
+    def set_level(cls, level):
+        if cls._logger is not None:
+            cls._logger.setLevel(level)
+            for handler in cls._logger.handlers:
+                handler.setLevel(level)
 
     @classmethod
     def get_logger(cls):

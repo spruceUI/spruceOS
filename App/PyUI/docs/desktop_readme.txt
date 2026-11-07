@@ -84,8 +84,10 @@ usually the script no longer matches the screens.
 From another app
 ----------------
 
-Apps that bring PyUI up themselves (as App/Cheevos does on devices) get the
-desktop the same way they get a handheld:
+An app with "pyuiEntry" in its config.json (App/Cheevos) runs inside this
+PyUI, as on a handheld (apps/native_app.py). Apps that bring PyUI up
+themselves (such as Cheevos's own desktop runner) get the desktop the same
+way they get a handheld:
 
     from devices.device_factory import initialize_device
     initialize_device("DESKTOP", main_ui_mode=False)

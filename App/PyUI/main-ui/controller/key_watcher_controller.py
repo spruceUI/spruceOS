@@ -258,6 +258,11 @@ class KeyWatcherController(ControllerInterface):
                 # First, check the event queue
                 if self.input_queue:
                     value = self.input_queue.popleft()
+                    if isinstance(value, tuple):
+                        controller_input, touch_point = value
+                        from controller.controller import Controller
+                        Controller.set_touch_point(*touch_point)
+                        value = controller_input
                     self.last_held_input = value
                     return value
 
@@ -297,6 +302,12 @@ class KeyWatcherController(ControllerInterface):
         # never shows up in still_held_down.
         with self.lock:
             self.input_queue.append(controller_input)
+            self.input_ready.notify_all()
+
+    def inject_touch_input(self, controller_input, point):
+        with self.lock:
+            self.input_queue.append((controller_input, point))
+            self.input_ready.notify_all()
 
     def init_controller(self):
         pass

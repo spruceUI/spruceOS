@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
@@ -22,6 +23,7 @@ class MiyooDevice(DeviceCommon):
     SOUND_DISABLED = 0
 
     def __init__(self):
+        self.NOMAP_KEYS = [57, 29, 56, 42, 28, 97, 1, 15, 20, 14, 18, 103, 108, 105, 106]
         self.button_remapper = ButtonRemapper(self.system_config)
         self.game_utils = MiyooTrimGameSystemUtils()
         super().__init__()
@@ -134,7 +136,12 @@ class MiyooDevice(DeviceCommon):
         elif(114 == key_code):
             return ControllerInput.VOLUME_DOWN
         else:
-            PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+            # Minis have all key events in the same path (/dev/input/event0) which
+            # means logging every key press that wasn't volume/power without this
+            # check, codes taken from miyoo_mini_common.py
+            if key_code not in self.NOMAP_KEYS:
+                PyUiLogger.get_logger().debug(f"Unrecognized keycode {key_code}")
+
             return None
 
     def is_wifi_enabled(self):
@@ -184,6 +191,10 @@ class MiyooDevice(DeviceCommon):
                                 stdin=subprocess.DEVNULL,
                                 stdout=subprocess.DEVNULL,
                                 stderr=subprocess.DEVNULL)
+        restart_cmd = PyUiConfig.get_pad_restarted_cmd()
+        if restart_cmd and os.path.exists(restart_cmd):
+            subprocess.run([restart_cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=30)
         Controller.re_init_controller()
     
     def remap_buttons(self):

@@ -65,13 +65,17 @@ def _bar_colors():
 
 
 class RealtimeMessageNetworkListener:
-    def __init__(self, port: int):
+    def __init__(self, port: int, hosted: bool = False):
         """
         Using an abstract unix socket named after the port. 
         In Linux, prefixing with \0 makes it an 'abstract' socket that 
         doesn't exist on the filesystem and requires no cleanup.
+
+        hosted: PyUI's menu listens for a script it runs (apps/script_app.py), so stopping
+        neither closes the display nor exits, and EXIT_APP is ignored.
         """
         self.port = int(port)
+        self.hosted = hosted
         self.socket_address = f"\0{self.port}"
         self.server_socket = None
         self.stop_event = threading.Event()
@@ -90,20 +94,27 @@ class RealtimeMessageNetworkListener:
         except Exception as e:
             PyUiLogger.get_logger().error(f"Error writing result to file: {e}")
 
-    def start(self):
-        """Start the message listener server using Unix Domain Sockets."""
-        self.logger.info(f"Starting RealtimeMessageNetworkListener on abstract socket: {self.port}...")
-
+    def bind(self):
+        """Take the socket: from now on, scripts' messages come to this process."""
         # Setup AF_UNIX socket for local IPC
         self.server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        
-        try:
-            self.server_socket.bind(self.socket_address)
-            self.server_socket.listen(5)
-            self.logger.info(f"Listening for local connections on abstract addr: {self.port}")
-            self._write_to_file("Listening on port " + str(self.port))
+        self.server_socket.bind(self.socket_address)
+        self.server_socket.listen(5)
+        self.logger.info(f"Listening for local connections on abstract addr: {self.port}")
+        self._write_to_file("Listening on port " + str(self.port))
 
-            while not self.stop_event.is_set():
+    def start(self, until=None):
+        """Start the message listener server using Unix Domain Sockets.
+
+        until: also stop once this returns True, checked between messages.
+        """
+        self.logger.info(f"Starting RealtimeMessageNetworkListener on abstract socket: {self.port}...")
+
+        try:
+            if self.server_socket is None:
+                self.bind()
+
+            while not self.stop_event.is_set() and not (until and until()):
                 self.server_socket.settimeout(0.2)
 
                 # Process any queued messages safely on the main thread
@@ -227,6 +238,9 @@ class RealtimeMessageNetworkListener:
 
         try:
             if cmd == "EXIT_APP":
+                if self.hosted:
+                    self.logger.info("Ignoring EXIT_APP: the menu shows this script's messages")
+                    return
                 self.logger.info("Received EXIT_APP command, shutting down...")
                 self.stop_event.set()
                 return
@@ -315,5 +329,7 @@ class RealtimeMessageNetworkListener:
             if t.is_alive():
                 t.join(timeout=1)
 
+        if self.hosted:
+            return  # the menu carries on with the display
         Display.deinit_display()
         sys.exit(0)

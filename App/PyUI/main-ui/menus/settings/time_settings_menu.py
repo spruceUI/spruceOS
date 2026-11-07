@@ -39,7 +39,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 # it talks to the network; PyUI picks the result up from the
                 # shared config file.
                 try:
-                    subprocess.Popen(["/mnt/SDCARD/spruce/scripts/syncTime.sh"])
+                    subprocess.Popen(["/mnt/SDCARD/spruce/scripts/network/syncTime.sh"])
                 except Exception as e:
                     PyUiLogger.get_logger().error(f"Failed to launch timezone detection: {e}")
 
@@ -61,7 +61,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 # re-reads the toggle and does nothing if the clock is already
                 # right, so a stray launch is harmless.
                 try:
-                    subprocess.Popen(["/mnt/SDCARD/spruce/scripts/syncTime.sh"])
+                    subprocess.Popen(["/mnt/SDCARD/spruce/scripts/network/syncTime.sh"])
                 except Exception as e:
                     PyUiLogger.get_logger().error(f"Failed to launch time sync: {e}")
 

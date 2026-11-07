@@ -168,8 +168,8 @@ def check_for_startup_init_only(args):
 
 def main():
     args = parse_arguments()
-    PyUiLogger.init(args.logDir, "PyUI")
-    PyUiLogger.get_logger().info(f"{args}")
+    # Keep startup quiet until the saved logging preference has been loaded.
+    PyUiLogger.init(args.logDir, "PyUI", level=logging.WARNING)
 
     #log_renderer_info()
 
@@ -180,6 +180,8 @@ def main():
             PyUiConfig.init(args.pyUiConfig)
             UserConfig.reload_config()
             CfwSystemConfig.init(args.cfwConfig)
+            PyUiLogger.set_level(CfwSystemConfig.get_log_level() or logging.DEBUG)
+            PyUiLogger.get_logger().info(f"{args}")
             Language.init()
 
         main_ui_mode = True

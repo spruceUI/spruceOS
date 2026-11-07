@@ -123,8 +123,7 @@ def _per_week(rate: float | None) -> str:
         return strings.UNKNOWN
     if rate >= SMALL_RATE:
         return fmt.number(round(rate))
-    shown = f"{rate:.1f}"
-    return "0" if shown == "0.0" else shown
+    return "0" if round(rate, 1) == 0 else fmt.decimal(rate, 1)
 
 
 class _Page:
@@ -280,12 +279,16 @@ class _Page:
         Returns:
             Two rows.
         """
-        ratio = f"{stats.retro_ratio:.2f}" if stats.retro_ratio is not None else strings.UNKNOWN
+        ratio = (
+            fmt.decimal(stats.retro_ratio, 2) if stats.retro_ratio is not None else strings.UNKNOWN
+        )
         unlocks = strings.STAT_UNLOCKS_VALUE.format(
-            hardcore=fmt.number(stats.unlocks_hardcore), casual=fmt.number(stats.unlocks_casual)
+            hardcore=fmt.count(strings.STAT_UNLOCKS_HARDCORE, stats.unlocks_hardcore),
+            casual=fmt.count(strings.STAT_UNLOCKS_CASUAL, stats.unlocks_casual),
         )
         beaten = strings.STAT_BEATEN_VALUE.format(
-            count=fmt.number(stats.games_beaten), retail=fmt.number(stats.games_beaten_retail)
+            beaten=fmt.number(stats.games_beaten),
+            retail=fmt.count(strings.STAT_BEATEN_RETAIL, stats.games_beaten_retail),
         )
         started = _percent(stats.started_beaten)
         return [
@@ -390,8 +393,7 @@ class _Page:
         ]
         hidden = len(consoles) - len(shown)
         if hidden:
-            template = strings.MORE_CONSOLE if hidden == 1 else strings.MORE_CONSOLES
-            rows.append(self._note(template.format(count=fmt.number(hidden))))
+            rows.append(self._note(fmt.count(strings.MORE_CONSOLES, hidden)))
         return rows
 
     def _note(self, text: str) -> Row:
@@ -421,15 +423,22 @@ class _Page:
             The row.
         """
         width = self._area.width - PADDING * 2
-        number = width // 6
-        name = width - number * 3
+        # A sixth of the width each, or more for a title that wouldn't fit (a narrow screen, a
+        # longer language)
+        titles = (strings.PLAYED, strings.BEATEN, strings.MASTERED)
+        numbers = [
+            max(width // 6, ui.text_width(ui.displayable(title), Text.BODY) + PADDING)
+            for title in titles
+        ]
+        name = width - sum(numbers)
 
         def draw(top: int) -> None:
             """Draw the line."""
             label = ui.fit_text(cells[0], Text.BODY, name - PADDING)
             ui.text(label, PADDING, top, accent=header)
-            for index, cell in enumerate(cells[1:]):
-                right = PADDING + name + number * (index + 1)
+            right = PADDING + name
+            for cell, number in zip(cells[1:], numbers, strict=True):
+                right += number
                 ui.text(cell, right, top, align=Align.TOP_RIGHT, accent=header)
 
         return Row(ui.line_height(Text.BODY) + PADDING // 4, draw)

@@ -67,17 +67,17 @@ class SettingsMenu(ABC):
         next_index = (current_index + direction) % len(all_entries)
         return all_entries[next_index]
 
-    def onscreen_keyboard_option(self, category, entry_name, input, current_value, update_value):
+    def onscreen_keyboard_option(self, category, entry_name, input, current_value, update_value, display_name=None):
         if(ControllerInput.A == input):
             new_value = self.on_screen_keyboard.get_input(
-                title_text=entry_name,
+                title_text=display_name or entry_name,
                 starting_text=str(current_value)
             )
             PyUiLogger.get_logger().info(f"Updating {entry_name} to {new_value}")
             update_value(category, entry_name, new_value)
 
 
-    def change_indexed_array_option_for_menu_options_list(self, category, entry_name, input, all_options, current_value, update_value):
+    def change_indexed_array_option_for_menu_options_list(self, category, entry_name, input, all_options, current_value, update_value, display_name=None):
         try:
             selected_index = all_options.index(current_value)
         except:
@@ -95,7 +95,7 @@ class SettingsMenu(ABC):
             if(selected_index == len(all_options)):
                 selected_index = 0
         elif(ControllerInput.A == input):
-            selected_index = self.get_selected_index(Language.select_option_prompt(entry_name), all_options)
+            selected_index = self.get_selected_index(Language.select_option_prompt(display_name or entry_name), all_options)
 
         PyUiLogger.get_logger().info(f"{current_value} is updated to index {selected_index}")
 
@@ -170,8 +170,9 @@ class SettingsMenu(ABC):
                                 entry_name=name, 
                                 category=category,
                                 current_value=selected_value,
-                                update_value=CfwSystemConfig.set_menu_option
-                                : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value)
+                                update_value=CfwSystemConfig.set_menu_option,
+                                display_name=display_name
+                                : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value, display_name)
                         )
                     )
                 else:
@@ -188,12 +189,26 @@ class SettingsMenu(ABC):
                                         entry_name=name, 
                                         category=category,
                                         all_options=self.resolve_options_for_device(option),
-                                        current_value=selected_value,update_value=CfwSystemConfig.set_menu_option
-                                        : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, all_options, current_value, update_value)
+                                        current_value=selected_value,update_value=CfwSystemConfig.set_menu_option,
+                                        display_name=display_name
+                                        : self.change_indexed_array_option_for_menu_options_list(category, entry_name, input_value, all_options, current_value, update_value, display_name)
                             )
                         )
         return option_list
 
+    @classmethod
+    def related_config_categories(cls, settings_name):
+        return [
+            category
+            for category in CfwSystemConfig.get_categories()
+            if category == settings_name or Language.settings_category(category) == settings_name
+        ]
+
+    def build_options_list_from_related_config_categories(self, settings_name):
+        option_list = []
+        for category in self.related_config_categories(settings_name):
+            option_list.extend(self.build_options_list_from_config_menu_options(category))
+        return option_list
 
 
 
@@ -203,7 +218,7 @@ class SettingsMenu(ABC):
 
         return GridOrListEntry(
             primary_text=primary_text,
-            value_text="<    " + str(current_value) + "    >",
+            value_text="<    " + Language.menu_option_value(current_value) + "    >",
             image_path=None,
             image_path_selected=None,
             description=None,
@@ -232,7 +247,7 @@ class SettingsMenu(ABC):
                 input, get_value_func, set_value_func)
         )
     
-    def build_numeric_entry(self, primary_text, get_value_func, set_value_func, min=1, max=sys.maxsize) -> GridOrListEntry:
+    def build_numeric_entry(self, primary_text, get_value_func, set_value_func, min=1, max=sys.maxsize, step=1) -> GridOrListEntry:
 
         return GridOrListEntry(
             primary_text=primary_text,
@@ -242,7 +257,7 @@ class SettingsMenu(ABC):
             description=None,
             icon=None,
             value=lambda input: self.change_numeric(
-                input, get_value_func, set_value_func, min, max)
+                input, get_value_func, set_value_func, min, max, step)
         )
 
     def build_percent_entry(self, primary_text, get_value_func, set_value_func) -> GridOrListEntry:
@@ -327,7 +342,7 @@ class SettingsMenu(ABC):
 
         set_value_func(value)
 
-    def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize):
+    def change_numeric(self, input, get_value_func, set_value_func, min=1, max=sys.maxsize, step=1):
         value = get_value_func()
         if(value is None):
             value = 0
@@ -344,7 +359,8 @@ class SettingsMenu(ABC):
         else:
             return  # No change for other inputs
 
-        value += delta
+        decimal_places = len(str(step).partition(".")[2])
+        value = round(value + delta * step, decimal_places)
         if(min <= value <= max):
             set_value_func(value)
 
@@ -354,7 +370,7 @@ class SettingsMenu(ABC):
         for index, opt in enumerate(options):
             option_list.append(
                 GridOrListEntry(
-                    primary_text=opt,
+                    primary_text=Language.menu_option_value(opt),
                     value=index
                 )
             )

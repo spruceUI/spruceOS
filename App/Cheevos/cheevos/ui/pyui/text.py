@@ -260,6 +260,49 @@ def fit_text(value: str, role: Text, max_width: int) -> str:
     )
 
 
+def wrap(value: str, role: Text, max_width: int) -> list[str]:
+    """Split ``value`` into lines that fit ``max_width`` in the font for ``role``.
+
+    Lines break between words. A word wider than a line is cut where the line ends, which is
+    how Chinese and Japanese text breaks: it has no spaces.
+
+    Args:
+        value: Text to wrap (existing newlines are kept).
+        role: Text role.
+        max_width: Maximum line width in pixels.
+
+    Returns:
+        Lines in order (at least one).
+    """
+    from display.display import Display
+
+    font = font_purpose(role)
+
+    def fits(text: str) -> bool:
+        """Report whether ``text`` fits on one line."""
+        return Display.get_text_dimensions(font, text)[0] <= max_width
+
+    lines: list[str] = []
+    for paragraph in displayable(value, role).splitlines() or [""]:
+        current = ""
+        for word in paragraph.split():
+            candidate = f"{current} {word}" if current else word
+            if fits(candidate):
+                current = candidate
+                continue
+            if current:
+                lines.append(current)
+            current = word
+            while not fits(current):
+                cut = max(Display.count_chars_that_fit(font, current, max_width), 1)
+                if cut >= len(current):  # the glyph estimate fits it after all
+                    break
+                lines.append(current[:cut])
+                current = current[cut:]
+        lines.append(current)
+    return lines
+
+
 def fit_with_tail(value: str, tail: str, role: Text, max_width: int) -> str:
     """Fit ``"value · tail"``, shortening ``value`` first so ``tail`` (a date) stays whole.
 

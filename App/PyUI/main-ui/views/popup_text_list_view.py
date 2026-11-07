@@ -1,5 +1,6 @@
 
 from typing import List
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from display.render_mode import RenderMode
@@ -28,6 +29,7 @@ class PopupTextListView(TextListView):
         self.view_y = int(Theme.pop_menu_y_offset() * Device.get_device().screen_height())
         if(Theme.pop_menu_add_top_bar_height_to_y_offset()):
             self.view_y += Display.get_top_bar_height()
+        self.popup_width, self.popup_height = Display.get_image_dimensions(Theme.menu_popup_bg_large())
 
         self.starting_x_offset = self.view_x + Theme.pop_menu_text_padding()
         self.base_y_offset = self.view_y
@@ -43,3 +45,41 @@ class PopupTextListView(TextListView):
 
     def view_finished(self):
         Display.unlock_current_image()
+
+    def touch_point_is_inside_popup(self, point):
+        if point is None:
+            return False
+        x, y = point
+        return (
+            self.view_x <= x < self.view_x + self.popup_width
+            and self.view_y <= y < self.view_y + self.popup_height
+        )
+
+    def touch_index_at(self, point):
+        if not self.touch_point_is_inside_popup(point):
+            return None
+        return super().touch_index_at(point)
+
+    def touch_follows_finger_from_anywhere(self, point):
+        return self.touch_point_is_inside_popup(point)
+
+    def touch_starts_scroll(self, point):
+        if point is None:
+            return False
+        if point[0] >= self.view_x + self.popup_width:
+            return True
+        return self.touch_index_at(point) is not None
+
+    def touch_uses_dpad_swipe(self, point):
+        if point is None:
+            return False
+        x, y = point
+        return (
+            x >= self.view_x + self.popup_width
+            and self.view_y <= y < self.view_y + self.popup_height
+        )
+
+    def touch_swipe_direction(self, dx, dy):
+        if abs(dx) >= abs(dy):
+            return super().touch_swipe_direction(dx, dy)
+        return ControllerInput.DPAD_DOWN if dy > 0 else ControllerInput.DPAD_UP

@@ -29,24 +29,24 @@ menu_button_down () {
 
         # Launch background timer that waits required seconds, then triggers the action
         (
-            menu_hold_time=$(get_config_value '.menuOptions."Game Switcher Settings".menuHoldTime.selected' 2)
+            menu_hold_time=$(get_config_value '.menuOptions."Button Settings".menuHoldTime.selected' 1)
             sleep "$menu_hold_time"
             # Check if the menubtn file still exists (i.e. button still held) AND NOT cancelled (i.e. no other button pressed)
             if [ -e /tmp/menubtn ] && [ ! -e /tmp/menubtn_cancelled ]; then
                 rm -f /tmp/menubtn
                 rm -f /tmp/menubtn_cancelled
-                do_vibrate="$(get_config_value '.menuOptions."Game Switcher Settings".menuShouldVibrate.selected' "True")"
+                do_vibrate="$(get_config_value '.menuOptions."Button Settings".menuShouldVibrate.selected' "True")"
                 # Only vibrate if enabled
                 if [ "$do_vibrate" = "True" ]; then
                     vibrate &
                 fi
-                HOLD_HOME="$(get_config_value '.menuOptions."Emulator Settings".holdHomeAction.selected' "Game Switcher")"
-                log_message "menubutton_watchdog.sh: Performing hold-home action: $HOLD_HOME"
-                perform_action "$HOLD_HOME"
+                HOLD_MENU="$(get_config_value '.menuOptions."Button Settings".holdMenuAction.selected' "Game Switcher")"
+                log_message "menubutton_watchdog.sh: Performing hold-home action: $HOLD_MENU"
+                perform_action "$HOLD_MENU"
 
                 # Only clean up game state when the action actually killed the game.
                 # "Emulator menu" just opens an in-game menu — the game is still running.
-                if [ "$HOLD_HOME" != "Emulator menu" ]; then
+                if [ "$HOLD_MENU" != "Emulator menu" ]; then
                     rm -f /tmp/cmd_to_run.sh
                     rm -f /mnt/SDCARD/spruce/flags/lastgame.lock
                 fi
@@ -76,9 +76,9 @@ menu_button_up () {
         fi
 
         if [ "$was_cancelled" = false ]; then
-            TAP_HOME="$(get_config_value '.menuOptions."Emulator Settings".tapHomeAction.selected' "Emulator menu")"
-            log_message "menubutton_watchdog.sh: Performing tap-home action: $TAP_HOME"
-            perform_action "$TAP_HOME"
+            TAP_MENU="$(get_config_value '.menuOptions."Button Settings".tapMenuAction.selected' "Emulator menu")"
+            log_message "menubutton_watchdog.sh: Performing tap-home action: $TAP_MENU"
+            perform_action "$TAP_MENU"
         fi
 
         resume_drastic

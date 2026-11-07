@@ -19,7 +19,7 @@
 # It also runs usb_audio_remote.sh on the routed card's own remote, keyed on the
 # route as well as the nodes: a replug can bring the same node numbers back.
 
-# shellcheck disable=SC2154 # usb_card and usb_routed are set by device.sh's functions
+# shellcheck disable=SC2154 # usb_card and usb_routed are set by usb_audio_helpers.sh
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 device_usb_audio_supported || exit 0
