@@ -196,6 +196,16 @@ if [ ! -f "$_ra_touch_done" ]; then
     touch "$_ra_touch_done"
 fi
 
+PX2_RA_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-Pixel2.cfg"
+if [ -f $PX2_RA_CFG ] ; then
+    sed -i -e 's/^audio_driver = "alsa"$/audio_driver = "pipewire"/' $PX2_RA_CFG
+    log_message "4.5.7: Pixel 2 retroarch audio driver changed to pipewire."
+fi
+
+# Update TWIGUI partition type, fixes mounting issue on macOS
+if [ "$PLATFORM" = "Pixel2" ]; then
+    sfdisk --part-type /dev/mmcblk0 3 0x0c
+fi
 
 # -------------------- UPGRADE COMPLETION --------------------
 # Check if the update was successful
