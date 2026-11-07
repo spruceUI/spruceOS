@@ -8,6 +8,8 @@
 # Usage: wifi.sh <command> [request file] [--wait]
 #   apply         make the radio match the saved .wifi setting
 #   restart       off and on again, only if the setting is on
+#   recover       restart only if no change is in flight and the radio stopped
+#                 answering. One still joining or out of range is left alone.
 #   suspend       radio off without changing the setting (sleep, in-game, poweroff)
 #   connect       save the network read from stdin (SSID line, then password
 #                 line, or none for an open network), then apply. A shell caller
@@ -24,7 +26,6 @@
 #
 # Radio changes return at once and do the work in a detached copy, unless --wait.
 
-WIFI_LOCK="/tmp/spruce_wifi.lock"
 WIFI_STATE_FILE="/tmp/wifi_state"
 WIFI_SUSPENDED="/tmp/wifi_suspended"
 WIFI_LATEST_APPLY="/tmp/wifi_latest_apply"
@@ -44,10 +45,10 @@ done
 
 READ_ONLY=0
 case "$CMD" in
-    apply|restart|suspend|connect|forget-all) ;;
+    apply|restart|recover|suspend|connect|forget-all) ;;
     status|ip|saved|scan) READ_ONLY=1 ;;
     *)
-        echo "usage: wifi.sh apply|restart|suspend|connect [FILE]|forget-all [--wait]" >&2
+        echo "usage: wifi.sh apply|restart|recover|suspend|connect [FILE]|forget-all [--wait]" >&2
         echo "       wifi.sh status|ip|saved|scan" >&2
         exit 1
         ;;
@@ -400,15 +401,12 @@ if [ "$READ_ONLY" = 1 ]; then
 fi
 # --- end read-only commands --------------------------------------------------
 
-wifi_sh_is_running() {
-    [ -n "$1" ] && grep -q "wifi.sh" "/proc/$1/cmdline" 2>/dev/null
-}
-
 [ "$CMD" = "apply" ] && echo "$$" > "$WIFI_LATEST_APPLY"
 
 # Half-second ticks. Sleep entry can't wait out a long SDIO recovery.
 case "$CMD" in
     suspend) max_ticks=60 ;;
+    recover) max_ticks=12 ;;
     *)       max_ticks=600 ;;
 esac
 
@@ -433,6 +431,8 @@ while :; do
             continue
         fi
     elif wifi_sh_is_running "$holder"; then
+        # Leave the current radio change to finish. A queued recovery can outlive its caller.
+        [ "$CMD" = "recover" ] && exit 0
         empty_pid_ticks=0
         dead_holder=""
     elif [ "$holder" = "$dead_holder" ]; then
@@ -517,6 +517,34 @@ restart_radio() {
     bring_radio_up
 }
 
+# Is the radio up and able to join on its own? Being out of range or still
+# associating counts as yes.
+wifi_radio_responding() {
+    [ "$(cat "$WIFI_STATE_FILE" 2>/dev/null)" = on ] || return 1
+    [ -d "/sys/class/net/$WIFI_IFACE" ] || return 1
+    if wifi_uses_nm; then
+        [ "$(nmcli radio wifi 2>/dev/null)" = enabled ]
+    elif device_manages_own_wifi; then
+        return 0
+    elif command -v wpa_cli >/dev/null 2>&1; then
+        # A wedged supplicant times out instead of answering
+        wpa_cli -i "$WIFI_IFACE" ping 2>/dev/null | grep -q PONG
+    else
+        pgrep -f "wpa_supplicant.*$WIFI_IFACE" >/dev/null
+    fi
+}
+
+# The connection wait asks for this. A restart drops a join in progress and adds
+# its own bring-up time, so a radio that answers is left to connect.
+recover_radio() {
+    wifi_available_on_device || return 0
+    if wifi_radio_responding; then
+        log_message "wifi.sh: radio is answering, leaving it to connect" -v
+        return 0
+    fi
+    restart_radio
+}
+
 suspend_radio() {
     touch "$WIFI_SUSPENDED"
     wifi_available_on_device || return 0
@@ -565,6 +593,7 @@ forget_networks() {
 case "$CMD" in
     apply)      apply_setting ;;
     restart)    restart_radio ;;
+    recover)    recover_radio ;;
     suspend)    suspend_radio ;;
     connect)    connect_network ;;
     forget-all) forget_networks ;;
