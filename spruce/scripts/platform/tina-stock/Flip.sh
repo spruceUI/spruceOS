@@ -675,6 +675,14 @@ work_led_on() {
     echo 1 >${LED_PATH}/brightness
 }
 
+charger_led_off() {
+    echo 0 >${RED_LED_PATH}/brightness
+}
+
+charger_led_on() {
+    echo 1 >${RED_LED_PATH}/brightness
+}
+
 # BaseOS-my355 (flagged by Flip.cfg) replaces some of the functions above.
 if [ -n "$SPRUCE_FLIP_BASEOS" ]; then
     . "/mnt/SDCARD/spruce/scripts/platform/baseos-my355/my355.sh"
