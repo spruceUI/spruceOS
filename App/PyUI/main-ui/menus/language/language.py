@@ -21,8 +21,6 @@ class Language:
 
     @classmethod
     def load(cls):
-        # Templates are compiled from the loaded file; drop them so a language
-        # picked in Settings doesn't keep matching the previous one's.
         cls._template_cache = {}
         language = PyUiConfig.get_language()
         if(language is not None):
