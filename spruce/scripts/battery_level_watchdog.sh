@@ -25,6 +25,98 @@ show_low_battery_warning() {
     stop_pyui_message_writer
 }
 
+is_charging() {
+    case "$(device_get_charging_status)" in
+        Charging|Full)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+get_low_battery_warning_led() {
+    # The configurable SOS LED is supported only by the Miyoo Flip.
+    if [ "$PLATFORM" != "Flip" ]; then
+        printf '%s\n' "Green"
+        return
+    fi
+
+    _configured_led="$(get_config_value \
+        '.menuOptions."System Settings".lowBatteryWarningLed.selected' \
+        'Green')"
+
+    # Fall back to green if the setting or red LED path is unavailable.
+    if [ "$_configured_led" = "Red" ] \
+        && [ -e "${RED_LED_PATH}/brightness" ]; then
+        printf '%s\n' "Red"
+    else
+        printf '%s\n' "Green"
+    fi
+}
+
+apply_flip_green_led_setting() {
+    # This additional handling applies only to the Flip when red is selected.
+    if [ "$PLATFORM" != "Flip" ] \
+        || [ "$low_battery_warning_led" != "Red" ]; then
+        return
+    fi
+
+    led_mode="$(get_config_value \
+        '.menuOptions."System Settings".ledMode.selected' \
+        'Always off')"
+
+    if [ "$led_mode" = "Always on" ]; then
+        work_led_on
+    elif [ "$led_mode" = "On in menu only" ] \
+        && flag_check "in_menu"; then
+        work_led_on
+    else
+        work_led_off
+    fi
+
+    # Red is the normal charging indicator and must remain fixed on.
+    if is_charging; then
+        charger_led_on
+    fi
+}
+
+low_battery_led_on() {
+    if [ "$PLATFORM" = "Flip" ] \
+        && [ "$low_battery_warning_led" = "Red" ]; then
+        charger_led_on
+    else
+        # Original behaviour for every other device and for green on Flip.
+        work_led_on
+    fi
+}
+
+low_battery_led_off() {
+    if [ "$PLATFORM" = "Flip" ] \
+        && [ "$low_battery_warning_led" = "Red" ]; then
+
+        # The red LED must remain permanently on while charging.
+        if is_charging; then
+            charger_led_on
+        else
+            charger_led_off
+        fi
+    else
+        # Original behaviour for every other device and for green on Flip.
+        work_led_off
+    fi
+}
+
+restore_flip_charging_led() {
+    # Ensure that a red SOS can never leave the charging indicator off.
+    if [ "$PLATFORM" = "Flip" ] \
+        && [ "$low_battery_warning_led" = "Red" ] \
+        && is_charging; then
+        charger_led_on
+    fi
+}
+
 morse_code_sos() {
 
     _do_vibrate=$1
@@ -33,20 +125,22 @@ morse_code_sos() {
     for _symbol in "$@"; do
         case $_symbol in
             ".")
-                work_led_on
+                low_battery_led_on
                 [ "$_do_vibrate" = "true" ] && vibrate 100 &
                 sleep $DOT_DURATION
                 ;;
             "-")
-                work_led_on
+                low_battery_led_on
                 [ "$_do_vibrate" = "true" ] && vibrate 100 &
                 sleep $DASH_DURATION
                 ;;
         esac
-        work_led_off
+
+        low_battery_led_off
         sleep $INTRA_CHAR_GAP
     done
     sleep $INTER_WORD_GAP
+    restore_flip_charging_led
 }
 
 force_shutdown_if_needed() {
@@ -81,6 +175,11 @@ while true; do
     current_battery_percent=$(device_get_battery_percent)
     percent_to_warn_at="$(get_config_value '.menuOptions."Battery Settings".lowPowerWarningPercent.selected' "4")"
 
+    # Other devices always resolve to Green and return immediately from
+    # apply_flip_green_led_setting().
+    low_battery_warning_led="$(get_low_battery_warning_led)"
+    apply_flip_green_led_setting
+
     # force a safe shutdown at 1% regardless of settings
     force_shutdown_if_needed "$current_battery_percent"
 
@@ -95,6 +194,9 @@ while true; do
         vibrate_count=0
         flag_added=false
         while [ "$current_battery_percent" -le "$percent_to_warn_at" ]; do
+            # Reload the selection before each complete SOS sequence.
+            low_battery_warning_led="$(get_low_battery_warning_led)"
+            apply_flip_green_led_setting
 
             if [ "$vibrate_count" -lt 2 ]; then
                 morse_code_sos "true" "." "." "." "-" "-" "-" "." "." "."
