@@ -7,6 +7,7 @@ case $INFO in
     *"SStar"*) boot_route="MiyooMini" ;;
     *)         boot_route="Other" ;;
 esac
+[ "$boot_route" = "Other" ] && [ -d /customer/app ] && boot_route="MiyooMini"
 
 # The boot session supervisor (spruce/scripts/boot/session.sh) wraps runtime.sh
 # with a crash-loop guard and a hand-off to the vendor UI. On the Flip it is
