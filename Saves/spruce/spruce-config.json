@@ -1228,7 +1228,7 @@
 					"Red"
 				],
 				"selected": "Green"
-			}
+			},
             "bootTo": {
                 "display": "Launch application on startup",
                 "description": "if not autoresuming last game",
