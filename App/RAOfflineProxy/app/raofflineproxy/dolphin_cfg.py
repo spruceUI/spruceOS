@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .config import detect_dolphin_ini, proxy_value
+from .utils import write_emulator_config
 
 ACHIEVEMENTS_SECTION = "[Achievements]"
 HOST_KEY = "HostUrl"
@@ -20,12 +21,12 @@ def patch_dolphin_ini(config_data: dict) -> dict:
 
     original = target.read_text(encoding="utf-8", errors="replace")
     previous = {
-        HOST_KEY: _extract_achievements_value(original, HOST_KEY),
-        HARDCORE_KEY: _extract_achievements_value(original, HARDCORE_KEY),
+        HOST_KEY: extract_achievements_value(original, HOST_KEY),
+        HARDCORE_KEY: extract_achievements_value(original, HARDCORE_KEY),
     }
     transformed = build_patched_dolphin_ini(original, config_data)
     if transformed != original:
-        target.write_text(transformed, encoding="utf-8")
+        write_emulator_config(target, transformed)
 
     already_patched = transformed == original and previous[HOST_KEY] == proxy_value(
         config_data
@@ -65,13 +66,13 @@ def revert_dolphin_ini(config_data: dict, previous: dict | None = None) -> dict:
         current, _sanitize_previous(config_data, previous or {})
     )
     if transformed != current:
-        target.write_text(transformed, encoding="utf-8")
+        write_emulator_config(target, transformed)
 
     return {"exists": True, "changed": transformed != current, "path": str(target)}
 
 
 def build_patched_dolphin_ini(content: str, config_data: dict) -> str:
-    return _update_achievements_section(
+    return update_achievements_section(
         content,
         {
             HOST_KEY: proxy_value(config_data),
@@ -97,7 +98,7 @@ def build_reverted_dolphin_ini(content: str, previous: dict) -> str:
     # Unlike PPSSPP, Dolphin's default ini has no HostUrl key at all until
     # patched, so a captured `None` (never set / sanitized away) means the
     # key should be removed entirely rather than restored as an empty value.
-    return _update_achievements_section(
+    return update_achievements_section(
         content,
         {
             HOST_KEY: previous.get(HOST_KEY),
@@ -106,11 +107,14 @@ def build_reverted_dolphin_ini(content: str, previous: dict) -> str:
     )
 
 
-def _update_achievements_section(content: str, updates: dict[str, str | None]) -> str:
-    """Apply key updates within [Achievements]; a `None` value removes the key."""
+def update_achievements_section(
+    content: str, updates: dict[str, str | None], section: str = ACHIEVEMENTS_SECTION
+) -> str:
+    """Apply key updates within [Achievements] (or another section); a `None`
+    value removes the key."""
     lines = content.split("\n")
     section_index = next(
-        (i for i, line in enumerate(lines) if line.strip() == ACHIEVEMENTS_SECTION),
+        (i for i, line in enumerate(lines) if line.strip() == section),
         None,
     )
 
@@ -119,7 +123,7 @@ def _update_achievements_section(content: str, updates: dict[str, str | None]) -
         if not additions:
             return content
         suffix = "\n".join(f"{key} = {value}" for key, value in additions.items())
-        return content.rstrip("\n") + f"\n{ACHIEVEMENTS_SECTION}\n{suffix}\n"
+        return content.rstrip("\n") + f"\n{section}\n{suffix}\n"
 
     section_end = next(
         (
@@ -153,12 +157,14 @@ def _update_achievements_section(content: str, updates: dict[str, str | None]) -
     return "\n".join(result)
 
 
-def _extract_achievements_value(content: str, key: str) -> str | None:
+def extract_achievements_value(
+    content: str, key: str, section: str = ACHIEVEMENTS_SECTION
+) -> str | None:
     in_section = False
     for line in content.splitlines():
         stripped = line.strip()
         if stripped.startswith("[") and stripped.endswith("]"):
-            in_section = stripped == ACHIEVEMENTS_SECTION
+            in_section = stripped == section
             continue
         if not in_section:
             continue

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from .config import detect_ppsspp_ini, proxy_value
+from .utils import write_emulator_config
 
 ACHIEVEMENTS_SECTION = "[Achievements]"
 HOST_KEY = "AchievementsHost"
@@ -42,7 +43,7 @@ def patch_ppsspp_ini(config_data: dict) -> dict:
     }
     transformed = build_patched_ppsspp_ini(original, config_data)
     if transformed != original:
-        target.write_text(transformed, encoding="utf-8")
+        write_emulator_config(target, transformed)
 
     already_patched = transformed == original and previous[HOST_KEY] == proxy_value(
         config_data
@@ -82,7 +83,7 @@ def revert_ppsspp_ini(config_data: dict, previous: dict | None = None) -> dict:
         current, _sanitize_previous(config_data, previous or {})
     )
     if transformed != current:
-        target.write_text(transformed, encoding="utf-8")
+        write_emulator_config(target, transformed)
 
     return {"exists": True, "changed": transformed != current, "path": str(target)}
 

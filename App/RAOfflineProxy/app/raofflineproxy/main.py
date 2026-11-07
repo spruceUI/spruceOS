@@ -45,6 +45,13 @@ from .dolphin_cfg import (
     revert_dolphin_ini,
     store_dolphin_previous,
 )
+from .duckstation_cfg import (
+    patch_duckstation_ini,
+    revert_duckstation_ini,
+    store_duckstation_previous,
+)
+from .flycast_cfg import patch_flycast_cfg, revert_flycast_cfg, store_flycast_previous
+from .pcsx2_cfg import patch_pcsx2_ini, revert_pcsx2_ini, store_pcsx2_previous
 from .retroarch_cfg import (
     enforce_patched_cfg,
     enforce_secondary_retroarch_cfgs,
@@ -139,11 +146,17 @@ def _patch_emulator_configs(config_data: dict, cfg_path: str) -> list[str]:
     batocera = patch_batocera_conf(config_data)
     ppsspp = patch_ppsspp_ini(config_data)
     dolphin = patch_dolphin_ini(config_data)
+    pcsx2 = patch_pcsx2_ini(config_data)
+    duckstation = patch_duckstation_ini(config_data)
+    flycast = patch_flycast_cfg(config_data)
     patch_state = load_patch_state() or {}
     store_secondary_retroarch_previous(patch_state, secondary)
     store_batocera_previous(patch_state, batocera)
     store_ppsspp_previous(patch_state, ppsspp)
     store_dolphin_previous(patch_state, dolphin)
+    store_pcsx2_previous(patch_state, pcsx2)
+    store_duckstation_previous(patch_state, duckstation)
+    store_flycast_previous(patch_state, flycast)
     save_patch_state(patch_state)
 
     if not result.get("exists", True):
@@ -167,6 +180,15 @@ def _patch_emulator_configs(config_data: dict, cfg_path: str) -> list[str]:
 
     if dolphin.get("exists"):
         output.append(f"Patched RetroAchievements.ini at {dolphin['path']}")
+
+    if pcsx2.get("exists"):
+        output.append(f"Patched PCSX2.ini at {pcsx2['path']}")
+
+    if duckstation.get("exists"):
+        output.append(f"Patched DuckStation settings.ini at {duckstation['path']}")
+
+    if flycast.get("exists"):
+        output.append(f"Patched Flycast emu.cfg at {flycast['path']}")
 
     return output
 
@@ -205,6 +227,9 @@ def _revert_proxy_config(config_data: dict, cfg_path: str | None) -> list[str]:
     batocera = revert_batocera_conf(config_data, patch_state.get("batocera_previous", {}))
     ppsspp = revert_ppsspp_ini(config_data, patch_state.get("ppsspp_previous", {}))
     dolphin = revert_dolphin_ini(config_data, patch_state.get("dolphin_previous", {}))
+    pcsx2 = revert_pcsx2_ini(config_data, patch_state.get("pcsx2_previous", {}))
+    duckstation = revert_duckstation_ini(config_data, patch_state.get("duckstation_previous", {}))
+    flycast = revert_flycast_cfg(config_data, patch_state.get("flycast_previous", {}))
     secondary = revert_secondary_retroarch_cfgs(
         config_data, patch_state.get("secondary_cfgs", [])
     )
@@ -220,6 +245,15 @@ def _revert_proxy_config(config_data: dict, cfg_path: str | None) -> list[str]:
 
     if dolphin.get("exists"):
         output.append(f"Reverted RetroAchievements.ini at {dolphin['path']}")
+
+    if pcsx2.get("exists"):
+        output.append(f"Reverted PCSX2.ini at {pcsx2['path']}")
+
+    if duckstation.get("exists"):
+        output.append(f"Reverted DuckStation settings.ini at {duckstation['path']}")
+
+    if flycast.get("exists"):
+        output.append(f"Reverted Flycast emu.cfg at {flycast['path']}")
 
     revert_result = None
     if patch_state:

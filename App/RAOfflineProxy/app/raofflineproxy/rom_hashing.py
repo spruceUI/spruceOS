@@ -64,7 +64,7 @@ class RomHashResult:
 
 
 def _candidate_library_paths() -> list[str | None]:
-    names = ("libraproxy_rchash.so", "libraproxy_rchash.dylib")
+    names = ("libraproxy_rchash.so", "libraproxy_rchash.dylib", "raproxy_rchash.dll")
     paths: list[str | None] = []
 
     override = os.environ.get("RAOFFLINEPROXY_RCHASH_LIB")

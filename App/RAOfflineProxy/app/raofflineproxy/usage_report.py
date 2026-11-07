@@ -15,7 +15,7 @@ except ImportError:  # pragma: no cover - non-POSIX dev machines
     fcntl = None
 
 from . import cache_keys, cache_queue, log_uploader, usage_stats
-from .config import CONFIG_DIR, ensure_config_dir, load_config
+from .config import CONFIG_DIR, ensure_config_dir, load_config, running_on_windows
 from .network import configured_ssl_context
 from .storage import PENDING_AWARD_STATUS_PENDING, Storage
 
@@ -99,6 +99,8 @@ def build_payload(
         "schema_version": USAGE_SCHEMA_VERSION,
         "consent_version": usage_stats.USAGE_STATS_CONSENT_VERSION,
         "client_id": client_id(username),
+        # The backend accepts only "android" and "linux"; Windows reports as
+        # linux, told apart by "os": "Windows".
         "platform": "linux",
         "os": metadata.get("os", "Linux"),
         "os_version": metadata.get("os_version", "unknown"),
@@ -179,6 +181,11 @@ def _report(storage: Storage, now_ms: int) -> bool:
     url = report_url(config_data)
     if not url or usage_stats.load_consent(config_data) is not True:
         return False
+    if running_on_windows():
+        from .windows.paths import test_channel
+
+        if test_channel():
+            return False  # test builds stay out of the real usage numbers
     with _report_lock() as acquired:
         if not acquired or not is_report_due(usage_stats.last_reported_at(), now_ms):
             return False
