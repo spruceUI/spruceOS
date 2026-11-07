@@ -15,9 +15,8 @@ Device setup
 ------------
 
 EnvVarDevice starts the watcher only in main UI mode and when supports_touch()
-is true. For this device, touch support is detected from TOUCH_EVENT_PATH or
-the recognized MAGICX_XU20 and MAGICX_ZERO40 device names. The path must be
-set and exist; otherwise touch is left off and a warning is logged. Device
+is true, which for this device means TOUCH_EVENT_PATH is set. The path must
+also exist; otherwise touch is left off and a warning is logged. Device
 launch configuration should set TOUCH_EVENT_PATH to the touchscreen's
 /dev/input/eventN node.
 

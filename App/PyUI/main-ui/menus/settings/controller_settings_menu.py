@@ -83,7 +83,7 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
                     step=0.05,
                 ),
                 self.build_numeric_entry(
-                    primary_text=Language.label("touchEdgeScrollMarginRatio", "Touch Edge Scroll Margin"),
+                    primary_text=Language.label("touchEdgeScrollMarginRatio", "Touch Edge Scroll Margin Ratio"),
                     get_value_func=system_config.get_touch_edge_scroll_margin_ratio,
                     set_value_func=system_config.set_touch_edge_scroll_margin_ratio,
                     min=0.05,

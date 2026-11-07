@@ -43,8 +43,6 @@ REQUIRED_ENV_VARS = (
 )
 
 class EnvVarDevice(DeviceCommon):
-    TOUCH_CAPABLE_DEVICE_NAMES = {"MAGICX_XU20", "MAGICX_ZERO40"}
-
     def __init__(self, main_ui_mode):
         missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
         if missing:
@@ -267,9 +265,7 @@ class EnvVarDevice(DeviceCommon):
         return os.environ["STATE_PATH"]
 
     def supports_touch(self):
-        return bool(os.environ.get("TOUCH_EVENT_PATH")) or any(
-            name in self.TOUCH_CAPABLE_DEVICE_NAMES for name in self.get_device_names()
-        )
+        return bool(os.environ.get("TOUCH_EVENT_PATH"))
 
     def remap_buttons(self):
         self.button_remapper.remap_buttons()
