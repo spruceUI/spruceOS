@@ -11,8 +11,8 @@
 #   start_syncthing_process
 #
 # External binaries:
-#   /mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh
-#   /mnt/SDCARD/spruce/scripts/networkservices.sh
+#   /mnt/SDCARD/spruce/scripts/network/syncthing_sync_check.sh
+#   /mnt/SDCARD/spruce/scripts/network/networkservices.sh
 #
 # Provides:
 #   handle_network_services (returns 2 when the player pressed B on the WiFi wait screen)
@@ -20,6 +20,15 @@
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
 	[ "$disable_wifi_in_game" = "True" ] || return 0
+	# Only RetroArch goes through the proxy, and only for systems RetroAchievements supports
+	case "$CORE" in *standalone*) return 0 ;; esac
+	case "$EMU_NAME" in
+		ARCADE|ARDUBOY|ATARI|COLECO|CPC|CPS1|CPS2|CPS3|DC|FAIRCHILD|FBNEO|FC|FDS|GB|GBA|GBC|GG|\
+		INTELLIVISION|JAGUAR|LYNX|MAME2003PLUS|MD|MEGADUCK|MS|MSU1|MSUMD|MSX|N64|NEOCD|NEOGEO|\
+		NGP|NGPC|ODYSSEY|PCE|PCECD|POKE|PS|SATELLAVIEW|SATURN|SEGACD|SEGASGONE|SEVENTYEIGHTHUNDRED|\
+		SFC|SGB|SGFX|SUFAMI|SUPERVISION|THIRTYTWOX|VB|VECTREX|VIDEOPAC|WS|WSC) ;;
+		*) return 0 ;;
+	esac
 	. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 	raproxy_rom_is_cached "$ROM_FILE" && return 0
 
@@ -60,7 +69,7 @@ handle_network_services() {
 		Disabled)          cheevos_wanted=false ;;
 		*)
 			cheevos_wanted=false
-			grep -q 'cheevos_enable = "true"' "/mnt/SDCARD/Saves/ra-configs/retroarch-$PLATFORM.cfg" 2>/dev/null && cheevos_wanted=true
+			grep -q 'cheevos_enable = "true"' "$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")" 2>/dev/null && cheevos_wanted=true
 			;;
 	esac
 	if [ "$disable_wifi_in_game" = "False" ] && [ "$cheevos_wanted" = true ]; then
@@ -87,7 +96,7 @@ handle_network_services() {
 	# Handle Syncthing sync if enabled
 	if [ "$syncthing_enabled" = "True" ] && $wifi_connected; then
 		start_syncthing_process
-		/mnt/SDCARD/spruce/scripts/syncthing_sync_check.sh --startup
+		/mnt/SDCARD/spruce/scripts/network/syncthing_sync_check.sh --startup
 		flag_add "syncthing_startup_synced" --tmp
 
 	fi
@@ -99,7 +108,7 @@ handle_network_services() {
 
 	# Handle network service disabling
 	if [ "$disable_wifi_in_game" = "True" ] || [ "$disable_net_serv_in_game" = "True" ]; then
-		/mnt/SDCARD/spruce/scripts/networkservices.sh off
+		/mnt/SDCARD/spruce/scripts/network/networkservices.sh off
 
 		if [ "$disable_wifi_in_game" = "True" ]; then
 			# Off without changing the setting; the apply at game exit brings it back

@@ -32,7 +32,6 @@ class XuMiniM(DarkmossDevice):
     # The 4.4 kernel lists the panel colour properties but rejects every set.
     PANEL_CALIBRATION = False
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
-    BATTERYPLUS_PERCENT_FILE = "/tmp/battery.percent"
     # The rk3326 base has no softvol Master and a 0-100 backlight: use the py-ui-config scripts.
     VOLUME_BACKLIGHT_CMDS = True
 

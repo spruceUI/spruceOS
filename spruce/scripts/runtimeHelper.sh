@@ -12,6 +12,36 @@ DEVICE_INIT_WAIT_PIDS=""
 # Pids of device_init jobs holding the display.
 DEVICE_INIT_DISPLAY_PIDS=""
 
+# POSIX shared memory. PortMaster's dialog mode (autoinstall, and every port
+# that shows a message through PortMasterDialog.txt) puts its FIFOs under
+# /dev/shm/portmaster, and stock TrimUI firmware has no /dev/shm at all:
+# mkdir fails on the missing parent, pugwash dies on mkfifo, and the
+# autoinstall silently does nothing. /dev is devtmpfs, so a tmpfs can be
+# mounted there each boot; nothing on the device's flash is touched. No-op
+# on firmware that already mounts one (Flip, Debian bases).
+ensure_dev_fd() {
+    for _pair in fd:fd stdin:fd/0 stdout:fd/1 stderr:fd/2; do
+        _dev="/dev/${_pair%%:*}"
+        [ -e "$_dev" ] && continue
+        ln -s "/proc/self/${_pair#*:}" "$_dev" 2>/dev/null \
+            && log_message "Linked $_dev (stock firmware had none)" \
+            || log_message "Could not create $_dev"
+    done
+}
+
+ensure_dev_shm() {
+    if [ -d /dev/shm ] && grep -q ' /dev/shm ' /proc/mounts 2>/dev/null; then
+        return 0
+    fi
+    mkdir -p /dev/shm 2>/dev/null || return 1
+    if mount -t tmpfs -o mode=1777,size=64m tmpfs /dev/shm 2>/dev/null; then
+        log_message "Mounted a tmpfs at /dev/shm (stock firmware had none)"
+    else
+        log_message "Could not mount /dev/shm; PortMaster dialogs will fail"
+        return 1
+    fi
+}
+
 # Waits for the device_init jobs that must finish before the frontend starts; returns 0.
 # With --except-display, the display jobs are left running; the caller's frontend
 # must then wait for the display itself.
@@ -42,8 +72,62 @@ run_sd_card_fix_if_triggered() {
         mkdir -p /tmp/sdfix
         cp /mnt/SDCARD/spruce/scripts/tasks/repairSD.sh /tmp/sdfix/
         chmod 777 /tmp/sdfix/repairSD.sh
-        /tmp/sdfix/repairSD.sh run
+        # Without spruce's library path: a shell started with it can map libraries from the card
+        # and would hold the card it is about to unmount. The repair gets the path as
+        # SDFIX_LD_LIBRARY_PATH and keeps its system folders for its tools.
+        (
+            SDFIX_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+            export SDFIX_LD_LIBRARY_PATH
+            unset LD_LIBRARY_PATH
+            exec /tmp/sdfix/repairSD.sh run
+        )
     fi
+}
+
+manage_ds_bootmenu_stubs() {
+    _show_stubs="$(get_config_value '.menuOptions."Emulator Settings".showDSBootMenuStubs.selected' "True")"
+    _nds_dir="/mnt/SDCARD/Roms/NDS"
+    _ndsi_dir="/mnt/SDCARD/Roms/NDSI"
+    _nds_stub="$_nds_dir/BootMenu.nds"
+    _ndsi_stub="$_ndsi_dir/BootMenuDSi.nds"
+
+    log_message "User preference: show DS firmware boot entries = $_show_stubs" -v
+
+    if [ "$PLATFORM" = "MiyooMini" ]; then
+        _show_stubs="False"
+        log_message "MiyooMini does not have DSperate; hiding DS firmware boot entries." -v
+    fi
+
+    if [ "$_show_stubs" = "False" ]; then
+        rm -f "$_nds_stub" "$_ndsi_stub"
+    else
+        mkdir -p "$_nds_dir" "$_ndsi_dir"
+
+        # if no other NDS files exist, don't create the stub
+        if _nds_other_file="$(find "$_nds_dir" \
+            \( -type d \( -name '.*' -o -path "$_nds_dir/Imgs" \) -prune \) -o \
+            \( -name '.*' -prune \) -o \
+            \( -type f ! -path "$_nds_stub" -print -quit \))"; then
+            if [ -n "$_nds_other_file" ]; then
+                touch "$_nds_stub"
+            else
+                rm -f "$_nds_stub"
+            fi
+        else
+            touch "$_nds_stub" # If find fails, still create the stub
+        fi
+
+        touch "$_ndsi_stub"
+    fi
+
+    _shown_stubs=""
+    [ -f "$_nds_stub" ] && _shown_stubs="BootMenu.nds"
+    if [ -f "$_ndsi_stub" ]; then
+        [ -n "$_shown_stubs" ] && _shown_stubs="$_shown_stubs, "
+        _shown_stubs="${_shown_stubs}BootMenuDSi.nds"
+    fi
+    [ -n "$_shown_stubs" ] || _shown_stubs="neither"
+    log_message "DS firmware boot entries that exist and will be shown: $_shown_stubs"
 }
 
 # Read by PortMaster's device_info.txt. In /tmp because the card moves between devices.
@@ -91,6 +175,13 @@ fetch_release_info() {
 
 check_for_update() {
 
+    # No radio, no network, no check - and none of the three 20-second waits.
+    if ! wifi_available_on_device; then
+        log_message "Update Check: device has no WiFi, skipping."
+        rm -rf "$TMP_DIR"
+        return 1
+    fi
+
     SD_CARD="/mnt/SDCARD"
     OTA_URL="https://spruceui.github.io/OTA/spruce"
     OTA_URL_BACKUP="https://raw.githubusercontent.com/spruceUI/spruceui.github.io/refs/heads/main/OTA/spruce"
@@ -100,17 +191,12 @@ check_for_update() {
     TMP_DIR="$SD_CARD/App/-OTA/check_tmp"
     CONFIG_FILE="$SD_CARD/App/-OTA/config.json"
 
-    should_check="$(get_config_value '.menuOptions."System Settings".checkForUpdates.selected' "True")"
-    if [ "$should_check" = "False" ]; then
-        return 1
-    fi
-
     timestamp_file="$SD_CARD/App/-OTA/last_check.timestamp"
     check_interval=86400  # 24 hours in seconds
-    # Developer/tester devices follow nightlies, which can be rebuilt several
-    # times a day; waiting 24 h after a prompt would flag a rebuild a day
-    # late. Check on every boot instead (one small fetch with mirrors).
-    if flag_check "developer_mode" || flag_check "tester_mode"; then
+    # Nightlies can be rebuilt several times a day; waiting 24 h after a prompt
+    # would flag a rebuild a day late. Check on every boot instead (one small
+    # fetch with mirrors).
+    if [ "$(get_config_value '.menuOptions."Network Settings".releaseChannel.selected' "Stable")" = "Nightly" ]; then
         check_interval=0
     fi
 
@@ -136,12 +222,6 @@ check_for_update() {
     # Update timestamp for next check
     date +%s > "$timestamp_file"
 
-    # No radio, no network, no check - and none of the three 20-second waits.
-    if ! wifi_available_on_device; then
-        log_message "Update Check: device has no WiFi, skipping."
-        rm -rf "$TMP_DIR"
-        return 1
-    fi
 
     # Check for Wi-Fi enabled status first
     wifi_enabled=$(awk '/wifi/ { gsub(/[,]/,"",$2); print $2}' "$SYSTEM_JSON")
@@ -264,12 +344,12 @@ check_for_update() {
             flag_add "update_prompted"
             # Line 1: version prompted; line 2: its build (nightly commit), so
             # a same-day rebuild of an already prompted nightly prompts again.
-            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
-            echo "$TARGET_VERSION" > "$(flag_path update_available)"
+            printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$FLAGS_DIR/update_prompted.lock"
+            echo "$TARGET_VERSION" > "$FLAGS_DIR/update_available.lock"
         else
             # Get version (and build) from previous prompt
-            prompted_version=$(head -n 1 "$(flag_path update_prompted)" | tr -d '[:space:]')
-            prompted_build=$(sed -n '2p' "$(flag_path update_prompted)" | tr -d '[:space:]')
+            prompted_version=$(head -n 1 "$FLAGS_DIR/update_prompted.lock" | tr -d '[:space:]')
+            prompted_build=$(sed -n '2p' "$FLAGS_DIR/update_prompted.lock" | tr -d '[:space:]')
 
             # Compare versions (using same logic as above)
             prompted_base_version=$(echo "$prompted_version" | cut -d'-' -f1)
@@ -289,8 +369,8 @@ check_for_update() {
             if [ $newer_than_prompted -eq 1 ]; then
                 # New version (or build) is newer than previously prompted
                 flag_add "update_available"
-                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$(flag_path update_prompted)"
-                echo "$TARGET_VERSION" > "$(flag_path update_available)"
+                printf '%s\n%s\n' "$TARGET_VERSION" "$target_build" > "$FLAGS_DIR/update_prompted.lock"
+                echo "$TARGET_VERSION" > "$FLAGS_DIR/update_available.lock"
             fi
         fi
         return 0
@@ -355,44 +435,6 @@ check_and_hide_update_app() {
     fi
 }
 
-# networkservices.sh starts SSH and Samba once Wi-Fi connects; this task also covers
-# a network it does not wait for (eth0, Wi-Fi off). It polls slowly: each
-# network_is_connected pass forks about seven processes, and polling every 0.2 s
-# competed with the first menu frame for the CPU.
-DEV_MODE_FAST_POLLS=30		# 30 x 2 s = first minute
-DEV_MODE_FAST_INTERVAL=2
-DEV_MODE_SLOW_INTERVAL=10
-
-developer_mode_task() {
-    if flag_check "developer_mode"; then
-        samba_enabled="$(get_config_value '.menuOptions."Network Settings".enableSamba.selected' "False")"
-        ssh_enabled="$(get_config_value '.menuOptions."Network Settings".enableSSH.selected' "False")"
-        ssh_service=$(get_ssh_service_name)
-
-        if [ "$samba_enabled" = "True" ] || [ "$ssh_enabled" = "True" ]; then
-            _dev_polls=0
-            while ! network_is_connected true; do
-                if [ "$_dev_polls" -lt "$DEV_MODE_FAST_POLLS" ]; then
-                    sleep "$DEV_MODE_FAST_INTERVAL"
-                    _dev_polls=$((_dev_polls + 1))
-                else
-                    sleep "$DEV_MODE_SLOW_INTERVAL"
-                fi
-            done
-
-            if [ "$samba_enabled" = "True" ] && ! pgrep "smbd" > /dev/null; then
-                log_message "Dev Mode: Samba starting..."
-                start_samba_process
-            fi
-
-            if [ "$ssh_enabled" = "True" ] && ! pgrep "$ssh_service" > /dev/null; then
-                log_message "Dev Mode: $ssh_service starting..."
-                start_ssh_process
-            fi
-        fi
-    fi
-}
-
 rotate_logs_background() {
         # Rotate logs spruce5.log -> spruce4.log -> spruce3.log -> etc.
         i=$((max_log_files - 1))
@@ -449,12 +491,14 @@ unstage_archive() {
 # drawn. preCmd unpacks after it in the same foreground run, so moving any of
 # them there is a deliberate boot-timing change, not a cleanup.
 unstage_archives_wanted() {
-    # The Mini V4 and Mini Flip (752x560) have always taken the 640x480 overlays
-    if { [ "$DISPLAY_WIDTH" = "640" ] && [ "$DISPLAY_HEIGHT" = "480" ]; } ||
-        { [ "$DISPLAY_WIDTH" = "752" ] && [ "$DISPLAY_HEIGHT" = "560" ]; }; then
+
+    # Ready resolution-specific overlays for the present device.
+    _suffix="${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}"
+    unstage_archive "overlays_${_suffix}".7z "preMenu"
+
+    # The Mini V4 and Mini Flip (752x560) have historically taken the 640x480 overlays
+    if [ "$DISPLAY_WIDTH" = "752" ] && [ "$DISPLAY_HEIGHT" = "560" ]; then
         unstage_archive "overlays_640x480.7z" "preMenu"
-    elif [ "$DISPLAY_WIDTH" = "1024" ] && [ "$DISPLAY_HEIGHT" = "768" ]; then
-        unstage_archive "overlays_1024x768.7z" "preMenu"
     fi
     if [ "$DEVICE_CAN_USE_EXTERNAL_CONTROLLER" = "true" ]; then
         unstage_archive "autoconfig.7z" "preMenu"
@@ -648,10 +692,12 @@ set_up_boot_action() {
                 ;;
             "NDS firmware")
                 log_message "Attempting to boot into Nintendo DS firmware via DSperate BootMenu.nds"
+                touch "/mnt/SDCARD/Roms/NDS/BootMenu.nds"
                 echo "\"/mnt/SDCARD/Emu/NDS/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDS/BootMenu.nds\"" > /tmp/cmd_to_run.sh
                 ;;
             "DSi firmware")
                 log_message "Attempting to boot into Nintendo DSi firmware via DSperate BootMenuDSi.nds"
+                touch "/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds"
                 echo "\"/mnt/SDCARD/Emu/NDSI/../../spruce/scripts/emu/standard_launch.sh\" \"/mnt/SDCARD/Roms/NDSI/BootMenuDSi.nds\"" > /tmp/cmd_to_run.sh
                 ;;
             "PPSSPP")

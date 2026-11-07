@@ -23,6 +23,7 @@ from cheevos.ui.pyui.text import (
     fit_with_tail,
     font_purpose,
     text_width,
+    wrap,
 )
 
 __all__ = [
@@ -183,35 +184,6 @@ def text(
     color = accent_color() if accent else Theme.text_color(font)
     width, height = Display.render_text(displayable(value, role), x, y, color, font, _mode(align))
     return int(width), int(height)
-
-
-def wrap(value: str, role: Text, max_width: int) -> list[str]:
-    """Split ``value`` into lines that fit ``max_width`` in the font for ``role``.
-
-    Args:
-        value: Text to wrap (existing newlines are kept).
-        role: Text role.
-        max_width: Maximum line width in pixels.
-
-    Returns:
-        Lines in order (at least one).
-    """
-    from display.display import Display
-
-    font = font_purpose(role)
-    lines: list[str] = []
-    for paragraph in displayable(value, role).splitlines() or [""]:
-        current = ""
-        for word in paragraph.split():
-            candidate = f"{current} {word}".strip()
-            width, _ = Display.get_text_dimensions(font, candidate)
-            if current and width > max_width:
-                lines.append(current)
-                current = word
-            else:
-                current = candidate
-        lines.append(current)
-    return lines
 
 
 def line_height(role: Text) -> int:

@@ -27,7 +27,8 @@ generate_cues() {
     find $SYSTEM -maxdepth 1 -type f -iname "*_cache[6-7].db" -exec rm -f {} +
 }
 
-display --icon "$ICON_PATH" -t "Generating M3Us... this shouldn't take longer than a few seconds"
+start_pyui_message_writer
+display_image_and_text "$ICON_PATH" "Generating M3Us... this shouldn't take longer than a few seconds."
 
 generate_cues # generate any missing cue sheets
 
@@ -52,7 +53,7 @@ if [ -d "$FULLPATH" ]; then
     find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "*([Dd][Ii][Ss][KkCc] 1) *.*[$DISC_EXTS]" | while read -r line; do
         FILENAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@ ([Dd][Ii][Ss][KkCc] 1)@@g')"
         DIRNAME=".${FILENAME%"${FILENAME##*[![:space:]]}"}" # remove spaces at the end
-        SEARCH_NAME="$(echo "${FILENAME}" | sed 's@([Dd][Ii][Ss][KkCc] 1)@([Dd][Ii][Ss][KkCc] ?)@g')"
+        SEARCH_NAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@([Dd][Ii][Ss][KkCc] 1)@([Dd][Ii][Ss][KkCc] ?)@g')"
 
         sync
         mkdir -p "$DIRNAME"
@@ -81,5 +82,6 @@ cd "$ROMS_DIR"
 find $SYSTEM -maxdepth 1 -type f -iname "*_cache[6-7].db" -exec rm -f {} +
 sync
 
-display_kill
+sleep 2
+stop_pyui_message_writer
 auto_regen_tmp_update

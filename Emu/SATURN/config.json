@@ -8,7 +8,8 @@
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
-      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh"
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh",
+      "launchInPyUI": true
     }
   ],
   "menuOptions": {
@@ -110,7 +111,7 @@
         "yabasanshiro-standalone-hle"
       ],
       "devices": [
-        "MAGICX_A133P"
+        "OAKMOSS_A133P"
       ],
       "selected": "yabasanshiro_generic_libretro",
       "overrides": {}

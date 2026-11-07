@@ -14,8 +14,6 @@ CORE="PPSSPP-SA"
 
 cd $EMU_DIR
 
-move_dotconfig_into_place
-
 run_ppsspp
 
 auto_regen_tmp_update

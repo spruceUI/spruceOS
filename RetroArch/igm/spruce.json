@@ -46,16 +46,28 @@
     "title":       "spruceOS Menu",
     "auto":        "Auto",
     "slot":        "Slot",
+    "max":         "Max",
+    "on":          "On",
+    "off":         "Off",
     "arrow_left":  "<",
     "arrow_right": ">"
   },
 
   "labels": {
-    "resume":    "Resume",
-    "save":      "Save",
-    "load":      "Load",
-    "reset":     "Reset",
-    "retroarch": "RetroArch Menu",
-    "exit":      "Exit Game"
+    "resume":     "Resume",
+    "save":       "Save",
+    "load":       "Load",
+    "ff_speed":   "FF Speed",
+    "reset":      "Reset",
+    "retroarch":  "RetroArch Menu",
+    "exit":       "Exit Game",
+    "disc":       "Disc",
+    "screenshot": "Screenshot",
+    "undo_save":  "Undo Save",
+    "undo_load":  "Undo Load",
+    "show_fps":   "Show FPS",
+    "mute":       "Mute",
+    "rewind":     "Rewind",
+    "shader":     "Shader"
   }
 }

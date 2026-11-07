@@ -29,6 +29,8 @@ class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
     MIYOO_STOCK_CONFIG_LOCATION = "/userdata/system.json"
+    # Same levels as the shell hotkeys (Flip.cfg SYSTEM_BACKLIGHT_LEVEL_0..10)
+    BACKLIGHT_TABLE = [1, 20, 35, 45, 60, 80, 100, 120, 150, 180, 220]
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
@@ -113,6 +115,7 @@ class MiyooFlip(MiyooDevice):
             Display.volume_changed(new_volume)
 
     def startup_init(self, include_wifi=True):
+        self._save_levels_as_numbers()
         self._set_lumination_to_config()
         self._set_contrast_to_config()
         self._set_saturation_to_config()
@@ -193,13 +196,25 @@ class MiyooFlip(MiyooDevice):
         else:
             return 1
     
+    # Hotkeys from fd492bb83 saved these as JSON strings; PyUI's +/- and dim need ints
+    def _save_levels_as_numbers(self):
+        cfg = self.system_config
+        backlight, contrast = cfg.backlight, cfg.contrast
+        if isinstance(backlight, str):
+            cfg.set_backlight(max(0, min(10, int(backlight) if backlight.isdigit() else 5)))
+        if isinstance(contrast, str):
+            cfg.set_contrast(max(1, min(20, int(contrast) if contrast.isdigit() else 10)))
+        if isinstance(backlight, str) or isinstance(contrast, str):
+            cfg.save_config()
+
     def _set_lumination_to_config(self):
+        level = max(0, min(10, int(self.system_config.backlight)))
         with open("/sys/class/backlight/backlight/brightness", "w") as f:
-            f.write(str(self.map_backlight_from_10_to_full_255(self.system_config.backlight)))
+            f.write(str(self.BACKLIGHT_TABLE[level]))
     
     def _set_contrast_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 
-                                     "179:contrast:"+str(self.system_config.contrast * 5)])
+                                     "179:contrast:"+str(int(self.system_config.contrast) * 5)])
     
     def _set_saturation_to_config(self):
         ProcessRunner.run(["modetest", "-M", "rockchip", "-a", "-w", 

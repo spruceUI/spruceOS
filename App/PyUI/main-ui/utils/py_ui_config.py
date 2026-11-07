@@ -192,14 +192,57 @@ class PyUiConfig:
         cls._data["gameSystemSortNamePrio"] = value
         cls.save()
 
+    # The language belongs to whoever owns the card, and this file is replaced
+    # on a full update, so when "sharedSystemConfig" names the card-wide file
+    # (where the timezone lives too) the language is kept there. Shell scripts
+    # read it from that file to follow the UI language.
+    LANGUAGE_KEY = "language"
+
+    @classmethod
+    def _read_shared_config(cls):
+        path = cls.get("sharedSystemConfig")
+        if not path:
+            return None
+        try:
+            with open(path) as f:
+                data = json.load(f)
+            return data if isinstance(data, dict) else {}
+        except (OSError, json.JSONDecodeError):
+            return {}
+
     @classmethod
     def get_language(cls):
-        return cls.get("language","English")
+        shared = cls._read_shared_config()
+        if shared and shared.get(cls.LANGUAGE_KEY):
+            return shared[cls.LANGUAGE_KEY]
+        language = cls.get(cls.LANGUAGE_KEY)
+        if shared is not None and language:
+            # Chosen before the language moved card-wide: adopt it.
+            cls._write_shared_language(shared, language)
+        return language or "English"
 
     @classmethod
     def set_language(cls, language):
-        cls._data["language"] = language
+        cls._data[cls.LANGUAGE_KEY] = language
         cls.save()
+        shared = cls._read_shared_config()
+        if shared is not None:
+            cls._write_shared_language(shared, language)
+
+    @classmethod
+    def _write_shared_language(cls, shared, language):
+        shared[cls.LANGUAGE_KEY] = language
+        path = cls.get("sharedSystemConfig")
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            tmp_path = f"{path}.tmp"
+            with open(tmp_path, 'w') as f:
+                json.dump(shared, f, indent=4)
+                f.flush()
+                os.fsync(f.fileno())
+            os.replace(tmp_path, path)
+        except OSError as e:
+            PyUiLogger.get_logger().error(f"Could not write {path}: {e}")
 
     @classmethod
     def include_stock_os_launch_option(cls):
@@ -254,6 +297,18 @@ class PyUiConfig:
         return cls.get("longTaskCmd",None)
 
     @classmethod
+    def get_launch_in_pyui_cmd(cls):
+        return cls.get("launchInPyUiCmd",None)
+
+    @classmethod
+    def get_verbose_logging_setting(cls):
+        return cls.get("verboseLoggingSetting", None)
+
+    @classmethod
+    def get_realtime_message_port(cls):
+        return cls.get("realtimeMessagePort",None)
+
+    @classmethod
     def mimic_miyoo_mainui_mode(cls):
         return cls.get("mimicMiyooMainUiMode",False)
 
@@ -272,6 +327,14 @@ class PyUiConfig:
     @classmethod
     def get_backlight_cmd(cls):
         return cls.get("backlightCmd",None)
+
+    @classmethod
+    def get_pad_restarted_cmd(cls):
+        return cls.get("padRestartedCmd",None)
+
+    @classmethod
+    def get_input_daemon_restart_cmd(cls):
+        return cls.get("inputDaemonRestartCmd",None)
 
     @classmethod
     def get_volume_cmd(cls):

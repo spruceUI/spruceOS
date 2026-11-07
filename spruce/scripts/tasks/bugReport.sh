@@ -184,6 +184,16 @@ redact_ip6() {
     echo "--- /proc/mi_modules/common/pq_info ---"
     head -c 2000 /proc/mi_modules/common/pq_info 2>/dev/null || echo "  <unreadable>"
 
+    if [ "$PLATFORM" = "SmartProS" ]; then
+        echo
+        echo "==== panel timing (dsi1c 0x055D0500 and tcon50 0x0ABA000C = 60 Hz) ===="
+        grep -o 'lcd=[^ ]*' /proc/cmdline
+        for _reg in dsi18:0x05508018 dsi1c:0x0550801C tcon44:0x05502044 tcon48:0x05502048 tcon4c:0x0550204C tcon50:0x05502050 tcon54:0x05502054; do
+            echo "${_reg%%:*} = $(devmem "${_reg#*:}" 32 2>&1)"
+        done
+        dmesg 2>/dev/null | grep -E 'lcd panel init|sw en=' | tail -6
+    fi
+
     echo
     echo "==== kernel log tail (may show rejected display commands) ===="
     # Redacted like every other dump: the radio driver prints both the adapter
@@ -636,7 +646,7 @@ if upload_report; then
     log_message "bugReport.sh: uploaded as $report_code"
 
     gh_qr_code="$(qr_code -t "https://github.com/spruceUI/spruceOS/issues/new?template=bug_report.yml&report-code=$report_code&version=$SPRUCE_VERSION")"
-    display_image_and_text "$gh_qr_code" 50 5 "Bug report sent. Your code is: SPR-MENR7V\nScan the QR code to create a GitHub issue or use the report code in our Discord to receive support.\n\nPress A to continue." 58
+    display_image_and_text "$gh_qr_code" 50 5 "Bug report sent. Your code is: $report_code\nScan the QR code to create a GitHub issue or use the report code in our Discord to receive support.\n\nPress A to continue." 58
 else
     log_and_display_message "The bug report could not be sent.\n\nPlease post bug_report.7z from your SD card in a GitHub issue or in our Discord to receive support.\n\nPress A to continue."
 fi

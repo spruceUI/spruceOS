@@ -229,41 +229,6 @@ def killall(*names, signal="-9"):
         ])
 
 
-def flag_check(name):
-    return any(
-        os.path.exists(path)
-        for path in (
-            f"{FLAGS_DIR}/{name}",
-            f"{FLAGS_DIR}/{name}.lock",
-            f"/tmp/{name}.lock"
-        )
-    )
-
-
-def flag_add(name, tmp=False):
-    dest = "/tmp" if tmp else FLAGS_DIR
-
-    os.makedirs(
-        dest,
-        exist_ok=True
-    )
-
-    Path(
-        f"{dest}/{name}.lock"
-    ).touch()
-
-
-def flag_remove(name):
-    for path in (
-        f"{FLAGS_DIR}/{name}.lock",
-        f"/tmp/{name}.lock"
-    ):
-        try:
-            os.remove(path)
-        except OSError:
-            pass
-
-
 def get_config_value(
     key_path,
     default=""
@@ -1626,50 +1591,8 @@ def run_restore():
 
 
 # ---------------------------------------------------------------------------
-# Version / flags
+# Version
 # ---------------------------------------------------------------------------
-
-def restore_flags(
-    developer_mode,
-    tester_mode
-):
-
-    if developer_mode:
-
-        os.makedirs(
-            FLAGS_DIR,
-            exist_ok=True
-        )
-
-        flag_add(
-            "developer_mode"
-        )
-
-    if tester_mode:
-
-        flag_remove(
-            "developer_mode"
-        )
-
-        flag_add(
-            "tester_mode"
-        )
-
-
-def get_update_channel():
-
-    if flag_check(
-        "developer_mode"
-    ):
-        return "nightly"
-
-    if flag_check(
-        "tester_mode"
-    ):
-        return "nightly"
-
-    return "stable"
-
 
 # ---------------------------------------------------------------------------
 # Archive cleanup
@@ -1975,18 +1898,6 @@ def main():
             )
 
     # ------------------------------------------------------------------
-    # Preserve flags before installation
-    # ------------------------------------------------------------------
-
-    developer_mode = flag_check(
-        "developer_mode"
-    )
-
-    tester_mode = flag_check(
-        "tester_mode"
-    )
-
-    # ------------------------------------------------------------------
     # Stop services before touching the installation
     # ------------------------------------------------------------------
 
@@ -2278,13 +2189,8 @@ def main():
     ])
 
     # ------------------------------------------------------------------
-    # Restore flags / remember the nightly base
+    # Remember the nightly base
     # ------------------------------------------------------------------
-
-    restore_flags(
-        developer_mode,
-        tester_mode
-    )
 
     record_nightly_base(
         updates

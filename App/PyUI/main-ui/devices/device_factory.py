@@ -71,6 +71,9 @@ def initialize_device(device, main_ui_mode):
     elif "RG353M" == device:
         from devices.darkmoss.rg353m import Rg353m
         Device.init(Rg353m(device))
+    elif "E5PLUS" == device:
+        from devices.darkmoss.e5plus import E5Plus
+        Device.init(E5Plus(device))
     elif "RGB30" == device:
         from devices.darkmoss.rgb30 import Rgb30
         Device.init(Rgb30(device))
@@ -92,18 +95,12 @@ def initialize_device(device, main_ui_mode):
     elif "POWKIDDY_V10" == device:
         from devices.darkmoss.v10 import V10
         Device.init(V10(device))
-    elif "MAGICX_ZERO28" == device or "SPRUCE_MAGICX_ZERO28" == device:
-        from devices.magicx.magicx_zero28 import MagicXZero28
-        Device.init(MagicXZero28(device, main_ui_mode))
-    elif "MAGICX_ZERO40" == device or "SPRUCE_MAGICX_ZERO40" == device:
-        from devices.magicx.magicx_zero40 import MagicXZero40
-        Device.init(MagicXZero40(device, main_ui_mode))
-    elif "MAGICX_XU20" == device or "SPRUCE_MAGICX_XU20" == device:
-        from devices.magicx.magicx_xu20 import MagicXXU20
-        Device.init(MagicXXU20(device, main_ui_mode))
     elif "GKD_PIXEL2" == device:
         from devices.gkd.gkd_pixel2 import GKDPixel2
         Device.init(GKDPixel2(device, main_ui_mode))
+    elif "SPRUCE" == device:
+        from devices.env.spruce.spruce_device import SpruceDevice
+        Device.init(SpruceDevice(main_ui_mode))
     elif "DESKTOP" == device:
         # A window on a Mac or PC, for development: see App/PyUI/docs/desktop_readme.txt
         from devices.desktop.desktop_device import DesktopDevice

@@ -157,7 +157,6 @@ class GKDDevice(DeviceCommon):
     def is_wifi_enabled(self):
         return self.system_config.is_wifi_enabled()
 
-    @throttle.limit_refresh(10)
     def get_ip_addr_text(self):
         import psutil
         if self.is_wifi_enabled():
@@ -306,3 +305,6 @@ class GKDDevice(DeviceCommon):
     @throttle.limit_refresh(1)
     def post_present_operations(self):
         self.clear_display_cache_if_memory_full("MemAvailable", 100)
+
+    def get_image_for_activity(self, activity):
+        return MiyooTrimCommon.get_image_for_activity(activity)

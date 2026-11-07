@@ -16,6 +16,7 @@ class TopBar:
         self.selected_tab = "Games"
         self.top_bar_h = 0
         self.top_bar_w = 0
+        self.tab_touch_bounds = []
 
     def render_top_bar(self, title, hide_top_bar_icons = False) :
         if(Theme.skip_main_menu()):
@@ -30,17 +31,24 @@ class TopBar:
         center_of_bar = self.top_bar_h //2
 
         x_offset = Theme.get_top_bar_initial_x_offset()
+        self.tab_touch_bounds = []
 
         games_color = Theme.text_color_selected(FontPurpose.GRID_ONE_ROW) if "Game" == self.selected_tab else Theme.text_color(FontPurpose.GRID_ONE_ROW)
         apps_color = Theme.text_color_selected(FontPurpose.GRID_ONE_ROW) if "App" == self.selected_tab else Theme.text_color(FontPurpose.GRID_ONE_ROW)
         settings_color = Theme.text_color_selected(FontPurpose.GRID_ONE_ROW) if "Setting" == self.selected_tab else Theme.text_color(FontPurpose.GRID_ONE_ROW)
         
         text_padding = 20 * Theme._default_multiplier
+        label_x = x_offset
         w, h = Display.render_text(Language.games(),x_offset, center_of_bar,  games_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        self.tab_touch_bounds.append(("Game", label_x, label_x + w))
         x_offset += w +text_padding
+        label_x = x_offset
         w, h = Display.render_text(Language.apps(),x_offset, center_of_bar,  apps_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        self.tab_touch_bounds.append(("App", label_x, label_x + w))
         x_offset += w +text_padding
+        label_x = x_offset
         w, h = Display.render_text(Language.settings(),x_offset, center_of_bar,  settings_color, FontPurpose.GRID_ONE_ROW, RenderMode.MIDDLE_LEFT_ALIGNED)
+        self.tab_touch_bounds.append(("Setting", label_x, label_x + w))
         x_offset += w +text_padding
 
         battery_percent = Device.get_device().get_battery_percent()
@@ -173,6 +181,15 @@ class TopBar:
 
     def get_top_bar_height(self):
         return self.top_bar_h
+
+    def touch_tab_at(self, point):
+        if point is None or not 0 <= point[1] < self.top_bar_h:
+            return None
+        x = point[0]
+        for tab, left, right in self.tab_touch_bounds:
+            if left <= x < right:
+                return tab
+        return None
     
     def get_current_title(self):
         return self.title

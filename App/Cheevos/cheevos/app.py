@@ -1,11 +1,12 @@
 """Composition root: wire credentials, caches, sync, lazy media and screens, then run home.
 
-Shared by the device entry point (``cheevos.__main__``) and the desktop runner, which differ
-only in the :class:`AppEnvironment` they pass (real HTTPS vs. recorded fixtures).
+Run by :func:`cheevos.native.session`, inside PyUI on a device and in the desktop runner,
+which differ only in the :class:`AppEnvironment` they pass (real HTTPS vs. recorded fixtures).
 """
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import shutil
 import threading
@@ -30,6 +31,7 @@ from cheevos.core.sync.detail_fetch import DetailFetcher, DetailSession
 from cheevos.core.sync.lazy_media import LazyMediaFetcher, MediaSession
 from cheevos.platform.paths import Paths
 from cheevos.ui.context import AppContext
+from cheevos.ui.language import LANG_DIR
 from cheevos.ui.media import MediaResolver
 from cheevos.ui.pyui import generated, primitives, redraw, status_bar, title_bar, visible_images
 from cheevos.ui.screens.home import Home
@@ -111,6 +113,9 @@ class AppEnvironment:
         auto_sync: Overrides the "sync when the app opens" setting when not ``None``.
         api_interval: Seconds between Web API requests, shared by every client (recorded
             fixtures need no pacing).
+        language: The app's language, as PyUI names its language files; ``None`` follows
+            Spruce's setting.
+        lang_dir: Where the translations are.
     """
 
     paths: Paths
@@ -119,6 +124,8 @@ class AppEnvironment:
     clock: Callable[[], float] = network_clock.now
     auto_sync: bool | None = None
     api_interval: float = API_INTERVAL
+    language: str | None = None
+    lang_dir: Path = LANG_DIR
 
 
 def _icons_dir(*, bar: bool = False) -> Path:
@@ -380,6 +387,8 @@ def run(*, started_at: float, env: AppEnvironment, game_id: int | None = None) -
         # Extracted and enlarged images live in RAM (tmpfs) on devices; give it back.
         shutil.rmtree(paths.media_scratch, ignore_errors=True)
         shutil.rmtree(paths.scaled_scratch, ignore_errors=True)
+        with contextlib.suppress(OSError):  # kept if anything else is in it
+            paths.scratch.rmdir()
 
 
 def _session_bar(ctx: AppContext, icons: Path, game_id: int | None) -> SyncBar:

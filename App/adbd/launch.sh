@@ -8,7 +8,7 @@ if pidof adbd >/dev/null 2>&1; then
 fi
 
 # WiFi comes up as the saved setting says; adbd is network ADB, so it needs WiFi on
-sh /mnt/SDCARD/spruce/scripts/wifi.sh apply --wait
+sh /mnt/SDCARD/spruce/scripts/network/wifi.sh apply --wait
 
 # surgical strike to nop /etc/profile
 # because it brings up the entire system again

@@ -24,7 +24,7 @@ log_message "menuButton.sh: menu button is now ${1:-unset}, restarting menubutto
     WATCHDOG="/mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh"
 
     # Shared with the boot launcher (utils/watchdog_launcher.sh, reachable here
-    # because helperFunctions.sh sources the platform's device_functions file).
+    # because helperFunctions.sh sources the platform's ${PLATFORM}.sh file).
     # It kills the watchdog and the getevent it owns.
     stop_running_watchdog "$WATCHDOG"
 

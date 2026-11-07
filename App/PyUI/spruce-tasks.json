@@ -1,13 +1,13 @@
 {
+  "Bug report": "/mnt/SDCARD/spruce/scripts/tasks/bugReport.sh",
+  "Clean up macOS dotfiles": "/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh",
+  "Clear all Recents": "/mnt/SDCARD/spruce/scripts/tasks/clearRecents.sh",
+  "Clear all Favorites": "/mnt/SDCARD/spruce/scripts/tasks/clearFavorites.sh",
   "Forget all WiFi networks": "/mnt/SDCARD/spruce/scripts/tasks/clearwifi.sh",
   "Forget all Bluetooth devices": "/mnt/SDCARD/spruce/scripts/tasks/clearbluetooth.sh",
   "Reauthorize PPSSPP cheevos": "/mnt/SDCARD/spruce/scripts/tasks/fetchPPSSPPauth.sh",
-  "Clean up macOS dotfiles": "/mnt/SDCARD/spruce/scripts/tasks/deleteMacFiles.sh",
   "Repair SD Card": "/mnt/SDCARD/spruce/scripts/tasks/repairSD.sh",
-  "Bug report": "/mnt/SDCARD/spruce/scripts/tasks/bugReport.sh",
   "Scan ScummVM games": "/mnt/SDCARD/spruce/scripts/tasks/scanScummVM.sh",
-  "Clear all Recents": "/mnt/SDCARD/spruce/scripts/tasks/clearRecents.sh",
-  "Clear all Favorites": "/mnt/SDCARD/spruce/scripts/tasks/clearFavorites.sh",
   "Emulator Reset Tasks/Reset RetroArch hotkeys": "/mnt/SDCARD/spruce/scripts/tasks/resetRAHotkeys.sh",
   "Emulator Reset Tasks/Reset RetroArch config": "/mnt/SDCARD/spruce/scripts/tasks/resetRA.sh",
   "Emulator Reset Tasks/Reset AdvanceMAME config": "/mnt/SDCARD/spruce/scripts/tasks/resetAdvMAME.sh",
@@ -16,7 +16,6 @@
   "Emulator Reset Tasks/Reset DSperate config": "/mnt/SDCARD/spruce/scripts/tasks/resetDSperate.sh",
   "Emulator Reset Tasks/Reset Flycast config": "/mnt/SDCARD/spruce/scripts/tasks/resetFlycast.sh",
   "Emulator Reset Tasks/Reset Mupen64plus config": "/mnt/SDCARD/spruce/scripts/tasks/resetMupen.sh",
-  "Emulator Reset Tasks/Reset PCSX ReARMED config": "/mnt/SDCARD/spruce/scripts/tasks/resetPCSXR.sh",
   "Emulator Reset Tasks/Reset PICO-8 config": "/mnt/SDCARD/spruce/scripts/tasks/resetPICO8.sh",
   "Emulator Reset Tasks/Reset PPSSPP config": "/mnt/SDCARD/spruce/scripts/tasks/resetPPSSPP.sh",
   "Emulator Reset Tasks/Reset ScummVM config": "/mnt/SDCARD/spruce/scripts/tasks/resetScummVM.sh",
@@ -28,7 +27,6 @@
     "Reset RetroArch config": "restore spruce default RA config for current device",
     "Reset DraStic config": "restore spruce default DraStic config for current device",
     "Reset DSperate config": "restore spruce default DSperate configs",
-    "Reset PCSX ReARMED config": "restore spruce default PSX standalone config",
     "Reset PPSSPP config": "restore spruce default PPSSPP hotkeys and config",
     "Reset Flycast config": "restore spruce default Flycast standalone config and pad maps for current device",
     "Reset Mupen64plus config": "restore spruce default N64 standalone configs for current device",
@@ -51,7 +49,7 @@
       "TRIMUI_A133P",
       "TRIMUI_SMART_PRO_S",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset DSperate config": [
@@ -61,7 +59,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset PPSSPP config": [
@@ -71,7 +69,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset Flycast config": [
@@ -81,7 +79,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset Mupen64plus config": [
@@ -91,7 +89,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset YabaSanshiro config": [
@@ -101,7 +99,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset AdvanceMAME config": [
@@ -111,7 +109,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ],
     "Emulator Reset Tasks/Reset BigPEmu config": [
@@ -121,7 +119,7 @@
       "MIYOO_A30",
       "GKD_PIXEL2",
       "ANBERNIC_RGXX",
-      "MAGICX_A133P",
+      "OAKMOSS_A133P",
       "DARKMOSS"
     ]
   }

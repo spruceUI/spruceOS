@@ -33,6 +33,7 @@ log_message "---------Starting up---------"
 write_device_info
 
 run_sd_card_fix_if_triggered    # do this before anything else
+manage_ds_bootmenu_stubs
 
 # Extra cores stay up through the boot; the first set_smart offlines them.
 set_performance --no-offline
@@ -130,7 +131,6 @@ else
     log_message "Auto Resume skipped (no save_active flag)"
 fi
 
-developer_mode_task &
 update_checker &
 
 # Set up the boot_to action prior to getting into the principal loop

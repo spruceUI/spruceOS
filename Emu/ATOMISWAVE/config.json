@@ -8,7 +8,8 @@
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
-      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh"
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh",
+      "launchInPyUI": true
     }
   ],
   "menuOptions": {
@@ -54,7 +55,7 @@
         "TRIMUI_A133P",
         "TRIMUI_SMART_PRO_S",
         "ANBERNIC_RGXX",
-        "MAGICX_A133P",
+        "OAKMOSS_A133P",
         "DARKMOSS"
       ],
       "options": [

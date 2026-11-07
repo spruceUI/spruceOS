@@ -51,7 +51,6 @@ while true; do
     set_network_proxy
 
     if [ ! -f /tmp/cmd_to_run.sh ]; then
-        display_kill &          # This is to kill leftover display processes that may be running
         flag_remove "lastgame"  # create in menu flag and remove last played game flag
         flag_add "in_menu" --tmp
         low_battery_check       # Check for the low_battery flag and warn user if so
@@ -120,8 +119,16 @@ while true; do
         touch /tmp/miyoo_inputd/enable_turbo_input 2>/dev/null # Enables turbo buttons in-game for Flip
         chmod a+x /tmp/cmd_to_run.sh
         cp /tmp/cmd_to_run.sh "$FLAGS_DIR/lastgame.lock" # set up autoresume
-        log_message "Running: $(cat /tmp/cmd_to_run.sh)"
-        /tmp/cmd_to_run.sh >/dev/null 2>&1
+        # PyUI sets TZ only in its own environment; games start from here. Only the game
+        # gets it, so this shell's log lines stay in UTC like the rest of the log.
+        _tz="$(jq -r '.timezone // empty' /mnt/SDCARD/Saves/spruce/shared-system.json 2>/dev/null)"
+        [ -n "$_tz" ] && [ -f "/mnt/SDCARD/spruce/zoneinfo/$_tz" ] || _tz=""
+        log_message "Running: $cmd"
+        if [ -n "$_tz" ]; then
+            TZ=":/mnt/SDCARD/spruce/zoneinfo/$_tz" /tmp/cmd_to_run.sh >/dev/null 2>&1
+        else
+            /tmp/cmd_to_run.sh >/dev/null 2>&1
+        fi
         cmd_exit_code=$?
 
         rm /tmp/cmd_to_run.sh
@@ -150,7 +157,7 @@ while true; do
     # Bring up network services and idlemon in case they were disabled in-game or otherwise toggled
     /mnt/SDCARD/spruce/scripts/idle_watchdog.sh &
     if wifi_available_on_device && [ "$(jq -r '.wifi // 0' "$SYSTEM_JSON")" -eq 1 ]; then
-        /mnt/SDCARD/spruce/scripts/networkservices.sh &
+        /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
     fi
 
 done

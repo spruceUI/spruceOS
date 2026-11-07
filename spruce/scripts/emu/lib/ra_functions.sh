@@ -8,6 +8,8 @@
 #   EMU_DIR
 #   ROM_FILE
 #   EMU_JSON_PATH
+#   DISPLAY_WIDTH
+#   DISPLAY_HEIGHT
 #   DISPLAY_ASPECT_RATIO
 #   LD_LIBRARY_PATH
 #
@@ -39,7 +41,7 @@ setup_rumble_env() {
 		"A30")
 			export RUMBLE_TIMED_PATH="/sys/devices/virtual/timed_output/vibrator/enable"
 			;;
-		"SmartPro"|"Brick"|"BrickPro"|"Flip")
+		"SmartPro"|"Brick"|"BrickOakMOSS"|"BrickPro"|"Flip")
 			export RUMBLE_SYSFS_PATH="/sys/class/gpio/${RUMBLE_GPIO}/value"
 			;;
 	esac
@@ -47,7 +49,7 @@ setup_rumble_env() {
 
 prepare_ra_config() {
 
-	export PLATFORM_CFG="/mnt/SDCARD/Saves/ra-configs/retroarch-${PLATFORM}.cfg"
+	export PLATFORM_CFG="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
 
 	if [ ! -f "$PLATFORM_CFG" ]; then
 		log_message "No retroarch-${PLATFORM}.cfg found."
@@ -170,7 +172,43 @@ prepare_ra_config() {
 		*) ;;
 	esac
 
+	# Show RetroArch's menu in the UI language when it has one
+	ra_language="$(ra_language_for_ui_language "$(get_ui_language)")"
+	if [ -n "$ra_language" ]; then
+		TMP_CFG="$(mktemp)"
+		if sed "s|^user_language = .*|user_language = \"$ra_language\"|" "$PLATFORM_CFG" > "$TMP_CFG"; then
+			mv "$TMP_CFG" "$PLATFORM_CFG"
+		else
+			rm -f "$TMP_CFG"
+		fi
+	fi
+
 	sync
+}
+
+# RetroArch's user_language (enum retro_language in libretro.h) for a PyUI
+# language file name; empty when RetroArch has no such language or none is set.
+ra_language_for_ui_language() {
+	case "$1" in
+		"English") echo 0 ;;
+		"Japanese") echo 1 ;;
+		"French") echo 2 ;;
+		"Spanish") echo 3 ;;
+		"German") echo 4 ;;
+		"Italian") echo 5 ;;
+		"Portuguese (BR)") echo 7 ;;
+		"Portuguese (Eur)") echo 8 ;;
+		"Russian") echo 9 ;;
+		"Korean") echo 10 ;;
+		"Chinese (T)") echo 11 ;;
+		"Chinese (S)") echo 12 ;;
+		"Polish") echo 14 ;;
+		"Vietnamese") echo 15 ;;
+		"Greek") echo 17 ;;
+		"Turkish") echo 18 ;;
+		"Ukrainian") echo 26 ;;
+		"Catalan") echo 29 ;;
+	esac
 }
 
 # Anbernic RG XX under BaseOS. The platform cfg carries the sdl2 drivers and
@@ -198,7 +236,7 @@ apply_baseos_ra_overlay() {
 		ra32.*) ;;
 		*) return 0 ;;
 	esac
-	overlay="$RA_DIR/platform/retroarch-$PLATFORM-32bit.cfg"
+	overlay="$(platform_path "$RA_DIR/platform/retroarch-%s-32bit.cfg")"
 	[ -f "$overlay" ] || return 0
 	case "$(get_config_value '.menuOptions."Emulator Settings".raHotkeyMiyoo.selected' "Menu")" in
 		"Select") modifier="$RA_DIR/platform/retroarch-AnbernicRG_XX-32bit-modifier-select.cfg" ;;
@@ -228,6 +266,10 @@ export_spruce_theme_dir() {
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
+	if [ "$CORE" = "pokedaisy" ]; then
+		seed_pokedaisy_ini 2>/dev/null
+		set_pokedaisy_panel
+	fi
 
 	# Apply per-game or system-wide RA build selection. The binary names are
 	# device-overridable because "64-bit" is not always the universal build -
@@ -239,7 +281,9 @@ run_retroarch() {
 		"64-bit") export RA_BIN="${RA_BIN_64:-ra64.universal}" ;;
 	esac
 
-	use_igm="$(get_config_value '.menuOptions."Emulator Settings".raInGameMenu.selected' "True")"
+	use_igm="$(get_config_value '.menuOptions."In-Game Menu Settings".raInGameMenu.selected' "True")"
+	simple_mode="$(jq -r '(.simpleMode // false) or (.kidMode // false)' "$SYSTEM_JSON" 2>/dev/null)"
+	[ "$simple_mode" = "true" ] && use_igm="True"
 
 	# Sync IGM flag file with config setting
 	IGM_FLAG="/mnt/SDCARD/RetroArch/IGM.txt"
@@ -247,6 +291,18 @@ run_retroarch() {
 		touch "$IGM_FLAG"
 	else
 		rm -f "$IGM_FLAG"
+	fi
+	IGM_ITEMS="/mnt/SDCARD/RetroArch/igm_items.json"
+	[ -f "$IGM_ITEMS" ] ||
+		/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh --now
+	# Simple and Kid Mode hide the RetroArch Menu entry; the user's list waits in .simple.
+	if [ "$simple_mode" = "true" ]; then
+		[ -f "$IGM_ITEMS.simple" ] || cp -f "$IGM_ITEMS" "$IGM_ITEMS.simple"
+		_items="$(jq -c '[.items[] | select(. != "retroarch")]' "$IGM_ITEMS.simple" 2>/dev/null)"
+		case "$_items" in ""|"[]") _items='["resume","save","load","reset","exit"]' ;; esac
+		echo "{\"items\":$_items}" > "$IGM_ITEMS.tmp" && mv -f "$IGM_ITEMS.tmp" "$IGM_ITEMS"
+	elif [ -f "$IGM_ITEMS.simple" ]; then
+		mv -f "$IGM_ITEMS.simple" "$IGM_ITEMS"
 	fi
 
 	export_spruce_theme_dir
@@ -446,11 +502,11 @@ ready_architecture_dependent_states() {
     esac
 
     # List of cores to handle
-    for CORE in ${CORE_LIST}; do
+    for CUR_CORE in ${CORE_LIST}; do
 	    # Loop over both STATES and SAVES
         for BASE in "$STATES" "$SAVES"; do
-            DIR_SUFFIX="$BASE/$CORE-$SUFFIX"
-            DIR_BASE="$BASE/$CORE"
+            DIR_SUFFIX="$BASE/$CUR_CORE-$SUFFIX"
+            DIR_BASE="$BASE/$CUR_CORE"
 
             # Only for SAVES: copy existing base files into SUFFIX dir if empty
 			# This is because we used to have a common saves dir, so if it's the
@@ -472,10 +528,10 @@ stash_architecture_dependent_states() {
     SAVES="/mnt/SDCARD/Saves/saves"
 
     # List of cores to handle
-    for CORE in $CORE_LIST; do
+    for CUR_CORE in $CORE_LIST; do
 		for BASE in "$STATES" "$SAVES"; do
-			mkdir -p "$BASE/$CORE-$SUFFIX"
-			umount "$BASE/$CORE"
+			mkdir -p "$BASE/$CUR_CORE-$SUFFIX"
+			umount "$BASE/$CUR_CORE"
         done
     done
 }
@@ -515,7 +571,7 @@ backup_rac_creds_to_spruce_cfg() {
 load_n64_controller_profile() {
 	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
 	case "$profile" in
-		*"Spruce"*) profile_name="Spruce-$PLATFORM" ;;	# the board's own layout
+		*"Spruce"*) profile_name="$(basename "$(platform_path "/mnt/SDCARD/Emu/N64/remaps/Spruce-%s.rmp")" .rmp)" ;;	# the board's own layout
 		*"Classic"*) profile_name="Classic" ;;
 		*"Action"*) profile_name="Action" ;;
 		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected
@@ -572,4 +628,43 @@ save_custom_n64_controller_profile() {
 	esac
 
 	cp -f "${REMAP_DIR}/${core_name}/${core_name}.rmp" "$REMAP_BACKUP"
+}
+
+seed_pokedaisy_ini() {
+	src="/mnt/SDCARD/Emu/GBA/pokedaisy/default.ini"
+	dst="/mnt/SDCARD/Saves/saves/PokeDaisy/pokedaisy/settings.ini"
+	if [ -f "$src" ] && [ ! -f "$dst" ]; then
+		mkdir -p "$(dirname "$dst")" 2>/dev/null
+		cp "$src" "$dst" && log_message "Seeded PokeDaisy settings.ini from $src to $dst"
+	fi
+}
+
+set_pokedaisy_panel() {
+	case "${DISPLAY_WIDTH:-}" in
+		""|*[!0-9]*) log_message "Cannot set PokeDaisy panel: invalid DISPLAY_WIDTH '$DISPLAY_WIDTH'"; return 1 ;;
+	esac
+	case "${DISPLAY_HEIGHT:-}" in
+		""|*[!0-9]*) log_message "Cannot set PokeDaisy panel: invalid DISPLAY_HEIGHT '$DISPLAY_HEIGHT'"; return 1 ;;
+	esac
+
+	opt_file="/mnt/SDCARD/RetroArch/.retroarch/config/PokeDaisy/PokeDaisy.opt"
+	if [ ! -f "$opt_file" ]; then
+		log_message "Cannot set PokeDaisy panel: options file not found at $opt_file"
+		return 1
+	fi
+	panel="${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}"
+	if grep -Fxq "pokedaisy_panel = \"$panel\"" "$opt_file"; then
+		return 0
+	fi
+	if ! grep -q '^pokedaisy_panel[[:space:]]*=' "$opt_file"; then
+		log_message "Cannot set PokeDaisy panel: setting not found in $opt_file"
+		return 1
+	fi
+
+	if sed -i "s|^pokedaisy_panel[[:space:]]*=.*|pokedaisy_panel = \"$panel\"|" "$opt_file"; then
+		log_message "Set PokeDaisy panel to $panel"
+	else
+		log_message "Failed to set PokeDaisy panel in $opt_file"
+		return 1
+	fi
 }

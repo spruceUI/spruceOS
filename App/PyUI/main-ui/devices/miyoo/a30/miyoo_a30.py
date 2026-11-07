@@ -1,6 +1,4 @@
-import fcntl
 from pathlib import Path
-import struct
 import subprocess
 import threading
 from audio.audio_player_delegate_sdl2 import AudioPlayerDelegateSdl2
@@ -28,6 +26,8 @@ class MiyooA30(MiyooDevice):
     OUTPUT_MIXER = 2
     SOUND_DISABLED = 0
     MIYOO_STOCK_CONFIG_LOCATION = "/config/system.json"
+    # Same levels and sysfs file as the shell hotkeys (A30.cfg SYSTEM_BACKLIGHT_LEVEL_0..10)
+    BACKLIGHT_TABLE = [2, 3, 4, 5, 6, 9, 15, 55, 120, 190, 255]
 
     def __init__(self, device_name, main_ui_mode):
         self.device_name = device_name
@@ -74,6 +74,7 @@ class MiyooA30(MiyooDevice):
 
 
     def startup_init(self, include_wifi=True):
+        self._save_levels_as_numbers()
         self._set_lumination_to_config()
         self._set_screen_settings_to_config()
         self.init_gpio()
@@ -142,22 +143,20 @@ class MiyooA30(MiyooDevice):
         else:
             return 1
     
+    # Hotkeys from fd492bb83 saved the level as a JSON string; PyUI's +/- and dim need an int
+    def _save_levels_as_numbers(self):
+        backlight = self.system_config.backlight
+        if isinstance(backlight, str):
+            self.system_config.set_backlight(max(0, min(10, int(backlight) if backlight.isdigit() else 5)))
+            self.system_config.save_config()
+
     def _set_lumination_to_config(self):
-        DISP_LCD_SET_BRIGHTNESS = 0x102
+        level = max(0, min(10, int(self.system_config.backlight)))
         try:
-            fd = os.open("/dev/disp", os.O_RDWR)
+            with open("/sys/devices/virtual/disp/disp/attr/lcdbl", "w") as f:
+                f.write(str(self.BACKLIGHT_TABLE[level]))
         except OSError as e:
-            PyUiLogger.get_logger().warning(f"Failed to open /dev/disp: {e}")
-            return
-
-        param = struct.pack('LLLL', 0, self.map_backlight_from_10_to_full_255(self.system_config.backlight, min_level=10), 0, 0)
-
-        try:
-            fcntl.ioctl(fd, DISP_LCD_SET_BRIGHTNESS, param)
-        except OSError as e:
-            PyUiLogger.get_logger().warning(f"ioctl failed: {e}")
-        finally:
-            os.close(fd)
+            PyUiLogger.get_logger().warning(f"backlight write failed: {e}")
 
     def supports_brightness_calibration(self):
         return True

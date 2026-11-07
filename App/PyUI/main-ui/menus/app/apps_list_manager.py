@@ -21,9 +21,14 @@ class AppListManager:
         self._entries_dict: dict[str, AppEntry] = {}
         self.load_from_file()
 
+    @staticmethod
+    def _key(app_config: AppConfig):
+        """Apps are known by their launch script; one that only runs inside PyUI, by its folder."""
+        return app_config.get_launch() or app_config.get_folder()
+
     def ensure_app_exists(self, app_config: AppConfig):
         """Add the app if it doesn't exist, and save to disk."""
-        launch = app_config.get_launch()
+        launch = self._key(app_config)
         if launch not in self._entries_dict:
             new_entry = AppEntry(launch)
             self._entries.insert(0, new_entry)  # keep list for order
@@ -63,7 +68,7 @@ class AppListManager:
 
     def get_app(self, app_config: AppConfig) -> AppEntry:
         """Return the AppEntry for the given AppConfig, creating and saving it if missing."""
-        launch = app_config.get_launch()
+        launch = self._key(app_config)
         entry = self._entries_dict.get(launch)
 
         if entry is None:

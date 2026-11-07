@@ -79,7 +79,7 @@ case "$PLATFORM" in
             *) ACCENT_PYUI_DEVICE="ANBERNIC_RGXX640480" ;;
         esac
         ;;
-    "Miniloong" | "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" )
+    "Miniloong" | "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" | "E5Plus" )
         # Every dArkMoss device, as in App/PyUI/launch.sh. Their PyUI device names don't
         # always match PLATFORM (V10 -> POWKIDDY_V10, A10Mini -> A10MINI, ...), so take
         # the name from device_names, the same source PyUI's launcher uses.
@@ -96,16 +96,12 @@ case "$PLATFORM" in
         PYTHON="/usr/bin/MainUI"
         ACCENT_PYUI_DEVICE="GKD_PIXEL2"
         ;;
-    "Zero28" | "Zero40" | "XU20")
+    "Zero28" | "Zero40" | "XU20" | "V90S" | "V20" | "BrickOakMOSS")
         RUN_DIR="/usr/magicx/bin"
-        PYSDL2_DLL_PATH="$(magicx_pyui_sdl_dir)"
+        PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        case "$PLATFORM" in
-            "Zero40") ACCENT_PYUI_DEVICE="MAGICX_ZERO40" ;;
-            "XU20") ACCENT_PYUI_DEVICE="MAGICX_XU20" ;;
-            *) ACCENT_PYUI_DEVICE="MAGICX_ZERO28" ;;
-        esac
+        # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the SPRUCE device, below.
         ;;
     *)
         log_message "Accent Color: platform $PLATFORM is not supported yet"
@@ -113,6 +109,12 @@ case "$PLATFORM" in
         exit 1
         ;;
 esac
+
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device, as in PyUI's launch.sh.
+if [ "$PYUI_ENV_DEVICE" = "true" ]; then
+    . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
+    ACCENT_PYUI_DEVICE="SPRUCE"
+fi
 
 [ -n "$PYTHON" ] || PYTHON="$(get_python_path)"
 export ACCENT_PYUI_DEVICE

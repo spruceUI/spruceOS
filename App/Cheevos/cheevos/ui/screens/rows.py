@@ -139,5 +139,5 @@ def game_row(
         ago = fmt.ago(when, ctx.clock()) if when else strings.NOT_STARTED
         detail = strings.LAST_ACTIVITY.format(console=game.console_name, ago=ago)
     if pending:
-        detail = strings.NOT_SYNCED.format(detail=detail, count=pending)
+        detail = fmt.count(strings.NOT_SYNCED, pending, detail=detail)
     return MenuItem(game.title, detail, icon, count, str(game.game_id))

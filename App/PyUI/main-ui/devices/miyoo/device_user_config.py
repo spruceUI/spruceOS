@@ -8,6 +8,11 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 
 class DeviceUserConfig:
+    TOUCH_LONG_PRESS_SECONDS_DEFAULT = 0.5
+    TOUCH_DOUBLE_TAP_SECONDS_DEFAULT = 0.35
+    TOUCH_EDGE_SCROLL_INTERVAL_SECONDS_DEFAULT = 0.30
+    TOUCH_EDGE_SCROLL_MARGIN_RATIO_DEFAULT = 0.15
+
     def __init__(self, filepath):
         self._lock = threading.Lock()
         self.filepath = filepath
@@ -441,7 +446,7 @@ class DeviceUserConfig:
         self.save_config()
 
     def game_selection_only_mode_enabled(self):
-        return self.config.get("gameSelectionOnlyMode", False)
+        return self.config.get("gameSelectionOnlyMode", False) or self.kid_mode_enabled()
 
     def set_game_selection_only_mode_enabled(self,value):
         self.config["gameSelectionOnlyMode"] = value
@@ -452,6 +457,13 @@ class DeviceUserConfig:
 
     def set_simple_mode_enabled(self,value):
         self.config["simpleMode"] = value
+        self.save_config()
+
+    def kid_mode_enabled(self):
+        return self.config.get("kidMode", False)
+
+    def set_kid_mode_enabled(self,value):
+        self.config["kidMode"] = value
         self.save_config()
 
     def get_preferred_region(self):
@@ -480,4 +492,38 @@ class DeviceUserConfig:
 
     def set_input_rate_limit_ms(self, value):
         self.config["inputRateLimitMs"] = value
+        self.save_config()
+
+    def get_touch_long_press_seconds(self):
+        return self.config.get("touchLongPressSeconds", self.TOUCH_LONG_PRESS_SECONDS_DEFAULT)
+
+    def set_touch_long_press_seconds(self, value):
+        self.config["touchLongPressSeconds"] = value
+        self.save_config()
+
+    def get_touch_double_tap_seconds(self):
+        return self.config.get("touchDoubleTapSeconds", self.TOUCH_DOUBLE_TAP_SECONDS_DEFAULT)
+
+    def set_touch_double_tap_seconds(self, value):
+        self.config["touchDoubleTapSeconds"] = value
+        self.save_config()
+
+    def get_touch_edge_scroll_interval_seconds(self):
+        return self.config.get(
+            "touchEdgeScrollIntervalSeconds",
+            self.TOUCH_EDGE_SCROLL_INTERVAL_SECONDS_DEFAULT
+        )
+
+    def set_touch_edge_scroll_interval_seconds(self, value):
+        self.config["touchEdgeScrollIntervalSeconds"] = value
+        self.save_config()
+
+    def get_touch_edge_scroll_margin_ratio(self):
+        return self.config.get(
+            "touchEdgeScrollMarginRatio",
+            self.TOUCH_EDGE_SCROLL_MARGIN_RATIO_DEFAULT
+        )
+
+    def set_touch_edge_scroll_margin_ratio(self, value):
+        self.config["touchEdgeScrollMarginRatio"] = value
         self.save_config()

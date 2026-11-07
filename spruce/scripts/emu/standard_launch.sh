@@ -123,6 +123,11 @@ case $EMU_NAME in
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate
 
+		elif [ "$EMU_NAME" = "NDSI" ]; then
+			log_message "Unsupported core '$CORE' for NDSI; falling back to DSperate"
+			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
+			run_dsperate
+
 		else
 			. /mnt/SDCARD/spruce/scripts/emu/lib/drastic_functions.sh
 			run_drastic
@@ -186,15 +191,6 @@ case $EMU_NAME in
 	"PORTS")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
 		run_port
-		;;
-
-	"PS")
-		if [ "$CORE" = "PCSX-ReARMed-standalone" ]; then
-			. /mnt/SDCARD/spruce/scripts/emu/lib/pcsx_functions.sh
-			run_pcsx_standalone
-		else
-			run_retroarch
-		fi
 		;;
 
 	"PSP")

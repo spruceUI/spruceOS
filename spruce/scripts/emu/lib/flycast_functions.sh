@@ -31,7 +31,7 @@ set_ui_scale() {
 
 	case "$PLATFORM" in
 		"Flip") SCALING=70 ;;
-		"Brick") SCALING=120 ;;
+		"Brick"|"BrickOakMOSS") SCALING=120 ;;
 		"BrickPro") SCALING=140 ;;
 		*) SCALING=100 ;;
 	esac

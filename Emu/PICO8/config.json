@@ -19,7 +19,8 @@
   "launchlist": [
     {
       "name": "Import carts from Splore",
-      "launch": "import.sh"
+      "launch": "import.sh",
+      "launchInPyUI": true
     }
   ],
   "menuOptions": {

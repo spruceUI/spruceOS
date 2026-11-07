@@ -38,15 +38,23 @@ class RecentsMenu(RomsMenuCommon):
             display_name = builder.resolve_display_name(rom_info, game_entry)
             system = self._extract_game_system(rom_info.rom_file_path)
 
-            # Remove any trailing " (System)" groups
-            display_name = re.sub(
-                rf"(?:\s*\({re.escape(system)}\))+$",
-                "",
-                display_name,
-            )
+            system_display_name = rom_info.game_system.display_name or system
+
+            # Remove any trailing old or friendly "(System)" groups before adding
+            # the canonical display name. This also avoids duplicates in recents
+            # created before this change.
+            suffix_names = [name for name in (system, system_display_name) if name]
+            if suffix_names:
+                suffix_pattern = "|".join(re.escape(name) for name in suffix_names)
+                display_name = re.sub(
+                    rf"(?:\s*\((?:{suffix_pattern})\))+$",
+                    "",
+                    display_name,
+                )
+            
             rom_list.append(
                 RomGridOrListEntry(
-                        display_name=display_name  +" (" + system +")",
+                        display_name=f"{display_name} ({system_display_name})",
                         folder_name="Recents",
                         game_system=rom_info.game_system,
                         rom_file_path=rom_info.rom_file_path,

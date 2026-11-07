@@ -147,7 +147,9 @@ class GameSwitcherSettingsMenu(settings_menu.SettingsMenu):
                         )
                 )
             
-        menu_options = self.build_options_list_from_config_menu_options(GameSwitcherSettingsMenu.SETTINGS_NAME)
+        menu_options = self.build_options_list_from_related_config_categories(
+            GameSwitcherSettingsMenu.SETTINGS_NAME
+        )
         option_list.extend(menu_options)
 
         return option_list

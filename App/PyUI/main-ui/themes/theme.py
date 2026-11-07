@@ -1144,6 +1144,8 @@ class Theme():
 
     @classmethod
     def get_game_selection_view_type(cls):
+        if Device.get_device().get_system_config().kid_mode_enabled():
+            return ViewType.CAROUSEL
         view_type_str = cls._data.get("gameSelectionViewType", "TEXT_AND_IMAGE")
         return getattr(ViewType, view_type_str, ViewType.TEXT_AND_IMAGE)
 
