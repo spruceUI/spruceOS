@@ -439,11 +439,15 @@ class GamelistGenerator:
 
                 if system_name == "FBNEO":
                     ckey = f"{filename_no_ext}.zip"
+                if system_name == "SCUMMVM":
+                    rom_file = os.path.join(os.path.dirname(output_path), file_rel_path)
+                    with open(rom_file, encoding="utf-8", errors="ignore") as f:
+                        ckey = f.read().strip()
 
                 display_name = csvgames[ckey]
                 game_writer.add_entry(file_rel_path, display_name, img_rel_path)
                 games_c += 1
-            except KeyError:
+            except (KeyError, OSError):
                 continue
 
         game_writer.write(output_path)
