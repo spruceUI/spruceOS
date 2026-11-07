@@ -157,14 +157,7 @@ enable_or_disable_rgb() {
 
 prepare_for_pyui_launch(){
     disable_dpad_mod
-    set_overclock
     echo "performance" > "$GPU_GOVENOR_DIR/governor"
-    (
-        # SDL2 takes forever, let it initialize before going to powersave
-        sleep 5
-        set_smart
-        unlock_governor 2>/dev/null
-    ) &
 }
 
 post_pyui_exit(){

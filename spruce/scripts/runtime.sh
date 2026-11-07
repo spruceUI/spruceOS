@@ -36,7 +36,10 @@ run_sd_card_fix_if_triggered    # do this before anything else
 manage_ds_bootmenu_stubs
 
 # Extra cores stay up through the boot; the first set_smart offlines them.
-set_performance --no-offline
+boot_performance=
+if ! flag_check "setting_cpu" && set_performance --no-offline; then
+    boot_performance=--boot-performance
+fi
 # Roms/PORTS -> Roms/ports on the first boot after an install/update; before device_init.
 if [ -f /mnt/SDCARD/spruce/flags/ports_PORTS_migration ]; then
     . /mnt/SDCARD/spruce/scripts/ports_migration.sh
@@ -67,6 +70,7 @@ randomize_theme_if_requested &
 # finished. firstboot may return success, warning, or failure; runtime chooses the closing
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_$(get_firstboot_key)"; then
+    boot_performance=
     wait_device_init_jobs   # firstboot.sh puts a PyUI on screen
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
@@ -96,11 +100,13 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
 elif archives_queued; then
+    boot_performance=
     run_unpacker_foreground "foreground run" "0"
 fi
 
 # Run upgrade scripts on first boot after PC installer (or if flag was left by a failed restore)
 if flag_check "run_upgrades"; then
+    boot_performance=
     log_message "run_upgrades flag detected, running upgrade scripts"
     run_upgrade_scripts
     flag_remove "run_upgrades"
@@ -146,4 +152,4 @@ fi
 
 # start main loop
 log_message "Starting main loop"
-/mnt/SDCARD/spruce/scripts/principal.sh
+/mnt/SDCARD/spruce/scripts/principal.sh ${boot_performance:+"$boot_performance"}

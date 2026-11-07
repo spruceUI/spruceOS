@@ -19,10 +19,17 @@
 # Source the helper functions
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Polls for a CPU mode change in flight to finish before a game launch:
-# at most TICKS polls, TICK_S apart.
+# A CPU mode change still in flight makes set_performance a no-op.
 CPU_LOCK_WAIT_TICKS=30
 CPU_LOCK_WAIT_TICK_S=0.05
+
+wait_for_cpu_mode_change() {
+    local ticks=0
+    while flag_check "setting_cpu" && [ "$ticks" -lt "$CPU_LOCK_WAIT_TICKS" ]; do
+        sleep "$CPU_LOCK_WAIT_TICK_S"
+        ticks=$((ticks + 1))
+    done
+}
 
 while true; do
     log_message "Starting new loop of principal.sh"
@@ -56,6 +63,12 @@ while true; do
         low_battery_check       # Check for the low_battery flag and warn user if so
         hide_or_unhide_AccentColor_app
 
+        # On a normal boot runtime.sh already set Performance. On return from
+        # a game or app, boost again until PyUI's first frame.
+        if [ "${1:-}" != "--boot-performance" ] || flag_check "setting_cpu"; then
+            wait_for_cpu_mode_change
+            set_performance --no-offline
+        fi
         prepare_for_pyui_launch
 
         log_activity_event "PyUI" "START"
@@ -66,6 +79,8 @@ while true; do
 
         flag_remove "in_menu"
     fi
+    # Consume the boot handoff before any staged command can run or be rejected.
+    set --
 
     # clear the FB to get rid of residual Loading or Iconfresh screen if present
     touch /tmp/fbdisplay_exit
@@ -107,12 +122,7 @@ while true; do
         sync
         cmd="$(sed 's/[[:space:]]*$//' /tmp/cmd_to_run.sh)"
         log_activity_event "$cmd" "START"
-        # A CPU mode change still in flight makes set_performance a no-op.
-        _cpu_ticks=0
-        while flag_check "setting_cpu" && [ "$_cpu_ticks" -lt "$CPU_LOCK_WAIT_TICKS" ]; do
-            sleep "$CPU_LOCK_WAIT_TICK_S"
-            _cpu_ticks=$((_cpu_ticks + 1))
-        done
+        wait_for_cpu_mode_change
         set_performance # lead with this to speed up launching
 
         udpbcast -f /tmp/host_msg 2>/dev/null &

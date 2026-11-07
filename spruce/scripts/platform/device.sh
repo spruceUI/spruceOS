@@ -138,7 +138,7 @@ unpause_emulators() {
 }
 
 prepare_for_pyui_launch(){
-    log_message "Missing prepare_for_pyui_launch function"
+    :
 }
 
 post_pyui_exit(){
