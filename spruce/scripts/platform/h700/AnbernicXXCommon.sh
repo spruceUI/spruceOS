@@ -707,7 +707,8 @@ set_backlight() {
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
     if [ "$level" -eq 10 ]; then raw=127; else raw=$((level * 25 / 2)); fi
-    [ "$raw" -lt 5 ] && raw=5
+    raw_floor="${H700_BACKLIGHT_RAW_FLOOR:-5}"
+    [ "$raw" -lt "$raw_floor" ] && raw="$raw_floor"
     "$DEVICE_PYTHON3_PATH" -c "
 import os, fcntl, struct
 fd = os.open('/dev/disp', os.O_RDWR)
