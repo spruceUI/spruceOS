@@ -7,6 +7,7 @@ run_advmame() {
 	COMMON_DIR="/mnt/SDCARD/Saves/saves/advmame"
 	export HOME="$(platform_path "/mnt/SDCARD/Saves/saves/advmame/%s")"
 	mkdir -p "$HOME/.advance"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	
 	for file in cheat.dat event.dat hiscore.dat history.dat; do
 		if [ -f "$EMU_DIR/$file" ]; then

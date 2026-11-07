@@ -7,6 +7,7 @@
 
 prepare_ra_config 2>/dev/null
 cd "$RA_DIR/"
+/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 RA_PARAMS="-v --config ${PLATFORM_CFG}"
 
 # Same 32-bit overlay a game launch gets (a no-op for this 64-bit build, whose

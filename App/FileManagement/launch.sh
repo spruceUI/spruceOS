@@ -26,6 +26,7 @@ killall -q idle_watchdog.sh 2>/dev/null
 
 export HOME="$(dirname "$0")"
 cd "$HOME"
+/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 
 LOG_PATH="/mnt/SDCARD/Saves/spruce/vtree-${PLATFORM}.log"
 

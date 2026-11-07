@@ -5,6 +5,7 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 export HOME="/mnt/SDCARD/Saves/flip/home"
+/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 PM_ROOT="/mnt/SDCARD/Persistent/portmaster"
 PM_DIR="$PM_ROOT/PortMaster"
 OURS="/mnt/SDCARD/App/PortMaster"

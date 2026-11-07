@@ -18,6 +18,7 @@
 run_gvu() {
 	export HOME="$EMU_DIR"
 	cd "$EMU_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 
 	# GVU uses its own isolated lib dirs to avoid conflicts with ffplay
 	if [ "$PLATFORM" = "A30" ]; then
@@ -128,6 +129,7 @@ run_mpv() {
 	# pixel 2 only
 	export HOME=$EMU_DIR
 	cd $EMU_DIR
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 
 	VO=$(set_hw_vo "$ROM_FILE")
 	log_message "run_mpv: Using $VO"
