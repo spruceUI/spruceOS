@@ -45,6 +45,17 @@ def merge_selected(old, new, path=""):
             elif "options" not in new:
                 print(f"Copying freeText '{current_path}'")
                 new[key] = old_val
+        elif key == "overrides" and isinstance(old_val, dict) and isinstance(new_val, dict):
+            options = new.get("options")
+            valid_values = None
+            if isinstance(options, list):
+                valid_values = [o.get("label") if isinstance(o, dict) else o for o in options]
+            for game, value in old_val.items():
+                if valid_values is None or value in valid_values:
+                    print(f"Copying '{current_path}/{game}': {value}")
+                    new_val[game] = value
+                else:
+                    print(f"Override is no longer valid in latest config '{current_path}/{game}': {value}")
         else:
             merge_selected(old_val, new_val, current_path)
 
