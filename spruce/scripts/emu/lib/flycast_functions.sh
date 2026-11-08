@@ -15,6 +15,7 @@
 #   migrate_standalone_data
 #   share_vmus
 #   install_flycast_pad_mapping
+#   configure_flycast_cheevos
 
 # The standalone's own data dir (states, console settings, NAOMI/Atomiswave saves), kept apart from the libretro
 # core's files. Its VMU cards are not here: both modules use one card set (share_vmus).
@@ -37,6 +38,50 @@ set_ui_scale() {
 	esac
 
 	sed "s/^UIScaling[[:space:]]*=[[:space:]]*.*/UIScaling = $SCALING/" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+}
+
+# spruce's RetroAchievements sign-in into emu.cfg; Manual leaves Flycast's own alone.
+# FLYCAST_CHEEVOS_ARGS gets the RAOfflineProxy host as -config settings, which are not
+# saved, so emu.cfg never keeps a proxy address. The proxy only serves softcore.
+configure_flycast_cheevos() {
+	CFG=/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg
+	FLYCAST_CHEEVOS_ARGS=""
+	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
+	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
+
+	case "$rac_mode" in
+		Disabled) _enabled=no; _hardcore= ;;
+		Casual|Softcore) _enabled=yes; _hardcore=no ;;
+		Hardcore) _enabled=yes; _hardcore=yes ;;
+		*) return 0 ;;
+	esac
+	[ -n "$rac_user" ] || _enabled=no
+
+	_section='/^\[achievements\]/,/^\[/'
+	_edits="$_section s|^Enabled[[:space:]]*=.*|Enabled = $_enabled|"
+	[ -n "$_hardcore" ] && _edits="$_edits;$_section s|^HardcoreMode[[:space:]]*=.*|HardcoreMode = $_hardcore|"
+
+	if [ "$_enabled" = yes ]; then
+		. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+		_cfg_user="$(sed -n "$_section s|^UserName[[:space:]]*=[[:space:]]*||p" "$CFG")"
+		_cfg_token="$(sed -n "$_section s|^Token[[:space:]]*=[[:space:]]*||p" "$CFG")"
+		if [ "$_cfg_user" != "$rac_user" ] || [ -z "$_cfg_token" ]; then
+			rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
+			_token="$(rac_login_token "$rac_user" "$rac_pass" Flycast)"
+			if [ -n "$_token" ]; then
+				_edits="$_edits;$_section s|^UserName[[:space:]]*=.*|UserName = $rac_user|;$_section s|^Token[[:space:]]*=.*|Token = $_token|"
+				log_message "Flycast: fetched a RetroAchievements token for $rac_user"
+			else
+				log_message "Flycast: RetroAchievements login failed for $rac_user"
+			fi
+		fi
+		if _host="$(raproxy_address)"; then
+			FLYCAST_CHEEVOS_ARGS="-config achievements:HostUrl=$_host -config achievements:HardcoreMode=no"
+			log_message "Flycast: achievements through RAOfflineProxy at $_host" -v
+		fi
+	fi
+
+	sed "$_edits" "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
 }
 
 move_screenshots() {
@@ -138,6 +183,7 @@ run_flycast_standalone() {
 	share_vmus
 	migrate_standalone_data
 	build_bios_view
+	configure_flycast_cheevos
 
 	cd "$HOME"
 	/mnt/SDCARD/spruce/scripts/asound-setup.sh
@@ -152,9 +198,9 @@ run_flycast_standalone() {
 	# One card set with the libretro core: its folder and no per-game A1 card, as transient settings (-config is
 	# not saved to emu.cfg), so an updated card's own emu.cfg can't split the set again.
 	if [ "$CORE" = "Flycast2024-standalone" ]; then
-		./flycast2024 -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no "$ROM_FILE" > $(emu_log_file) 2>&1
+		./flycast2024 -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no $FLYCAST_CHEEVOS_ARGS "$ROM_FILE" > $(emu_log_file) 2>&1
 	else
-		./flycast -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no "$ROM_FILE" > $(emu_log_file) 2>&1
+		./flycast -config config:Dreamcast.VMUPath="$FLYCAST_VMU_DIR" -config config:PerGameVmu=no $FLYCAST_CHEEVOS_ARGS "$ROM_FILE" > $(emu_log_file) 2>&1
 	fi
 
 	umount $HOME/bios
