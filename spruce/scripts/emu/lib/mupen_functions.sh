@@ -294,6 +294,9 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 
 	export M64P_AUTOLOAD=1
 	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
+	case "$PLATFORM" in
+		"Anbernic"*) export_sdl_gamecontroller_map positional ;;
+	esac
 	treat_dpad_as_analog
 	./mupen64plus \
 		--configdir "$MUPEN_CONFIG_DIR" \
