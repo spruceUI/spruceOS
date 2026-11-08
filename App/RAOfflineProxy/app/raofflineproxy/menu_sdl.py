@@ -24,6 +24,13 @@ from .dolphin_cfg import (
     revert_dolphin_ini,
     store_dolphin_previous,
 )
+from .duckstation_cfg import (
+    patch_duckstation_ini,
+    revert_duckstation_ini,
+    store_duckstation_previous,
+)
+from .flycast_cfg import patch_flycast_cfg, revert_flycast_cfg, store_flycast_previous
+from .pcsx2_cfg import patch_pcsx2_ini, revert_pcsx2_ini, store_pcsx2_previous
 from .config import (
     APP_VERSION,
     CONFIG_DIR,
@@ -38,6 +45,7 @@ from .config import (
     running_on_rocknix,
     running_on_spruce,
     running_on_darkos,
+    running_on_windows,
     save_config,
 )
 from .platform import (
@@ -74,6 +82,7 @@ from .rom_browser import (
     remove_cached_game,
 )
 from .service import service_status, start_service_process, stop_service_process
+from .watch_folders import normalize_folder, unwatch_folder, watch_folder, watched_folders
 from .knulli_service import (
     disable_service_autostart,
     enable_service_autostart,
@@ -136,6 +145,10 @@ from .menu_input import (
     read_keys,
 )
 
+if running_on_windows():
+    # No /dev/input on Windows: gamepads come through SDL instead, as the same codes.
+    from .windows.input import close_input_devices, open_input_devices, read_keys
+
 SDL_LOG_PATH = CONFIG_DIR / "menu-sdl.log"
 STALE_HOOK_PATH = Path("/userdata/system/scripts/RAOfflineProxy_game_hook.sh")
 BACKGROUND_COLOR = (0, 0, 0)
@@ -147,6 +160,8 @@ STATUS_COLOR = (180, 180, 180)
 SECONDARY_TEXT_COLOR = (110, 110, 110)
 ERROR_COLOR = (200, 70, 60)
 ERROR_SECONDS = 3
+BROWSER_MODE_ADD = "add"
+BROWSER_MODE_WATCH = "watch"
 FPS = 60
 LEFT_MARGIN = 32
 GROUP_GAP = 14
@@ -348,13 +363,23 @@ def run_menu_sdl(command_runner: str) -> None:
     log_menu_sdl(
         f"run_menu_sdl start python={sys.version.split()[0]} executable={sys.executable}"
     )
+    if running_on_windows():
+        from .windows.input import show_existing_menu
+
+        if show_existing_menu():
+            log_menu_sdl("menu already open; brought it to the front")
+            return
     try:
         import pygame
 
         pygame.init()
         pygame.font.init()
 
-        if running_on_mini_sdl_stack():
+        if running_on_windows():
+            from .windows.input import open_menu_window
+
+            surface = open_menu_window(pygame, load_config())
+        elif running_on_mini_sdl_stack():
             # No fallback: the vendored SDL2 carries no driver but "Mini", which presents
             # only through this renderer path. A plain surface would come back as a menu
             # that runs but never draws, so failing here and returning to the launcher is
@@ -389,7 +414,10 @@ def run_menu_sdl(command_runner: str) -> None:
 
         width, height = surface.get_size()
         log_menu_sdl(f"display set_mode surface_size={width}x{height}")
-        session = MenuSdlSession(command_runner, surface, width, height, pygame)
+        session_class = MenuSdlSession
+        if running_on_windows():
+            from .windows.menu import WindowsMenuSession as session_class
+        session = session_class(command_runner, surface, width, height, pygame)
         session.run()
     except Exception:
         log_menu_sdl(traceback.format_exc().rstrip())
@@ -499,10 +527,16 @@ def start_proxy_inline() -> bool:
     batocera = patch_batocera_conf(config_data)
     ppsspp = patch_ppsspp_ini(config_data)
     dolphin = patch_dolphin_ini(config_data)
+    pcsx2 = patch_pcsx2_ini(config_data)
+    duckstation = patch_duckstation_ini(config_data)
+    flycast = patch_flycast_cfg(config_data)
     patch_state = load_patch_state() or {}
     store_batocera_previous(patch_state, batocera)
     store_ppsspp_previous(patch_state, ppsspp)
     store_dolphin_previous(patch_state, dolphin)
+    store_pcsx2_previous(patch_state, pcsx2)
+    store_duckstation_previous(patch_state, duckstation)
+    store_flycast_previous(patch_state, flycast)
     save_patch_state(patch_state)
     return not patch_result.get("exists", True)
 
@@ -517,6 +551,9 @@ def stop_proxy_inline() -> None:
     revert_batocera_conf(config_data, previous_batocera)
     revert_ppsspp_ini(config_data, patch_state.get("ppsspp_previous", {}))
     revert_dolphin_ini(config_data, patch_state.get("dolphin_previous", {}))
+    revert_pcsx2_ini(config_data, patch_state.get("pcsx2_previous", {}))
+    revert_duckstation_ini(config_data, patch_state.get("duckstation_previous", {}))
+    revert_flycast_cfg(config_data, patch_state.get("flycast_previous", {}))
 
     if patch_state:
         revert_retroarch_cfg(revert_cfg_path, patch_state, config_data=config_data)
@@ -566,6 +603,8 @@ class MenuSdlSession:
         self.key_log: list[int] = []
         self.browser_dir: Path | None = None
         self.browser_root: Path | None = None
+        self.browser_mode = BROWSER_MODE_ADD
+        self.browser_watched: set[str] = set()
         self.browser_entries: list[Path] = []
         self.view_positions: dict[str, tuple[int, int]] = {}
         self.browser_positions: dict[str, tuple[int, int]] = {}
@@ -781,7 +820,7 @@ class MenuSdlSession:
         if self.view == "cached_games":
             cached = [game.title for game in self.cached_games]
             if getattr(self, "main_online", False):
-                return ["Add ROM", "Start Smart Cache", *cached, "Clear cache", "Back"]
+                return ["Add ROMs", "Watch folders", "Start Smart Cache", *cached, "Clear cache", "Back"]
             return [*cached, "Clear cache", "Back"]
 
         if self.view == "pending_awards":
@@ -842,11 +881,11 @@ class MenuSdlSession:
 
             labels = []
             if self.browser_has_cacheable_files():
-                labels.append("Add folder")
+                labels.append(self.browser_action_label())
             effective_root = self.browser_root or resolve_rom_root(load_config())
             if self.browser_dir.parent != self.browser_dir and self.browser_dir != effective_root:
                 labels.append("..")
-            labels.extend(entry.name for entry in self.browser_entries)
+            labels.extend(self.browser_entry_labels())
             labels.append("Cancel")
             return labels
 
@@ -926,7 +965,7 @@ class MenuSdlSession:
                 else "Cached Game"
             )
         if self.view == "file_browser":
-            return "Add ROM"
+            return "Watch folders" if self.browser_watch_mode() else "Add ROMs"
         if self.view == "update_prompt":
             return "Update Available"
         if self.view == "usage_consent":
@@ -1405,14 +1444,18 @@ class MenuSdlSession:
         self.restore_view_position(self.support_qr_return_view)
 
     def cached_games_header_count(self) -> int:
-        return 2 if getattr(self, "main_online", False) else 0
+        return 3 if getattr(self, "main_online", False) else 0
 
     def activate_cached_games_selected(self) -> None:
         labels = self.current_labels()
         selected_label = labels[self.selected_index] if labels else ""
 
-        if selected_label == "Add ROM":
-            self.open_file_browser()
+        if selected_label == "Add ROMs":
+            self.open_file_browser(BROWSER_MODE_ADD)
+            return
+
+        if selected_label == "Watch folders":
+            self.open_file_browser(BROWSER_MODE_WATCH)
             return
 
         if selected_label == "Start Smart Cache":
@@ -1568,6 +1611,10 @@ class MenuSdlSession:
         )
 
     def needs_controller_calibration(self) -> bool:
+        if running_on_windows():
+            # SDL's GameController mapping already puts A/B at BTN_SOUTH/BTN_EAST,
+            # which is_confirm_key/is_cancel_key default to.
+            return False
         return not self.calibration_complete()
 
     def configured_confirm_button(self) -> int | None:
@@ -1689,7 +1736,10 @@ class MenuSdlSession:
             first_entry_index += 1
         cancel_index = first_entry_index + len(self.browser_entries)
         if has_add_folder and self.selected_index == 0:
-            self.start_folder_cache_for_browser_dir()
+            if self.browser_watch_mode():
+                self.toggle_watch_for_browser_dir()
+            else:
+                self.start_folder_cache_for_browser_dir()
             return
         if parent_index is not None and self.selected_index == parent_index:
             self.save_browser_position()
@@ -1710,10 +1760,11 @@ class MenuSdlSession:
 
         self.start_single_rom_cache(entry)
 
-    def open_file_browser(self) -> None:
+    def open_file_browser(self, mode: str = BROWSER_MODE_ADD) -> None:
         try:
             self.save_view_position("cached_games")
             root = resolve_rom_root(load_config())
+            self.browser_mode = mode
             self.browser_root = root
             self.set_browser_dir(root, restore=True)
             self.view = "file_browser"
@@ -1797,9 +1848,59 @@ class MenuSdlSession:
         self.browser_root = new_root
         self.set_browser_dir(new_root, restore=False)
 
+    def browser_watch_mode(self) -> bool:
+        return getattr(self, "browser_mode", BROWSER_MODE_ADD) == BROWSER_MODE_WATCH
+
+    def browser_is_watched(self, path: Path) -> bool:
+        return normalize_folder(path) in getattr(self, "browser_watched", ())
+
+    def browser_action_label(self) -> str:
+        if not self.browser_watch_mode():
+            return "Add folder"
+        if self.browser_dir is not None and self.browser_is_watched(self.browser_dir):
+            return "Stop watching this folder"
+        return "Watch this folder"
+
+    def browser_entry_labels(self) -> list[str]:
+        if not self.browser_watch_mode():
+            return [entry.name for entry in self.browser_entries]
+        return [
+            f"{entry.name} (watching)" if self.browser_is_watched(entry) else entry.name
+            for entry in self.browser_entries
+        ]
+
+    def refresh_browser_watched(self) -> None:
+        self.browser_watched = {normalize_folder(folder) for folder in watched_folders(load_config())}
+
+    def toggle_watch_for_browser_dir(self) -> None:
+        if self.browser_dir is None:
+            return
+        folder = self.browser_dir
+        config_data = load_config()
+        try:
+            if self.browser_is_watched(folder):
+                unwatch_folder(config_data, self.storage, folder)
+                text = "Stopped watching folder"
+            else:
+                watch_folder(config_data, folder)
+                text = (
+                    "Watching folder"
+                    if self.proxy_running()
+                    else "Watching folder, starts with the proxy"
+                )
+        except Exception as exc:
+            self.message = (f"Watch failed: {exc}", time.monotonic() + ERROR_SECONDS)
+            return
+        self.refresh_browser_watched()
+        self.message = (text, time.monotonic() + 1.5)
+
     def set_browser_dir(self, path: Path, restore: bool = False) -> None:
         self.browser_dir = path
-        self.browser_entries = list_browser_entries(path)
+        entries = list_browser_entries(path)
+        if self.browser_watch_mode():
+            self.refresh_browser_watched()
+            entries = [entry for entry in entries if entry.is_dir()]
+        self.browser_entries = entries
         if restore:
             self.restore_browser_position(path)
             return

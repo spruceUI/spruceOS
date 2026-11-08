@@ -20,12 +20,17 @@
 cache_cheevos_at_launch() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 0
 	[ "$disable_wifi_in_game" = "True" ] || return 0
-	# Only RetroArch goes through the proxy, and only for systems RetroAchievements supports
-	case "$CORE" in *standalone*) return 0 ;; esac
+	# RetroArch, PPSSPP, Flycast and DSperate go through the proxy, and only for systems
+	# RetroAchievements supports. The proxy can't hash .cso; those games cache on their first online play.
+	case "$EMU_NAME:$CORE" in
+		PSP:*) case "$ROM_FILE" in *.cso|*.CSO) return 0 ;; esac ;;
+		NDS:DSperate*|DC:Flycast*) ;;
+		NDS:*|*:*standalone*) return 0 ;;
+	esac
 	case "$EMU_NAME" in
 		ARCADE|ARDUBOY|ATARI|COLECO|CPC|CPS1|CPS2|CPS3|DC|FAIRCHILD|FBNEO|FC|FDS|GB|GBA|GBC|GG|\
-		INTELLIVISION|JAGUAR|LYNX|MAME2003PLUS|MD|MEGADUCK|MS|MSU1|MSUMD|MSX|N64|NEOCD|NEOGEO|\
-		NGP|NGPC|ODYSSEY|PCE|PCECD|POKE|PS|SATELLAVIEW|SATURN|SEGACD|SEGASGONE|SEVENTYEIGHTHUNDRED|\
+		INTELLIVISION|JAGUAR|LYNX|MAME2003PLUS|MD|MEGADUCK|MS|MSU1|MSUMD|MSX|N64|NDS|NEOCD|NEOGEO|\
+		NGP|NGPC|ODYSSEY|PCE|PCECD|POKE|PS|PSP|SATELLAVIEW|SATURN|SEGACD|SEGASGONE|SEVENTYEIGHTHUNDRED|\
 		SFC|SGB|SGFX|SUFAMI|SUPERVISION|THIRTYTWOX|VB|VECTREX|VIDEOPAC|WS|WSC) ;;
 		*) return 0 ;;
 	esac

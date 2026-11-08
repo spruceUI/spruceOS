@@ -10,6 +10,7 @@
 [ "${SPRUCE_HELPERS_LOADED:-}" = "$$" ] && return 0
 
 # constants used in multiple different helperFunctions:
+WIFI_LOCK="/tmp/spruce_wifi.lock"
 export FLAGS_DIR="/mnt/SDCARD/spruce/flags"
 export WPA_SUPPLICANT_FILE="/mnt/SDCARD/Saves/spruce/wpa_supplicant.conf"
 export WPA_LEGACY_CONFS="/userdata/cfg/wpa_supplicant.conf /appconfigs/wpa_supplicant.conf /config/wpa_supplicant.conf"     # Where PyUI wrote saved networks before they became card-global
@@ -108,6 +109,12 @@ if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_config" ]; then
 fi
 [ ! -f "$platform_config" ] || . "$platform_config"
 
+EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
+ra64.h700 ra32.h700 \
+retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
+flycast flycast2024 yabasanshiro yabasanshiro.trimui dsperate dsperate.a30 \
+mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN"
+
 # Ensure all methods are defined, and just logged if missing
 . "/mnt/SDCARD/spruce/scripts/platform/device.sh"
 
@@ -165,6 +172,7 @@ device_names() {
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
+        Pixel2DarkMoss)   echo "GKD_PIXEL2_DARKMOSS"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "OAKMOSS_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "OAKMOSS_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "OAKMOSS_A133P" ;;
@@ -1470,6 +1478,16 @@ wifi_request() {
     sh /mnt/SDCARD/spruce/scripts/network/wifi.sh "$@"
 }
 
+wifi_sh_is_running() {
+    case "$1" in ''|*[!0-9]*) return 1 ;; esac
+    grep -q 'wifi[.]sh' "/proc/$1/cmdline" 2>/dev/null
+}
+
+wifi_change_in_progress() {
+    local pid
+    { IFS= read -r pid < "$WIFI_LOCK/pid"; } 2>/dev/null && wifi_sh_is_running "$pid"
+}
+
 # Is the saved WiFi setting on? PyUI writes SYSTEM_JSON from its shipped default,
 # and on a first boot it may not exist yet, so read that default instead. With
 # neither readable it means off.
@@ -1750,6 +1768,7 @@ network_is_connected() {
 # --cancellable also offers B on the wait screen, which returns 2: a game launch
 # uses it to go back to the menu, so a player out of range can pick another network.
 check_and_connect_wifi() {
+    local uptime start_time elapsed recovery_requested=0
     # Shutdown's Syncthing check calls this whatever the setting says; never turn WiFi on against it
     if ! wifi_setting_wanted; then
         log_message "WiFi is off in settings, not connecting"
@@ -1767,17 +1786,15 @@ check_and_connect_wifi() {
         return 1
     fi
 
-    timeout=60
-    start_time=$(date +%s)
-
-    # Check if device has wifi available
+    # Some platforms report unavailable until the radio worker brings up the interface.
     if ! device_wifi_is_available; then
-        return 1
+        wifi_available_on_device && wifi_change_in_progress || return 1
     fi
 
+    read -r uptime _ < /proc/uptime
+    start_time="${uptime%%.*}"
     log_message "Attempting to connect to WiFi"
     start_pyui_message_writer 1
-    wifi_request restart
 
     cancel_key=""
     wait_text="Waiting to connect....\nPress START to continue anyway."
@@ -1817,7 +1834,7 @@ check_and_connect_wifi() {
         fi
 
         # 2. Check for successful connection
-        if network_is_connected; then
+        if network_is_connected true; then
             log_message "Successfully connected to WiFi"
             kill "$GE_PID" 2>/dev/null
             stop_pyui_message_writer
@@ -1825,14 +1842,22 @@ check_and_connect_wifi() {
         fi
 
         # 3. Check for timeout
-        current_time=$(date +%s)
-        if [ $((current_time - start_time)) -ge $timeout ]; then
-            log_message "WiFi connection timed out after $timeout seconds"
+        # Use uptime because the network can correct the wall clock during this wait.
+        read -r uptime _ < /proc/uptime
+        elapsed=$(( ${uptime%%.*} - start_time ))
+        if [ "$elapsed" -ge 60 ]; then
+            log_message "WiFi connection timed out after 60 seconds"
             kill "$GE_PID" 2>/dev/null
             stop_pyui_message_writer
             return 1
         fi
 
+        # Recovery restarts only a radio that stopped answering. It backs off while a change
+        # holds the lock, so ask once none runs.
+        if [ "$recovery_requested" = 0 ] && ! wifi_change_in_progress; then
+            wifi_request recover
+            recovery_requested=1
+        fi
         sleep 0.1
     done
     stop_pyui_message_writer

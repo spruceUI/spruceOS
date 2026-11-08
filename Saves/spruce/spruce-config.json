@@ -700,7 +700,18 @@
                     "Casual",
                     "Hardcore"
                 ],
-                "selected": "Manual"
+                "selected": "Manual",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosMode.sh"
+            },
+            "enableOfflineProxy": {
+                "display": "RAOfflineProxy",
+                "description": "Earn Casual Cheevos Offline",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
             },
             "username": {
                 "display": "Username",
@@ -718,16 +729,6 @@
                 "type": "freeText",
                 "selected": "",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
-            },
-            "enableOfflineProxy": {
-                "display": "RAOfflineProxy",
-                "description": "Earn Casual Cheevos Offline",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
             },
             "raproxyUsageStats": {
                 "display": "Share RAOfflineProxy statistics",

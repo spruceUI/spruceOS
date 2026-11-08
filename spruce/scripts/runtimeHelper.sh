@@ -391,6 +391,12 @@ update_checker(){
     check_for_update
 }
 
+# WiFi and RAOfflineProxy normally wait for PyUI's first frame. $1 says why they start
+# now, for the log; only the first start of a boot does anything.
+start_boot_jobs() {
+    sh /mnt/SDCARD/spruce/scripts/boot/after_first_frame.sh "$1" </dev/null >/dev/null 2>&1 &
+}
+
 check_for_update_file() {
     # An incremental OTA leaves spruceOTA-*.7z archives plus a queue file
     # rather than a spruceV*.7z, and "install later" must survive a reboot.

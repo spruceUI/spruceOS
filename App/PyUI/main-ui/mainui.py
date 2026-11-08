@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 import signal
+import subprocess
 import sys
 import threading
 from devices.device import Device
@@ -87,9 +88,23 @@ def start_background_threads():
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
 
+def run_first_frame_cmd():
+    """Let the CFW start work it held back so it would not compete with PyUI's startup."""
+    cmd = PyUiConfig.get_first_frame_cmd()
+    if not cmd or not os.path.exists(cmd):
+        return
+    try:
+        # Its own session, so it outlives this PyUI when a game launch follows at once
+        subprocess.Popen([cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError as e:
+        PyUiLogger.get_logger().warning(f"Could not run the first frame command {cmd}: {e}")
+
+
 def finish_startup():
     """Release the startup clock and warm optional data after the first frame."""
     threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    threading.Thread(target=run_first_frame_cmd, name="FirstFrameCmd", daemon=True).start()
     from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
     CheevosCacheManager.initialize()
 

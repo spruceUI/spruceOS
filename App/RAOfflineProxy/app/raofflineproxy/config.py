@@ -4,6 +4,7 @@ import json
 import logging
 import logging.handlers
 import os
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
@@ -28,7 +29,7 @@ SPRUCE_RA_CONFIG_DIR = Path("/mnt/SDCARD/Saves/ra-configs")
 SPRUCE_CONFIG_JSON = Path("/mnt/SDCARD/Saves/spruce/spruce-config.json")
 SPRUCE_SETTINGS_MENU = "RetroAchievements Settings"
 CPUINFO_PATH = Path("/proc/cpuinfo")
-OAKMOSS_MARKER = Path("/usr/magicx")
+MAGICX_MARKER = Path("/usr/magicx")
 BASEOS_RELEASE_PATH = Path("/etc/baseos-release")
 LOONG_DAEMON = Path("/loong/loong_daemon")
 SDCARD_RETROARCH_CFG_CANDIDATES = (
@@ -145,15 +146,6 @@ _SPRUCE_H700_PLATFORMS = {
     "rg40xxv": "AnbernicXX640480OneStick",
 }
 _SPRUCE_H700_DEFAULT = "AnbernicXX640480"
-# /usr/magicx/device names the oakMOSS board; a base without the file is a Zero 28 (helperFunctions.sh).
-_SPRUCE_OAKMOSS_PLATFORMS = {
-    "zero40": "Zero40",
-    "xu20": "XU20",
-    "v90s": "V90S",
-    "v20": "V20",
-    "brick": "BrickOakMOSS",
-}
-_SPRUCE_OAKMOSS_DEFAULT = "Zero28"
 
 
 def _baseos_target() -> str:
@@ -167,13 +159,6 @@ def _baseos_target() -> str:
             return line.split("=", 1)[1].strip()
 
     return ""
-
-
-def _oakmoss_board() -> str:
-    try:
-        return (OAKMOSS_MARKER / "device").read_text(encoding="utf-8", errors="replace").strip()
-    except OSError:
-        return ""
 
 
 def _spruce_rk3566_platform() -> str:
@@ -214,8 +199,8 @@ def spruce_platform() -> str:
     if "0xd03" in info:
         return _SPRUCE_H700_PLATFORMS.get(_baseos_target(), _SPRUCE_H700_DEFAULT)
 
-    if OAKMOSS_MARKER.exists():
-        return _SPRUCE_OAKMOSS_PLATFORMS.get(_oakmoss_board(), _SPRUCE_OAKMOSS_DEFAULT)
+    if MAGICX_MARKER.exists():
+        return "Zero28"
 
     return "MiyooMini"
 
@@ -257,6 +242,20 @@ def spruce_setting(name: str) -> str | None:
     return value.strip() or None
 
 
+def running_on_windows() -> bool:
+    """The one Windows check. Code in raofflineproxy.windows is imported only
+    inside a branch on this, so it never loads on the other devices."""
+    return sys.platform == "win32"
+
+
+def _windows_retroarch_candidates() -> tuple[Path, ...]:
+    if not running_on_windows():
+        return ()
+    from .windows import paths
+
+    return (*paths.retroarch_cfg_candidates(), paths.retroarch_placeholder(CONFIG_DIR))
+
+
 def resolve_config_dir() -> Path:
     configured = os.environ.get("RAOFFLINEPROXY_CONFIG_DIR")
     if configured:
@@ -284,13 +283,18 @@ def resolve_config_dir() -> Path:
     if running_on_rocknix():
         return DEFAULT_ROCKNIX_CONFIG_DIR
 
+    if running_on_windows():
+        from .windows import paths
+
+        return paths.config_dir()
+
     return Path.home() / ".config" / "raofflineproxy"
 
 
 RA_HOST = "https://retroachievements.org"
 RA_MEDIA_HOST = "https://media.retroachievements.org"
-APP_VERSION = os.environ.get("RAOFFLINEPROXY_APP_VERSION") or "2.2.0-alpha1-nightly.54"
-PROXY_UA_TAG = f"RAOfflineProxy/Linux/{APP_VERSION}"
+APP_VERSION = os.environ.get("RAOFFLINEPROXY_APP_VERSION") or "2.3.0-alpha1"
+PROXY_UA_TAG = f"RAOfflineProxy/{'Windows' if running_on_windows() else 'Linux'}/{APP_VERSION}"
 FALLBACK_USER_AGENT = "RetroArch/1.21.0 (Linux)"
 
 DEFAULT_PROXY_PORT = 8080
@@ -319,12 +323,17 @@ def ensure_config_dir() -> Path:
 
 def configure_logging() -> None:
     ensure_config_dir()
-    handler = logging.handlers.RotatingFileHandler(
-        str(LOG_FILE),
-        maxBytes=2 * 1024 * 1024,
-        backupCount=1,
-        encoding="utf-8",
-    )
+    if running_on_windows():
+        from .windows.process import rotating_log_handler
+
+        handler = rotating_log_handler(str(LOG_FILE), 2 * 1024 * 1024, 1, "utf-8")
+    else:
+        handler = logging.handlers.RotatingFileHandler(
+            str(LOG_FILE),
+            maxBytes=2 * 1024 * 1024,
+            backupCount=1,
+            encoding="utf-8",
+        )
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
     logging.basicConfig(handlers=[handler], level=logging.INFO, force=True)
 
@@ -344,6 +353,13 @@ def load_config() -> dict:
 
     if not isinstance(data, dict):
         raise ValueError(f"Invalid config file: {CONFIG_FILE}")
+
+    if running_on_windows():
+        # Points each emulator at its real config, or at a placeholder when it's
+        # turned off or its config doesn't exist yet (e.g. never launched).
+        from .windows.emulators import apply_state
+
+        apply_state(data)
 
     return data
 
@@ -451,6 +467,8 @@ def _retroarch_cfg_lookup() -> tuple[tuple[Callable[[], bool], tuple[Path, ...]]
             (spruce_retroarch_cfg(),) if running_on_spruce() else (),
         ),
         (lambda: Path("/mnt/SDCARD").exists(), tuple(SDCARD_RETROARCH_CFG_CANDIDATES)),
+        # The placeholder comes last, so it's used only when no RetroArch exists.
+        (running_on_windows, _windows_retroarch_candidates()),
     )
 
 
@@ -512,6 +530,13 @@ def detect_ppsspp_ini(config_data: dict) -> str | None:
     if DEFAULT_ROCKNIX_PPSSPP_INI.exists():
         return str(DEFAULT_ROCKNIX_PPSSPP_INI)
 
+    if running_on_windows():
+        from .windows import paths
+
+        windows_ini = paths.ppsspp_ini()
+        if windows_ini is not None:
+            return str(windows_ini)
+
     return None
 
 
@@ -527,7 +552,47 @@ def detect_dolphin_config_dir(config_data: dict) -> str | None:
     if DEFAULT_ROCKNIX_DOLPHIN_CONFIG_DIR.exists():
         return str(DEFAULT_ROCKNIX_DOLPHIN_CONFIG_DIR)
 
+    if running_on_windows():
+        from .windows import paths
+
+        windows_dir = paths.dolphin_config_dir()
+        if windows_dir is not None:
+            return str(windows_dir)
+
     return None
+
+
+def _detect_windows_only_config(config_data: dict, key: str, finder: str) -> str | None:
+    """Found on Windows; elsewhere only where it's configured, so nothing
+    starts patching these emulators' files on the handhelds."""
+    configured = config_data.get(key)
+    if configured:
+        return str(configured)
+
+    env_override = os.environ.get(f"RAOFFLINEPROXY_{key.upper()}")
+    if env_override:
+        return env_override
+
+    if running_on_windows():
+        from .windows import paths
+
+        found = getattr(paths, finder)()
+        if found is not None:
+            return str(found)
+
+    return None
+
+
+def detect_pcsx2_ini(config_data: dict) -> str | None:
+    return _detect_windows_only_config(config_data, "pcsx2_ini", "pcsx2_ini")
+
+
+def detect_duckstation_ini(config_data: dict) -> str | None:
+    return _detect_windows_only_config(config_data, "duckstation_ini", "duckstation_ini")
+
+
+def detect_flycast_cfg(config_data: dict) -> str | None:
+    return _detect_windows_only_config(config_data, "flycast_cfg", "flycast_cfg")
 
 
 def detect_dolphin_ini(config_data: dict) -> str | None:

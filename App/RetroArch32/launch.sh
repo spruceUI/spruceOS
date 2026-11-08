@@ -23,6 +23,7 @@ sed 's|^libretro_directory.*|libretro_directory = "./.retroarch/cores"|' "$PLATF
 mv "$TMP_CFG" "$PLATFORM_CFG"
 
 cd "$RA_DIR/"
+/mnt/SDCARD/spruce/scripts/asound-setup.sh "$RA_DIR"
 RA_PARAMS="-v --config ${PLATFORM_CFG}"
 
 # Same 32-bit overlay a game launch gets. Without it this app ran on the

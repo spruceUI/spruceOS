@@ -52,8 +52,8 @@ ensure_dev_shm
 ensure_dev_fd
 battery_snapshot boot
 restore_volume_after_audio_service &
-# Check if WiFi is enabled and bring up network services if so
-wifi_request apply
+# WiFi and RAOfflineProxy start after the menu's first frame (boot/after_first_frame.sh),
+# or below, on boots that run something else first.
 
 # Flag cleanup
 flag_remove "log_verbose" &
@@ -71,6 +71,7 @@ randomize_theme_if_requested &
 # UX accordingly. "Happy gaming" should remain first-boot-only and appear once.
 if flag_check "first_boot_$(get_firstboot_key)"; then
     boot_performance=
+    start_boot_jobs "first boot"
     wait_device_init_jobs   # firstboot.sh puts a PyUI on screen
     SPRUCE_FIRSTBOOT_UI=1 "/mnt/SDCARD/spruce/scripts/firstboot.sh"
     firstboot_rc="$?"
@@ -102,11 +103,13 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
 elif archives_queued; then
     boot_performance=
     run_unpacker_foreground "foreground run" "0"
+    start_boot_jobs "unpacked"
 fi
 
 # Run upgrade scripts on first boot after PC installer (or if flag was left by a failed restore)
 if flag_check "run_upgrades"; then
     boot_performance=
+    start_boot_jobs "upgrades"
     log_message "run_upgrades flag detected, running upgrade scripts"
     run_upgrade_scripts
     flag_remove "run_upgrades"
@@ -122,11 +125,10 @@ fi
 # Not awaited: the first menu frame does not need the watchdogs up.
 launch_startup_watchdogs &
 
-# Before the network, not after it: achievements are earned offline.
-raproxy_apply &
-
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
+    # A game comes first, so start now: the proxy gets the resume setup as a head start
+    start_boot_jobs "auto-resume"
     if auto_resume_game; then
         log_message "Auto Resume contract: staged intent in runtime helper; principal.sh owns execution."
     else
@@ -145,10 +147,13 @@ set_up_boot_action
 # Nothing from device_init may still be touching the display or the LEDs under the frontend.
 # PyUI waits for the display itself; a game staged to run first does not.
 if [ -f /tmp/cmd_to_run.sh ]; then
+    start_boot_jobs "game first"
     wait_device_init_jobs
 else
     wait_device_init_jobs --except-display
 fi
+# In case PyUI never draws its first frame
+( sleep 20; start_boot_jobs "no first frame after 20 s" ) &
 
 # start main loop
 log_message "Starting main loop"

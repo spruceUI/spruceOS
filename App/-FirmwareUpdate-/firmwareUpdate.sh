@@ -33,7 +33,7 @@ case "$PLATFORM" in
 		[ -n "$FW_FILE" ] || unsupported_device
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM")
+	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM"|"Pixel2DarkMoss")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
 	"Zero28"|"Zero40"|"XU20")

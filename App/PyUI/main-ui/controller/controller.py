@@ -507,7 +507,7 @@ class Controller:
 
         try:
             value = CfwSystemConfig.get_selected_value(
-                "Game Switcher Settings",
+                "Button Settings",
                 "menuHoldTime"
             )
             return float(value)
@@ -518,8 +518,8 @@ class Controller:
     def game_switcher_uses_hold_action():
         from utils.cfw_system_config import CfwSystemConfig
         return CfwSystemConfig.get_selected_value(
-            "Emulator Settings",
-            "holdHomeAction"
+            "Button Settings",
+            "holdMenuAction"
         ) == "Game Switcher"
     
     @staticmethod

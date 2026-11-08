@@ -84,6 +84,7 @@ _set_scummvm_platform() {
 run_scummvm_menu() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	# ROM_FILE, CORE not present 
 	SCUMMVM_LOG="$(emu_log_file)"
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
@@ -101,6 +102,7 @@ run_scummvm_menu() {
 run_scummvm() {
 	export HOME="/mnt/SDCARD/Saves/"
 	cd "$EMU_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
 	SCUMMVM_LOG="$(emu_log_file)"
 	export SDL_GAMECONTROLLERCONFIG_FILE="$EMU_DIR/gamecontrollerdb.txt"
 

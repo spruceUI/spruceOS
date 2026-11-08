@@ -8,13 +8,14 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from . import cache_budget, cache_keys
-from .config import CONFIG_DIR, ensure_config_dir
+from .config import CONFIG_DIR, ensure_config_dir, running_on_windows
 from .storage import Storage
 
 try:
     import fcntl
 except ModuleNotFoundError:
     fcntl = None
+
 
 CACHE_QUEUE_MAX_ATTEMPTS = 3
 DRAIN_LOCK_FILE = CONFIG_DIR / "cache_queue.drain.lock"
@@ -181,6 +182,12 @@ class _FileLock:
 
     @staticmethod
     def _acquire(handle, shared: bool, blocking: bool, should_abort) -> bool:
+        if running_on_windows():
+            from .windows import process as windows_process
+
+            return windows_process.acquire_file_lock(
+                handle, shared, blocking, should_abort, LOCK_POLL_SECONDS
+            )
         if fcntl is None:
             return True
         mode = (fcntl.LOCK_SH if shared else fcntl.LOCK_EX) | fcntl.LOCK_NB
@@ -218,7 +225,11 @@ class _HeldLock:
 
 
 def _unlock(handle) -> None:
-    if fcntl is not None:
+    if running_on_windows():
+        from .windows import process as windows_process
+
+        windows_process.unlock_file(handle.fileno())
+    elif fcntl is not None:
         fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 

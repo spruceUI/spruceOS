@@ -32,22 +32,6 @@ display_dsperate_bios_message() {
 	stop_pyui_message_writer
 }
 
-# Prints a RetroAchievements session token for the account, or nothing.
-rac_login_token() {
-	_u="$(printf '%s' "$1" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
-	_p="$(printf '%s' "$2" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
-	_url="https://retroachievements.org/dorequest.php?r=login&u=$_u&p=$_p"
-	if command -v curl >/dev/null 2>&1; then
-		_resp="$(curl -sS -f --connect-timeout 15 -A spruceOS "$_url" 2>/dev/null)"
-		case "$?" in
-			35|51|58|59|60|77) _resp="$(curl -k -sS -f --connect-timeout 15 -A spruceOS "$_url" 2>/dev/null)" ;;
-		esac
-	else
-		_resp="$(wget -q --no-check-certificate -U spruceOS -O - "$_url" 2>/dev/null)"
-	fi
-	printf '%s' "$_resp" | sed -n 's/.*"Token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
-}
-
 seed_dsperate_config() {
 	_src_dir="/mnt/SDCARD/Emu/NDS/dsperate-configs"
 	_cfg_dir="/mnt/SDCARD/Saves/dsperate"
@@ -67,6 +51,8 @@ seed_dsperate_config() {
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
 # file it only reads (DS_CHEEVOS_CFW_CONFIG); its own in-menu sign-in wins.
 prepare_dsperate_cheevos() {
+	. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+	unset DS_CHEEVOS_HOST
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
 	case "$rac_mode" in
@@ -74,6 +60,8 @@ prepare_dsperate_cheevos() {
 		Disabled) rm -f "$DS_CHEEVOS_CFW_CONFIG"; return 0 ;;
 		*) return 0 ;;
 	esac
+	# DSperate is softcore only, so the proxy takes every mode
+	DS_CHEEVOS_HOST="$(raproxy_address)" && export DS_CHEEVOS_HOST
 	if ! grep -qx "cheevos_username = \"$rac_user\"" "$DS_CHEEVOS_CFW_CONFIG" 2>/dev/null; then
 		rac_pass="$(get_config_value '.menuOptions."RetroAchievements Settings".password.selected' "")"
 		_token="$(rac_login_token "$rac_user" "$rac_pass")"

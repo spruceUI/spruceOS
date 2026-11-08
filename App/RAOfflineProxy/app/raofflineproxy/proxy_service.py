@@ -24,6 +24,7 @@ from .config import (
     image_caching_enabled,
     proxy_host,
     proxy_port,
+    running_on_windows,
     upstream_host,
 )
 from .flusher import flush_pending_awards
@@ -56,7 +57,7 @@ from .rom_cache import (
     refresh_game_patch,
 )
 from .last_played import LAST_PLAYED_ACTIONS, load_recently_played_game_ids, record_game_played
-from .rom_browser import DrainResult, DrainStop, drain_cache_queue, format_clock_time
+from .rom_browser import DrainResult, DrainStop, cached_game_id_for_hash, drain_cache_queue, format_clock_time
 from .state import save_online_state
 from .storage import Storage, current_millis, migrate_user_case_in_cache_keys
 from .utils import (
@@ -209,7 +210,9 @@ def _start_image_downloads(
 
 
 class ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-    allow_reuse_address = True
+    # Windows SO_REUSEADDR lets a second server bind over a live one, so it is
+    # POSIX-only (see windows/process.py, make_probe_exclusive).
+    allow_reuse_address = not running_on_windows()
     daemon_threads = True
 
 
@@ -662,8 +665,28 @@ class ProxyRuntimeServer(ThreadingTCPServer):
                 if cached is not None:
                     rewritten_body, _ = rewrite_image_urls(action, cached["responseBody"], proxy_base_url)
                     return ok_json(filter_warning_achievements_for_action(action, rewritten_body))
+            if hash_value and user:
+                cached = self._achievementsets_for_same_game(hash_value, user)
+                if cached is not None:
+                    rewritten_body, _ = rewrite_image_urls(action, cached["responseBody"], proxy_base_url)
+                    return ok_json(filter_warning_achievements_for_action(action, rewritten_body))
 
         return error_json(503, "no cached response")
+
+    def _achievementsets_for_same_game(self, hash_value: str, user: str) -> dict | None:
+        """Another disc of a multi-disc game: its gameid was cached, but the
+        achievement sets were cached under a different disc's hash."""
+        game_id = cached_game_id_for_hash(self.storage, hash_value)
+        if game_id is None:
+            return None
+        user_suffix = f":{cache_keys.normalize_user(user)}"
+        for meta in self.storage.cached_game_meta(game_id):
+            key = meta["cacheKey"]
+            if key.startswith(cache_keys.PREFIX_ACHIEVEMENTSETS) and key.endswith(user_suffix):
+                cached = self.storage.get_cache(key)
+                if cached is not None:
+                    return cached
+        return None
 
     def build_offline_unlocks_response(self, game_id: int, user: str) -> str:
         entry = self.storage.get_cache(cache_keys.unlocks(game_id, user))

@@ -73,5 +73,7 @@ Where PyUI uses each
   "No network selected" text    status (saved)
   RG28XX WiFi rows shown        status (radio)
 
-Commands spruce's own scripts use (not called by PyUI): restart, suspend,
-forget-all. See spruce/scripts/network/wifi.sh.
+Spruce's own scripts also use restart, recover, suspend and forget-all.
+The connection wait requests recover once no other radio change is running.
+Recover restarts only a radio that stopped answering: one still joining or
+out of range is left to connect. See spruce/scripts/network/wifi.sh.

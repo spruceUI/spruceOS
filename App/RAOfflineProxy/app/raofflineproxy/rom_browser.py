@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import json
 import logging
+import shutil
 import tempfile
 import time
 import urllib.error
@@ -15,7 +16,13 @@ from urllib.parse import urljoin
 from . import cache_budget, cache_keys, cache_queue, rate_limit, usage_stats
 from .auth import resolve_credentials
 from .cache_queue import QueuedRom
-from .config import FALLBACK_USER_AGENT, RA_MEDIA_HOST, image_caching_enabled, upstream_host
+from .config import (
+    FALLBACK_USER_AGENT,
+    RA_MEDIA_HOST,
+    ensure_config_dir,
+    image_caching_enabled,
+    upstream_host,
+)
 from .es_export import collect_cached_game_ids
 from .image_cache import (
     clear_all_cached_images,
@@ -434,16 +441,15 @@ def hash_candidates_for_manual_cache(path: Path) -> list[str]:
     # Exactly one inner console ROM: hash its extracted content.
     if len(rom_entries) == 1:
         rom_entry = rom_entries[0]
-        with zipfile.ZipFile(path) as archive:
-            with archive.open(rom_entry) as source:
-                rom_bytes = source.read()
-
         suffix = Path(rom_entry.filename).suffix
         entry_name = Path(rom_entry.filename).stem
-        with tempfile.TemporaryDirectory() as temp_dir:
+        # /tmp is RAM-backed on handhelds: stream the entry to the data dir instead.
+        with tempfile.TemporaryDirectory(prefix="rom-hash-", dir=ensure_config_dir()) as temp_dir:
             temp_name = entry_name if suffix else Path(rom_entry.filename).name
             temp_path = Path(temp_dir) / f"{temp_name}{suffix}"
-            temp_path.write_bytes(rom_bytes)
+            with zipfile.ZipFile(path) as archive:
+                with archive.open(rom_entry) as source, temp_path.open("wb") as target:
+                    shutil.copyfileobj(source, target, length=64 * 1024)
             if temp_path.suffix.lower() == ".chd":
                 result = hash_rom_candidates_result(temp_path)
                 if result.error is not None:

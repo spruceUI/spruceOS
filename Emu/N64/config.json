@@ -24,6 +24,7 @@
       ],
       "options": [
         "mupen64plus-standalone",
+        "mupen64plus-pow2",
         "km_ludicrousn64_2k22_xtreme_amped",
         "mupen64plus_next"
       ],
@@ -72,7 +73,8 @@
         "km_ludicrousn64_2k22_xtreme_amped",
         "parallel_n64",
         "mupen64plus_next",
-        "mupen64plus-standalone"
+        "mupen64plus-standalone",
+        "mupen64plus-pow2"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
       "overrides": {}

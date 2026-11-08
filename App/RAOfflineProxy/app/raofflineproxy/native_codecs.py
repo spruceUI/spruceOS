@@ -10,13 +10,35 @@ decompress RVZ groups and re-encrypt Wii partition data for hashing.
 
 import ctypes
 import ctypes.util
+import os
+import sys
+from pathlib import Path
 
 
 class CodecError(Exception):
     pass
 
 
+def _windows_dll_dirs() -> tuple[Path, ...]:
+    """Windows has no system libzstd/libcrypto: zstd.dll ships next to this
+    module, and libcrypto comes from the Python install's DLLs directory (the
+    copy its ssl module uses)."""
+    from .config import running_on_windows
+
+    if not running_on_windows():
+        return ()
+    return (Path(__file__).resolve().parent, Path(sys.base_prefix) / "DLLs")
+
+
 def _load(names: tuple[str, ...], sonames: tuple[str, ...]) -> ctypes.CDLL:
+    for directory in _windows_dll_dirs():
+        for name in names:
+            candidate = directory / name
+            if os.path.isfile(candidate):
+                try:
+                    return ctypes.CDLL(str(candidate))
+                except OSError:
+                    continue
     for name in names:
         try:
             return ctypes.CDLL(name)
@@ -47,7 +69,7 @@ def _zstd() -> ctypes.CDLL:
     if _zstd_cache is not None:
         return _zstd_cache
 
-    lib = _load(("libzstd.so.1", "libzstd.so", "libzstd.dylib"), ("zstd",))
+    lib = _load(("libzstd.so.1", "libzstd.so", "libzstd.dylib", "libzstd.dll", "zstd.dll"), ("zstd",))
     lib.ZSTD_decompress.argtypes = [
         ctypes.c_void_p,
         ctypes.c_size_t,
@@ -90,7 +112,7 @@ def _crypto() -> ctypes.CDLL:
     if _crypto_cache is not None:
         return _crypto_cache
 
-    lib = _load(("libcrypto.so.3", "libcrypto.so", "libcrypto.dylib"), ("crypto",))
+    lib = _load(("libcrypto.so.3", "libcrypto.so", "libcrypto.dylib", "libcrypto-3-x64.dll", "libcrypto-3.dll"), ("crypto",))
     lib.EVP_CIPHER_CTX_new.restype = ctypes.c_void_p
     lib.EVP_aes_128_cbc.restype = ctypes.c_void_p
     lib.EVP_EncryptInit_ex.argtypes = [
