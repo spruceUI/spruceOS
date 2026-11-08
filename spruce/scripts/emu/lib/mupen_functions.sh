@@ -302,6 +302,8 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 		--configdir "$MUPEN_CONFIG_DIR" \
 		--datadir "$MUPEN_DATA_DIR" \
 		--sshotdir "$MUPEN_SCREENSHOT_DIR" \
+		--fullscreen \
+		--resolution "${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}" \
 		"$ROM_PATH" > "$(emu_log_file)" 2>&1
 	mupen_rc=$?
 	treat_dpad_as_dpad
