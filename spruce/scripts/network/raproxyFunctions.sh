@@ -81,6 +81,14 @@ raproxy_apply() {
 	fi
 }
 
+# host:port of the proxy when it is enabled and running, else nothing
+raproxy_address() {
+	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 1
+	ra_proxy_is_running || return 1
+	_port="$(jq -r '.proxy_port // empty' "$RA_PROXY_DIR/data/config.json" 2>/dev/null)"
+	echo "127.0.0.1:${_port:-8099}"
+}
+
 raproxy_cached_games_json() {
 	ra_proxy_is_installed || return 1
 	_ra_proxy_run cached-games --json 2>/dev/null

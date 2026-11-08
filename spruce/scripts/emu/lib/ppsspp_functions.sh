@@ -120,7 +120,7 @@ configure_retroachievements() {
 		"Disabled")
 			# disable cheevos but leave everything else alone
 			TMP_CFG="$(mktemp)"
-			if sed -e "s|^AchievementsEnable.*|AchievementsEnable = False|" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
+			if sed -e "s|^AchievementsEnable[[:space:]]*=.*|AchievementsEnable = False|" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
 				mv "$TMP_CFG" "$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
 			else
 				rm -f "$TMP_CFG"
@@ -129,7 +129,7 @@ configure_retroachievements() {
 		"Casual"|"Softcore")
 			TMP_CFG="$(mktemp)"
 			if sed \
-				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
+				-e "s|^AchievementsEnable[[:space:]]*=.*|AchievementsEnable = True|" \
 				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = False|" \
 				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
 			"$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
@@ -141,7 +141,7 @@ configure_retroachievements() {
 		"Hardcore")
 			TMP_CFG="$(mktemp)"
 			if sed \
-				-e "s|^AchievementsEnable.*|AchievementsEnable = True|" \
+				-e "s|^AchievementsEnable[[:space:]]*=.*|AchievementsEnable = True|" \
 				-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = True|" \
 				-e "s|^AchievementsUserName.*|AchievementsUserName = \"$rac_user\"|" \
 			"$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini" > "$TMP_CFG"; then
@@ -174,11 +174,8 @@ configure_raproxy_host() {
 	_host=""
 	case "$rac_mode" in
 		Casual|Softcore|Hardcore)
-			if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] &&
-				pgrep -f "raofflineproxy\.main run-service" >/dev/null 2>&1; then
-				_port="$(jq -r '.proxy_port // empty' /mnt/SDCARD/App/RAOfflineProxy/data/config.json 2>/dev/null)"
-				_host="127.0.0.1:${_port:-8099}"
-			fi
+			. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+			_host="$(raproxy_address)"
 			;;
 	esac
 

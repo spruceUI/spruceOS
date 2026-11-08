@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+
 # --- Configuration ---
 PSP_DIR="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
 OUTPUT_FILE="$PSP_DIR/ppsspp_retroachievements.dat"
@@ -22,6 +25,8 @@ log_message "Logging in to RetroAchievements for $USER_VAL..." -v
 ENC_USER=$(echo -n "$USER_VAL" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')
 ENC_PASS=$(echo -n "$PASS_VAL" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')
 URL="https://retroachievements.org/dorequest.php?r=login&u=$ENC_USER&p=$ENC_PASS"
+# With WiFi off for the game, only the proxy can answer, from its cached login
+RA_PROXY_ADDR="$(raproxy_address)" && URL="http://$RA_PROXY_ADDR/dorequest.php?r=login2&u=$ENC_USER&p=$ENC_PASS"
 
 
 # 3. Perform the API login with SSL bypass (-k or --no-check-certificate)
