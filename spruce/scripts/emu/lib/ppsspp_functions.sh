@@ -54,6 +54,7 @@ run_ppsspp() {
 	set_up_default_configs_if_needed
 	load_ppsspp_configs
 	configure_retroachievements
+	configure_raproxy_host
 	configure_language
 
 	export HOME=/mnt/SDCARD/Saves
@@ -163,6 +164,34 @@ configure_retroachievements() {
 			fi
 			;;
 	esac
+}
+
+# Points PPSSPP at RAOfflineProxy while it runs. Set at every launch, since
+# load_ppsspp_configs replaces ppsspp.ini with the device's copy. The proxy only
+# serves softcore, as with RetroArch.
+configure_raproxy_host() {
+	_ini="$PPSSPP_LIVE_SYSTEM_DIR/ppsspp.ini"
+	_host=""
+	case "$rac_mode" in
+		Casual|Softcore|Hardcore)
+			if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] &&
+				pgrep -f "raofflineproxy\.main run-service" >/dev/null 2>&1; then
+				_port="$(jq -r '.proxy_port // empty' /mnt/SDCARD/App/RAOfflineProxy/data/config.json 2>/dev/null)"
+				_host="127.0.0.1:${_port:-8099}"
+			fi
+			;;
+	esac
+
+	TMP_CFG="$(mktemp)"
+	if [ -n "$_host" ]; then
+		log_message "PPSSPP: achievements through RAOfflineProxy at $_host" -v
+		sed -e '/^AchievementsHost[[:space:]]*=/d' \
+			-e "s|^AchievementsChallengeMode.*|AchievementsChallengeMode = False|" \
+			-e "/^\[Achievements\]/a AchievementsHost = $_host" \
+			"$_ini" > "$TMP_CFG"
+	else
+		sed -e '/^AchievementsHost[[:space:]]*=[[:space:]]*127\.0\.0\.1:/d' "$_ini" > "$TMP_CFG"
+	fi && mv "$TMP_CFG" "$_ini" || rm -f "$TMP_CFG"
 }
 
 # PPSSPP's menu language (a file in Emu/PSP/assets/lang) for a PyUI language
