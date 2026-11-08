@@ -97,8 +97,8 @@ if flag_check "first_boot_$(get_firstboot_key)"; then
         log_message "Firstboot: firstboot.sh returned non-zero; skipping completion UX."
     fi
 elif archives_queued; then
-    start_boot_jobs "unpacking"
     run_unpacker_foreground "foreground run" "0"
+    start_boot_jobs "unpacked"
 fi
 
 # Run upgrade scripts on first boot after PC installer (or if flag was left by a failed restore)
