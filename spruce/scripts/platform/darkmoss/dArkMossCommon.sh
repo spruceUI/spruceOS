@@ -288,12 +288,25 @@ device_enter_sleep() {
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
     save_sleep_info "$IDLE_TIMEOUT" || return 1
     set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    # The base's sleep hook restores the brightness it saw before suspend, and
+    # resume thaws the game: a timed wake would light the panel and run the game
+    # until save_poweroff closes it. Only a manual wake restores both.
+    signal_emulators STOP
+    echo 0 > "$DEVICE_BACKLIGHT_PATH"
     trigger_device_sleep
 }
 
 darkmoss_exit_sleep() {
     set_volume "$(get_volume_level)" false
     echo 0 >"$WAKE_ALARM_PATH" 2>/dev/null
+    apply_backlight "$(get_backlight_level)"
+    signal_emulators CONT
+}
+
+signal_emulators() {
+    for process in $EMU_PROCESSES; do
+        killall -q -"$1" "$process" 2>/dev/null
+    done
 }
 
 device_exit_sleep() {

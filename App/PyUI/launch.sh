@@ -216,7 +216,7 @@ case "$PLATFORM" in
 ############################################################
 # Rockchip RK3566 or RK3326 devices, under dArkMoss
 ############################################################
-    "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" | "E5Plus" )
+    "RGB30" | "RGB20SX" | "A10Mini" | "A10MiniV4" | "XUMiniM" | "G350" | "V10" | "RG353M" | "E5Plus" | "Pixel2DarkMoss" )
         # The base is dArkMoss - Debian trixie, glibc 2.41 - not the MossySpruce
         # this block used to name. It ships libdrm, a Mali Bifrost G52 blob that
         # libEGL/libGLESv2/libgbm all symlink to, and SDL2 2.32.4 with a KMSDRM

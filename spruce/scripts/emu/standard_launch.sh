@@ -135,7 +135,10 @@ case $EMU_NAME in
 		;;
 
 	"N64")
-		if [ "$CORE" = "mupen64plus-standalone" ]; then
+		if [ "$CORE" = "mupen64plus-pow2" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/mupen_functions.sh
+			run_mupen_pow2
+		elif [ "$CORE" = "mupen64plus-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/mupen_functions.sh
 			run_mupen_standalone
 		else

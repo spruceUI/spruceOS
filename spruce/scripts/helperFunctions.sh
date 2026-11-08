@@ -109,6 +109,12 @@ if [ -z "$PLATFORM_FAMILY" ] || [ ! -f "$platform_config" ]; then
 fi
 [ ! -f "$platform_config" ] || . "$platform_config"
 
+EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
+ra64.h700 ra32.h700 \
+retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
+flycast flycast2024 yabasanshiro yabasanshiro.trimui dsperate dsperate.a30 \
+mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN"
+
 # Ensure all methods are defined, and just logged if missing
 . "/mnt/SDCARD/spruce/scripts/platform/device.sh"
 
@@ -166,6 +172,7 @@ device_names() {
         XUMiniM)          echo "MAGICX_XU_MINI_M"; echo "DARKMOSS" ;;
         G350)             echo "G350";    echo "DARKMOSS" ;;
         V10)              echo "POWKIDDY_V10"; echo "DARKMOSS" ;;
+        Pixel2DarkMoss)   echo "GKD_PIXEL2_DARKMOSS"; echo "DARKMOSS" ;;
         Zero28)           echo "MAGICX_ZERO28"; echo "OAKMOSS_A133P" ;;
         Zero40)           echo "MAGICX_ZERO40"; echo "OAKMOSS_A133P" ;;
         XU20)             echo "MAGICX_XU20";   echo "OAKMOSS_A133P" ;;

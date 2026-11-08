@@ -209,12 +209,15 @@ oakmoss_apply_volume() {
     vol="${1:-0}"
     case "$vol" in ''|*[!0-9]*) vol=0 ;; esac
     if [ "$vol" -le 0 ]; then
-        att=$OAKMOSS_DIGITAL_VOLUME_FLOOR
+        # Fully mute at volume level 0 by disabling the speaker amplifier
+        amixer sset 'HpSpeaker' off >/dev/null 2>&1
     else
+        # Enable speaker amplifier when volume goes above 0
+        amixer sset 'HpSpeaker' on >/dev/null 2>&1
         [ "$vol" -gt 20 ] && vol=20
         att=$(( (OAKMOSS_DIGITAL_VOLUME_QUIETEST * (20 - vol) + 9) / 19 ))
+        amixer sset 'digital volume' "$att" >/dev/null 2>&1
     fi
-    amixer sset 'digital volume' "$att" >/dev/null 2>&1
 }
 
 # The chip's own step in the base's device_init: the rumble GPIO (BrickCommon.sh brings the Brick's).
