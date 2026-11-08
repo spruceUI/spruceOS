@@ -266,6 +266,9 @@ run_dsperate() {
 		# through ctypes but the loader never finds. DraStic's lib64_Flip build is
 		# patched for DraStic and segfaults dsperate even rendering offscreen.
 		[ "$PLATFORM" = "Flip" ] && export LD_LIBRARY_PATH="$EMU_DIR/DSperate_flip_lib:$LD_LIBRARY_PATH"
+		# Mesa's lavapipe is a CPU Vulkan device: the Vulkan present picks it on
+		# dArkMoss's Mali boards, crawls and segfaults. Hidden, it falls to the RGA.
+		export VK_LOADER_DRIVERS_DISABLE='*lvp*'
 		./dsperate "$@" --config "$_config_path" > "$(emu_log_file)" 2>&1
 	fi
 
