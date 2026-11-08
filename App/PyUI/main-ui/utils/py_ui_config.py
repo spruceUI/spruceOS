@@ -325,6 +325,11 @@ class PyUiConfig:
         return cls.get("cpuModeCmd",None)
 
     @classmethod
+    def get_first_frame_cmd(cls):
+        """Run with no arguments after every first frame PyUI presents. None means off."""
+        return cls.get("firstFrameCmd",None)
+
+    @classmethod
     def get_backlight_cmd(cls):
         return cls.get("backlightCmd",None)
 

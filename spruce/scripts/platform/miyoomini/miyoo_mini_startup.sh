@@ -30,6 +30,14 @@ mount -o bind /mnt/SDCARD/spruce/miyoomini/etc/group /etc/group
 mount -o bind /mnt/SDCARD/RetroArch/ra32.mini /mnt/SDCARD/RetroArch/retroarch
 
 (
+    # Not beside PyUI's start: wait until boot/after_first_frame.sh runs (the menu's first
+    # frame). Give up after 20 s, so ADB still comes up when the rest of the boot crashes.
+    _waits=0
+    while [ ! -d /tmp/spruce_boot_jobs_started ] && [ "$_waits" -lt 40 ]; do
+        sleep 0.5
+        _waits=$((_waits + 1))
+    done
+
     # On a first boot PyUI has not copied its template to Saves/ yet; read the
     # template it will copy instead of skipping the whole
     # bring-up and leaving wlan0 to PyUI minutes later, after firstboot.
