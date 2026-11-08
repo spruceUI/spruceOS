@@ -621,7 +621,6 @@ jobs:
             | A10 Mini              | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | Miniloong Pocket 1    | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX XU Mini M      | Supported | Yes, [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
-            | GKD Pixel 2 (dArkMoss) | In development | No, one card with [dArkMoss](https://github.com/spruceUI/dArkMoss/releases/latest) |
             | MagicX Zero 28        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX Zero 40        | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
             | MagicX XU20 V32       | Supported | Yes, [oakMoss](https://github.com/spruceUI/oakMoss/releases/latest) |
@@ -629,8 +628,6 @@ jobs:
             > **Anbernic RGXX+ series:** These devices require a BaseOS TF1 image, which you can grab [here](https://github.com/pvaibhav/BaseOS/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
             > **Powkiddy RGB30, RGB20SX and V10, Miniloong Pocket 1, A10 Mini, G350, MagicX XU Mini M and Anbernic RG353M:** these devices need dArkMoss on TF1, which you can grab [here](https://github.com/spruceUI/dArkMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
-
-            > **GKD Pixel 2 on dArkMoss (Twig-Next is a separate OS):** the Pixel 2 has one card slot. dArkMoss for the Pixel 2 adds a SPRUCEOS partition to that card at its first boot, and spruceOS goes on that partition.
 
             > **MagicX Zero 28, Zero 40 and XU20 V32:** these devices need oakMoss on TF1, which you can grab [here](https://github.com/spruceUI/oakMoss/releases/latest). TF2 takes a standard spruceOS installation, so your spruceOS card stays freely swappable between supported devices.
 
