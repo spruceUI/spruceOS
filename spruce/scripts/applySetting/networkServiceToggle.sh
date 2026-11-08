@@ -89,20 +89,12 @@ apply_toggle() {
     fi
 }
 
-# The proxy cannot validate a hardcore run, so enabling it drops Hardcore to
-# Casual. Done before the hand-off: PyUI reloads spruce-config.json once
-# changeCmd returns, so the edit is picked up rather than overwritten.
-if [ "$SERVICE" = "raproxy" ] && [ "$ENABLED" = "True" ] && [ "$MODE" != "--worker" ]; then
-    SPRUCE_JSON="/mnt/SDCARD/Saves/spruce/spruce-config.json"
-    if [ "$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")" = "Hardcore" ]; then
-        TMP_JSON="$(mktemp)"
-        if jq '.menuOptions["RetroAchievements Settings"].modeToggle.selected = "Casual"' "$SPRUCE_JSON" > "$TMP_JSON"; then
-            mv "$TMP_JSON" "$SPRUCE_JSON"
-            log_message "networkServiceToggle: offline proxy on, RetroAchievements mode Hardcore -> Casual"
-        else
-            rm -f "$TMP_JSON"
-        fi
-    fi
+# Hardcore keeps the proxy off. Done before the hand-off: PyUI reloads
+# spruce-config.json once changeCmd returns, so the setting shows off again.
+if [ "$SERVICE" = "raproxy" ] && [ "$ENABLED" = "True" ] && [ "$MODE" != "--worker" ] &&
+    [ "$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")" = "Hardcore" ]; then
+    raproxy_setting_off && log_message "networkServiceToggle: RAOfflineProxy stays off in Hardcore"
+    exit 0
 fi
 
 # Do the work detached, and one at a time per service.

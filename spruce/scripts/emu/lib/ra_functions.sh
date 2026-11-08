@@ -103,8 +103,8 @@ prepare_ra_config() {
 			;;
 	esac
 
-	# The proxy cannot validate a hardcore run. Enabling it already drops the
-	# mode to Casual (networkServiceToggle.sh); this covers Hardcore chosen after.
+	# The proxy cannot validate a hardcore run, so Hardcore runs casual while it is
+	# on. The saved mode is left alone, so turning the proxy off restores Hardcore.
 	if [ "$rac_mode" = "Hardcore" ] &&
 		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
 		log_message "Offline proxy on; casual for this launch"

@@ -81,6 +81,19 @@ raproxy_apply() {
 	fi
 }
 
+# Saves the RAOfflineProxy setting as off. Hardcore and the proxy don't mix: the
+# proxy can't validate a hardcore run.
+raproxy_setting_off() {
+	_json=/mnt/SDCARD/Saves/spruce/spruce-config.json
+	_tmp="$(mktemp)"
+	if jq --indent 4 '.menuOptions["RetroAchievements Settings"].enableOfflineProxy.selected = "False"' "$_json" > "$_tmp"; then
+		mv "$_tmp" "$_json"
+	else
+		rm -f "$_tmp"
+		return 1
+	fi
+}
+
 # host:port of the proxy when it is enabled and running, else nothing
 raproxy_address() {
 	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 1
