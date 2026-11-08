@@ -121,6 +121,8 @@ launch_startup_watchdogs &
 
 # check whether to auto-resume into a game
 if flag_check "save_active"; then
+    # A game comes first, so start now: the proxy gets the resume setup as a head start
+    start_boot_jobs "auto-resume"
     if auto_resume_game; then
         log_message "Auto Resume contract: staged intent in runtime helper; principal.sh owns execution."
     else

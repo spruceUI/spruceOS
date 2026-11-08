@@ -13,6 +13,8 @@ mkdir /tmp/spruce_boot_jobs_started 2>/dev/null || exit 0
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 
 log_message "Starting WiFi and RAOfflineProxy (${1:-first frame})"
-wifi_request apply
-# Not gated on WiFi: achievements are earned offline
+# The proxy goes first: on boots without the menu a game follows at once, and RetroArch
+# logs in to it. Not gated on WiFi, since achievements are earned offline. Both start
+# in the background, so WiFi only waits for the setting read.
 raproxy_apply
+wifi_request apply
