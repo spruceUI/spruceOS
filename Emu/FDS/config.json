@@ -21,7 +21,8 @@
       "display": "Retroarch Core",
       "options": [
         "fceumm",
-        "nestopia"
+        "nestopia",
+        "armnes"
       ],
       "selected": "fceumm",
       "overrides": {}
