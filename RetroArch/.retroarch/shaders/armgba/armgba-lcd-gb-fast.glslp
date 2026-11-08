@@ -1,26 +1,26 @@
-# armGBA LCD Lite: the Game Boy Color.
+# armGBA LCD Fast: the first Game Boy, measured colors.
 shaders = 2
-shader0 = shaders/armgba-lcd-fade-lite.glsl
+shader0 = shaders/armgba-lcd-fade-fast.glsl
 filter_linear0 = false
 scale_type0 = source
 scale0 = 1.0
 float_framebuffer0 = true
 feedback_pass = 0
-shader1 = shaders/armgba-lcd-lite.glsl
+shader1 = shaders/armgba-lcd-fast.glsl
 filter_linear1 = true
 scale_type1 = viewport
 
 parameters = "GHOSTING;INTERLACED;GHOST_DARKEN;GHOST_LIGHTEN;DRIVEN_SHARE;PIXEL_GAPS;GAP_SHARE;GAP_ACROSS;GAP_DOWN;GAP_RED;GAP_GREEN;GAP_BLUE;KEEP_BRIGHTNESS"
 GHOSTING = 1
 INTERLACED = 0
-GHOST_DARKEN = 15
-GHOST_LIGHTEN = 30
-DRIVEN_SHARE = 0.75
+GHOST_DARKEN = 50
+GHOST_LIGHTEN = 110
+DRIVEN_SHARE = 0.8
 PIXEL_GAPS = 1
-GAP_SHARE = 0.15
-GAP_ACROSS = 0.6
-GAP_DOWN = 0.1
-GAP_RED = 0
-GAP_GREEN = 0
-GAP_BLUE = 0
+GAP_SHARE = 0.25
+GAP_ACROSS = 1
+GAP_DOWN = 1
+GAP_RED = 63
+GAP_GREEN = 138
+GAP_BLUE = 4
 KEEP_BRIGHTNESS = 1
