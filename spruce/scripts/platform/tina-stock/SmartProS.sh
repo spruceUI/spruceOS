@@ -152,10 +152,6 @@ send_virtual_key_L3() {
     } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP
 }
 
-prepare_for_pyui_launch(){
-    log_message "prepare_for_pyui_launch not needed for Trim UI Smart Pro S " -v
-}
-
 post_pyui_exit(){
     log_message "post_pyui_exit not needed for Trim UI Smart Pro S " -v
 }

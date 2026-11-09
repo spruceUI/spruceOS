@@ -546,19 +546,6 @@ ASOUND
 #####   MENU LOOP HOOKS   #####
   #############################
 
-# Full clock for SDL2 startup, then back to smart once the menu is up. Not the
-# Flip's version, which also pins the memory controller and never releases it.
-prepare_for_pyui_launch() {
-    set_performance
-    (
-        sleep 5
-        if flag_check "in_menu"; then
-            set_smart
-        fi
-        unlock_governor 2>/dev/null
-    ) &
-}
-
 post_pyui_exit() {
     log_message "post_pyui_exit not needed on this device" -v
 }
