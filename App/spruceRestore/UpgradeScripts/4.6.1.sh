@@ -62,6 +62,29 @@ update_shader_presets() {
     done
 }
 
+remove_replaced_lite_shaders() {
+    _shader_dir="/mnt/SDCARD/RetroArch/.retroarch/shaders/armgba"
+    for _relative in \
+        shaders/armgba-lcd-fade-lite.glsl \
+        shaders/armgba-lcd-lite.glsl \
+        armgba-lcd-gba-lite.glslp \
+        armgba-lcd-gbc-lite.glslp \
+        armgba-lcd-gb-gray-lite.glslp \
+        armgba-lcd-gb-light-lite.glslp \
+        armgba-lcd-gb-lite.glslp \
+        armgba-lcd-gb-pocket-lite.glslp; do
+        _lite="$_shader_dir/$_relative"
+        _fast="${_lite%-lite.*}-fast.${_lite##*.}"
+        [ -f "$_lite" ] && [ -f "$_fast" ] || continue
+        if rm -f "$_lite"; then
+            log_message "Removed replaced shader file: $_lite"
+        else
+            log_message "Failed to remove replaced shader file: $_lite"
+            _upgrade_warnings=1
+        fi
+    done
+}
+
 migrate_pokedaisy_selection() {
     _system="$1"
     _core="$2"
@@ -111,6 +134,7 @@ if ! update_shader_presets; then
     log_message "Failed to update shader presets"
     _upgrade_warnings=1
 fi
+remove_replaced_lite_shaders
 migrate_pokedaisy_selection GB pokedaisy_gbc
 migrate_pokedaisy_selection GBC pokedaisy_gbc
 migrate_pokedaisy_selection GBA pokedaisy_gba
