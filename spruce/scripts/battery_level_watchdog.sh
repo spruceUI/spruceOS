@@ -17,12 +17,13 @@ INTER_WORD_GAP=1.4
 
 # Run in the background: waiting for a button here would hold up the forced shutdown.
 show_low_battery_warning() {
-    start_pyui_message_writer 1
-    log_and_display_message "Battery has $current_battery_percent% left. Charge or shutdown your device."
-    sleep 1
-    acknowledge
-    sleep 0.5
-    stop_pyui_message_writer
+    request_file="/tmp/pyui_modal_message"
+    request_tmp="${request_file}.$$"
+
+    printf '%s\n' \
+        "Battery has $current_battery_percent% left. Charge or shutdown your device." \
+        > "$request_tmp" \
+        && mv "$request_tmp" "$request_file"
 }
 
 morse_code_sos() {
