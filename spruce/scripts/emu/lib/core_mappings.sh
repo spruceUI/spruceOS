@@ -78,7 +78,7 @@ get_core_folder() {
         "parallel_n64_libretro.so") echo "ParaLLEl N64" ;;
         "pcsx_rearmed_libretro.so") echo "PCSX-ReARMed-$(arch_suffix)" ;;
         "picodrive_libretro.so") echo "PicoDrive" ;;
-        "pokedaisy_libretro.so") echo "PokeDaisy" ;;
+        "pokedaisy_gba_libretro.so"|"pokedaisy_gbc_libretro.so") echo "PokeDaisy" ;;
         "pokemini_libretro.so") echo "PokeMini" ;;
         "potator_libretro.so") echo "Potator" ;;
         "ppsspp_libretro.so") echo "PPSSPP" ;;

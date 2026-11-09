@@ -266,10 +266,12 @@ export_spruce_theme_dir() {
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
-	if [ "$CORE" = "pokedaisy" ]; then
-		seed_pokedaisy_ini 2>/dev/null
-		set_pokedaisy_panel
-	fi
+	case "$CORE" in
+		"pokedaisy_gba"|"pokedaisy_gbc")
+			seed_pokedaisy_ini 2>/dev/null
+			set_pokedaisy_panel
+			;;
+	esac
 
 	# Apply per-game or system-wide RA build selection. The binary names are
 	# device-overridable because "64-bit" is not always the universal build -

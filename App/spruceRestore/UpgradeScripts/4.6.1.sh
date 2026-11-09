@@ -62,15 +62,63 @@ update_shader_presets() {
     done
 }
 
-# Run the update
-update_shader_presets
+migrate_pokedaisy_selection() {
+    _system="$1"
+    _core="$2"
+    for _cfg in "/mnt/SDCARD/Saves/spruce/emu_backups/$_system.json" "/mnt/SDCARD/Emu/$_system/config.json"; do
+        [ -f "$_cfg" ] || continue
+
+        jq -e '
+            .menuOptions.Emulator |
+            (.selected == "pokedaisy") or
+            ((.overrides | type == "object") and any(.overrides[]; . == "pokedaisy"))
+        ' "$_cfg" >/dev/null
+        _status=$?
+        case "$_status" in
+            1) continue ;;
+            0) ;;
+            *)
+                log_message "Failed to inspect PokeDaisy selections in $_cfg"
+                _upgrade_warnings=1
+                continue
+                ;;
+        esac
+
+        _tmp="$(mktemp "${_cfg}.tmp.XXXXXX")" || {
+            log_message "Failed to create temporary file for $_cfg"
+            _upgrade_warnings=1
+            continue
+        }
+        if cp -p "$_cfg" "$_tmp" && jq --arg core "$_core" '
+            .menuOptions.Emulator |= (
+                if .selected == "pokedaisy" then .selected = $core else . end |
+                if (.overrides | type) == "object" then
+                    .overrides |= map_values(if . == "pokedaisy" then $core else . end)
+                else . end
+            )
+        ' "$_cfg" > "$_tmp" && mv -f "$_tmp" "$_cfg"; then
+            log_message "$_system: migrated PokeDaisy selections to $_core in $_cfg"
+        else
+            rm -f "$_tmp"
+            log_message "Failed to migrate PokeDaisy selections in $_cfg"
+            _upgrade_warnings=1
+        fi
+    done
+}
+
+_upgrade_warnings=0
+if ! update_shader_presets; then
+    log_message "Failed to update shader presets"
+    _upgrade_warnings=1
+fi
+migrate_pokedaisy_selection GB pokedaisy_gbc
+migrate_pokedaisy_selection GBC pokedaisy_gbc
+migrate_pokedaisy_selection GBA pokedaisy_gba
 
 # -------------------- UPGRADE COMPLETION --------------------
-# Check if the update was successful
-if [ $? -eq 0 ]; then
+if [ "$_upgrade_warnings" -eq 0 ]; then
     log_message "Upgrade to version $TARGET_VERSION completed successfully"
-    exit 0
 else
-    log_message "Error: Upgrade to version $TARGET_VERSION failed"
-    exit 1
+    log_message "Upgrade to version $TARGET_VERSION completed with warnings"
 fi
+exit 0
