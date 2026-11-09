@@ -201,6 +201,7 @@ volume_up() {
 
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+SLEEP_CHARGER_SETTLE_SECONDS=3
 
 trigger_device_sleep() {
     echo deep >/sys/power/mem_sleep
