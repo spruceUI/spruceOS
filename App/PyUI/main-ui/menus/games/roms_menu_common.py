@@ -225,6 +225,29 @@ class RomsMenuCommon(ABC):
 
     def default_to_last_game_selection(self):
         return True
+
+    def _restore_selection_after_rom_deletion(self, page_name, rom_list, selected_index):
+        if len(rom_list) > 1:
+            next_index = selected_index + 1
+            if next_index == len(rom_list):
+                next_index = selected_index - 1
+            next_game = rom_list[next_index].get_value()
+            PyUiState.set_last_game_selection(
+                page_name,
+                next_game.rom_file_path,
+                getattr(self, 'subfolder', '') or ''
+            )
+            return
+
+        game_system = getattr(self, 'game_system', None)
+        if (
+            len(rom_list) == 1
+            and game_system is not None
+            and page_name == game_system.display_name
+            and not getattr(self, 'subfolder', None)
+        ):
+            PyUiState.set_last_game_selection(page_name, None, '')
+            PyUiState.set_in_game_selection_screen(False)
    
     def _run_rom_selection_for_rom_list(self, page_name, rom_list, refresh_rom_list=None) :
         selected = Selection(None,None,0)
@@ -313,11 +336,15 @@ class RomsMenuCommon(ABC):
                         page_name, selected.get_selection().get_value().rom_file_path,
                         getattr(self, 'subfolder', '') or ''
                     )
+                    selected_index = selected.get_index()
                     gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
                     GameConfigMenu(
                         selected.get_selection().get_value().game_system, 
                         selected.get_selection().get_value(), 
-                        gen_additional_game_options
+                        gen_additional_game_options,
+                        on_rom_deleted=lambda: self._restore_selection_after_rom_deletion(
+                            page_name, rom_list, selected_index
+                        )
                     ).show_config(os.path.basename(selected.get_selection().get_value().rom_file_path))
                     # Regenerate as game config menu might've changed something
                     rom_list = self._get_rom_list()

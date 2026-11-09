@@ -25,10 +25,11 @@ from menus.language.language import Language
 # Would like this to be generic in the future but this is so Miyoo specific right now 
 # Due to the oddities in how its handled
 class GameConfigMenu:
-    def __init__(self, game_system: GameSystem, game : RomInfo, gen_additional_game_options):
+    def __init__(self, game_system: GameSystem, game : RomInfo, gen_additional_game_options, on_rom_deleted=None):
         self.game_system = game_system
         self.game = game
         self.gen_additional_game_options = gen_additional_game_options
+        self.on_rom_deleted = on_rom_deleted
 
     def get_selected_index(self, title, options):
         selected = Selection(None, None, 0)
@@ -156,6 +157,8 @@ class GameConfigMenu:
                 FavoritesManager.remove_favorite(self.game)
                 RecentsManager.remove_game(self.game)
                 CollectionsManager.remove_game_from_collections(self.game)
+                if self.on_rom_deleted is not None:
+                    self.on_rom_deleted()
                 #TODO don't be hackish and reload. Instead remove it from caches
                 sys.exit()
     
