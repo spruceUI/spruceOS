@@ -109,7 +109,8 @@ class DefaultThemePatcher():
             height_multiplier = ((scale_height-scale_width) / scale_width) + 1
             width_multiplier = 1.0  
 
-        aspect_ratio_reset = abs(scale_width - scale_height) > 1e-6
+        # Recents only when the wider screen gains a main-menu column (16:9 -> 5); 3:2 stays at 4.
+        aspect_ratio_reset = int(4 * width_multiplier) > 4
 
         PyUiLogger().get_logger().info(f"Patching theme {config_path} from {theme_width}x{theme_height} to {target_width}x{target_height} w/ a scale factor of {scale}")
 
@@ -243,7 +244,7 @@ class DefaultThemePatcher():
             new_dict = {}
             for k, v in obj.items():
 
-                if k in cls.ASPECT_RATIO_RESET_KEYS:
+                if k in cls.ASPECT_RATIO_RESET_KEYS and aspect_ratio_reset:
                     new_dict[k] = cls.ASPECT_RATIO_RESET_KEYS[k]
                 elif cls._should_scale_based_on_width(k) and abs(width_multiplier - 1.0) > 1e-6:
                     PyUiLogger.get_logger().info(f"Scaled {k} based on width_multiplier of {width_multiplier}")
