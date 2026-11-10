@@ -1,5 +1,5 @@
 YabaSanshiro (Yabause)
-https://github.com/devmiyax/yabause
+https://github.com/sydarn/yabause
 
 Copyright (c) Guillaume Duhamel, Theo Berkau, and YabaSanshiro contributors
 

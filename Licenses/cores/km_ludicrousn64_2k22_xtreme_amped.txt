@@ -1,5 +1,5 @@
 Mupen64Plus (KMFDManic)
-https://github.com/libretro/mupen64plus-libretro-nx
+https://github.com/KMFDManic/ludicrous-2k22-xtreme-amped
 
 Copyright (c) KMFDManic, Mupen64Plus contributors
 

@@ -3,7 +3,7 @@ https://htop.dev/
 
 Copyright (c) Hisham Muhammad and htop contributors
 
-Licensed under the GNU General Public License v2.0
+Licensed under the GNU General Public License v2.0 or later
 
 ---
 

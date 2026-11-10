@@ -1,5 +1,5 @@
 SameDuck (Mega Duck)
-https://github.com/libretro/SameBoy
+https://github.com/libretro/SameDuck
 
 Copyright (c) Lior Halphon
 

@@ -1,9 +1,9 @@
-TGB Dual (GB/GBC)
-https://github.com/libretro/tgbdual-libretro
+Green End SFTP Server (gesftpserver)
+https://www.greenend.org.uk/rjk/sftpserver/
 
-Copyright (c) Hii
+Copyright (C) 2007-2016 Richard Kettlewell
 
-Licensed under the GNU General Public License v2.0
+Licensed under the GNU General Public License v2.0 or later
 
 ---
 

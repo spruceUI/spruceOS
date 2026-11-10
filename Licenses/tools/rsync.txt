@@ -3,7 +3,7 @@ https://rsync.samba.org/
 
 Copyright (c) Andrew Tridgell, Wayne Davison, and rsync contributors
 
-Licensed under the GNU General Public License v3.0
+Licensed under the GNU General Public License v3.0 or later
 
 ---
 

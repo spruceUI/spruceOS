@@ -1,0 +1,19 @@
+Included with permission
+
+These works are not under an open license. They are included in spruceOS
+with the permission of their authors, given to the spruce team directly.
+
+advanced_drastic            trngaje        https://github.com/trngaje/advanced_drastic
+  (libadvdrastic.so)
+GVU, fetch_subs             amruthwo       https://github.com/amruthwo/GVU
+Gallery                     Hairo R. Carela
+Songo#5                     Riley
+Squatch Quest (Demo)        Seaside Studios https://seasidestudios.itch.io/squatch-quest
+Icons                       Icons8         https://icons8.com/
+Perfect overlays            1playerinsertcoin, mugwomp93
+drkhrse bezels              drkhrse        https://github.com/drkhrse/drkhrse_miyoo_bezels
+Jeltron overlays            Jeltr0n
+tobographic overlays        tobographic
+GB/GBC grid filters         akouzoukos
+offset_up filter            eggs
+64-bit tools from TomatoOS  Tech Toy Tinker

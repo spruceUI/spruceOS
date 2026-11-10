@@ -1,5 +1,5 @@
 Mupen64Plus (N64)
-https://github.com/libretro/mupen64plus-libretro-nx
+https://github.com/libretro/mupen64plus-libretro
 
 Copyright (c) Mupen64Plus contributors
 

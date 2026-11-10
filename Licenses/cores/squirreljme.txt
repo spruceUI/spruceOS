@@ -1,5 +1,5 @@
 SquirrelJME (Java ME)
-https://github.com/libretro/squirreljme
+https://github.com/SquirrelJME/SquirrelJME
 
 Copyright (c) Stephanie Gawroriski
 

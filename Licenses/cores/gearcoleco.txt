@@ -1,5 +1,5 @@
 GearColeco (ColecoVision)
-https://github.com/libretro/Gearcoleco
+https://github.com/drhelius/Gearcoleco
 
 Copyright (c) Ignacio Sanchez Gines
 
