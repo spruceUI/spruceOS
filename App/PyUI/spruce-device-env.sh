@@ -17,6 +17,7 @@
 #   CHARGE_STATUS_PATH                $BATTERY/status, unless the cfg sets CHARGE_STATUS_CMD
 #   SUPPORTS_WIFI                     wifi_available_on_device, unless the cfg sets CHECK_WIFI_SUPPORT_CMD
 #   BACKLIGHT_CMD                     set-backlight.sh, if the device defines apply_backlight
+#   VOL_UP/DOWN_CMD                   spruce/scripts/step-volume.sh up/down (volume_up/volume_down)
 #   CONTRAST/SATURATION/BRIGHTNESS/HUE_CMD  set-display.sh, if it defines apply_display_<setting>
 #   FW_VERSION                        device_get_fw_version, if defined
 #   HAS_FFMPEG                        ffmpeg on PATH, which PyUI's image resizing runs
@@ -112,6 +113,10 @@ elif wifi_available_on_device; then
 else
     spruce_env_default SUPPORTS_WIFI "false"
 fi
+
+# The Volume row steps through the device's own volume_up/volume_down, which every platform defines.
+spruce_env_default VOL_UP_CMD "/mnt/SDCARD/spruce/scripts/step-volume.sh up"
+spruce_env_default VOL_DOWN_CMD "/mnt/SDCARD/spruce/scripts/step-volume.sh down"
 
 # Hardware goes through PyUI's action scripts, for the hooks this device's functions define.
 command -v apply_backlight >/dev/null 2>&1 &&
