@@ -170,9 +170,9 @@ class Sdl2AudioPlayer:
         PyUiLogger.get_logger().info("Sdl2AudioPlayer cleaned up.")
 
     @staticmethod
-    def load_wav(file_path: str):
-        """Preload a WAV file into the worker's chunk_map."""
-        return Sdl2AudioPlayer._send_cmd("preload_wav", file_path, expect_reply=True)
+    def load_wav(file_path: str, *, wait=True):
+        """Queue a WAV preload ahead of any subsequent playback commands."""
+        return Sdl2AudioPlayer._send_cmd("preload_wav", file_path, expect_reply=wait)
     
     # --------------------------
     # Worker implementation below
