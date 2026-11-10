@@ -84,7 +84,7 @@ class DefaultThemePatcher():
             if(not os.path.exists(background_image)):
                 background_image = os.path.join(path, "skin","background.qoi")
 
-            theme_width, theme_height = Display.get_image_dimensions(background_image)
+            theme_width, theme_height = Display.get_source_image_dimensions(background_image)
             PyUiLogger.get_logger().debug(f"Theme background size: {theme_width}x{theme_height}, Target size: {target_width}x{target_height}")
             if(theme_width != 0 and theme_width != target_width):
                 cls.scale_theme(path, theme_width, theme_height, target_width, target_height)

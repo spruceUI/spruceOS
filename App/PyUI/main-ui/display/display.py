@@ -834,6 +834,53 @@ class Display:
     def image_load(cls, image_path):
         #PyUiLogger.get_logger().info(f"Loading {image_path}")
         return sdl2.sdlimage.IMG_Load(image_path.encode("utf-8"))
+
+    @classmethod
+    def get_source_image_dimensions(cls, img):
+        if img is None:
+            return 0, 0
+
+        surface = cls.image_load(img)
+        if not surface:
+            return 0, 0
+
+        width, height = surface.contents.w, surface.contents.h
+        sdl2.SDL_FreeSurface(surface)
+        return width, height
+
+    @classmethod
+    def _fit_to_max_texture_size(cls, width, height):
+        device = Device.get_device()
+        return min(width, device.max_texture_width()), min(height, device.max_texture_height())
+
+    @classmethod
+    def crop_surface_to_max_texture_size(cls, surface, image_path):
+        """Center-crop a surface to the device's max texture size. Frees the surface passed in."""
+        width, height = surface.contents.w, surface.contents.h
+        crop_w, crop_h = cls._fit_to_max_texture_size(width, height)
+        if crop_w == width and crop_h == height:
+            return surface
+
+        pixel_format = surface.contents.format.contents
+        cropped = sdl2.SDL_CreateRGBSurfaceWithFormat(0, crop_w, crop_h, pixel_format.BitsPerPixel, pixel_format.format)
+        if cropped:
+            # Blending would mix the source pixels with the new surface's contents; copy them as they are
+            sdl2.SDL_SetSurfaceBlendMode(surface, sdl2.SDL_BLENDMODE_NONE)
+            src_rect = sdl2.SDL_Rect((width - crop_w) // 2, (height - crop_h) // 2, crop_w, crop_h)
+            sdl2.SDL_BlitSurface(surface, src_rect, cropped, None)
+            PyUiLogger.get_logger().info(f"Cropped {image_path} from {width} x {height} to {crop_w} x {crop_h} to fit the texture limit")
+        else:
+            PyUiLogger.get_logger().error(f"Could not create a cropped surface for {image_path}: {sdl2.SDL_GetError().decode()}")
+
+        sdl2.SDL_FreeSurface(surface)
+        return cropped
+
+    @classmethod
+    def _load_render_surface(cls, image_path):
+        surface = cls.convert_surface_to_safe_format(cls.image_load(image_path))
+        if not surface:
+            return None
+        return cls.crop_surface_to_max_texture_size(surface, image_path)
     
     @classmethod
     def convert_surface_to_safe_format(cls, surface):
@@ -867,15 +914,13 @@ class Display:
                 texture_w = cache.width
                 texture_h = cache.height
             else:
-                surface = Display.image_load(image_path)
-                surface = cls.convert_surface_to_safe_format(surface)
+                surface = cls._load_render_surface(image_path)
                 if not surface:
                     if not cls.log_sdl_error_and_clear_cache_image(image_path):
                         elapsed_ms = (time.perf_counter() - start) * 1000
                         cls.image_render_timer+= elapsed_ms
                         return 0,0
-                    surface = Display.image_load(image_path)
-                    surface = cls.convert_surface_to_safe_format(surface)
+                    surface = cls._load_render_surface(image_path)
                     if not surface:
                         PyUiLogger.get_logger().error(f"Failed to load image: {image_path}")
                         elapsed_ms = (time.perf_counter() - start) * 1000
@@ -888,17 +933,6 @@ class Display:
 
                 surface_width = surface.contents.w
                 surface_height = surface.contents.h
-
-                if(surface_width > Device.get_device().max_texture_width() or surface_height > Device.get_device().max_texture_height()):
-                    sdl2.SDL_FreeSurface(surface)
-                    PyUiLogger.get_logger().warning(
-                        f"Image is too large to render ({surface_width} x {surface_height} with max of {Device.get_device().max_texture_width()} x {Device.get_device().max_texture_height()}). Skipping {image_path}\n"
-                    ) 
-                    cls._problematic_images.add(image_path)
-                    elapsed_ms = (time.perf_counter() - start) * 1000
-                    cls.image_render_timer+= elapsed_ms
-                    return 0, 0
-
 
                 if not texture:
                     if not cls.log_sdl_error_and_clear_cache_image(image_path):
@@ -1387,15 +1421,9 @@ class Display:
         if cached is not None:
             return cached.width, cached.height
 
-        # Fall back to loading the image if it isn't cached
-        surface = cls.image_load(img)
-        if not surface:
-            return 0, 0
-
-        width, height = surface.contents.w, surface.contents.h
-        sdl2.SDL_FreeSurface(surface)
-
-        return width, height
+        # Fall back to loading the image if it isn't cached; report the size it will be drawn at
+        width, height = cls.get_source_image_dimensions(img)
+        return cls._fit_to_max_texture_size(width, height)
 
     _cached_space_dimensions = None  # class-level cache
     @classmethod
