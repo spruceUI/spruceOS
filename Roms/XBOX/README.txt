@@ -1,10 +1,10 @@
 Xbox games for hakuX
 
-Supported files: .iso, .xiso and .sqfs
+Supported files: .iso, .xiso, .chd and .sqfs
 
 The SD card is FAT32, which cannot hold a file bigger than 4 GB. Many Xbox
 games are bigger than that, so they need one or both of the steps below.
-Do both on a computer, then copy the result to this folder.
+Do them on a computer, then copy the result to this folder.
 
 
 1. Trim the image with extract-xiso
@@ -21,17 +21,19 @@ Most games come out well under 4 GB. If yours does, you are done.
 extract-xiso: https://github.com/XboxDev/extract-xiso
 
 
-2. Pack a large game into a .sqfs
+2. Compress a large game to .chd
 
-Some games are still over 4 GB after trimming (Halo 2 is 4.7 GB). Put the
-ISO inside a compressed SquashFS file and copy that instead:
+Some games are still over 4 GB after trimming (Halo 2 is 4.7 GB, and 3.1 GB
+as a CHD). Convert the ISO with chdman, the same tool used for PlayStation
+and Dreamcast games:
 
-    mksquashfs "Game.iso" "Game.sqfs" -comp gzip
+    chdman createdvd -i "Game.iso" -o "Game.chd"
 
-The .sqfs must hold exactly one ISO and must itself be under 4 GB. Use gzip,
-not zstd: older device kernels cannot read zstd. mksquashfs is in the
-squashfs-tools package on Linux and in WSL on Windows.
+Use createdvd, not createcd. chdman comes with MAME (mame-tools on Linux).
 
+
+A .sqfs file holding one ISO also works on devices whose kernel can mount
+SquashFS (make it with: mksquashfs "Game.iso" "Game.sqfs" -comp gzip).
 
 The first launch of any game takes a minute or two with a black screen while
 the emulated hard disk is set up. Use your own dumps of discs you own.

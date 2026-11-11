@@ -4,7 +4,7 @@
     "iconsel": "xbox_sel.png",
     "themecolor": "107C10",
     "launch": "../../spruce/scripts/emu/standard_launch.sh",
-    "extlist": "iso|xiso|sqfs",
+    "extlist": "iso|xiso|chd|sqfs",
     "launchlist": [],
     "menuOptions": {
         "Governor": {
