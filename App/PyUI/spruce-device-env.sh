@@ -57,7 +57,11 @@ spruce_env_key_mappings() {
     _buttons="$_buttons UP:DPAD_UP DOWN:DPAD_DOWN LEFT:DPAD_LEFT RIGHT:DPAD_RIGHT"
     [ "${DEVICE_NUM_ANALOG_STICKS:-0}" -gt 0 ] && _buttons="$_buttons L3:L3 R3:R3"
     for _button in $_buttons; do
-        eval "echo \"${_button#*:} \$B_${_button%%:*}\""
+        if [ "$_button" = "R3:R3" ] && [ "${B_R3:-}" = "316" ]; then
+            echo "R3 1 316"
+        else
+            eval "echo \"${_button#*:} \$B_${_button%%:*}\""
+        fi
     done | awk '
         function add(type, code, value, results) {
             json = json sep "{\"type\":" type ",\"code\":" code ",\"value\":" value ",\"results\":[" results "]}"
@@ -77,7 +81,8 @@ spruce_env_key_mappings() {
 
 spruce_env_default SCREEN_WIDTH "$DISPLAY_WIDTH"
 spruce_env_default SCREEN_HEIGHT "$DISPLAY_HEIGHT"
-spruce_env_default SCREEN_ROTATION "$DISPLAY_ROTATION"
+spruce_env_default SCREEN_ROTATION "${PYUI_SCREEN_ROTATION:-$DISPLAY_ROTATION}"
+spruce_env_default DEFAULT_CFG_PATH "$SYSTEM_JSON_DEFAULT"
 spruce_env_default SYSTEM_CFG_PATH "$SYSTEM_JSON"
 spruce_env_default AUDIO_PLAYER "SDL2"
 spruce_env_default PYUI_DEVICE_NAMES "$(device_names | tr '\n' ',' | sed 's/,$//')"

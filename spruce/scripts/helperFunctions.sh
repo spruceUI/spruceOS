@@ -189,14 +189,17 @@ device_names() {
     esac
 
     # Ring LEDs: two of the three models share a platform with models that have
-    # none, so no platform token can stand in for this. Set in AnbernicXXCommon.sh.
-    if [ "${XX_RGB_MODEL:-0}" = "1" ]; then
-        echo "ANBERNIC_RGXX_RGB"
-    fi
+    # none, so identify those models from BaseOS's target.
+    case "${BASEOS_TARGET:-}" in
+        rg40xx*|rgcubexx) echo "ANBERNIC_RGXX_RGB" ;;
+    esac
     # Lid wake: the clamshells share their platforms with slabs too. See xx_lid_wake.sh.
-    if command -v xx_lid_wake_supported >/dev/null 2>&1 && xx_lid_wake_supported; then
-        echo "ANBERNIC_RGXX_LID_WAKE"
-    fi
+    case "${BASEOS_TARGET:-}" in
+        *sp)
+            [ -w /sys/class/power_supply/axp2202-battery/os_sleep ] &&
+                echo "ANBERNIC_RGXX_LID_WAKE"
+            ;;
+    esac
 }
 
 # The live RetroArch config, seeded from the .bak when absent. The configs moved

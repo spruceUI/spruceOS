@@ -1,12 +1,21 @@
 
 
+import fcntl
+import os
+import struct
+
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
+from controller.controller_inputs import ControllerInput
+from devices.charge.charge_status import ChargeStatus
 from devices.env.env_var_device import EnvVarDevice
 from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
 from devices.miyoo_trim_common import MiyooTrimCommon
+from devices.std_in_based_send_event_binary_helper import StdInBasedSendEventBinaryHelper
 from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
 from games.utils.game_entry import GameEntry
 from menus.games.utils.rom_info import RomInfo
+from utils import throttle
+from utils.py_ui_config import PyUiConfig
 
 
 class SpruceDevice(EnvVarDevice):
@@ -16,6 +25,55 @@ class SpruceDevice(EnvVarDevice):
         # Spruce uses the miyoo file format for its configs regardless of which device it is on
         self.games_file_parser = MiyooGamesFileParser()   
         self.game_utils = MiyooTrimGameSystemUtils()
+        if os.environ.get("ANBERNIC_XX_BACKLIGHT_IOCTL") == "true":
+            self._set_lumination_to_config()
+
+    def _set_lumination_to_config(self):
+        if os.environ.get("ANBERNIC_XX_BACKLIGHT_IOCTL") != "true":
+            return super()._set_lumination_to_config()
+
+        value = max(5, self.map_backlight_from_10_to_full_255(self.system_config.backlight) // 2)
+        fd = os.open("/dev/disp", os.O_RDWR)
+        try:
+            fcntl.ioctl(fd, 0x102, struct.pack("QQQQ", 0, value, 0, 0))
+        finally:
+            os.close(fd)
+
+    def volume_up(self):
+        event_path = os.environ.get("ANBERNIC_XX_VOLUME_EVENT_PATH")
+        if event_path:
+            StdInBasedSendEventBinaryHelper.send_key_down_and_up(event_path, 115)
+        else:
+            super().volume_up()
+
+    def volume_down(self):
+        event_path = os.environ.get("ANBERNIC_XX_VOLUME_EVENT_PATH")
+        if event_path:
+            StdInBasedSendEventBinaryHelper.send_key_down_and_up(event_path, 114)
+        else:
+            super().volume_down()
+
+    def special_input(self, controller_input, length_in_seconds):
+        if os.environ.get("ANBERNIC_XX_DEVICE") != "true" or not PyUiConfig.enable_button_watchers():
+            return
+        if controller_input == ControllerInput.POWER_BUTTON:
+            if length_in_seconds < 1:
+                self.sleep()
+            else:
+                self.prompt_power_down()
+
+    @throttle.limit_refresh(5)
+    def get_charge_status(self):
+        if os.environ.get("ANBERNIC_XX_DEVICE") != "true":
+            return super().get_charge_status()
+        try:
+            status = self._read_status("CHARGE_STATUS_PATH", "CHARGE_STATUS_CMD")
+        except Exception as e:
+            self._log_status_error("the charge status", e)
+            return ChargeStatus.DISCONNECTED
+        if status and status.lower() == "charging":
+            return ChargeStatus.CHARGING
+        return ChargeStatus.DISCONNECTED
 
     def calibrate_sticks(self):
         # TODO get from env var which version of calibration to use and then call it
@@ -64,4 +122,3 @@ class SpruceDevice(EnvVarDevice):
 
     def get_image_for_activity(self, activity):
         return MiyooTrimCommon.get_image_for_activity(activity)
-

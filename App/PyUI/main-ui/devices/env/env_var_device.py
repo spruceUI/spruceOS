@@ -485,7 +485,8 @@ class EnvVarDevice(DeviceCommon):
         return FfmpegImageUtils()
 
     def get_device_name(self):
-        return "ignored" # Needs to be refactored out
+        names = self.get_device_names()
+        return names[0] if names else "ignored"
 
     def get_device_names(self):
         return [
