@@ -1,4 +1,3 @@
-import os
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -28,8 +27,6 @@ class Controller:
     last_press_time_map = {}
     special_non_sdl_event = False
     render_required_callback = None
-    _modal_message_active = False
-    _modal_message_file = "/tmp/pyui_modal_message"
     last_controller_input = None
     _input_history = []
     gs_triggered = False
@@ -280,53 +277,22 @@ class Controller:
         Controller.get_input_called_again = False
         return Controller.last_controller_input
 
-
     @staticmethod
-    def show_pending_modal_message():
-        if Controller._modal_message_active:
-            return False
+    def wake_from_screensaver():
+        if not Controller._screensaver_active:
+            return
 
-        message_file = Controller._modal_message_file
-        if not os.path.isfile(message_file):
-            return False
+        from display.display import Display
+        from display.screensaver import ScreenSaver
 
-        Controller._modal_message_active = True
+        ScreenSaver.clear_cache()
+        Display.restore_from_blank()
 
-        try:
-            with open(message_file, "r", encoding="utf-8") as source:
-                message = source.read().strip()
-
-            try:
-                os.unlink(message_file)
-            except FileNotFoundError:
-                pass
-
-            if not message:
-                return False
-
-            from display.display import Display
-
-            Controller.clear_last_input()
-            Controller.clear_input_queue()
-
-            Display.display_message(message)
-
-            Controller.wait_for_input([
-                ControllerInput.A,
-                ControllerInput.B,
-            ])
-
-            # Do not pass the acknowledgement through to the underlying menu.
-            Controller.clear_last_input()
-            Controller.clear_input_queue()
-            return True
-
-        except Exception:
-            PyUiLogger.get_logger().exception("Could not display pending modal message")
-            return False
-
-        finally:
-            Controller._modal_message_active = False
+        Controller._screensaver_active = False
+        Controller.last_controller_input = None
+        Controller.last_input_time = time.monotonic()
+        Controller.screensaver_input_tracking_time = time.monotonic()
+        Controller.controller_interface.clear_input_queue()
 
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
@@ -377,12 +343,6 @@ class Controller:
 
         # Screensaver: check if idle timeout reached (skip if game running)
         if not called_from_check_for_hotkey and Controller._try_start_screensaver(Display):
-            return False
-
-        if (
-            not called_from_check_for_hotkey
-            and Controller.show_pending_modal_message()
-        ):
             return False
 
         #if(Controller.last_controller_input is not None):
