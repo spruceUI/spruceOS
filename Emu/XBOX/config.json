@@ -1,0 +1,39 @@
+{
+    "label": "Xbox",
+    "icon": "xbox.png",
+    "iconsel": "xbox_sel.png",
+    "themecolor": "107C10",
+    "launch": "../../spruce/scripts/emu/standard_launch.sh",
+    "extlist": "iso|xiso|sqfs",
+    "launchlist": [],
+    "menuOptions": {
+        "Governor": {
+            "display": "CPU Mode",
+            "options": [
+                "Smart",
+                "Performance",
+                "Overclock"
+            ],
+            "selected": "Performance",
+            "overrides": {}
+        }
+    },
+    "sortOrder": 7500,
+    "brand": "Microsoft",
+    "type": "homeconsole",
+    "releaseYear": 2001,
+    "default_emulator": "hakux",
+    "devices": [
+    "TRIMUI_A133P",
+    "TRIMUI_SMART_PRO_S",
+    "MIYOO_FLIP",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "DARKMOSS",
+    "OAKMOSS_A133P"
+    ],
+    "alternativeFolderNames": [
+        "xbox",
+        "hakux"
+    ]
+}

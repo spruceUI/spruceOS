@@ -1,0 +1,42 @@
+{
+  "source": {
+    "url": "https://github.com/rfandango/hakuX.git",
+    "commit": "e11ee60b90742a368a08f7f5339af10048a63a04"
+  },
+  "source/external/fex": {
+    "url": "https://github.com/rfandango/FEX.git",
+    "commit": "52018bf46a8279b22bce738548ab3f40db467064"
+  },
+  "deps/volk": {
+    "url": "https://github.com/zeux/volk",
+    "commit": "0b17a763ba5643e32da1b2152f8140461b3b7345"
+  },
+  "deps/glslang": {
+    "url": "https://github.com/KhronosGroup/glslang",
+    "commit": "b5782e52ee2f7b3e40bb9c80d15b47016e008bc9"
+  },
+  "deps/spirv_reflect": {
+    "url": "https://github.com/KhronosGroup/SPIRV-Reflect",
+    "commit": "ef913b3ab3da1becca3cf46b15a10667c67bebe5"
+  },
+  "deps/vma": {
+    "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator",
+    "commit": "1d8f600fd424278486eade7ed3e877c99f0846b1"
+  },
+  "deps/root/subprojects/nv2a_vsh_cpu": {
+    "url": "https://github.com/xemu-project/nv2a_vsh_cpu",
+    "commit": "561fe80da57a881f89000256b459440c0178a7ce"
+  },
+  "deps/SDL2": {
+    "url": "https://github.com/libsdl-org/SDL.git",
+    "commit": "79ec168f3c1e2fe27335cb8886439f7ef676fb49"
+  },
+  "deps/zlib": {
+    "url": "https://github.com/madler/zlib.git",
+    "commit": "51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf"
+  },
+  "deps/Vulkan-Headers": {
+    "url": "https://github.com/KhronosGroup/Vulkan-Headers.git",
+    "commit": "6802bb4733b63ed5efd3adb308a6c885ef180ea1"
+  }
+}

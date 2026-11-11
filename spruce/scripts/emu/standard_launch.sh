@@ -157,6 +157,11 @@ case $EMU_NAME in
 		fi
 		;;
 
+	"XBOX")
+		. /mnt/SDCARD/spruce/scripts/emu/lib/hakux_functions.sh
+		run_hakux
+		;;
+
 	"JAGUAR")
 		if [ "$CORE" = "bigpemu-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/bigpemu_functions.sh

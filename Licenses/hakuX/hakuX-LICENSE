@@ -1,0 +1,42 @@
+hakuX is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. The full text is in COPYING.
+
+hakuX is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+Anyone who distributes hakuX, or a work based on it, in binary form must also
+make its complete corresponding source code available under the same license.
+
+Parts from other projects keep their own licenses, all compatible with the
+above:
+
+- The MCPX APU (native/dev/apu) is xemu's device, ported to the native core.
+  Each of its files keeps the license its header states:
+  - GNU Lesser General Public License, version 2 or later
+    (licenses/LGPL-2.1.txt): apu.c, apu_debug.h, apu_int.h, apu_regs.h,
+    debug.c, fpconv.h, dsp/dsp_dma.c, dsp/dsp_dma.h, dsp/dsp_dma_regs.h,
+    dsp/gp_ep.c, dsp/gp_ep.h, vp/vp.c, vp/vp.h, vp/hrtf.h.
+  - GNU General Public License, version 2 or later (licenses/GPL-2.0.txt):
+    the DSP56300 emulator, adapted from Hatari's DSP M56001 emulation
+    (ARAnyM developer team): dsp/debug.c, dsp/debug.h, dsp/dsp.c, dsp/dsp.h,
+    dsp/dsp_cpu.c, dsp/dsp_cpu.h, dsp/dsp_cpu_regs.h, dsp/dsp_dis.c.inc,
+    dsp/dsp_emu.c.inc, dsp/dsp_state.h.
+  - GNU General Public License (licenses/GPL-2.0.txt): vp/svf.h, adapted
+    from the SWH LADSPA plugins (Steve Harris), whose source names no
+    version (svf_1214.xml: copyright "GPL"; xemu's header says GPLv2).
+  - BSD 3-Clause (licenses/adpcm-xq.license.txt): vp/adpcm.h, the ADPCM-XQ
+    decoder (David Bryant).
+  The rest of native/dev/apu (apu_base.h, out.c, state.c, vp/mix_inline.h,
+  vp/resample.*) is hakuX's own.
+- native/kernel/xboxkrnl.exe.def comes from nxdk: CC0-1.0.
+- The window presenter's shaders (hw/xbox/hle/vk/swapchain.c): its FXAA is
+  FXAA 3.11 Quality (Timothy Lottes) as PCSX2's fxaa.fx tunes it, GNU
+  General Public License, version 3 or later; its SGSR is Qualcomm's
+  Snapdragon Game Super Resolution 1, BSD 3-Clause
+  (licenses/snapdragon-gsr.license.txt).
+- The libraries the app bundles (FEX, SDL3, adrenotools, glslang, volk,
+  Vulkan Memory Allocator, SPIRV-Reflect, nv2a_vsh_cpu, and FEX's own
+  dependencies): their licenses are in licenses/.

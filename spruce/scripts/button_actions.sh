@@ -148,6 +148,13 @@ kill_bigpemu() {
     killall -q -9 bigpemu
 }
 
+kill_hakux() {
+	log_message "button_actions.sh: Killing hakuX!"
+	killall -q -15 hakux.aarch64
+	sleep 1
+	killall -q -9 hakux.aarch64
+}
+
 kill_vtree() {
     killall -q -15 vtree.a30 vtree.mini vtree.aarch64
     sleep 2
@@ -176,6 +183,8 @@ kill_emulator() {
         kill_dsperate
     elif pgrep -f "bigpemu" >/dev/null; then
         kill_bigpemu
+    elif pgrep -f "hakux.aarch64" >/dev/null; then
+        kill_hakux
     elif pgrep -f "vtree.a30|vtree.mini|vtree.aarch64" >/dev/null; then
         kill_vtree
     elif pgrep -f "grout32|grout64" >/dev/null; then
@@ -309,6 +318,8 @@ perform_action() {
         elif [ -f /tmp/pico8_igm ] && pgrep -f "pico8_64|pico8_dyn" >/dev/null; then
             # Only while the menu library is preloaded: SIGUSR2 kills a bare pico-8
             killall -q -USR2 pico8_64 pico8_dyn
+        elif pgrep -f "hakux.aarch64" >/dev/null; then
+            killall -q -USR2 hakux.aarch64
         else
             send_menu_button_to_retroarch
         fi

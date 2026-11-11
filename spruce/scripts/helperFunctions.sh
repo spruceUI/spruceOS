@@ -113,7 +113,7 @@ EMU_PROCESSES="ra32.a30 ra32.mini ra32.universal ra64.universal ra64.pixel2 \
 ra64.h700 ra32.h700 \
 retroarch drastic drastic32 drastic64 pico8_dyn pico8_64 \
 flycast flycast2024 yabasanshiro yabasanshiro.trimui dsperate dsperate.a30 \
-mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN"
+mupen64plus PPSSPPSDL PPSSPPSDL_TrimUI PPSSPPSDL_$PLATFORM $PSP_BIN hakux.aarch64"
 
 # Ensure all methods are defined, and just logged if missing
 . "/mnt/SDCARD/spruce/scripts/platform/device.sh"
