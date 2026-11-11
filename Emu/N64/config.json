@@ -77,7 +77,10 @@
         "mupen64plus-pow2"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_32": {
       "display": "Emulator32",
@@ -92,7 +95,10 @@
         "mupen64plus"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "32-bit"
+      }
     },
     "controlMode": {
       "display": "RA: C-button Mode",
