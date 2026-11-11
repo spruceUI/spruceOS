@@ -57,7 +57,14 @@ spruce_env_key_mappings() {
     _buttons="$_buttons UP:DPAD_UP DOWN:DPAD_DOWN LEFT:DPAD_LEFT RIGHT:DPAD_RIGHT"
     [ "${DEVICE_NUM_ANALOG_STICKS:-0}" -gt 0 ] && _buttons="$_buttons L3:L3 R3:R3"
     for _button in $_buttons; do
-        eval "echo \"${_button#*:} \$B_${_button%%:*}\""
+        if [ "$_button" = "R3:R3" ]; then
+            case "${B_R3:-}" in
+                ''|*[!0-9]*) eval "echo \"${_button#*:} \$B_${_button%%:*}\"" ;;
+                *) echo "R3 1 $B_R3" ;;
+            esac
+        else
+            eval "echo \"${_button#*:} \$B_${_button%%:*}\""
+        fi
     done | awk '
         function add(type, code, value, results) {
             json = json sep "{\"type\":" type ",\"code\":" code ",\"value\":" value ",\"results\":[" results "]}"

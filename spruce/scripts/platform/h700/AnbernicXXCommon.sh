@@ -69,6 +69,30 @@ get_config_path() {
     echo "$SYSTEM_JSON"
 }
 
+device_get_fw_version() {
+    _baseos_version="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '\r' | sed 's/^"//;s/"$//')"
+    if [ -n "$_baseos_version" ]; then
+        echo "BaseOS $_baseos_version"
+    else
+        echo "Unknown"
+    fi
+}
+
+# Apply the saved panel brightness when the env-var PyUI device starts.
+prepare_for_pyui_launch() {
+    _backlight_level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$_backlight_level" in
+        ''|*[!0-9]*) _backlight_level="$(jq -r '.backlight // empty' "$SYSTEM_JSON_DEFAULT" 2>/dev/null)" ;;
+    esac
+    case "$_backlight_level" in
+        ''|*[!0-9]*)
+            log_message "Could not read the backlight level before starting PyUI"
+            return 0
+            ;;
+    esac
+    apply_backlight "$_backlight_level"
+}
+
 # One firstboot flag for the whole XX family rather than one per model. These
 # devices differ only in screen and shell, so a card moved from an RG SP to a
 # CubeXX has nothing left to set up - re-running the lane would only replay the
@@ -701,8 +725,8 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-# Same ioctl and scale as PyUI's _set_lumination_to_config
-set_backlight() {
+# Apply the same ioctl and scale as the former PyUI H700 device class.
+apply_backlight() {
     level="$1"
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
@@ -717,6 +741,13 @@ try:
 finally:
     os.close(fd)
 "
+}
+
+set_backlight() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 10 ] && level=10
+    apply_backlight "$level" || return
     tmp="$SYSTEM_JSON.tmp.$$"
     jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
