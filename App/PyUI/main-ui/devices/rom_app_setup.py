@@ -23,3 +23,11 @@ class RomAppSetup(ABC):
     @abstractmethod
     def get_app_finder(self):
         pass
+
+    @abstractmethod
+    def get_core_name_overrides(self, core_name):
+        pass
+
+    @abstractmethod
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        pass
