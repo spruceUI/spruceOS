@@ -76,7 +76,7 @@ case "$PLATFORM" in
         else
             DEVICE="TRIMUI_SMART_PRO"
         fi
-        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
