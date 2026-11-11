@@ -36,10 +36,7 @@ REQUIRED_ENV_VARS = (
     # Screen
     "SCREEN_WIDTH", "SCREEN_HEIGHT", "SCREEN_ROTATION",
     # Controller
-    "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "CONTROLLER_EVENT_FORMAT",
-    # Commands
-    "POWER_OFF_CMD", 
-    
+    "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "CONTROLLER_EVENT_FORMAT"    
 )
 
 class EnvVarDevice(DeviceCommon):
@@ -175,7 +172,7 @@ class EnvVarDevice(DeviceCommon):
         return self.is_hdmi_connected()
 
     def power_off_cmd(self):
-        return os.environ["POWER_OFF_CMD"]
+        return os.environ.get("POWER_OFF_CMD") or None
 
     # Unset or empty: no reboot command (None).
     def reboot_cmd(self):
