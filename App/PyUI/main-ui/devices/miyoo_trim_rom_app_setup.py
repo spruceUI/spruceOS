@@ -1,4 +1,4 @@
-from devices import RomAppSetup
+from devices.rom_app_setup import RomAppSetup
 from menus.games.utils.rom_info import RomInfo
 from devices.miyoo_trim_common import MiyooTrimCommon
 from apps.miyoo.miyoo_app_finder import MiyooAppFinder
