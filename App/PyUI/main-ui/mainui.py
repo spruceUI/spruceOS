@@ -229,11 +229,19 @@ def main():
             Device.get_device().get_game_system_utils().prefetch_active_systems()
             warm_wifi_status()
 
+        audio_devices = PyUiConfig.get_deferred_startup_audio_devices()
+        defer_audio = main_ui_mode and bool(audio_devices) and Device.supports_device(audio_devices)
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
-            Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
+            Theme.init(
+                selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height(),
+                setup_audio=not defer_audio,
+            )
 
         with log_timing("Display initialization", PyUiLogger.get_logger()):    
             Display.init()
+        if defer_audio:
+            # Let the worker open audio while the menu draws, after SDL video is ready.
+            Theme.init_audio(queue_click=True)
         with log_timing("Display Present", PyUiLogger.get_logger()):    
             Display.present()
         

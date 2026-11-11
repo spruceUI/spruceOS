@@ -32,11 +32,11 @@ class Theme():
     _grid_game_default_size = 140
 
     @classmethod
-    def init(cls, path, width, height):
-        cls.set_theme_path(path, width, height)
+    def init(cls, path, width, height, *, setup_audio=True):
+        cls.set_theme_path(path, width, height, setup_audio=setup_audio)
 
     @classmethod
-    def set_theme_path(cls,path, width = 0, height = 0):
+    def set_theme_path(cls, path, width=0, height=0, *, setup_audio=True):
         #Uneeded due to moving where we convert?
         #cls.load_defaults_so_user_can_see_at_least(path)
         cls._path = path
@@ -81,7 +81,12 @@ class Theme():
 
         cls._default_multiplier = min(scale_width, scale_height)
 
-        cls.button_press_sounds_changed()
+        if setup_audio:
+            cls.init_audio()
+
+    @classmethod
+    def init_audio(cls, *, queue_click=False):
+        cls.button_press_sounds_changed(queue_click=queue_click)
         cls.bgm_setting_changed()
 
     @classmethod
@@ -105,12 +110,16 @@ class Theme():
                 Device.get_device().get_audio_system().audio_loop_mp3(bgm_mp3)
 
     @classmethod
-    def button_press_sounds_changed(cls):
+    def button_press_sounds_changed(cls, *, queue_click=False):
         cls._play_button_press_sounds = Device.get_device().get_system_config().play_button_press_sound()
         button_press_wav = os.path.join(cls._path, "sound", "change.wav")
         if(os.path.exists(button_press_wav)) and os.path.getsize(button_press_wav) > 0:
             cls._button_press_wav = button_press_wav
-            Device.get_device().get_audio_system().load_wav(button_press_wav)
+            audio = Device.get_device().get_audio_system()
+            load_wav = audio.load_wav
+            if queue_click:
+                load_wav = getattr(audio, "queue_wav", load_wav)
+            load_wav(button_press_wav)
 
     @classmethod
     def controller_button_pressed(cls, input):
