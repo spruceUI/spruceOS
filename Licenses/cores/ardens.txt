@@ -1,5 +1,5 @@
 Ardens (Arduboy)
-https://github.com/libretro/ardens
+https://github.com/tiberiusbrown/Ardens
 
 Copyright (c) tiberiusbrown
 

@@ -1,11 +1,63 @@
 Opera (3DO)
 https://github.com/libretro/opera-libretro
 
-Copyright (c) The FreeDO Team
+Copyright (c) The FreeDO Team and Antonio SJ Musumeci (trapexit)
 
-Licensed under the GNU Lesser General Public License v2.1
+Licensed under the FreeDO modified GNU Lesser General Public License (non-commercial)
 
 ---
+
+Opera / FreeDO licensing
+========================
+
+Inherited FreeDO license notice
+------------------------------
+
+www.freedo.org
+The first working 3DO multiplayer emulator.
+
+The FreeDO licensed under modified GNU LGPL, with following notes:
+
+*   The owners and original authors of the FreeDO have full right to
+*   develop closed source derivative work.
+
+*   Any non-commercial uses of the FreeDO sources or any knowledge
+*   obtained by studying or reverse engineering of the sources, or
+*   any other material published by FreeDO have to be accompanied
+*   with full credits.
+
+*   Any commercial uses of FreeDO sources or any knowledge obtained
+*   by studying or reverse engineering of the sources, or any other
+*   material published by FreeDO is strictly forbidden without
+*   owners approval.
+
+The above notes are taking precedence over GNU LGPL in conflicting
+situations.
+
+Project authors:
+*  Alexander Troosh
+*  Maxim Grishin
+*  Allen Wright
+*  John Sammons
+*  Felix Lazarev
+*  Antonio SJ Musumeci (trapexit) <trapexit@spawn.link>
+
+
+trapexit contributions
+---------------------
+
+Contributions by Antonio SJ Musumeci (trapexit) <trapexit@spawn.link>
+are licensed under the GNU Lesser General Public License, version 2.1
+or (at your option) any later version (LGPL-2.1-or-later).
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+Existing copyright and license notices remain applicable. This
+contribution-specific grant does not replace the license terms for
+inherited code, third-party dependencies, or generated Opera Boot ROM data.
+
+---
+
+GNU Lesser General Public License v2.1
 
                   GNU LESSER GENERAL PUBLIC LICENSE
                        Version 2.1, February 1999

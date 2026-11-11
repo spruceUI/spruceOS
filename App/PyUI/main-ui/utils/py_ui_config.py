@@ -330,6 +330,12 @@ class PyUiConfig:
         return cls.get("firstFrameCmd",None)
 
     @classmethod
+    def get_deferred_startup_audio_devices(cls):
+        """Device names that initialize menu audio after the display. None means off."""
+        devices = cls.get("deferStartupAudioDevices")
+        return devices if isinstance(devices, list) else None
+
+    @classmethod
     def get_backlight_cmd(cls):
         return cls.get("backlightCmd",None)
 

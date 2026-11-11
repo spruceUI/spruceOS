@@ -124,12 +124,6 @@ new_execution_loop() {
     log_message "*** nothing to do for new_execution_loop" -v
 }
 
-# Nothing to prepare on a bare board; trimui_a133p.sh overrides this for the
-# inputd mode files.
-prepare_for_pyui_launch(){
-    log_message "*** nothing to do for prepare_for_pyui_launch" -v
-}
-
 post_pyui_exit(){
     # Should we touch input_no_dpad and input_dpad_to_joystick?
     log_message "*** nothing to do for post_pyui_exit" -v

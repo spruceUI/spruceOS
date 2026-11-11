@@ -1,5 +1,5 @@
 EasyRPG Player
-https://github.com/libretro/easyrpg-libretro
+https://github.com/EasyRPG/Player
 
 Copyright (c) EasyRPG Team
 

@@ -1,0 +1,10 @@
+libmodplug
+https://github.com/Konstanty/libmodplug
+
+Olivier Lapicque, Kenton Varda, Konstanty Bialkowski
+
+Public domain
+
+---
+
+ModPlug-XMMS and libmodplug are now in the public domain.

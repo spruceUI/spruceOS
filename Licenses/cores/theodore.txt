@@ -1,7 +1,7 @@
 Theodore (Thomson)
-https://github.com/libretro/Theodore
+https://github.com/Zlika/theodore
 
-Copyright (c) Daniel Music
+Copyright (c) Thomas Lorblanchès and Theodore contributors
 
 Licensed under the GNU General Public License v3.0
 

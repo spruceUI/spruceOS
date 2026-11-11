@@ -1,0 +1,216 @@
+Info-ZIP Zip and UnZip (zip, zipcloak, zipnote, zipsplit, unzip)
+https://infozip.sourceforge.net/
+
+Copyright (c) 1990-2009 Info-ZIP
+
+Licensed under the Info-ZIP License
+
+---
+
+This is version 2009-Jan-02 of the Info-ZIP license.
+The definitive version of this document should be available at
+
+ftp://ftp.info-zip.org/pub/infozip/license.html indefinitely and
+a copy at http://www.info-zip.org/pub/infozip/license.html.
+
+Copyright (c) 1990-2009 Info-ZIP.  All rights reserved.
+
+For the purposes of this copyright and license, "Info-ZIP" is defined as
+the following set of individuals:
+
+   Mark Adler, John Bush, Karl Davis, Harald Denker, Jean-Michel Dubois,
+   Jean-loup Gailly, Hunter Goatley, Ed Gordon, Ian Gorman, Chris Herborth,
+   Dirk Haase, Greg Hartwig, Robert Heath, Jonathan Hudson, Paul Kienitz,
+   David Kirschbaum, Johnny Lee, Onno van der Linden, Igor Mandrichenko,
+   Steve P. Miller, Sergio Monesi, Keith Owens, George Petrov, Greg Roelofs,
+   Kai Uwe Rommel, Steve Salisbury, Dave Smith, Steven M. Schweda,
+   Christian Spieler, Cosmin Truta, Antoine Verheijen, Paul von Behren,
+   Rich Wales, Mike White.
+
+This software is provided "as is," without warranty of any kind, express
+or implied.  In no event shall Info-ZIP or its contributors be held liable
+for any direct, indirect, incidental, special or consequential damages
+arising out of the use of or inability to use this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the above disclaimer and the following restrictions:
+
+    *  Redistributions of source code (in whole or in part) must retain
+       the above copyright notice, definition, disclaimer, and this list
+       of conditions.
+
+  *  Redistributions in binary form (compiled executables and libraries)
+       must reproduce the above copyright notice, definition, disclaimer,
+       and this list of conditions in documentation and/or other materials
+       provided with the distribution.  Additional documentation is not needed
+       for executables where a command line license option provides these and
+       a note regarding this option is in the executable's startup banner.  The
+       sole exception to this condition is redistribution of a standard
+       UnZipSFX binary (including SFXWiz) as part of a self-extracting archive;
+       that is permitted without inclusion of this license, as long as the
+       normal SFX banner has not been removed from the binary or disabled.
+
+  *  Altered versions--including, but not limited to, ports to new operating
+       systems, existing ports with new graphical interfaces, versions with
+       modified or added functionality, and dynamic, shared, or static library
+       versions not from Info-ZIP--must be plainly marked as such and must not
+       be misrepresented as being the original source or, if binaries,
+       compiled from the original source.  Such altered versions also must not
+       be misrepresented as being Info-ZIP releases--including, but not
+       limited to, labeling of the altered versions with the names "Info-ZIP"
+       (or any variation thereof, including, but not limited to, different
+       capitalizations), "Pocket UnZip," "WiZ" or "MacZip" without the
+       explicit permission of Info-ZIP.  Such altered versions are further
+       prohibited from misrepresentative use of the Zip-Bugs or Info-ZIP
+       e-mail addresses or the Info-ZIP URL(s), such as to imply Info-ZIP
+       will provide support for the altered versions.
+
+  *  Info-ZIP retains the right to use the names "Info-ZIP," "Zip," "UnZip,"
+       "UnZipSFX," "WiZ," "Pocket UnZip," "Pocket Zip," and "MacZip" for its
+       own source and binary releases.
+
+This license is also available as plain ASCII:
+
+     * LICENSE (ASCII text)
+
+The text in the LICENSE file should be identical to that above except for
+the absence of HTML markup (obviously).  But in case of discrepancies in the
+actual wording, ftp://ftp.info-zip.org/pub/infozip/license.html is the definitive
+version.
+
+Note that the lack of the BSD ``advertising clause'' and the presence of the
+third and fourth restrictions are the two principal differences from the BSD
+license.  Restriction #3 is intended only to protect us from having to support
+other people's code and from getting blamed for other people's bugs.  (We have
+enough bugs of our own. :-) )
+
+ Examples
+
+Here are some examples of what we consider acceptable and unacceptable (i.e.,
+misrepresentative) uses of the Info-ZIP names and contact info:
+
+     OK
+     Not OK
+
+         This is a port of Info-ZIP's Zip to the FooBar 9000 by
+         JoeBob JBobberson.  I have submitted my patches to Info-ZIP, so
+         the port should be incorporated into the next official release.
+
+         This is the official FooBar 9000 port of Info-ZIP's
+         Zip.
+
+         The original UnZip sources are available from Info-ZIP's
+         home site at http://www.info-zip.org/pub/infozip/UnZip.html ;
+         my patches are available from http://site.xyz/.  Send any bug reports on the FooBar 9000 port
+         to JoeBob@site.xyz .
+
+         (complete absence of identifying material or contact information
+         other than that included in standard Info-ZIP documentation or source
+         code)
+
+         at top of the screen displayed by typing ``unzip'' with no
+         parameters:
+
+         UnZip 5.40 of 28 November 1998, by Info-ZIP.  FooBar
+         9000 port maintained by JoeBob JBobberson; send bug reports to
+         JoeBob@site.xyz.
+
+         UnZip 5.40 of 28 November 1998, by Info-ZIP.  Maintained
+         by C. Spieler.  Send bug reports to the authors at
+         http://www.goatley.com/hunter/zip-bug.html; see README for details.
+
+With regard to what defines a ``port'' (i.e., sufficiently different from
+``our code'' that we would like you to be the first line of defense against
+bug reports), the usual rule of thumb is:  if you didn't have to change any
+source code, it's not a new port.  This includes cases where maybe you had to
+supply some unusual compiler flags (unless they have to do with aggressive
+optimizations that may fail unpredictably) or define a macro that isn't present
+in the standard makefile(s); we'd love to hear from you so that such things
+can be incorporated into future makefiles, but they don't constitute a port.
+The prototypical example is a new Unix variant, perhaps where it was necessary
+to compile via make -f unix/Makefile LOCAL_UNZIP="-DNO_UID_GID -DZMEM"
+all or something similar, but more typically where it wasn't necessary
+to do anything special.
+
+ Self-extracting Archives
+
+As noted in condition #2, Info-ZIP's self-extractor stub, UnZipSFX, and
+its variants (such as SFXWiz) constitute a special case.  Redistribution of
+those as part of a self-extracting archive, without the inclusion of the
+Info-ZIP license in accompanying documentation, is allowed as long as the
+normal SFX banner has not been removed or disabled.  Note that the banner
+text may be extended, however.  For example, it is completely
+acceptable (and desirable!) to append to the UnZipSFX banner a notice such as:
+
+    This archive is being distributed by XYZfoo Corporation.  See
+    http://www.XYZfooCorp.com/contacts/ for contact information and other
+    help.
+
+ Exceptions
+
+The license given above covers only Info-ZIP's code.  There are five files
+in the Zip and UnZip distributions that are covered by separate copyrights
+and licenses:
+
+     * mktime.c (Zip)
+
+  * unreduce.c (UnZip)
+
+  * amiga/time_lib.c (Zip)
+
+  * macos/macstuff.c (Zip)
+
+  * macos/macstuff.h (Zip)
+
+mktime.c is copyrighted by David MacKenzie and Michael Haertel
+and may be used freely as long as its copyright notice is retained and
+functional changes are noted.  (In other words, its license is roughly
+equivalent to the Info-ZIP license.)
+
+The full version of unreduce.c is the only remaining trace of
+Samuel H. Smith's original 1989 code, and its license explicitly prohibits
+commercial use and requires distribution of source code if the code is used
+in another program; as of UnZip 5.42, it is provided only as a separate
+add-on, not as part of the main UnZip distribution.  (The stub version included
+with UnZip 5.42 and later is merely a placeholder and does not contain any of
+Smith's code.)
+
+time_lib.c is copyrighted by Norbert Pueschel and may not be
+used commercially without the explicit permission of the copyright holder;
+non-commercial distribution by anyone other than Info-ZIP requires the
+inclusion of an additional piece of documentation.
+
+macstuff.c and macstuff.h are derived from
+the More Files
+package and are copyrighted by Apple Computer and Jim Luther.  They may be
+used without restriction provided that the source code is documented as
+having descended from Apple Sample Code and as containing subsequent changes.
+See the comments in the relevant source files for details.
+
+In addition, versions of the following files that were released prior
+to this license were (and always will be) in the public domain.  Newer
+versions are now covered by our copyright and license, but that doesn't
+affect the older copies:
+
+     * crypt.c (Zip and UnZip; both full version and dummy version)
+
+  * crypt.h (Zip and UnZip; both full version and dummy version)
+
+  * explode.c (UnZip)
+
+  * funzip.c (UnZip)
+
+  * inflate.c (UnZip)
+
+  * inflate.h (UnZip)
+
+  * os2/os2zip.c (Zip)
+
+  * os2/os2zip.h (Zip)
+
+Finally, note that the copyright and license presented here do not give you
+any special rights with respect to patents, export regulations, trademarks,
+or other laws of the United States or other countries.  This may or may not
+be an issue for the code in unshrink.c, crypt.c, crypt.h, etc.
+

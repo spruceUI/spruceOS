@@ -1,0 +1,28 @@
+Vendor binaries
+
+These files come from the device makers' stock firmware or SDKs. They are
+proprietary to their makers and are included so spruce can run on the
+hardware they were written for.
+
+Miyoo (https://lomiyoo.com/)
+  miyoo/lib/libgamename.so, librsautil.so, libshmvar.so, libtmenu.so
+  spruce/miyoomini/bin/audioserver, keymon, adbd
+  miyoo/lib/libpadsp.so (via OnionUI)
+  Emu/PSP/miyoo282_xpad_inputd
+  spruce/FIRMWARE_UPDATE/miyoo282_fw.img.7z (Miyoo A30 stock firmware)
+  spruce/flip/miyoo355_rootfs_32.img_part* (Miyoo Flip 32-bit root filesystem)
+
+TrimUI (https://trimui.net/)
+  spruce/smartpro/inputd/trimui_inputd, spruce/brickpro/inputd/trimui_inputd,
+  spruce/smartpros/inputd/trimui_inputd
+
+Anbernic / Allwinner / ARM
+  spruce/h700/lib32/libmali.so.0 and its libEGL, libGLESv1_CM, libGLESv2
+  (ARM Mali driver from the Anbernic stock image)
+
+ARM / Rockchip
+  spruce/flip/libmali-bifrost-g52-g2p0-gbm.so (see Mali-EULA.txt)
+
+muOS (https://muos.dev/)
+  spruce/flip/muOS-pixie-reduced.sqsh-part* is a reduced muOS 2410 root
+  filesystem. Its contents are under their own licenses.

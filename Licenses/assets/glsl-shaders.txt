@@ -1,0 +1,15 @@
+libretro GLSL shaders (RetroArch/.retroarch/shaders/shaders_glsl)
+https://github.com/libretro/glsl-shaders
+
+Copyright (c) the individual shader authors
+
+The collection has no single license. Each shader is licensed by its author
+under the terms in its own file header. The shaders shipped here are under,
+variously: the GNU General Public License v2.0 or later, the GNU General
+Public License v3.0, the GNU Lesser General Public License, the MIT License,
+BSD licenses, or are dedicated to the public domain / CC0. Some files name
+an author but state no license.
+
+The shaders in RetroArch/.retroarch/shaders/spruce are by DariusG and
+Metallic77, made for the Miyoo A30. sharp-bilinear-simple and the Virtual Boy
+palette shaders in that folder are by rsn8887, public domain.

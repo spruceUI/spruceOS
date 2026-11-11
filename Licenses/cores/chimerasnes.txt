@@ -1,11 +1,57 @@
 ChimeraSNES
-https://github.com/libretro/ChimeraSNES
+https://github.com/jamsilva/chimerasnes
 
-Copyright (c) Gary Henderson, Jerremy Koot, and Snes9x contributors
+Copyright (C) 2010-2017 The RetroArch team
+Copyright (C) 2010 dking, BassAceGold, ShadauxCat and Nebuleon
+Copyright (c) 1996-2023 Snes9x contributors
 
-Licensed under the Snes9x License (custom non-commercial)
+Licensed under the Snes9x License (custom non-commercial), with ndssfc code under the GNU General Public License v2.0 or later
 
 ---
+
+List of licenses:
+- - - - - - - - - - - - - - - - - - - - - - -
+
+Copyright (C) 2010-2017 The RetroArch team
+
+Permission is hereby granted, free of charge,
+to any person obtaining a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+- - - - - - - - - - - - - - - - - - - - - - -
+
+ndssfc
+Copyright (C) 2010 dking <dking024@gmail.com>,
+  GBAtemp users BassAceGold, ShadauxCat and Nebuleon
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of
+the License, or (at your option) any later version.
+
+Some source code with this sdk belongs to the source's authors.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+- - - - - - - - - - - - - - - - - - - - - - -
 
   Snes9x - Portable Super Nintendo Entertainment System (TM) emulator.
 
@@ -132,46 +178,13 @@ Licensed under the Snes9x License (custom non-commercial)
   Sound emulator code used in 1.52+
   (c) Copyright 2004 - 2007  Shay Green (gblargg@gmail.com)
 
-  S-SMP emulator code used in 1.54+
-  (c) Copyright 2016         byuu
-
   SH assembler code partly based on x86 assembler code
   (c) Copyright 2002 - 2004  Marcus Comstedt (marcus@mc.pp.se)
-
-  2xSaI filter
-  (c) Copyright 1999 - 2001  Derek Liauw Kie Fa
-
-  HQ2x, HQ3x, HQ4x filters
-  (c) Copyright 2003         Maxim Stepin (maxim@hiend3d.com)
-
-  NTSC filter
-  (c) Copyright 2006 - 2007  Shay Green
-
-  GTK+ GUI code
-  (c) Copyright 2004 - 2023  BearOso
-
-  Win32 GUI code
-  (c) Copyright 2003 - 2006  blip,
-                             funkyass,
-                             Matthew Kendora,
-                             Nach,
-                             nitsuja
-  (c) Copyright 2009 - 2023  OV2
-
-  Original Mac OS GUI code
-  (c) Copyright 1998 - 2001  John Stiles
-  (c) Copyright 2001 - 2011  zones
-  New MacOS GUI code
-  (c) Copyright 2022 - 2023  Michael Donald Buckley
 
   Libretro port
   (c) Copyright 2011 - 2017  Hans-Kristian Arntzen,
                              Daniel De Matteis
                              (Under no circumstances will commercial rights be given)
-
-
-  Specific ports contains the works of other authors. See headers in
-  individual files.
 
 
   Snes9x homepage: http://www.snes9x.com/
@@ -199,11 +212,34 @@ Licensed under the Snes9x License (custom non-commercial)
   Super NES and Super Nintendo Entertainment System are trademarks of
   Nintendo Co., Limited and its subsidiary companies.
 
--------------------------------------------------------------------------------
+- - - - - - - - - - - - - - - - - - - - - - -
 
-Some parts included in Snes9x are usually available under a different license,
-their authors have granted exception for their use in Snes9x (and/or they are
-licensed as LGPL):
- - JMA: GPL/LGPL, see jma/license.txt
- - snes_ntsc: LGPL, see filter/snes_ntsc-license.txt
- - xBRZ: GPLv3, see filter/xbrz-license.txt
+Copyright (C) 1997-2001 ZSNES Team ( zsknight@zsnes.com / _demo_@zsnes.com )
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+- - - - - - - - - - - - - - - - - - - - - - -
+
+SNESAPU
+copyright (C) 2003-04 Alpha-II Productions
+http://www.alpha-ii.com/
+
+Ported from x86 assembler to C and implementation by Brad Jorsch
+
+Person who rewrites this.
+Copyright (C) 2004 sanmaiwashi
+http://toriniku.sourceforge.net/
+

@@ -201,6 +201,7 @@ volume_up() {
 
 
 WAKE_ALARM_PATH="/sys/class/rtc/rtc0/wakealarm"
+SLEEP_CHARGER_SETTLE_SECONDS=3
 
 trigger_device_sleep() {
     echo deep >/sys/power/mem_sleep
@@ -281,19 +282,6 @@ send_virtual_key_L3() {
         echo $B_L3 0 # L3 up
         echo 0 0 0   # tell sendevent to exit
     } | sendevent $EVENT_PATH_READ_INPUTS_SPRUCE
-}
-
-prepare_for_pyui_launch(){
-    set_performance
-    echo "performance" > /sys/class/devfreq/dmc/governor
-    (
-        # SDL2 takes forever, let it initialize before going to powersave
-        sleep 5
-        if flag_check "in_menu"; then
-            set_smart
-        fi
-        unlock_governor 2>/dev/null
-    ) &
 }
 
 launch_startup_watchdogs(){

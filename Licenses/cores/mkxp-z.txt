@@ -1,5 +1,5 @@
 MKXP-Z (RPG Maker)
-https://github.com/libretro/mkxp-z-libretro
+https://github.com/mkxp-z/mkxp-z
 
 Copyright (c) Ancurio, MKXP-Z contributors
 
