@@ -25,6 +25,8 @@ from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
+from games.utils.game_entry import GameEntry
+from menus.games.utils.rom_info import RomInfo
 
 
 # The launcher cannot start without these; every other variable is optional.
@@ -37,6 +39,8 @@ REQUIRED_ENV_VARS = (
     "SCREEN_WIDTH", "SCREEN_HEIGHT", "SCREEN_ROTATION",
     # Controller
     "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "CONTROLLER_EVENT_FORMAT"    
+    # MISC SETUPS
+    "ROM_SETUP"
 )
 
 class EnvVarDevice(DeviceCommon):
@@ -79,6 +83,19 @@ class EnvVarDevice(DeviceCommon):
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
+
+        self.rom_setup = os.environ["ROM_SETUP"]
+
+        if "MIYOO" == self.rom_setup: 
+            from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
+            from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
+            from devices.miyoo_trim_rom_app_setup import MiyooTrimRomAppSetup
+            self.games_file_parser = MiyooGamesFileParser()   
+            self.game_utils = MiyooTrimGameSystemUtils()
+            self.rom_app_setup = MiyooTrimRomAppSetup()
+        else:
+            raise ValueError(f"Unsupported ROM setup: {self.rom_setup}")
+            
         if(main_ui_mode):
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
@@ -518,3 +535,51 @@ class EnvVarDevice(DeviceCommon):
 
     def supports_image_resizing(self):
         return os.environ.get("HAS_FFMPEG", "false").lower() == "true"
+
+    def calibrate_sticks(self):
+        # TODO get from env var which version of calibration to use and then call it
+        # Can we actually make a generic UI that does something like
+        # 1) from env var call a clear calibration function
+        # 2) Call a env var pointing to a cmd to say calibrate left stick -> ask user to rotate left in foreground
+        # 3) Call a env var pointing to a cmd to say calibrate right stick -> ask user to rotate right in foreground
+        pass
+
+    def supports_analog_calibration(self):
+        # TODO base on same thing as above
+        return False
+
+    
+    # Same key resolution as get_selected_emulator, which the launcher mirrors, plus the per-game override
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        menu_options = game_system_config.get_menu_options()
+        arch_key = self.get_emulator_arch(menu_options, rom_file_path)
+        for key, option in menu_options.items():
+            if key.startswith("Emulator") and (arch_key is None or key == arch_key) and any(name in (option.get("devices") or []) for name in self.get_device_names()):
+                return game_system_config.get_effective_menu_selection(key, rom_file_path)
+        return game_system_config.get_effective_menu_selection("Emulator", rom_file_path)
+
+    # Same suffixed state folder names the TrimUI and Miyoo classes check; a missing one is just a failed exists()
+    def get_core_name_overrides(self, core_name):
+        return [core_name, core_name + "-64", core_name + "-32"]
+
+    # SPRUCE uses the miyoo format for all of its emu config files
+    def get_app_finder(self):
+        return self.rom_app_setup.get_app_finder()
+    
+    def parse_favorites(self) -> list[GameEntry]:
+        return self.games_file_parser.parse_favorites()
+    
+    def parse_recents(self) -> list[GameEntry]:
+        return self.games_file_parser.parse_recents()
+
+    def run_game(self, rom_info: RomInfo):
+        return self.rom_app_setup.run_game(self, rom_info)
+
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        return self.rom_app_setup.run_cmd(self, args, dir, is_power_cmd)
+            
+    def run_app(self, folder,launch):
+        return self.rom_app_setup.run_app(self, folder,launch)
+
+    def get_image_for_activity(self, activity):
+        return self.rom_app_setup.get_image_for_activity(activity)

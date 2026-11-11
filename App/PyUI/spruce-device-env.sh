@@ -138,3 +138,5 @@ spruce_env_default COLLECTIONS_PATH "/mnt/SDCARD/Collections/"
 spruce_env_default STATE_PATH "/mnt/SDCARD/Saves/pyui-state.json"
 
 unset _button _buttons _rest _setting
+
+spruce_env_default ROM_SETUP "MIYOO"
