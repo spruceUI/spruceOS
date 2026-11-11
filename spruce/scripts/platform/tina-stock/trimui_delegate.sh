@@ -364,3 +364,23 @@ device_backlight_up() {
     fi
     set_backlight $((backlight + 1))
 }
+
+# Default behavior for trimui -- smart pro for some reason overrides it though -- should double check is necessary
+apply_stick_calibration() {
+    local flag="/tmp/trimui_inputd/cal_update"
+    local deadline=$((SECONDS + 5))
+
+    mkdir -p "$(dirname "$flag")"
+    touch "$flag"
+
+    while [[ -e "$flag" ]]; do
+        if (( SECONDS >= deadline )); then
+            echo "Error: trimui_inputd did not pick up cal_update" >&2
+            return 1
+        fi
+        sleep 0.1
+    done
+
+    sleep 0.3
+}
+spruce_env_default APPLY_STICK_CALIBRATION "source /mnt/SDCARD/spruce/scripts/helperFunctions.sh && apply_stick_calibration"
