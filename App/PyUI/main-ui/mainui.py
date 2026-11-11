@@ -19,6 +19,8 @@ import sdl2
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from display.display import Display
 from themes.theme import Theme
 from utils.cfw_system_config import CfwSystemConfig
@@ -181,6 +183,23 @@ def check_for_startup_init_only(args):
         Device.get_device().startup_init(include_wifi=False)
         sys.exit(0)
 
+def show_external_message(message):
+    Controller.wake_from_screensaver()
+    Controller.clear_last_input()
+    Controller.clear_input_queue()
+
+    Display.display_message(message)
+
+    Controller.wait_for_input([
+        ControllerInput.A,
+        ControllerInput.B,
+    ])
+
+    # Do not pass the acknowledgement to the underlying menu.
+    Controller.clear_last_input()
+    Controller.clear_input_queue()
+    Controller.request_redraw()
+
 def main():
     args = parse_arguments()
     # Keep startup quiet until the saved logging preference has been loaded.
@@ -206,7 +225,7 @@ def main():
 
         if main_ui_mode:
             # Before the slow part of startup, so a power-off during it still gets the farewell.
-            shutdown.listen()
+            shutdown.listen(PyUiConfig.get("externalMessagePath"))
 
         with log_timing("Device initialization", PyUiLogger.get_logger()):
             initialize_device(args.device, main_ui_mode)
@@ -249,7 +268,11 @@ def main():
         Theme.convert_theme_if_needed(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
         Controller.init()
         if main_ui_mode:
-            shutdown.arm(Display.present_farewell, Controller.controller_interface.signal_wakeup_fd())
+            shutdown.arm(
+                Display.present_farewell,
+                Controller.controller_interface.signal_wakeup_fd(),
+                show_external_message,
+            )
 
         Device.get_device().perform_sdcard_ro_check()
 
