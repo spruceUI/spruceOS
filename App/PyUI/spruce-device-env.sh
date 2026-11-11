@@ -79,6 +79,7 @@ spruce_env_default SCREEN_WIDTH "$DISPLAY_WIDTH"
 spruce_env_default SCREEN_HEIGHT "$DISPLAY_HEIGHT"
 spruce_env_default SCREEN_ROTATION "$DISPLAY_ROTATION"
 spruce_env_default SYSTEM_CFG_PATH "$SYSTEM_JSON"
+spruce_env_default DEFAULT_CFG_PATH "$SYSTEM_JSON_DEFAULT"
 spruce_env_default AUDIO_PLAYER "SDL2"
 spruce_env_default PYUI_DEVICE_NAMES "$(device_names | tr '\n' ',' | sed 's/,$//')"
 
@@ -138,3 +139,5 @@ spruce_env_default COLLECTIONS_PATH "/mnt/SDCARD/Collections/"
 spruce_env_default STATE_PATH "/mnt/SDCARD/Saves/pyui-state.json"
 
 unset _button _buttons _rest _setting
+
+spruce_env_default BACKLIGHT_CMD "source /mnt/SDCARD/spruce/scripts/helperFunctions.sh && set_backlight"
