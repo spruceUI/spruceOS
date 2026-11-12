@@ -95,22 +95,6 @@
       "source": "pad",
       "from": "cfg"
     },
-    "L3": {
-      "code": "1 706",
-      "source": "pad",
-      "from": "cfg",
-      "label": "F3",
-      "prompt": "Press F3 (L3)",
-      "note": "no sticks: the cfg's F1-F5 are Select, Start, L3, R3 and the F key (A10Mini.cfg)"
-    },
-    "R3": {
-      "code": "1 707",
-      "source": "pad",
-      "from": "cfg",
-      "label": "F4",
-      "prompt": "Press F4 (R3)",
-      "note": "no sticks: the cfg's F1-F5 are Select, Start, L3, R3 and the F key (A10Mini.cfg)"
-    },
     "SELECT": {
       "code": "1 704",
       "source": "pad",
@@ -143,6 +127,8 @@
     }
   },
   "absent": {
+    "L3": "no F3 on the A10 Mini V4 (tester 2026-11-12; button-reader-A10MiniV4-1.txt: no input on the step); A10MiniV4.cfg still lists B_L3/B_R3 1 706/1 707, the A10 Mini's F3/F4",
+    "R3": "no F4 on the A10 Mini V4 (tester 2026-11-12; button-reader-A10MiniV4-1.txt: no input on the step); A10MiniV4.cfg still lists B_L3/B_R3 1 706/1 707, the A10 Mini's F3/F4",
     "HOME": "cfg B_HOME=DOESNT_EXIST",
     "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0); the d-pad can be switched to drive the same ABS_X/ABS_Y the STICK_* cfg vars name (odroidgo3-joypad's dpad_analog attribute), but that is a software mode swap of the d-pad, not a second control",
     "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
@@ -155,7 +141,8 @@
     "spruce/scripts/platform/darkmoss/A10MiniV4.cfg",
     "spruce/scripts/platform/darkmoss/A10MiniV4.sh",
     "spruce/scripts/platform/darkmoss/dArkMossCommon.sh",
-    "the lab capturesA10MiniV4-20261104.txt"
+    "the lab capturesA10MiniV4-20261104.txt",
+    "button-reader-A10MiniV4-1.txt"
   ],
   "notes": [
     "A10Mini.cfg's own header: \"Pad, panel and SoC values are from the kernel dts ... and dArkOS's RG351MP configs; none of it has been read off a running unit yet.\" Every button code here is therefore cfg-level, not measured, even though A10MiniV4 has been booted in the lab (its discovery capture confirms the pad node name and that the unit boots, not individual button presses).",
