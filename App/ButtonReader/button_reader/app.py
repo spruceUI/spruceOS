@@ -22,6 +22,7 @@ RELEASE_WAIT = 3.0
 RESCAN_SECONDS = 2.0
 REDRAW_SECONDS = 0.25
 MIN_FRAME = 1 / 30.0
+RECENT_LINES = 3  # last presses listed under the picture, above the status line
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXIT_HINT = "Exit: hold a button 10 s, or Select+Start"
 
@@ -34,6 +35,7 @@ KEY_STEPS = [("BOTTOM", None), ("RIGHT", None), ("TOP", None), ("LEFT", None),
              ("SELECT", "Press SELECT"), ("START", "Press START"), ("L3", "Click the LEFT stick in (L3)"),
              ("R3", "Click the RIGHT stick in (R3)"), ("MENU", "Tap MENU"), ("HOME", "Press HOME"),
              ("VOL_UP", "Press VOL+"), ("VOL_DOWN", "Press VOL-")]
+STICK_CLICKS = {"L3": 1, "R3": 2}  # the sticks a device needs for each click step
 STICK_STEPS = [("LEFT_X", "LEFT", "x", "Push the LEFT stick fully RIGHT, then let go"),
                ("LEFT_Y", "LEFT", "y", "Push the LEFT stick fully DOWN, then let go"),
                ("RIGHT_X", "RIGHT", "x", "Push the RIGHT stick fully RIGHT, then let go"),
@@ -232,7 +234,7 @@ class Session:
                 self.log.info(f"Button Reader: {text}")
                 self.event_line(text)
                 if kind == "down":
-                    self.recent = ([text] + self.recent)[:3]
+                    self.recent = ([text] + self.recent)[:RECENT_LINES]
                     self.on_press(short, control, now)
             elif kind == "switch":
                 text = f"{item[0]} switch {SW_NAMES.get(item[1], item[1])} = {item[2]}"
@@ -318,14 +320,17 @@ class Session:
         except OSError as error:
             self.log.warning(f"Button Reader: no report ({error}); the steps still run")
             self.report = None
+        count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
+        sticks = int(count) if count.isdigit() else sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
         names, steps = self.names, []
         for slot, prompt in KEY_STEPS:
             if slot in names.absent or (slot == "HOME" and not names.controls_of("HOME")):
                 continue
+            # A stick click needs its stick (the Minis have none), unless a node reports the cfg's code for it.
+            if sticks < STICK_CLICKS.get(slot, 0) and self.slot_state(slot, set()) != "off":
+                continue
             prompt = prompt or face_prompt(slot, self.platform)
             steps.append(("key", slot, prompt, SLOT_VAR[slot], spec_control(cfg_spec(SLOT_VAR[slot], self.env))))
-        count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
-        sticks = int(count) if count.isdigit() else sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
             var = dict((s, (vx, vy)) for s, vx, vy, _dx, _dy in STICKS)[stick][0 if axis == "x" else 1]
             steps.append(("stick", role, prompt, var, stick_axis(cfg_spec(var, self.env))))
@@ -478,6 +483,7 @@ class Session:
                 s.prompt = f"Steps: {ok} of {len(self.step_results)} as the cfg expects"
                 s.prompt_color = picture.GOOD if ok == len(self.step_results) else picture.WARN
         s.lines = [(text, picture.TEXT if i == 0 else picture.GRAY) for i, text in enumerate(self.recent)]
+        s.line_rows = RECENT_LINES + 1
         if self.mode == "steps" and self.phase == "ask":
             left = self.step_timeout - (now - self.phase_since)
             last = self.step_results[-1] if self.step_results else None

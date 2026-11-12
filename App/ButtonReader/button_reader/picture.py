@@ -29,6 +29,7 @@ class Scene:
         self.prompt = ""
         self.prompt_color = TEXT
         self.lines = []        # [(text, color)] under the picture
+        self.line_rows = 0     # rows kept for lines, filled or not, so the picture doesn't move as they fill
         self.overlay = None    # big centred text (exit countdown, start screen)
         self.overlay_color = WARN
 
@@ -168,7 +169,8 @@ def draw(canvas, area, scene):
     top = y + normal * 0.2
     if scene.prompt:
         canvas.text(scene.prompt, x + w / 2, top + normal / 2, scene.prompt_color, "normal", "center")
-    lines_h = small * (len(scene.lines) + 0.3) if scene.lines else 0
+    rows = max(scene.line_rows, len(scene.lines))
+    lines_h = small * (rows + 0.3) if rows else 0
     pic = (x + 6, top + normal * 1.05, w - 12, h - (top - y) - normal * 1.05 - lines_h)
     layout = Layout(*pic, has_home=scene.state.get("HOME") not in (None, "absent", "unknown"))
     u = layout.u
