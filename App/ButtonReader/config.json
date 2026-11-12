@@ -2,6 +2,6 @@
     "label": "Button Reader",
     "icon": "buttonreader.png",
     "pyuiEntry": "button_reader.app:run",
-    "description": "Live controller picture with each button's kernel code; optional full diagnostic",
+    "description": "Generic gamepad tester",
     "hideInSimpleMode": true
 }
