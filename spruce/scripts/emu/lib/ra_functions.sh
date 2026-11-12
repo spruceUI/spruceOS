@@ -413,6 +413,8 @@ get_cached_core_path() {
 transfer_save(){
 	cached_core_folder="$1"
 	current_core_folder="$2"
+	# Ensure if its first time swapping to this emu that the folder exists
+	mkdir -p "/mnt/SDCARD/Saves/saves/$current_core_folder"
 
 	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "Prompt")"
 	if [ "$KEEP_SAVES_BETWEEN_CORES" = "Always" ]; then
