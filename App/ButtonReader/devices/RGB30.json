@@ -120,13 +120,13 @@
       "code": "1 115",
       "source": "vol",
       "from": "cfg",
-      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30 is one: on Standard, its + sent 114 and - 115 (RGB30-1/2, 2026-11-12)"
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30's rocker is standard: RGB30-4 (2026-11-12) read + as 115 and - as 114 on Standard; runs 1-3's reversed readings were the buttons pressed the other way round (tester)"
     },
     "VOL_DOWN": {
       "code": "1 114",
       "source": "vol",
       "from": "cfg",
-      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30 is one: on Standard, its + sent 114 and - 115 (RGB30-1/2, 2026-11-12)"
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30's rocker is standard: RGB30-4 (2026-11-12) read + as 115 and - as 114 on Standard; runs 1-3's reversed readings were the buttons pressed the other way round (tester)"
     },
     "POWER": {
       "code": "1 116",
