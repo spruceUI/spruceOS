@@ -78,19 +78,11 @@ device_get_fw_version() {
     fi
 }
 
-# Apply the saved panel brightness when the env-var PyUI device starts.
+# EnvVarDevice does not apply the saved backlight at startup; the old XX PyUI class did.
 prepare_for_pyui_launch() {
-    _backlight_level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
-    case "$_backlight_level" in
-        ''|*[!0-9]*) _backlight_level="$(jq -r '.backlight // empty' "$SYSTEM_JSON_DEFAULT" 2>/dev/null)" ;;
-    esac
-    case "$_backlight_level" in
-        ''|*[!0-9]*)
-            log_message "Could not read the backlight level before starting PyUI"
-            return 0
-            ;;
-    esac
-    apply_backlight "$_backlight_level"
+    _level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$_level" in ''|*[!0-9]*) return 0 ;; esac
+    apply_backlight "$_level"
 }
 
 # One firstboot flag for the whole XX family rather than one per model. These
