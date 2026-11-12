@@ -185,6 +185,8 @@ case "$PLATFORM" in
             DEVICE="ANBERNIC_RGXX640480"
         fi
 
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
+
         "$PYUI_BIN" \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
             -device "$DEVICE" \
