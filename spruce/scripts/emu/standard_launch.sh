@@ -115,7 +115,10 @@ case $EMU_NAME in
 		;;
 
 	"NDS"|"NDSI")
-		if [ "$CORE" = "DSperate-Tate" ]; then
+		if [ "$CORE" = "pokedaisy_ds" ]; then
+			run_retroarch
+			
+		elif [ "$CORE" = "DSperate-Tate" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate --tate
 
