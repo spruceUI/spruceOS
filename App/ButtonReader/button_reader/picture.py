@@ -24,8 +24,8 @@ class Scene:
     def __init__(self):
         self.labels = {}       # slot -> label
         self.state = {}        # slot -> "on" | "off" | "absent" | "unknown"
-        self.sticks = {}       # "LEFT"/"RIGHT" -> {"present", "dx", "dy", "hidden"}
-        self.hidden = set()    # slots the device doesn't have and the picture leaves out (R3 on one stick)
+        self.sticks = {}       # "LEFT"/"RIGHT" -> {"present", "dx", "dy", "absent"}
+        self.title = "Button Reader"  # PyUI's top bar: the app and the device's name ("Unknown" without a manifest)
         self.target = None     # slot or "LEFT_X"... being asked for in a guided step
         self.prompt = ""
         self.prompt_color = TEXT
@@ -33,11 +33,14 @@ class Scene:
         self.line_rows = 0     # rows kept for lines, filled or not, so the picture doesn't move as they fill
         self.overlay = None    # big centred text (exit countdown, start screen)
         self.overlay_color = WARN
+        self.info = None       # [(text, color)]: the device info pane, drawn instead of the picture
+        self.info_scroll = 0
 
 
 # Two arrangements in units u: "tall" puts the sticks under the D-pad and face buttons (a
 # vertical handheld); "wide" puts everything in one row. The one with the larger u wins.
-# The top row: L3, a gap, L1 L2, the volume and power keys, R2 R1, a gap, R3.
+# The top row: L3, a gap, L1 L2, the volume and power keys, R2 R1, a gap, R3. Every element is always drawn;
+# what a device lacks is grayed out. The middle holds Select/Start over Menu, Home and Fn.
 SHAPES = {
     "tall": {"size": (22.4, 11.0), "body": (-10, 1.6, 20, 9.3), "row": 0.75,
              "top": {"L3": (-10.1, 2.0), "L1": (-7.15, 2.5), "L2": (-4.45, 2.5), "VOL_DOWN": (-2.0, 1.7),
@@ -58,7 +61,7 @@ SHORT = {"Power": "Pwr", "Select": "Sel", "Start": "St", "Menu": "M", "Home": "H
 class Layout:
     """Element shapes for a picture area, in the arrangement that draws them largest."""
 
-    def __init__(self, x, y, w, h, has_home):
+    def __init__(self, x, y, w, h):
         name = max(SHAPES, key=lambda k: min(w / SHAPES[k]["size"][0], h / (SHAPES[k]["size"][1] + 0.5)))
         shape = SHAPES[name]
         sw, sh = shape["size"]
@@ -89,11 +92,8 @@ class Layout:
         upper, lower = shape["middle"]
         rect("SELECT", -1.45, upper, 2.4, 0.9)
         rect("START", 1.45, upper, 2.4, 0.9)
-        if has_home:
-            rect("MENU", -1.3, lower, 2.2, 0.9)
-            rect("HOME", 1.3, lower, 2.2, 0.9)
-        else:
-            rect("MENU", 0.0, lower, 2.4, 0.9)
+        for slot, cx in (("MENU", -2.2), ("HOME", 0.0), ("FN", 2.2)):
+            rect(slot, cx, lower, 2.0, 0.9)
         self.rects = r
         self.stick = {s: (ox + cx * u, oy + cy * u, 1.65 * u) for s, (cx, cy) in shape["sticks"].items()}
 
@@ -150,9 +150,9 @@ def draw_slot(canvas, shape, label, state, targeted, thick):
 
 
 def draw_stick(canvas, center, info, targeted):
-    """The stick's deflection; its click is L3/R3 in the top row."""
+    """The stick's deflection; its click is L3/R3 in the top row. A stick the device lacks is grayed out."""
     cx, cy, radius = center
-    present = info.get("present")
+    present = info.get("present") and not info.get("absent")
     ring = TARGET if targeted else (OUTLINE if present else DIM)
     fill_circle(canvas, cx, cy, radius, ring)
     fill_circle(canvas, cx, cy, radius - max(2, radius * 0.07), BODY if not present else KEY)
@@ -177,25 +177,24 @@ def draw(canvas, area, scene):
     top = y + normal * 0.2
     if scene.prompt:
         canvas.text(scene.prompt, x + w / 2, top + normal / 2, scene.prompt_color, "normal", "center")
+    if scene.info is not None:
+        draw_info(canvas, (x + 12, top + normal * 1.05, w - 24, h - (top - y) - normal * 1.05), scene)
+        return None
     rows = max(scene.line_rows, len(scene.lines))
     lines_h = small * (rows + 0.3) if rows else 0
     pic = (x + 6, top + normal * 1.05, w - 12, h - (top - y) - normal * 1.05 - lines_h)
-    layout = Layout(*pic, has_home=scene.state.get("HOME") not in (None, "absent", "unknown"))
+    layout = Layout(*pic)
     u = layout.u
     thick = max(1, int(u * 0.08))
     bx, by, bw, bh = layout.body
     fill_round_rect(canvas, bx, by, bw, bh, 1.5 * u, BODY)
     for slot, shape in layout.rects.items():
-        if slot in scene.hidden:
-            continue
         label = None if slot.startswith("DPAD_") else scene.labels.get(slot, slot)
         draw_slot(canvas, shape, label, scene.state.get(slot, "unknown"), scene.target == slot, thick)
     dcx, dcy, arm = layout.dpad_center
     canvas.box(KEY, dcx - arm / 2, dcy - arm / 2, arm, arm)
     for stick, center in layout.stick.items():
         info = scene.sticks.get(stick, {"present": False})
-        if info.get("hidden"):
-            continue
         draw_stick(canvas, center, info, scene.target in (f"{stick}_X", f"{stick}_Y"))
     ly = y + h - lines_h + small * 0.2
     for text, color in scene.lines:
@@ -209,6 +208,38 @@ def draw(canvas, area, scene):
         canvas.box(scene.overlay_color, x + (w - ow) / 2, pic[1] + pic[3] / 2 - oh / 2, ow, 2)
         canvas.text(scene.overlay, x + w / 2, pic[1] + pic[3] / 2, scene.overlay_color, "big", "center")
     return layout
+
+
+def wrap(canvas, text, width, size="small"):
+    """Lines of text no wider than width, broken between words; continuation lines indented."""
+    out = []
+    line = ""
+    for word in text.split(" "):
+        trial = f"{line} {word}" if line else word
+        if line and canvas.text_width(trial, size) > width:
+            out.append(line)
+            line = "    " + word
+        else:
+            line = trial
+    out.append(line)
+    return out
+
+
+def draw_info(canvas, area, scene):
+    """The device info pane: wrapped lines from scene.info, scrolled by scene.info_scroll rows."""
+    x, y, w, h = area
+    small = canvas.line_height("small")
+    lines = [(part, color) for text, color in scene.info for part in wrap(canvas, text, w)]
+    rows = max(1, int(h // small))
+    if len(lines) > rows:
+        rows -= 1  # the last row says what is below
+    start = min(scene.info_scroll, max(0, len(lines) - rows))
+    ly = y + small / 2
+    for text, color in lines[start:start + rows]:
+        canvas.text(text, x, ly, color, "small", "left")
+        ly += small
+    if len(lines) > start + rows:
+        canvas.text(f"... {len(lines) - start - rows} more lines (D-pad down)", x, ly, DIM, "small", "left")
 
 
 class RecordingCanvas:

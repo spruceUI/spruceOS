@@ -1,0 +1,171 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "XU10",
+  "name": "MagicX XU10",
+  "brand": "MagicX",
+  "models": [
+    "MagicX XU10"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=XU10 (PyUI device MAGICX_XU10, confirmed in the Button Reader reports)",
+  "cfg": "spruce/scripts/platform/darkmoss/XU10.cfg",
+  "spruce_ref": "e12204bf4",
+  "face_print": "xbox",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "MagicX XU10 Controller",
+      "by_path": "platform-xu10-joypad-event-joystick",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "rg351-keys",
+      "from": "measured: button-reader-XU10-2.txt",
+      "note": "a 4th node beside the pwrkey, the codec and the pad, not named in XU10.cfg's candidate lists; dArkMossCommon.sh's resolve_key_event_node() finds it by its KEY_VOLUMEUP/DOWN capability bits at boot, overriding the cfg's static EVENT_PATH_VOLUME=EVENT_PATH_POWER"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "MENU": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3",
+      "y": "3 4",
+      "source": "pad",
+      "from": "measured: button-reader-XU10-2.txt"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none (not exercised in the Button Reader reports; no cfg code either)",
+    "FN_LEFT": "none (not exercised in the Button Reader reports; no cfg code either)",
+    "FN_RIGHT": "none (not exercised in the Button Reader reports; no cfg code either)",
+    "LID": "none (not exercised in the Button Reader reports; no cfg code either)"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/XU10.cfg",
+    "spruce/scripts/platform/darkmoss/dArkMossCommon.cfg",
+    "button-reader-XU10-1.txt",
+    "button-reader-XU10-2.txt",
+    "button-reader-XU10-3.txt",
+    "button-reader-XU10-4.txt"
+  ],
+  "notes": [
+    "XU10.cfg exists only on the local branch at commit e12204bf4 (\"Add the MagicX XU10 (dArkMoss), beside the XU Mini M\"); it is not on origin/Development.",
+    "Four Button Reader runs exist from the same session (2026-04-13, device clock). Runs 2 and 4 are complete and OK on every step (face buttons, d-pad, L1/R1/L2/R2, SELECT/START, L3/R3 stick clicks, MENU, VOL+/VOL-, both sticks full-range -1800..1800). Runs 1 and 3 show DIFFERENT presses early (e.g. pressing \"the BOTTOM face button\" reported DPAD_DOWN) and then stop after a handful of steps: almost certainly a tester mis-press/orientation slip on those two attempts, not a hardware fault, since runs 2 and 4 (same unit, same boot) are fully consistent with the cfg. Codes below follow the OK runs.",
+    "Both analog sticks are confirmed present and move the full -1800..1800 range on ABS_X/ABS_Y and ABS_RX/ABS_RY (run 2), matching DEVICE_NUM_ANALOG_STICKS=2.",
+    "face_print is \"xbox\" per the tester (2026-11-11): printed A bottom, B right, X left, Y top. Every other PLATFORM in this batch is \"nintendo\" by default; no evidence was found to override that for any of them."
+  ]
+}

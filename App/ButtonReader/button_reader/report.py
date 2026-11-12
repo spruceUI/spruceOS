@@ -4,11 +4,12 @@ import hashlib
 import os
 import time
 
-from button_reader import VERSION, emulator_maps
+from button_reader import VERSION, emulator_maps, features
 from button_reader.names import EV_ABS, EV_KEY, HAT_FIRST, HAT_LAST, abs_name, face_print_text, key_name
 
 ENV_PREFIXES = ("B_", "STICK_", "EVENT_PATH_", "DEVICE_NUM_ANALOG_STICKS", "SDL_GAMECONTROLLER",
-                "PLATFORM", "PYUI_", "CONTROLLER_")
+                "PLATFORM", "PYUI_", "CONTROLLER_", "FN_KEY_", "SPRUCE_DEVICE_NAME", "DISPLAY_", "RUMBLE_",
+                "LED_PATH", "DEVICE_HAS_", "WIFI_MODULE", "WIFI_ONBOARD_MODULE")
 
 
 def _read(path, mode="r"):
@@ -52,8 +53,15 @@ class Report:
         self.line(f"Button Reader {VERSION} report (verbose)")
         uptime = (_read("/proc/uptime") or "?").strip()
         self.line(f"date (device clock): {time.strftime('%Y-%m-%d %H:%M:%S')}   uptime: {uptime}")
-        self.line(f"platform: {session.platform}   PyUI device: {session.device_desc}")
-        self.line(f"face buttons: {face_print_text(session.platform)} (the step prompts name both)")
+        self.line(f"device: {session.manifest.name}   platform: {session.platform}   "
+                  f"PyUI device: {session.device_desc}")
+        self.line(session.manifest_text())
+        self.line(f"controls: {session.controls_summary()}")
+        for text in session.source_lines():
+            self.line(f"source {text}")
+        for slot, mine, theirs in session.manifest.cfg_differences(session.env):
+            self.line(f"cfg differs: {slot}: the manifest says {mine}, the cfg {theirs}")
+        self.line(f"face buttons: {face_print_text(session.manifest.face_print)} (the step prompts name both)")
         if session.switch is not None:
             position = session.switch.value if session.switch.readable else "none readable"
             self.line(f"Fn switch: {position} (spruce's device_get_switch_position)")
@@ -65,6 +73,11 @@ class Report:
             data = _read(path, "rb")
             if data:
                 self.line(f"dtb: {path} {len(data)} B sha256 {hashlib.sha256(data).hexdigest()}")
+        self.line()
+        self.line("--- device features (sysfs, PyUI and the cfg, read once)")
+        for label, text in features.detect(session.env, session.roots, session.nodes, session.pyui_device,
+                                           session.pad.touch):
+            self.line(f"{label}: {text}")
         self.line()
         self.line("--- platform cfg values PyUI's environment carries")
         for key in sorted(k for k in session.env if k.startswith(ENV_PREFIXES)):

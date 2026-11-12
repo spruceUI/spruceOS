@@ -1,0 +1,161 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "XU20",
+  "name": "MagicX XU20",
+  "brand": "MagicX",
+  "models": [
+    "MagicX XU20"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device = xu20",
+  "cfg": "spruce/scripts/platform/oakmoss/XU20.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "mcu",
+      "node": "magicx-input",
+      "from": "measured: the lab capturesXU20-20260921.txt",
+      "note": "simplepad, a UART MCU pad (see Zero28). The capture is the stock MagicX image (2026-09-21), before oakMOSS."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesXU20-20260921.txt"
+    },
+    "touch": {
+      "kind": "touch",
+      "node": "hyn_ts",
+      "from": "measured: the lab capturesXU20-20260921.txt",
+      "note": "Hynitron hyn_ts (OAKMOSS_TOUCH_MODULE=hynitron); not autoloaded, device_init's oakmoss_load_touch loads it once the board has settled"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 103",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 108",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 105",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 106",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 158",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the cfg is conditional: on an image that still carries MagicX's second codes (OAKMOSS_PAD_RIDERS=1, detected from the pad's key-capability bits at boot) MENU is 256 instead, because 158 is then B's second code and 353 rides on A; oakMOSS images from 2026-09-26 drop the riders, so 158 is the current default",
+      "cfg_differs": "XU20.cfg sets B_MENU at runtime (1 256 with OAKMOSS_PAD_RIDERS=1, else 1 158); the static read sees no value. 1 158 is current oakMOSS"
+    },
+    "HOME": {
+      "code": "1 172",
+      "source": "pad",
+      "from": "cfg",
+      "note": "KEY_HOMEPAGE, the XU20's extra face button (G/switch-key, PH11 then PH14 across image generations); conditional on the pad reporting key 172 in its capability bits at boot - cfg exports DOESNT_EXIST when that bit is absent (older images gave this physical key no code at all). The 2026-09-21 stock-image capture (predates this logic) shows a BTN_G GPIO edge firing once, consistent with a real, reachable button on this board, unlike the Zero 28/Zero 40's unused BTN_G pin. device_home_button_pressed in XU20.sh runs the configured Home action on it.",
+      "cfg_differs": "XU20.cfg sets B_HOME at runtime: 1 172 when the pad declares key 172, else DOESNT_EXIST; the static read sees the else branch"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "L3": "the cfg exports B_L3=\"1 317\" (the shared MagicX simplepad block, 'also logs left fnkey stuff'), but DEVICE_NUM_ANALOG_STICKS=0 and the task's own framing states the XU20 has no analog sticks despite the cfg listing L3/R3; the 2026-09-21 capture's GPIO table has no THUMB_L/THUMB_R lines, and the cfg's own SDL_GAMECONTROLLERCONFIG binds no leftstick/rightstick/L3/R3 for this board. There is no stick to click.",
+    "R3": "see L3: cfg exports B_R3=\"1 318\" from the shared block, but there is no physical stick/click on this board (DEVICE_NUM_ANALOG_STICKS=0; no SDL bind; no measured GPIO edge)",
+    "LEFT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0; simplepad reports joysticks=<0x0>); STICK_LEFT/RIGHT/UP/DOWN are blank in the cfg",
+    "RIGHT_STICK": "0 sticks; STICK_LEFT_2/RIGHT_2/UP_2/DOWN_2 are blank in the cfg",
+    "FN_SWITCH": "no switch; device_get_switch_position is the oakMOSS no-op stub on MagicX boards (oakmoss_a133p.sh: the TrimUI PH19 pin is L1 here)",
+    "FN_LEFT": "no Fn key separate from L3/R3 (which are themselves absent here); none declared",
+    "FN_RIGHT": "no Fn key separate from L3/R3 (which are themselves absent here); none declared",
+    "LID": "no lid; not a clamshell, no hall node in this board's tree"
+  },
+  "evidence": [
+    "the lab capturesXU20-20260921.txt",
+    "the lab capturesXU20-20260921-kernel-facts.txt",
+    "spruce/scripts/platform/oakmoss/XU20.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/XU20.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/MagicXCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b"
+  ],
+  "notes": [
+    "The 2026-09-21 discovery capture is the stock MagicX image, before oakMOSS; node names are expected to carry over by name match (magicx-input, axp2202-pek) but have not been re-measured on an oakMOSS build.",
+    "A hardware run on a current oakMOSS image should confirm HOME fires 1 172 (not DOESNT_EXIST) and MENU is 158, not 256 - both depend on the pad's reported key-capability bits, which this task did not probe directly."
+  ]
+}

@@ -52,16 +52,11 @@ LABELS = {"A": "A", "B": "B", "X": "X", "Y": "Y", "DPAD_UP": "Up", "DPAD_DOWN": 
           "DPAD_LEFT": "Left", "DPAD_RIGHT": "Right", "L1": "L1", "R1": "R1", "L2": "L2",
           "R2": "R2", "L3": "L3", "R3": "R3", "SELECT": "Select", "START": "Start", "MENU": "Menu",
           "HOME": "Home", "VOLUME_UP": "Vol+", "VOLUME_DOWN": "Vol-", "POWER_BUTTON": "Power"}
-# The letter printed at each face position. Nintendo unless the platform is listed in XBOX_PRINT;
+# The letter printed at each face position: Nintendo unless the device's manifest says "xbox";
 # the codes and the cfg stay by position either way.
 FACE_DIRECTION = {"BOTTOM": "SOUTH", "RIGHT": "EAST", "TOP": "NORTH", "LEFT": "WEST"}
 FACE_PRINT = {"nintendo": {"BOTTOM": "B", "RIGHT": "A", "TOP": "X", "LEFT": "Y"},
               "xbox": {"BOTTOM": "A", "RIGHT": "B", "TOP": "Y", "LEFT": "X"}}
-XBOX_PRINT = {"XU10"}
-# What a platform has that its cfg doesn't say (user, 11-11): the Brick Pro has a Home key though its cfg says
-# DOESNT_EXIST; the Smart Pro's and the A30's sticks don't click (the A30's stick uart sends 2 axes, no click bit).
-UNLISTED = {"BrickPro": {"HOME"}}
-NO_STICK_CLICKS = {"SmartPro", "A30"}
 # (stick, cfg variable for right, cfg variable for down, default X axis, default Y axis)
 STICKS = [("LEFT", "STICK_RIGHT", "STICK_DOWN", 0, 1), ("RIGHT", "STICK_RIGHT_2", "STICK_DOWN_2", 3, 4)]
 PYUI_STICK = {"LEFT_STICK_LEFT": ("LEFT", "x", -1), "LEFT_STICK_RIGHT": ("LEFT", "x", 1),
@@ -86,19 +81,15 @@ def control_name(control):
     return f"{abs_name(code)}{'+' if sign > 0 else '-'}"
 
 
-def face_print(platform):
-    return "xbox" if platform in XBOX_PRINT else "nintendo"
-
-
-def face_print_text(platform):
+def face_print_text(style):
     """'nintendo print: B bottom, A right, X top, Y left'."""
-    letters = FACE_PRINT[face_print(platform)]
-    return f"{face_print(platform)} print: " + ", ".join(f"{letters[s]} {s.lower()}" for s in FACE_DIRECTION)
+    letters = FACE_PRINT.get(style, FACE_PRINT["nintendo"])
+    return f"{style} print: " + ", ".join(f"{letters[s]} {s.lower()}" for s in FACE_DIRECTION)
 
 
-def face_prompt(slot, platform):
+def face_prompt(slot, style):
     """'Press FACE_NORTH/X': the position, then the letter this device prints there."""
-    return f"Press FACE_{FACE_DIRECTION[slot]}/{FACE_PRINT[face_print(platform)][slot]}"
+    return f"Press FACE_{FACE_DIRECTION[slot]}/{FACE_PRINT.get(style, FACE_PRINT['nintendo'])[slot]}"
 
 
 def signed(value):
@@ -155,7 +146,7 @@ def stick_axis(spec):
 class Names:
     """Which slot, label, cfg variable and PyUI name each control has on this device."""
 
-    def __init__(self, env=None, pyui_controls=None, pyui_sticks=None):
+    def __init__(self, env=None, pyui_controls=None, pyui_sticks=None, manifest=None):
         env = os.environ if env is None else env
         self.env = env
         self.pyui = dict(pyui_controls or {})   # control -> ControllerInput name
@@ -171,12 +162,12 @@ class Names:
             if control is not None:
                 self.cfg_var.setdefault(control, var)
                 self.slot.setdefault(control, slot)
-        platform = env.get("PLATFORM", "")
-        self.unlisted = UNLISTED.get(platform, set())
-        self.absent -= self.unlisted
-        self.no_stick_clicks = platform in NO_STICK_CLICKS
-        if self.no_stick_clicks:
-            self.absent |= {"L3", "R3"}
+        if manifest is not None:  # what the device lacks, and the codes a placeholder cfg doesn't give
+            self.absent = {slot for slot, _var, _pyui in SLOTS if manifest.has(slot) is False}
+            for slot, _var, _pyui in SLOTS:
+                control = spec_control(manifest.code(slot))
+                if control is not None and slot not in self.slot.values():
+                    self.slot.setdefault(control, slot)
         for control, pyui in self.pyui.items():
             slot = PYUI_SLOT.get(pyui)
             if slot and control not in self.slot and slot not in self.slot.values():
@@ -190,6 +181,11 @@ class Names:
                     x = (code, psign)
                 if pstick == stick and axis == "y" and y is None:
                     y = (code, psign)
+            entry = manifest.control(f"{stick}_STICK") if manifest is not None else {}
+            if x is None:
+                x = stick_axis(parse_spec(entry.get("x")))
+            if y is None:
+                y = stick_axis(parse_spec(entry.get("y")))
             if x or y:
                 self.sticks[stick] = {"x": x, "y": y, "vars": (var_x, var_y)}
 

@@ -7,13 +7,13 @@ import os
 import select
 import time
 
-from button_reader import VERSION, evdev, hardware, picture
+from button_reader import VERSION, evdev, features, hardware, manifest, picture
 from button_reader.fn_switch import FnSwitch
 from button_reader.joystick_input import JoystickInput
-from button_reader.names import ABSENT, EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS, STICKS
-from button_reader.names import SW_NAMES
-from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, pyui_tables, sign, spec_control
-from button_reader.names import stick_axis
+from button_reader.manifest import SLOT_VARS
+from button_reader.names import ABSENT, EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOTS, STICKS, SW_NAMES
+from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, parse_spec, pyui_tables, sign
+from button_reader.names import spec_control, stick_axis
 
 EXIT_HOLD = 10.0
 COUNTDOWN_AFTER = 3.0
@@ -26,6 +26,7 @@ RESCAN_SECONDS = 2.0
 REDRAW_SECONDS = 0.25
 MIN_FRAME = 1 / 30.0
 RECENT_LINES = 3  # last presses listed under the picture, above the status line
+INFO_HOLD = 10.0  # L1 + R1 held this long in the picture opens the device info
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXIT_HINT = "Exit: hold a button 10 s, or Select+Start"
 
@@ -37,7 +38,9 @@ KEY_STEPS = [("BOTTOM", None), ("RIGHT", None), ("TOP", None), ("LEFT", None),
              ("L2", "Press L2 (lower left shoulder)"), ("R2", "Press R2 (lower right shoulder)"),
              ("SELECT", "Press SELECT"), ("START", "Press START"), ("L3", "Click the LEFT stick in (L3)"),
              ("R3", "Click the RIGHT stick in (R3)"), ("MENU", "Tap MENU"), ("HOME", "Press HOME"),
+             ("FN_LEFT", "Press the left Fn key"), ("FN_RIGHT", "Press the right Fn key"),
              ("VOL_UP", "Press VOL+"), ("VOL_DOWN", "Press VOL-")]
+FN_SLOTS = ("FN_LEFT", "FN_RIGHT")
 STICK_CLICKS = {"L3": 1, "R3": 2}  # the sticks a device needs for each click step
 STICK_STEPS = [("LEFT_X", "LEFT", "x", "Push the LEFT stick fully RIGHT, then let go"),
                ("LEFT_Y", "LEFT", "y", "Push the LEFT stick fully DOWN, then let go"),
@@ -150,7 +153,7 @@ class Pad:
 class Session:
     def __init__(self, device=None, controller_interface=None, log=None, screen=None, env=None,
                  nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None, switch=None,
-                 joystick=None):
+                 joystick=None, devices_dir=None):
         self.env = dict(os.environ if env is None else env)
         self.desktop = desktop
         self.switch = switch
@@ -160,8 +163,10 @@ class Session:
             for key, value in ENV.items():
                 self.env.setdefault(key, value)
         controls, sticks = pyui_tables(controller_interface, device)
-        self.names = Names(self.env, controls, sticks)
+        self.manifest = manifest.load(self.env, devices_dir)
+        self.names = Names(self.env, controls, sticks, self.manifest)
         self.platform = self.env.get("PLATFORM") or "unknown"
+        self.pyui_device = device
         aliases = ""
         try:
             aliases = ", ".join(device.get_device_names())
@@ -210,6 +215,13 @@ class Session:
         self.logged_axis = {}
         self._ranked = []
         self.failed = set()
+        self.expect_from = {}
+        self.info_hold = INFO_HOLD
+        self.info_since = None  # when L1 + R1 began to be held together in the picture
+        self.info_open = False
+        self.info_lines = []
+        self.info_scroll = 0
+        self.hold_floor = self.started  # the exit hold counts from here, so the info chord never exits
         self.done = False
         self.exit_reason = None
         self.dirty = True
@@ -217,8 +229,14 @@ class Session:
     # --- logging
 
     def log_inventory(self):
-        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {self.platform} "
-                      f"({self.device_desc}), {face_print_text(self.platform)}")
+        m = self.manifest
+        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {m.name} ({self.platform}, "
+                      f"{self.device_desc}), {face_print_text(m.face_print)}")
+        self.log.info(f"Button Reader: {self.manifest_text()}")
+        for text in self.source_lines():
+            self.log.info(f"Button Reader:   {text}")
+        for slot, mine, theirs in m.cfg_differences(self.env):
+            self.log.info(f"Button Reader:   {slot}: the manifest says {mine}, the cfg {theirs}")
         for info in self.infos:
             node = info.node
             self.log.info(f"Button Reader: {info.summary()}")
@@ -238,6 +256,85 @@ class Session:
                 self.log.info(f"Button Reader:   {node.short} ADC input {name}: {adc} channel {channel}")
         for error in self.open_errors:
             self.log.info(f"Button Reader: {error}")
+
+    def manifest_text(self):
+        m = self.manifest
+        if m.known:
+            models = ", ".join(m.data.get("models", []))
+            return (f"manifest devices/{os.path.basename(m.path)}: {m.data.get('name')} ({models}); "
+                    f"this unit: {m.model or 'model not told'}")
+        return f"no manifest for {self.platform}: rules from the cfg" + (f" ({m.error})" if m.error else "")
+
+    def source_lines(self):
+        """Each manifest source and what stands for it here: the node(s) matching its name, the daemon, the GPIO."""
+        m = self.manifest
+        if not m.known:
+            return []
+        out = []
+        for sid, src in m.sources.items():
+            kind = src.get("kind", "?")
+            if m.node_names(sid):
+                found = [n.short for n in self.nodes if m.matches(sid, n.name)]
+                out.append(f"{sid} ({kind}) {m.node_names(sid)[0]}: {', '.join(found) if found else 'NOT FOUND'}")
+            elif kind == "uart":
+                pids = []
+                if self.joystick is not None and src.get("fed_by") == "joystickinput":
+                    try:
+                        pids = self.joystick.find()
+                    except OSError:
+                        pass
+                seen = f"pid {', '.join(map(str, pids))}" if pids else "not running"
+                out.append(f"{sid} (uart) {src.get('device', '?')} via {src.get('fed_by', '?')}: {seen}")
+            elif kind == "gpio":
+                sw = self.switch
+                seen = f"reads {sw.value}" if sw is not None and sw.readable else "not readable"
+                out.append(f"{sid} (gpio) {src.get('device', '?')}: {seen}")
+            else:
+                out.append(f"{sid} ({kind})")
+        others = [f"{n.short} {n.name}" for n in self.nodes if not any(m.matches(sid, n.name) for sid in m.sources)]
+        if others:
+            out.append("not in the manifest: " + ", ".join(others))
+        return out
+
+    def source_note(self, role, short):
+        """' (not from pad TRIMUI Player1)' when a press arrived on another node than the manifest's source."""
+        sid, src = self.manifest.source_of(role)
+        node = next((n for n in self.nodes if n.short == short), None)
+        if not src or node is None or not self.manifest.node_names(sid) or self.manifest.matches(sid, node.name):
+            return ""
+        return f" (not from its source {sid}: {src.get('node')})"
+
+    def controls_summary(self):
+        m = self.manifest
+
+        def yes(slot):
+            has = m.has(slot)
+            return "yes" if has else "no" if has is False else "?"
+        clicks = [s for s in ("L3", "R3") if m.has(s) and m.control(s).get("label") != "Fn"]
+        fn_keys = [s for s in ("L3", "R3") if m.control(s).get("label") == "Fn"] + [s for s in FN_SLOTS if m.has(s)]
+        return (f"sticks {self.stick_count()} ({'click ' + '/'.join(clicks) if clicks else 'no clicks'}), "
+                f"Home {yes('HOME')}, volume {yes('VOL_UP')}, Fn keys {'/'.join(fn_keys) or 'no'}, "
+                f"Fn switch {yes('FN_SWITCH')}, lid {yes('LID')}, {m.face_print} print")
+
+    def device_info(self):
+        """The info pane: [(text, color)], what the manifest says and what this unit shows."""
+        m = self.manifest
+        rows = [(f"{m.name} ({self.platform})", picture.TEXT)]
+        if m.known:
+            d = m.data
+            rows.append((" | ".join(str(d.get(k)) for k in ("brand", "soc", "base", "arch") if d.get(k)), picture.GRAY))
+        rows.append((self.manifest_text(), picture.GRAY))
+        rows.append(("Controls: " + self.controls_summary(), picture.TEXT))
+        for text in self.source_lines():
+            rows.append((f"Source {text}", picture.WARN if "NOT FOUND" in text else picture.GRAY))
+        if not m.known:
+            rows.append(("Input nodes: " + ", ".join(f"{n.short} {n.name}" for n in self.nodes), picture.GRAY))
+        diffs = m.cfg_differences(self.env)
+        if diffs:
+            rows.append((f"cfg differs from the manifest on {', '.join(d[0] for d in diffs)}", picture.WARN))
+        for label, text in features.detect(self.env, self.roots, self.nodes, self.pyui_device, self.pad.touch):
+            rows.append((f"{label}: {text}", picture.TEXT))
+        return rows
 
     def t(self):
         return self.clock() - self.started
@@ -275,7 +372,15 @@ class Session:
                 self.event_line(text)
 
     def on_press(self, short, control, now):
-        if self.mode == "start" and not self.is_power(control):
+        if self.info_open:
+            slot = self.names.slot.get(control)
+            if slot in ("DPAD_UP", "DPAD_DOWN"):
+                self.info_scroll = max(0, self.info_scroll + (1 if slot == "DPAD_DOWN" else -1))
+            elif not self.is_power(control):
+                self.info_open = False
+                self.event_line("device info closed")
+            self.dirty = True
+        elif self.mode == "start" and not self.is_power(control):
             self.start_verbose(now)
         elif self.mode == "steps" and self.phase == "ask" and self.steps[self.step_i][0] == "key" \
                 and not self.is_power(control):
@@ -306,15 +411,33 @@ class Session:
         start_controls = self.names.controls_of("START")
         return bool(select_controls and start_controls and held & set(select_controls) and held & set(start_controls))
 
+    def stick_count(self):
+        """The manifest's sticks; without one, the cfg's count or the sticks whose axes the nodes report."""
+        count = self.manifest.stick_count()
+        if count is None:
+            count = sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
+        return count
+
+    def expected(self, slot):
+        """The control a step expects: the cfg's code, else the manifest's (the Minis' cfg holds placeholders)."""
+        spec = cfg_spec(SLOT_VARS[slot], self.env)
+        self.expect_from[slot] = "cfg"
+        if spec in (None, ABSENT):
+            spec = self.manifest.code(slot)
+            self.expect_from[slot] = "manifest" if spec else None
+        return spec_control(spec)
+
     def stick_axes(self, stick):
         """{"x": (short, axis, sign), "y": ...} for one stick, from the cfg/PyUI or the default axes."""
         out = {"x": None, "y": None}
+        has = self.manifest.has(f"{stick}_STICK")
+        if has is False:
+            return out  # a pad that declares axes the device lacks (the A30's RX/RY) draws nothing for them
         info = self.names.sticks.get(stick)
         defaults = {s: (dx, dy) for s, _vx, _vy, dx, dy in STICKS}[stick]
-        count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
         for k, axis in enumerate(("x", "y")):
             want = info[axis] if info and info[axis] else None
-            if want is None and info is None and count != "0" and not (count == "1" and stick == "RIGHT"):
+            if want is None and info is None:  # the stick exists, or nothing says it doesn't
                 want = (defaults[k], 1)
             if want is None:
                 continue
@@ -357,31 +480,35 @@ class Session:
         except OSError as error:
             self.log.warning(f"Button Reader: no report ({error}); the steps still run")
             self.report = None
-        count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
-        if count.isdigit():
-            sticks = int(count)
-        else:
-            sticks = sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
+        m = self.manifest
+        sticks = self.stick_count()
         names = self.names
         steps = []
         for slot, prompt in KEY_STEPS:
-            if slot in names.absent:
+            has = m.has(slot)
+            if has is False:
                 continue
-            if slot == "HOME" and not names.controls_of("HOME") and slot not in names.unlisted:
-                continue
-            # A stick click needs its stick (the Minis have none), but the Brick's Fn keys send L3/R3. Virtual pads
-            # (the A30's joypad, trimui_inputd) declare 317/318 whatever the hardware has, so that proves nothing.
-            if sticks < STICK_CLICKS.get(slot, 0):
-                side = self.fn_key_side(slot)
-                if side is None:
+            if not m.known:
+                # The cfg's rules. A stick click needs its stick (the Minis have none), but the Brick's Fn keys send
+                # L3/R3. Virtual pads (the A30's joypad, trimui_inputd) declare 317/318 whatever the hardware has.
+                if has is None and slot in ("HOME",) + FN_SLOTS and not names.controls_of(slot):
                     continue
-                prompt = f"Press the {side} Fn key ({slot})"
-            prompt = prompt or face_prompt(slot, self.platform)
-            steps.append(("key", slot, prompt, SLOT_VAR[slot], spec_control(cfg_spec(SLOT_VAR[slot], self.env))))
+                if sticks < STICK_CLICKS.get(slot, 0):
+                    side = self.fn_key_side(slot)
+                    if side is None:
+                        continue
+                    prompt = f"Press the {side} Fn key ({slot})"
+            prompt = m.control(slot).get("prompt") or prompt or face_prompt(slot, m.face_print)
+            steps.append(("key", slot, prompt, SLOT_VARS[slot], self.expected(slot)))
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
             var = dict((s, (vx, vy)) for s, vx, vy, _dx, _dy in STICKS)[stick][0 if axis == "x" else 1]
-            steps.append(("stick", role, prompt, var, stick_axis(cfg_spec(var, self.env))))
-        if self.switch is not None and self.switch.readable:
+            expected = stick_axis(cfg_spec(var, self.env))
+            self.expect_from[role] = "cfg"
+            if expected is None:
+                expected = stick_axis(parse_spec(m.control(f"{stick}_STICK").get(axis)))
+                self.expect_from[role] = "manifest" if expected else None
+            steps.append(("stick", role, prompt, var, expected))
+        if self.switch is not None and self.switch.readable and m.has("FN_SWITCH") is not False:
             steps.append(("switch", "FN_SWITCH", "Flip the Fn switch, then back (its action runs)",
                           "device_get_switch_position", None))
         self.steps = steps
@@ -399,11 +526,17 @@ class Session:
         if kind == "key":
             if expected:
                 want = self.names.describe(expected)
+                if self.expect_from.get(role) == "manifest":
+                    want += " (manifest)"
+            elif self.manifest.known and self.manifest.has(role):
+                want = f"no code known (manifest: {self.manifest.control(role).get('from', '?')})"
             elif cfg_spec(var, self.env) == ABSENT:
                 want = "nothing (cfg: DOESNT_EXIST)"
             else:
                 want = "nothing (cfg unset)"
             got = f"{answer[0]} {self.names.describe(answer[1])}" if answer else "no input"
+            if answer:
+                got += self.source_note(role, answer[0])
             same = bool(answer) and answer[1] == expected
         elif kind == "switch":
             want = "a flip"
@@ -411,6 +544,8 @@ class Session:
             same = bool(answer)
         else:
             want = f"{abs_name(expected[0])} {'+' if expected[1] > 0 else '-'}" if expected else "nothing (cfg unset)"
+            if expected and self.expect_from.get(role) == "manifest":
+                want += " (manifest)"
             got = (f"{answer[0]} {abs_name(answer[1][1])} {'+' if answer[1][2] > 0 else '-'}" if answer else "no input")
             same = bool(answer) and (answer[1][1], answer[1][2]) == tuple(expected or ())
         if not answer:
@@ -424,8 +559,8 @@ class Session:
         self.last_record = (now, role, answer[1] if answer else None, self.answers.get(role))
         if answer and kind != "switch":
             self.answers[role] = answer
-        if answer and kind == "key" and role in self.names.unlisted:
-            self.names.slot.setdefault(answer[1], role)  # the picture lights it from now on
+        if answer and kind == "key" and expected is None and self.manifest.known and self.manifest.has(role):
+            self.names.slot.setdefault(answer[1], role)  # a control the manifest lists without a code: lit from now
         if kind == "stick" or expected is None:
             want += f" ({var})"  # a key's description already names its cfg variable
         self.step_results.append({"prompt": prompt, "var": var, "want": want, "got": got, "verdict": verdict})
@@ -470,14 +605,37 @@ class Session:
         """"left"/"right" when the cfg's FN_KEY_* sends this stick click (the Brick), else None."""
         side = "left" if slot == "L3" else "right"
         fn_key = cfg_spec(f"FN_KEY_{side.upper()}", self.env)
-        if fn_key and fn_key == cfg_spec(SLOT_VAR[slot], self.env):
+        if fn_key and fn_key == cfg_spec(SLOT_VARS[slot], self.env):
             return side
         return None
 
     def longest_hold(self, now):
-        held = [(now - since, control) for (_s, control), since in self.pad.pressed.items()
+        held = [(now - max(since, self.hold_floor), control) for (_s, control), since in self.pad.pressed.items()
                 if not self.is_power(control)]
         return max(held) if held else (0.0, None)
+
+    def info_chord_down(self):
+        held = {c for _s, c in self.pad.pressed}
+        left = set(self.names.controls_of("L1"))
+        right = set(self.names.controls_of("R1"))
+        return bool(left & held and right & held)
+
+    def tick_info(self, now):
+        """L1 + R1 held together in the picture: after INFO_HOLD the device info opens. Meanwhile the exit hold
+        restarts, so letting one of them go first never leaves the app."""
+        if self.mode != "picture" or not self.info_chord_down():
+            self.info_since = None
+            return
+        self.hold_floor = now
+        if self.info_since is None:
+            self.info_since = now
+        if not self.info_open and now - self.info_since >= self.info_hold:
+            self.info_open = True
+            self.info_scroll = 0
+            self.info_lines = self.device_info()
+            self.event_line("device info opened (L1 + R1)")
+            self.log.info("Button Reader: device info opened")
+        self.dirty = True
 
     def begin_exit(self, reason, now):
         self.mode = "leaving"
@@ -510,6 +668,7 @@ class Session:
             self.dirty = True
         elif self.mode == "steps":
             self.tick_steps(now)
+        self.tick_info(now)
         if self.mode == "leaving":
             keys_held = any(c[0] == EV_KEY for _s, c in self.pad.pressed)
             if not keys_held or now - self.mode_since > self.release_wait:
@@ -558,18 +717,16 @@ class Session:
     def scene(self, now):
         s = picture.Scene()
         held = {c for _s, c in self.pad.pressed}
+        m = self.manifest
+        s.title = f"Button Reader - {m.name}"
         for slot, _var, _pyui in SLOTS:
-            s.labels[slot] = self.names.label(slot)
+            s.labels[slot] = m.control(slot).get("label") or self.names.label(slot)
             s.state[slot] = self.slot_state(slot, held)
+        s.labels["FN"], s.state["FN"] = self.fn_state(held)
         raw = []
-        one_stick = self.env.get("DEVICE_NUM_ANALOG_STICKS", "") == "1"
-        if one_stick:
-            s.hidden.add("R3")  # a one-stick device (the A30) shows no right stick and no R3
-        if self.names.no_stick_clicks:
-            s.hidden |= {"L3", "R3"}  # nor a stick that doesn't click (the A30, the Smart Pro) its L3/R3
         for stick in ("LEFT", "RIGHT"):
             axes = self.stick_axes(stick)
-            info = {"present": any(axes.values()), "hidden": one_stick and stick == "RIGHT"}
+            info = {"present": any(axes.values()), "absent": m.has(f"{stick}_STICK") is False}
             for axis, key in (("x", "dx"), ("y", "dy")):
                 if axes[axis]:
                     short, code, direction = axes[axis]
@@ -616,9 +773,35 @@ class Session:
         if self.mode != "leaving" and held_for >= self.countdown_after and control is not None:
             s.overlay = f"Exit in {max(1, math.ceil(self.exit_hold - held_for))} s"
             s.overlay_color = picture.WARN
+        if self.info_since is not None and not self.info_open and now - self.info_since >= self.countdown_after:
+            s.overlay = f"Device info in {max(1, math.ceil(self.info_hold - (now - self.info_since)))} s"
+            s.overlay_color = picture.TARGET
+        if self.info_open:
+            s.prompt = "Device info"
+            s.info = self.info_lines
+            s.info_scroll = self.info_scroll
+            s.overlay = None
         return s
 
+    def fn_state(self, held):
+        """The picture's Fn box: lit while an Fn key is held; it reads the Fn switch's position when there is one."""
+        m = self.manifest
+        keys = [s for s in FN_SLOTS if m.has(s)] + [s for s in ("L3", "R3") if m.control(s).get("label") == "Fn"]
+        has = [m.has(s) for s in ("FN_SWITCH",) + FN_SLOTS] + [True] * bool(keys)
+        label = "Fn"
+        if self.switch is not None and self.switch.readable and m.has("FN_SWITCH") is not False:
+            label = f"Fn {self.switch.value}"
+        if any(c in held for s in keys for c in self.names.controls_of(s) + [spec_control(m.code(s))]):
+            return label, "on"
+        if True in has:
+            return label, "off"
+        return label, "absent" if all(h is False for h in has) else "unknown"
+
     def footer(self, now):
+        if self.info_open:
+            return "D-pad scrolls; any other button closes"
+        if self.info_since is not None:
+            return "Keep holding L1 + R1 for the device info"
         held_for, control = self.longest_hold(now)
         if self.mode != "leaving" and held_for >= self.countdown_after and control is not None:
             return f"Exit in {max(1, math.ceil(self.exit_hold - held_for))} s; let go to stay"
@@ -628,7 +811,8 @@ class Session:
 
     def run(self):
         try:
-            if self.joystick is not None and self.joystick.analog():
+            m = self.manifest  # a known device switches joystickinput only when its manifest names it as a source
+            if self.joystick is not None and (not m.known or m.fed_by("joystickinput")) and self.joystick.analog():
                 text = f"joystickinput (pid {', '.join(map(str, self.joystick.pids))}) set to analog mode while open"
                 self.log.info(f"Button Reader: {text}")
                 self.event_line(text)
@@ -734,7 +918,7 @@ class PyUiScreen:
         self.after_present = None  # host tests capture frames here
 
     def show(self, scene, footer):
-        self.D.clear("Button Reader", bottom_bar_text=footer, render_bottom_bar_icons_and_images=False)
+        self.D.clear(scene.title, bottom_bar_text=footer, render_bottom_bar_icons_and_images=False)
         top = self.D.get_top_bar_height()
         bottom = self.h - self.D.get_bottom_bar_height()
         picture.draw(self.canvas, (0, top, self.w, bottom - top), scene)
