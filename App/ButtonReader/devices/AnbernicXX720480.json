@@ -19,13 +19,13 @@
       "kind": "joypad",
       "node": "ANBERNIC-keys",
       "from": "derived: same ANBERNIC-keys/event1 pad as the other XX buckets (matrix; no own discovery capture for this bucket)",
-      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes and FF rumble, all on one event1 node (also enumerates as js0). Its EV_KEY bitmask also advertises KEY_ESC/KEY_VOLUMEDOWN/KEY_VOLUMEUP, but those three never actually fire on this node (controller-matrix C2 / RG28XX diagnostic capture)."
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes and FF rumble, all on one event1 node (also enumerates as js0). Its EV_KEY bitmask also advertises KEY_ESC/KEY_VOLUMEDOWN/KEY_VOLUMEUP, but those three never actually fire on this node (controller-matrix C2 / RG28XX diagnostic capture). On the RG34XX SP under BaseOS 1.4.0 (2026-11-12) KEY_VOLUMEUP/KEY_VOLUMEDOWN do arrive here, unlike the capture above."
     },
     "vol": {
       "kind": "gpio-keys",
       "node": "dierct-keys-polled",
       "from": "matrix",
-      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; matrix: measured on this model (controller-matrix input_nodes.event2 provenance) for this bucket's own node)."
+      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; matrix: measured on this model (controller-matrix input_nodes.event2 provenance) for this bucket's own node). On the RG34XX SP under BaseOS 1.4.0 (2026-11-12) nothing fired here; the volume keys came on event1 ANBERNIC-keys."
     },
     "power": {
       "kind": "pmic",
@@ -118,15 +118,15 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "the code (115) matches the cfg's B_VOLUP, but the cfg's only input path is EVENT_PATH_READ_INPUTS_SPRUCE (event1/ANBERNIC-keys); that node advertises KEY_VOLUMEUP but never emits it. The press is measured arriving on event2 (dierct-keys-polled) instead (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX720480-1.txt (RG34XX SP run 1, BaseOS 1.4.0)",
+      "note": "on the RG34XX SP under BaseOS 1.4.0 the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled (2026-11-12); the controller matrix (C2) and the NextUI port saw it on dierct-keys-polled"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "same as VOL_UP: the code (114) matches the cfg's B_VOLDOWN, but cfg implies event1, while measured delivery is event2 (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX720480-1.txt (RG34XX SP run 1, BaseOS 1.4.0)",
+      "note": "on the RG34XX SP under BaseOS 1.4.0 the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled (2026-11-12); the controller matrix (C2) and the NextUI port saw it on dierct-keys-polled"
     },
     "POWER": {
       "code": "1 116",
@@ -169,7 +169,8 @@
   "evidence": [
     "controller-matrix.json",
     "h700-baseos-deep-dive.md",
-    "unittest/tests/test_rg28xx_diagnostic.py"
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX720480-1.txt"
   ],
   "notes": [
     "SPRUCE_DEVICE_NAME is computed at runtime; rg34xxsp is NOT one of the named arms, so it falls to the default arm: SPRUCE_DEVICE_NAME=\"Anbernic RG34XXSP\" (upper-cased BASEOS_TARGET, no space) -- note the mismatch against this file's model name \"RG34XX SP\" (with a space).",

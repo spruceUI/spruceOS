@@ -115,13 +115,13 @@
       "code": "1 115",
       "source": "pad",
       "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
-      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
       "source": "pad",
       "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
-      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",

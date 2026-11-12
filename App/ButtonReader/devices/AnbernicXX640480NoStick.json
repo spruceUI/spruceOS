@@ -20,13 +20,13 @@
       "kind": "joypad",
       "node": "ANBERNIC-keys",
       "from": "measured: the lab capturesAnbernicXX640480NoStick-20260921.txt",
-      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Plus, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Plus and RG35XX SP, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
     },
     "vol": {
       "kind": "gpio-keys",
       "node": "dierct-keys-polled",
       "from": "matrix",
-      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Plus nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
+      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Plus and RG35XX SP nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
     },
     "power": {
       "kind": "pmic",
@@ -120,14 +120,14 @@
     "VOL_UP": {
       "code": "1 115",
       "source": "pad",
-      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus)",
-      "note": "on the RG35XX Plus the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX SP is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus run 1); button-reader-AnbernicXX640480NoStick-1.txt (RG35XX SP run 1)",
+      "note": "on the RG35XX Plus and RG35XX SP the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
       "source": "pad",
-      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus)",
-      "note": "on the RG35XX Plus the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX SP is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus run 1); button-reader-AnbernicXX640480NoStick-1.txt (RG35XX SP run 1)",
+      "note": "on the RG35XX Plus and RG35XX SP the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -157,6 +157,7 @@
     "controller-matrix.json",
     "h700-baseos-deep-dive.md",
     "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX640480NoStick-1.txt",
     "button-reader-AnbernicXX640480NoStick-1.txt"
   ],
   "notes": [
