@@ -212,7 +212,7 @@ def _parse_mapping(value: object, english_value: dict[str, str]) -> tuple[Value 
 def _parse_sequence(
     value: object, english_value: tuple[str, ...]
 ) -> tuple[Value | None, list[str]]:
-    """Check a translation of a fixed list (month names, the About lines).
+    """Check a translation of a fixed list (month names, size units).
 
     Args:
         value: A list as long as the English one.

@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from cheevos.core.models import GameProgress
 
 DAY = 24 * 60 * 60
+RECENT_GAME_WINDOW = 30 * DAY
 DEFAULT_STALE_AFTER = 30 * DAY
 DEFAULT_STALE_BUDGET = 20
 
@@ -179,48 +180,20 @@ def plan_detail_fetches(  # noqa: PLR0913 — planning inputs, all keyword-only
     return DetailPlan(tuple(never), tuple(changed), tuple(oldest_first))
 
 
-def working_set(
-    games: Sequence[GameProgress], *, on_device: Collection[int], recent_since: int
-) -> set[int]:
-    """Return the games whose details every sync keeps: on this device, or active lately.
+def working_set(games: Sequence[GameProgress], *, on_device: Collection[int], now: int) -> set[int]:
+    """Return the games on this device or active in the last 30 days.
 
     Args:
         games: The library.
         on_device: Game IDs with a ROM on this SD card.
-        recent_since: Games active at or after this time count as recent.
+        now: Current time (epoch seconds).
 
     Returns:
         Their game IDs.
     """
+    recent_since = now - RECENT_GAME_WINDOW
     return {
         game.game_id
         for game in games
         if game.game_id in on_device or activity(game) >= recent_since
     }
-
-
-def badge_game_ids(
-    games: Sequence[GameProgress],
-    *,
-    on_device: set[int],
-    include_all: bool,
-    recent_since: int | None,
-) -> list[int]:
-    """Select the games whose badges a sync should download (.agents/sync-and-storage.md).
-
-    Args:
-        games: The library.
-        on_device: Game IDs with a ROM on this SD card.
-        include_all: Scope "All games".
-        recent_since: Games active at or after this time count as recent; ``None`` disables
-            the recent rule (scope "None" passes an empty ``on_device`` and ``None``).
-
-    Returns:
-        Game IDs in library order.
-    """
-    selected = []
-    for game in games:
-        recent = recent_since is not None and activity(game) >= recent_since
-        if include_all or game.game_id in on_device or recent:
-            selected.append(game.game_id)
-    return selected
