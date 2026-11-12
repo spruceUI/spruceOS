@@ -613,11 +613,8 @@ version_older_than() {
       "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
 }
 
-# The GitHub project this device's BaseOS build comes from: BASEOS_REPO when the
-# build records it, else by its BASEOS_TARGET.
+# The GitHub project this device's BaseOS build comes from, by its BASEOS_TARGET.
 baseos_repo() {
-    _repo="$(sed -n 's/^BASEOS_REPO=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    [ -n "$_repo" ] && { echo "$_repo"; return; }
     case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')" in
         my355) echo "apommel/baseos-my355" ;;
         *) echo "pvaibhav/BaseOS" ;;
