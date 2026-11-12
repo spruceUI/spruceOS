@@ -76,7 +76,7 @@ class Report:
         self.line()
         self.line("--- device features (sysfs, PyUI and the cfg, read once)")
         for label, text in features.detect(session.env, session.roots, session.nodes, session.pyui_device,
-                                           session.pad.touch):
+                                           session.pad.touch, session.spruce):
             self.line(f"{label}: {text}")
         self.line()
         self.line("--- platform cfg values PyUI's environment carries")

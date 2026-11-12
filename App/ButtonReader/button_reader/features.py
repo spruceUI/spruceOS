@@ -124,10 +124,19 @@ def rgb(sys):
     return _listed(found) if found else "none detected"
 
 
-def bluetooth(sys):
+def bluetooth(sys, spruce=None):
+    """spruce's answer first (the radio may be off, so no hci shows), then the adapter and rfkill seen now."""
     hci = _names(f"{sys}/class/bluetooth/hci*")
     kill = _rfkill(sys, "bluetooth")
-    text = f"adapter {_listed(hci)}" if hci else "no adapter"
+    supported = spruce.get("bluetooth") if spruce is not None else None
+    if supported == "0":
+        text = "not on this board (spruce)"
+    elif hci:
+        text = f"adapter {_listed(hci)}" + ("; on this board (spruce)" if supported == "1" else "")
+    elif supported == "1":
+        text = "on this board (spruce); radio off: no adapter until Bluetooth is turned on"
+    else:
+        text = "no adapter"
     return text + (f"; rfkill {_listed(kill, 2)}" if kill else "")
 
 
@@ -159,10 +168,10 @@ def lid(sys, nodes):
     return _listed(found, 3) if found else "none detected"
 
 
-def detect(env, roots, nodes, pyui_device=None, touch_shorts=()):
+def detect(env, roots, nodes, pyui_device=None, touch_shorts=(), spruce=None):
     """[(label, text)], one row per feature."""
     sys = roots.sys
     return [("Display", display(env, sys, pyui_device)), ("Panel", panel(env, sys)),
             ("PyUI scale", pyui_scale(env, pyui_device)), ("Rumble", rumble(env, sys, nodes)),
-            ("LEDs", leds(env, sys)), ("RGB", rgb(sys)), ("Bluetooth", bluetooth(sys)), ("Wi-Fi", wifi(env, sys)),
-            ("Touch", touch(env, nodes, touch_shorts)), ("Lid", lid(sys, nodes))]
+            ("LEDs", leds(env, sys)), ("RGB", rgb(sys)), ("Bluetooth", bluetooth(sys, spruce)),
+            ("Wi-Fi", wifi(env, sys)), ("Touch", touch(env, nodes, touch_shorts)), ("Lid", lid(sys, nodes))]

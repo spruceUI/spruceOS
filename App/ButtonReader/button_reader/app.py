@@ -10,6 +10,7 @@ import time
 from button_reader import VERSION, evdev, features, hardware, manifest, picture
 from button_reader.fn_switch import FnSwitch
 from button_reader.joystick_input import JoystickInput
+from button_reader.spruce_query import SpruceQuery
 from button_reader.manifest import SLOT_VARS
 from button_reader.names import ABSENT, EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOTS, STICKS, SW_NAMES
 from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, parse_spec, pyui_tables, sign
@@ -158,11 +159,12 @@ class Pad:
 class Session:
     def __init__(self, device=None, controller_interface=None, log=None, screen=None, env=None,
                  nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None, switch=None,
-                 joystick=None, devices_dir=None):
+                 joystick=None, devices_dir=None, spruce=None):
         self.env = dict(os.environ if env is None else env)
         self.desktop = desktop
         self.switch = switch
         self.joystick = joystick
+        self.spruce = spruce  # spruce's own answers (Bluetooth), asked once when first needed
         if desktop is not None:
             from button_reader.desktop_keys import ENV
             for key, value in ENV.items():
@@ -339,7 +341,8 @@ class Session:
         diffs = m.cfg_differences(self.env)
         if diffs:
             rows.append((f"cfg differs from the manifest on {', '.join(d[0] for d in diffs)}", picture.WARN))
-        for label, text in features.detect(self.env, self.roots, self.nodes, self.pyui_device, self.pad.touch):
+        for label, text in features.detect(self.env, self.roots, self.nodes, self.pyui_device, self.pad.touch,
+                                           self.spruce):
             rows.append((f"{label}: {text}", picture.TEXT))
         return rows
 
@@ -986,9 +989,10 @@ def run(**_kwargs):
         screen = PyUiScreen(device, desktop=desktop is not None)
         switch = FnSwitch() if desktop is None else None
         joystick = JoystickInput() if desktop is None else None
+        spruce = SpruceQuery() if desktop is None else None
         session = Session(device=device, controller_interface=Controller.controller_interface, log=log,
                           screen=screen, desktop=desktop, report_dir=report_dir(desktop), switch=switch,
-                          joystick=joystick)
+                          joystick=joystick, spruce=spruce)
         path = session.run()
         if path:
             shown = os.path.relpath(path, "/mnt/SDCARD") if path.startswith("/mnt/SDCARD/") else path
