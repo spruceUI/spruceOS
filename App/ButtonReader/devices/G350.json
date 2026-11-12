@@ -20,12 +20,18 @@
       "node": "GO-Super Gamepad",
       "by_path": "platform-odroidgo3-joypad-event-joystick",
       "from": "derived: G350.cfg's header says the pad is \"confirmed against both units' rk3326-*-linux.dts\" (identical product/revision/name and button codes to the A10 Mini's), but not run on a G350 unit itself",
-      "note": "same odroidgo3-joypad driver and node name as the A10 Mini/A10 Mini V4"
+      "note": "same odroidgo3-joypad driver and node name as the A10 Mini/A10 Mini V4. On the G350 (2026-11-12) the volume keys came on odroidgo3-keys, not here."
     },
     "power": {
       "kind": "pmic",
       "node": "rk8xx_pwrkey",
       "from": "cfg"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "odroidgo3-keys",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "VOL+/- (115/114), measured 2026-11-12"
     }
   },
   "controls": {
@@ -116,13 +122,15 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "pad",
-      "from": "cfg"
+      "source": "vol",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "on the G350 the key arrives on odroidgo3-keys (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "pad",
-      "from": "cfg"
+      "source": "vol",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "on the G350 the key arrives on odroidgo3-keys (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -151,7 +159,8 @@
   },
   "evidence": [
     "spruce/scripts/platform/darkmoss/G350.cfg",
-    "spruce/scripts/platform/darkmoss/G350.sh"
+    "spruce/scripts/platform/darkmoss/G350.sh",
+    "button-reader-G350-1.txt"
   ],
   "notes": [
     "G350 has 2 real analog sticks (DEVICE_NUM_ANALOG_STICKS=2), unlike the A10 Mini/A10 Mini V4 which share this same odroidgo3-joypad driver and the same L3/R3/MENU codes but are stickless: on the G350 those BTN_TRIGGER_HAPPY codes are genuine stick clicks (L3/R3) and an F/MENU button; on the A10 Mini they are plain buttons. No code in this manifest has been independently measured on a running G350."

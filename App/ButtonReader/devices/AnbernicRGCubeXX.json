@@ -25,7 +25,7 @@
       "kind": "gpio-keys",
       "node": "dierct-keys-polled",
       "from": "matrix",
-      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; measured: the lab capturesAnbernicRGCubeXX-20260824.txt for this bucket's own node)."
+      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; measured: the lab capturesAnbernicRGCubeXX-20260824.txt for this bucket's own node). On the RG CubeXX (2026-11-12) the volume keys came on ANBERNIC-keys, not here."
     },
     "power": {
       "kind": "pmic",
@@ -111,15 +111,15 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "the code (115) matches the cfg's B_VOLUP, but the cfg's only input path is EVENT_PATH_READ_INPUTS_SPRUCE (event1/ANBERNIC-keys); that node advertises KEY_VOLUMEUP but never emits it. The press is measured arriving on event2 (dierct-keys-polled) instead (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicRGCubeXX-1.txt (RG CubeXX run 1)",
+      "note": "on the RG CubeXX the key arrives on ANBERNIC-keys (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "same as VOL_UP: the code (114) matches the cfg's B_VOLDOWN, but cfg implies event1, while measured delivery is event2 (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicRGCubeXX-1.txt (RG CubeXX run 1)",
+      "note": "on the RG CubeXX the key arrives on ANBERNIC-keys (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -160,7 +160,8 @@
     "the lab capturesAnbernicRGCubeXX-20260824.txt",
     "controller-matrix.json",
     "h700-baseos-deep-dive.md",
-    "unittest/tests/test_rg28xx_diagnostic.py"
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicRGCubeXX-1.txt"
   ],
   "notes": [
     "SPRUCE_DEVICE_NAME is computed at runtime; rgcubexx has its own named arm in AnbernicXXCommon.cfg: SPRUCE_DEVICE_NAME=\"Anbernic RG CubeXX\" (note the cfg's own string says \"RG CubeXX\", not the retail \"RG Cube\" used as this file's model name -- likely spruce mirroring the XX-suffix convention of its sibling buckets (RG35XX/RG40XX/RG34XX), not a second model. Button Reader's model-name match against SPRUCE_DEVICE_NAME should account for this if it ever needs exact-string matching.",

@@ -26,7 +26,7 @@
       "kind": "adc-keys",
       "node": "sunxi-keyboard",
       "from": "matrix: derived by parity with the Smart Pro, not measured",
-      "note": "the volume keys on the LRADC"
+      "note": "the volume keys on the LRADC. On the stock Brick (2026-11-12) the volume keys came on TRIMUI Player1, not here."
     },
     "power": {
       "kind": "pmic",
@@ -133,13 +133,15 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "lradc",
-      "from": "cfg"
+      "source": "pad",
+      "from": "measured: button-reader-Brick-1.txt (stock Brick run 1)",
+      "note": "on the stock Brick the key arrives on TRIMUI Player1 (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "lradc",
-      "from": "cfg"
+      "source": "pad",
+      "from": "measured: button-reader-Brick-1.txt (stock Brick run 1)",
+      "note": "on the stock Brick the key arrives on TRIMUI Player1 (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -162,6 +164,7 @@
   },
   "evidence": [
     "the lab capturesBrick-20260921.txt",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-Brick-1.txt"
   ]
 }

@@ -26,7 +26,7 @@
       "kind": "adc-keys",
       "node": "sunxi-keyboard",
       "from": "matrix: derived from the Brick and the Smart Pro, not measured",
-      "note": "the volume keys on the LRADC"
+      "note": "the volume keys on the LRADC. On the Brick Pro (2026-11-12) the volume keys came on TRIMUI Player1, not here."
     },
     "power": {
       "kind": "pmic",
@@ -128,20 +128,22 @@
       "from": "cfg"
     },
     "HOME": {
-      "code": null,
-      "source": "lradc",
-      "from": "tester 2026-11-11",
-      "cfg_differs": "BrickPro.cfg says B_HOME=DOESNT_EXIST; the tester says the Brick Pro has a Home key; code and node not measured (the TSPS's Home is 172 on sunxi-keyboard)"
+      "code": "1 172",
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2; run 1 the same)",
+      "cfg_differs": "BrickPro.cfg says B_HOME=DOESNT_EXIST; on hardware Home sends 172 KEY_HOMEPAGE on TRIMUI Player1 (PyUI's HOME), measured 2026-11-12"
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "lradc",
-      "from": "cfg"
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2)",
+      "note": "on the Brick Pro the key arrives on TRIMUI Player1 (2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "lradc",
-      "from": "cfg"
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2)",
+      "note": "on the Brick Pro the key arrives on TRIMUI Player1 (2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -184,6 +186,7 @@
   "evidence": [
     "the lab capturesBrickPro-20260921.txt",
     "controller-matrix.json",
-    "button-reader-SmartProS-1.txt"
+    "button-reader-SmartProS-1.txt",
+    "button-reader-BrickPro-2.txt"
   ]
 }
