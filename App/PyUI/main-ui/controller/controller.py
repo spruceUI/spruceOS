@@ -259,6 +259,11 @@ class Controller:
         if(Controller.last_controller_input is None):
             return None
         
+        # MENU fires once per press: a held MENU is a chord or the game switcher
+        if(Controller.last_controller_input == ControllerInput.MENU
+           and Controller.return_count_of_current_input != 0):
+            return None
+
         now = time.monotonic()
         if(Controller.return_count_of_current_input == 0):
             # This is for initiating turbo mode
