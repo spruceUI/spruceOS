@@ -117,12 +117,6 @@
       "source": "pad",
       "from": "cfg"
     },
-    "MENU": {
-      "code": "1 705",
-      "source": "pad",
-      "from": "derived: same probe as the rest of this cfg (see notes)",
-      "note": "the default (L3) branch of the Button Settings > Menu button jq check in V10.cfg; set to R3 it becomes 1 708 instead"
-    },
     "POWER": {
       "code": "1 116",
       "source": "power",
@@ -130,6 +124,7 @@
     }
   },
   "absent": {
+    "MENU": "no Menu button: the menu is a button combo (tester 2026-11-11); V10.cfg's B_MENU reuses L3's or R3's code (a volume button), per Button Settings > Menu button",
     "HOME": "cfg B_HOME=DOESNT_EXIST",
     "VOL_UP": "cfg B_VOLUP=DOESNT_EXIST",
     "VOL_DOWN": "cfg B_VOLDOWN=DOESNT_EXIST",
