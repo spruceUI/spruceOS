@@ -79,7 +79,7 @@ Every slot below appears exactly once, in `controls` or in `absent`:
 | `label`, `prompt` | optional overrides for the picture label and the guided step's prompt |
 | `read` | for a `gpio` control: the spruce function that reads it |
 | `cfg_differs` | required when `code` (or a stick's `x`/`y`) differs from the cfg's value (or the cfg has none / says `DOESNT_EXIST`): why |
-| `over_cfg` | sticks only, with `cfg_differs`: why the manifest's `x`/`y` are the hardware's. Button Reader then expects and draws those axes instead of the cfg's (the Flip and TrimUI right sticks, whose cfg lines spruce keeps) |
+| `over_cfg` | sticks only, with `cfg_differs`: why the manifest's `x`/`y` are the hardware's. Button Reader then expects and draws those axes instead of the cfg's (the Flip, TrimUI and RGB30 right sticks, the XU Mini M's down; spruce keeps its cfg lines) |
 | `models` | optional [model names from `models`]: only these models of the PLATFORM have it (the Mini Flip's lid, the Mini Plus's volume keys). Button Reader matches them against `SPRUCE_DEVICE_NAME`; when it can't tell the model, the control counts as unknown, not absent |
 | `note` | optional |
 | `from` | provenance |

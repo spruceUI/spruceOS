@@ -116,23 +116,17 @@
       "source": "pad",
       "from": "matrix"
     },
-    "MENU": {
-      "code": "1 317",
-      "source": "pad",
-      "from": "matrix",
-      "note": "the default (L3) branch of the Button Settings > Menu button jq check in RGB30.cfg; not a dedicated button"
-    },
     "VOL_UP": {
       "code": "1 115",
       "source": "vol",
       "from": "cfg",
-      "note": "dArkMossCommon.cfg default; the Standard/Swapped setting is read at boot (see notes)"
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30 is one: on Standard, its + sent 114 and - 115 (RGB30-1/2, 2026-11-12)"
     },
     "VOL_DOWN": {
       "code": "1 114",
       "source": "vol",
       "from": "cfg",
-      "note": "dArkMossCommon.cfg default; the Standard/Swapped setting is read at boot (see notes)"
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30 is one: on Standard, its + sent 114 and - 115 (RGB30-1/2, 2026-11-12)"
     },
     "POWER": {
       "code": "1 116",
@@ -146,13 +140,16 @@
       "from": "matrix"
     },
     "RIGHT_STICK": {
-      "x": "3 2",
-      "y": "3 3",
+      "x": "3 3",
+      "y": "3 4",
       "source": "pad",
-      "from": "matrix"
+      "from": "measured: button-reader-RGB30-1.txt; button-reader-RGB30-2.txt (RGB30 runs 1-2)",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 2\" (ABS_Z, which this pad lacks) and STICK_DOWN_2 \"3 3\" (ABS_RX, which is across); on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
     }
   },
   "absent": {
+    "MENU": "no Menu button on the RGB30 (tester 2026-11-12; no input on the step in RGB30-1/2); RGB30.cfg's B_MENU reuses L3's code (317) per Button Settings > Menu button",
     "HOME": "cfg B_HOME=DOESNT_EXIST",
     "FN_SWITCH": "none (matrix)",
     "FN_LEFT": "none (matrix)",
@@ -162,7 +159,9 @@
   "evidence": [
     "spruce/scripts/platform/darkmoss/RGB30.cfg",
     "spruce/scripts/platform/darkmoss/RGB30.sh",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-RGB30-1.txt",
+    "button-reader-RGB30-2.txt"
   ],
   "notes": [
     "No dedicated MENU button: by default a tap of L3 (1 317) is both L3 and MENU (Button Settings > Menu button, default L3); the alternative setting swaps this so R3 (1 318) is MENU instead and L3 stays a plain stick click. The code/source below is the default (L3) branch; the other stick click (R3 by default) is a plain click with no MENU role.",
