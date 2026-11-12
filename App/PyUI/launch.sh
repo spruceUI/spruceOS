@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device.
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven ENV_VAR device.
 [ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
 
 runifnecessary() {
@@ -359,7 +359,7 @@ case "$PLATFORM" in
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         # Every oakMOSS cfg sets PYUI_ENV_DEVICE=true: PyUI has no other device class for these boards.
-        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \

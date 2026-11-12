@@ -3,10 +3,16 @@ import os
 import threading
 
 from utils.logger import PyUiLogger
+from utils.py_ui_config import PyUiConfig
 
 
 class UserConfig:
     FILEPATH = "/mnt/SDCARD/Saves/pyui-common.json"
+
+    # Kept in py-ui-config.json before this file existed; spruceRestore still puts them back there after an update.
+    MIGRATED_KEYS = ("gameSystemSortMode", "gameSystemSortTypePrio", "gameSystemSortBrandPrio",
+                     "gameSystemSortYearPrio", "gameSystemSortNamePrio", "showAllGameSystems", "showAmPm",
+                     "syncTimeViaNetwork", "turboDelayMs", "use24HourClock")
 
     _lock = threading.Lock()
     config = {}
@@ -22,6 +28,18 @@ class UserConfig:
                 cls.config = {}
             except FileNotFoundError:
                 cls.config = {}
+        cls._migrate_from_pyui_config()
+
+    @classmethod
+    def _migrate_from_pyui_config(cls):
+        migrated = {key: PyUiConfig.get(key) for key in cls.MIGRATED_KEYS
+                    if key not in cls.config and PyUiConfig.get(key) is not None}
+        if migrated:
+            cls.config.update(migrated)
+            try:
+                cls.save_config()
+            except RuntimeError as e:
+                PyUiLogger.get_logger().error(f"Could not save migrated settings: {e}")
 
     @classmethod
     def save_config(cls):
@@ -66,7 +84,7 @@ class UserConfig:
 
     @classmethod
     def game_system_sort_mode(cls):
-        return cls.config.get("gameSystemSortMode","Alphabetical")
+        return cls.config.get("gameSystemSortMode","SortOrderKey")
 
     @classmethod
     def set_game_system_sort_mode(cls, value):
@@ -111,11 +129,12 @@ class UserConfig:
 
     @classmethod
     def get_turbo_delay_ms(cls):
-        return cls.config.get("turboDelayMs", 120) / 1000
+        return cls.config.get("turboDelayMs", 250) / 1000
 
     @classmethod
     def set_turbo_delay_ms(cls, delay):
         cls.config["turboDelayMs"] = delay
+        cls.save_config()
 
     @classmethod
     def use_24_hour_clock(cls):

@@ -121,27 +121,7 @@ vibrate() {
     esac
 }
 
-# TODO is this necessary, why is smart pro special?
+# This inputd has no cal_update; it only reads joypad*.config at startup.
 apply_stick_calibration() {
-    local restart_cmd="$1"
-
-    if [[ -z "$restart_cmd" || ! -x "$restart_cmd" ]]; then
-        echo "Error: Input daemon restart command not available: $restart_cmd" >&2
-        return 1
-    fi
-
-    "$restart_cmd" >/dev/null 2>&1 || return $?
-
-    # Reopen the volume key watcher if one is configured.
-    if [[ -n "${VOLUME_KEY_EVENT_PATH:-}" && -n "${VOLUME_KEY_WATCHER_FD:-}" ]]; then
-        local old_fd="$VOLUME_KEY_WATCHER_FD"
-        local new_fd
-
-        exec {new_fd}<"$VOLUME_KEY_EVENT_PATH" || return 1
-
-        VOLUME_KEY_WATCHER_FD="$new_fd"
-        exec {old_fd}<&- 2>/dev/null || true
-    fi
+    restart_trimui_inputd
 }
-
-spruce_env_default APPLY_STICK_CALIBRATION "source /mnt/SDCARD/spruce/scripts/helperFunctions.sh && apply_stick_calibration"

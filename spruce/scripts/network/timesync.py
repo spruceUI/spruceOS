@@ -20,6 +20,7 @@ import time
 import urllib.request
 
 VERSION_FILE = "/mnt/SDCARD/spruce/spruce"
+USER_CONFIG = "/mnt/SDCARD/Saves/pyui-common.json"
 PYUI_CONFIG = "/mnt/SDCARD/App/PyUI/py-ui-config.json"
 SHARED_CONFIG = "/mnt/SDCARD/Saves/spruce/shared-system.json"
 ZONEINFO_DIR = "/mnt/SDCARD/spruce/zoneinfo"
@@ -66,8 +67,11 @@ def read_json(path):
 def sync_enabled():
     # Fails open: only an explicit false turns it off, because a wrongly skipped
     # sync leaves every HTTPS feature failing with a certificate error.
-    config = read_json(PYUI_CONFIG)
-    return not (isinstance(config, dict) and config.get("syncTimeViaNetwork") is False)
+    for path in (USER_CONFIG, PYUI_CONFIG):
+        config = read_json(path)
+        if isinstance(config, dict) and "syncTimeViaNetwork" in config:
+            return config["syncTimeViaNetwork"] is not False
+    return True
 
 
 def floor():
