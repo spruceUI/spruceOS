@@ -12,7 +12,7 @@ shows the kernel's own codes.
   lacks (Home, Fn, a volume key, a stick, a stick click) is grayed out. Each control lights while
   it is held; the Fn box shows the Fn switch's position where there is one. Labels are PyUI's
   names for the codes, so on a board whose print differs from its position (the XU10), the
-  bottom button can read "A". The top bar names the device, or says "Unknown".
+  bottom button can read "A". The first line under the picture names the device, or says "Unknown".
 - press any button: the **full diagnostic**. Guided steps ask for each control the device has, by
   position (each step skips itself after 15 s), then the picture opens. A face step names the
   position and the letter printed there: `FACE_NORTH/X`, or `FACE_NORTH/Y` on an Xbox-style

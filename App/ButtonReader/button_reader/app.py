@@ -25,7 +25,7 @@ RELEASE_WAIT = 3.0
 RESCAN_SECONDS = 2.0
 REDRAW_SECONDS = 0.25
 MIN_FRAME = 1 / 30.0
-RECENT_LINES = 3  # last presses listed under the picture, above the status line
+RECENT_LINES = 2  # last presses listed under the picture, between the device's name and the status line
 INFO_HOLD = 10.0  # L1 + R1 held this long in the picture opens the device info
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXIT_HINT = "Exit: hold a button 10 s, or Select+Start"
@@ -718,7 +718,6 @@ class Session:
         s = picture.Scene()
         held = {c for _s, c in self.pad.pressed}
         m = self.manifest
-        s.title = f"Button Reader - {m.name}"
         for slot, _var, _pyui in SLOTS:
             s.labels[slot] = m.control(slot).get("label") or self.names.label(slot)
             s.state[slot] = self.slot_state(slot, held)
@@ -754,8 +753,9 @@ class Session:
                 ok = sum(1 for r in self.step_results if r["verdict"] in ("OK", "RECORDED"))
                 s.prompt = f"Steps: {ok} of {len(self.step_results)} as the cfg expects"
                 s.prompt_color = picture.GOOD if ok == len(self.step_results) else picture.WARN
-        s.lines = [(text, picture.TEXT if i == 0 else picture.GRAY) for i, text in enumerate(self.recent)]
-        s.line_rows = RECENT_LINES + 1
+        s.lines = [(m.name, picture.TARGET if m.known else picture.WARN)]  # the device first; "Unknown" stands out
+        s.lines += [(text, picture.TEXT if i == 0 else picture.GRAY) for i, text in enumerate(self.recent)]
+        s.line_rows = RECENT_LINES + 2
         if self.mode == "steps" and self.phase == "ask":
             left = self.step_timeout - (now - self.phase_since)
             last = self.step_results[-1] if self.step_results else None

@@ -25,7 +25,7 @@ class Scene:
         self.labels = {}       # slot -> label
         self.state = {}        # slot -> "on" | "off" | "absent" | "unknown"
         self.sticks = {}       # "LEFT"/"RIGHT" -> {"present", "dx", "dy", "absent"}
-        self.title = "Button Reader"  # PyUI's top bar: the app and the device's name ("Unknown" without a manifest)
+        self.title = "Button Reader"  # PyUI's top bar; the device's name is the first of the lines
         self.target = None     # slot or "LEFT_X"... being asked for in a guided step
         self.prompt = ""
         self.prompt_color = TEXT

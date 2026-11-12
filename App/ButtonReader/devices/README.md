@@ -5,7 +5,7 @@ has, where each one's signal comes from (in terms Button Reader can see on the d
 device lacks. Button Reader reads its rules from it:
 
 - the guided steps: one per control listed, none for what is absent;
-- the picture: what the device lacks is grayed out; the top bar names the device ("Unknown" without a manifest);
+- the picture: what the device lacks is grayed out; the line under it names the device ("Unknown" without one);
 - which daemon to switch (`fed_by: joystickinput` puts the A30's stick in analog mode while the app is open);
 - which node a press should come from (a step notes a press from another node);
 - the expected code where the cfg has none (the Miyoo Minis' cfg holds placeholders).
