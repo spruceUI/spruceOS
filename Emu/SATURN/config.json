@@ -4,7 +4,7 @@
   "iconsel": "saturn_sel.png",
   "themecolor": "E4007F",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "chd|zip|mds|ccd|iso|cue",
+  "extlist": "m3u|chd|zip|mds|ccd|iso|cue",
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
