@@ -6,13 +6,14 @@ shows the kernel's own codes.
 
 **Apps → Button Reader.** For 3 seconds a start screen waits:
 
-- press nothing: the **picture** opens. The face buttons are laid out by position, along with
-  the D-pad, Select/Start, Menu/Home/Fn and both sticks with their deflection. The top row reads
-  L3, L1 L2, the volume and power keys, R2 R1, R3. Every element is always drawn: what the device
-  lacks (Home, Fn, a volume key, a stick, a stick click) is grayed out. Each control lights while
-  it is held; the Fn box shows the Fn switch's position where there is one. Labels are PyUI's
-  names for the codes, so on a board whose print differs from its position (the XU10), the
-  bottom button can read "A". The first line under the picture names the device, or says "Unknown".
+- press nothing: the **picture** opens. The face buttons are laid out by position, along with the
+  D-pad, Select/Start, Menu/Home/Fn and both sticks with their deflection. The top row reads L3,
+  L1 L2, the volume keys, R2 R1, R3 (no Power: pressing it puts the device to sleep). Every
+  element is always drawn: what the device lacks (Home, Fn, a volume key, a stick, a stick click)
+  is grayed out. Each control lights while it is held; the Fn box shows the Fn switch's position
+  where there is one. Labels are PyUI's names for the codes, so on a board whose print differs
+  from its position (the XU10), the bottom button can read "A". The first line under the picture
+  names the device, or says "Unknown".
 - press any button: the **full diagnostic**. Guided steps ask for each control the device has, by
   position (each step skips itself after 15 s), then the picture opens. A face step names the
   position and the letter printed there: `FACE_NORTH/X`, or `FACE_NORTH/Y` on an Xbox-style

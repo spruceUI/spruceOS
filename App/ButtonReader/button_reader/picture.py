@@ -40,23 +40,22 @@ class Scene:
 
 # Two arrangements in units u: "tall" puts the sticks under the D-pad and face buttons (a
 # vertical handheld); "wide" puts everything in one row. The one with the larger u wins.
-# The top row: L3, a gap, L1 L2, the volume and power keys, R2 R1, a gap, R3. Every element is always drawn;
-# what a device lacks is grayed out. The middle holds Select/Start over Menu, Home and Fn.
+# The top row: L3, a gap, L1 L2, the volume keys, R2 R1, a gap, R3; no Power, since pressing it puts the device
+# to sleep. Every element is always drawn: what a device lacks is grayed out. The middle holds Select/Start over
+# Menu, Home and Fn.
 SHAPES = {
     "tall": {"size": (22.4, 11.0), "body": (-10, 1.6, 20, 9.3), "row": 0.75,
-             "top": {"L3": (-10.1, 2.0), "L1": (-7.15, 2.5), "L2": (-4.45, 2.5), "VOL_DOWN": (-2.0, 1.7),
-                     "POWER": (0.0, 1.9), "VOL_UP": (2.0, 1.7), "R2": (4.45, 2.5), "R1": (7.15, 2.5),
-                     "R3": (10.1, 2.0)},
+             "top": {"L3": (-10.1, 2.0), "L1": (-7.15, 2.5), "L2": (-4.45, 2.5), "VOL_DOWN": (-1.1, 1.7),
+                     "VOL_UP": (1.1, 1.7), "R2": (4.45, 2.5), "R1": (7.15, 2.5), "R3": (10.1, 2.0)},
              "dpad": (-6.2, 4.4), "face": (6.2, 4.4), "sticks": {"LEFT": (-2.9, 8.2), "RIGHT": (2.9, 8.2)},
              "middle": (3.4, 4.9)},
     "wide": {"size": (26.0, 7.5), "body": (-11.9, 1.6, 23.8, 5.7), "row": 0.75,
-             "top": {"L3": (-11.9, 2.0), "L1": (-8.9, 2.6), "L2": (-6.0, 2.6), "VOL_DOWN": (-2.4, 2.0),
-                     "POWER": (0.0, 2.2), "VOL_UP": (2.4, 2.0), "R2": (6.0, 2.6), "R1": (8.9, 2.6),
-                     "R3": (11.9, 2.0)},
+             "top": {"L3": (-11.9, 2.0), "L1": (-8.9, 2.6), "L2": (-6.0, 2.6), "VOL_DOWN": (-1.25, 2.0),
+                     "VOL_UP": (1.25, 2.0), "R2": (6.0, 2.6), "R1": (8.9, 2.6), "R3": (11.9, 2.0)},
              "dpad": (-5.6, 4.3), "face": (5.6, 4.3), "sticks": {"LEFT": (-9.7, 4.3), "RIGHT": (9.7, 4.3)},
              "middle": (3.3, 4.8)},
 }
-SHORT = {"Power": "Pwr", "Select": "Sel", "Start": "St", "Menu": "M", "Home": "H", "Vol+": "+", "Vol-": "-"}
+SHORT = {"Select": "Sel", "Start": "St", "Menu": "M", "Home": "H", "Vol+": "+", "Vol-": "-"}
 
 
 class Layout:
