@@ -57,6 +57,8 @@ class Report:
         if session.switch is not None:
             position = session.switch.value if session.switch.readable else "none readable"
             self.line(f"Fn switch: {position} (spruce's device_get_switch_position)")
+        if session.joystick is not None and session.joystick.pids:
+            self.line("stick: spruce's joystickinput is in analog mode while the app is open (keyboard mode at exit)")
         model = (_read("/proc/device-tree/model", "rb") or b"?").rstrip(b"\0").decode("utf-8", "replace")
         self.line(f"model: {model}   kernel: {os.uname().release} {os.uname().machine}")
         for path in ["/sys/firmware/fdt"] + sorted(glob.glob("/boot/*.dtb*")):

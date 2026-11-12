@@ -7,9 +7,10 @@ shows the kernel's own codes.
 **Apps → Button Reader.** For 3 seconds a start screen waits:
 
 - press nothing: the **picture** opens. The face buttons are laid out by position, along with
-  the D-pad, L1/L2/R1/R2, L3/R3, Select/Start/Menu, the volume keys and both sticks with their
-  deflection. Each control lights while it is held. Labels are PyUI's names for the codes, so on
-  a board whose print differs from its position (the XU10), the bottom button can read "A".
+  the D-pad, Select/Start/Menu and both sticks with their deflection. The top row reads
+  L3, L1 L2, the volume and power keys, R2 R1, R3. A one-stick device (the A30) shows no right
+  stick and no R3. Each control lights while it is held. Labels are PyUI's names for the codes,
+  so on a board whose print differs from its position (the XU10), the bottom button can read "A".
 - press any button: the **full diagnostic**. Guided steps ask for each control by position
   (each step skips itself after 15 s; a device without sticks, like the Minis, gets no L3/R3
   step, except the Brick, whose Fn keys send L3/R3), then the picture opens. The Smart Pro's
@@ -26,7 +27,9 @@ Select and Start together. Select or Start alone does nothing. Don't press Power
 puts the device to sleep.
 
 spruce's own watchers keep running. A Menu tap sends RetroArch's menu key, and a Menu hold
-runs the game-switcher action; neither leaves the app.
+runs the game-switcher action; neither leaves the app. On the A30, spruce's `joystickinput`
+turns the stick into D-pad keys while PyUI runs; the app switches it to analog mode while it is
+open (as spruce's PICO-8 and OpenBOR launchers do) and back to D-pad mode when it closes.
 
 ## What is logged
 

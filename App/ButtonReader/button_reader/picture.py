@@ -24,7 +24,8 @@ class Scene:
     def __init__(self):
         self.labels = {}       # slot -> label
         self.state = {}        # slot -> "on" | "off" | "absent" | "unknown"
-        self.sticks = {}       # "LEFT"/"RIGHT" -> {"present", "dx", "dy", "click", "label"}
+        self.sticks = {}       # "LEFT"/"RIGHT" -> {"present", "dx", "dy", "hidden"}
+        self.hidden = set()    # slots the device doesn't have and the picture leaves out (R3 on one stick)
         self.target = None     # slot or "LEFT_X"... being asked for in a guided step
         self.prompt = ""
         self.prompt_color = TEXT
@@ -36,15 +37,18 @@ class Scene:
 
 # Two arrangements in units u: "tall" puts the sticks under the D-pad and face buttons (a
 # vertical handheld); "wide" puts everything in one row. The one with the larger u wins.
+# The top row: L3, a gap, L1 L2, the volume and power keys, R2 R1, a gap, R3.
 SHAPES = {
-    "tall": {"size": (21.0, 11.0), "body": (-10, 1.6, 20, 9.3), "row": 0.75,
-             "top": {"L1": (-8.0, 2.6), "L2": (-5.1, 2.6), "VOL_DOWN": (-2.1, 1.8), "POWER": (0.0, 1.9),
-                     "VOL_UP": (2.1, 1.8), "R2": (5.1, 2.6), "R1": (8.0, 2.6)},
+    "tall": {"size": (22.4, 11.0), "body": (-10, 1.6, 20, 9.3), "row": 0.75,
+             "top": {"L3": (-10.1, 2.0), "L1": (-7.15, 2.5), "L2": (-4.45, 2.5), "VOL_DOWN": (-2.0, 1.7),
+                     "POWER": (0.0, 1.9), "VOL_UP": (2.0, 1.7), "R2": (4.45, 2.5), "R1": (7.15, 2.5),
+                     "R3": (10.1, 2.0)},
              "dpad": (-6.2, 4.4), "face": (6.2, 4.4), "sticks": {"LEFT": (-2.9, 8.2), "RIGHT": (2.9, 8.2)},
              "middle": (3.4, 4.9)},
-    "wide": {"size": (24.6, 7.5), "body": (-11.9, 1.6, 23.8, 5.7), "row": 0.75,
-             "top": {"L1": (-9.6, 2.6), "L2": (-6.7, 2.6), "VOL_DOWN": (-2.4, 2.0), "POWER": (0.0, 2.2),
-                     "VOL_UP": (2.4, 2.0), "R2": (6.7, 2.6), "R1": (9.6, 2.6)},
+    "wide": {"size": (26.0, 7.5), "body": (-11.9, 1.6, 23.8, 5.7), "row": 0.75,
+             "top": {"L3": (-11.9, 2.0), "L1": (-8.9, 2.6), "L2": (-6.0, 2.6), "VOL_DOWN": (-2.4, 2.0),
+                     "POWER": (0.0, 2.2), "VOL_UP": (2.4, 2.0), "R2": (6.0, 2.6), "R1": (8.9, 2.6),
+                     "R3": (11.9, 2.0)},
              "dpad": (-5.6, 4.3), "face": (5.6, 4.3), "sticks": {"LEFT": (-9.7, 4.3), "RIGHT": (9.7, 4.3)},
              "middle": (3.3, 4.8)},
 }
@@ -146,10 +150,10 @@ def draw_slot(canvas, shape, label, state, targeted, thick):
 
 
 def draw_stick(canvas, center, info, targeted):
+    """The stick's deflection; its click is L3/R3 in the top row."""
     cx, cy, radius = center
     present = info.get("present")
-    click = info.get("click", "unknown")
-    ring = ON if click == "on" else TARGET if targeted else (OUTLINE if present else DIM)
+    ring = TARGET if targeted else (OUTLINE if present else DIM)
     fill_circle(canvas, cx, cy, radius, ring)
     fill_circle(canvas, cx, cy, radius - max(2, radius * 0.07), BODY if not present else KEY)
     if present:
@@ -161,10 +165,6 @@ def draw_stick(canvas, center, info, targeted):
         canvas.box(DIM, cx - reach, cy, 2 * reach, 1)
         canvas.box(DIM, cx, cy - reach, 1, 2 * reach)
         fill_circle(canvas, cx + dx * reach, cy + dy * reach, dot, ON if moved else OUTLINE)
-    label = info.get("label")
-    if label:
-        canvas.text(label, cx, cy + radius + canvas.line_height("small") * 0.6, ON if click == "on" else
-                    (GRAY if click != "absent" else DIM), "small", "center")
 
 
 def draw(canvas, area, scene):
@@ -186,14 +186,17 @@ def draw(canvas, area, scene):
     bx, by, bw, bh = layout.body
     fill_round_rect(canvas, bx, by, bw, bh, 1.5 * u, BODY)
     for slot, shape in layout.rects.items():
+        if slot in scene.hidden:
+            continue
         label = None if slot.startswith("DPAD_") else scene.labels.get(slot, slot)
         draw_slot(canvas, shape, label, scene.state.get(slot, "unknown"), scene.target == slot, thick)
     dcx, dcy, arm = layout.dpad_center
     canvas.box(KEY, dcx - arm / 2, dcy - arm / 2, arm, arm)
     for stick, center in layout.stick.items():
-        info = scene.sticks.get(stick, {"present": False, "click": "unknown"})
-        click = "L3" if stick == "LEFT" else "R3"
-        draw_stick(canvas, center, info, scene.target in (f"{stick}_X", f"{stick}_Y", click))
+        info = scene.sticks.get(stick, {"present": False})
+        if info.get("hidden"):
+            continue
+        draw_stick(canvas, center, info, scene.target in (f"{stick}_X", f"{stick}_Y"))
     ly = y + h - lines_h + small * 0.2
     for text, color in scene.lines:
         canvas.text(text, x + 12, ly + small / 2, color, "small", "left")

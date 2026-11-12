@@ -9,6 +9,7 @@ import time
 
 from button_reader import VERSION, evdev, hardware, picture
 from button_reader.fn_switch import FnSwitch
+from button_reader.joystick_input import JoystickInput
 from button_reader.names import ABSENT, EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS, STICKS
 from button_reader.names import SW_NAMES
 from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, pyui_tables, sign, spec_control
@@ -148,10 +149,12 @@ class Pad:
 
 class Session:
     def __init__(self, device=None, controller_interface=None, log=None, screen=None, env=None,
-                 nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None, switch=None):
+                 nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None, switch=None,
+                 joystick=None):
         self.env = dict(os.environ if env is None else env)
         self.desktop = desktop
         self.switch = switch
+        self.joystick = joystick
         if desktop is not None:
             from button_reader.desktop_keys import ENV
             for key, value in ENV.items():
@@ -311,7 +314,7 @@ class Session:
         count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
         for k, axis in enumerate(("x", "y")):
             want = info[axis] if info and info[axis] else None
-            if want is None and info is None and count != "0":
+            if want is None and info is None and count != "0" and not (count == "1" and stick == "RIGHT"):
                 want = (defaults[k], 1)
             if want is None:
                 continue
@@ -366,12 +369,13 @@ class Session:
                 continue
             if slot == "HOME" and not names.controls_of("HOME") and slot not in names.unlisted:
                 continue
-            # A stick click needs its stick (the Minis have none), unless a node reports the cfg's code for it:
-            # the Brick's Fn keys send L3/R3.
+            # A stick click needs its stick (the Minis have none), but the Brick's Fn keys send L3/R3. Virtual pads
+            # (the A30's joypad, trimui_inputd) declare 317/318 whatever the hardware has, so that proves nothing.
             if sticks < STICK_CLICKS.get(slot, 0):
-                if self.slot_state(slot, set()) != "off":
+                side = self.fn_key_side(slot)
+                if side is None:
                     continue
-                prompt = self.stickless_prompt(slot)
+                prompt = f"Press the {side} Fn key ({slot})"
             prompt = prompt or face_prompt(slot, self.platform)
             steps.append(("key", slot, prompt, SLOT_VAR[slot], spec_control(cfg_spec(SLOT_VAR[slot], self.env))))
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
@@ -462,12 +466,13 @@ class Session:
 
     # --- exits
 
-    def stickless_prompt(self, slot):
+    def fn_key_side(self, slot):
+        """"left"/"right" when the cfg's FN_KEY_* sends this stick click (the Brick), else None."""
         side = "left" if slot == "L3" else "right"
         fn_key = cfg_spec(f"FN_KEY_{side.upper()}", self.env)
         if fn_key and fn_key == cfg_spec(SLOT_VAR[slot], self.env):
-            return f"Press the {side} Fn key ({slot})"
-        return f"Press {slot} (no stick on this device)"
+            return side
+        return None
 
     def longest_hold(self, now):
         held = [(now - since, control) for (_s, control), since in self.pad.pressed.items()
@@ -557,9 +562,12 @@ class Session:
             s.labels[slot] = self.names.label(slot)
             s.state[slot] = self.slot_state(slot, held)
         raw = []
-        for stick, click in (("LEFT", "L3"), ("RIGHT", "R3")):
+        one_stick = self.env.get("DEVICE_NUM_ANALOG_STICKS", "") == "1"
+        if one_stick:
+            s.hidden.add("R3")  # a one-stick device (the A30) shows no right stick and no R3
+        for stick in ("LEFT", "RIGHT"):
             axes = self.stick_axes(stick)
-            info = {"present": any(axes.values()), "click": s.state[click], "label": s.labels[click]}
+            info = {"present": any(axes.values()), "hidden": one_stick and stick == "RIGHT"}
             for axis, key in (("x", "dx"), ("y", "dy")):
                 if axes[axis]:
                     short, code, direction = axes[axis]
@@ -617,6 +625,10 @@ class Session:
     # --- main loop
 
     def run(self):
+        if self.joystick is not None and self.joystick.analog():
+            text = f"joystickinput (pid {', '.join(map(str, self.joystick.pids))}) set to analog mode while open"
+            self.log.info(f"Button Reader: {text}")
+            self.event_line(text)
         self.log_inventory()
         last_rescan = last_draw = self.clock()
         try:
@@ -652,6 +664,8 @@ class Session:
     def close(self):
         if self.switch is not None:
             self.switch.close()
+        if self.joystick is not None:
+            self.joystick.restore()
         for (short, axis), (low, high) in sorted(self.pad.extremes.items()):
             if self.pad.kind(short, axis) in ("stick", "trigger") and low != high:
                 self.log.info(f"Button Reader: {short} {abs_name(axis)} seen {low}..{high}")
@@ -757,8 +771,10 @@ def run(**_kwargs):
     try:
         screen = PyUiScreen(device, desktop=desktop is not None)
         switch = FnSwitch() if desktop is None else None
+        joystick = JoystickInput() if desktop is None else None
         session = Session(device=device, controller_interface=Controller.controller_interface, log=log,
-                          screen=screen, desktop=desktop, report_dir=report_dir(desktop), switch=switch)
+                          screen=screen, desktop=desktop, report_dir=report_dir(desktop), switch=switch,
+                          joystick=joystick)
         path = session.run()
         if path:
             shown = os.path.relpath(path, "/mnt/SDCARD") if path.startswith("/mnt/SDCARD/") else path
