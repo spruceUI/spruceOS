@@ -103,7 +103,7 @@ class MiyooTrimCommon():
         return self.is_hdmi_connected()
 
     @staticmethod
-    def run_analog_stick_calibration_all_sticks(device):
+    def run_analog_stick_calibration_all_sticks_miyoo(device):
         import sdl2
         import time
         from controller.controller import Controller

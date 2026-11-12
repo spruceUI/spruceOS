@@ -29,5 +29,5 @@ class RomAppSetup(ABC):
         pass
 
     @abstractmethod
-    def get_core_for_game(self, game_system_config, rom_file_path):
+    def get_core_for_game(self, device, game_system_config, rom_file_path):
         pass

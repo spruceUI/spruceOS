@@ -223,11 +223,12 @@ class GameConfigMenu:
                     # Check dependencies
                     depends_on = option.get("dependsOn", {})
                     dependencies_met = all(
-                        not Device.supports_device((menu_options.get(dependency) or {}).get("devices"))
+                        dependency not in menu_options
+                        or not Device.supports_device(menu_options[dependency].get("devices"))
                         or self.game_system.game_system_config.get_effective_menu_selection(dependency, rom_file_path) == required_value
                         for dependency, required_value in depends_on.items()
                     )
-                    
+
                     if not supported_device or not dependencies_met:
                         continue
 

@@ -66,7 +66,7 @@ class UserConfig:
 
     @classmethod
     def game_system_sort_mode(cls):
-        return cls.config.get("gameSystemSortMode","Alphabetical")
+        return cls.config.get("gameSystemSortMode","SortOrderKey")
 
     @classmethod
     def set_game_system_sort_mode(cls, value):
@@ -111,11 +111,12 @@ class UserConfig:
 
     @classmethod
     def get_turbo_delay_ms(cls):
-        return cls.config.get("turboDelayMs", 120) / 1000
+        return cls.config.get("turboDelayMs", 250) / 1000
 
     @classmethod
     def set_turbo_delay_ms(cls, delay):
         cls.config["turboDelayMs"] = delay
+        cls.save_config()
 
     @classmethod
     def use_24_hour_clock(cls):

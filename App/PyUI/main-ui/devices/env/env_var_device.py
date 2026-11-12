@@ -548,12 +548,26 @@ class EnvVarDevice(DeviceCommon):
 
     def apply_stick_calibration(self):
         self._run_setting_cmd("APPLY_STICK_CALIBRATION")
+        if os.environ.get("REOPEN_VOLUME_WATCHER_AFTER_CALIBRATION", "false").lower() != "true":
+            return
+        watcher = self.volume_key_watcher
+        if watcher is not None:
+            old_fd = watcher.fd
+            try:
+                watcher.fd = os.open(watcher.event_path, os.O_RDONLY | os.O_NONBLOCK)
+            except OSError as e:
+                PyUiLogger.get_logger().warning(f"Could not reopen {watcher.event_path}: {e}")
+                return
+            try:
+                os.close(old_fd)
+            except OSError:
+                pass
 
     def supports_analog_calibration(self):
         return os.environ.get("STICK_CALIBRATION_TYPE", None) is not None
 
     def get_core_for_game(self, game_system_config, rom_file_path):
-        return self.rom_app_setup.get_core_for_game(game_system_config, rom_file_path)
+        return self.rom_app_setup.get_core_for_game(self, game_system_config, rom_file_path)
 
     def get_core_name_overrides(self, core_name):
         return self.rom_app_setup.get_core_name_overrides(core_name)
