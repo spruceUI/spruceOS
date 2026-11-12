@@ -26,7 +26,6 @@ from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from games.utils.game_entry import GameEntry
-from menus.games.utils.rom_info import RomInfo
 
 
 # The launcher cannot start without these; every other variable is optional.

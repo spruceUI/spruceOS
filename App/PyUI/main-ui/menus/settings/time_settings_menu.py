@@ -6,7 +6,6 @@ from devices.miyoo.user_config import UserConfig
 from menus.settings import settings_menu
 from menus.settings.set_time_menu import SetTimeMenu
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 

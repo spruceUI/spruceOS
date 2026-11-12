@@ -44,7 +44,7 @@ class UserConfig:
                 os.replace(tempname, cls.FILEPATH)
 
             except Exception as e:
-                raise RuntimeError(f"Failed to save config: {e}")
+                PyUiLogger.get_logger().error(f"Failed to save {cls.FILEPATH}: {e}")
 
     @classmethod
     def get_ignore_articles_when_sorting(cls):

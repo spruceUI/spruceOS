@@ -767,6 +767,12 @@ finally:
 "
 }
 
+turn_on_screen() {
+    _level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$_level" in ''|*[!0-9]*) _level=5 ;; esac
+    apply_backlight "$_level"
+}
+
 send_menu_button_to_retroarch() {
     # Every RetroArch binary this device can launch has to be listed here or the
     # home button silently does nothing in-game. ra64.h700 is the BaseOS default.

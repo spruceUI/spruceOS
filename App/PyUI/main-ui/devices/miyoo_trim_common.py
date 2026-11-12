@@ -108,7 +108,6 @@ class MiyooTrimCommon():
         import time
         from controller.controller import Controller
         from devices.miyoo.trim_ui_joystick import TrimUIJoystick
-        from devices.miyoo_trim_common import MiyooTrimCommon
         from utils.py_ui_config import PyUiConfig
         sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
         ProcessRunner.run(["killall","-9","miyoo_inputd"])
