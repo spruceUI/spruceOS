@@ -540,7 +540,7 @@ class EnvVarDevice(DeviceCommon):
         STICK_CALIBRATION_TYPE = os.environ["STICK_CALIBRATION_TYPE"]
         if "MIYOO" == STICK_CALIBRATION_TYPE:
             from devices.miyoo_trim_common import MiyooTrimCommon
-            MiyooTrimCommon.run_analog_stick_calibration_all_sticks(self)
+            MiyooTrimCommon.run_analog_stick_calibration_all_sticks_miyoo(self)
         elif "TRIMUI" == STICK_CALIBRATION_TYPE:
             from controller.controller import Controller
             from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
@@ -548,7 +548,8 @@ class EnvVarDevice(DeviceCommon):
 
     def apply_stick_calibration(self):
         self._run_setting_cmd("APPLY_STICK_CALIBRATION")
-        # A restarted input daemon recreates its nodes, so the volume watcher reopens its own.
+        if os.environ.get("REOPEN_VOLUME_WATCHER_AFTER_CALIBRATION", "false").lower() != "true":
+            return
         watcher = self.volume_key_watcher
         if watcher is not None:
             old_fd = watcher.fd

@@ -78,8 +78,8 @@ device_get_fw_version() {
     fi
 }
 
-# EnvVarDevice does not apply the saved backlight at startup; the old XX PyUI class did.
-prepare_for_pyui_launch() {
+# Boot to game skips PyUI, so the saved backlight is applied at boot rather than by PyUI.
+restore_backlight() {
     _level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
     case "$_level" in ''|*[!0-9]*) return 0 ;; esac
     apply_backlight "$_level"
@@ -487,6 +487,8 @@ anbernic_xx_common_init() {
     fi
 
     runtime_mounts_anbernic_34xxsp
+
+    restore_backlight
 
     stage_ra_autoconfig
 

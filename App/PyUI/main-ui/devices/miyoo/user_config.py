@@ -3,16 +3,10 @@ import os
 import threading
 
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 
 
 class UserConfig:
     FILEPATH = "/mnt/SDCARD/Saves/pyui-common.json"
-
-    # Kept in py-ui-config.json before this file existed; spruceRestore still puts them back there after an update.
-    MIGRATED_KEYS = ("gameSystemSortMode", "gameSystemSortTypePrio", "gameSystemSortBrandPrio",
-                     "gameSystemSortYearPrio", "gameSystemSortNamePrio", "showAllGameSystems", "showAmPm",
-                     "syncTimeViaNetwork", "turboDelayMs", "use24HourClock")
 
     _lock = threading.Lock()
     config = {}
@@ -28,18 +22,6 @@ class UserConfig:
                 cls.config = {}
             except FileNotFoundError:
                 cls.config = {}
-        cls._migrate_from_pyui_config()
-
-    @classmethod
-    def _migrate_from_pyui_config(cls):
-        migrated = {key: PyUiConfig.get(key) for key in cls.MIGRATED_KEYS
-                    if key not in cls.config and PyUiConfig.get(key) is not None}
-        if migrated:
-            cls.config.update(migrated)
-            try:
-                cls.save_config()
-            except RuntimeError as e:
-                PyUiLogger.get_logger().error(f"Could not save migrated settings: {e}")
 
     @classmethod
     def save_config(cls):
