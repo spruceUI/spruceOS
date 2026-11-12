@@ -672,3 +672,30 @@ set_pokedaisy_panel() {
 		return 1
 	fi
 }
+
+# Sets or adds `key = "value"` in Azahar's core config. The match is anchored so that
+# e.g. video_rotation never touches a longer key that ends in the same text.
+set_azahar_cfg_value() {
+	cfg="/mnt/SDCARD/RetroArch/.retroarch/config/Azahar/Azahar.cfg"
+	key="$1"
+	value="$2"
+	mkdir -p "$(dirname "$cfg")"
+	touch "$cfg"
+	if grep -q "^${key}[[:space:]]*=" "$cfg"; then
+		sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$cfg"
+	else
+		[ -s "$cfg" ] && [ -n "$(tail -c 1 "$cfg")" ] && echo >> "$cfg"
+		echo "${key} = \"${value}\"" >> "$cfg"
+	fi
+}
+
+set_rotation_for_miniloong_vulkan() {
+	[ "$PLATFORM" = "Miniloong" ] || return 0
+	set_azahar_cfg_value video_rotation 1
+	set_azahar_cfg_value aspect_ratio_index 10
+}
+
+reset_rotation_for_miniloong_vulkan() {
+	set_azahar_cfg_value video_rotation 0
+	set_azahar_cfg_value aspect_ratio_index 22
+}

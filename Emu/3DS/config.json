@@ -15,7 +15,7 @@
         "Performance",
         "Overclock"
       ],
-      "selected": "Performance",
+      "selected": "Overclock",
       "overrides": {}
     }
   },
@@ -26,8 +26,6 @@
   "default_emulator": "azahar",
   "scaling_min_freq": 1008000,
   "devices": [
-    "TRIMUI_A133P",
-    "TRIMUI_SMART_PRO_S",
     "OAKMOSS_A133P",
     "RGB30",
     "RGB20SX",
