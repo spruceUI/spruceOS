@@ -625,13 +625,13 @@ class Session:
     # --- main loop
 
     def run(self):
-        if self.joystick is not None and self.joystick.analog():
-            text = f"joystickinput (pid {', '.join(map(str, self.joystick.pids))}) set to analog mode while open"
-            self.log.info(f"Button Reader: {text}")
-            self.event_line(text)
-        self.log_inventory()
-        last_rescan = last_draw = self.clock()
         try:
+            if self.joystick is not None and self.joystick.analog():
+                text = f"joystickinput (pid {', '.join(map(str, self.joystick.pids))}) set to analog mode while open"
+                self.log.info(f"Button Reader: {text}")
+                self.event_line(text)
+            self.log_inventory()
+            last_rescan = last_draw = self.clock()
             while not self.done:
                 if self.desktop is not None:
                     self.desktop.pump()
@@ -662,10 +662,13 @@ class Session:
         return self.report_path
 
     def close(self):
+        if self.joystick is not None:
+            try:
+                self.joystick.restore()  # first, so nothing failing below keeps the stick out of the menu
+            except OSError as error:
+                self.log.warning(f"Button Reader: joystickinput not set back to keyboard mode ({error})")
         if self.switch is not None:
             self.switch.close()
-        if self.joystick is not None:
-            self.joystick.restore()
         for (short, axis), (low, high) in sorted(self.pad.extremes.items()):
             if self.pad.kind(short, axis) in ("stick", "trigger") and low != high:
                 self.log.info(f"Button Reader: {short} {abs_name(axis)} seen {low}..{high}")
