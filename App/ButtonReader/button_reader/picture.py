@@ -35,6 +35,7 @@ class Scene:
         self.overlay_color = WARN
         self.info = None       # [(text, color)]: the device info pane, drawn instead of the picture
         self.info_scroll = 0
+        self.info_max = None   # set by the drawing: the last row the pane can scroll to
 
 
 # Two arrangements in units u: "tall" puts the sticks under the D-pad and face buttons (a
@@ -233,7 +234,8 @@ def draw_info(canvas, area, scene):
     rows = max(1, int(h // small))
     if len(lines) > rows:
         rows -= 1  # the last row says what is below
-    start = min(scene.info_scroll, max(0, len(lines) - rows))
+    scene.info_max = max(0, len(lines) - rows)
+    start = min(scene.info_scroll, scene.info_max)
     ly = y + small / 2
     for text, color in lines[start:start + rows]:
         canvas.text(text, x, ly, color, "small", "left")

@@ -27,6 +27,11 @@ REDRAW_SECONDS = 0.25
 MIN_FRAME = 1 / 30.0
 RECENT_LINES = 2  # last presses listed under the picture, between the device's name and the status line
 INFO_HOLD = 10.0  # L1 + R1 held this long in the picture opens the device info
+INFO_MIRROR = 0.1  # a press this soon after one the info pane acted on is its copy (the A30's joypad mirror)
+INFO_PAGE = 5  # rows D-pad left/right scroll the info pane
+HAT_DPAD = {(17, -1): "DPAD_UP", (17, 1): "DPAD_DOWN", (16, -1): "DPAD_LEFT", (16, 1): "DPAD_RIGHT"}
+KEY_DPAD = {103: "DPAD_UP", 108: "DPAD_DOWN", 105: "DPAD_LEFT", 106: "DPAD_RIGHT"}
+INFO_SCROLL = {"DPAD_UP": -1, "DPAD_DOWN": 1, "DPAD_LEFT": -INFO_PAGE, "DPAD_RIGHT": INFO_PAGE}
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXIT_HINT = "Exit: hold a button 10 s, or Select+Start"
 
@@ -221,6 +226,8 @@ class Session:
         self.info_open = False
         self.info_lines = []
         self.info_scroll = 0
+        self.info_max = None  # the last row the pane can scroll to, as last drawn
+        self.info_acted = -1.0  # when the pane last scrolled or opened: mirrored copies of that press are skipped
         self.hold_floor = self.started  # the exit hold counts from here, so the info chord never exits
         self.done = False
         self.exit_reason = None
@@ -373,13 +380,16 @@ class Session:
 
     def on_press(self, short, control, now):
         if self.info_open:
-            slot = self.names.slot.get(control)
-            if slot in ("DPAD_UP", "DPAD_DOWN"):
-                self.info_scroll = max(0, self.info_scroll + (1 if slot == "DPAD_DOWN" else -1))
-            elif not self.is_power(control):
-                self.info_open = False
-                self.event_line("device info closed")
-            self.dirty = True
+            if now - self.info_acted >= INFO_MIRROR:
+                step = self.info_step(control)
+                if step:
+                    last = self.info_max if self.info_max is not None else self.info_scroll + abs(step)
+                    self.info_scroll = max(0, min(self.info_scroll + step, last))
+                    self.info_acted = now
+                elif not self.is_power(control):
+                    self.info_open = False
+                    self.event_line("device info closed")
+                self.dirty = True
         elif self.mode == "start" and not self.is_power(control):
             self.start_verbose(now)
         elif self.mode == "steps" and self.phase == "ask" and self.steps[self.step_i][0] == "key" \
@@ -614,6 +624,14 @@ class Session:
                 if not self.is_power(control)]
         return max(held) if held else (0.0, None)
 
+    def info_step(self, control):
+        """Rows a D-pad press scrolls the info pane, whichever node sends it: its slot, a hat or an arrow key."""
+        etype, code, direction = control
+        slot = self.names.slot.get(control)
+        if slot not in INFO_SCROLL:
+            slot = HAT_DPAD.get((code, direction)) if etype == EV_ABS else KEY_DPAD.get(code)
+        return INFO_SCROLL.get(slot, 0)
+
     def info_chord_down(self):
         held = {c for _s, c in self.pad.pressed}
         left = set(self.names.controls_of("L1"))
@@ -632,6 +650,7 @@ class Session:
         if not self.info_open and now - self.info_since >= self.info_hold:
             self.info_open = True
             self.info_scroll = 0
+            self.info_acted = now
             self.info_lines = self.device_info()
             self.event_line("device info opened (L1 + R1)")
             self.log.info("Button Reader: device info opened")
@@ -799,7 +818,7 @@ class Session:
 
     def footer(self, now):
         if self.info_open:
-            return "D-pad scrolls; any other button closes"
+            return "D-pad scrolls (left/right a page); any other button closes"
         if self.info_since is not None:
             return "Keep holding L1 + R1 for the device info"
         held_for, control = self.longest_hold(now)
@@ -839,7 +858,9 @@ class Session:
                     last_rescan = now
                 if self.screen is not None:
                     if (self.dirty and now - last_draw >= MIN_FRAME) or now - last_draw > REDRAW_SECONDS:
-                        self.screen.show(self.scene(now), self.footer(now))
+                        scene = self.scene(now)
+                        self.screen.show(scene, self.footer(now))
+                        self.info_max = scene.info_max
                         self.dirty = False
                         last_draw = now
                     self.screen.idle(now)
