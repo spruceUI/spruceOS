@@ -32,7 +32,7 @@ class AppMenuPopup:
 
         if(app):
             popup_options.append(GridOrListEntry(
-                    primary_text=Language.show_app() if AppsManager.is_hidden(app) else "Hide App",
+                    primary_text=Language.show_app() if AppsManager.is_hidden(app) else Language.hide_app(),
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
                     description="",
@@ -41,7 +41,7 @@ class AppMenuPopup:
             ))
 
         popup_options.append(GridOrListEntry(
-                primary_text=Language.hide_hidden_apps() if self.current_show_all_apps_setting else "Show Hidden Apps",
+                primary_text=Language.hide_hidden_apps() if self.current_show_all_apps_setting else Language.show_hidden_apps(),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description="",
@@ -49,9 +49,9 @@ class AppMenuPopup:
                 value=lambda input_value: self.toggle_show_all_apps(input_value)
         ))
 
-        top_bar_text = "App Options"
+        top_bar_text = Language.app_options()
         if(app):
-            top_bar_text = f"{app.get_label()} Sub Options"
+            top_bar_text = Language.app_sub_options(Language.app_text(app.get_label()))
         popup_view = ViewCreator.create_view(
             view_type=ViewType.POPUP,
             options=popup_options,

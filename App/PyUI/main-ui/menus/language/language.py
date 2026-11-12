@@ -1,6 +1,7 @@
 
 import json
 import os
+import re
 import sys
 
 from display.font_purpose import FontPurpose
@@ -11,6 +12,7 @@ from utils.py_ui_config import PyUiConfig
 class Language:
     _data = {}
     _config_path = None
+    _template_cache = {}
     @classmethod
 
     def init(cls):
@@ -19,6 +21,7 @@ class Language:
 
     @classmethod
     def load(cls):
+        cls._template_cache = {}
         language = PyUiConfig.get_language()
         if(language is not None):
             #PyUiLogger.get_logger().info(f"language is {language}")
@@ -198,6 +201,102 @@ class Language:
         if text in governor:
             return governor[text]
         return text
+
+    @classmethod
+    def translate(cls, section: str, text):
+        """Translate English text that comes from outside PyUI (config files,
+        shell scripts) using a section keyed by that English text.
+
+        Keys may contain {placeholders}: "Now downloading {name}!" matches
+        "Now downloading Foo!" and the captured text is substituted into the
+        translation. Unknown text is returned unchanged."""
+        if not text or not isinstance(text, str):
+            return text
+        entries = cls._data.get(section)
+        if not isinstance(entries, dict):
+            return text
+        if text in entries:
+            return entries[text]
+        for pattern, names, translation in cls._templates_for(section, entries):
+            match = pattern.fullmatch(text)
+            if match:
+                result = translation
+                for index, name in enumerate(names):
+                    result = result.replace("{" + name + "}", match.group(f"p{index}"))
+                return result
+        return text
+
+    @classmethod
+    def _templates_for(cls, section, entries):
+        templates = cls._template_cache.get(section)
+        if templates is None:
+            templates = []
+            for key, translation in entries.items():
+                if "{" not in key or not isinstance(translation, str):
+                    continue
+                parts = re.split(r"\{(\w+)\}", key)
+                if not "".join(parts[0::2]).strip():
+                    continue  # placeholders only: would match any text
+                regex = ""
+                names = []
+                for i, part in enumerate(parts):
+                    if i % 2 == 0:
+                        regex += re.escape(part)
+                    elif part in names:
+                        regex += f"(?P=p{names.index(part)})"
+                    else:
+                        regex += f"(?P<p{len(names)}>.+?)"
+                        names.append(part)
+                try:
+                    templates.append((re.compile(regex, re.DOTALL), names, translation))
+                except re.error:
+                    logger = PyUiLogger.get_logger()
+                    if logger:
+                        logger.warning(f"Bad translation template in {section}: {key}")
+            cls._template_cache[section] = templates
+        return templates
+
+    @classmethod
+    def option_list_text(cls, text):
+        """Display text for an entry, title or description of a JSON option list
+        (Settings > Tasks, and lists shell scripts show). The JSON keys stay in
+        English because they also name icons and are written back as results."""
+        return cls.translate("optionListText", text)
+
+    @classmethod
+    def app_text(cls, text):
+        """Display text for an app's label or description. App config files
+        (and the scripts that rewrite them) stay in English; the label is also
+        the key for hidden apps and the last selection."""
+        return cls.translate("appText", text)
+
+    @classmethod
+    def hidden_app_label(cls, label: str) -> str:
+        return cls.label("hiddenAppLabel", "{name}(Hidden)").replace("{name}", label)
+
+    @classmethod
+    def hide_app(cls):
+        return cls._data.get("hideApp", "Hide App")
+
+    @classmethod
+    def show_hidden_apps(cls):
+        return cls._data.get("showHiddenApps", "Show Hidden Apps")
+
+    @classmethod
+    def app_options(cls):
+        return cls._data.get("appOptions", "App Options")
+
+    @classmethod
+    def app_sub_options(cls, name: str) -> str:
+        return cls.label("appSubOptions", "{name} Sub Options").replace("{name}", name)
+
+    @classmethod
+    def running_task(cls, name: str) -> str:
+        return cls.label("runningTask", "Running {name}...").replace("{name}", name)
+
+    @classmethod
+    def finished_running_task(cls, name: str) -> str:
+        return cls.label("finishedRunningTask", "Finished: {name}").replace("{name}", name)
 
     @classmethod
     def select_option_prompt(cls, name: str) -> str:
