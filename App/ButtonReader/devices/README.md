@@ -65,7 +65,7 @@ Every slot below appears exactly once, in `controls` or in `absent`:
 
 ```json
 "BOTTOM": {"code": "1 304", "source": "pad", "from": "cfg"}
-"L3": {"code": "1 317", "source": "pad", "label": "Fn", "prompt": "Press the left Fn key (L3)", "from": "user 2026-11-11"}
+"L3": {"code": "1 317", "source": "pad", "label": "Fn", "prompt": "Press the left Fn key (L3)", "from": "tester 2026-11-11"}
 "LEFT_STICK": {"x": "3 0", "y": "3 1", "source": "pad", "from": "cfg"}
 "FN_SWITCH": {"source": "fn-switch", "read": "device_get_switch_position", "from": "cfg (TrimUI .sh)"}
 ```

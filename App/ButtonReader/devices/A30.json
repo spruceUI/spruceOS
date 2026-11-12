@@ -146,7 +146,7 @@
     }
   },
   "absent": {
-    "L3": "the stick doesn't click: its UART frame carries 2 axes and no click bit, and no GPIO or input event fires (WM probe 2026-11-11); 317 on MIYOO Pad1 is only declared",
+    "L3": "the stick doesn't click: its UART frame carries 2 axes and no click bit, and no GPIO or input event fires (lab probe 2026-11-11); 317 on MIYOO Pad1 is only declared",
     "R3": "one stick, and it doesn't click",
     "HOME": "cfg B_HOME=DOESNT_EXIST",
     "RIGHT_STICK": "one stick (DEVICE_NUM_ANALOG_STICKS=1)",
