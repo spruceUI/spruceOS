@@ -664,7 +664,11 @@ class Session:
     def close(self):
         if self.joystick is not None:
             try:
-                self.joystick.restore()  # first, so nothing failing below keeps the stick out of the menu
+                restored = self.joystick.restore()  # first, so nothing failing below keeps the stick out of the menu
+                if restored:
+                    text = f"joystickinput (pid {', '.join(map(str, restored))}) set back to keyboard mode"
+                    self.log.info(f"Button Reader: {text}")
+                    self.event_line(text)
             except OSError as error:
                 self.log.warning(f"Button Reader: joystickinput not set back to keyboard mode ({error})")
         if self.switch is not None:

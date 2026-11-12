@@ -34,10 +34,11 @@ class JoystickInput:
         return self.pids
 
     def restore(self):
-        """Keyboard mode again (the stick drives the menu), for whichever joystickinput runs now."""
-        if self.pids:
-            self.send(self.find(), signal.SIGUSR2)
+        """Keyboard mode again (the stick drives the menu), for whichever joystickinput runs now; returns its pids."""
+        pids = self.find() if self.pids else []
+        self.send(pids, signal.SIGUSR2)
         self.pids = []
+        return pids
 
     def send(self, pids, sig):
         for pid in pids:

@@ -59,9 +59,9 @@ FACE_PRINT = {"nintendo": {"BOTTOM": "B", "RIGHT": "A", "TOP": "X", "LEFT": "Y"}
               "xbox": {"BOTTOM": "A", "RIGHT": "B", "TOP": "Y", "LEFT": "X"}}
 XBOX_PRINT = {"XU10"}
 # What a platform has that its cfg doesn't say (user, 11-11): the Brick Pro has a Home key though its cfg says
-# DOESNT_EXIST; the Smart Pro's sticks don't click.
+# DOESNT_EXIST; the Smart Pro's sticks don't click, nor does the A30's (no click in its gpio-keys; 2 runs, no input).
 UNLISTED = {"BrickPro": {"HOME"}}
-NO_STICK_CLICKS = {"SmartPro"}
+NO_STICK_CLICKS = {"SmartPro", "A30"}
 # (stick, cfg variable for right, cfg variable for down, default X axis, default Y axis)
 STICKS = [("LEFT", "STICK_RIGHT", "STICK_DOWN", 0, 1), ("RIGHT", "STICK_RIGHT_2", "STICK_DOWN_2", 3, 4)]
 PYUI_STICK = {"LEFT_STICK_LEFT": ("LEFT", "x", -1), "LEFT_STICK_RIGHT": ("LEFT", "x", 1),
