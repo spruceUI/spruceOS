@@ -96,22 +96,6 @@
       "source": "pad",
       "from": "cfg"
     },
-    "L3": {
-      "code": "1 317",
-      "source": "pad",
-      "from": "cfg",
-      "label": "Fn",
-      "prompt": "Press the left Fn key (L3)",
-      "note": "no sticks: the case's Fn keys send L3/R3 (twig Pixel2.cfg); Pixel2DarkMoss.cfg says they don't exist"
-    },
-    "R3": {
-      "code": "1 318",
-      "source": "pad",
-      "from": "cfg",
-      "label": "Fn",
-      "prompt": "Press the right Fn key (R3)",
-      "note": "no sticks: the case's Fn keys send L3/R3 (twig Pixel2.cfg); Pixel2DarkMoss.cfg says they don't exist"
-    },
     "SELECT": {
       "code": "1 314",
       "source": "pad",
@@ -156,6 +140,8 @@
     }
   },
   "absent": {
+    "L3": "no L3/R3 and no Fn buttons on the Pixel 2 (tester 2026-11-12); twig Pixel2.cfg still lists B_L3/B_R3 317/318",
+    "R3": "no L3/R3 and no Fn buttons on the Pixel 2 (tester 2026-11-12); twig Pixel2.cfg still lists B_L3/B_R3 317/318",
     "HOME": "cfg has no B_HOME at all (unlike Pixel2DarkMoss.cfg, which sets it to DOESNT_EXIST explicitly)",
     "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0); the cfg's STICK_* values are vestigial (see notes)",
     "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
