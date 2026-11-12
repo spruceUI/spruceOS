@@ -17,15 +17,24 @@
   "sources": {
     "pad": {
       "kind": "joypad",
-      "node": "Loong Gamepad",
+      "node": "retrogame_joypad",
       "by_path": "platform-singleadc-joypad-event-joystick",
-      "from": "measured: the lab capturesMiniloong-20260921.txt; matrix",
-      "note": "carries the pad, d-pad (as 4 keys), L3 and the volume keys; cfg's PAD_NAME_CANDIDATES says \"retrogame_joypad\" (the RGB30's pad name), which does not match this measured name - resolution still works because PAD_NODE_CANDIDATES' by-path match is tried first and succeeds; the name candidate is dead/stale"
+      "from": "measured: button-reader-Miniloong-1.txt (dArkMoss 11052026); the lab capturesMiniloong-20260921.txt named it Loong Gamepad",
+      "note": "carries the face buttons, d-pad (as 4 keys), L1/R1/L2/R2, L3, MENU, the stick and FF rumble; dArkMoss 11052026 names it retrogame_joypad, as the cfg's PAD_NAME_CANDIDATES does, and an older image Loong Gamepad (kept as a match). The volume keys are on gpio-keys-vol",
+      "match": [
+        "Loong Gamepad"
+      ]
     },
     "power": {
       "kind": "pmic",
       "node": "rk805 pwrkey",
       "from": "measured: the lab capturesMiniloong-20260921.txt; matrix"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys-vol",
+      "from": "measured: button-reader-Miniloong-1.txt",
+      "note": "VOL+/- (115/114), measured 2026-11-12"
     }
   },
   "controls": {
@@ -111,13 +120,13 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "pad",
-      "from": "matrix"
+      "source": "vol",
+      "from": "measured: button-reader-Miniloong-1.txt"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "pad",
-      "from": "matrix"
+      "source": "vol",
+      "from": "measured: button-reader-Miniloong-1.txt"
     },
     "POWER": {
       "code": "1 116",
@@ -144,7 +153,8 @@
     "spruce/scripts/platform/darkmoss/Miniloong.cfg",
     "the lab capturesMiniloong-20260921.txt",
     "the lab capturesMiniloong-20260911.txt",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-Miniloong-1.txt"
   ],
   "notes": [
     "R3 (cfg B_R3=1 318, BTN_THUMBR) never fires on hardware (controller-matrix 2026-09-06, conflict L-g); kept absent here rather than as a dead control, since the device has only one stick (DEVICE_NUM_ANALOG_STICKS=1) and no second stick to click.",
