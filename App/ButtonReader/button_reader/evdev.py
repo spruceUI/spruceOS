@@ -10,8 +10,10 @@ import struct
 from button_reader.names import EV_ABS, EV_KEY
 
 EVENT = struct.Struct("llHHi")
-KEY_MAX, ABS_MAX = 0x2FF, 0x3F
-KEY_BYTES, ABS_BYTES = (KEY_MAX + 8) // 8, (ABS_MAX + 8) // 8
+KEY_MAX = 0x2FF
+ABS_MAX = 0x3F
+KEY_BYTES = (KEY_MAX + 8) // 8
+ABS_BYTES = (ABS_MAX + 8) // 8
 
 
 def _ior(nr, size):
@@ -64,7 +66,8 @@ class Node:
         except OSError:
             self.ident = tuple(int(read_text(f"{sysdir}/id/{k}") or "0", 16)
                                for k in ("bustype", "vendor", "product", "version"))
-        self.keys, self.axes = [], {}
+        self.keys = []
+        self.axes = {}
         try:
             self.keys = bits(fcntl.ioctl(self.fd, EVIOCGBIT(EV_KEY, KEY_BYTES), bytes(KEY_BYTES)))
             for axis in bits(fcntl.ioctl(self.fd, EVIOCGBIT(EV_ABS, ABS_BYTES), bytes(ABS_BYTES))):
@@ -102,7 +105,11 @@ class PipeNode(Node):
     """A node fed through a pipe: the desktop keyboard, and fake boards in host tests."""
 
     def __init__(self, short, name, keys=(), axes=None, ident=(0x19, 0, 0, 0), phys=""):
-        self.path, self.short, self.name, self.phys, self.uniq = f"/dev/input/{short}", short, name, phys, ""
+        self.path = f"/dev/input/{short}"
+        self.short = short
+        self.name = name
+        self.phys = phys
+        self.uniq = ""
         self.ident = tuple(ident)
         self.keys = sorted(keys)
         self.axes = {a: dict({"value": 0, "fuzz": 0, "flat": 0, "res": 0}, **info)

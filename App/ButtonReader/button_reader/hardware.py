@@ -14,7 +14,9 @@ class Roots:
     """Where sysfs, procfs, the device tree and debugfs are: the real ones, or a host test's."""
 
     def __init__(self, base=""):
-        self.sys, self.proc, self.dev = base + "/sys", base + "/proc", base + "/dev"
+        self.sys = base + "/sys"
+        self.proc = base + "/proc"
+        self.dev = base + "/dev"
         self.dt = base + "/proc/device-tree"
         self.dt_sysfs = base + "/sys/firmware/devicetree/base"
         self.debug_gpio = base + "/sys/kernel/debug/gpio"
@@ -70,7 +72,8 @@ class DeviceTree:
                     if name in files:
                         value = _u32s(_read(os.path.join(top, name)))
                         if value:
-                            self._phandles[value[0]] = "/" + os.path.relpath(top, self.root).replace(os.sep, "/").lstrip("./")
+                            relative = os.path.relpath(top, self.root).replace(os.sep, "/")
+                            self._phandles[value[0]] = "/" + relative.lstrip("./")
         return self._phandles.get(number)
 
     def label(self, path):
@@ -177,8 +180,11 @@ def key_wiring(dt, of_node, bases):
 
 def adc_channels(dt, of_node):
     """[(name, ADC node, channel)] from io-channels / io-channel-names (analog sticks, adc-keys)."""
-    cells, names = dt.u32s(of_node, "io-channels"), dt.strings(of_node, "io-channel-names")
-    out, i, n = [], 0, 0
+    cells = dt.u32s(of_node, "io-channels")
+    names = dt.strings(of_node, "io-channel-names")
+    out = []
+    i = 0
+    n = 0
     while i < len(cells):
         adc = dt.phandle(cells[i])
         width = (dt.u32s(adc, "#io-channel-cells") or [1])[0] if adc else 1

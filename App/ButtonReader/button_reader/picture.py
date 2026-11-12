@@ -59,8 +59,12 @@ class Layout:
         shape = SHAPES[name]
         sw, sh = shape["size"]
         u = min(w / sw, h / (sh + 0.5))
-        ox, oy = x + w / 2.0, y + (h - sh * u) / 2.0
-        self.name, self.u, self.ox, self.oy = name, u, ox, oy
+        ox = x + w / 2.0
+        oy = y + (h - sh * u) / 2.0
+        self.name = name
+        self.u = u
+        self.ox = ox
+        self.oy = oy
         bx, by, bw, bh = shape["body"]
         self.body = (ox + bx * u, oy + by * u, bw * u, bh * u)
         r = {}
@@ -132,7 +136,8 @@ def draw_slot(canvas, shape, label, state, targeted, thick):
         radius = min(w, h) * 0.3
         fill_round_rect(canvas, x, y, w, h, radius, outline)
         fill_round_rect(canvas, x + t, y + t, w - 2 * t, h - 2 * t, max(radius - t, 0), fill)
-        cx, cy = x + w / 2, y + h / 2
+        cx = x + w / 2
+        cy = y + h / 2
     if label:
         room = 2 * (radius - t) if shape[0] == "circle" else w - 2 * t
         if canvas.text_width(label, "small") > room * 0.92:
@@ -150,7 +155,8 @@ def draw_stick(canvas, center, info, targeted):
     if present:
         dot = radius * 0.32
         reach = radius - dot - 3
-        dx, dy = max(-1.0, min(1.0, info.get("dx", 0.0))), max(-1.0, min(1.0, info.get("dy", 0.0)))
+        dx = max(-1.0, min(1.0, info.get("dx", 0.0)))
+        dy = max(-1.0, min(1.0, info.get("dy", 0.0)))
         moved = abs(dx) > 0.15 or abs(dy) > 0.15
         canvas.box(DIM, cx - reach, cy, 2 * reach, 1)
         canvas.box(DIM, cx, cy - reach, 1, 2 * reach)
@@ -165,7 +171,9 @@ def draw(canvas, area, scene):
     """Draw the whole scene in area = (x, y, w, h)."""
     x, y, w, h = area
     canvas.box(PANEL, x, y, w, h)
-    big, normal, small = canvas.line_height("big"), canvas.line_height("normal"), canvas.line_height("small")
+    big = canvas.line_height("big")
+    normal = canvas.line_height("normal")
+    small = canvas.line_height("small")
     top = y + normal * 0.2
     if scene.prompt:
         canvas.text(scene.prompt, x + w / 2, top + normal / 2, scene.prompt_color, "normal", "center")
@@ -184,14 +192,16 @@ def draw(canvas, area, scene):
     canvas.box(KEY, dcx - arm / 2, dcy - arm / 2, arm, arm)
     for stick, center in layout.stick.items():
         info = scene.sticks.get(stick, {"present": False, "click": "unknown"})
-        draw_stick(canvas, center, info, scene.target in (f"{stick}_X", f"{stick}_Y", "L3" if stick == "LEFT" else "R3"))
+        click = "L3" if stick == "LEFT" else "R3"
+        draw_stick(canvas, center, info, scene.target in (f"{stick}_X", f"{stick}_Y", click))
     ly = y + h - lines_h + small * 0.2
     for text, color in scene.lines:
         canvas.text(text, x + 12, ly + small / 2, color, "small", "left")
         ly += small
     if scene.overlay:
         tw = canvas.text_width(scene.overlay, "big") + 2 * big
-        ow, oh = min(tw, w - 16), big * 2
+        ow = min(tw, w - 16)
+        oh = big * 2
         canvas.box(PANEL, x + (w - ow) / 2, pic[1] + pic[3] / 2 - oh / 2, ow, oh)
         canvas.box(scene.overlay_color, x + (w - ow) / 2, pic[1] + pic[3] / 2 - oh / 2, ow, 2)
         canvas.text(scene.overlay, x + w / 2, pic[1] + pic[3] / 2, scene.overlay_color, "big", "center")
@@ -202,8 +212,10 @@ class RecordingCanvas:
     """A canvas that only counts and records (host tests, and sizing without a screen)."""
 
     def __init__(self, char_w=9, line_h=20):
-        self.boxes, self.texts = 0, []
-        self.char_w, self.line_h = char_w, line_h
+        self.boxes = 0
+        self.texts = []
+        self.char_w = char_w
+        self.line_h = line_h
 
     def box(self, color, x, y, w, h):
         self.boxes += 1

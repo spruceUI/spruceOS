@@ -50,7 +50,8 @@ class Report:
 
     def header(self, session):
         self.line(f"Button Reader {VERSION} report (verbose)")
-        self.line(f"date (device clock): {time.strftime('%Y-%m-%d %H:%M:%S')}   uptime: {(_read('/proc/uptime') or '?').strip()}")
+        uptime = (_read("/proc/uptime") or "?").strip()
+        self.line(f"date (device clock): {time.strftime('%Y-%m-%d %H:%M:%S')}   uptime: {uptime}")
         self.line(f"platform: {session.platform}   PyUI device: {session.device_desc}")
         self.line(f"face buttons: {face_print_text(session.platform)} (the step prompts name both)")
         model = (_read("/proc/device-tree/model", "rb") or b"?").rstrip(b"\0").decode("utf-8", "replace")
@@ -78,7 +79,8 @@ class Report:
         self.line()
 
     def node(self, session, info):
-        node, names = info.node, session.names
+        node = info.node
+        names = session.names
         num = emulator_maps.numbering(node)
         self.line(info.summary())
         if node.uniq:
@@ -93,8 +95,10 @@ class Report:
             seen = session.pad.extremes.get((node.short, axis))
             role = names.stick_role(axis)
             pyui = [names.pyui.get((EV_ABS, axis, s)) for s in (-1, 1)]
-            what = (f"stick {role[0]} {role[1]}{' (inverted)' if role[2] < 0 else ''}" if role
-                    else ", ".join(f"{abs_name(axis)}{'-+'[k]} = PyUI {p}" for k, p in enumerate(pyui) if p) or "unmapped")
+            if role:
+                what = f"stick {role[0]} {role[1]}{' (inverted)' if role[2] < 0 else ''}"
+            else:
+                what = ", ".join(f"{abs_name(axis)}{'-+'[k]} = PyUI {p}" for k, p in enumerate(pyui) if p) or "unmapped"
             sdl = (f"SDL hat {num['sdl_hats'][axis]}" if axis in num["sdl_hats"]
                    else f"SDL a{num['sdl_axes'].get(axis, '-')}")
             ra = f"hat {(axis - HAT_FIRST) // 2}" if HAT_FIRST <= axis <= HAT_LAST else num["ra_axes"].get(axis, "-")
@@ -114,14 +118,16 @@ class Report:
             etype, code, direction = control
             holders = [i for i in session.infos if (code in i.node.keys if etype == EV_KEY else code in i.node.axes)]
             if not holders:
-                self.line(f"{names.slot.get(control, '-'):10} | no node reports {key_name(code) if etype == EV_KEY else abs_name(code)}"
+                what = key_name(code) if etype == EV_KEY else abs_name(code)
+                self.line(f"{names.slot.get(control, '-'):10} | no node reports {what}"
                           f" | {code} | {names.pyui.get(control, '-')} | {names.cfg_var.get(control, '-')} | - | -")
                 continue
             for info in holders:
                 num = emulator_maps.numbering(info.node)
                 if etype == EV_KEY:
                     wiring = info.wiring_text(code, session.consumers)
-                    ra, sdl = num["ra_buttons"].get(code, "-"), f"b{num['sdl_buttons'].get(code, '-')}"
+                    ra = num["ra_buttons"].get(code, "-")
+                    sdl = f"b{num['sdl_buttons'].get(code, '-')}"
                     what = key_name(code)
                 else:
                     wiring = "analog/hat axis (see the node's abs lines)"
@@ -150,7 +156,8 @@ class Report:
         for note in notes:
             self.line(f"note: {note}")
         if ra:
-            ra_path, sdl_path = self.base + "-retroarch.cfg", self.base + "-sdl.txt"
+            ra_path = self.base + "-retroarch.cfg"
+            sdl_path = self.base + "-sdl.txt"
             with open(ra_path, "w") as fh:
                 fh.write(ra)
             with open(sdl_path, "w") as fh:

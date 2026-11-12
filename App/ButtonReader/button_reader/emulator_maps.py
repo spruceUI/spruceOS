@@ -5,9 +5,15 @@ import struct
 
 from button_reader.names import EV_ABS, EV_KEY, HAT_FIRST, HAT_LAST, abs_name, key_name
 
-KEY_UP, KEY_DOWN, BTN_MISC, BTN_JOYSTICK, KEY_MAX = 103, 108, 0x100, 0x120, 0x2FF
-ABS_MISC, ABS_MAX = 0x28, 0x3F
-RA_MAX_BUTTONS, RA_MAX_AXES = 64, 32
+KEY_UP = 103
+KEY_DOWN = 108
+BTN_MISC = 0x100
+BTN_JOYSTICK = 0x120
+KEY_MAX = 0x2FF
+ABS_MISC = 0x28
+ABS_MAX = 0x3F
+RA_MAX_BUTTONS = 64
+RA_MAX_AXES = 32
 
 # (slot, RetroArch bind, SDL field). SDL fields are spruce's label-named form, as the cfgs'
 # SDL_GAMECONTROLLER_MAP: a = right, b = bottom, x = top, y = left.
@@ -26,7 +32,8 @@ HAT_MASK = {("y", -1): 1, ("x", 1): 2, ("y", 1): 4, ("x", -1): 8}
 
 
 def ra_buttons(keys):
-    keyset, order = set(keys), []
+    keyset = set(keys)
+    order = []
     for low, high in ((KEY_UP, KEY_DOWN + 1), (BTN_MISC, KEY_MAX), (0, KEY_UP), (KEY_DOWN + 1, BTN_MISC)):
         order += [c for c in range(low, high) if c in keyset]
     return {code: i for i, code in enumerate(order[:RA_MAX_BUTTONS])}
@@ -54,7 +61,8 @@ def _digital_hat(x, y):
 
 def sdl_hats(axes):
     """{hat abs code: SDL hat number} for the hat pairs SDL treats as digital."""
-    hats, number = {}, 0
+    hats = {}
+    number = 0
     for code in range(HAT_FIRST, HAT_LAST + 1, 2):
         if _digital_hat(axes.get(code), axes.get(code + 1)):
             for c in (code, code + 1):
@@ -142,7 +150,8 @@ def candidates(answers, nodes):
     node = pad_node(answers, nodes)
     if node is None:
         return None, None, ["no step was answered: no candidate configs"]
-    num, notes = numbering(node), []
+    num = numbering(node)
+    notes = []
     ra = ["# Candidate RetroArch autoconfig from Button Reader's guided steps (by position).",
           "# Check it before use: RetroArch's udev driver matches it by input_device.",
           'input_driver = "udev"', f'input_device = "{node.name}"',
@@ -156,7 +165,10 @@ def candidates(answers, nodes):
         if short != node.short:
             notes.append(f"{slot} answered on {short}, not {node.short}: left out of both")
             continue
-        what = key_name(control[1]) if control[0] == EV_KEY else f"{abs_name(control[1])} {'+' if control[2] > 0 else '-'}"
+        if control[0] == EV_KEY:
+            what = key_name(control[1])
+        else:
+            what = f"{abs_name(control[1])} {'+' if control[2] > 0 else '-'}"
         ra_value = _ra_value(control, num)
         if ra_bind and ra_value:
             ra.append(f"# {slot.lower()}: {control[1]} {what}")

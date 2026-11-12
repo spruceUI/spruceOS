@@ -3,7 +3,10 @@ for a key, or (EV_ABS, code, +1 or -1) for a hat direction or a trigger pushed t
 """
 import os
 
-EV_SYN, EV_KEY, EV_ABS, EV_SW = 0, 1, 3, 5
+EV_SYN = 0
+EV_KEY = 1
+EV_ABS = 3
+EV_SW = 5
 
 KEY_NAMES = {
     1: "KEY_ESC", 14: "KEY_BACKSPACE", 15: "KEY_TAB", 18: "KEY_E", 20: "KEY_T", 28: "KEY_ENTER",
@@ -27,7 +30,8 @@ ABS_NAMES = {0: "ABS_X", 1: "ABS_Y", 2: "ABS_Z", 3: "ABS_RX", 4: "ABS_RY", 5: "A
              21: "ABS_HAT2Y", 22: "ABS_HAT3X", 23: "ABS_HAT3Y", 40: "ABS_MISC", 47: "ABS_MT_SLOT",
              53: "ABS_MT_POSITION_X", 54: "ABS_MT_POSITION_Y", 57: "ABS_MT_TRACKING_ID"}
 SW_NAMES = {0: "SW_LID", 2: "SW_HEADPHONE_INSERT", 4: "SW_MICROPHONE_INSERT", 6: "SW_LINEOUT_INSERT"}
-HAT_FIRST, HAT_LAST = 16, 23
+HAT_FIRST = 16
+HAT_LAST = 23
 KEY_POWER = 116
 
 # Picture slots: (slot, cfg variable, PyUI ControllerInput). The cfg names positions (A right,
@@ -152,7 +156,9 @@ class Names:
         self.env = env
         self.pyui = dict(pyui_controls or {})   # control -> ControllerInput name
         self.pyui_sticks = dict(pyui_sticks or {})  # abs code -> (stick, "x"/"y", sign of +)
-        self.cfg_var, self.slot, self.absent = {}, {}, set()
+        self.cfg_var = {}
+        self.slot = {}
+        self.absent = set()
         for slot, var, _pyui in SLOTS:
             spec = cfg_spec(var, env)
             if spec == ABSENT:
@@ -167,7 +173,8 @@ class Names:
                 self.slot[control] = slot
         self.sticks = {}  # stick -> {"x": (axis, sign), "y": (axis, sign), "vars": (...)}
         for stick, var_x, var_y, _dx, _dy in STICKS:
-            x, y = stick_axis(cfg_spec(var_x, env)), stick_axis(cfg_spec(var_y, env))
+            x = stick_axis(cfg_spec(var_x, env))
+            y = stick_axis(cfg_spec(var_y, env))
             for code, (pstick, axis, psign) in self.pyui_sticks.items():
                 if pstick == stick and axis == "x" and x is None:
                     x = (code, psign)
@@ -210,7 +217,8 @@ def pyui_tables(controller_interface=None, device=None):
     """PyUI's tables, {control: ControllerInput name} and {abs code: stick role}, read from the
     provider's static dicts (never calling stateful providers); dArkMoss's L3/R3 from its fallback.
     """
-    controls, sticks = {}, {}
+    controls = {}
+    sticks = {}
     provider = getattr(controller_interface, "mapping_provider", None)
     tables = [getattr(provider, "key_mappings", None)]
     try:
@@ -221,7 +229,8 @@ def pyui_tables(controller_interface=None, device=None):
         if not isinstance(table, dict):
             continue
         for event, results in table.items():
-            etype, code = getattr(event, "event_type", None), getattr(event, "code", None)
+            etype = getattr(event, "event_type", None)
+            code = getattr(event, "code", None)
             value = signed(getattr(event, "value", 0) or 0)
             for result in results or []:
                 state = getattr(getattr(result, "key_state", None), "name", "")
@@ -236,9 +245,11 @@ def pyui_tables(controller_interface=None, device=None):
         controls.setdefault((EV_KEY, code, 1), getattr(pyui, "name", str(pyui)))
     axes = getattr(provider, "stick_axes", None) or getattr(provider, "STICK_AXES", None) or {}
     for code, axis in axes.items():
-        low, high = (getattr(axis, "left", None), getattr(axis, "right", None))
+        low = getattr(axis, "left", None)
+        high = getattr(axis, "right", None)
         if low is None:
-            low, high = getattr(axis, "up", None), getattr(axis, "down", None)
+            low = getattr(axis, "up", None)
+            high = getattr(axis, "down", None)
         role = PYUI_STICK.get(getattr(high, "name", ""))
         if role:
             sticks[code] = role

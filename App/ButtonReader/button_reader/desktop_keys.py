@@ -35,7 +35,8 @@ class DesktopKeyboard(PipeNode):
         self.quit = False
 
     def pump(self):
-        sdl2, event = self.sdl2, self.sdl2.SDL_Event()
+        sdl2 = self.sdl2
+        event = self.sdl2.SDL_Event()
         while sdl2.SDL_PollEvent(ctypes.byref(event)):
             if event.type == sdl2.SDL_QUIT:
                 self.quit = True

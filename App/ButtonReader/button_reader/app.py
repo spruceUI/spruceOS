@@ -8,9 +8,9 @@ import select
 import time
 
 from button_reader import VERSION, evdev, hardware, picture
-from button_reader.names import (EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS,
-                                 STICKS, SW_NAMES, Names, abs_name, cfg_spec, face_print_text, face_prompt,
-                                 pyui_tables, sign, spec_control, stick_axis)
+from button_reader.names import EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS, STICKS, SW_NAMES
+from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, pyui_tables, sign, spec_control
+from button_reader.names import stick_axis
 
 EXIT_HOLD = 10.0
 COUNTDOWN_AFTER = 3.0
@@ -47,7 +47,10 @@ class Pad:
 
     def __init__(self, names):
         self.names = names
-        self.values, self.extremes, self.info, self.pressed = {}, {}, {}, {}
+        self.values = {}
+        self.extremes = {}
+        self.info = {}
+        self.pressed = {}
         self.push = {}  # (short, axis) -> directions that count as a press (triggers)
         self.touch = set()  # nodes with multitouch axes: their ABS_X/Y are a touchscreen
         self.rest = {}  # (short, axis) -> value when opened: an unmapped trigger rests off-centre
@@ -84,7 +87,8 @@ class Pad:
         info = self.info.get((short, axis))
         if not info or info["max"] - info["min"] < 2:
             return 0.0
-        mid, half = (info["max"] + info["min"]) / 2.0, (info["max"] - info["min"]) / 2.0
+        mid = (info["max"] + info["min"]) / 2.0
+        half = (info["max"] - info["min"]) / 2.0
         return (self.values.get((short, axis), mid) - mid) / half
 
     def moved(self, short, axis):
@@ -119,7 +123,8 @@ class Pad:
             axis = (short, code)
             self.values[axis] = value
             low_high = self.extremes.setdefault(axis, [value, value])
-            low_high[0], low_high[1] = min(low_high[0], value), max(low_high[1], value)
+            low_high[0] = min(low_high[0], value)
+            low_high[1] = max(low_high[1], value)
             kind = self.kind(short, code)
             if kind not in ("hat", "trigger"):
                 return [("axis", axis)]
@@ -156,10 +161,13 @@ class Session:
             aliases = ", ".join(device.get_device_names())
         except Exception:
             pass
-        self.device_desc = f"{type(device).__name__ if device is not None else 'none'}" + (f" ({aliases})" if aliases else "")
+        self.device_desc = type(device).__name__ if device is not None else "none"
+        if aliases:
+            self.device_desc += f" ({aliases})"
         self.log = log or logging.getLogger("ButtonReader")
         self.roots = roots or hardware.Roots()
-        self.clock, self.screen = clock, screen
+        self.clock = clock
+        self.screen = screen
         self.report_dir = report_dir or os.path.join(APP_DIR, "reports")
         self.open_errors = []
         if nodes is None:
@@ -171,22 +179,40 @@ class Session:
         self.infos, self.consumers, self.dt = hardware.inventory(self.nodes, self.roots)
         pad_paths = [getattr(controller_interface, "event_path", None), self.env.get("EVENT_PATH_READ_INPUTS_SPRUCE")]
         self.pad_paths = {os.path.realpath(p) for p in pad_paths if p and os.path.exists(p)}
-        self.exit_hold, self.countdown_after, self.start_window = EXIT_HOLD, COUNTDOWN_AFTER, START_WINDOW
-        self.step_timeout, self.settle_max, self.release_wait = STEP_TIMEOUT, SETTLE_MAX, RELEASE_WAIT
-        self.settle_quiet, self.rest_since = SETTLE_QUIET, None
+        self.exit_hold = EXIT_HOLD
+        self.countdown_after = COUNTDOWN_AFTER
+        self.start_window = START_WINDOW
+        self.step_timeout = STEP_TIMEOUT
+        self.settle_max = SETTLE_MAX
+        self.release_wait = RELEASE_WAIT
+        self.settle_quiet = SETTLE_QUIET
+        self.rest_since = None
         self.started = self.clock()
-        self.mode, self.mode_since = "start", self.started
-        self.verbose, self.report, self.report_path = False, None, None
-        self.steps, self.step_i, self.phase, self.phase_since = [], 0, "settle", self.started
-        self.step_results, self.answers, self.last_record = [], {}, None
-        self.recent, self.logged_axis, self._ranked, self.failed = [], {}, [], set()
-        self.done, self.exit_reason, self.dirty = False, None, True
+        self.mode = "start"
+        self.mode_since = self.started
+        self.verbose = False
+        self.report = None
+        self.report_path = None
+        self.steps = []
+        self.step_i = 0
+        self.phase = "settle"
+        self.phase_since = self.started
+        self.step_results = []
+        self.answers = {}
+        self.last_record = None
+        self.recent = []
+        self.logged_axis = {}
+        self._ranked = []
+        self.failed = set()
+        self.done = False
+        self.exit_reason = None
+        self.dirty = True
 
     # --- logging
 
     def log_inventory(self):
-        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {self.platform} ({self.device_desc}), "
-                      f"{face_print_text(self.platform)}")
+        self.log.info(f"Button Reader {VERSION}: {len(self.nodes)} input nodes on {self.platform} "
+                      f"({self.device_desc}), {face_print_text(self.platform)}")
         for info in self.infos:
             node = info.node
             self.log.info(f"Button Reader: {info.summary()}")
@@ -223,7 +249,8 @@ class Session:
         if etype == EV_ABS and self.report:
             info = self.pad.info.get((node.short, code)) or {"min": 0, "max": 8}
             step = max((info["max"] - info["min"]) / 8.0, 1)
-            if HAT_FIRST <= code <= HAT_LAST or abs(value - self.logged_axis.get((node.short, code), info.get("value", 0))) >= step:
+            logged = self.logged_axis.get((node.short, code), info.get("value", 0))
+            if HAT_FIRST <= code <= HAT_LAST or abs(value - logged) >= step:
                 self.logged_axis[(node.short, code)] = value
                 self.event_line(f"{node.short} ABS {abs_name(code)} {value}")
         for kind, item in self.pad.feed(node, etype, code, value, now):
@@ -254,7 +281,8 @@ class Session:
     def withdraw_chord_answer(self, now):
         """The chord's first key may have just answered a step: that answer was the exit, not a test."""
         last = self.last_record
-        if not last or now - last[0] > 0.6 or last[2] not in set(self.names.controls_of("SELECT") + self.names.controls_of("START")):
+        chord = set(self.names.controls_of("SELECT") + self.names.controls_of("START"))
+        if not last or now - last[0] > 0.6 or last[2] not in chord:
             return
         _t, role, _control, previous = last
         self.step_results.pop()
@@ -268,7 +296,8 @@ class Session:
 
     def chord_down(self):
         held = {c for _s, c in self.pad.pressed}
-        select_controls, start_controls = self.names.controls_of("SELECT"), self.names.controls_of("START")
+        select_controls = self.names.controls_of("SELECT")
+        start_controls = self.names.controls_of("START")
         return bool(select_controls and start_controls and held & set(select_controls) and held & set(start_controls))
 
     def stick_axes(self, stick):
@@ -321,8 +350,12 @@ class Session:
             self.log.warning(f"Button Reader: no report ({error}); the steps still run")
             self.report = None
         count = self.env.get("DEVICE_NUM_ANALOG_STICKS", "")
-        sticks = int(count) if count.isdigit() else sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
-        names, steps = self.names, []
+        if count.isdigit():
+            sticks = int(count)
+        else:
+            sticks = sum(1 for s in ("LEFT", "RIGHT") if any(self.stick_axes(s).values()))
+        names = self.names
+        steps = []
         for slot, prompt in KEY_STEPS:
             if slot in names.absent or (slot == "HOME" and not names.controls_of("HOME")):
                 continue
@@ -334,8 +367,12 @@ class Session:
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
             var = dict((s, (vx, vy)) for s, vx, vy, _dx, _dy in STICKS)[stick][0 if axis == "x" else 1]
             steps.append(("stick", role, prompt, var, stick_axis(cfg_spec(var, self.env))))
-        self.steps, self.step_i = steps, 0
-        self.mode, self.mode_since, self.phase, self.phase_since = "steps", now, "settle", now
+        self.steps = steps
+        self.step_i = 0
+        self.mode = "steps"
+        self.mode_since = now
+        self.phase = "settle"
+        self.phase_since = now
         self.log.info(f"Button Reader: full diagnostic, {len(steps)} guided steps, report {self.report_path}")
         if not steps:
             self.mode = "picture"
@@ -360,9 +397,12 @@ class Session:
         self.event_line(f"step {self.step_i + 1} {verdict}: {prompt}: expected {want}, got {got}")
         self.log.info(f"Button Reader: step {verdict}: {prompt}: expected {want}, got {got}")
         self.step_i += 1
-        self.phase, self.phase_since, self.dirty = "settle", now, True
+        self.phase = "settle"
+        self.phase_since = now
+        self.dirty = True
         if self.step_i >= len(self.steps):
-            self.mode, self.mode_since = "picture", now
+            self.mode = "picture"
+            self.mode_since = now
 
     def tick_steps(self, now):
         if self.phase == "settle":
@@ -372,7 +412,10 @@ class Session:
                 self.rest_since = now
             quiet = self.rest_since is not None and now - self.rest_since >= self.settle_quiet
             if quiet or now - self.phase_since > self.settle_max:
-                self.phase, self.phase_since, self.dirty, self.rest_since = "ask", now, True, None
+                self.phase = "ask"
+                self.phase_since = now
+                self.dirty = True
+                self.rest_since = None
                 self.event_line(f"step {self.step_i + 1}: {self.steps[self.step_i][2]}")
             return
         kind, role, _prompt, _var, _expected = self.steps[self.step_i]
@@ -389,17 +432,23 @@ class Session:
     # --- exits
 
     def longest_hold(self, now):
-        held = [(now - since, control) for (_s, control), since in self.pad.pressed.items() if not self.is_power(control)]
+        held = [(now - since, control) for (_s, control), since in self.pad.pressed.items()
+                if not self.is_power(control)]
         return max(held) if held else (0.0, None)
 
     def begin_exit(self, reason, now):
-        self.mode, self.mode_since, self.exit_reason, self.dirty = "leaving", now, reason, True
+        self.mode = "leaving"
+        self.mode_since = now
+        self.exit_reason = reason
+        self.dirty = True
         self.log.info(f"Button Reader: exit ({reason})")
         self.event_line(f"exit: {reason}")
 
     def tick(self, now):
         if self.mode == "start" and now - self.mode_since >= self.start_window:
-            self.mode, self.mode_since, self.dirty = "picture", now, True
+            self.mode = "picture"
+            self.mode_since = now
+            self.dirty = True
         elif self.mode == "steps":
             self.tick_steps(now)
         if self.mode == "leaving":
@@ -472,10 +521,12 @@ class Session:
             if self.phase == "settle":
                 s.prompt = "Let go of everything"
             else:
-                s.prompt, s.target = f"{self.step_i + 1}/{len(self.steps)}: {prompt}", role
+                s.prompt = f"{self.step_i + 1}/{len(self.steps)}: {prompt}"
+                s.target = role
                 s.prompt_color = picture.TARGET
         elif self.mode == "leaving":
-            s.prompt, s.overlay = "Let go of the buttons", "Leaving"
+            s.prompt = "Let go of the buttons"
+            s.overlay = "Leaving"
         else:
             s.prompt = "Press anything"
             if self.step_results:
@@ -535,7 +586,8 @@ class Session:
                 if self.screen is not None:
                     if (self.dirty and now - last_draw >= MIN_FRAME) or now - last_draw > REDRAW_SECONDS:
                         self.screen.show(self.scene(now), self.footer(now))
-                        self.dirty, last_draw = False, now
+                        self.dirty = False
+                        last_draw = now
                     self.screen.idle(now)
         finally:
             self.close()
@@ -565,8 +617,10 @@ class PyUiCanvas:
         from display.render_mode import RenderMode
         self.D = Display
         small = min((FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, FontPurpose.LIST), key=Display.get_line_height)
-        big = FontPurpose.MESSAGE if Display.get_line_height(FontPurpose.MESSAGE) <= 1.8 * Display.get_line_height(small) \
-            else FontPurpose.LIST
+        if Display.get_line_height(FontPurpose.MESSAGE) <= 1.8 * Display.get_line_height(small):
+            big = FontPurpose.MESSAGE
+        else:
+            big = FontPurpose.LIST
         self.fonts = {"small": small, "normal": FontPurpose.LIST, "big": big}
         self.align = {"center": RenderMode.MIDDLE_CENTER_ALIGNED, "left": RenderMode.MIDDLE_LEFT_ALIGNED}
 
@@ -588,11 +642,14 @@ class PyUiScreen:
     def __init__(self, device, desktop=False):
         from controller.controller import Controller
         from display.display import Display
-        self.D, self.C = Display, Controller
-        self.w, self.h = device.screen_width(), device.screen_height()
+        self.D = Display
+        self.C = Controller
+        self.w = device.screen_width()
+        self.h = device.screen_height()
         self.canvas = PyUiCanvas()
         # On the desktop clear_input_queue flushes SDL's key events, which the app reads itself.
-        self.clear_queue, self.cleared = not desktop, 0.0
+        self.clear_queue = not desktop
+        self.cleared = 0.0
         self.after_present = None  # host tests capture frames here
 
     def show(self, scene, footer):
