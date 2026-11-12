@@ -29,7 +29,10 @@
         "mupen64plus_next"
       ],
       "selected": "mupen64plus-standalone",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_A30": {
       "display": "Emulator",
