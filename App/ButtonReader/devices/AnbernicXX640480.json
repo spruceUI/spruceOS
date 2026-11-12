@@ -21,13 +21,13 @@
       "kind": "joypad",
       "node": "ANBERNIC-keys",
       "from": "measured: the lab capturesAnbernicXX640480-20260921.txt",
-      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Pro, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Pro and RG35XX H, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
     },
     "vol": {
       "kind": "gpio-keys",
       "node": "dierct-keys-polled",
       "from": "matrix",
-      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Pro nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
+      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Pro and RG35XX H nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
     },
     "power": {
       "kind": "pmic",
@@ -114,14 +114,14 @@
     "VOL_UP": {
       "code": "1 115",
       "source": "pad",
-      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro)",
-      "note": "on the RG35XX Pro the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX H and RG40XX H are unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
     },
     "VOL_DOWN": {
       "code": "1 114",
       "source": "pad",
-      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro)",
-      "note": "on the RG35XX Pro the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX H and RG40XX H are unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
+      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
     },
     "POWER": {
       "code": "1 116",
@@ -163,7 +163,8 @@
     "controller-matrix.json",
     "h700-baseos-deep-dive.md",
     "unittest/tests/test_rg28xx_diagnostic.py",
-    "button-reader-AnbernicXX640480-1.txt"
+    "button-reader-AnbernicXX640480-1.txt",
+    "button-reader-AnbernicXX640480-2.txt"
   ],
   "notes": [
     "SPRUCE_DEVICE_NAME is computed at runtime; all three named members have their own arm in AnbernicXXCommon.cfg: rg35xxh -> \"Anbernic RG35XX H\", rg35xxpro -> \"Anbernic RG35XX Pro\", rg40xxh -> \"Anbernic RG40XX H\".",

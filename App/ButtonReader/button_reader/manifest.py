@@ -17,6 +17,11 @@ SLOT_VARS.update({"FN_LEFT": "FN_KEY_LEFT", "FN_RIGHT": "FN_KEY_RIGHT"})
 STICK_VARS = {"LEFT_STICK": ("STICK_RIGHT", "STICK_DOWN"), "RIGHT_STICK": ("STICK_RIGHT_2", "STICK_DOWN_2")}
 FN_CLICK = {"FN_LEFT": "L3", "FN_RIGHT": "R3"}  # where a cfg's Fn key shares the click's code (the Brick)
 UNKNOWN = "Unknown"
+FEED_GROUPS = [("face buttons", ("BOTTOM", "RIGHT", "TOP", "LEFT")),
+               ("D-pad", ("DPAD_UP", "DPAD_DOWN", "DPAD_LEFT", "DPAD_RIGHT"))]
+FEED_NAMES = {"SELECT": "Select", "START": "Start", "MENU": "Menu", "HOME": "Home", "VOL_UP": "VOL+",
+              "VOL_DOWN": "VOL-", "POWER": "Power", "LEFT_STICK": "left stick", "RIGHT_STICK": "right stick",
+              "FN_SWITCH": "Fn switch", "FN_LEFT": "left Fn key", "FN_RIGHT": "right Fn key", "LID": "lid"}
 
 
 class Manifest:
@@ -80,6 +85,17 @@ class Manifest:
 
     def fed_by(self, daemon):
         return [sid for sid, s in self.sources.items() if s.get("fed_by") == daemon]
+
+    def feeds(self, sid):
+        """What a source carries on this unit, short ("face buttons, D-pad, L1, VOL+"), or "nothing here"."""
+        slots = [s for s in ALL_SLOTS if self.control(s).get("source") == sid and self.has(s) is not False]
+        names = []
+        for label, group in FEED_GROUPS:
+            if all(g in slots for g in group):
+                names.append(label)
+                slots = [s for s in slots if s not in group]
+        names += [FEED_NAMES.get(s, s) for s in slots]
+        return ", ".join(names) if names else "nothing here"
 
     def over_cfg(self, slot):
         """The stick's manifest entry when it says the hardware's axes win over the cfg's (over_cfg), else None."""

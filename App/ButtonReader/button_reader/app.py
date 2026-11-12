@@ -275,7 +275,8 @@ class Session:
         return f"no manifest for {self.platform}: rules from the cfg" + (f" ({m.error})" if m.error else "")
 
     def source_lines(self):
-        """Each manifest source and what stands for it here: the node(s) matching its name, the daemon, the GPIO."""
+        """Each manifest source, what stands for it here (the node(s) matching its name, the daemon, the GPIO) and
+        the controls it feeds."""
         m = self.manifest
         if not m.known:
             return []
@@ -284,7 +285,7 @@ class Session:
             kind = src.get("kind", "?")
             if m.node_names(sid):
                 found = [n.short for n in self.nodes if m.matches(sid, n.name)]
-                out.append(f"{sid} ({kind}) {m.node_names(sid)[0]}: {', '.join(found) if found else 'NOT FOUND'}")
+                text = f"{sid} ({kind}) {m.node_names(sid)[0]}: {', '.join(found) if found else 'NOT FOUND'}"
             elif kind == "uart":
                 pids = []
                 if self.joystick is not None and src.get("fed_by") == "joystickinput":
@@ -293,16 +294,17 @@ class Session:
                     except OSError:
                         pass
                 seen = f"pid {', '.join(map(str, pids))}" if pids else "not running"
-                out.append(f"{sid} (uart) {src.get('device', '?')} via {src.get('fed_by', '?')}: {seen}")
+                text = f"{sid} (uart) {src.get('device', '?')} via {src.get('fed_by', '?')}: {seen}"
             elif kind == "gpio":
                 sw = self.switch
                 if sw is not None and sw.readable:
                     seen = f"reads {sw.value}"
                 else:  # None: the first read (a short sh run) hasn't come back yet
                     seen = "not read yet" if sw is not None and sw.readable is None else "not readable"
-                out.append(f"{sid} (gpio) {src.get('device', '?')}: {seen}")
+                text = f"{sid} (gpio) {src.get('device', '?')}: {seen}"
             else:
-                out.append(f"{sid} ({kind})")
+                text = f"{sid} ({kind})"
+            out.append(f"{text}; feeds {m.feeds(sid)}")
         others = [f"{n.short} {n.name}" for n in self.nodes if not any(m.matches(sid, n.name) for sid in m.sources)]
         if others:
             out.append("not in the manifest: " + ", ".join(others))
