@@ -2,6 +2,7 @@ import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 
+from devices.miyoo.user_config import UserConfig
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
@@ -261,7 +262,7 @@ class Controller:
         now = time.monotonic()
         if(Controller.return_count_of_current_input == 0):
             # This is for initiating turbo mode
-            Controller.hold_delay = PyUiConfig.get_turbo_delay_ms()
+            Controller.hold_delay = UserConfig.get_turbo_delay_ms()
         else:
             # Means we have already returned once
             elapsed = now - Controller.last_hold_return_time
