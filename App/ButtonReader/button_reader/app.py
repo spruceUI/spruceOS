@@ -8,7 +8,9 @@ import select
 import time
 
 from button_reader import VERSION, evdev, hardware, picture
-from button_reader.names import EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS, STICKS, SW_NAMES
+from button_reader.fn_switch import FnSwitch
+from button_reader.names import ABSENT, EV_ABS, EV_KEY, EV_SW, HAT_FIRST, HAT_LAST, KEY_POWER, SLOT_VAR, SLOTS, STICKS
+from button_reader.names import SW_NAMES
 from button_reader.names import Names, abs_name, cfg_spec, face_print_text, face_prompt, pyui_tables, sign, spec_control
 from button_reader.names import stick_axis
 
@@ -146,9 +148,10 @@ class Pad:
 
 class Session:
     def __init__(self, device=None, controller_interface=None, log=None, screen=None, env=None,
-                 nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None):
+                 nodes=None, roots=None, report_dir=None, clock=time.monotonic, desktop=None, switch=None):
         self.env = dict(os.environ if env is None else env)
         self.desktop = desktop
+        self.switch = switch
         if desktop is not None:
             from button_reader.desktop_keys import ENV
             for key, value in ENV.items():
@@ -340,6 +343,8 @@ class Session:
     def start_verbose(self, now):
         from button_reader.report import Report
         self.verbose = True
+        if self.switch is not None:
+            self.switch.wait_first(2.0)  # the header and the steps need to know whether there is one
         try:
             self.report = Report(self.report_dir, self.platform)
             self.report_path = self.report.path
@@ -357,7 +362,9 @@ class Session:
         names = self.names
         steps = []
         for slot, prompt in KEY_STEPS:
-            if slot in names.absent or (slot == "HOME" and not names.controls_of("HOME")):
+            if slot in names.absent:
+                continue
+            if slot == "HOME" and not names.controls_of("HOME") and slot not in names.unlisted:
                 continue
             # A stick click needs its stick (the Minis have none), unless a node reports the cfg's code for it:
             # the Brick's Fn keys send L3/R3.
@@ -370,6 +377,9 @@ class Session:
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
             var = dict((s, (vx, vy)) for s, vx, vy, _dx, _dy in STICKS)[stick][0 if axis == "x" else 1]
             steps.append(("stick", role, prompt, var, stick_axis(cfg_spec(var, self.env))))
+        if self.switch is not None and self.switch.readable:
+            steps.append(("switch", "FN_SWITCH", "Flip the Fn switch, then back (its action runs)",
+                          "device_get_switch_position", None))
         self.steps = steps
         self.step_i = 0
         self.mode = "steps"
@@ -383,17 +393,35 @@ class Session:
     def record(self, answer, now):
         kind, role, prompt, var, expected = self.steps[self.step_i]
         if kind == "key":
-            want = self.names.describe(expected) if expected else "nothing (cfg unset)"
+            if expected:
+                want = self.names.describe(expected)
+            elif cfg_spec(var, self.env) == ABSENT:
+                want = "nothing (cfg: DOESNT_EXIST)"
+            else:
+                want = "nothing (cfg unset)"
             got = f"{answer[0]} {self.names.describe(answer[1])}" if answer else "no input"
             same = bool(answer) and answer[1] == expected
+        elif kind == "switch":
+            want = "a flip"
+            got = f"{answer[1][0]} -> {answer[1][1]}" if answer else "no flip"
+            same = bool(answer)
         else:
             want = f"{abs_name(expected[0])} {'+' if expected[1] > 0 else '-'}" if expected else "nothing (cfg unset)"
             got = (f"{answer[0]} {abs_name(answer[1][1])} {'+' if answer[1][2] > 0 else '-'}" if answer else "no input")
             same = bool(answer) and (answer[1][1], answer[1][2]) == tuple(expected or ())
-        verdict = "NO INPUT" if not answer else "RECORDED" if expected is None else "OK" if same else "DIFFERENT"
+        if not answer:
+            verdict = "NO INPUT"
+        elif kind == "switch":
+            verdict = "OK"
+        elif expected is None:
+            verdict = "RECORDED"
+        else:
+            verdict = "OK" if same else "DIFFERENT"
         self.last_record = (now, role, answer[1] if answer else None, self.answers.get(role))
-        if answer:
+        if answer and kind != "switch":
             self.answers[role] = answer
+        if answer and kind == "key" and role in self.names.unlisted:
+            self.names.slot.setdefault(answer[1], role)  # the picture lights it from now on
         if kind == "stick" or expected is None:
             want += f" ({var})"  # a key's description already names its cfg variable
         self.step_results.append({"prompt": prompt, "var": var, "want": want, "got": got, "verdict": verdict})
@@ -454,7 +482,23 @@ class Session:
         self.log.info(f"Button Reader: exit ({reason})")
         self.event_line(f"exit: {reason}")
 
+    def tick_switch(self, now):
+        if self.switch is None:
+            return
+        asking = self.mode == "steps" and self.phase == "ask" and self.steps[self.step_i][0] == "switch"
+        flip = self.switch.poll(now, 0.3 if asking else 1.0)
+        if not flip:
+            return
+        text = f"Fn switch {flip[0]} -> {flip[1]}"
+        self.log.info(f"Button Reader: {text}")
+        self.event_line(text)
+        self.recent = ([text] + self.recent)[:RECENT_LINES]
+        self.dirty = True
+        if asking:
+            self.record(("switch", flip), now)
+
     def tick(self, now):
+        self.tick_switch(now)
         if self.mode == "start" and now - self.mode_since >= self.start_window:
             self.mode = "picture"
             self.mode_since = now
@@ -554,6 +598,8 @@ class Session:
             s.lines.append((text, picture.BAD if last and last["verdict"] == "DIFFERENT" else picture.GRAY))
         else:
             others = [f"{short} {self.names.describe(c)}" for short, c in self.pad.pressed if c not in self.names.slot]
+            if self.switch is not None and self.switch.readable:
+                raw.append(f"Fn switch {self.switch.value}")
             s.lines.append(("Also held: " + "; ".join(others[:2]), picture.WARN) if others
                            else ("   ".join(raw) or f"{len(self.nodes)} input nodes", picture.GRAY))
         held_for, control = self.longest_hold(now)
@@ -604,6 +650,8 @@ class Session:
         return self.report_path
 
     def close(self):
+        if self.switch is not None:
+            self.switch.close()
         for (short, axis), (low, high) in sorted(self.pad.extremes.items()):
             if self.pad.kind(short, axis) in ("stick", "trigger") and low != high:
                 self.log.info(f"Button Reader: {short} {abs_name(axis)} seen {low}..{high}")
@@ -708,8 +756,9 @@ def run(**_kwargs):
         item.setLevel(logging.INFO)
     try:
         screen = PyUiScreen(device, desktop=desktop is not None)
-        session = Session(device=device, controller_interface=Controller.controller_interface,
-                          log=log, screen=screen, desktop=desktop, report_dir=report_dir(desktop))
+        switch = FnSwitch() if desktop is None else None
+        session = Session(device=device, controller_interface=Controller.controller_interface, log=log,
+                          screen=screen, desktop=desktop, report_dir=report_dir(desktop), switch=switch)
         path = session.run()
         if path:
             shown = os.path.relpath(path, "/mnt/SDCARD") if path.startswith("/mnt/SDCARD/") else path

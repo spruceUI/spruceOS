@@ -58,6 +58,10 @@ FACE_DIRECTION = {"BOTTOM": "SOUTH", "RIGHT": "EAST", "TOP": "NORTH", "LEFT": "W
 FACE_PRINT = {"nintendo": {"BOTTOM": "B", "RIGHT": "A", "TOP": "X", "LEFT": "Y"},
               "xbox": {"BOTTOM": "A", "RIGHT": "B", "TOP": "Y", "LEFT": "X"}}
 XBOX_PRINT = {"XU10"}
+# What a platform has that its cfg doesn't say (user, 11-11): the Brick Pro has a Home key though its cfg says
+# DOESNT_EXIST; the Smart Pro's sticks don't click.
+UNLISTED = {"BrickPro": {"HOME"}}
+NO_STICK_CLICKS = {"SmartPro"}
 # (stick, cfg variable for right, cfg variable for down, default X axis, default Y axis)
 STICKS = [("LEFT", "STICK_RIGHT", "STICK_DOWN", 0, 1), ("RIGHT", "STICK_RIGHT_2", "STICK_DOWN_2", 3, 4)]
 PYUI_STICK = {"LEFT_STICK_LEFT": ("LEFT", "x", -1), "LEFT_STICK_RIGHT": ("LEFT", "x", 1),
@@ -167,6 +171,11 @@ class Names:
             if control is not None:
                 self.cfg_var.setdefault(control, var)
                 self.slot.setdefault(control, slot)
+        platform = env.get("PLATFORM", "")
+        self.unlisted = UNLISTED.get(platform, set())
+        self.absent -= self.unlisted
+        if platform in NO_STICK_CLICKS:
+            self.absent |= {"L3", "R3"}
         for control, pyui in self.pyui.items():
             slot = PYUI_SLOT.get(pyui)
             if slot and control not in self.slot and slot not in self.slot.values():

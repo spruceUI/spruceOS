@@ -54,6 +54,9 @@ class Report:
         self.line(f"date (device clock): {time.strftime('%Y-%m-%d %H:%M:%S')}   uptime: {uptime}")
         self.line(f"platform: {session.platform}   PyUI device: {session.device_desc}")
         self.line(f"face buttons: {face_print_text(session.platform)} (the step prompts name both)")
+        if session.switch is not None:
+            position = session.switch.value if session.switch.readable else "none readable"
+            self.line(f"Fn switch: {position} (spruce's device_get_switch_position)")
         model = (_read("/proc/device-tree/model", "rb") or b"?").rstrip(b"\0").decode("utf-8", "replace")
         self.line(f"model: {model}   kernel: {os.uname().release} {os.uname().machine}")
         for path in ["/sys/firmware/fdt"] + sorted(glob.glob("/boot/*.dtb*")):
