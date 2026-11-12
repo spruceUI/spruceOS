@@ -19,7 +19,7 @@ class JoystickInput:
             if not entry.isdigit():
                 continue
             try:
-                with open(os.path.join(self.proc_root, entry, "comm")) as f:
+                with open(os.path.join(self.proc_root, entry, "comm"), errors="replace") as f:
                     comm = f.read().strip()
             except OSError:
                 continue

@@ -23,8 +23,8 @@ class Roots:
 
 
 def _read(path, mode="rb"):
-    try:
-        with open(path, mode) as fh:
+    try:  # text that isn't UTF-8 (a debugfs gpio label) reads with replacement marks
+        with open(path, mode, **({} if "b" in mode else {"errors": "replace"})) as fh:
             return fh.read()
     except OSError:
         return None

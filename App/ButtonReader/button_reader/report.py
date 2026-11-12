@@ -13,8 +13,9 @@ ENV_PREFIXES = ("B_", "STICK_", "EVENT_PATH_", "DEVICE_NUM_ANALOG_STICKS", "SDL_
 
 
 def _read(path, mode="r"):
+    """A file's contents, or None. Text that isn't UTF-8 (the H700's debugfs gpio) reads with replacement marks."""
     try:
-        with open(path, mode) as fh:
+        with open(path, mode, **({} if "b" in mode else {"errors": "replace"})) as fh:
             return fh.read()
     except OSError:
         return None

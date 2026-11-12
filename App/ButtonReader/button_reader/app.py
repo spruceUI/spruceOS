@@ -890,6 +890,9 @@ class Session:
             try:
                 self.report.line(f"{self.t():9.3f} end ({self.exit_reason or 'stopped'})")
                 self.report.finish(self)
+            except Exception as error:  # what didn't make it into the report must not stop the app
+                self.log.warning(f"Button Reader: report incomplete ({error!r})")
+                self.report.line(f"--- report stopped early: {error!r}")
             finally:
                 self.report.close()
             self.log.info(f"Button Reader: report {self.report_path}")
