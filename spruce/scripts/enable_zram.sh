@@ -16,17 +16,35 @@ load_module() {
   insmod "$file" 2>/dev/null || true
 }
 
-enable_zram="$(get_config_value '.menuOptions."System Settings".useZRAM.selected' "True")"
-if [ "$enable_zram" != "True" ]; then
-  log_message "No ZRAM requested per user settings."
-  /mnt/SDCARD/spruce/scripts/disable_zram.sh
+# Devices without a zram module skip silently.
+if ! device_supports_zram; then
   exit 0
 fi
 
 set -eu
 
-# If zram is already active, do nothing
-if grep -q '^/dev/zram0 ' /proc/swaps 2>/dev/null; then
+# Optional size in GB (e.g. 0.5 or 1). Without it, use 50% of RAM clamped to 128 MiB - 1 GiB.
+REQUEST_GB="${1:-}"
+if [ -n "$REQUEST_GB" ]; then
+  if ! awk -v g="$REQUEST_GB" 'BEGIN { exit !(g ~ /^[0-9]+(\.[0-9]+)?$/ && g + 0 > 0) }'; then
+    echo "Usage: $0 [size_in_GB]   e.g. $0 0.5 or $0 1" >&2
+    exit 2
+  fi
+  # zram rounds disksize up to a whole page, so round the target the same way for comparison.
+  ZRAM_BYTES="$(awk -v g="$REQUEST_GB" 'BEGIN { b = g * 1073741824; printf "%.0f", int((b + 4095) / 4096) * 4096 }')"
+else
+  MEM_KB="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
+  ZRAM_BYTES=$((MEM_KB * 1024 / 2))
+  MIN=$((128 * 1024 * 1024))
+  MAX=$((1024 * 1024 * 1024))
+
+  [ "$ZRAM_BYTES" -lt "$MIN" ] && ZRAM_BYTES=$MIN
+  [ "$ZRAM_BYTES" -gt "$MAX" ] && ZRAM_BYTES=$MAX
+fi
+
+# If zram is already active at the target size, do nothing
+if grep -q '^/dev/zram0 ' /proc/swaps 2>/dev/null &&
+   [ "$(cat /sys/block/zram0/disksize 2>/dev/null)" = "$ZRAM_BYTES" ]; then
   exit 0
 fi
 
@@ -72,7 +90,12 @@ if [ ! -b /dev/zram0 ] || [ ! -d /sys/block/zram0 ]; then
 fi
 
 # Reset any previous configuration.
-swapoff /dev/zram0 2>/dev/null || true
+if grep -q '^/dev/zram0 ' /proc/swaps 2>/dev/null; then
+  swapoff /dev/zram0 || {
+    log_message "Could not turn off active zram swap; leaving it unchanged."
+    exit 1
+  }
+fi
 echo 1 > /sys/block/zram0/reset 2>/dev/null || true
 
 # Select a compressor.
@@ -83,15 +106,6 @@ if [ -w /sys/block/zram0/comp_algorithm ]; then
     echo lzo > /sys/block/zram0/comp_algorithm 2>/dev/null || true
   fi
 fi
-
-# 50% of RAM, clamped to 128 MiB - 1 GiB.
-MEM_KB="$(awk '/MemTotal/ {print $2}' /proc/meminfo)"
-ZRAM_BYTES=$((MEM_KB * 1024 / 2))
-MIN=$((128 * 1024 * 1024))
-MAX=$((1024 * 1024 * 1024))
-
-[ "$ZRAM_BYTES" -lt "$MIN" ] && ZRAM_BYTES=$MIN
-[ "$ZRAM_BYTES" -gt "$MAX" ] && ZRAM_BYTES=$MAX
 
 echo "$ZRAM_BYTES" > /sys/block/zram0/disksize
 

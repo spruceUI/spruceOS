@@ -57,6 +57,11 @@ flag_add 'emulator_launched' --tmp
 
 case $EMU_NAME in
 		
+	"3DS")
+		/mnt/SDCARD/spruce/scripts/enable_zram.sh 1 # ensure 1 GB if possible
+		run_retroarch
+		/mnt/SDCARD/spruce/scripts/enable_zram.sh & # revert to default size
+		;;
 	"A30PORTS")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
 		run_A30_port
