@@ -19,7 +19,7 @@ from button_reader.names import spec_control, stick_axis
 EXIT_HOLD = 10.0
 COUNTDOWN_AFTER = 3.0
 START_WINDOW = 3.0
-STEP_TIMEOUT = 15.0
+STEP_TIMEOUT = 7.0  # a guided step skips itself after this long without an answer
 SETTLE_MAX = 3.0
 SETTLE_QUIET = 0.1  # at rest this long before the next step asks: outlasts a switch's release bounce
 RELEASE_WAIT = 3.0

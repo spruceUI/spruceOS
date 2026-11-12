@@ -15,7 +15,7 @@ shows the kernel's own codes.
   from its position (the XU10), the bottom button can read "A". The first line under the picture
   names the device, or says "Unknown".
 - press any button: the **full diagnostic**. Guided steps ask for each control the device has, by
-  position (each step skips itself after 15 s), then the picture opens. A face step names the
+  position (each step skips itself after 7 s), then the picture opens. A face step names the
   position and the letter printed there: `FACE_NORTH/X`, or `FACE_NORTH/Y` on an Xbox-style
   print (A bottom, B right, X left, Y top). Where spruce's `device_get_switch_position` reads a
   Fn switch (the TrimUIs), the last step asks for a flip: its action runs, so flip it back. At
