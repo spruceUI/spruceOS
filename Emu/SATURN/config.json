@@ -48,7 +48,10 @@
         "yabasanshiro-standalone-hle"
       ],
       "selected": "yabasanshiro_generic_libretro",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_Flip": {
       "display": "Emulator",
@@ -62,7 +65,10 @@
         "ANBERNIC_RGXX"
       ],
       "selected": "yabasanshiro_generic_libretro",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_Pixel2": {
       "display": "Emulator",
@@ -129,7 +135,10 @@
         "DARKMOSS"
       ],
       "selected": "yabadabadoo",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "32-bit"
+      }
     }
   },
   "sortOrder": 5500,
