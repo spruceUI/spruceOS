@@ -359,9 +359,12 @@ class Session:
         for slot, prompt in KEY_STEPS:
             if slot in names.absent or (slot == "HOME" and not names.controls_of("HOME")):
                 continue
-            # A stick click needs its stick (the Minis have none), unless a node reports the cfg's code for it.
-            if sticks < STICK_CLICKS.get(slot, 0) and self.slot_state(slot, set()) != "off":
-                continue
+            # A stick click needs its stick (the Minis have none), unless a node reports the cfg's code for it:
+            # the Brick's Fn keys send L3/R3.
+            if sticks < STICK_CLICKS.get(slot, 0):
+                if self.slot_state(slot, set()) != "off":
+                    continue
+                prompt = self.stickless_prompt(slot)
             prompt = prompt or face_prompt(slot, self.platform)
             steps.append(("key", slot, prompt, SLOT_VAR[slot], spec_control(cfg_spec(SLOT_VAR[slot], self.env))))
         for role, stick, axis, prompt in STICK_STEPS[:2 * min(sticks, 2)]:
@@ -430,6 +433,13 @@ class Session:
             self.record(None, now)
 
     # --- exits
+
+    def stickless_prompt(self, slot):
+        side = "left" if slot == "L3" else "right"
+        fn_key = cfg_spec(f"FN_KEY_{side.upper()}", self.env)
+        if fn_key and fn_key == cfg_spec(SLOT_VAR[slot], self.env):
+            return f"Press the {side} Fn key ({slot})"
+        return f"Press {slot} (no stick on this device)"
 
     def longest_hold(self, now):
         held = [(now - since, control) for (_s, control), since in self.pad.pressed.items()

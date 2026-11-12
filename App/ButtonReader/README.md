@@ -12,7 +12,7 @@ shows the kernel's own codes.
   a board whose print differs from its position (the XU10), the bottom button can read "A".
 - press any button: the **full diagnostic**. Guided steps ask for each control by position
   (each step skips itself after 15 s; a device without sticks, like the Minis, gets no L3/R3
-  step), then the picture opens. A face step names the position
+  step, except the Brick, whose Fn keys send L3/R3), then the picture opens. A face step names the position
   and the letter printed there: `FACE_NORTH/X`, or `FACE_NORTH/Y` on the XU10 (printed
   Xbox-style: A bottom, B right, X left, Y top). At exit a report is written to
   `App/ButtonReader/reports/button-reader-<PLATFORM>-<n>.txt`, with
