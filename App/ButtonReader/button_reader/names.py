@@ -59,7 +59,7 @@ FACE_PRINT = {"nintendo": {"BOTTOM": "B", "RIGHT": "A", "TOP": "X", "LEFT": "Y"}
               "xbox": {"BOTTOM": "A", "RIGHT": "B", "TOP": "Y", "LEFT": "X"}}
 XBOX_PRINT = {"XU10"}
 # What a platform has that its cfg doesn't say (user, 11-11): the Brick Pro has a Home key though its cfg says
-# DOESNT_EXIST; the Smart Pro's sticks don't click, nor does the A30's (no click in its gpio-keys; 2 runs, no input).
+# DOESNT_EXIST; the Smart Pro's and the A30's sticks don't click (the A30's stick uart sends 2 axes, no click bit).
 UNLISTED = {"BrickPro": {"HOME"}}
 NO_STICK_CLICKS = {"SmartPro", "A30"}
 # (stick, cfg variable for right, cfg variable for down, default X axis, default Y axis)
@@ -174,7 +174,8 @@ class Names:
         platform = env.get("PLATFORM", "")
         self.unlisted = UNLISTED.get(platform, set())
         self.absent -= self.unlisted
-        if platform in NO_STICK_CLICKS:
+        self.no_stick_clicks = platform in NO_STICK_CLICKS
+        if self.no_stick_clicks:
             self.absent |= {"L3", "R3"}
         for control, pyui in self.pyui.items():
             slot = PYUI_SLOT.get(pyui)

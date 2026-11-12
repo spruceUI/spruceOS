@@ -9,12 +9,13 @@ shows the kernel's own codes.
 - press nothing: the **picture** opens. The face buttons are laid out by position, along with
   the D-pad, Select/Start/Menu and both sticks with their deflection. The top row reads
   L3, L1 L2, the volume and power keys, R2 R1, R3. A one-stick device (the A30) shows no right
-  stick and no R3. Each control lights while it is held. Labels are PyUI's names for the codes,
+  stick and no R3; where the sticks don't click (the A30, the Smart Pro) L3 and R3 are left out
+  too. Each control lights while it is held. Labels are PyUI's names for the codes,
   so on a board whose print differs from its position (the XU10), the bottom button can read "A".
 - press any button: the **full diagnostic**. Guided steps ask for each control by position
   (each step skips itself after 15 s; a device without sticks, like the Minis, gets no L3/R3
   step, except the Brick, whose Fn keys send L3/R3), then the picture opens. The Smart Pro's and the A30's
-  sticks don't click, so it gets no L3/R3 step either; the Brick Pro gets a Home step though its
+  sticks don't click, so they get no L3/R3 step either; the Brick Pro gets a Home step though its
   cfg says it has none. Where spruce's `device_get_switch_position` reads a Fn switch (the
   TrimUIs), the last step asks for a flip: its action runs, so flip it back. A face step names the position
   and the letter printed there: `FACE_NORTH/X`, or `FACE_NORTH/Y` on the XU10 (printed

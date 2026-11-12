@@ -565,6 +565,8 @@ class Session:
         one_stick = self.env.get("DEVICE_NUM_ANALOG_STICKS", "") == "1"
         if one_stick:
             s.hidden.add("R3")  # a one-stick device (the A30) shows no right stick and no R3
+        if self.names.no_stick_clicks:
+            s.hidden |= {"L3", "R3"}  # nor a stick that doesn't click (the A30, the Smart Pro) its L3/R3
         for stick in ("LEFT", "RIGHT"):
             axes = self.stick_axes(stick)
             info = {"present": any(axes.values()), "hidden": one_stick and stick == "RIGHT"}
