@@ -1,17 +1,17 @@
-"""Settings: badge scope, recent window, spoilers, auto-sync, sync actions, key, cache, about."""
+"""Settings: spoilers, auto-sync, sync actions, key and cache."""
 
 from __future__ import annotations
 
 import dataclasses
 from collections.abc import Callable
 
-from cheevos import __version__
-from cheevos.core.settings import RECENT_DAYS_CHOICES, BadgeScope, DescriptionHiding
+from cheevos.core.settings import DescriptionHiding
 from cheevos.ui import format as fmt
 from cheevos.ui import strings
 from cheevos.ui.context import AppContext
+from cheevos.ui.pyui.primitives import Button
 from cheevos.ui.pyui.views import MenuItem, choose
-from cheevos.ui.screens.common import message, pick
+from cheevos.ui.screens.common import message, pick, prompt
 from cheevos.ui.screens.setup import change_key
 
 
@@ -40,18 +40,6 @@ def _items(ctx: AppContext) -> list[MenuItem]:
     tail = ctx.credentials.api_key[-4:]
     return [
         MenuItem(
-            strings.BADGE_DOWNLOADS,
-            strings.BADGE_SCOPES[settings.badge_scope.value],
-            ctx.icon("image"),
-            key="scope",
-        ),
-        MenuItem(
-            strings.RECENT_WINDOW,
-            fmt.count(strings.RECENT_DAYS, settings.recent_days),
-            ctx.icon("calendar"),
-            key="recent",
-        ),
-        MenuItem(
             strings.HIDE_LOCKED,
             strings.HIDE_LOCKED_HINTS[settings.hide_descriptions.value],
             ctx.icon("lock"),
@@ -71,7 +59,6 @@ def _items(ctx: AppContext) -> list[MenuItem]:
             ctx.icon("chart"),
             key="clear",
         ),
-        MenuItem(strings.ABOUT, strings.ABOUT_HINT, ctx.icon("debug"), key="about"),
     ]
 
 
@@ -141,29 +128,6 @@ def _change_hiding(ctx: AppContext) -> None:
         ctx.update_settings(dataclasses.replace(ctx.settings, hide_descriptions=hiding))
 
 
-def _change_scope(ctx: AppContext) -> None:
-    """Pick the badge download scope.
-
-    Args:
-        ctx: App context.
-    """
-    chosen = pick(strings.BADGE_DOWNLOADS, strings.BADGE_SCOPES, ctx.settings.badge_scope.value)
-    if chosen:
-        ctx.update_settings(dataclasses.replace(ctx.settings, badge_scope=BadgeScope(chosen)))
-
-
-def _change_recent(ctx: AppContext) -> None:
-    """Pick the "recent games" window.
-
-    Args:
-        ctx: App context.
-    """
-    options = {str(days): fmt.count(strings.RECENT_DAYS, days) for days in RECENT_DAYS_CHOICES}
-    chosen = pick(strings.RECENT_WINDOW, options, str(ctx.settings.recent_days))
-    if chosen:
-        ctx.update_settings(dataclasses.replace(ctx.settings, recent_days=int(chosen)))
-
-
 def _toggle(ctx: AppContext, field: str) -> None:
     """Flip a boolean setting.
 
@@ -198,20 +162,16 @@ def _stop_download(ctx: AppContext) -> None:
 
 
 def _clear_images(ctx: AppContext) -> None:
-    """Empty the image cache (images download again when needed).
+    """Ask for confirmation before emptying the image cache.
 
     Args:
         ctx: App context.
     """
-    ctx.media_cache.clear()
-    message(strings.CLEAR_IMAGES, [strings.IMAGES_CLEARED])
-
-
-def _about() -> None:
-    """Show version, license and credits."""
-    lines = list(strings.ABOUT_TEXT)
-    lines[0] = lines[0].format(version=__version__)
-    message(strings.ABOUT, lines)
+    paragraphs = [strings.CLEAR_IMAGES_ASK, strings.CLEAR_IMAGES_EFFECT]
+    hints = [(Button.A, strings.HINT_DELETE), (Button.B, strings.CANCEL)]
+    if prompt(strings.IMAGE_CACHE, paragraphs, hints) is Button.A:
+        ctx.media_cache.clear()
+        message(strings.IMAGE_CACHE, [strings.IMAGES_CLEARED])
 
 
 def show_settings(ctx: AppContext) -> None:
@@ -221,8 +181,6 @@ def show_settings(ctx: AppContext) -> None:
         ctx: App context.
     """
     actions: dict[str, Callable[[], None]] = {
-        "scope": lambda: _change_scope(ctx),
-        "recent": lambda: _change_recent(ctx),
         "spoilers": lambda: _change_hiding(ctx),
         "proxy": lambda: _about_proxy(ctx),
         "auto": lambda: _toggle(ctx, "auto_sync"),
@@ -231,7 +189,6 @@ def show_settings(ctx: AppContext) -> None:
         "stop": lambda: _stop_download(ctx),
         "key": lambda: change_key(ctx),
         "clear": lambda: _clear_images(ctx),
-        "about": _about,
     }
     selected = 0
     while choice := choose(strings.SETTINGS, _items(ctx), selected=selected, full_status=True):

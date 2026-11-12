@@ -56,8 +56,11 @@ def progress_text(status: SyncStatus) -> str:
         return strings.SYNC_RUNNING_ITEM.format(done=done, total=status.total)
     if status.phase is Phase.RECENT and status.done:
         return strings.SYNC_RUNNING_RECENT.format(done=status.done)
-    if status.phase is Phase.MEDIA and status.total:
-        return strings.SYNC_RUNNING_IMAGES.format(done=status.done, total=status.total)
+    if status.phase is Phase.MEDIA:
+        if status.total:
+            return strings.SYNC_RUNNING_IMAGES.format(done=status.done, total=status.total)
+        if status.done:
+            return strings.SYNC_RUNNING_IMAGES_COUNT.format(done=fmt.number(status.done))
     return strings.SYNC_PHASES.get(status.phase.value, "")
 
 
