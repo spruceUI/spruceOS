@@ -20,13 +20,13 @@
       "kind": "joypad",
       "node": "ANBERNIC-keys",
       "from": "measured: the lab capturesAnbernicXX640480NoStick-20260921.txt",
-      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes and FF rumble, all on one event1 node (also enumerates as js0). Its EV_KEY bitmask also advertises KEY_ESC/KEY_VOLUMEDOWN/KEY_VOLUMEUP, but those three never actually fire on this node (controller-matrix C2 / RG28XX diagnostic capture)."
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Plus, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
     },
     "vol": {
       "kind": "gpio-keys",
       "node": "dierct-keys-polled",
       "from": "matrix",
-      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; measured: the lab capturesAnbernicXX640480NoStick-20260921.txt for this bucket's own node)."
+      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Plus nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
     },
     "power": {
       "kind": "pmic",
@@ -119,15 +119,15 @@
     },
     "VOL_UP": {
       "code": "1 115",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "the code (115) matches the cfg's B_VOLUP, but the cfg's only input path is EVENT_PATH_READ_INPUTS_SPRUCE (event1/ANBERNIC-keys); that node advertises KEY_VOLUMEUP but never emits it. The press is measured arriving on event2 (dierct-keys-polled) instead (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus)",
+      "note": "on the RG35XX Plus the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX SP is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
     },
     "VOL_DOWN": {
       "code": "1 114",
-      "source": "vol",
-      "from": "matrix",
-      "cfg_differs": "same as VOL_UP: the code (114) matches the cfg's B_VOLDOWN, but cfg implies event1, while measured delivery is event2 (controller-matrix C2)."
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus)",
+      "note": "on the RG35XX Plus the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG35XX SP is unmeasured, and the RG34XX SP/RG40XX V (other buckets) were seen on dierct-keys-polled by the NextUI port"
     },
     "POWER": {
       "code": "1 116",
@@ -156,7 +156,8 @@
     "the lab capturesAnbernicXX640480NoStick-20260921.txt",
     "controller-matrix.json",
     "h700-baseos-deep-dive.md",
-    "unittest/tests/test_rg28xx_diagnostic.py"
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX640480NoStick-1.txt"
   ],
   "notes": [
     "SPRUCE_DEVICE_NAME is computed at runtime; rg35xxplus has its own arm: SPRUCE_DEVICE_NAME=\"Anbernic RG35XX Plus\". rg35xxsp is NOT one of the named arms (only rgcubexx/rgsp/rg35xxplus/rg35xxh/rg35xxpro/rg40xxh/rg40xxv are), so it falls to the default arm: SPRUCE_DEVICE_NAME=\"Anbernic RG35XXSP\" (upper-cased BASEOS_TARGET, no space) -- note the mismatch against this file's model name \"RG35XX SP\" (with a space); a Button Reader name match that requires an exact substring will miss it.",
