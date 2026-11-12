@@ -182,18 +182,6 @@ class GameConfigMenu:
                     2000,
                 )
 
-    # With raBuild, show only the emulator list the launcher resolves (as get_selected_emulator)
-    def is_inactive_emulator_option(self, name, menu_options, rom_file_path):
-        ra_devices = (menu_options.get("raBuild") or {}).get("devices")
-        if not name.startswith("Emulator") or not ra_devices or not Device.supports_device(ra_devices):
-            return False
-        device = Device.get_device()
-        active = device.get_emulator_arch(menu_options, rom_file_path) or next(
-            (key for key, option in menu_options.items() if key.startswith("Emulator")
-             and any(n in (option.get("devices") or []) for n in device.get_device_names())),
-            "Emulator")
-        return name != active
-
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
         selected = Selection(None, None, 0)
@@ -231,32 +219,47 @@ class GameConfigMenu:
                 for name, option in menu_options.items():
                     devices = option.get("devices")
                     supported_device = Device.supports_device(devices)
-                    if(supported_device and not self.is_inactive_emulator_option(name, menu_options, rom_file_path)):
-                        effective_value = self.game_system.game_system_config.get_effective_menu_selection(name,rom_file_path)
-                        display_name = Language.menu_option_display(option.get('display'))
-                        contains_override = self.game_system.game_system_config.contains_menu_override(name,rom_file_path)
-                        if(contains_override):
-                            display_name = display_name + "*"
-                        
-                        overridable_entries.append(name)
-                        localized_value = Language.menu_option_value(effective_value)
-                        config_list.append(
-                                        GridOrListEntry(
-                                        primary_text=display_name,
-                                        value_text="<    " + localized_value + "    >",
-                                        image_path=None,
-                                        image_path_selected=None,
-                                        description=None,
-                                        icon=None,
-                                        value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override, 
-                                        all_options=option.get('options', []), current_value=effective_value,
-                                            update_value=self.game_system.game_system_config.set_menu_option, update_override=self.game_system.game_system_config.set_menu_override,
-                                            remove_override=self.game_system.game_system_config.delete_menu_override,
-                                            display_name=Language.menu_option_display(option.get('display'))
-                                            : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name)
-                                )
-                        )
 
+                    # Check dependencies
+                    depends_on = option.get("dependsOn", {})
+                    dependencies_met = all(
+                        self.game_system.game_system_config.get_effective_menu_selection(
+                            dependency, rom_file_path
+                        ) == required_value
+                        for dependency, required_value in depends_on.items()
+                    )
+
+                    if not supported_device or not dependencies_met:
+                        continue
+
+                    effective_value = self.game_system.game_system_config.get_effective_menu_selection(name, rom_file_path)
+                    display_name = Language.menu_option_display(option.get('display'))
+                    contains_override = self.game_system.game_system_config.contains_menu_override(name, rom_file_path)
+
+                    if contains_override:
+                        display_name = display_name + "*"
+
+                    overridable_entries.append(name)
+                    localized_value = Language.menu_option_value(effective_value)
+
+                    config_list.append(
+                        GridOrListEntry(
+                            primary_text=display_name,
+                            value_text="<    " + localized_value + "    >",
+                            image_path=None,
+                            image_path_selected=None,
+                            description=None,
+                            icon=None,
+                            value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override,
+                                all_options=option.get('options', []), current_value=effective_value,
+                                update_value=self.game_system.game_system_config.set_menu_option,
+                                update_override=self.game_system.game_system_config.set_menu_override,
+                                remove_override=self.game_system.game_system_config.delete_menu_override,
+                                display_name=Language.menu_option_display(option.get('display'))
+                                : self.change_indexed_array_option(entry_name, input_value, rom_file_path, contains_override, all_options, current_value, update_value, update_override, remove_override, display_name)
+                        )
+                    )                
+                
                 if(overridable_entries):
                     config_list.append(
                         GridOrListEntry(

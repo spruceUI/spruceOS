@@ -1072,6 +1072,9 @@ class DeviceCommon(AbstractDevice):
         """
         return [self.get_device_name()]
 
+    # TODO this and the below are NOT device common. This is spruce specific
+    # And does not apply to ROCKNIX or MUOS -- need to remove but that
+    # Will break some things on spruce so might take some time
     def get_emulator_arch(self, menu_options: dict, rom_file_path=None):
         """The Emulator_64/Emulator_32 key matching the RA build, or None if this device lacks that key."""
         ra_build = menu_options.get("raBuild")
