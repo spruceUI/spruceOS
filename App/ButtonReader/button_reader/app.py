@@ -296,7 +296,10 @@ class Session:
                 out.append(f"{sid} (uart) {src.get('device', '?')} via {src.get('fed_by', '?')}: {seen}")
             elif kind == "gpio":
                 sw = self.switch
-                seen = f"reads {sw.value}" if sw is not None and sw.readable else "not readable"
+                if sw is not None and sw.readable:
+                    seen = f"reads {sw.value}"
+                else:  # None: the first read (a short sh run) hasn't come back yet
+                    seen = "not read yet" if sw is not None and sw.readable is None else "not readable"
                 out.append(f"{sid} (gpio) {src.get('device', '?')}: {seen}")
             else:
                 out.append(f"{sid} ({kind})")
@@ -517,7 +520,11 @@ class Session:
             var = dict((s, (vx, vy)) for s, vx, vy, _dx, _dy in STICKS)[stick][0 if axis == "x" else 1]
             expected = stick_axis(cfg_spec(var, self.env))
             self.expect_from[role] = "cfg"
-            if expected is None:
+            over = m.over_cfg(f"{stick}_STICK")
+            if over and stick_axis(parse_spec(over.get(axis))):  # measured axes win over the cfg's
+                expected = stick_axis(parse_spec(over.get(axis)))
+                self.expect_from[role] = "manifest"
+            elif expected is None:
                 expected = stick_axis(parse_spec(m.control(f"{stick}_STICK").get(axis)))
                 self.expect_from[role] = "manifest" if expected else None
             steps.append(("stick", role, prompt, var, expected))

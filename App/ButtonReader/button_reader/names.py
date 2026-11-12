@@ -176,6 +176,10 @@ class Names:
         for stick, var_x, var_y, _dx, _dy in STICKS:
             x = stick_axis(cfg_spec(var_x, env))
             y = stick_axis(cfg_spec(var_y, env))
+            over = manifest.over_cfg(f"{stick}_STICK") if manifest is not None else None
+            if over:  # the hardware's axes, measured, where the cfg names others
+                x = stick_axis(parse_spec(over.get("x"))) or x
+                y = stick_axis(parse_spec(over.get("y"))) or y
             for code, (pstick, axis, psign) in self.pyui_sticks.items():
                 if pstick == stick and axis == "x" and x is None:
                     x = (code, psign)

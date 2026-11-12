@@ -5,7 +5,7 @@ import fnmatch
 import json
 import os
 
-from button_reader.names import ABSENT, SLOTS, cfg_spec, parse_spec
+from button_reader.names import ABSENT, SLOTS, cfg_spec, parse_spec, stick_axis
 
 SCHEMA = "spruce-button-reader-device/1"
 DEVICES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "devices")
@@ -81,14 +81,27 @@ class Manifest:
     def fed_by(self, daemon):
         return [sid for sid, s in self.sources.items() if s.get("fed_by") == daemon]
 
+    def over_cfg(self, slot):
+        """The stick's manifest entry when it says the hardware's axes win over the cfg's (over_cfg), else None."""
+        control = self.control(slot)
+        return control if slot in STICK_VARS and control.get("over_cfg") else None
+
     def cfg_differences(self, env):
-        """[(slot, manifest code, cfg value)] where both name a code and they differ."""
+        """[(slot, manifest value, cfg value)] where both name a code (or stick axis) and they differ."""
         out = []
         for slot, var in SLOT_VARS.items():
             mine = self.code(slot)
             theirs = cfg_spec(var, env)
             if mine and theirs not in (None, ABSENT) and mine != theirs:
                 out.append((slot, self.control(slot).get("code"), env.get(var)))
+        for slot, (var_x, var_y) in STICK_VARS.items():
+            control = self.control(slot)
+            for axis, var in (("x", var_x), ("y", var_y)):
+                mine = stick_axis(parse_spec(control.get(axis)))
+                theirs = stick_axis(cfg_spec(var, env))
+                if mine and theirs and mine != theirs:
+                    used = " (Button Reader uses the manifest's)" if self.over_cfg(slot) else ""
+                    out.append((f"{slot} {axis}", control.get(axis) + used, env.get(var)))
         return out
 
 

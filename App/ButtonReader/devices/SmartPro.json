@@ -139,10 +139,12 @@
       "from": "cfg"
     },
     "RIGHT_STICK": {
-      "x": "3 4 32767",
-      "y": "3 3 32767",
+      "x": "3 3 32767",
+      "y": "3 4 32767",
       "source": "pad",
-      "from": "cfg"
+      "from": "inferred: button-reader-SmartProS-1.txt (the Smart Pro S, same TrimUI pad); not measured on this model",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 4 32767\" and STICK_DOWN_2 \"3 3 32767\"; on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "inferred from the Smart Pro S (same TrimUI pad), not measured on this model (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
     },
     "FN_SWITCH": {
       "source": "fn-switch",
@@ -160,6 +162,7 @@
   },
   "evidence": [
     "the lab capturesSmartPro-20260921.txt",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-SmartProS-1.txt"
   ]
 }

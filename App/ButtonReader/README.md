@@ -43,8 +43,9 @@ open (as spruce's PICO-8 and OpenBOR launchers do) and back to D-pad mode when i
 lacks; Button Reader's rules come from it (format and provenance in `devices/README.md`). That is
 how the Minis (no sticks) get no L3/R3 step while the Brick's Fn keys do (they send L3/R3), how the
 A30's and the Smart Pro's sticks get no click step, how the Brick Pro gets a Home step its cfg
-denies, and how the Minis' steps check codes their cfg leaves as placeholders. A device without a
-manifest is "Unknown" and gets rules derived from its cfg.
+denies, and how the Minis' steps check codes their cfg leaves as placeholders. On the Flip and the
+TrimUI Smart Pro (S) and Brick Pro, the right stick's measured axes (`over_cfg`) win over the cfg's
+lines. A device without a manifest is "Unknown" and gets rules derived from its cfg.
 
 ## What is logged
 

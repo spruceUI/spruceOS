@@ -154,10 +154,12 @@
       "from": "cfg"
     },
     "RIGHT_STICK": {
-      "x": "3 4 32767",
-      "y": "3 3 32767",
+      "x": "3 3 32767",
+      "y": "3 4 32767",
       "source": "pad",
-      "from": "cfg"
+      "from": "measured: button-reader-SmartProS-1.txt (Smart Pro S)",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 4 32767\" and STICK_DOWN_2 \"3 3 32767\"; on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
     },
     "FN_SWITCH": {
       "source": "fn-switch",
@@ -173,7 +175,8 @@
   "evidence": [
     "the lab capturesSmartProS-20260921.txt",
     "probe-tsps-86.txt",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-SmartProS-1.txt"
   ],
   "notes": [
     "Full sticks with clicks (tester 2026-11-11)."

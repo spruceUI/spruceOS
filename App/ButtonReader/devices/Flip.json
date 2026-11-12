@@ -147,10 +147,12 @@
       "from": "cfg"
     },
     "RIGHT_STICK": {
-      "x": "3 4",
-      "y": "3 3",
+      "x": "3 3",
+      "y": "3 4",
       "source": "pad",
-      "from": "cfg"
+      "from": "measured: button-reader-Flip-3.txt; button-reader-Flip-1.txt (bench and BaseOS Flips)",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 4\" and STICK_DOWN_2 \"3 3\"; on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
     },
     "LID": {
       "source": "lid",
@@ -166,7 +168,9 @@
   "evidence": [
     "probe-flip-94.txt",
     "the lab capturesFlip-20260921.txt",
-    "controller-matrix.json"
+    "controller-matrix.json",
+    "button-reader-Flip-3.txt",
+    "button-reader-Flip-1.txt"
   ],
   "notes": [
     "adc-keys (an unused ADC ladder) and hdmi_cec_key are also present and carry no control.",
