@@ -5,7 +5,7 @@
   "themecolor": "AA1111",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "requiredfiles": [],
-  "extlist": "3ds|cia|zip|7z",
+  "extlist": "3ds|3dsx|z3dsx|elf|axf|cci|zcci|cxi|zcxi|app",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
@@ -28,8 +28,6 @@
   "devices": [
     "TRIMUI_A133P",
     "TRIMUI_SMART_PRO_S",
-    "MIYOO_FLIP",
-    "ANBERNIC_RGXX",
     "OAKMOSS_A133P",
     "RGB30",
     "RGB20SX",
