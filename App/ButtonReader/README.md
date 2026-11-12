@@ -22,7 +22,7 @@ shows the kernel's own codes.
   exit a report is written to `App/ButtonReader/reports/button-reader-<PLATFORM>-<n>.txt`, with
   `-retroarch.cfg` and `-sdl.txt` candidates beside it.
 
-**Device info:** in the picture, hold L1 and R1 together for 10 seconds. The pane lists what the
+**Device info:** in the picture, hold L1 and R1 together for 5 seconds. The pane lists what the
 manifest says and what this unit shows: its controls, each input source and the node standing for
 it, and the display, panel, PyUI's scale, rumble, LEDs, RGB, Bluetooth, Wi-Fi, touch and lid. The
 D-pad scrolls (left and right by a page); any other button closes it. Holding L1 + R1 never counts as the exit
