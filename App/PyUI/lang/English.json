@@ -860,6 +860,8 @@
         "Updating other screen sizes...": "Updating other screen sizes...",
         "Updating {folder}...": "Updating {folder}...",
         "This theme doesn't support Accent Color. Try NextUI Style.": "This theme doesn't support Accent Color. Try NextUI Style.",
-        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Accent Color hit an error - see Saves/spruce/accentcolor log."
+        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Accent Color hit an error - see Saves/spruce/accentcolor log.",
+        "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL": "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL",
+        "(A to type)": "(A to type)"
     }
 }

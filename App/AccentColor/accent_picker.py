@@ -137,7 +137,7 @@ class Picker:
 
     # ---------- drawing ----------
     def draw(self):
-        Display.clear("", bottom_bar_text="<> ADJUST   L1/R1 x16   A APPLY   B CANCEL")
+        Display.clear("", bottom_bar_text=tr("<> ADJUST   L1/R1 x16   A APPLY   B CANCEL"))
         W, px = self.W, self.px
         acc = tuple(self.rgb)
         sel = eng.selected_text_color(acc)
@@ -169,11 +169,13 @@ class Picker:
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_RIGHT_ALIGNED)
             elif name == "HEX":
                 Display.render_text("HEX", label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
-                Display.render_text(eng.to_hex(acc) + ("   (A to type)" if i == self.row else ""), track_x, cy, color,
+                Display.render_text(eng.to_hex(acc) + ("   " + tr("(A to type)") if i == self.row else ""), track_x, cy, color,
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
             else:
-                Display.render_text(tr("PRESET"), label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
-                Display.render_text("< " + tr(PRESETS[self.preset][0]) + " >", track_x + px(20), cy, color,
+                label_w, _ = Display.render_text(tr("PRESET"), label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
+                # after the label, which is wider than "PRESET" in some languages
+                value_x = max(track_x + px(20), label_x + label_w + px(8))
+                Display.render_text("< " + tr(PRESETS[self.preset][0]) + " >", value_x, cy, color,
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
 
         # live preview on the right: a list row highlighted in the accent, plus a hint circle
