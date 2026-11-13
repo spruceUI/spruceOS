@@ -1,0 +1,172 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "AnbernicRGCubeXX",
+  "name": "Anbernic RG CubeXX",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG CubeXX"
+  ],
+  "family": "h700",
+  "base": "BaseOS",
+  "soc": "Allwinner H700",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: cpuinfo CPU part \"*0xd03*\" (H700) -> reads BASEOS_TARGET from /etc/baseos-release; case \"rgcubexx\" -> PLATFORM=AnbernicRGCubeXX",
+  "cfg": "spruce/scripts/platform/h700/AnbernicRGCubeXX.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "ANBERNIC-keys",
+      "from": "measured: the lab capturesAnbernicRGCubeXX-20260824.txt",
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes and FF rumble, all on one event1 node (also enumerates as js0). Its EV_KEY bitmask also advertises KEY_ESC/KEY_VOLUMEDOWN/KEY_VOLUMEUP, but those three never actually fire on this node (controller-matrix C2 / RG28XX diagnostic capture)."
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "dierct-keys-polled",
+      "from": "matrix",
+      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; measured: the lab capturesAnbernicRGCubeXX-20260824.txt for this bucket's own node). On the RG CubeXX (2026-11-12) the volume keys came on ANBERNIC-keys, not here."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesAnbernicRGCubeXX-20260824.txt"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 306",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 309",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicRGCubeXX-1.txt (RG CubeXX run 1)",
+      "note": "on the RG CubeXX the key arrives on ANBERNIC-keys (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicRGCubeXX-1.txt (RG CubeXX run 1)",
+      "note": "on the RG CubeXX the key arrives on ANBERNIC-keys (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 2 4096",
+      "y": "3 3 4096",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 4 4096",
+      "y": "3 5 4096",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "LID": "no lid on any model in this bucket",
+    "HOME": "cfg B_HOME=\"DOESNT_EXIST\"; MENU is spruce's home key on this line (matrix)",
+    "FN_SWITCH": "no latching Fn switch on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_LEFT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_RIGHT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)"
+  },
+  "evidence": [
+    "the lab capturesAnbernicRGCubeXX-20260824.txt",
+    "controller-matrix.json",
+    "h700-baseos-deep-dive.md",
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicRGCubeXX-1.txt"
+  ],
+  "notes": [
+    "SPRUCE_DEVICE_NAME is computed at runtime; rgcubexx has its own named arm in AnbernicXXCommon.cfg: SPRUCE_DEVICE_NAME=\"Anbernic RG CubeXX\" (note the cfg's own string says \"RG CubeXX\", not the retail \"RG Cube\" used as this file's model name -- likely spruce mirroring the XX-suffix convention of its sibling buckets (RG35XX/RG40XX/RG34XX), not a second model. Button Reader's model-name match against SPRUCE_DEVICE_NAME should account for this if it ever needs exact-string matching.",
+    "VOL_KEY_WATCHER_PATH/POWER_KEY_WATCHER_PATH/CONTROLLER_KEY_WATCHER_PATH are exported in AnbernicXXCommon.cfg (event0/event2/event1) but nothing in the h700 tree reads them -- dead variables, not evidence for any control's source (grep of spruce/scripts at spruce_ref 0dccf5276b).",
+    "Display: 720x720, DISPLAY_ROTATION=0 (AnbernicRGCubeXX.cfg).",
+    "models are spruce's own SPRUCE_DEVICE_NAME values (AnbernicXXCommon.cfg); Button Reader matches the unit's name against them"
+  ]
+}

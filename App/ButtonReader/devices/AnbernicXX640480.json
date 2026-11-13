@@ -1,0 +1,177 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "AnbernicXX640480",
+  "name": "Anbernic RG35XX H / RG35XX Pro / RG40XX H",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG35XX H",
+    "Anbernic RG35XX Pro",
+    "Anbernic RG40XX H"
+  ],
+  "family": "h700",
+  "base": "BaseOS",
+  "soc": "Allwinner H700",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: cpuinfo CPU part \"*0xd03*\" (H700) -> reads BASEOS_TARGET from /etc/baseos-release; case \"rg35xxh\"/\"rg35xxpro\"/\"rg40xxh\", and the default (`*`) arm -> PLATFORM=AnbernicXX640480",
+  "cfg": "spruce/scripts/platform/h700/AnbernicXX640480.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "ANBERNIC-keys",
+      "from": "measured: the lab capturesAnbernicXX640480-20260921.txt",
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Pro and RG35XX H, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "dierct-keys-polled",
+      "from": "matrix",
+      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Pro and RG35XX H nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesAnbernicXX640480-20260921.txt"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 306",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 309",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480-1.txt (RG35XX Pro run 1); button-reader-AnbernicXX640480-2.txt (RG35XX H run 2)",
+      "note": "on the RG35XX Pro and RG35XX H the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled; the RG40XX H is unmeasured. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 2 4096",
+      "y": "3 3 4096",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 4 4096",
+      "y": "3 5 4096",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "LID": "no lid on any model in this bucket",
+    "HOME": "cfg B_HOME=\"DOESNT_EXIST\"; MENU is spruce's home key on this line (matrix)",
+    "FN_SWITCH": "no latching Fn switch on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_LEFT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_RIGHT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)"
+  },
+  "evidence": [
+    "the lab capturesAnbernicXX640480-20260921.txt",
+    "controller-matrix.json",
+    "h700-baseos-deep-dive.md",
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX640480-1.txt",
+    "button-reader-AnbernicXX640480-2.txt"
+  ],
+  "notes": [
+    "SPRUCE_DEVICE_NAME is computed at runtime; all three named members have their own arm in AnbernicXXCommon.cfg: rg35xxh -> \"Anbernic RG35XX H\", rg35xxpro -> \"Anbernic RG35XX Pro\", rg40xxh -> \"Anbernic RG40XX H\".",
+    "VOL_KEY_WATCHER_PATH/POWER_KEY_WATCHER_PATH/CONTROLLER_KEY_WATCHER_PATH are exported in AnbernicXXCommon.cfg (event0/event2/event1) but nothing in the h700 tree reads them -- dead variables, not evidence for any control's source (grep of spruce/scripts at spruce_ref 0dccf5276b).",
+    "This platform is also helperFunctions.sh's catch-all default arm (`*) export PLATFORM=\"AnbernicXX640480\"`): any BASEOS_TARGET not named in its case statement lands here too, with SPRUCE_DEVICE_NAME=\"Anbernic $(BASEOS_TARGET upper-cased)\". This manifest only covers the three named, known members; a future unlisted BASEOS_TARGET falling into this bucket needs its own hardware check before trusting this file for it.",
+    "Display: 640x480, DISPLAY_ROTATION=0 (AnbernicXX640480.cfg).",
+    "controller-matrix.json (generated 2026-09-06) and h700-baseos-deep-dive.md predate the current spruce_ref's helperFunctions.sh split: they still fold rg35xxplus, rg35xxsp and rg40xxv into this same AnbernicXX640480 bucket. At spruce_ref 0dccf5276b those three now have their own PLATFORMs (AnbernicXX640480NoStick, AnbernicXX640480OneStick) -- bucket membership in this file was re-derived from helperFunctions.sh directly, not copied from that older table; only the per-model layout/lid facts from it were reused.",
+    "models are spruce's own SPRUCE_DEVICE_NAME values (AnbernicXXCommon.cfg); Button Reader matches the unit's name against them"
+  ]
+}

@@ -1,0 +1,178 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "V20",
+  "name": "Powkiddy V20",
+  "brand": "Powkiddy",
+  "models": [
+    "Powkiddy V20"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device = v20",
+  "cfg": "spruce/scripts/platform/oakmoss/V20.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "Powkiddy V20 Gamepad",
+      "from": "cfg",
+      "note": "oakMOSS's adc-joypad driver (DT adc_gamepad), found by name (POWKIDDY_PAD_NAME, set in V20.cfg). V20.cfg's own comment says this platform is 'UNTESTED, carried from the V90S'; a 2026-11-01 simulated run (not hardware) failed to resolve this node at all, which is consistent with no lab unit yet rather than a wrong name."
+    },
+    "lradc": {
+      "kind": "adc-keys",
+      "node": "sunxi-keyboard",
+      "from": "cfg",
+      "note": "shared PowkiddyCommon.cfg path; hardware-verified on the V90S (same board family) but not on a V20 unit"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "cfg",
+      "note": "shared PowkiddyCommon.cfg pattern match; hardware-verified on the V90S, not on a V20 unit. A 2026-11-01 simulated run resolved power to a node it printed as 'Power Button' instead - likely an artifact of that simulation rather than real hardware, but worth rechecking on a unit."
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg",
+      "note": "V20.cfg's own override, over PowkiddyCommon's lack of L3/R3; the research survey (2026-10-23) places L3/R3 on PD21/PD20 on Knulli's 5.15 kernel only, not in the stock DT - oakMOSS's own kernel/DT wiring for this board is unconfirmed"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg",
+      "note": "see L3; the V20 research survey also flags PD20 as the V90S's rumble PWM pin, repurposed as R3 here - unverified on oakMOSS's own tree"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the 'Mode' button (SDL guide:b10)"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "lradc",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "lradc",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0 32767",
+      "y": "3 1 32767",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3 32767",
+      "y": "3 4 32767",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the research survey flags that Knulli's V20 tree swaps the right stick's two axes vs this ordering - confirm on a unit"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "no switch; device_get_switch_position is the oakMOSS no-op stub (PowkiddyCommon.sh does not override it)",
+    "FN_LEFT": "no Fn key; none declared",
+    "FN_RIGHT": "no Fn key; none declared",
+    "LID": "vertical slab, not a clamshell; no hall node for this board in the stock DT survey (n/a, unlike the V90S's disabled MH248 node)"
+  },
+  "evidence": [
+    "spruce/scripts/platform/oakmoss/V20.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/PowkiddyCommon.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/PowkiddyCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b",
+    "README.md",
+    "stock-dt-v20-v90s.txt",
+    "B233-V20.txt"
+  ],
+  "notes": [
+    "No lab unit of the V20 exists yet as of the 2026-10-23 research and the 2026-11-01 simulated runs; every control here is cfg-only, carried from the V90S by board-family similarity (same stock firmware, same adc-joypad DT pattern) rather than measured. Treat this whole manifest as the weakest-evidenced of the six and re-verify wholesale on first hardware contact.",
+    "A 2026-11-01 simulated test run ('oak-rename'/'oak-rebase') FAILED to resolve the V20's pad node and reported POWER on an unexpected node name; both read as simulation artifacts (no real device attached) rather than hardware facts, but are worth re-checking once a unit exists.",
+    "A hardware run should settle: L3/R3 presence and codes (PD21/PD20 per the kernel survey, vs Knulli's 5.15-only wiring), the right stick's axis order, and whether POWER truly resolves to axp2202-pek."
+  ]
+}

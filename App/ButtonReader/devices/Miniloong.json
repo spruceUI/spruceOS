@@ -1,0 +1,163 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Miniloong",
+  "name": "Miniloong Pocket 1",
+  "brand": "Miniloong",
+  "models": [
+    "Miniloong Pocket 1"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd05 (RK3566) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=Miniloong (or, pre-stamp images, HW_DEVICE containing \"Miniloong\")",
+  "cfg": "spruce/scripts/platform/darkmoss/Miniloong.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "retrogame_joypad",
+      "by_path": "platform-singleadc-joypad-event-joystick",
+      "from": "measured: button-reader-Miniloong-1.txt (dArkMoss 11052026); the lab capturesMiniloong-20260921.txt named it Loong Gamepad",
+      "note": "carries the face buttons, d-pad (as 4 keys), L1/R1/L2/R2, L3, MENU, the stick and FF rumble; dArkMoss 11052026 names it retrogame_joypad, as the cfg's PAD_NAME_CANDIDATES does, and an older image Loong Gamepad (kept as a match). The volume keys are on gpio-keys-vol",
+      "match": [
+        "Loong Gamepad"
+      ]
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "measured: the lab capturesMiniloong-20260921.txt; matrix"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys-vol",
+      "from": "measured: button-reader-Miniloong-1.txt",
+      "note": "VOL+/- (115/114), measured 2026-11-12"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "measured: button-reader-Miniloong-1.txt"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "measured: button-reader-Miniloong-1.txt"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "R3": "single stick (DEVICE_NUM_ANALOG_STICKS=1); cfg declares B_R3=1 318 (BTN_THUMBR) but it never fires on hardware (matrix, conflict L-g)",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "RIGHT_STICK": "1 stick (DEVICE_NUM_ANALOG_STICKS=1)",
+    "FN_SWITCH": "none (matrix)",
+    "FN_LEFT": "none (matrix)",
+    "FN_RIGHT": "none (matrix)",
+    "LID": "none (matrix)"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/Miniloong.cfg",
+    "the lab capturesMiniloong-20260921.txt",
+    "the lab capturesMiniloong-20260911.txt",
+    "controller-matrix.json",
+    "button-reader-Miniloong-1.txt"
+  ],
+  "notes": [
+    "R3 (cfg B_R3=1 318, BTN_THUMBR) never fires on hardware (controller-matrix 2026-09-06, conflict L-g); kept absent here rather than as a dead control, since the device has only one stick (DEVICE_NUM_ANALOG_STICKS=1) and no second stick to click.",
+    "L2/R2 are plain keys (1 312/1 313); the STICK_LEFT_2/RIGHT_2/UP_2/DOWN_2 cfg vars are vestigial on this one-stick device (controller-matrix conflict L-g) and are not treated as a second stick here."
+  ]
+}

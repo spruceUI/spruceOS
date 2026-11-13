@@ -1,0 +1,167 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "RGB20SX",
+  "name": "Powkiddy RGB20SX",
+  "brand": "Powkiddy",
+  "models": [
+    "Powkiddy RGB20SX"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: boots the RGB30 image (RK3566/0xd05 + OS_NAME=DARKMOSS, no distinct SPRUCE_PLATFORM stamp -> PLATFORM defaults to RGB30), then overridden to RGB20SX when /sys/bus/sdio/devices/*/uevent shows SDIO_ID=024C:D723 (the RTL8723DS radio)",
+  "cfg": "spruce/scripts/platform/darkmoss/RGB20SX.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "retrogame_joypad",
+      "by_path": "platform-singleadc-joypad-event-joystick",
+      "from": "derived: same board as the RGB30 (matrix); RGB20SX not separately measured"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "derived: same board as the RGB30 (matrix)"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys",
+      "from": "derived: same board as the RGB30 (matrix)"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default via the inherited RGB30.cfg; the Standard/Swapped setting is read at boot"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default via the inherited RGB30.cfg; the Standard/Swapped setting is read at boot"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 2",
+      "y": "3 3",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/RGB20SX.cfg",
+    "spruce/scripts/platform/darkmoss/RGB30.cfg",
+    "spruce/scripts/platform/darkmoss/RGB20SX.sh",
+    "controller-matrix.json"
+  ],
+  "notes": [
+    "RGB20SX.cfg sources RGB30.cfg wholesale (PLATFORM_MIGRATE_FROM=RGB30) and overrides only SPRUCE_DEVICE_NAME, SYSTEM_JSON and the Fn key: \"It has the FN key the RGB30 lacks, so both stick clicks stay L3/R3\" (fixed MENU=1 316, L3=1 317, R3=1 318, not RGB30's jq-conditional stick-click-as-MENU). No controller-matrix entry or discovery capture exists for the RGB20SX itself in this workspace; everything here is derived from the RGB30 board it shares."
+  ]
+}

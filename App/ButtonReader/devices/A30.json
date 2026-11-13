@@ -1,0 +1,167 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "A30",
+  "name": "Miyoo A30",
+  "brand": "Miyoo",
+  "models": [
+    "Miyoo A30"
+  ],
+  "family": "tina-stock",
+  "base": "stock (Miyoo)",
+  "soc": "Allwinner A33",
+  "arch": "armhf",
+  "identify": "helperFunctions.sh: /proc/cpuinfo contains sun8i",
+  "cfg": "spruce/scripts/platform/tina-stock/A30.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "keys": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys-polled",
+      "from": "measured: button-reader-A30-2.txt",
+      "note": "every button as a keyboard code, MENU = KEY_ESC; spruce reads this node"
+    },
+    "pad": {
+      "kind": "virtual",
+      "node": "MIYOO Pad1",
+      "fed_by": "joypad",
+      "from": "measured: button-reader-A30-2.txt",
+      "note": "an Xbox-style pad joypad builds for RetroArch; it declares 317/318 and RX/RY the hardware lacks"
+    },
+    "stick": {
+      "kind": "uart",
+      "node": null,
+      "fed_by": "joystickinput",
+      "device": "/dev/ttyS2",
+      "modes": {
+        "analog": "SIGUSR1",
+        "keyboard": "SIGUSR2"
+      },
+      "from": "measured: RESULT.txt",
+      "note": "analog mode puts ABS_X/ABS_Y on MIYOO Pad1; keyboard mode (spruce's default under PyUI) turns the stick into D-pad keys on gpio-keys-polled"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp22-supplyer",
+      "from": "measured: button-reader-A30-2.txt"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 29",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "RIGHT": {
+      "code": "1 57",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "TOP": {
+      "code": "1 42",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "LEFT": {
+      "code": "1 56",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "DPAD_UP": {
+      "code": "1 103 1",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "DPAD_DOWN": {
+      "code": "1 108 1",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "DPAD_LEFT": {
+      "code": "1 105 1",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 106 1",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "L1": {
+      "code": "1 15",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "R1": {
+      "code": "1 14",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "L2": {
+      "code": "1 18",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "R2": {
+      "code": "1 20",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "SELECT": {
+      "code": "1 97",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "START": {
+      "code": "1 28",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "MENU": {
+      "code": "1 1",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "keys",
+      "from": "measured: button-reader-A30-2.txt"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "stick",
+      "from": "measured: button-reader-A30-2.txt",
+      "cfg_differs": "the cfg names no STICK_* axes; ABS_X/ABS_Y on MIYOO Pad1 in analog mode, measured"
+    }
+  },
+  "absent": {
+    "L3": "the stick doesn't click: its UART frame carries 2 axes and no click bit, and no GPIO or input event fires (lab probe 2026-11-11); 317 on MIYOO Pad1 is only declared",
+    "R3": "one stick, and it doesn't click",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "RIGHT_STICK": "one stick (DEVICE_NUM_ANALOG_STICKS=1)",
+    "FN_SWITCH": "none (device.sh's device_get_switch_position answers nothing)",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "button-reader-A30-2.txt",
+    "RESULT.txt",
+    "the lab capturesA30-20260921.txt",
+    "controller-matrix.json"
+  ],
+  "notes": [
+    "The stick's measured range (ABS_X -22..200, ABS_Y -64..176, Y at rest ~-20) exceeds its absinfo (-128..128): calibration or joystickinput scaling, not Button Reader (report 2, 2026-11-11)."
+  ]
+}
