@@ -1,0 +1,192 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "BrickPro",
+  "name": "TrimUI Brick Pro",
+  "brand": "TrimUI",
+  "models": [
+    "TrimUI Brick Pro"
+  ],
+  "family": "tina-stock",
+  "base": "stock (TrimUI)",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo contains TG4040",
+  "cfg": "spruce/scripts/platform/tina-stock/BrickPro.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "virtual",
+      "node": "TRIMUI Player1",
+      "fed_by": "trimui_inputd",
+      "from": "measured: the lab capturesBrickPro-20260921.txt",
+      "note": "the pad, MENU and the sticks; spruce reads this node"
+    },
+    "lradc": {
+      "kind": "adc-keys",
+      "node": "sunxi-keyboard",
+      "from": "matrix: derived from the Brick and the Smart Pro, not measured",
+      "note": "the volume keys on the LRADC. On the Brick Pro (2026-11-12) the volume keys came on TRIMUI Player1, not here."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesBrickPro-20260921.txt"
+    },
+    "fn-switch": {
+      "kind": "gpio",
+      "node": null,
+      "device": "gpio243 PH19",
+      "from": "cfg: spruce/scripts/platform/tina-stock/a133p.sh device_get_switch_position",
+      "note": "a latching switch, read through sysfs; a flip runs its action (trimui_scened)"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "3 2 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "3 5 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "HOME": {
+      "code": "1 172",
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2; run 1 the same)",
+      "cfg_differs": "BrickPro.cfg says B_HOME=DOESNT_EXIST; on hardware Home sends 172 KEY_HOMEPAGE on TRIMUI Player1 (PyUI's HOME), measured 2026-11-12"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2)",
+      "note": "on the Brick Pro the key arrives on TRIMUI Player1 (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-BrickPro-2.txt (Brick Pro run 2)",
+      "note": "on the Brick Pro the key arrives on TRIMUI Player1 (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0 32767",
+      "y": "3 1 32767",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3 32767",
+      "y": "3 4 32767",
+      "source": "pad",
+      "from": "inferred: button-reader-SmartProS-1.txt (the Smart Pro S, same TrimUI pad); not measured on this model",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 4 32767\" and STICK_DOWN_2 \"3 3 32767\"; on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "inferred from the Smart Pro S (same TrimUI pad), not measured on this model (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
+    },
+    "FN_SWITCH": {
+      "source": "fn-switch",
+      "read": "device_get_switch_position",
+      "from": "cfg: a133p.sh"
+    },
+    "FN_LEFT": {
+      "code": "1 59",
+      "source": "pad",
+      "from": "cfg FN_KEY_LEFT; matrix: measured KEY_F1 on TRIMUI Player1"
+    },
+    "FN_RIGHT": {
+      "code": "1 60",
+      "source": "pad",
+      "from": "cfg FN_KEY_RIGHT; matrix: measured KEY_F2 on TRIMUI Player1"
+    }
+  },
+  "absent": {
+    "LID": "none"
+  },
+  "evidence": [
+    "the lab capturesBrickPro-20260921.txt",
+    "controller-matrix.json",
+    "button-reader-SmartProS-1.txt",
+    "button-reader-BrickPro-2.txt"
+  ]
+}

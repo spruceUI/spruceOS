@@ -110,8 +110,32 @@ compute_remaining_sleep_time() {
     return 0
 }
 
+# Woken with the lid closed, e.g. by a charger being plugged in: stay up long enough
+# for charger detection to finish, or the device suspends again before it charges.
+# 0 is no wait; a platform that needs one sets it after sourcing this file.
+SLEEP_CHARGER_SETTLE_SECONDS="${SLEEP_CHARGER_SETTLE_SECONDS:-0}"
+
+# 0 once the wait is over with the lid still closed, 1 if the lid opened
+wait_for_charger_to_settle() {
+    [ "$SLEEP_CHARGER_SETTLE_SECONDS" -gt 0 ] || return 0
+    _settle_waited=0
+    while [ "$_settle_waited" -lt $((SLEEP_CHARGER_SETTLE_SECONDS * 2)) ]; do
+        [ "$(device_lid_open)" = "1" ] && return 1
+        sleep 0.5
+        _settle_waited=$((_settle_waited + 1))
+    done
+    log_message "device_continue_sleep: charger status after ${SLEEP_CHARGER_SETTLE_SECONDS}s: $(device_get_charging_status 2>/dev/null)"
+    return 0
+}
+
 device_continue_sleep() {
     log_message "device_continue_sleep: Checking remaining sleep time"
+
+    # The wait counts against the remaining sleep time, so compute that afterwards
+    if ! wait_for_charger_to_settle; then
+        log_message "device_continue_sleep: lid opened, not suspending again"
+        return 0
+    fi
 
     REMAINING="$(compute_remaining_sleep_time)"
     if [ $? -ne 0 ] || [ -z "$REMAINING" ]; then

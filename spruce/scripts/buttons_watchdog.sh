@@ -13,7 +13,7 @@ L3_DOWN=false
 # Map the System Value to MainUI brightness level 
 
 volume_down_bg() {
-    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    trap 'set_volume "$CURR_VOLUME"; exit' TERM
     while true; do
         sleep 0.3
         if [ $CURR_VOLUME -gt 0 ]; then
@@ -24,7 +24,7 @@ volume_down_bg() {
 }
 
 volume_up_bg() {
-    trap 'set_volume "$CURR_VOLUME"' EXIT # This is called when the subprocess is killed
+    trap 'set_volume "$CURR_VOLUME"; exit' TERM
     while true; do
         sleep 0.3
         if [ $CURR_VOLUME -lt 20 ]; then

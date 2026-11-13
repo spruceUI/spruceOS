@@ -1,5 +1,5 @@
 Flycast Xtreme (KMFDManic)
-https://github.com/libretro/flycast
+https://github.com/KMFDManic/morpheuscast_xtreme
 
 Copyright (c) KMFDManic, Flycast contributors
 

@@ -20,7 +20,7 @@ import time
 import urllib.request
 
 VERSION_FILE = "/mnt/SDCARD/spruce/spruce"
-PYUI_CONFIG = "/mnt/SDCARD/App/PyUI/py-ui-config.json"
+USER_CONFIG = "/mnt/SDCARD/Saves/pyui-common.json"
 SHARED_CONFIG = "/mnt/SDCARD/Saves/spruce/shared-system.json"
 ZONEINFO_DIR = "/mnt/SDCARD/spruce/zoneinfo"
 CLOCK_DONE_FLAG = "/tmp/time_sync_done"
@@ -66,7 +66,7 @@ def read_json(path):
 def sync_enabled():
     # Fails open: only an explicit false turns it off, because a wrongly skipped
     # sync leaves every HTTPS feature failing with a certificate error.
-    config = read_json(PYUI_CONFIG)
+    config = read_json(USER_CONFIG)
     return not (isinstance(config, dict) and config.get("syncTimeViaNetwork") is False)
 
 

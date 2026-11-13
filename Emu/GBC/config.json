@@ -23,7 +23,7 @@
         "armgba",
         "gambatte",
         "mgba",
-        "pokedaisy"
+        "pokedaisy_gbc"
       ],
       "selected": "gambatte",
       "overrides": {},

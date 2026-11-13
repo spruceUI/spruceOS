@@ -1,0 +1,162 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Pixel2",
+  "name": "GKD Pixel 2",
+  "brand": "GKD",
+  "models": [
+    "GKD Pixel 2"
+  ],
+  "family": "twig",
+  "base": "twigUI-Next",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) and no OS_NAME=DARKMOSS stamp in /etc/os-release (the dArkMoss branch, Pixel2DarkMoss, is picked only when that stamp is present)",
+  "cfg": "spruce/scripts/platform/twig/Pixel2.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": null,
+      "by_path": "platform-gamekiddy-joypad-event-joystick",
+      "from": "cfg",
+      "note": "gamekiddy-joypad driver; node name not given by this cfg (no PAD_NAME_CANDIDATES), resolved purely by this by-path link"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": null,
+      "by_path": "platform-ff180000.i2c-platform-rk805-pwrkey-event",
+      "from": "cfg"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": null,
+      "by_path": "platform-gpio-keys-event",
+      "from": "cfg"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg",
+      "also": [
+        "rctrl_pressed"
+      ]
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg",
+      "also": [
+        "enter_pressed"
+      ]
+    },
+    "MENU": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg",
+      "also": [
+        "volume up"
+      ]
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg",
+      "also": [
+        "volume down"
+      ]
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "L3": "no L3/R3 and no Fn buttons on the Pixel 2 (tester 2026-11-12); twig Pixel2.cfg still lists B_L3/B_R3 317/318",
+    "R3": "no L3/R3 and no Fn buttons on the Pixel 2 (tester 2026-11-12); twig Pixel2.cfg still lists B_L3/B_R3 317/318",
+    "HOME": "cfg has no B_HOME at all (unlike Pixel2DarkMoss.cfg, which sets it to DOESNT_EXIST explicitly)",
+    "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0); the cfg's STICK_* values are vestigial (see notes)",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "the case's Fn keys are L3/R3 (1 317/1 318)",
+    "FN_RIGHT": "the case's Fn keys are L3/R3 (1 317/1 318)",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/twig/Pixel2.cfg"
+  ],
+  "notes": [
+    "No analog stick (DEVICE_NUM_ANALOG_STICKS=0), but unlike Pixel2DarkMoss.cfg (which sets STICK_LEFT/RIGHT/UP/DOWN=DOESNT_EXIST), this cfg still carries real-looking axis/magnitude values for all four (e.g. STICK_LEFT=\"3 0 -32767\"). Treated as dead/vestigial copy-paste, not a real stick, consistent with DEVICE_NUM_ANALOG_STICKS=0 and with the dArkMoss sibling cfg's cleaner DOESNT_EXIST.",
+    "B_L3/B_R3 (1 317/1 318) are present here with a comment that they \"also log left/right fnkey stuff\": the case's Fn keys and L3/R3 are the same physical buttons. This conflicts with Pixel2DarkMoss.cfg, which sets B_L3/B_R3=DOESNT_EXIST for the same physical GKD Pixel 2 hardware (same gamekiddy-joypad EVENT_PATH). Kept per this platform's own cfg; not reconciled.",
+    "SELECT/START/VOL_UP/VOL_DOWN each carry a secondary \"_2\" signal (B_SELECT_2=rctrl_pressed, B_START_2=enter_pressed, B_VOLUP_2=\"volume up\", B_VOLDOWN_2=\"volume down\"): these are getevent-style textual names helperFunctions.sh matches as a fallback, the same mechanism used on the oakMOSS MagicX boards (XU20/Zero28/Zero40) and the tina-stock/miyoomini platforms, not a second physical signal from the device.",
+    "This cfg exports no B_HOME at all (not even DOESNT_EXIST), unlike every dArkMoss platform cfg in this batch; treated as absent."
+  ]
+}

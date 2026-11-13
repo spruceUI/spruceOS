@@ -1,0 +1,158 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "V90S",
+  "name": "Powkiddy V90S",
+  "brand": "Powkiddy",
+  "models": [
+    "Powkiddy V90S"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device = v90s",
+  "cfg": "spruce/scripts/platform/oakmoss/V90S.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "Powkiddy V90S Gamepad",
+      "from": "measured: refactor-suite-r4.txt",
+      "note": "oakMOSS's adc-joypad driver (DT adc_gamepad), found by name (POWKIDDY_PAD_NAME, set in V90S.cfg). Confirmed resolving to /dev/input/event1 on the lab unit ; all face/d-pad/shoulder/SELECT/START/MENU codes hardware-verified in the 2026-10-30 guided button test."
+    },
+    "lradc": {
+      "kind": "adc-keys",
+      "node": "sunxi-keyboard",
+      "from": "measured: RESULTS.md",
+      "note": "the volume keys, on their own LRADC device per PowkiddyCommon.sh's oakmoss_resolve_event_paths; VOL+/VOL- hardware-verified in the same test"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: refactor-suite-r4.txt",
+      "note": "resolved to /dev/input/event2 on the lab unit; the 2026-10-30 button test's capture list includes this node but the test does not press POWER itself"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "measured: RESULTS.md",
+      "note": "the 'Mode' button (SDL guide:b10)"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "lradc",
+      "from": "measured: RESULTS.md"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "lradc",
+      "from": "measured: RESULTS.md"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "L3": "explicit cfg B_L3=\"DOESNT_EXIST\" (V90S.cfg, after sourcing PowkiddyCommon.cfg); no sticks on this board. The 2026-10-30 hardware test's header states 'no sticks, no L3/R3'",
+    "R3": "explicit cfg B_R3=\"DOESNT_EXIST\"; see L3",
+    "LEFT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0); hardware-confirmed, see L3",
+    "RIGHT_STICK": "0 sticks; see L3",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "no switch; device_get_switch_position is the oakMOSS no-op stub (PowkiddyCommon.sh does not override it)",
+    "FN_LEFT": "no Fn key; none declared",
+    "FN_RIGHT": "no Fn key; none declared",
+    "LID": "clamshell hinge, but spruce does not read a lid on this board: the stock DT carries a disabled MH248 hall node ('hall_para', interrupt PL9) that is unverified as wired, and oakMOSS's device_lid_open (oakMOSSCommon.sh) always returns '1' regardless. Knulli's capability list names 'lid' for the V90S, but no public source shows how lid-close is detected there either."
+  },
+  "evidence": [
+    "RESULTS.md",
+    "refactor-suite-r4.txt",
+    "README.md",
+    "stock-dt-v20-v90s.txt",
+    "spruce/scripts/platform/oakmoss/V90S.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/PowkiddyCommon.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/PowkiddyCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b"
+  ],
+  "notes": [
+    "The strongest-evidenced manifest of the six: a 2026-10-30 guided button test on the lab unit (.82, B233) hardware-verified every control this manifest lists as present, and its header independently confirms no sticks and no L3/R3.",
+    "POWER itself was not pressed in that test (its capture list only shows the node was recorded); treat the code as cfg-only until a run presses it.",
+    "The V90S lid and FF rumble remain the biggest open items per the 2026-10-23 research (needs a unit that shows the hall sensor wired); rumble is out of scope for this manifest (not a Button Reader control)."
+  ]
+}

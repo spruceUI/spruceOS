@@ -1,5 +1,5 @@
 LowRes NX
-https://github.com/nicklockwood/LowRes-NX
+https://github.com/timoinutilis/lowres-nx
 
 Copyright (c) Timo Kloss
 

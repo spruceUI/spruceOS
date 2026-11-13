@@ -57,6 +57,13 @@ flag_add 'emulator_launched' --tmp
 
 case $EMU_NAME in
 		
+	"3DS")
+		/mnt/SDCARD/spruce/scripts/enable_zram.sh 1 # ensure 1 GB if possible
+		set_rotation_for_miniloong_vulkan
+		run_retroarch
+		reset_rotation_for_miniloong_vulkan
+		/mnt/SDCARD/spruce/scripts/enable_zram.sh & # revert to default size
+		;;
 	"A30PORTS")
 		. /mnt/SDCARD/spruce/scripts/emu/lib/ports_functions.sh
 		run_A30_port
@@ -115,7 +122,10 @@ case $EMU_NAME in
 		;;
 
 	"NDS"|"NDSI")
-		if [ "$CORE" = "DSperate-Tate" ]; then
+		if [ "$CORE" = "pokedaisy_ds" ]; then
+			run_retroarch
+			
+		elif [ "$CORE" = "DSperate-Tate" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/dsperate_functions.sh
 			run_dsperate --tate
 
@@ -135,7 +145,10 @@ case $EMU_NAME in
 		;;
 
 	"N64")
-		if [ "$CORE" = "mupen64plus-standalone" ]; then
+		if [ "$CORE" = "mupen64plus-pow2" ]; then
+			. /mnt/SDCARD/spruce/scripts/emu/lib/mupen_functions.sh
+			run_mupen_pow2
+		elif [ "$CORE" = "mupen64plus-standalone" ]; then
 			. /mnt/SDCARD/spruce/scripts/emu/lib/mupen_functions.sh
 			run_mupen_standalone
 		else

@@ -24,11 +24,15 @@
       ],
       "options": [
         "mupen64plus-standalone",
+        "mupen64plus-pow2",
         "km_ludicrousn64_2k22_xtreme_amped",
         "mupen64plus_next"
       ],
       "selected": "mupen64plus-standalone",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_A30": {
       "display": "Emulator",
@@ -72,10 +76,14 @@
         "km_ludicrousn64_2k22_xtreme_amped",
         "parallel_n64",
         "mupen64plus_next",
-        "mupen64plus-standalone"
+        "mupen64plus-standalone",
+        "mupen64plus-pow2"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_32": {
       "display": "Emulator32",
@@ -90,7 +98,10 @@
         "mupen64plus"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "32-bit"
+      }
     },
     "controlMode": {
       "display": "RA: C-button Mode",

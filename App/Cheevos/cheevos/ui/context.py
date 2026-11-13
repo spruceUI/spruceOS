@@ -88,7 +88,7 @@ class AppContext:
         return self.icons / f"{name}.png"
 
     def start_sync(self, *, full: bool = False) -> bool:
-        """Start a background sync with the current settings.
+        """Start a background sync.
 
         Args:
             full: Start "Download every game".
@@ -99,12 +99,7 @@ class AppContext:
         if self.launch_game_id is not None:
             self.details.request(self.launch_game_id, refresh=True)
             return True
-        options = SyncOptions(
-            full=full,
-            badge_scope=self.settings.badge_scope,
-            recent_days=self.settings.recent_days,
-        )
-        return self.sync.start(options)
+        return self.sync.start(SyncOptions(full=full))
 
     def full_download_pending(self) -> bool:
         """Whether "Download every game" started and hasn't finished (later syncs resume it)."""

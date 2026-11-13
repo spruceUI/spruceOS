@@ -4,6 +4,7 @@ import re
 import subprocess
 from apps.miyoo.miyoo_app_config import MiyooAppConfig
 from devices.device import Device
+from devices.utils.process_runner import ProcessRunner
 from display.display import Display
 from games.utils.game_system import GameSystem
 from menus.app.app_utils import AppUtils
@@ -100,7 +101,32 @@ class MiyooTrimCommon():
 
     def should_scale_screen(self):
         return self.is_hdmi_connected()
-    
+
+    @staticmethod
+    def run_analog_stick_calibration_all_sticks_miyoo(device):
+        import sdl2
+        import time
+        from controller.controller import Controller
+        from devices.miyoo.trim_ui_joystick import TrimUIJoystick
+        from utils.py_ui_config import PyUiConfig
+        sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_GAMECONTROLLER)
+        ProcessRunner.run(["killall","-9","miyoo_inputd"])
+        time.sleep(0.5)
+        joystick = TrimUIJoystick()
+        joystick.open()
+        MiyooTrimCommon.run_analog_stick_calibration(device,"Left stick",joystick,"/userdata/joypad.config","L")
+        #TODO check for existance of right stick
+        MiyooTrimCommon.run_analog_stick_calibration(device,"Right stick",joystick,"/userdata/joypad_right.config","R")
+        subprocess.Popen(["/usr/miyoo/bin/miyoo_inputd"],
+                                stdin=subprocess.DEVNULL,
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL)
+        restart_cmd = PyUiConfig.get_pad_restarted_cmd()
+        if restart_cmd and os.path.exists(restart_cmd):
+            subprocess.run([restart_cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL, timeout=30)
+        Controller.re_init_controller()
+
     @staticmethod
     def run_analog_stick_calibration(device, stick_name, joystick, file_path, leftOrRight):
         from display.display import Display

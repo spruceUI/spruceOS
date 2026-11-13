@@ -1,5 +1,5 @@
 GearSystem (SMS/GG)
-https://github.com/libretro/Gearsystem
+https://github.com/drhelius/Gearsystem
 
 Copyright (c) Ignacio Sanchez Gines
 

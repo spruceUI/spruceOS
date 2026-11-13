@@ -103,8 +103,8 @@ prepare_ra_config() {
 			;;
 	esac
 
-	# The proxy cannot validate a hardcore run. Enabling it already drops the
-	# mode to Casual (networkServiceToggle.sh); this covers Hardcore chosen after.
+	# The proxy cannot validate a hardcore run, so Hardcore runs casual while it is
+	# on. The saved mode is left alone, so turning the proxy off restores Hardcore.
 	if [ "$rac_mode" = "Hardcore" ] &&
 		[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ]; then
 		log_message "Offline proxy on; casual for this launch"
@@ -266,10 +266,12 @@ export_spruce_theme_dir() {
 
 run_retroarch() {
 	prepare_ra_config 2>/dev/null
-	if [ "$CORE" = "pokedaisy" ]; then
-		seed_pokedaisy_ini 2>/dev/null
-		set_pokedaisy_panel
-	fi
+	case "$CORE" in
+		"pokedaisy_gba"|"pokedaisy_gbc")
+			seed_pokedaisy_ini 2>/dev/null
+			set_pokedaisy_panel
+			;;
+	esac
 
 	# Apply per-game or system-wide RA build selection. The binary names are
 	# device-overridable because "64-bit" is not always the universal build -
@@ -411,6 +413,8 @@ get_cached_core_path() {
 transfer_save(){
 	cached_core_folder="$1"
 	current_core_folder="$2"
+	# Ensure if its first time swapping to this emu that the folder exists
+	mkdir -p "/mnt/SDCARD/Saves/saves/$current_core_folder"
 
 	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "Prompt")"
 	if [ "$KEEP_SAVES_BETWEEN_CORES" = "Always" ]; then
@@ -667,4 +671,31 @@ set_pokedaisy_panel() {
 		log_message "Failed to set PokeDaisy panel in $opt_file"
 		return 1
 	fi
+}
+
+# Sets or adds `key = "value"` in Azahar's core config. The match is anchored so that
+# e.g. video_rotation never touches a longer key that ends in the same text.
+set_azahar_cfg_value() {
+	cfg="/mnt/SDCARD/RetroArch/.retroarch/config/Azahar/Azahar.cfg"
+	key="$1"
+	value="$2"
+	mkdir -p "$(dirname "$cfg")"
+	touch "$cfg"
+	if grep -q "^${key}[[:space:]]*=" "$cfg"; then
+		sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$cfg"
+	else
+		[ -s "$cfg" ] && [ -n "$(tail -c 1 "$cfg")" ] && echo >> "$cfg"
+		echo "${key} = \"${value}\"" >> "$cfg"
+	fi
+}
+
+set_rotation_for_miniloong_vulkan() {
+	[ "$PLATFORM" = "Miniloong" ] || return 0
+	set_azahar_cfg_value video_rotation 1
+	set_azahar_cfg_value aspect_ratio_index 10
+}
+
+reset_rotation_for_miniloong_vulkan() {
+	set_azahar_cfg_value video_rotation 0
+	set_azahar_cfg_value aspect_ratio_index 22
 }

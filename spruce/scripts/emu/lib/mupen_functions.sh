@@ -11,6 +11,7 @@
 #
 # Provides:
 #   run_mupen_standalone
+#   run_mupen_pow2
 
 # Read a value from mupen64plus.cfg by [section] and key.
 # Usage: get_cfg_value section key default
@@ -252,4 +253,60 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	done
 
 	rm -rf "$TEMP_ROM"
+}
+
+run_mupen_pow2() {
+	export HOME="/mnt/SDCARD/Saves/spruce/mupen64plus-pow2"
+	export XDG_CONFIG_HOME="$HOME"
+	export XDG_DATA_HOME="$HOME"
+	export LD_LIBRARY_PATH="$EMU_DIR/pow2:$LD_LIBRARY_PATH"
+	MUPEN_CONFIG_DIR="$XDG_CONFIG_HOME"
+	MUPEN_DATA_DIR="$EMU_DIR/pow2/data"
+	MUPEN_SCREENSHOT_DIR="/mnt/SDCARD/Saves/screenshots/mupen64plus-pow2"
+
+	mkdir -p "$MUPEN_CONFIG_DIR" "$XDG_DATA_HOME" "$MUPEN_SCREENSHOT_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
+	cd "$EMU_DIR/pow2"
+
+	TEMP_ROM=""
+	case "$ROM_FILE" in
+	*.n64 | *.v64 | *.z64)
+		ROM_PATH="$ROM_FILE"
+		;;
+	*.zip)
+		TEMP_ROM=$(mktemp -d)
+		"$(get_python_path)" -c "
+import zipfile, sys
+with zipfile.ZipFile(sys.argv[1]) as z:
+    z.extractall(sys.argv[2])
+" "$ROM_FILE" "$TEMP_ROM"
+		ROM_PATH="$(find "$TEMP_ROM" -type f | head -1)"
+		;;
+	*.7z)
+		TEMP_ROM=$(mktemp)
+		ROM_PATH="$TEMP_ROM"
+		7zr e "$ROM_FILE" -so >"$TEMP_ROM"
+		;;
+	*)
+		ROM_PATH="$ROM_FILE"
+		;;
+	esac
+
+	export M64P_AUTOLOAD=1
+	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
+	case "$PLATFORM" in
+		"Anbernic"*) export_sdl_gamecontroller_map positional ;;
+	esac
+	treat_dpad_as_analog
+	./mupen64plus \
+		--configdir "$MUPEN_CONFIG_DIR" \
+		--datadir "$MUPEN_DATA_DIR" \
+		--sshotdir "$MUPEN_SCREENSHOT_DIR" \
+		--fullscreen \
+		--resolution "${DISPLAY_WIDTH}x${DISPLAY_HEIGHT}" \
+		"$ROM_PATH" > "$(emu_log_file)" 2>&1
+	mupen_rc=$?
+	treat_dpad_as_dpad
+	rm -rf "$TEMP_ROM"
+	return "$mupen_rc"
 }

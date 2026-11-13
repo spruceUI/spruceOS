@@ -1,0 +1,170 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "AnbernicXX640480NoStick",
+  "name": "Anbernic RG35XX Plus / RG35XX SP",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG35XX Plus",
+    "Anbernic RG35XXSP"
+  ],
+  "family": "h700",
+  "base": "BaseOS",
+  "soc": "Allwinner H700",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: cpuinfo CPU part \"*0xd03*\" (H700) -> reads BASEOS_TARGET from /etc/baseos-release; case \"rg35xxplus\"|\"rg35xxsp\" -> PLATFORM=AnbernicXX640480NoStick",
+  "cfg": "spruce/scripts/platform/h700/AnbernicXX640480NoStick.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "ANBERNIC-keys",
+      "from": "measured: the lab capturesAnbernicXX640480NoStick-20260921.txt",
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes, FF rumble and, on the RG35XX Plus and RG35XX SP, the volume keys (measured 2026-11-12), all on one event1 node (also js0)"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "dierct-keys-polled",
+      "from": "matrix",
+      "note": "vendor's own typo for the node name, kept verbatim. It declares 114/115, but on the RG35XX Plus and RG35XX SP nothing fired on it (2026-11-12); other models of the line send the volume keys here (NextUI port, controller-matrix event2 entry)"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesAnbernicXX640480NoStick-20260921.txt"
+    },
+    "lid-sensor": {
+      "kind": "hall",
+      "node": null,
+      "device": "/sys/class/power_supply/axp2202-battery/hallkey",
+      "from": "cfg (LID_STATUS_PATH, LID_CLOSED_VALUE in AnbernicXXCommon.cfg); matrix (lid_watchdog_v2.sh runs only on *sp BASEOS_TARGETs)",
+      "note": "sysfs poll, not an evdev switch; LID_CLOSED_VALUE=0"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 306",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 309",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus run 1); button-reader-AnbernicXX640480NoStick-1.txt (RG35XX SP run 1)",
+      "note": "on the RG35XX Plus and RG35XX SP the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX640480NoStick-1.txt (RG35XX Plus run 1); button-reader-AnbernicXX640480NoStick-1.txt (RG35XX SP run 1)",
+      "note": "on the RG35XX Plus and RG35XX SP the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled. The NextUI port saw the RG34XX SP and RG40XX V use dierct-keys-polled under other firmware; the RG34XX SP on BaseOS 1.4.0 uses ANBERNIC-keys too (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LID": {
+      "source": "lid-sensor",
+      "from": "cfg (LID_STATUS_PATH); matrix (lid_watchdog_v2.sh on *sp targets)",
+      "models": [
+        "Anbernic RG35XXSP"
+      ]
+    }
+  },
+  "absent": {
+    "L3": "no analog stick on this bucket's hardware; cfg still exports B_L3=\"1 313\" (shared AnbernicXXCommon.cfg), but the nostick SDL_GAMECONTROLLER_MAP (_XX_GC_NOSTICK) binds no button there (derived from AnbernicXXCommon.cfg + controller-matrix idx table).",
+    "R3": "no analog stick on this bucket's hardware; cfg still exports B_R3=\"1 316\" (shared AnbernicXXCommon.cfg), but the nostick SDL_GAMECONTROLLER_MAP (_XX_GC_NOSTICK) binds no button there (derived from AnbernicXXCommon.cfg + controller-matrix idx table).",
+    "LEFT_STICK": "0 sticks on this bucket (XX_PAD_LAYOUT=\"nostick\" -> DEVICE_NUM_ANALOG_STICKS=0 in AnbernicXXCommon.cfg)",
+    "RIGHT_STICK": "0 sticks on this bucket (XX_PAD_LAYOUT=\"nostick\" -> DEVICE_NUM_ANALOG_STICKS=0 in AnbernicXXCommon.cfg)",
+    "HOME": "cfg B_HOME=\"DOESNT_EXIST\"; MENU is spruce's home key on this line (matrix)",
+    "FN_SWITCH": "no latching Fn switch on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_LEFT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_RIGHT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)"
+  },
+  "evidence": [
+    "the lab capturesAnbernicXX640480NoStick-20260921.txt",
+    "controller-matrix.json",
+    "h700-baseos-deep-dive.md",
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX640480NoStick-1.txt",
+    "button-reader-AnbernicXX640480NoStick-1.txt"
+  ],
+  "notes": [
+    "SPRUCE_DEVICE_NAME is computed at runtime; rg35xxplus has its own arm: SPRUCE_DEVICE_NAME=\"Anbernic RG35XX Plus\". rg35xxsp is NOT one of the named arms (only rgcubexx/rgsp/rg35xxplus/rg35xxh/rg35xxpro/rg40xxh/rg40xxv are), so it falls to the default arm: SPRUCE_DEVICE_NAME=\"Anbernic RG35XXSP\" (upper-cased BASEOS_TARGET, no space) -- note the mismatch against this file's model name \"RG35XX SP\" (with a space); a Button Reader name match that requires an exact substring will miss it.",
+    "VOL_KEY_WATCHER_PATH/POWER_KEY_WATCHER_PATH/CONTROLLER_KEY_WATCHER_PATH are exported in AnbernicXXCommon.cfg (event0/event2/event1) but nothing in the h700 tree reads them -- dead variables, not evidence for any control's source (grep of spruce/scripts at spruce_ref 0dccf5276b).",
+    "LID is only on RG35XX SP, not RG35XX Plus (controller-matrix models.rg35xxsp/.rg35xxplus; lid_watchdog_v2.sh only runs for *sp BASEOS_TARGETs) -- scoped with the new \"models\" key on the LID control instead of a note.",
+    "Display: 640x480, DISPLAY_ROTATION=0 (AnbernicXX640480NoStick.cfg).",
+    "models are spruce's own SPRUCE_DEVICE_NAME values (AnbernicXXCommon.cfg); Button Reader matches the unit's name against them"
+  ]
+}

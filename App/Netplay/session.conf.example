@@ -1,0 +1,65 @@
+# Copy to /mnt/SDCARD/.userdata/shared/Netplay/session.conf, then launch the pak to arm it.
+#
+# Host device - leave peer unset:
+role=host
+port=55437
+# Generated automatically when the session is armed. It prevents a new
+# session from loading an old /tmp recovery checkpoint.
+#session_id=<32 hexadecimal characters>
+
+# Client device - comment out the above and use these, with the host's IP:
+#role=client
+#port=55437
+#peer=192.168.1.42
+
+# The setup app generates these after comparing both devices. Installed cores
+# remain first choice; do not add compat_core.* by hand unless both devices have
+# the matching local fallback.
+compatibility_cores=1
+share_cores=0       # frozen; no executable core files cross the network
+hybrid_network=1    # UDP input/hash traffic; state and cable data stay on TCP
+verbose_logs=0      # retain one full diagnostic log per game process
+#compat_core.gpsp=1
+
+# --- input delay -----------------------------------------------------------
+# Frames of lag traded for tolerance of a late peer. Both devices must end on
+# the same number - each primes its own first input_delay frames with neutral
+# input, so a mismatch diverges during priming and never recovers.
+#
+# With input_delay_auto=1 the shim measures the round trip during the handshake
+# and both peers adopt the higher of their two proposals, which is
+# order-independent and keeps that invariant. The number below is then only the
+# fallback for a link that never answers a probe. The setup app writes both.
+#
+# Drop input_delay_auto to pin a value for testing; pin it on *both* devices,
+# since a one-sided pin is still only a proposal and the peer's higher value
+# wins.
+input_delay=3
+input_delay_auto=1
+
+# --- mode ------------------------------------------------------------------
+# Normally omitted. One armed session covers every system, so the shim decides
+# per launch from the core it wraps: gambatte and gpSP emulate a real cable and
+# get link, everything else gets shared screen (which needs only serialize and
+# unserialize, so it works for any core).
+#
+# Uncomment to force it for one of them:
+#mode=netplay   # shared screen: one game, inputs synced between both devices
+#mode=link      # link cable: two games, the cores exchange their own traffic
+
+# --- Game Boy / GBC link (gambatte) ---------------------------------------
+# Gambatte does not use the libretro netpacket interface; it opens its own TCP
+# socket, configured purely through core options. The pak ships a gambatte built
+# with HAVE_NETWORK=1 because NextUI's has Game Link compiled out entirely.
+#
+# Host:
+#   option.gambatte_gb_link_mode=Network Server
+#   option.gambatte_gb_link_network_port=12345
+#
+# Client (IP is set as four separate octet options):
+#   option.gambatte_gb_link_mode=Network Client
+#   option.gambatte_gb_link_network_port=12345
+#   option.gambatte_gb_link_network_server_ip_1=192
+#   option.gambatte_gb_link_network_server_ip_2=168
+#   option.gambatte_gb_link_network_server_ip_3=0
+#   option.gambatte_gb_link_network_server_ip_4=180

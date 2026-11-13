@@ -25,6 +25,7 @@ from menus.settings.button_remapper import ButtonRemapper
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
+from games.utils.game_entry import GameEntry
 
 
 # The launcher cannot start without these; every other variable is optional.
@@ -37,9 +38,8 @@ REQUIRED_ENV_VARS = (
     "SCREEN_WIDTH", "SCREEN_HEIGHT", "SCREEN_ROTATION",
     # Controller
     "CONTROLLER_EVENT_PATH", "CONTROLLER_KEY_MAPPINGS", "CONTROLLER_EVENT_FORMAT",
-    # Commands
-    "POWER_OFF_CMD", 
-    
+    # MISC SETUPS
+    "ROM_SETUP"
 )
 
 class EnvVarDevice(DeviceCommon):
@@ -82,6 +82,19 @@ class EnvVarDevice(DeviceCommon):
 
         self.button_remapper = ButtonRemapper(self.system_config)
 
+
+        self.rom_setup = os.environ["ROM_SETUP"]
+
+        if "MIYOO" == self.rom_setup: 
+            from devices.miyoo.miyoo_games_file_parser import MiyooGamesFileParser
+            from games.utils.device_specific.miyoo_trim_game_system_utils import MiyooTrimGameSystemUtils
+            from devices.miyoo_trim_rom_app_setup import MiyooTrimRomAppSetup
+            self.games_file_parser = MiyooGamesFileParser()   
+            self.game_utils = MiyooTrimGameSystemUtils()
+            self.rom_app_setup = MiyooTrimRomAppSetup()
+        else:
+            raise ValueError(f"Unsupported ROM setup: {self.rom_setup}")
+            
         if(main_ui_mode):
             # Done to try to account for external systems editting the config file
             self.config_watcher_thread, self.config_watcher_thread_stop_event = FileWatcher().start_file_watcher(
@@ -175,7 +188,7 @@ class EnvVarDevice(DeviceCommon):
         return self.is_hdmi_connected()
 
     def power_off_cmd(self):
-        return os.environ["POWER_OFF_CMD"]
+        return os.environ.get("POWER_OFF_CMD") or None
 
     # Unset or empty: no reboot command (None).
     def reboot_cmd(self):
@@ -521,3 +534,60 @@ class EnvVarDevice(DeviceCommon):
 
     def supports_image_resizing(self):
         return os.environ.get("HAS_FFMPEG", "false").lower() == "true"
+
+    def calibrate_sticks(self):
+        STICK_CALIBRATION_TYPE = os.environ["STICK_CALIBRATION_TYPE"]
+        if "MIYOO" == STICK_CALIBRATION_TYPE:
+            from devices.miyoo_trim_common import MiyooTrimCommon
+            MiyooTrimCommon.run_analog_stick_calibration_all_sticks_miyoo(self)
+        elif "TRIMUI" == STICK_CALIBRATION_TYPE:
+            from controller.controller import Controller
+            from devices.trimui.trim_ui_stick_calibrator import TrimUIStickCalibrator
+            TrimUIStickCalibrator(Controller.controller_interface.event_path, self.apply_stick_calibration).run()
+
+    def apply_stick_calibration(self):
+        self._run_setting_cmd("APPLY_STICK_CALIBRATION")
+        if os.environ.get("REOPEN_VOLUME_WATCHER_AFTER_CALIBRATION", "false").lower() != "true":
+            return
+        watcher = self.volume_key_watcher
+        if watcher is not None:
+            old_fd = watcher.fd
+            try:
+                watcher.fd = os.open(watcher.event_path, os.O_RDONLY | os.O_NONBLOCK)
+            except OSError as e:
+                PyUiLogger.get_logger().warning(f"Could not reopen {watcher.event_path}: {e}")
+                return
+            try:
+                os.close(old_fd)
+            except OSError:
+                pass
+
+    def supports_analog_calibration(self):
+        return os.environ.get("STICK_CALIBRATION_TYPE", None) is not None
+
+    def get_core_for_game(self, game_system_config, rom_file_path):
+        return self.rom_app_setup.get_core_for_game(self, game_system_config, rom_file_path)
+
+    def get_core_name_overrides(self, core_name):
+        return self.rom_app_setup.get_core_name_overrides(core_name)
+
+    def get_app_finder(self):
+        return self.rom_app_setup.get_app_finder()
+    
+    def parse_favorites(self) -> list[GameEntry]:
+        return self.games_file_parser.parse_favorites()
+    
+    def parse_recents(self) -> list[GameEntry]:
+        return self.games_file_parser.parse_recents()
+
+    def run_game(self, rom_info: RomInfo):
+        return self.rom_app_setup.run_game(self, rom_info)
+
+    def run_cmd(self, args, dir = None, is_power_cmd = False):
+        return self.rom_app_setup.run_cmd(self, args, dir, is_power_cmd)
+            
+    def run_app(self, folder,launch):
+        return self.rom_app_setup.run_app(self, folder,launch)
+
+    def get_image_for_activity(self, activity):
+        return self.rom_app_setup.get_image_for_activity(activity)

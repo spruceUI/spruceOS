@@ -1,11 +1,11 @@
 # Software Information
 display_name = "Clydeware - GameTank (GameTank)"
-authors = "Clyde Shaffer"
+authors = "SundownerSport|Clyde Shaffer"
 supported_extensions = "gtr"
 corename = "GameTank"
 license = "MIT"
 permissions = ""
-display_version = "0.1"
+display_version = "1.0.3"
 categories = "Emulator"
 
 # Hardware Information
@@ -29,4 +29,4 @@ needs_fullpath = "false"
 disk_control = "false"
 is_experimental = "true"
 
-description = "Libretro port of Clyde Shaffer's GameTank emulator. The GameTank is an 8-bit console with two 65C02 CPUs, a hardware blitter and 128x128 graphics."
+description = "Libretro port by SundownerSport of GameTankEmulator. The GameTank console and GameTankEmulator are by Clyde Shaffer. The GameTank is an 8-bit console with two 65C02 CPUs, a hardware blitter and 128x128 graphics."

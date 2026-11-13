@@ -700,7 +700,18 @@
                     "Casual",
                     "Hardcore"
                 ],
-                "selected": "Manual"
+                "selected": "Manual",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosMode.sh"
+            },
+            "enableOfflineProxy": {
+                "display": "RAOfflineProxy",
+                "description": "Earn Casual Cheevos Offline",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
             },
             "username": {
                 "display": "Username",
@@ -718,16 +729,6 @@
                 "type": "freeText",
                 "selected": "",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/cheevosApiKey.sh"
-            },
-            "enableOfflineProxy": {
-                "display": "RAOfflineProxy",
-                "description": "Earn Casual Cheevos Offline",
-                "options": [
-                    "True",
-                    "False"
-                ],
-                "selected": "False",
-                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh raproxy"
             },
             "raproxyUsageStats": {
                 "display": "Share RAOfflineProxy statistics",
@@ -1281,24 +1282,6 @@
                 "options":[
                     "True",
                     "Only when unplugged",
-                    "False"
-                ],
-                "selected": "True"
-            },
-            "useZRAM":{
-                "devices": [
-                    "MIYOO_A30",
-                    "MIYOO_FLIP",
-                    "GKD_PIXEL2",
-                    "OAKMOSS_A133P",
-                    "TRIMUI_A133P",
-                    "TRIMUI_SMART_PRO_S",
-                    "DARKMOSS"
-                ],
-                "display": "Enable ZRAM",
-                "description": "50% of device RAM; reboot to apply",
-                "options": [
-                    "True",
                     "False"
                 ],
                 "selected": "True"

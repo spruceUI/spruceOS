@@ -1,0 +1,24 @@
+PokeDaisy GBA core (pokedaisy_gba) additional notices
+https://github.com/thwonp/pokedaisy-lr
+
+The GBA core is built over armGBA. From the NOTICE of the pokedaisy-lr
+armGBA branch:
+
+- The libretro GBA core over armGBA (libretro/armgba, the plorpOS collection
+  only): armGBA (third_party/armgba), Copyright (c) 2026 Magnominus, Mozilla
+  Public License 2.0 for its own code (src/, its libretro glue, bios/), which
+  carries Jeffrey Pfau's and mGBA contributors' notices where it follows mGBA's
+  code (its renderer, save chips, cheats and sound channels, MPL 2.0) -
+  https://github.com/MagnominusGit/armGBA (source: the submodule's pinned
+  commit, v1.5). Built with libretro.h (MIT) and RetroArch's libretro-common and
+  the LZMA SDK as armGBA carries them in libretro/deps (MIT and public domain).
+  armGBA's Game Boy side (Gambatte, GNU GPL 2.0 only) is NOT built: it cannot be
+  linked into this GPL 3.0 work, and Game Boy games stay on the mGBA core.
+  PokeDaisy's files for it (libretro/pd_agba_*, libretro/armgba/) change none of
+  armGBA's files.
+- zlib (third_party/zlib, v1.3.1), Copyright (C) 1995-2024 Jean-loup Gailly and
+  Mark Adler, the zlib License - https://zlib.net (the armGBA core's glue calls
+  it; the cross toolchain has none).
+
+armGBA license texts: Licenses/LICENSE-armgba.txt, Licenses/LICENSE-armgba-MPL-2.0.txt
+zlib license: Licenses/libraries/zlib.txt

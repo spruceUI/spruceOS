@@ -1,23 +1,35 @@
-QUASI88 (NEC PC-8801)
+QUASI88 (PC-8801)
 https://github.com/libretro/quasi88-libretro
 
-Copyright (c) Showzoh Fukunaga
+Copyright (c) 2019, celerizer
+QUASI88: Copyright (c) Showzoh Fukunaga
+Sound drivers: Copyright (c) 1997-2007, Nicola Salmoria and the MAME team
+fmgen: Copyright (C) by cisc
 
 Licensed under the BSD 3-Clause License
+The MAME sound code is under the MAME License (non-commercial)
+fmgen may be distributed only as free software; commercial use needs its author's consent
 
 ---
+
+BSD 3-Clause License
+
+Copyright (c) 2019, celerizer
+All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
-1. Redistributions of source code must retain the above copyright notice,
-   this list of conditions and the following disclaimer.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
-3. Neither the name of the copyright holder nor the names of its contributors
-   may be used to endorse or promote products derived from this software
-   without specific prior written permission.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,3 +41,50 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+---
+
+MAME sound drivers (src/snddrv)
+
+Copyright (c) 1997-2007, Nicola Salmoria and the MAME team
+All rights reserved. 
+
+Redistribution and use of this code or any derivative works are permitted
+provided that the following conditions are met: 
+
+* Redistributions may not be sold, nor may they be used in a commercial
+product or activity. 
+
+* Redistributions that are modified from the original source must include the
+complete source code, including the source code for all components used by a
+binary built from the modified sources. However, as a special exception, the
+source code distributed need not include anything that is normally distributed
+(in either source or binary form) with the major components (compiler, kernel,
+and so on) of the operating system on which the executable runs, unless that
+component itself accompanies the executable.
+
+* Redistributions must reproduce the above copyright notice, this list of
+conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+POSSIBILITY OF SUCH DAMAGE. 
+
+---
+
+fmgen
+
+------------------------------------------------------------------------------
+        FM Sound Generator with OPN/OPM interface
+        Copyright (C) by cisc 1998, 2003.
+------------------------------------------------------------------------------
+
+縲先ｦりｦ√

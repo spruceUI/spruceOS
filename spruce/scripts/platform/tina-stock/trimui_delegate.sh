@@ -364,3 +364,20 @@ device_backlight_up() {
     fi
     set_backlight $((backlight + 1))
 }
+
+# trimui_inputd rereads the calibration when this flag appears and deletes it.
+apply_stick_calibration() {
+    flag="/tmp/trimui_inputd/cal_update"
+    mkdir -p "${flag%/*}"
+    touch "$flag"
+    tries=50
+    while [ -e "$flag" ]; do
+        tries=$((tries - 1))
+        if [ "$tries" -le 0 ]; then
+            echo "Error: trimui_inputd did not pick up cal_update" >&2
+            return 1
+        fi
+        sleep 0.1
+    done
+    sleep 0.3
+}

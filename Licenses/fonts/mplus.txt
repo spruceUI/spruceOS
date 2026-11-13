@@ -1,0 +1,15 @@
+M+ 1p
+https://mplusfonts.github.io/
+
+Copyright (c) 2016 M+ FONTS PROJECT
+
+Shipped as the RetroArch GLUI menu font (assets/glui/font.ttf)
+
+Licensed under the M+ FONTS License
+
+---
+
+These fonts are free software.
+Unlimited permission is granted to use, copy, and distribute them, with
+or without modification, either commercially or noncommercially.
+THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.

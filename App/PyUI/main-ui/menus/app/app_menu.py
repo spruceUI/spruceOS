@@ -31,6 +31,12 @@ class AppMenu:
         if(selected.get_selection() is not None):
             PyUiState.set_last_app_selection(selected.get_selection().get_extra_data().get_label())
 
+    def display_label(self, app):
+        label = Language.app_text(app.get_label())
+        if AppsManager.is_hidden(app):
+            return Language.hidden_app_label(label)
+        return label
+
     def handle_app_selection(self, app):
         launch = app.get_launch()
         folder = app.get_folder()
@@ -53,7 +59,7 @@ class AppMenu:
                 icon = AppUtils.get_icon(None,"scraper.png")
                 app_list.append(
                         GridOrListEntry(
-                            primary_text=boxart_scraper_config.get_label() + "(Hidden)" if AppsManager.is_hidden(boxart_scraper_config) else boxart_scraper_config.get_label(),
+                            primary_text=self.display_label(boxart_scraper_config),
                             image_path=None,
                             image_path_selected=None,
                             description=Language.label("scrapeBoxartDesc", "Scrape game boxart"),
@@ -69,7 +75,7 @@ class AppMenu:
                 icon = AppUtils.get_icon(None,"rtc.png")
                 app_list.append(
                         GridOrListEntry(
-                            primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
+                            primary_text=self.display_label(activity_tracker_config),
                             image_path=None,
                             image_path_selected=None,
                             description=Language.label("trackAppUsageDesc", "Track app usage"),
@@ -106,10 +112,10 @@ class AppMenu:
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(
-                            primary_text=app.get_label() + "(Hidden)" if AppsManager.is_hidden(app) else app.get_label(),
+                            primary_text=self.display_label(app),
                             image_path=icon,
                             image_path_selected=icon,
-                            description=app.get_description(),
+                            description=Language.app_text(app.get_description()),
                             icon=icon,
                             extra_data=app,
                             value=lambda app=app: self.handle_app_selection(app)
@@ -122,7 +128,7 @@ class AppMenu:
 
             idx = 0
             for app in app_list:
-                if(app.get_primary_text() == last_selected_label):
+                if(app.get_extra_data().get_label() == last_selected_label):
                     selected = Selection(None,None,idx)
                     break
                 idx += 1

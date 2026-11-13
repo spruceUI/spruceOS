@@ -25,18 +25,18 @@ unsupported_device() {
 }
 
 NEEDS_UPDATE=true
-case "$PLATFORM" in
-	"A30"|"Flip"|"Brick"|"BrickPro"|"SmartPro"|"SmartProS")
+case "$PLATFORM_FAMILY" in
+	"tina-stock")
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	"MiyooMini")
+	"miyoomini")
 		[ -n "$FW_FILE" ] || unsupported_device
 		NEEDS_UPDATE="$(check_if_fw_needs_update)"
 		;;
-	"RGB30"|"RGB20SX"|"Miniloong"|"A10Mini"|"A10MiniV4"|"G350"|"V10"|"XUMiniM"|"Pixel2DarkMoss")
+	"darkmoss")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/darkmossUpdate.sh
 		;;
-	"Zero28"|"Zero40"|"XU20")
+	"oakmoss")
 		exec /mnt/SDCARD/App/-FirmwareUpdate-/oakmossUpdate.sh
 		;;
 	*)

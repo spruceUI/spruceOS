@@ -1,5 +1,5 @@
 Gearboy (GB/GBC)
-https://github.com/libretro/Gearboy
+https://github.com/drhelius/Gearboy
 
 Copyright (c) Ignacio Sanchez Gines
 

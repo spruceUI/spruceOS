@@ -1,5 +1,5 @@
 SwanStation (KMFDManic)
-https://github.com/libretro/swanstation
+https://github.com/KMFDManic/swanstation
 
 Copyright (c) KMFDManic, Connor McLaughlin
 

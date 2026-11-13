@@ -1,0 +1,170 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Brick",
+  "name": "TrimUI Brick",
+  "brand": "TrimUI",
+  "models": [
+    "TrimUI Brick"
+  ],
+  "family": "tina-stock",
+  "base": "stock (TrimUI)",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo contains TG3040",
+  "cfg": "spruce/scripts/platform/tina-stock/Brick.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "virtual",
+      "node": "TRIMUI Player1",
+      "fed_by": "trimui_inputd",
+      "from": "measured: the lab capturesBrick-20260921.txt",
+      "note": "the pad, MENU and the sticks; spruce reads this node"
+    },
+    "lradc": {
+      "kind": "adc-keys",
+      "node": "sunxi-keyboard",
+      "from": "matrix: derived by parity with the Smart Pro, not measured",
+      "note": "the volume keys on the LRADC. On the stock Brick (2026-11-12) the volume keys came on TRIMUI Player1, not here."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesBrick-20260921.txt"
+    },
+    "fn-switch": {
+      "kind": "gpio",
+      "node": null,
+      "device": "gpio243 PH19",
+      "from": "cfg: spruce/scripts/platform/tina-stock/a133p.sh device_get_switch_position",
+      "note": "a latching switch, read through sysfs; a flip runs its action (trimui_scened)"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "3 2 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "3 5 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg (FN_KEY_LEFT/RIGHT = B_L3/B_R3); matrix: measured BTN_THUMBL/THUMBR",
+      "label": "Fn",
+      "prompt": "Press the left Fn key (L3)"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg (FN_KEY_LEFT/RIGHT = B_L3/B_R3); matrix: measured BTN_THUMBL/THUMBR",
+      "label": "Fn",
+      "prompt": "Press the right Fn key (R3)"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-Brick-1.txt (stock Brick run 1)",
+      "note": "on the stock Brick the key arrives on TRIMUI Player1 (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-Brick-1.txt (stock Brick run 1)",
+      "note": "on the stock Brick the key arrives on TRIMUI Player1 (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "FN_SWITCH": {
+      "source": "fn-switch",
+      "read": "device_get_switch_position",
+      "from": "cfg: a133p.sh"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "LEFT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_LEFT": "the Fn keys are L3/R3 (317/318) on the Brick",
+    "FN_RIGHT": "the Fn keys are L3/R3 (317/318) on the Brick",
+    "LID": "none"
+  },
+  "evidence": [
+    "the lab capturesBrick-20260921.txt",
+    "controller-matrix.json",
+    "button-reader-Brick-1.txt"
+  ]
+}

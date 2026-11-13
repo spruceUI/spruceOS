@@ -180,6 +180,9 @@ class ScreenSaver:
 
             surface = Display.image_load(bg_image)
             if surface:
+                # Crop before blurring: the blur visits every pixel in Python, so it should only see what can be drawn
+                surface = Display.crop_surface_to_max_texture_size(surface, bg_image)
+            if surface:
                 # Blur first: it reads the pixels itself and only understands 24
                 # and 32 bit surfaces, so it has to see the format IMG_Load gave
                 # us rather than whatever the renderer wants.

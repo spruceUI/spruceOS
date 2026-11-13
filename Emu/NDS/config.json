@@ -26,7 +26,8 @@
       "options": [
         "DraStic-Steward",
         "DSperate",
-        "DSperate-Tate"
+        "DSperate-Tate",
+        "pokedaisy_ds"
       ],
       "selected": "DraStic-Steward",
       "overrides": {}
@@ -43,7 +44,8 @@
         "DraStic-original",
         "DraStic-trngaje",
         "DSperate",
-        "DSperate-Tate"
+        "DSperate-Tate",
+        "pokedaisy_ds"
       ],
       "selected": "DSperate",
       "overrides": {}
@@ -56,7 +58,8 @@
       "options": [
         "DraStic-trngaje",
         "DSperate",
-        "DSperate-Tate"
+        "DSperate-Tate",
+        "pokedaisy_ds"
       ],
       "selected": "DraStic-trngaje",
       "overrides": {}
@@ -70,7 +73,8 @@
       "options": [
         "DSperate",
         "DSperate-Tate",
-        "DraStic-original"
+        "DraStic-original",
+        "pokedaisy_ds"
       ],
       "selected": "DSperate",
       "overrides": {}

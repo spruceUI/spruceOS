@@ -62,14 +62,21 @@ restore_spruce_config() {
     log_message "Config restore complete."
 }
 
+# The language goes back into py-ui-config.json; the rest now live in pyui-common.json, where
+# a value already there wins, so this only carries settings over from before the move.
 restore_pyui_settings() {
     local saved="/mnt/SDCARD/Saves/spruce/backups/pyui-settings.json"
     local config="/mnt/SDCARD/App/PyUI/py-ui-config.json"
+    local user_config="/mnt/SDCARD/Saves/pyui-common.json"
 
     [ -f "$saved" ] || { log_message "No saved PyUI settings: $saved"; return 1; }
 
-    jq -s '.[0] * .[1]' "$config" "$saved" > "$config.tmp" && mv -f "$config.tmp" "$config" &&
-        log_message "Restored PyUI settings"
+    jq -s '.[0] * (.[1] | {language} | with_entries(select(.value != null)))' "$config" "$saved" > "$config.tmp" &&
+        mv -f "$config.tmp" "$config" || rm -f "$config.tmp"
+
+    [ -s "$user_config" ] || echo '{}' > "$user_config"
+    jq -s '(.[1] | del(.language)) * .[0]' "$user_config" "$saved" > "$user_config.tmp" &&
+        mv -f "$user_config.tmp" "$user_config" && log_message "Restored PyUI settings" || rm -f "$user_config.tmp"
 }
 
 restore_theme_configs() {

@@ -1,4 +1,7 @@
-Icons: tenlevels
+Theme: tenlevels
+
+Icons: Icons8, Forma set (https://icons8.com/)
+Font: Nunito by Vernon Adams merged with WenQuanYi Micro Hei
 
 RetroActive icon set -- baxysquare, baxy-retroarch-themes
   https://github.com/baxysquare/baxy-retroarch-themes  (MIT License)

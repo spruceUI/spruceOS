@@ -1,0 +1,147 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "V10",
+  "name": "Powkiddy V10",
+  "brand": "Powkiddy",
+  "models": [
+    "Powkiddy V10"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=V10",
+  "cfg": "spruce/scripts/platform/darkmoss/V10.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "GO-Advance Gamepad (rev 1.1)",
+      "match": [
+        "GO-Advance Gamepad"
+      ],
+      "by_path": "platform-odroidgo2-joypad-event-joystick",
+      "from": "derived: V10.cfg's header cites \"a hardware probe of a V10 running dArkOS 09022026\" for the button codes and backlight range; that probe artifact is not in this workspace, so treated as derived rather than measured here"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "cfg"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 706",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 707",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 705",
+      "source": "pad",
+      "from": "cfg",
+      "label": "Vol",
+      "prompt": "Press one printed volume button (L3)",
+      "note": "no sticks: the printed volume buttons come through the pad as L3/R3 (V10.cfg); which is which is not confirmed"
+    },
+    "R3": {
+      "code": "1 708",
+      "source": "pad",
+      "from": "cfg",
+      "label": "Vol",
+      "prompt": "Press the other printed volume button (R3)",
+      "note": "no sticks: the printed volume buttons come through the pad as L3/R3 (V10.cfg); which is which is not confirmed"
+    },
+    "SELECT": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 709",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "MENU": "no Menu button: the menu is a button combo (tester 2026-11-11); V10.cfg's B_MENU reuses L3's or R3's code (a volume button), per Button Settings > Menu button",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "VOL_UP": "cfg B_VOLUP=DOESNT_EXIST",
+    "VOL_DOWN": "cfg B_VOLDOWN=DOESNT_EXIST",
+    "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0; STICK_* are DOESNT_EXIST); the d-pad can be switched to drive stick axes instead (V10.sh DPAD_ANALOG), a software mode, not a second physical control",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/V10.cfg",
+    "spruce/scripts/platform/darkmoss/V10.sh"
+  ],
+  "notes": [
+    "No analog stick (DEVICE_NUM_ANALOG_STICKS=0); the d-pad can be switched to drive the stick axes instead (V10.sh's DPAD_ANALOG sysfs toggle, swapped by MENU+SELECT in game), the same mechanism as the A10 Mini.",
+    "No VOL_UP/VOL_DOWN control: B_VOLUP/B_VOLDOWN are DOESNT_EXIST. V10.cfg's comment says the case's printed volume buttons are wired through the pad as the L3 (1 705, \"-\") and R3 (1 708, \"+\"-adjacent) BTN_TRIGGER_HAPPY buttons, not as KEY_VOLUMEUP/DOWN - spruce reads them as L3/R3 (one of which also doubles as MENU, see below), never as a volume rocker.",
+    "MENU is not a dedicated button: by default it shares L3's code (1 705); Button Settings > Menu button set to R3 moves it to R3's code (1 708) instead. SELECT (1 704, the \"-\" button) and START (1 709, the \"+\" button) are separate, ordinary buttons, not the same thing as the volume-labeled L3/R3 above."
+  ]
+}

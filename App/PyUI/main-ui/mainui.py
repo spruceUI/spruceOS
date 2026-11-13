@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 import signal
+import subprocess
 import sys
 import threading
 from devices.device import Device
@@ -87,9 +88,23 @@ def start_background_threads():
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
 
+def run_first_frame_cmd():
+    """Let the CFW start work it held back so it would not compete with PyUI's startup."""
+    cmd = PyUiConfig.get_first_frame_cmd()
+    if not cmd or not os.path.exists(cmd):
+        return
+    try:
+        # Its own session, so it outlives this PyUI when a game launch follows at once
+        subprocess.Popen([cmd], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError as e:
+        PyUiLogger.get_logger().warning(f"Could not run the first frame command {cmd}: {e}")
+
+
 def finish_startup():
     """Release the startup clock and warm optional data after the first frame."""
     threading.Thread(target=Device.get_device().set_cpu_normal, daemon=True).start()
+    threading.Thread(target=run_first_frame_cmd, name="FirstFrameCmd", daemon=True).start()
     from menus.games.utils.cheevos_cache_manager import CheevosCacheManager
     CheevosCacheManager.initialize()
 
@@ -214,11 +229,19 @@ def main():
             Device.get_device().get_game_system_utils().prefetch_active_systems()
             warm_wifi_status()
 
+        audio_devices = PyUiConfig.get_deferred_startup_audio_devices()
+        defer_audio = main_ui_mode and bool(audio_devices) and Device.supports_device(audio_devices)
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
-            Theme.init(selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height())
+            Theme.init(
+                selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height(),
+                setup_audio=not defer_audio,
+            )
 
         with log_timing("Display initialization", PyUiLogger.get_logger()):    
             Display.init()
+        if defer_audio:
+            # Let the worker open audio while the menu draws, after SDL video is ready.
+            Theme.init_audio(queue_click=True)
         with log_timing("Display Present", PyUiLogger.get_logger()):    
             Display.present()
         

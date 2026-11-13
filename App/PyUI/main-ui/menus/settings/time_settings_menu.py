@@ -2,10 +2,10 @@
 import subprocess
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
+from devices.miyoo.user_config import UserConfig
 from menus.settings import settings_menu
 from menus.settings.set_time_menu import SetTimeMenu
 from utils.logger import PyUiLogger
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -45,14 +45,14 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def change_24_hour_clock_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            PyUiConfig.set_use_24_hour_clock(
-                not PyUiConfig.use_24_hour_clock())
+            UserConfig.set_use_24_hour_clock(
+                not UserConfig.use_24_hour_clock())
 
 
     def change_sync_time_via_network_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            enabled = not PyUiConfig.sync_time_via_network()
-            PyUiConfig.set_sync_time_via_network(enabled)
+            enabled = not UserConfig.sync_time_via_network()
+            UserConfig.set_sync_time_via_network(enabled)
             if enabled:
                 # Apply it here rather than leaving the clock wrong until the
                 # next game exit, which is when networkservices.sh would
@@ -68,8 +68,8 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
 
     def change_am_pm_setting(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            PyUiConfig.set_show_am_pm(
-                not PyUiConfig.show_am_pm())
+            UserConfig.set_show_am_pm(
+                not UserConfig.show_am_pm())
 
 
     def set_time(self, input):
@@ -136,7 +136,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 GridOrListEntry(
                     primary_text=Language.sync_time_via_network(),
                     value_text="<    " +
-                    ("On" if PyUiConfig.sync_time_via_network() else "Off") + "    >",
+                    ("On" if UserConfig.sync_time_via_network() else "Off") + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
@@ -149,7 +149,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             GridOrListEntry(
                 primary_text=Language.twenty_four_hour_clock(),
                 value_text="<    " +
-                 ("On" if PyUiConfig.use_24_hour_clock() else "Off") + "    >",
+                 ("On" if UserConfig.use_24_hour_clock() else "Off") + "    >",
                  image_path=None,
                  image_path_selected=None,
                  description=None,
@@ -161,7 +161,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 GridOrListEntry(
                     primary_text=Language.show_am_pm(),
                     value_text="<    " +
-                    ("On" if PyUiConfig.show_am_pm() else "Off") + "    >",
+                    ("On" if UserConfig.show_am_pm() else "Off") + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,

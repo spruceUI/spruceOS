@@ -1,5 +1,5 @@
 Flycast (Dreamcast)
-https://github.com/libretro/flycast
+https://github.com/flyinghead/flycast
 
 Copyright (c) Flycast contributors
 

@@ -1,0 +1,175 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "BrickOakMOSS",
+  "name": "TrimUI Brick",
+  "brand": "TrimUI",
+  "models": [
+    "TrimUI Brick"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device = brick",
+  "cfg": "spruce/scripts/platform/oakmoss/BrickOakMOSS.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "virtual",
+      "node": "TRIMUI Player1",
+      "fed_by": "trimui_inputd",
+      "from": "measured: RESULTS.md",
+      "note": "oakMOSS runs TrimUI's own trimui_inputd on the Brick (BrickOakMOSS.sh starts it), so the pad is the same virtual 'TRIMUI Player1' node as on stock, volume keys included; BrickOakMOSS.sh's oakmoss_resolve_event_paths looks it up by that name"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "cfg",
+      "note": "BrickOakMOSS.sh's oakmoss_resolve_event_paths matches '*axp*pek*'/'*[Pp]ower*'/'*pwr*' generically; not separately re-measured on the oakMOSS build (the stock Brick's own axp2202-pek was measured, the lab capturesBrick-20260921.txt)"
+    },
+    "fn-switch": {
+      "kind": "gpio",
+      "node": null,
+      "device": "gpio243 PH19",
+      "from": "cfg: spruce/scripts/platform/oakmoss/BrickOakMOSS.sh device_get_switch_position",
+      "note": "BrickOakMOSS.sh overrides oakMOSS's generic no-op stub (oakmoss_a133p.sh's device_get_switch_position, which is blank because that pin is L1 on the MagicX boards) to read the same TrimUI PH19 pin stock reads; not independently hardware-verified on an oakMOSS build"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "L2": {
+      "code": "3 2 255",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "R2": {
+      "code": "3 5 255",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "label": "Fn",
+      "prompt": "Press the left Fn key (L3)",
+      "from": "tester 2026-11-11",
+      "note": "measured PASS as 'L3 / Brick FN1' in the 2026-10-30 hardware test; the Brick has no analog sticks, so BTN_THUMBL is wired to the left Fn key and nothing else reports it (FN_KEY_LEFT=\"1 317\" in the inherited Brick.cfg)"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "label": "Fn",
+      "prompt": "Press the right Fn key (R3)",
+      "from": "tester 2026-11-11",
+      "note": "measured PASS as 'Brick FN2' in the 2026-10-30 hardware test; BTN_THUMBR wired to the right Fn key (FN_KEY_RIGHT=\"1 318\")"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: RESULTS.md"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "FN_SWITCH": {
+      "source": "fn-switch",
+      "read": "device_get_switch_position",
+      "from": "cfg: spruce/scripts/platform/oakmoss/BrickOakMOSS.sh"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST (inherited from tina-stock/Brick.cfg, unchanged by BrickOakMOSS.cfg)",
+    "LEFT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0, inherited from Brick.cfg); the 2026-10-30 hardware test's rows 20-23 only exercised the concurrently-tested Zero 40's stick, idle on the Brick side",
+    "RIGHT_STICK": "0 sticks; see LEFT_STICK",
+    "FN_LEFT": "the Fn keys are L3/R3 (317/318) on the Brick, per the tester (2026-11-11) and confirmed by the 2026-10-30 hardware test",
+    "FN_RIGHT": "the Fn keys are L3/R3 (317/318) on the Brick; see FN_LEFT",
+    "LID": "no lid; not a clamshell"
+  },
+  "evidence": [
+    "RESULTS.md",
+    "the lab capturesBrick-20260921.txt",
+    "spruce/scripts/platform/oakmoss/BrickOakMOSS.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/BrickOakMOSS.sh @ 0dccf5276b",
+    "spruce/scripts/platform/tina-stock/Brick.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b"
+  ],
+  "notes": [
+    "The best-evidenced of the six for the pad itself: the 2026-10-30 guided test ran concurrently on a Brick running oakMOSS  and a Zero 40, and every Brick row PASSed, including L3/R3 as the two Fn keys and the explicit note that the Zero 40 has no R3 - independent corroboration of the Zero40.json RIGHT_STICK/R3 conflict noted there.",
+    "POWER and FN_SWITCH were not exercised in that test (POWER is rarely pressed in a guided run to avoid shutting the unit down mid-test, and no Fn-switch flip was in the prompt list); both stay cfg-only until a run checks them.",
+    "BrickOakMOSS.cfg sources the stock tina-stock/Brick.cfg verbatim for all its B_* codes, so anything that changes on a future stock Brick firmware revision should be re-checked here too."
+  ]
+}

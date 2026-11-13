@@ -1,0 +1,7 @@
+{
+    "label": "Button Reader",
+    "icon": "buttonreader.png",
+    "pyuiEntry": "button_reader.app:run",
+    "description": "Generic gamepad tester",
+    "hideInSimpleMode": true
+}

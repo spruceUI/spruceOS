@@ -235,7 +235,6 @@ send_menu_button_to_retroarch() {
 }
 
 prepare_for_pyui_launch(){
-    set_performance
     has_v4_screen && fbset -g 752 560 752 560 32
 }
 
@@ -413,7 +412,7 @@ mini_reenable_buttons() {
     echo 1 > /sys/module/gpio_keys_polled/parameters/button_enable
 }
 
-# The Mini kernels (4.9.84 #968, #1136, #1313) have no zram module: skip enable_zram.sh and its log line
+# The Mini kernels (4.9.84 #968, #1136, #1313) have no zram module, so enable_zram.sh exits early here
 device_supports_zram() {
     return 1
 }

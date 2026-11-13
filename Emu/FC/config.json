@@ -22,7 +22,8 @@
       "options": [
         "fceumm",
         "nestopia",
-        "quicknes"
+        "quicknes",
+        "armnes"
       ],
       "selected": "fceumm",
       "overrides": {}

@@ -1,0 +1,25 @@
+mupen64plus-pow2: one static Mupen64Plus executable (core, console front-end, video, RSP, audio and input plugins).
+
+The executable links the components below into one program. Each keeps its own licence headers and copyright notices in its sources
+(the submodules under ext/). Licence texts are in LICENSES/.
+
+| component | path | licence |
+|---|---|---|
+| mupen64plus-core (fork "dento") | ext/mupen64plus-core-dento | GPL-2.0-or-later (core and its minizip / md5 / OGLFT subprojects under their own headers) |
+| mupen64plus-ui-console (fork "inn") | ext/mupen64plus-ui-inn | GPL-2.0-or-later |
+| mupen64plus-rdp-foir | ext/mupen64plus-rdp-foir | GPL-3.0-or-later |
+| mupen64plus-rsp-armlet | ext/mupen64plus-rsp-armlet | GPL-2.0-or-later (own code), plus: |
+|   mupen64plus-rsp-hle | its ext/mupen64plus-rsp-hle | GPL-2.0-or-later |
+|   parallel-rsp (beebono fork) | its ext/parallel-rsp | MIT or LGPL-3.0-or-later (taken under LGPL here) |
+|   GNU Lightning | inside parallel-rsp | LGPL-3.0-or-later |
+| mupen64plus-audio-altru (fork of audio-sdl) | ext/mupen64plus-audio-altru | GPL-2.0-or-later |
+| mupen64plus-input-suxty | ext/mupen64plus-input-suxty | GPL-2.0-or-later |
+
+Combined work: GPL-2.0-only cannot be combined with LGPL-3.0 or GPL-3.0, but every GPL component above is "or later", so the executable as a
+whole is distributed under GPL-3.0-or-later (GPLv3 section 5, LGPLv3 section 4). The complete corresponding source is this repository with its
+submodules (the LGPL relink right is met by it: build with bundle/build-bundle.sh). Statically linked system libraries: libpng, zlib
+(permissive licences); the C++ runtime (libstdc++, libgcc) is linked statically under the GCC Runtime Library Exception.
+SDL2 (zlib licence) is linked dynamically.
+
+Credits: see the NOTICE.md of arMLEt (rsp-hle, parallel-rsp, Lightning), foir's README (angrylion-rdp-plus as the accuracy oracle) and each
+component's headers.

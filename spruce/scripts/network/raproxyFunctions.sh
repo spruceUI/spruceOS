@@ -81,6 +81,50 @@ raproxy_apply() {
 	fi
 }
 
+# Saves the RAOfflineProxy setting as off. Hardcore and the proxy don't mix: the
+# proxy can't validate a hardcore run.
+raproxy_setting_off() {
+	_json=/mnt/SDCARD/Saves/spruce/spruce-config.json
+	_tmp="$(mktemp)"
+	if jq --indent 4 '.menuOptions["RetroAchievements Settings"].enableOfflineProxy.selected = "False"' "$_json" > "$_tmp"; then
+		mv "$_tmp" "$_json"
+	else
+		rm -f "$_tmp"
+		return 1
+	fi
+}
+
+# host:port of the proxy when it is enabled and running, else nothing
+raproxy_address() {
+	[ "$(get_config_value '.menuOptions."RetroAchievements Settings".enableOfflineProxy.selected' "False")" = "True" ] || return 1
+	ra_proxy_is_running || return 1
+	_port="$(jq -r '.proxy_port // empty' "$RA_PROXY_DIR/data/config.json" 2>/dev/null)"
+	echo "127.0.0.1:${_port:-8099}"
+}
+
+# Prints a RetroAchievements token for the account, or nothing. Through the proxy
+# when it runs: with WiFi off for a game, it answers from its cached login.
+# $3 is the user agent.
+rac_login_token() {
+	_u="$(printf '%s' "$1" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
+	_p="$(printf '%s' "$2" | sed 's/%/%25/g; s/+/%2B/g; s/#/%23/g; s/&/%26/g; s/ /%20/g')"
+	_ua="${3:-spruceOS}"
+	if _addr="$(raproxy_address)"; then
+		_url="http://$_addr/dorequest.php?r=login2&u=$_u&p=$_p"
+	else
+		_url="https://retroachievements.org/dorequest.php?r=login&u=$_u&p=$_p"
+	fi
+	if command -v curl >/dev/null 2>&1; then
+		_resp="$(curl -sS -f --connect-timeout 15 -A "$_ua" "$_url" 2>/dev/null)"
+		case "$?" in
+			35|51|58|59|60|77) _resp="$(curl -k -sS -f --connect-timeout 15 -A "$_ua" "$_url" 2>/dev/null)" ;;
+		esac
+	else
+		_resp="$(wget -q --no-check-certificate -U "$_ua" -O - "$_url" 2>/dev/null)"
+	fi
+	printf '%s' "$_resp" | sed -n 's/.*"Token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+}
+
 raproxy_cached_games_json() {
 	ra_proxy_is_installed || return 1
 	_ra_proxy_run cached-games --json 2>/dev/null

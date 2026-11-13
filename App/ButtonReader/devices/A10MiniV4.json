@@ -1,0 +1,152 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "A10MiniV4",
+  "name": "A10 Mini V4",
+  "brand": "A10",
+  "models": [
+    "A10 Mini V4"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=A10MiniV4 (A10Mini whose device-tree model also contains \"V4\")",
+  "cfg": "spruce/scripts/platform/darkmoss/A10MiniV4.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "GO-Super Gamepad",
+      "by_path": "platform-odroidgo3-joypad-event-joystick",
+      "from": "measured: the lab capturesA10MiniV4-20261104.txt (node name only; individual button presses not captured)",
+      "note": "odroidgo3-joypad driver; carries the face buttons, d-pad, L1/R1/L2/R2, SELECT/START/L3/R3/MENU as BTN_TRIGGER_HAPPY1-5"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "measured: the lab capturesA10MiniV4-20261104.txt (node name only; individual button presses not captured)"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "odroidgo3-keys",
+      "from": "derived: A10MiniV4 discovery capture (the lab capturesA10MiniV4-20261104.txt) shows a 4th node \"odroidgo3-keys\" (event3, kbd) beside the pwrkey and the pad; dArkMossCommon.sh's resolve_key_event_node() re-points EVENT_PATH_VOLUME at whichever node's capability bits report both KEY_VOLUMEUP/DOWN, which the cfg's static event0 guess does not account for. Not confirmed this is that node: a hardware run should press VOL+/VOL- and see which /dev/input/eventN fires.",
+      "note": "cfg literally sets EVENT_PATH_VOLUME=EVENT_PATH_POWER (event0); this may be overridden at boot"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 705",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 708",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "L3": "no F3 on the A10 Mini V4 (tester 2026-11-12; button-reader-A10MiniV4-1.txt: no input on the step); A10MiniV4.cfg still lists B_L3/B_R3 1 706/1 707, the A10 Mini's F3/F4",
+    "R3": "no F4 on the A10 Mini V4 (tester 2026-11-12; button-reader-A10MiniV4-1.txt: no input on the step); A10MiniV4.cfg still lists B_L3/B_R3 1 706/1 707, the A10 Mini's F3/F4",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0); the d-pad can be switched to drive the same ABS_X/ABS_Y the STICK_* cfg vars name (odroidgo3-joypad's dpad_analog attribute), but that is a software mode swap of the d-pad, not a second control",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_SWITCH": "none (no such mechanism in A10Mini.sh/dArkMossCommon.sh)",
+    "FN_LEFT": "none (no such mechanism in A10Mini.sh/dArkMossCommon.sh)",
+    "FN_RIGHT": "none (no such mechanism in A10Mini.sh/dArkMossCommon.sh)",
+    "LID": "none (no such mechanism in A10Mini.sh/dArkMossCommon.sh)"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/A10MiniV4.cfg",
+    "spruce/scripts/platform/darkmoss/A10MiniV4.sh",
+    "spruce/scripts/platform/darkmoss/dArkMossCommon.sh",
+    "the lab capturesA10MiniV4-20261104.txt",
+    "button-reader-A10MiniV4-1.txt"
+  ],
+  "notes": [
+    "A10Mini.cfg's own header: \"Pad, panel and SoC values are from the kernel dts ... and dArkOS's RG351MP configs; none of it has been read off a running unit yet.\" Every button code here is therefore cfg-level, not measured, even though A10MiniV4 has been booted in the lab (its discovery capture confirms the pad node name and that the unit boots, not individual button presses).",
+    "No analog stick (DEVICE_NUM_ANALOG_STICKS=0), but the odroidgo3-joypad driver can report the d-pad as the left stick instead (A10Mini.sh's DPAD_ANALOG sysfs toggle, swapped by MENU+SELECT in game): a software mode, not a second physical control.",
+    "L3/R3 (1 706/1 707) are two of the five BTN_TRIGGER_HAPPY1-5 buttons the odroidgo3-joypad driver exposes (select, start, L3, R3, the F/MENU key); the cfg comment describes them as real physical buttons on this stickless board, not stick clicks."
+  ]
+}

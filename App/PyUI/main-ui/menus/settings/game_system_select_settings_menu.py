@@ -1,8 +1,8 @@
 
 from controller.controller_inputs import ControllerInput
+from devices.miyoo.user_config import UserConfig
 from menus.settings import settings_menu
 from menus.settings.list_of_options_selection_menu import ListOfOptionsSelectionMenu
-from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 
 
@@ -16,16 +16,16 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
     
     def change_game_system_sort_mode(self, input):
         if (ControllerInput.DPAD_LEFT == input):
-            PyUiConfig.set_game_system_sort_mode(self.get_next_entry(PyUiConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,-1))
+            UserConfig.set_game_system_sort_mode(self.get_next_entry(UserConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,-1))
         elif (ControllerInput.DPAD_RIGHT == input):
-            PyUiConfig.set_game_system_sort_mode(self.get_next_entry(PyUiConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,+1))
+            UserConfig.set_game_system_sort_mode(self.get_next_entry(UserConfig.game_system_sort_mode(),GAME_SYSTEM_SORT_MODE_OPTIONS,+1))
         elif (ControllerInput.A == input):
             selected_index = ListOfOptionsSelectionMenu().get_selected_option_index(
                 GAME_SYSTEM_SORT_MODE_OPTIONS,
                 Language.label("gameSystemSortModeTitle", "Game System Sort Mode"),
                 label_func=Language.game_system_sort_mode_label)
             if(selected_index is not None):
-                PyUiConfig.set_game_system_sort_mode(GAME_SYSTEM_SORT_MODE_OPTIONS[selected_index])
+                UserConfig.set_game_system_sort_mode(GAME_SYSTEM_SORT_MODE_OPTIONS[selected_index])
 
         self.theme_changed = True
         self.theme_ever_changed = True
@@ -35,20 +35,20 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         # Map field names to their getter and setter methods
         field_map = {
             "Type": {
-                "get": PyUiConfig.game_system_sort_type_priority,
-                "set": PyUiConfig.set_game_system_sort_type_priority
+                "get": UserConfig.game_system_sort_type_priority,
+                "set": UserConfig.set_game_system_sort_type_priority
             },
             "Brand": {
-                "get": PyUiConfig.game_system_sort_brand_priority,
-                "set": PyUiConfig.set_game_system_sort_brand_priority
+                "get": UserConfig.game_system_sort_brand_priority,
+                "set": UserConfig.set_game_system_sort_brand_priority
             },
             "Year": {
-                "get": PyUiConfig.game_system_sort_year_priority,
-                "set": PyUiConfig.set_game_system_sort_year_priority
+                "get": UserConfig.game_system_sort_year_priority,
+                "set": UserConfig.set_game_system_sort_year_priority
             },
             "Name": {
-                "get": PyUiConfig.game_system_sort_name_priority,
-                "set": PyUiConfig.set_game_system_sort_name_priority
+                "get": UserConfig.game_system_sort_name_priority,
+                "set": UserConfig.set_game_system_sort_name_priority
             }
         }
 
@@ -88,7 +88,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
 
     def change_show_all_game_systems(self, input):
         if (ControllerInput.DPAD_LEFT == input or ControllerInput.DPAD_RIGHT == input or ControllerInput.A == input):
-            PyUiConfig.set_show_all_game_systems(not PyUiConfig.show_all_game_systems())
+            UserConfig.set_show_all_game_systems(not UserConfig.show_all_game_systems())
             self.theme_changed = True
             self.theme_ever_changed = True
 
@@ -98,7 +98,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.show_all_systems(),
-                value_text="<    " + Language.on_off_label(PyUiConfig.show_all_game_systems()) + "    >",
+                value_text="<    " + Language.on_off_label(UserConfig.show_all_game_systems()) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,
@@ -110,7 +110,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.game_system_sorting(),
-                value_text="<    " + Language.game_system_sort_mode_label(PyUiConfig.game_system_sort_mode()) + "    >",
+                value_text="<    " + Language.game_system_sort_mode_label(UserConfig.game_system_sort_mode()) + "    >",
                 image_path=None,
                 image_path_selected=None,
                 description=None,
@@ -119,11 +119,11 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             )
         )
 
-        if(PyUiConfig.game_system_sort_mode() == "Custom"):
+        if(UserConfig.game_system_sort_mode() == "Custom"):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.system_type_priority(),
-                    value_text="<    " + str(PyUiConfig.game_system_sort_type_priority())+ "    >",
+                    value_text="<    " + str(UserConfig.game_system_sort_type_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
@@ -134,7 +134,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.system_brand_priority(),
-                    value_text="<    " + str(PyUiConfig.game_system_sort_brand_priority())+ "    >",
+                    value_text="<    " + str(UserConfig.game_system_sort_brand_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
@@ -145,7 +145,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.system_year_priority(),
-                    value_text="<    " + str(PyUiConfig.game_system_sort_year_priority())+ "    >",
+                    value_text="<    " + str(UserConfig.game_system_sort_year_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
@@ -156,7 +156,7 @@ class GameSystemSelectSettingsMenu(settings_menu.SettingsMenu):
             option_list.append(
                 GridOrListEntry(
                     primary_text=Language.system_name_priority(),
-                    value_text="<    " + str(PyUiConfig.game_system_sort_name_priority())+ "    >",
+                    value_text="<    " + str(UserConfig.game_system_sort_name_priority())+ "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,

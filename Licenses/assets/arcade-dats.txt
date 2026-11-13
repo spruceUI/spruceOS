@@ -1,0 +1,25 @@
+Arcade data files (Emu/ARCADE)
+
+history.dat
+http://www.arcade-history.com
+Maintained by Alexis Bousiges
+Copyright 1998-2005 History.dat all rights reserved
+
+  This arcade video games database may not be distributed for commercial
+  purposes in whole or in part, in any form or by any means, electronic or
+  mechanical, or by any information storage now known or hereafter invented
+  without express written permission.
+
+cheat.dat
+http://cheat.retrogames.com
+Pugsy's MAME Cheat File, 14 May 2006
+
+  If this cheat.dat file is NOT of 'alpha' status then it can be freely
+  distributed with any MAME compile or any frontend. All I ask is that you
+  do not modify the cheat file in any way. I'd appreciate it if you mention
+  or link to the website where you can find future updates:
+  http://cheat.retrogames.com
+
+hiscore.dat
+http://www.mameworld.net/highscore/
+Leezer and contributors

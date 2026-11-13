@@ -1,0 +1,42 @@
+{
+  "label": "3DS",
+  "icon": "dsi.png",
+  "iconsel": "dsi_sel.png",
+  "themecolor": "AA1111",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "requiredfiles": [],
+  "extlist": "3ds|3dsx|z3dsx|elf|axf|cci|zcci|cxi|zcxi|app",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Overclock",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 4010,
+  "brand": "Nintendo",
+  "type": "handheld",
+  "releaseYear": 2011,
+  "default_emulator": "azahar",
+  "scaling_min_freq": 1008000,
+  "devices": [
+    "OAKMOSS_A133P",
+    "RGB30",
+    "RGB20SX",
+    "MINILOONG_POCKET1",
+    "RG353M",
+    "E5PLUS"
+  ],
+  "alternativeFolderNames": [
+    "n3ds",
+    "new3ds",
+    "threeds",
+    "nintendo3ds"
+  ]
+}

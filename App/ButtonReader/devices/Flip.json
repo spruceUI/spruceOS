@@ -1,0 +1,179 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Flip",
+  "name": "Miyoo Flip",
+  "brand": "Miyoo",
+  "models": [
+    "Miyoo Flip"
+  ],
+  "family": "tina-stock",
+  "base": "stock (Miyoo) or BaseOS-my355",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd05 and no DARKMOSS in /etc/os-release",
+  "cfg": "spruce/scripts/platform/tina-stock/Flip.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "virtual",
+      "node": "MIYOO Player1",
+      "fed_by": null,
+      "from": "measured: probe-flip-94.txt",
+      "note": "a /devices/virtual node (045e:028e); the daemon behind it is not recorded"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys-polled",
+      "from": "measured: probe-flip-94.txt"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "measured: probe-flip-94.txt"
+    },
+    "lid": {
+      "kind": "hall",
+      "node": "hall wake key",
+      "from": "measured: probe-flip-94.txt",
+      "note": "hall-mh248; spruce reads the lid through sysfs"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "3 2 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "3 5 255",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3",
+      "y": "3 4",
+      "source": "pad",
+      "from": "measured: button-reader-Flip-3.txt; button-reader-Flip-1.txt (bench and BaseOS Flips)",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 4\" and STICK_DOWN_2 \"3 3\"; on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
+    },
+    "LID": {
+      "source": "lid",
+      "from": "measured: probe-flip-94.txt"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none"
+  },
+  "evidence": [
+    "probe-flip-94.txt",
+    "the lab capturesFlip-20260921.txt",
+    "controller-matrix.json",
+    "button-reader-Flip-3.txt",
+    "button-reader-Flip-1.txt"
+  ],
+  "notes": [
+    "adc-keys (an unused ADC ladder) and hdmi_cec_key are also present and carry no control.",
+    "On BaseOS-my355 Flip.cfg also sources my355.cfg, which changes no button or event value."
+  ]
+}

@@ -1,0 +1,127 @@
+name: Sync version files
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - autorun.inf
+      - spruce/spruce
+
+jobs:
+  sync-version-files:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: sync-version-files-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Synchronize version files
+        id: synchronize
+        env:
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          if [[ "$PUSH_BEFORE" =~ ^0+$ ]]; then
+            CHANGED_FILES=$'autorun.inf\nspruce/spruce'
+          else
+            CHANGED_FILES="$(git diff --name-only "$PUSH_BEFORE" HEAD -- autorun.inf spruce/spruce)"
+          fi
+          export CHANGED_FILES
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          import sys
+
+          spruce_path = Path("spruce/spruce")
+          autorun_path = Path("autorun.inf")
+          version_pattern = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+\Z")
+          changed = set(os.environ["CHANGED_FILES"].splitlines())
+          spruce_name = "spruce/spruce"
+          autorun_name = "autorun.inf"
+
+          def valid_version(value):
+              return value if version_pattern.fullmatch(value) else None
+
+          def read_spruce_version():
+              return valid_version(spruce_path.read_text().strip())
+
+          def read_autorun_version():
+              lines = autorun_path.read_text().splitlines()
+              for line in lines:
+                  if re.match(r"^\s*label\s*=", line, re.IGNORECASE):
+                      match = re.fullmatch(
+                          r"\s*label\s*=\s*spruce\s+v(.+?)\s*",
+                          line,
+                          re.IGNORECASE,
+                      )
+                      if match:
+                          version = valid_version(match.group(1))
+                          if version:
+                              return version
+              return None
+
+          if not changed.intersection({spruce_name, autorun_name}):
+              print("No version-file changes detected; nothing to synchronize.")
+              sys.exit(0)
+
+          if changed.intersection({spruce_name, autorun_name}) == {spruce_name}:
+              version = read_spruce_version()
+              if version is None:
+                  sys.exit("Error: changed spruce/spruce does not contain a valid x.x.x version")
+          elif changed.intersection({spruce_name, autorun_name}) == {autorun_name}:
+              version = read_autorun_version()
+              if version is None:
+                  sys.exit("Error: changed autorun.inf has no valid 'spruce vX.X.X' label")
+          else:
+              candidates = [
+                  version
+                  for version in (read_spruce_version(), read_autorun_version())
+                  if version is not None
+              ]
+              if not candidates:
+                  sys.exit("Error: neither file contains a valid x.x.x version")
+              version = max(candidates, key=lambda value: tuple(map(int, value.split("."))))
+
+          spruce_path.write_text(version + "\n")
+          autorun_lines = autorun_path.read_text().splitlines()
+          label_indices = [
+              i for i, line in enumerate(autorun_lines)
+              if re.match(r"^\s*label\s*=", line, re.IGNORECASE)
+          ]
+          if label_indices:
+              for index in label_indices:
+                  autorun_lines[index] = f"label = spruce v{version}"
+          else:
+              autorun_lines.append(f"label = spruce v{version}")
+          autorun_path.write_text("\n".join(autorun_lines) + "\n")
+          print(f"Synchronized both version files to {version}")
+          PY
+
+          if ! git diff --quiet -- spruce/spruce autorun.inf; then
+            VERSION="$(< spruce/spruce)"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add spruce/spruce autorun.inf
+            git commit -m "Sync version files to ${VERSION}"
+            git push origin "HEAD:${GITHUB_REF}"
+          else
+            echo "Both version files are already synchronized."
+          fi
+
+      - name: Report synchronization failure
+        if: failure()
+        run: |
+          echo "::error title=Version synchronization failed::The triggering commit remains in the repository; see this workflow run for details."
+          {
+            echo "### Version synchronization failed"
+            echo "The triggering commit was not reverted or blocked. See the workflow logs for details."
+          } >> "$GITHUB_STEP_SUMMARY"
