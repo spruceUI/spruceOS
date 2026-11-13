@@ -161,7 +161,7 @@ class GKDDevice(DeviceCommon):
         import psutil
         if self.is_wifi_enabled():
             if not self.get_wifi_menu().adapter_is_connected():
-                return "No USB adapter"
+                return Language.label("noUsbAdapter", "No USB adapter")
 
             try:
                 wlan_addrs = []

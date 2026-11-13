@@ -131,14 +131,16 @@ class MiyooTrimCommon():
     def run_analog_stick_calibration(device, stick_name, joystick, file_path, leftOrRight):
         from display.display import Display
         
-        Display.clear("Stick Calibration")
-        Display.display_message(f"Rotate {stick_name}")
+        from menus.language.language import Language
+
+        Display.clear(Language.label("stickCalibrationTitle", "Stick Calibration"))
+        Display.display_message(Language.label("rotateStick", "Rotate {stick}").replace("{stick}", stick_name))
         Display.present()
        
         rotate_stats = joystick.sample_axes_stats()
         
-        Display.clear("Stick Calibration")
-        Display.display_message(f"Leave {stick_name} Still")
+        Display.clear(Language.label("stickCalibrationTitle", "Stick Calibration"))
+        Display.display_message(Language.label("leaveStickStill", "Leave {stick} Still").replace("{stick}", stick_name))
         Display.present()
 
         centered_stats = joystick.sample_axes_stats()

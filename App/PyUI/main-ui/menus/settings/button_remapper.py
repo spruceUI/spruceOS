@@ -159,7 +159,7 @@ class ButtonRemapper:
         selected = Selection(None,None,0)
         list_view = ViewCreator.create_view(
                     view_type=ViewType.TEXT_ONLY,
-                    top_bar_text=f"Remapping {physical_button.name}", 
+                    top_bar_text=Language.label("remappingButton", "Remapping {button}").replace("{button}", Language.controller_input_label(physical_button)), 
                     options=option_list,
                     selected_index=selected.get_index())
         while(selected is not None):               

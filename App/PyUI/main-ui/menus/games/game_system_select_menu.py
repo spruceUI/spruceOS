@@ -308,7 +308,7 @@ class GameSystemSelectMenu:
             icon = image_path_selected
             option = GridOrListEntry(
                     primary_text=game_system.display_name,
-                    primary_text_long=GameSystemSelectMenu.full_name_mapping.get(game_system.folder_name.lower()),
+                    primary_text_long=Language.translate("gameSystemFullNames", GameSystemSelectMenu.full_name_mapping.get(game_system.folder_name.lower())),
                     image_path=image_path,
                     image_path_selected=image_path_selected,
                     description = lambda idx=index, gs=game_system, total=total_count: Language.label(

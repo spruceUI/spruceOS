@@ -136,7 +136,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 GridOrListEntry(
                     primary_text=Language.sync_time_via_network(),
                     value_text="<    " +
-                    ("On" if UserConfig.sync_time_via_network() else "Off") + "    >",
+                    Language.on_off_label(UserConfig.sync_time_via_network()) + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,
@@ -149,7 +149,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
             GridOrListEntry(
                 primary_text=Language.twenty_four_hour_clock(),
                 value_text="<    " +
-                 ("On" if UserConfig.use_24_hour_clock() else "Off") + "    >",
+                 Language.on_off_label(UserConfig.use_24_hour_clock()) + "    >",
                  image_path=None,
                  image_path_selected=None,
                  description=None,
@@ -161,7 +161,7 @@ class TimeSettingsMenu(settings_menu.SettingsMenu):
                 GridOrListEntry(
                     primary_text=Language.show_am_pm(),
                     value_text="<    " +
-                    ("On" if UserConfig.show_am_pm() else "Off") + "    >",
+                    Language.on_off_label(UserConfig.show_am_pm()) + "    >",
                     image_path=None,
                     image_path_selected=None,
                     description=None,

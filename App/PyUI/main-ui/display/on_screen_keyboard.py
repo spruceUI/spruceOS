@@ -5,6 +5,7 @@ from devices.device import Device
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from themes.theme import Theme
+from menus.language.language import Language
 
 
 class OnScreenKeyboard:
@@ -51,7 +52,7 @@ class OnScreenKeyboard:
         key_h = key_w
 
         while running:
-            Display.clear("Keyboard")
+            Display.clear(Language.label("keyboardTitle", "Keyboard"))
             Display.render_image(
                 image_path = Theme.keyboard_bg(),
                 x = 0,

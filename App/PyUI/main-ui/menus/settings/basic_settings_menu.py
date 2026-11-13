@@ -185,7 +185,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                 option_list.append(
                         GridOrListEntry(
                                 primary_text=Language.bluetooth(),
-                                value_text="<    " + ("On" if Device.get_device().is_bluetooth_enabled() else "Off") + "    >",
+                                value_text="<    " + Language.on_off_label(Device.get_device().is_bluetooth_enabled()) + "    >",
                                 image_path=None,
                                 image_path_selected=None,
                                 description=None,
