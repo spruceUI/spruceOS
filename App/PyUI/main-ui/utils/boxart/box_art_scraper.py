@@ -4,9 +4,12 @@ import os
 from pathlib import Path
 import subprocess
 import re
+import threading
 import time
 from typing import List, Optional
 
+from controller.controller import Controller
+from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
@@ -571,6 +574,8 @@ class BoxArtScraper:
     # Function to process a single ROM file
     def process_rom(self, sys_name, ra_name, sys_imgs_dir, relative_path, file):
 
+        if self.cancelled:
+           return None
         # Create subfolder structure inside Imgs to mirror ROM folder structure
         target_img_dir = os.path.join(sys_imgs_dir, relative_path)
         if not os.path.exists(target_img_dir):
@@ -683,6 +688,27 @@ class BoxArtScraper:
         # Run tasks concurrently
         count = 0
         success_count = 0
+        self.cancelled = False
+        
+        watcher_stop = threading.Event()
+
+        def cancelled_watcher():
+            PyUiLogger.get_logger().info("Cancellation watcher started")
+            while not watcher_stop.is_set():
+                Controller.get_input()
+                if Controller.last_input() == ControllerInput.B:
+                    self.cancelled = True
+                    PyUiLogger.get_logger().info(
+                        "BoxartScraper: Scraping cancelled by user."
+                    )
+                    break
+
+
+        watcher_thread = threading.Thread(
+            target=cancelled_watcher,
+            daemon=True
+        )
+        watcher_thread.start()
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [executor.submit(self.process_rom, *t) for t in tasks]
 
@@ -701,6 +727,9 @@ class BoxArtScraper:
                         downloaded_files.append(result)
                 except Exception as e:
                     PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
+
+        watcher_stop.set()
+        watcher_thread.join()
 
         self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
         time.sleep(2)
@@ -789,14 +818,30 @@ class BoxArtScraper:
     # ==========================================================
 
     def _download_file(self, url: str, dest_path: str) -> bool:
-        """Download file to destination path."""
         try:
-            # Deferred: urllib.request has a heavy import graph.
             import urllib.request
-            urllib.request.urlretrieve(url, dest_path)
-            return True
+
+            with urllib.request.urlopen(url, timeout=15) as response:
+                with open(dest_path, "wb") as output:
+                    while True:
+                        # Check cancellation
+                        if self.cancelled:
+                            return False
+
+                        chunk = response.read(8192)
+
+                        if not chunk:
+                            break
+
+                        output.write(chunk)
+
+            return not self.cancelled
+
         except Exception as e:
             PyUiLogger.get_logger().error(e)
-            if os.path.exists(dest_path):
-                os.remove(dest_path)
             return False
+
+        finally:
+            if self.cancelled or not os.path.exists(dest_path):
+                if os.path.exists(dest_path):
+                    os.remove(dest_path)
