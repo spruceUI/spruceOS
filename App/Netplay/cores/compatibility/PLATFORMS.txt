@@ -1,0 +1,24 @@
+Compatibility core ABI mapping
+
+armv7:
+  my282
+
+aarch64:
+  tg5040
+  tg5050
+  my355
+  h700
+
+In Netplay.pak each directory contains the same pinned core revisions and
+portable feature profile for its ABI, so an armv7 and an aarch64 device can
+fall back to the same game. Netplay.pak selects the directory from PLATFORM at
+launch.
+
+In the Spruce Complete build (App/Netplay), aarch64 matches the supported
+64-bit RetroArch routing. The my355 build directory also serves the RK3566
+RGB30, RGB20SX and Miniloong Pocket 1 targets. The Miyoo A30 (my282) is a
+32-bit spruce device: its ra32.* launches are hooked like the 64-bit ones,
+and when core negotiation pairs a 64-bit device with a 32-bit one it writes
+compat_ra32=1, which makes the 64-bit side run spruce's 32-bit RetroArch
+with the 32-bit cores and the armv7 shim. An optional separately built
+armv7 set may be staged for development.

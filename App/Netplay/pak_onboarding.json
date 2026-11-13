@@ -1,0 +1,37 @@
+{
+  "pages": [
+    {
+      "title": "Welcome to Netplay!",
+      "description": "Host on one device, then choose Join on the other. Then launch the game through the menus like normal. Both devices should have the same game."
+    },
+    {
+      "title": "Ad Hoc or WiFi?",
+      "description": "Ad hoc networks usually provide better performance than WiFi. Option only shows on supported devices."
+    },
+    {
+      "title": "WiFi Power Saving",
+      "description": "You can also choose to disable WiFi power saving, which may improve performance. On some devices this requires a driver reboot of several seconds. Turns off on reboot. Not tested on all devices."
+    },
+    {
+      "title": "Two is better than one.",
+      "description": "Gambatte, mGBA and armGBA all support dual instances: emulating both devices on each device helps performance. Enabled if your device supports it."
+    },
+    {
+      "title": "Compatibility cores",
+      "description": "Use Netplay's matched cores when the installed cores differ between devices?",
+      "setting": "compatibility_cores",
+      "options": [
+        { "label": "Yes", "value": 1 },
+        { "label": "No", "value": 0 }
+      ]
+    },
+    {
+      "title": "Automatic save backups",
+      "description": "In case of any problems, the last three sessions' game saves are backed up for you in the Netplay app folder."
+    },
+    {
+      "title": "Ready to play!",
+      "description": "Choose Host or Join in the main menu, and have fun!"
+    }
+  ]
+}
