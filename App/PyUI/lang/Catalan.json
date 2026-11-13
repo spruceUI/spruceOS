@@ -859,6 +859,8 @@
         "Updating other screen sizes...": "S'estan actualitzant les altres mides de pantalla...",
         "Updating {folder}...": "S'està actualitzant {folder}...",
         "This theme doesn't support Accent Color. Try NextUI Style.": "Aquest tema no admet el color d'accent. Prova NextUI Style.",
-        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Error al color d'accent: consulta el registre a Saves/spruce/accentcolor."
+        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Error al color d'accent: consulta el registre a Saves/spruce/accentcolor.",
+        "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL": "<> AJUSTA   L1/R1 x16   A APLICA   B CANCEL·LA",
+        "(A to type)": "(A per escriure)"
     }
 }
