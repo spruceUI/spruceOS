@@ -838,5 +838,29 @@
         "Restore configs & settings from backup": "Restaura la configuració des d'una còpia de seguretat",
         "Boxart Scraper": "Descàrrega de caràtules",
         "Activity Tracker": "Registre d'activitat"
+    },
+    "accentColor": {
+        "ACCENT COLOR": "COLOR D'ACCENT",
+        "PRESET": "PREDEFINIT",
+        "OPEN": "OBRE",
+        "White": "Blanc",
+        "NextUI Red": "Vermell NextUI",
+        "Red": "Vermell",
+        "Orange": "Taronja",
+        "Yellow": "Groc",
+        "Green": "Verd",
+        "Teal": "Verd blavós",
+        "Blue": "Blau",
+        "Purple": "Porpra",
+        "Pink": "Rosa",
+        "Hex color (RRGGBB)": "Color hexadecimal (RRGGBB)",
+        "Not a hex color - use 6 digits, e.g. F5C518": "No és un color hexadecimal: usa 6 xifres, p. ex. F5C518",
+        "Applying {color}...": "S'està aplicant {color}...",
+        "Updating other screen sizes...": "S'estan actualitzant les altres mides de pantalla...",
+        "Updating {folder}...": "S'està actualitzant {folder}...",
+        "This theme doesn't support Accent Color. Try NextUI Style.": "Aquest tema no admet el color d'accent. Prova NextUI Style.",
+        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Error al color d'accent: consulta el registre a Saves/spruce/accentcolor.",
+        "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL": "<> AJUSTA   L1/R1 x16   A APLICA   B CANCEL·LA",
+        "(A to type)": "(A per escriure)"
     }
 }

@@ -839,5 +839,29 @@
         "Restore configs & settings from backup": "Restore configs & settings from backup",
         "Boxart Scraper": "Boxart Scraper",
         "Activity Tracker": "Activity Tracker"
+    },
+    "accentColor": {
+        "ACCENT COLOR": "ACCENT COLOR",
+        "PRESET": "PRESET",
+        "OPEN": "OPEN",
+        "White": "White",
+        "NextUI Red": "NextUI Red",
+        "Red": "Red",
+        "Orange": "Orange",
+        "Yellow": "Yellow",
+        "Green": "Green",
+        "Teal": "Teal",
+        "Blue": "Blue",
+        "Purple": "Purple",
+        "Pink": "Pink",
+        "Hex color (RRGGBB)": "Hex color (RRGGBB)",
+        "Not a hex color - use 6 digits, e.g. F5C518": "Not a hex color - use 6 digits, e.g. F5C518",
+        "Applying {color}...": "Applying {color}...",
+        "Updating other screen sizes...": "Updating other screen sizes...",
+        "Updating {folder}...": "Updating {folder}...",
+        "This theme doesn't support Accent Color. Try NextUI Style.": "This theme doesn't support Accent Color. Try NextUI Style.",
+        "Accent Color hit an error - see Saves/spruce/accentcolor log.": "Accent Color hit an error - see Saves/spruce/accentcolor log.",
+        "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL": "<> ADJUST   L1/R1 x16   A APPLY   B CANCEL",
+        "(A to type)": "(A to type)"
     }
 }
