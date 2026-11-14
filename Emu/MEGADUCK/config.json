@@ -4,7 +4,7 @@
   "iconsel": "megaduck_sel.png",
   "themecolor": "3cc7c7",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "bin|zip|7z",
+  "extlist": "bin|zip|7z|duck|md0|md1|md2|md20s|md25s",
   "launchlist": [],
   "menuOptions": {
     "Governor": {
@@ -16,13 +16,22 @@
       ],
       "selected": "Smart",
       "overrides": {}
+    },
+    "Emulator": {
+      "display": "Retroarch Core",
+      "options": [
+        "armgba",
+        "sameduck"
+      ],
+      "selected": "armgba",
+      "overrides": {}
     }
   },
   "sortOrder": 3400,
   "brand": "Welback",
   "type": "handheld",
   "releaseYear": 1993,
-  "default_emulator": "sameduck",
-  "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["megaduck","COUGARBOY","cougarboy","sameduck"]
+  "default_emulator": "armgba",
+  "scaling_min_freq": 480000,
+  "alternativeFolderNames": ["cougarboy","sameduck"]
 }
