@@ -8,6 +8,7 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
 from views.view_type import ViewType
+from menus.common.bottom_bar import BottomBarHint
 
 
 from menus.language.language import Language
@@ -92,6 +93,15 @@ class BluetoothMenu:
         return True
 
 
+    def _get_bottom_bar_hints(self, selected_entry, option_list):
+        hints = [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("backText", "Back")),
+        ]
+        if(selected_entry is not None and option_list and selected_entry is not option_list[0]):
+            hints.append(BottomBarHint(ControllerInput.X, Language.label("forgetText", "Forget")))
+        return hints
+
     def show_bluetooth_menu(self):
         try:
             selected = Selection(None, None, 0)
@@ -137,6 +147,7 @@ class BluetoothMenu:
                         top_bar_text=Language.label("bluetoothConfiguration", "Bluetooth Configuration"), 
                         options=option_list,
                         selected_index=selected.get_index()) #always reset to the top in case devices change during a scan
+                list_view.set_bottom_bar_hints_provider(lambda entry: self._get_bottom_bar_hints(entry, option_list))
 
                 accepted_inputs = [ControllerInput.A, ControllerInput.DPAD_LEFT, ControllerInput.DPAD_RIGHT,
                                                     ControllerInput.L1, ControllerInput.R1, ControllerInput.X]

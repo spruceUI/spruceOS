@@ -16,7 +16,7 @@ class EmptyView(View):
         pass
 
     def _render(self):
-        Display.clear(Language.no_entries_found())
+        Display.clear(Language.no_entries_found(), bottom_bar_hints=self.get_bottom_bar_hints())
         Display.render_text_centered(Language.no_entries_found(),Device.get_device().screen_width()//2, Device.get_device().screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
         Display.present()
         

@@ -12,6 +12,7 @@ from menus.games.utils.favorites_manager import FavoritesManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from menus.common.bottom_bar import BottomBarHint
 from utils.logger import PyUiLogger
 from utils.user_prompt import UserPrompt
 from views.grid_or_list_entry import GridOrListEntry
@@ -182,6 +183,15 @@ class GameConfigMenu:
                     2000,
                 )
 
+    def _get_bottom_bar_hints(self, selected_entry):
+        hints = [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("backText", "Back")),
+        ]
+        if(selected_entry is not None and selected_entry.get_extra_data() == "overridable"):
+            hints.append(BottomBarHint(ControllerInput.X, Language.label("toggleOverrideText", "Toggle Override")))
+        return hints
+
     def show_config(self, rom_file_path) :
         self.game_system.game_system_config.reload_config()
         selected = Selection(None, None, 0)
@@ -250,6 +260,7 @@ class GameConfigMenu:
                             image_path_selected=None,
                             description=None,
                             icon=None,
+                            extra_data="overridable",
                             value=lambda input_value, entry_name=name, rom_file_path=rom_file_path, contains_override=contains_override,
                                 all_options=option.get('options', []), current_value=effective_value,
                                 update_value=self.game_system.game_system_config.set_menu_option,
@@ -292,12 +303,13 @@ class GameConfigMenu:
 
             config_list.extend(self.gen_additional_game_options())
 
-            if(view is None):        
+            if(view is None):
                 view = ViewCreator.create_view(
                     view_type=ViewType.ICON_AND_DESC,
                     top_bar_text=Language.label("gameConfigurationTitle", "{system} Configuration").replace("{system}", self.game_system.display_name),
                     options=config_list,
                     selected_index=selected.get_index())
+                view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
             else:
                 view.set_options(config_list)
 

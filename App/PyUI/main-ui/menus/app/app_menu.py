@@ -9,6 +9,7 @@ from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.app_utils import AppUtils
 from menus.app.hidden_apps_manager import AppsManager
+from menus.common.bottom_bar import BottomBarHint
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.activity.activity_tracker import ActivityTracker
@@ -85,6 +86,12 @@ class AppMenu:
                 )
 
                 
+    def _get_bottom_bar_hints(self, selected_entry):
+        hints = [BottomBarHint(ControllerInput.A, Language.label("launchText", "Launch"))]
+        if(not Theme.skip_main_menu()):
+            hints.append(BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text())))
+        return hints
+
     def run_app_selection(self) :
         running = True
     
@@ -134,6 +141,7 @@ class AppMenu:
                     top_bar_text=Language.apps(), 
                     options=app_list,
                     selected_index=selected.get_index())
+                view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
             else:
                 view.set_options(app_list)
             

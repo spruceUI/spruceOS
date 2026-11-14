@@ -1,0 +1,7 @@
+Icons: tenlevels
+
+RetroActive icon set -- baxysquare, baxy-retroarch-themes
+  https://github.com/baxysquare/baxy-retroarch-themes  (MIT License)
+EasyRPG swirl -- the EasyRPG Project (easyrpg.org)
+
+System names, logos and hardware designs belong to their respective owners.

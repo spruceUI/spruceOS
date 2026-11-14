@@ -218,7 +218,7 @@ class CarouselView(View):
                 Display.set_new_bg(bg, is_custom_theme_background=True)
 
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
-            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True, bottom_bar_hints=self.get_bottom_bar_hints())
         elif(self.set_bottom_bar_text_to_selection):
             Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
         else:

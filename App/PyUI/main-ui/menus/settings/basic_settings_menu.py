@@ -13,6 +13,7 @@ from menus.settings.sound_settings import SoundSettings
 from menus.settings.tasks_menu import TasksMenu
 from menus.settings.theme.theme_selection_menu import ThemeSelectionMenu
 from menus.settings.theme.theme_settings_menu import ThemeSettingsMenu
+from menus.common.bottom_bar import BottomBarHint
 from themes.theme import Theme
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -127,6 +128,15 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
         if (input == ControllerInput.A):
             SoundSettings().show_menu()
 
+
+    def get_bottom_bar_hints(self, selected_entry):
+        hints = [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("backText", "Back")),
+        ]
+        if(selected_entry is not None and selected_entry.get_primary_text() == Language.theme()):
+            hints.append(BottomBarHint(ControllerInput.X, Language.theme_settings()))
+        return hints
 
     def build_options_list(self):
         option_list = []
@@ -301,6 +311,7 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
                     top_bar_text=Language.settings(), 
                     options=option_list,
                     selected_index=selected.get_index())
+                list_view.set_bottom_bar_hints_provider(self.get_bottom_bar_hints)
                     
                 self.theme_changed = False
             else:
