@@ -409,6 +409,21 @@ flip_shield_session() {
     :
 }
 
+# The Mali Vulkan driver, the Vulkan loader and Arm's window-system layer are
+# not in the firmware; they ship in spruce/flip/vulkan. libstdc++ comes from
+# bind_glibc.sh. The layer is found through XDG_CONFIG_DIRS, not XDG_CONFIG_HOME:
+# PPSSPP keeps its own config under XDG_CONFIG_HOME.
+device_vulkan_env() {
+    _vk=/mnt/SDCARD/spruce/flip/vulkan
+    [ -f "$_vk/lib/libMaliVulkan.so.1" ] || return 1
+    export VK_ICD_FILENAMES="$_vk/vulkan/icd.d/mali.json"
+    export XDG_CONFIG_DIRS="$_vk/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}"
+    export LD_LIBRARY_PATH="$_vk/loader:$_vk/lib:${LD_LIBRARY_PATH:-/usr/lib:/lib}"
+    export SDL_VIDEODRIVER=KMSDRM
+    export SDL_AUDIODRIVER=alsa
+    unset DISPLAY WAYLAND_DISPLAY
+}
+
 flip_start_vendor_services() {
     /usr/miyoo/bin/btmanager &
     /usr/miyoo/bin/hardwareservice &
