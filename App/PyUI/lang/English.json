@@ -13,8 +13,7 @@
         "SHADOWED": "Shadowed Size",
         "SHADOWED_BACKDROP": "Shadowed Backdrop Size",
         "SHADOWED_SMALL": "Shadowed Small Size",
-        "SHADOWED_BACKDROP_SMALL": "Shadowed Backdrop Small Size",
-        "BOTTOM_BAR_HINT": "Bottom Bar Hint Size"
+        "SHADOWED_BACKDROP_SMALL": "Shadowed Backdrop Small Size"
     },
     "Games": "Games",
     "Recents": "Recents",
@@ -339,13 +338,6 @@
     "updatingWifiConfig": "Updating config file for {ssid} with password {password}",
     "confirmText": "Okay",
     "backText": "Back",
-    "launchText": "Launch",
-    "openText": "Open",
-    "optionsText": "Options",
-    "selectText": "Select",
-    "closeText": "Close",
-    "forgetText": "Forget",
-    "toggleOverrideText": "Toggle Override",
     "cloudflareOfflineAborting": "Cloudflare ping failed; device is offline. Aborting.",
     "scrapingBoxartPatient": "Scraping box art. Please be patient, especially with large libraries!",
     "scrapingComplete": "Scraping complete!",
