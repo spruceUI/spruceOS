@@ -1,4 +1,5 @@
 {
+    "showBottomBar": true,
     "name": "Spruce",
     "author": "tenlevels",
     "description": "spruce theme for a30",
@@ -15,7 +16,8 @@
     "hint": {
         "font": "nunwen.ttf",
         "size": 25,
-        "color": "#EBDBB2"
+        "color": "#EBDBB2",
+        "contextbuttons": true
     },
     "currentpage": {
         "font": "nunwen.ttf",
@@ -75,5 +77,6 @@
                 "color": "#88CC88"
             }
         ]
-    }
+    },
+    "gameSelectionViewType": "GRID"
 }
