@@ -15,14 +15,38 @@ INTER_WORD_GAP=1.4
 
 ##### FUNCTIONS #####
 
-# Run in the background: waiting for a button here would hold up the forced shutdown.
+# Ask the running main PyUI instance to display the warning.
 show_low_battery_warning() {
-    start_pyui_message_writer 1
-    log_and_display_message "Battery has $current_battery_percent% left. Charge or shutdown your device."
-    sleep 1
-    acknowledge
-    sleep 0.5
-    stop_pyui_message_writer
+    message="Battery has $current_battery_percent% left. Charge or shutdown your device."
+    pyui_config="/mnt/SDCARD/App/PyUI/py-ui-config.json"
+
+    # Preserve the original spruce.log entry.
+    log_message "$message"
+
+    request_file="$(
+        jq -r '.externalMessagePath // empty' "$pyui_config" 2>/dev/null
+    )"
+
+    # Fall back to the existing return-from-game warning path.
+    if [ -z "$request_file" ]; then
+        flag_add "low_battery" --tmp
+        return
+    fi
+
+    request_tmp="${request_file}.$$"
+
+    if ! printf '%s\n' "$message" > "$request_tmp" \
+        || ! mv "$request_tmp" "$request_file"; then
+        rm -f "$request_tmp"
+        flag_add "low_battery" --tmp
+        return
+    fi
+
+    # Wake the main PyUI input wait. Other PyUI modes ignore SIGWINCH.
+    if ! pkill -WINCH -f '/App/PyUI/main-ui/[m]ainui[.]py'; then
+        rm -f "$request_file"
+        flag_add "low_battery" --tmp
+    fi
 }
 
 morse_code_sos() {
@@ -102,11 +126,11 @@ while true; do
             else
                 if [ "$flag_added" = false ]; then
                     # On the Mini, starting a writer runs freemma, which clears the running menu.
-                    if flag_check "in_menu" && [ "$PLATFORM" != "MiyooMini" ]; then
-                        show_low_battery_warning &
-                    else
-                        flag_add "low_battery" --tmp
-                    fi
+                    if flag_check "in_menu"; then
+					    show_low_battery_warning &
+					else
+					    flag_add "low_battery" --tmp
+					fi
                     flag_added=true
                 fi
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
