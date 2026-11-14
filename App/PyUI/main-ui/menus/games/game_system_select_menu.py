@@ -7,6 +7,7 @@ from games.utils.game_system import GameSystem
 from menus.games.game_select_menu import GameSelectMenu
 from menus.games.game_system_select_menu_popup import GameSystemSelectMenuPopup
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from menus.common.bottom_bar import BottomBarHint
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.py_ui_state import PyUiState
@@ -329,6 +330,12 @@ class GameSystemSelectMenu:
                 break
         return systems_list, selected
 
+    def _get_bottom_bar_hints(self, selected_entry):
+        hints = [BottomBarHint(ControllerInput.A, Language.label("openText", "Open"))]
+        if(not Theme.skip_main_menu()):
+            hints.append(BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text())))
+        return hints
+
     def run_system_selection(self) :
         if(self.selected is not None):
             if(PyUiState.get_in_game_selection_screen()):
@@ -382,6 +389,7 @@ class GameSystemSelectMenu:
                         grid_view_wrap_around_single_row=Theme.get_system_select_grid_wrap_around_single_row(),
                         veritcal_carousel=Theme.get_system_select_use_vertical_carousel()
                      )
+            view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
         else:
             view.set_options(self.systems_list)
 

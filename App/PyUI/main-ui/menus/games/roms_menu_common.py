@@ -13,6 +13,8 @@ from menus.games.utils.collections_manager import CollectionsManager
 from menus.games.utils.recents_manager import RecentsManager
 from menus.games.utils.rom_info import RomInfo
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
+from menus.common.bottom_bar import BottomBarHint
+from menus.language.language import Language
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -129,8 +131,23 @@ class RomsMenuCommon(ABC):
     def get_image_resize_height_multiplier(self):
         return None
     
+    def _get_bottom_bar_hints(self, selected_entry):
+        back = BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text()))
+        if(selected_entry is None):
+            return [back]
+        value = selected_entry.get_value()
+        rom_path = getattr(value, "rom_file_path", None) or getattr(selected_entry, "rom_file_path", None)
+        is_openable = getattr(value, "is_collection", False) or (rom_path is not None and os.path.isdir(rom_path))
+        hints = [
+            BottomBarHint(ControllerInput.A, Language.label("openText", "Open") if is_openable else Language.label("launchText", "Launch")),
+            back,
+        ]
+        if(not self.support_only_game_launching):
+            hints.append(BottomBarHint(ControllerInput.X, Language.label("optionsText", "Options")))
+        return hints
+
     def create_view(self, page_name, rom_list, selected):
-        return ViewCreator.create_view(
+        view = ViewCreator.create_view(
                         view_type=self.get_view_type(),
                         top_bar_text=page_name,
                         options=rom_list,
@@ -158,6 +175,8 @@ class RomsMenuCommon(ABC):
                         icon_and_desc_use_image_in_place_of_icon=True,
                         veritcal_carousel=self.get_game_select_use_vertical_carousel(),
                         )
+        view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
+        return view
 
     def _build_rom_list(self, verify_system=True):
         rom_list = self._get_rom_list()
