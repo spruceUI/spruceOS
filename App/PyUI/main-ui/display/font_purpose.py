@@ -15,5 +15,4 @@ class FontPurpose(Enum):
     SHADOWED = auto()
     SHADOWED_BACKDROP = auto()
     SHADOWED_SMALL = auto()
-    SHADOWED_BACKDROP_SMALL = auto()
-    BOTTOM_BAR_HINT = auto()
+    SHADOWED_BACKDROP_SMALL = auto()    
