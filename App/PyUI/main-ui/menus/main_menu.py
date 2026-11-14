@@ -5,6 +5,7 @@ from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from menus.language.language import Language
+from menus.common.bottom_bar import BottomBarHint
 from themes.theme import Theme
 from utils.logger import PyUiLogger
 from utils.py_ui_state import PyUiState
@@ -159,8 +160,11 @@ class MainMenu:
             
         return self.reorder_options(Theme.get_main_menu_option_ordering(),image_text_list)
 
+    def _get_bottom_bar_hints(self, selected_entry):
+        return [BottomBarHint(ControllerInput.A, Language.label("openText", "Open"))]
+
     def build_main_menu_view(self, options, selected):
-        return ViewCreator.create_view(
+        view = ViewCreator.create_view(
             view_type=Theme.get_view_type_for_main_menu(),
             top_bar_text=Theme.get_main_menu_title(), 
             options=options, 
@@ -174,6 +178,8 @@ class MainMenu:
             grid_view_wrap_around_single_row=Theme.get_main_menu_grid_wrap_around_single_row(),
             veritcal_carousel=Theme.get_main_menu_use_vertical_carousel()
         )
+        view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
+        return view
 
     def launch_selection(self, selection):
         if("Game" == selection):
@@ -229,6 +235,7 @@ class MainMenu:
 
     def run_main_menu_selection(self):
         if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            (Path(__file__).resolve().parent.parent.parent / "pyui_gs_trigger").unlink(missing_ok=True)
             from menus.games.just_games_menu import JustGamesMenu
             while(True):
                 JustGamesMenu().run_rom_selection()

@@ -79,6 +79,7 @@ get_core_folder() {
         "pcsx_rearmed_libretro.so") echo "PCSX-ReARMed-$(arch_suffix)" ;;
         "picodrive_libretro.so") echo "PicoDrive" ;;
         "pokedaisy_gba_libretro.so"|"pokedaisy_gbc_libretro.so") echo "PokeDaisy" ;;
+        "pokedaisy_ds_libretro.so") echo "PokeDaisy DS" ;;
         "pokemini_libretro.so") echo "PokeMini" ;;
         "potator_libretro.so") echo "Potator" ;;
         "ppsspp_libretro.so") echo "PPSSPP" ;;

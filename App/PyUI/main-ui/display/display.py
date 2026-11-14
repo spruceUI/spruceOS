@@ -115,6 +115,7 @@ class Display:
     background_texture = None
     top_bar_text = None
     bottom_bar_text = None
+    bottom_bar_hints = None
     _add_index_last_args = None
     is_custom_theme_background = None
     _glyph_cache = {}
@@ -519,7 +520,8 @@ class Display:
               hide_top_bar_icons = False,
               bottom_bar_text = None,
               render_bottom_bar_icons_and_images = True,
-              force_top_and_bottom_bar = False):
+              force_top_and_bottom_bar = False,
+              bottom_bar_hints = None):
         cls.top_bar_text = top_bar_text
         cls._frame_draws.append(("clear", cls.bg_path, cls.is_custom_theme_background,
                                  cls.bg_canvas, cls.background_texture))
@@ -537,8 +539,9 @@ class Display:
 
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
-            cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
+            cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images, bottom_bar_hints=bottom_bar_hints)
         cls.bottom_bar_text = bottom_bar_text
+        cls.bottom_bar_hints = bottom_bar_hints
 
     @classmethod
     def _log(cls, msg):
@@ -1201,11 +1204,12 @@ class Display:
 
             if Theme.render_top_and_bottom_bar_last():
                 cls.top_bar.render_top_bar(cls.top_bar_text)
-                cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text)
+                cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text, bottom_bar_hints=cls.bottom_bar_hints)
                 if cls._add_index_last_args is not None:
                     cls.add_index_text(*cls._add_index_last_args)
                     cls._add_index_last_args = None
                 cls.bottom_bar_text = None
+                cls.bottom_bar_hints = None
 
             cls._copy_canvas_to_window(fade)
             cls.pace_frame()
@@ -1541,6 +1545,17 @@ class Display:
                     RenderMode.BOTTOM_RIGHT_ALIGNED
                 )
 
+
+    @classmethod
+    def get_font_baseline_offset(cls, purpose):
+        # Pixels from a text texture's bottom up to its baseline, where the
+        # bottoms of capital glyphs sit. (TTF_FontDescent is not this: it is
+        # signed, and includes how far descenders reach below the baseline.)
+        try:
+            font = cls.fonts[purpose].font
+            return int(sdl2.sdlttf.TTF_FontHeight(font) - sdl2.sdlttf.TTF_FontAscent(font))
+        except Exception:
+            return 0
 
     @classmethod
     def get_current_top_bar_title(cls):

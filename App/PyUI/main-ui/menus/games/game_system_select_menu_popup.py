@@ -15,6 +15,7 @@ from menus.games.utils import raproxy_cli
 from menus.games.utils.rom_file_name_utils import RomFileNameUtils
 from menus.games.utils.rom_select_options_builder import get_rom_select_options_builder
 from menus.language.language import Language
+from menus.common.bottom_bar import BottomBarHint
 from themes.theme import Theme
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.logger import PyUiLogger
@@ -193,7 +194,11 @@ class GameSystemSelectMenuPopup:
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
-                        
+        popup_view.set_bottom_bar_hints_provider(lambda entry: [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("closeText", "Close")),
+        ])
+
 
         while (popup_selection := popup_view.get_selection(select_controller_inputs=[ControllerInput.A, ControllerInput.MENU])):
             if(popup_selection.get_input() is not None):

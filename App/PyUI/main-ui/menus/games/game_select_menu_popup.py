@@ -29,6 +29,7 @@ from views.view_type import ViewType
 
 
 from menus.language.language import Language
+from menus.common.bottom_bar import BottomBarHint
 
 class GameSelectMenuPopup:
     def __init__(self):
@@ -332,6 +333,10 @@ class GameSelectMenuPopup:
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
+        popup_view.set_bottom_bar_hints_provider(lambda entry: [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("closeText", "Close")),
+        ])
 
 
         while (popup_selection := popup_view.get_selection(select_controller_inputs=[ControllerInput.A, ControllerInput.MENU])):

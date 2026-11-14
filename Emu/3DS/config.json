@@ -3,7 +3,7 @@
   "icon": "dsi.png",
   "iconsel": "dsi_sel.png",
   "themecolor": "AA1111",
-  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "launch": "launch-vulkan.sh",
   "requiredfiles": [],
   "extlist": "3ds|3dsx|z3dsx|elf|axf|cci|zcci|cxi|zcxi|app",
   "launchlist": [],
@@ -17,6 +17,17 @@
       ],
       "selected": "Overclock",
       "overrides": {}
+    },
+    "raBuild": {
+      "display": "RetroArch Build",
+      "options": [
+        "64-bit"
+      ],
+      "selected": "64-bit",
+      "overrides": {},
+      "devices": [
+        "MIYOO_FLIP"
+      ]
     }
   },
   "sortOrder": 4010,
@@ -31,7 +42,8 @@
     "RGB20SX",
     "MINILOONG_POCKET1",
     "RG353M",
-    "E5PLUS"
+    "E5PLUS",
+    "MIYOO_FLIP"
   ],
   "alternativeFolderNames": [
     "n3ds",
