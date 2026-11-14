@@ -26,6 +26,7 @@ from menus.games.utils.rom_info import RomInfo
 from utils import throttle
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.py_ui_config import PyUiConfig
+from menus.language.language import Language
 
 MAX_VOLUME = 20
 MIN_RAW_VALUE = -60
@@ -896,7 +897,7 @@ class MiyooMiniCommon(MiyooDevice):
             menu_options = rom_info.game_system.game_system_config.get_menu_options()
             selected_core = self.get_selected_emulator(menu_options)
             if(selected_core is None):
-                Display.display_message("No core found", 2_000)
+                Display.display_message(Language.label("noCoreFound", "No core found"), 2_000)
                 return
 
             selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores/" + selected_core + "_libretro.so"

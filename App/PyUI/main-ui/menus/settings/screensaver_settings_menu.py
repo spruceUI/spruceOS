@@ -332,7 +332,7 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
                 Display.render_text(text, int(w * 0.22), start_y + index * 42, color_tuple, FontPurpose.LIST, RenderMode.TOP_LEFT_ALIGNED)
 
             Display.render_text(hex_color, int(w * 0.5), start_y + 145, (102, 247, 255), FontPurpose.LIST, RenderMode.TOP_CENTER_ALIGNED)
-            Display.render_text("Up/Down channel  Left/Right +/-1  L1/R1 +/-10  X reset  A save  B cancel",
+            Display.render_text(Language.get("screensaverColorPickerKeys", "Up/Down channel  Left/Right +/-1  L1/R1 +/-10  X reset  A save  B cancel"),
                 int(w * 0.5), h - 55, (170, 170, 170), FontPurpose.LIST, RenderMode.TOP_CENTER_ALIGNED)
             Display.present()
 
@@ -483,13 +483,14 @@ class ScreenSaverSettingsMenu(settings_menu.SettingsMenu):
             "#FF4040": "Red",
             "#80FF72": "Green",
         }
-        return labels.get(color, color)
+        label = labels.get(color)
+        return Language.translate("colorNames", label) if label else color
 
     def build_options_list(self):
         option_list = []
 
         timeout = Theme.get_screensaver_timeout_sec()
-        timeout_text = f"{timeout // 60}m {timeout % 60}s" if timeout > 0 else Language.get("off", "Off")
+        timeout_text = Language.get("minutesSecondsFormat", "{minutes}m {seconds}s").replace("{minutes}", str(timeout // 60)).replace("{seconds}", str(timeout % 60)) if timeout > 0 else Language.get("off", "Off")
         option_list.append(
             GridOrListEntry(
                 primary_text=Language.get("screensaverTimeout", "Timeout"),

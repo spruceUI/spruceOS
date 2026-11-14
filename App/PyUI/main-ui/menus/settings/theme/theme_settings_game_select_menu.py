@@ -103,7 +103,7 @@ class ThemeSettingsGameSelectMenu(ThemeSettingsMenuCommon):
         option_list = []
         option_list.append(
             self.build_enabled_disabled_entry(
-                "Vertical Carousel",
+                Language.label("verticalCarousel", "Vertical Carousel"),
                 Theme.get_game_select_use_vertical_carousel,
                 Theme.set_game_select_use_vertical_carousel)
         )

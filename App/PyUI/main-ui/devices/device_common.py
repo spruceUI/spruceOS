@@ -40,7 +40,7 @@ class DeviceCommon(AbstractDevice):
         from controller.controller import Controller
         while(True):
             PyUiLogger.get_logger().info("Prompting for shutdown")
-            Display.clear("Power")
+            Display.clear(Language.label("powerTitle", "Power"))
             Display.render_text_centered(Language.label("powerDownPrompt", "Would you like to power down?"),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             if(self.reboot_cmd() is not None):
                 Display.render_text_centered(Language.label("powerDownOptionsWithReboot", "A = Power Down, X = Reboot, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)

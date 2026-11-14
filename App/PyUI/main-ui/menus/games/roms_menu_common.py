@@ -148,7 +148,7 @@ class RomsMenuCommon(ABC):
     def create_view(self, page_name, rom_list, selected):
         view = ViewCreator.create_view(
                         view_type=self.get_view_type(),
-                        top_bar_text=page_name,
+                        top_bar_text=Language.translate("pageTitles", page_name),
                         options=rom_list,
                         selected_index=selected.get_index(),
                         rows=self.get_game_select_row_count(),
