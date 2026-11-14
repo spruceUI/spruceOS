@@ -134,7 +134,8 @@ class BasicSettingsMenu(settings_menu.SettingsMenu):
             BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
             BottomBarHint(ControllerInput.B, Language.label("backText", "Back")),
         ]
-        if(selected_entry is not None and selected_entry.get_primary_text() == Language.theme()):
+        if(selected_entry is not None and selected_entry.get_primary_text() == Language.theme()
+                and not Device.get_device().get_system_config().simple_mode_enabled()):
             hints.append(BottomBarHint(ControllerInput.X, Language.theme_settings()))
         return hints
 

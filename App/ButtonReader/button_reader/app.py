@@ -709,6 +709,20 @@ class Session:
         if held >= self.exit_hold:
             self.begin_exit(f"{self.names.describe(control)} held {self.exit_hold:.0f} s", now)
 
+    def drop(self, node):
+        """Forget a node that went away (an unplugged pad); rescan reopens it if it comes back."""
+        index = self.nodes.index(node)
+        del self.nodes[index]
+        if index < len(self.infos):
+            del self.infos[index]
+        node.close()
+        for table in (self.pad.pressed, self.pad.values, self.pad.info, self.pad.push, self.pad.rest):
+            for key in [k for k in table if k[0] == node.short]:
+                del table[key]
+        self.pad.touch.discard(node.short)
+        self.log.info(f"{node.path} went away")
+        self.dirty = True
+
     def rescan(self):
         """Open nodes that appeared since (a USB or Bluetooth pad); one that won't open is not retried."""
         known = {n.path for n in self.nodes} | self.failed
@@ -860,9 +874,13 @@ class Session:
                 if not fds:
                     time.sleep(0.02)
                 now = self.clock()
-                for node in self.nodes:
+                for node in list(self.nodes):
                     if node.fd in ready:
-                        for etype, code, value in node.read():
+                        events = node.read()
+                        if events is None:
+                            self.drop(node)
+                            continue
+                        for etype, code, value in events:
                             self.on_event(node, etype, code, value, now)
                 self.tick(now)
                 if now - last_rescan > RESCAN_SECONDS and self.desktop is None:
