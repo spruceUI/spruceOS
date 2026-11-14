@@ -68,6 +68,9 @@ run_ppsspp() {
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR"
 
+	# A Vulkan driver shipped outside the firmware (Flip), for the Vulkan backend
+	command -v device_vulkan_env >/dev/null 2>&1 && device_vulkan_env
+
 	case "$PLATFORM" in
 		# PowerVR devices need mali-fbdev SDL video driver and global alpha mode
 		"Brick"|"BrickOakMOSS"|"SmartPro"|"BrickPro"|"Zero28"|"Zero40"|"XU20"|"V90S"|"V20")
