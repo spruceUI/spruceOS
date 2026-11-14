@@ -132,16 +132,15 @@ class RomsMenuCommon(ABC):
         return None
     
     def _get_bottom_bar_hints(self, selected_entry):
-        back = BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text()))
+        back = [] if self.support_only_game_launching else [BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text()))]
         if(selected_entry is None):
-            return [back]
+            return back
         value = selected_entry.get_value()
         rom_path = getattr(value, "rom_file_path", None) or getattr(selected_entry, "rom_file_path", None)
         is_openable = getattr(value, "is_collection", False) or (rom_path is not None and os.path.isdir(rom_path))
         hints = [
             BottomBarHint(ControllerInput.A, Language.label("openText", "Open") if is_openable else Language.label("launchText", "Launch")),
-            back,
-        ]
+        ] + back
         if(not self.support_only_game_launching):
             hints.append(BottomBarHint(ControllerInput.X, Language.label("optionsText", "Options")))
         return hints
