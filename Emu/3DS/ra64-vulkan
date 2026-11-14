@@ -1,0 +1,29 @@
+#!/bin/sh
+EMU_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+R="$EMU_DIR/runtime"
+V="$EMU_DIR/vulkan"
+mkdir -p "$EMU_DIR/logs"
+exec >>"$EMU_DIR/logs/launcher.log" 2>&1
+
+for REQUIRED in "$R/ra64.universal" "$V/loader/libvulkan.so.1" "$V/lib/libMaliVulkan.so.1"; do
+    if [ ! -f "$REQUIRED" ]; then
+        echo "Azahar Flip: missing $REQUIRED"
+        exit 1
+    fi
+done
+
+export XDG_CONFIG_HOME="$V/xdg"
+export VK_ICD_FILENAMES="$V/vulkan/icd.d/mali.json"
+export SDL_VIDEODRIVER=KMSDRM
+export SDL_AUDIODRIVER=alsa
+unset DISPLAY WAYLAND_DISPLAY
+
+# Explicit private loader: the installed core needs glibc >= 2.38 and
+# GLIBCXX_3.4.32. The loader copy is named ra64.universal so spruce's process
+# discovery, menu button and exit actions recognize the running emulator.
+# Do not replace the system libc or expose this path to shells.
+exec "$R/ra64.universal" \
+    --library-path "$R:$V/loader:$V/lib:${LD_LIBRARY_PATH:-/usr/lib:/lib}" \
+    /mnt/SDCARD/RetroArch/ra64.universal "$@" \
+    --appendconfig "$EMU_DIR/vulkan.cfg" \
+    --log-file "$EMU_DIR/logs/retroarch.log"

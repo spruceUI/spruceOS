@@ -1,0 +1,19 @@
+The Vulkan driver/loader stack is copied unchanged from this workspace's
+previously tested Miyoo Flip Deadcast package. The Arm WSI layer's MIT license
+is included as vulkan-wsi-layer.txt. The Mali ICD retains its original license;
+this package is a local compatibility adaptation for the same user's device.
+
+The private runtime is from Arm GNU Toolchain 14.2.rel1, GCC 14.2.1.
+glibc libraries: GNU LGPL 2.1 or later.
+libstdc++ and libgcc: GNU GPL 3 with the GCC Runtime Library Exception 3.1.
+The runtime binaries were stripped without changing their executable code.
+runtime/ra64.universal is a copy of the toolchain's dynamic loader, named for
+spruce's process detection; it is not another RetroArch executable.
+
+Upstream toolchain and corresponding source bundles:
+https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads
+https://gcc.gnu.org/releases.html
+https://www.gnu.org/software/libc/
+
+RetroArch and Azahar remain the copies already installed by spruceOS and are
+not distributed in this package.
