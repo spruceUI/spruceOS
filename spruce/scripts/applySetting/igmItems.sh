@@ -23,7 +23,8 @@ igm_items_write() {
          ["disc","igmDisc"], ["screenshot","igmScreenshot"],
          ["undo_save","igmUndoSave"], ["undo_load","igmUndoLoad"],
          ["show_fps","igmShowFps"], ["mute","igmMute"],
-         ["rewind","igmRewind"], ["shader","igmShader"]] as $map
+         ["rewind","igmRewind"], ["shader","igmShader"],
+         ["cheats","igmCheats"]] as $map
         | [$map[][0]] as $canon
         | ($cfg[0].menuOptions."In-Game Menu Settings" // {}) as $opts
         | [$map[] | select(($opts[.[1]].selected // "True") == "True") | .[0]] as $on

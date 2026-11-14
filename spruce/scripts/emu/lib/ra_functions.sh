@@ -336,6 +336,13 @@ run_retroarch() {
 
 	apply_baseos_ra_overlay
 
+	# Cheats turned on in the in-game menu are saved per game; this re-applies
+	# them at launch. RetroArch takes one --appendconfig, joined with "|".
+	case "$RA_PARAMS" in
+		*--appendconfig*) RA_PARAMS="${RA_PARAMS}|$RA_DIR/spruce-cheats.cfg" ;;
+		*) RA_PARAMS="${RA_PARAMS} --appendconfig $RA_DIR/spruce-cheats.cfg" ;;
+	esac
+
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
 	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).

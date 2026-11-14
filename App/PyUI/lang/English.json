@@ -458,6 +458,8 @@
         "Show Mute toggle": "Show Mute toggle",
         "Show Rewind toggle": "Show Rewind toggle",
         "Show Shader toggle": "Show Shader toggle",
+        "Show Cheats": "Show Cheats",
+        "Shown for games with a .cht file in RetroArch/.retroarch/cheats": "Shown for games with a .cht file in RetroArch/.retroarch/cheats",
         "Wake on lid open": "Wake on lid open",
         "Shoulder LED color": "Shoulder LED color",
         "Shoulder LED brightness": "Shoulder LED brightness",
