@@ -1,3 +1,14 @@
+Arm Vulkan WSI layer (libVkLayer_window_system_integration)
+https://gitlab.freedesktop.org/mesa/vulkan-wsi-layer
+
+Copyright (c) 2019 Arm Limited
+
+Licensed under the MIT License
+
+Shipped in spruce/flip/vulkan/xdg/vulkan/implicit_layer.d
+
+---
+
 Copyright (c) 2019 Arm Limited.
 
 SPDX-License-Identifier: MIT
