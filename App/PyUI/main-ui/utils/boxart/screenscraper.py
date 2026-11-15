@@ -187,13 +187,18 @@ class ScreenScraper:
             yield
 
     def box_art_url(self, system_id: int, rom_path: str, rom_name: str, spruce_region,
-                    max_width: int, max_height: int) -> Optional[str]:
-        """URL of the front box for a ROM, or None. Raises ScreenScraperError to stop the run."""
+                    max_width: int, max_height: int, cancelled=None) -> Optional[str]:
+        """URL of the front box for a ROM, or None. Raises ScreenScraperError to stop the run.
+
+        cancelled: checked once a thread is free, so a stopped run skips lookups still queued.
+        """
         found = rom_hash(rom_path)
         if not found:
             return None
         crc, size, file_name = found
         with self.slot():
+            if cancelled is not None and cancelled():
+                return None
             data = self._get("jeuInfos.php", romtype="rom", systemeid=system_id,
                              romnom=file_name, romtaille=size, crc=crc)
         game = (data or {}).get("response", {}).get("jeu")

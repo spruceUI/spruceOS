@@ -1,10 +1,9 @@
 from collections.abc import Set
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
 import os
 from pathlib import Path
 import subprocess
 import re
-import threading
 import time
 from typing import List, Optional
 from urllib.parse import quote
@@ -595,8 +594,12 @@ class BoxArtScraper:
             return None
         
     def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str, rom_path: str = None) -> bool:
+        if self.cancelled:
+            return False
         if rom_path and self._download_from_screenscraper(sys_name, rom_file_name, rom_path, image_path):
             return True
+        if self.cancelled:
+            return False
 
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
@@ -640,7 +643,8 @@ class BoxArtScraper:
             return False
         width, height = Device.get_device().get_boxart_large_resize_dimensions()
         try:
-            url = self.screenscraper.box_art_url(system_id, rom_path, rom_name, self.preferred_region, width, height)
+            url = self.screenscraper.box_art_url(system_id, rom_path, rom_name, self.preferred_region,
+                                                 width, height, cancelled=lambda: self.cancelled)
         except ScreenScraperError as e:
             self.screenscraper.stop(e.kind)
             return False
@@ -758,53 +762,43 @@ class BoxArtScraper:
         self.report_screenscraper_stop()
         BoxArtResizer.patch_boxart_list([entry[1] for entry in roms_and_paths])
 
+    @staticmethod
+    def _cancel_pressed() -> bool:
+        # Polled on this, the main, thread: SDL only delivers input to the thread that set up
+        # video, so a watcher thread never saw B on a device.
+        pressed = Controller.controller_interface.get_input(1)
+        return Device.get_device().check_for_button_remap(pressed) == ControllerInput.B
+
     def run_scraper_tasks(self, max_workers, tasks):
         downloaded_files = []
         # Run tasks concurrently
         count = 0
         success_count = 0
         self.cancelled = False
-        
-        watcher_stop = threading.Event()
 
-        def cancelled_watcher():
-            PyUiLogger.get_logger().info("Cancellation watcher started")
-            while not watcher_stop.is_set():
-                Controller.get_input()
-                if Controller.last_input() == ControllerInput.B:
-                    self.cancelled = True
-                    PyUiLogger.get_logger().info(
-                        "BoxartScraper: Scraping cancelled by user."
-                    )
-                    break
-
-
-        watcher_thread = threading.Thread(
-            target=cancelled_watcher,
-            daemon=True
-        )
-        watcher_thread.start()
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(self.process_rom, *t) for t in tasks]
+            pending = {executor.submit(self.process_rom, *t) for t in tasks}
 
-            for future in as_completed(futures):
-                count = count +1
-                self.log_and_display_message(
-                    Language.label("scrapingBoxartProgressFound", "Scraping box art... ({count}/{total}). Found {found} so far.")
-                    .replace("{count}", str(count))
-                    .replace("{total}", str(len(tasks)))
-                    .replace("{found}", str(success_count))
-                )
-                try:
-                    result = future.result()
-                    if result: 
-                        success_count = success_count +1
-                        downloaded_files.append(result)
-                except Exception as e:
-                    PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
-
-        watcher_stop.set()
-        watcher_thread.join()
+            while pending:
+                done, pending = wait(pending, timeout=0.05, return_when=FIRST_COMPLETED)
+                for future in done:
+                    count = count +1
+                    self.log_and_display_message(
+                        Language.label("scrapingBoxartProgressFound", "Scraping box art... ({count}/{total}). Found {found} so far.")
+                        .replace("{count}", str(count))
+                        .replace("{total}", str(len(tasks)))
+                        .replace("{found}", str(success_count))
+                    )
+                    try:
+                        result = future.result()
+                        if result: 
+                            success_count = success_count +1
+                            downloaded_files.append(result)
+                    except Exception as e:
+                        PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
+                if not self.cancelled and self._cancel_pressed():
+                    self.cancelled = True
+                    PyUiLogger.get_logger().info("BoxartScraper: Scraping cancelled by user.")
 
         self.report_screenscraper_stop()
         self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
