@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 from devices.device import Device
+from menus.language.language import Language
 from utils.cached_exists import CachedExists
 from utils.logger import PyUiLogger
 
@@ -35,7 +36,6 @@ class DefaultThemePatcher():
             return False
 
         Display.clear(Language.label("patchingThemeTitle", "Patching Theme"))
-        from menus.language.language import Language
         Display.display_message(Language.label("patchingThemeAssets", "Patching theme to faster assets"))
         for dirpath, dirnames, filenames in os.walk(path):
             for filename in filenames:
