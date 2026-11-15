@@ -7,6 +7,7 @@ import re
 import threading
 import time
 from typing import List, Optional
+from urllib.parse import quote
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
@@ -100,6 +101,7 @@ class BoxArtScraper:
         self._cache = {}  # sys_name -> list of (filename, token_set)
         self._arcade_xml_cache = None  # Single global dict: rom_name -> display_name for all arcade systems
         self._folder_to_system = None  # Lazy map: on-disk ROM folder name -> canonical system name
+        self.cancelled = False
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -322,7 +324,7 @@ class BoxArtScraper:
             PyUiLogger.get_logger().warning(f"BoxartScraper: Image list file not found for {sys_name}.")
             return None
 
-        rom_without_ext = os.path.splitext(rom_file_name)[0]
+        rom_without_ext = rom_file_name
 
         # For arcade systems, use central MAME XML to get display name
         # If not found, skip this ROM entirely (don't attempt fallback matching)
@@ -619,16 +621,18 @@ class BoxArtScraper:
     def download_remote_image(self, ra_name, remote_image_name, image_path):
         CachedExists.clear()
 
-        boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
-        fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
+        image = quote(remote_image_name)
+        boxart_url = f"http://thumbnails.libretro.com/{quote(ra_name)}/Named_Boxarts/{image}"
+        fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{quote(ra_name.replace(' ', '_'))}/master/Named_Boxarts/{image}"
 
         PyUiLogger.get_logger().info(f"BoxartScraper: Downloading {boxart_url}")
-        success = self._download_file(boxart_url, image_path)
-        if not success:
-            PyUiLogger.get_logger().info(f"BoxartScraper: failed {boxart_url}, trying fallback.")
-            if not self._download_file(fallback_url, image_path):
-                PyUiLogger.get_logger().info(f"BoxartScraper: failed {fallback_url}.")
-        return success
+        if self._download_file(boxart_url, image_path):
+            return True
+        PyUiLogger.get_logger().info(f"BoxartScraper: failed {boxart_url}, trying fallback.")
+        if self._download_file(fallback_url, image_path):
+            return True
+        PyUiLogger.get_logger().info(f"BoxartScraper: failed {fallback_url}.")
+        return False
 
     @pauses_idle_shutdown
     def download_boxart_batch(
