@@ -14,11 +14,10 @@ import zipfile
 from email.utils import parsedate_to_datetime
 from urllib.request import Request, urlopen
 
-from controller.controller import Controller
-from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.display import Display
 from menus.language.language import Language
+from utils.boxart import ss_regions
 from utils.boxart.box_art_scraper import BoxArtScraper
 from utils.idle_shutdown import pauses_idle_shutdown
 from utils.logger import PyUiLogger
@@ -44,6 +43,9 @@ PREFERRED_REGIONS = {
     "jp": ["japan", "world", "usa"],
     "wor": ["world", "usa", "europe"],
 }
+_REGION_WORDS = {}
+for _word, _key in ss_regions.NAME_REGIONS.items():
+    _REGION_WORDS.setdefault(_key, _word)
 
 
 def title_key(name: str) -> str:
@@ -62,15 +64,25 @@ def _region_rank(name: str, wanted: list) -> int:
     return len(wanted)
 
 
-def match_cheat(rom_name: str, names: list, spruce_region: str):
-    """The cheat file (without .cht) for a ROM, or None. names: the system's cheat files."""
+def cheat_index(names: list):
+    """A system's cheat files by title key, and by the title before any subtitle."""
+    by_title, by_main_title = {}, {}
+    for n in names:
+        by_title.setdefault(title_key(n), []).append(n)
+        by_main_title.setdefault(title_key(_TAGS.sub("", n).split(" - ")[0]), []).append(n)
+    return by_title, by_main_title
+
+
+def match_cheat(rom_name: str, index, spruce_region: str):
+    """The cheat file (without .cht) for a ROM, or None. index: cheat_index() of the system's files."""
+    by_title, by_main_title = index
     key = title_key(rom_name)
     if not key:
         return None
-    same = [n for n in names if title_key(n) == key]
+    same = by_title.get(key, [])
     if not same and " - " not in _TAGS.sub("", rom_name):
         # libretro's title may add a subtitle ("Kwirk - He's A-maze-ing!"); only if it is one game
-        same = [n for n in names if title_key(_TAGS.sub("", n).split(" - ")[0]) == key]
+        same = by_main_title.get(key, [])
         if len({title_key(n) for n in same}) != 1:
             return None
     if not same:
@@ -81,17 +93,10 @@ def match_cheat(rom_name: str, names: list, spruce_region: str):
 
 def _region_order(rom_name: str, spruce_region) -> list:
     """Regions named in the ROM's own tags first, then spruce's preferred region."""
-    keys = []
-    for tag in re.findall(r"\(([^()]*)\)", rom_name):
-        for word in tag.split(","):
-            k = {"usa": "us", "europe": "eu", "japan": "jp", "world": "wor"}.get(word.strip().lower())
-            if k and k not in keys:
-                keys.append(k)
-    v = spruce_region.upper() if isinstance(spruce_region, str) else ""
-    keys.append("eu" if "EUR" in v else "jp" if "JAP" in v or v in ("JP", "JPN") else "wor" if "WORLD" in v else "us")
+    keys = ss_regions.regions_in_name(rom_name) + [ss_regions.key_for_spruce(spruce_region)]
     order = []
     for k in keys:
-        for region in PREFERRED_REGIONS[k]:
+        for region in PREFERRED_REGIONS.get(k, [_REGION_WORDS[k]]):
             if region not in order:
                 order.append(region)
     return order
@@ -115,10 +120,8 @@ class CheatDownloader:
         Display.display_message(text, duration_ms)
 
     def _cancel_pressed(self) -> bool:
-        if not self.cancelled:
-            pressed = Controller.controller_interface.get_input(1)
-            if Device.get_device().check_for_button_remap(pressed) == ControllerInput.B:
-                self.cancelled = True
+        if not self.cancelled and BoxArtScraper._cancel_pressed():
+            self.cancelled = True
         return self.cancelled
 
     def _download(self) -> bool:
@@ -223,7 +226,7 @@ class CheatDownloader:
                 files = by_folder.get(folder) if folder else None
                 if not files:
                     continue
-                names = [f[:-4] for f in files if not NOT_CHEATS.search(f)]
+                index = cheat_index([f[:-4] for f in files if not NOT_CHEATS.search(f)])
                 for rom in self._roms(game_system):
                     if self._cancel_pressed():
                         break
@@ -231,7 +234,7 @@ class CheatDownloader:
                     if self._has_cheats(folder, rom_name):
                         already += 1
                         continue
-                    match = match_cheat(rom_name, names, region)
+                    match = match_cheat(rom_name, index, region)
                     if not match:
                         continue
                     target_dir = os.path.join(CHEATS_DIR, folder)
