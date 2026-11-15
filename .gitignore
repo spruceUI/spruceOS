@@ -16,4 +16,4 @@ CLAUDE.md
 .scratch/
 
 # ScreenScraper developer credentials, written by the release workflows from GitHub secrets
-App/PyUI/main-ui/utils/boxart/screenscraper_dev.json
+App/PyUI/main-ui/utils/boxart/ss.bin

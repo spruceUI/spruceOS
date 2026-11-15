@@ -115,12 +115,17 @@ jobs:
           SS_DEVPASSWORD: ${{ secrets.SCREENSCRAPER_DEVPASSWORD }}
         run: |
           # Box art comes from ScreenScraper only for signed-in users of a build that has these.
-          DEV_FILE="App/PyUI/main-ui/utils/boxart/screenscraper_dev.json"
+          DEV_FILE="App/PyUI/main-ui/utils/boxart/ss.bin"
           if [ -z "$SS_DEVID" ] || [ -z "$SS_DEVPASSWORD" ]; then
             echo "No ScreenScraper developer credentials; box art stays on libretro."
             exit 0
           fi
-          jq -n --arg id "$SS_DEVID" --arg pw "$SS_DEVPASSWORD" '{devid: $id, devpassword: $pw}' > "$DEV_FILE"
+          python3 - "$DEV_FILE" <<'PY'
+          import base64, json, os, sys
+          key = b"spruceOS box art"  # same key as utils/boxart/screenscraper.py
+          raw = json.dumps({"devid": os.environ["SS_DEVID"], "devpassword": os.environ["SS_DEVPASSWORD"]}).encode()
+          open(sys.argv[1], "wb").write(base64.b64encode(bytes(b ^ key[i % len(key)] for i, b in enumerate(raw))))
+          PY
 
       - name: Create 7z archive
         run: |

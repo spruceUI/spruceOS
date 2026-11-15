@@ -2,11 +2,12 @@
 
 ScreenScraper wants a checksum and the file size with every lookup, so ROMs are matched by CRC32
 (read from the zip index when the zip holds one file, otherwise computed) rather than by name.
-spruce's developer credentials come from screenscraper_dev.json, which the release workflows
-write from GitHub secrets; without it, or without a signed-in user, callers use libretro only.
+spruce's developer credentials come from ss.bin, which the release workflows write from GitHub
+secrets; without it, or without a signed-in user, callers use libretro only.
 The user's login is kept in plain text, as Skyscraper and Scrappy keep it.
 """
 
+import base64
 import json
 import os
 import ssl
@@ -25,7 +26,10 @@ from utils.logger import PyUiLogger
 
 API = "https://api.screenscraper.fr/api2/"
 SOFTNAME = "spruceOS"
-DEV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenscraper_dev.json")
+DEV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ss.bin")
+# Not protection (the key ships beside it): only keeps the developer login out of plain-text
+# searches of release archives. The workflows encode it the same way.
+DEV_KEY = b"spruceOS box art"
 USER_FILE = "/mnt/SDCARD/Saves/spruce/screenscraper.json"
 HASH_LIMIT = 64 * 1024 * 1024
 TIMEOUT = 20
@@ -54,6 +58,16 @@ def _load(path: str) -> dict:
         return {}
 
 
+def _load_dev(path: str) -> dict:
+    try:
+        with open(path, "rb") as f:
+            raw = base64.b64decode(f.read())
+        data = json.loads(bytes(b ^ DEV_KEY[i % len(DEV_KEY)] for i, b in enumerate(raw)))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
 def rom_hash(path: str):
     """(CRC32 as 8 hex digits, size, file name) for a ROM, or None when it cannot be hashed."""
     try:
@@ -77,7 +91,7 @@ def rom_hash(path: str):
 
 class ScreenScraper:
     def __init__(self):
-        dev = _load(DEV_FILE)
+        dev = _load_dev(DEV_FILE)
         user = _load(USER_FILE)
         self.devid = str(dev.get("devid", ""))
         self.devpassword = str(dev.get("devpassword", ""))
