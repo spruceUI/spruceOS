@@ -799,9 +799,26 @@ class BoxArtScraper:
                 if not self.cancelled and self._cancel_pressed():
                     self.cancelled = True
                     PyUiLogger.get_logger().info("BoxartScraper: Scraping cancelled by user.")
+                    self.log_and_display_message(Language.label("scrapingStopping", "Stopping..."))
+                    # games not started never run; the few already downloading finish and keep their art
+                    for future in pending:
+                        future.cancel()
+                    for future in pending:
+                        if future.cancelled():
+                            continue
+                        try:
+                            result = future.result()
+                            if result:
+                                downloaded_files.append(result)
+                        except Exception as e:
+                            PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
+                    break
 
         self.report_screenscraper_stop()
-        self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
+        if self.cancelled:
+            self.log_and_display_message(Language.label("scrapingStopped", "Scraping stopped."))
+        else:
+            self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
         time.sleep(2)
         BoxArtResizer.patch_boxart_list(downloaded_files)
 

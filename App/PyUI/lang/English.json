@@ -349,6 +349,8 @@
     "cloudflareOfflineAborting": "Cloudflare ping failed; device is offline. Aborting.",
     "scrapingBoxartPatient": "Scraping box art. Please be patient, especially with large libraries!",
     "scrapingComplete": "Scraping complete!",
+    "scrapingStopping": "Stopping...",
+    "scrapingStopped": "Scraping stopped.",
     "wifiMustBeConnected": "Wifi must be connected",
     "boxartScraperTitle": "Boxart Scraper",
     "downloadMissingBoxart": "Download missing box art",
