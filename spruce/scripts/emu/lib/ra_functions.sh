@@ -643,7 +643,6 @@ save_custom_n64_controller_profile() {
 		"mupen64plus") 							core_name="Mupen64Plus GLES2" ;;
 		"parallel_n64") 						core_name="ParaLLEl N64" ;;
 		"mupen64plus_next") 					core_name="Mupen64Plus-Next" ;;
-		"armn64") 							core_name="armN64" ;;
 		*) return 0 ;; # if not a known N64 core, do nothing
 	esac
 
