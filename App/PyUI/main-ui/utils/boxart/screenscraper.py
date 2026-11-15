@@ -34,6 +34,7 @@ USER_FILE = "/mnt/SDCARD/Saves/spruce/screenscraper.json"
 HASH_LIMIT = 64 * 1024 * 1024
 TIMEOUT = 20
 BUSY_RETRIES = 5
+FAILURES_IN_A_ROW = 3
 
 # Why a run stops using ScreenScraper; the rest of the run uses libretro
 LOGIN = "login"        # user name/password (or our developer account) rejected
@@ -101,6 +102,7 @@ class ScreenScraper:
         self.threads = 1
         self._slots = threading.BoundedSemaphore(1)
         self._stop_lock = threading.Lock()
+        self._failures = 0
 
     def has_dev_credentials(self) -> bool:
         return bool(self.devid and self.devpassword)
@@ -144,14 +146,21 @@ class ScreenScraper:
         params.update(extra)
         return urlencode(params)
 
-    def _get(self, endpoint: str, **params) -> Optional[dict]:
-        """The decoded answer, or None when ScreenScraper does not know the game."""
+    def _get(self, endpoint: str, per_game: bool = False, **params) -> Optional[dict]:
+        """The decoded answer, or None when ScreenScraper does not know the game.
+
+        per_game: a timeout or unreadable reply gives None for this game; only several in a row
+        stop the run.
+        """
         url = API + endpoint + "?" + self._params(**params)
         for attempt in range(BUSY_RETRIES + 1):
             try:
                 with urlopen(url, timeout=TIMEOUT) as response:
                     body = response.read()
-                return json.loads(body.decode("utf-8", errors="replace"))
+                data = json.loads(body.decode("utf-8", errors="replace"))
+                with self._stop_lock:
+                    self._failures = 0
+                return data
             except HTTPError as e:
                 if e.code == 404:
                     return None
@@ -174,7 +183,15 @@ class ScreenScraper:
                     raise ScreenScraperError(CLOCK, str(e.reason))
                 raise ScreenScraperError(NETWORK, str(e.reason))
             except (OSError, ValueError) as e:
-                raise ScreenScraperError(NETWORK, str(e))
+                if not per_game:
+                    raise ScreenScraperError(NETWORK, str(e))
+                with self._stop_lock:
+                    self._failures += 1
+                    failures = self._failures
+                if failures >= FAILURES_IN_A_ROW:
+                    raise ScreenScraperError(NETWORK, str(e))
+                PyUiLogger.get_logger().info(f"ScreenScraper: {endpoint} failed ({e}), no result for this game")
+                return None
         return None
 
     def account(self) -> dict:
@@ -213,7 +230,7 @@ class ScreenScraper:
         with self.slot():
             if cancelled is not None and cancelled():
                 return None
-            data = self._get("jeuInfos.php", romtype="rom", systemeid=system_id,
+            data = self._get("jeuInfos.php", per_game=True, romtype="rom", systemeid=system_id,
                              romnom=file_name, romtaille=size, crc=crc)
         game = (data or {}).get("response", {}).get("jeu")
         if not isinstance(game, dict):
