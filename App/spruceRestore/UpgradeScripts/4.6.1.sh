@@ -129,6 +129,31 @@ migrate_pokedaisy_selection() {
     done
 }
 
+# Emulator_RGB30 was renamed Emulator_DARKMOSS. A restore copies selections by
+# key, so the old key in a backup would be dropped and the choice lost.
+rename_darkmoss_emulator_key() {
+    _system="$1"
+    for _cfg in "/mnt/SDCARD/Saves/spruce/emu_backups/$_system.json" "/mnt/SDCARD/Emu/$_system/config.json"; do
+        [ -f "$_cfg" ] || continue
+        jq -e '.menuOptions | has("Emulator_RGB30") and (has("Emulator_DARKMOSS") | not)' "$_cfg" >/dev/null || continue
+
+        _tmp="$(mktemp "${_cfg}.tmp.XXXXXX")" || {
+            log_message "Failed to create temporary file for $_cfg"
+            _upgrade_warnings=1
+            continue
+        }
+        if cp -p "$_cfg" "$_tmp" && jq '
+            .menuOptions |= with_entries(if .key == "Emulator_RGB30" then .key = "Emulator_DARKMOSS" else . end)
+        ' "$_cfg" > "$_tmp" && mv -f "$_tmp" "$_cfg"; then
+            log_message "$_system: renamed Emulator_RGB30 to Emulator_DARKMOSS in $_cfg"
+        else
+            rm -f "$_tmp"
+            log_message "Failed to rename Emulator_RGB30 in $_cfg"
+            _upgrade_warnings=1
+        fi
+    done
+}
+
 _upgrade_warnings=0
 if ! update_shader_presets; then
     log_message "Failed to update shader presets"
@@ -138,6 +163,9 @@ remove_replaced_lite_shaders
 migrate_pokedaisy_selection GB pokedaisy_gbc
 migrate_pokedaisy_selection GBC pokedaisy_gbc
 migrate_pokedaisy_selection GBA pokedaisy_gba
+for _system in DC N64 NDS PS SATURN; do
+    rename_darkmoss_emulator_key "$_system"
+done
 
 # -------------------- UPGRADE COMPLETION --------------------
 if [ "$_upgrade_warnings" -eq 0 ]; then
