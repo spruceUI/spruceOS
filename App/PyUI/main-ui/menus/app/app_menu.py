@@ -13,7 +13,7 @@ from menus.common.bottom_bar import BottomBarHint
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.activity.activity_tracker import ActivityTracker
-from utils.boxart.box_art_scraper import BoxArtScraper
+from menus.app.box_art_scraper_menu import BoxArtScraperMenu
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
@@ -65,7 +65,7 @@ class AppMenu:
                             description=Language.label("scrapeBoxartDesc", "Scrape game boxart"),
                             icon=icon,
                             extra_data=boxart_scraper_config,
-                            value=BoxArtScraper().scrape_boxart
+                            value=BoxArtScraperMenu().run
                         )
                 )
 

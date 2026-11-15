@@ -14,3 +14,6 @@ CLAUDE.md
 .agents/
 .claude/
 .scratch/
+
+# ScreenScraper developer credentials, written by the release workflows from GitHub secrets
+App/PyUI/main-ui/utils/boxart/ss.bin
