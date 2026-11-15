@@ -1,3 +1,2 @@
-You can find cheats here https://github.com/libretro/libretro-database/tree/master/cht
-
-Download what you would like and add the files here.
+How to add cheats and turn them on in the in-game menu:
+https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games#cheats

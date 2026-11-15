@@ -60,8 +60,11 @@ case "$PLATFORM" in
 # Brick / BrickPro / SmartPro / SmartProS
 ############################################################
     "Brick" | "BrickPro" | "SmartPro" | "SmartProS" )
-        tinymix set 9 1
-        tinymix set 1 0
+        # MinUI's "match stock audio": swaps L/R, which the Smart Pro S does not need
+        if [ "$PLATFORM" != "SmartProS" ]; then
+            tinymix set 9 1
+            tinymix set 1 0
+        fi
 
         cd /usr/trimui/bin
 

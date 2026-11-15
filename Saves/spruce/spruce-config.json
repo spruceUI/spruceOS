@@ -557,6 +557,16 @@
                     "False"
                 ],
                 "selected": "False"
+            },
+            "igmCheats": {
+                "display": "Show Cheats",
+                "description": "Shown for games with a .cht file in RetroArch/.retroarch/cheats",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/igmItems.sh",
+                "options": [
+                    "True",
+                    "False"
+                ],
+                "selected": "False"
             }
         },
         "LEDs Settings": {

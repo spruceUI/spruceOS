@@ -85,13 +85,13 @@ class Node:
             return ""
 
     def read(self):
-        """Every pending event as (type, code, value); [] when there is none."""
+        """Every pending event as (type, code, value); [] when there is none, None once the node is gone."""
         try:
             data = os.read(self.fd, EVENT.size * 64)
         except (BlockingIOError, InterruptedError):
             return []
         except OSError:
-            return []  # unplugged: the node stays listed, silent
+            return None
         return [EVENT.unpack_from(data, off)[2:] for off in range(0, len(data) - EVENT.size + 1, EVENT.size)]
 
     def close(self):

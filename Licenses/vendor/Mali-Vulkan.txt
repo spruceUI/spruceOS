@@ -1,0 +1,6 @@
+ARM Mali Vulkan driver (libMaliVulkan) for the Mali-G52 in the Miyoo Flip
+Copyright (c) ARM Limited
+
+Proprietary. Shipped as spruce/flip/vulkan/lib/libMaliVulkan.so.1, with its
+ICD file in spruce/flip/vulkan/vulkan/icd.d/mali.json. Taken unchanged from
+the Miyoo Flip Deadcast package; see Mali-EULA.txt for ARM's driver terms.

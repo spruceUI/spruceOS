@@ -336,6 +336,24 @@ run_retroarch() {
 
 	apply_baseos_ra_overlay
 
+	# Cheats turned on in the in-game menu are saved per game; this re-applies
+	# them at launch. RetroArch takes one --appendconfig, joined with "|".
+	case "$RA_PARAMS" in
+		*--appendconfig*) RA_PARAMS="${RA_PARAMS}|$RA_DIR/spruce-cheats.cfg" ;;
+		*) RA_PARAMS="${RA_PARAMS} --appendconfig $RA_DIR/spruce-cheats.cfg" ;;
+	esac
+
+	# vulkan_launch.sh systems: the 64-bit build has the Vulkan driver built in,
+	# so it only needs the device's driver stack and vulkan.cfg.
+	case "$RA_BIN" in
+		ra64.*)
+			if [ "$RA_VULKAN" = 1 ] && command -v device_vulkan_env >/dev/null 2>&1 \
+					&& device_vulkan_env; then
+				RA_PARAMS="${RA_PARAMS}|$RA_DIR/vulkan.cfg"
+			fi
+			;;
+	esac
+
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
 	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).

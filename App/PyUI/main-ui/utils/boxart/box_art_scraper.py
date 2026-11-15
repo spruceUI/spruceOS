@@ -1,12 +1,12 @@
 from collections.abc import Set
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, as_completed, wait
 import os
 from pathlib import Path
 import subprocess
 import re
-import threading
 import time
 from typing import List, Optional
+from urllib.parse import quote
 
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
@@ -14,6 +14,8 @@ from devices.device import Device
 from display.display import Display
 from games.utils.box_art_resizer import BoxArtResizer
 from menus.language.language import Language
+from utils.boxart.screenscraper import CLOCK, CLOSED, LOGIN, NETWORK, QUOTA, ScreenScraper, ScreenScraperError
+from utils.boxart.ss_systems import SYSTEM_IDS
 from utils.cached_exists import CachedExists
 from utils.idle_shutdown import pauses_idle_shutdown
 from utils.logger import PyUiLogger
@@ -100,6 +102,8 @@ class BoxArtScraper:
         self._cache = {}  # sys_name -> list of (filename, token_set)
         self._arcade_xml_cache = None  # Single global dict: rom_name -> display_name for all arcade systems
         self._folder_to_system = None  # Lazy map: on-disk ROM folder name -> canonical system name
+        self.cancelled = False
+        self.screenscraper = ScreenScraper()
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -322,7 +326,7 @@ class BoxArtScraper:
             PyUiLogger.get_logger().warning(f"BoxartScraper: Image list file not found for {sys_name}.")
             return None
 
-        rom_without_ext = os.path.splitext(rom_file_name)[0]
+        rom_without_ext = rom_file_name
 
         # For arcade systems, use central MAME XML to get display name
         # If not found, skip this ROM entirely (don't attempt fallback matching)
@@ -572,7 +576,7 @@ class BoxArtScraper:
     # ==========================================================
     
     # Function to process a single ROM file
-    def process_rom(self, sys_name, ra_name, sys_imgs_dir, relative_path, file):
+    def process_rom(self, sys_name, ra_name, sys_imgs_dir, relative_path, file, rom_path=None):
 
         if self.cancelled:
            return None
@@ -584,12 +588,19 @@ class BoxArtScraper:
         rom_name = os.path.splitext(file)[0]
         image_path = os.path.join(target_img_dir, f"{rom_name}.png")
 
-        if self.download_boxart(sys_name, rom_name, image_path):
+        if self.download_boxart(sys_name, rom_name, image_path, rom_path):
             return image_path
         else:
             return None
         
-    def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str) -> bool:
+    def download_boxart(self, sys_name: str, rom_file_name: str, image_path: str, rom_path: str = None) -> bool:
+        if self.cancelled:
+            return False
+        if rom_path and self._download_from_screenscraper(sys_name, rom_file_name, rom_path, image_path):
+            return True
+        if self.cancelled:
+            return False
+
         ra_name = self.get_ra_alias(sys_name)
         if not ra_name:
             PyUiLogger.get_logger().info(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
@@ -612,6 +623,69 @@ class BoxArtScraper:
         PyUiLogger.get_logger().info(f"BoxartScraper: No image found for {rom_file_name} in {sys_name}.")
         return False
 
+    # ==========================================================
+    # ScreenScraper (signed-in users; libretro is the fallback)
+    # ==========================================================
+
+    @staticmethod
+    def _is_image(path: str) -> bool:
+        # ScreenScraper answers "NOMEDIA" and the like with HTTP 200 instead of an image
+        try:
+            with open(path, "rb") as f:
+                head = f.read(8)
+        except OSError:
+            return False
+        return head.startswith(b"\x89PNG") or head.startswith(b"\xff\xd8\xff")
+
+    def _download_from_screenscraper(self, sys_name, rom_name, rom_path, image_path) -> bool:
+        system_id = SYSTEM_IDS.get(sys_name)
+        if system_id is None or not self.screenscraper.ready():
+            return False
+        width, height = Device.get_device().get_boxart_large_resize_dimensions()
+        try:
+            url = self.screenscraper.box_art_url(system_id, rom_path, rom_name, self.preferred_region,
+                                                 width, height, cancelled=lambda: self.cancelled)
+        except ScreenScraperError as e:
+            self.screenscraper.stop(e.kind)
+            return False
+        if not url:
+            return False
+        with self.screenscraper.slot():
+            ok = self._download_file(url, image_path)
+        if ok and self._is_image(image_path):
+            return True
+        # a dropped download or a "NOMEDIA" reply leaves no file behind for libretro to miss
+        if os.path.exists(image_path):
+            os.remove(image_path)
+        return False
+
+    def start_screenscraper(self) -> None:
+        """At the start of a run: check the login and size the threads, or fall back to libretro."""
+        if not (self.screenscraper.has_dev_credentials() and self.screenscraper.signed_in()):
+            return
+        try:
+            account = self.screenscraper.start()
+            PyUiLogger.get_logger().info(
+                f"ScreenScraper: {self.screenscraper.username}, {self.screenscraper.threads} thread(s), "
+                f"{account.get('requeststoday', '?')}/{account.get('maxrequestsperday', '?')} requests today")
+        except ScreenScraperError as e:
+            self.screenscraper.stop(e.kind)
+            self.report_screenscraper_stop()
+
+    def report_screenscraper_stop(self) -> None:
+        reason = self.screenscraper.stopped
+        if reason is None:
+            return
+        messages = {
+            LOGIN: Language.label("screenscraperLoginRejected", "ScreenScraper rejected the login. Using libretro box art."),
+            QUOTA: Language.label("screenscraperQuota", "Today's ScreenScraper limit is used up. Using libretro box art."),
+            CLOSED: Language.label("screenscraperClosed", "ScreenScraper is closed right now. Using libretro box art."),
+            NETWORK: Language.label("screenscraperUnreachable", "ScreenScraper could not be reached. Using libretro box art."),
+            CLOCK: Language.label("screenscraperClock", "ScreenScraper's certificate was rejected; check the date and time. Using libretro box art."),
+        }
+        self.log_and_display_message(messages.get(reason, messages[NETWORK]))
+        time.sleep(3)
+
     def download_remote_image_for_system(self, sys_name: str, remote_image_name: str, image_path: str):
         ra_name = self.get_ra_alias(sys_name)
         return self.download_remote_image(ra_name, remote_image_name, image_path)
@@ -619,16 +693,18 @@ class BoxArtScraper:
     def download_remote_image(self, ra_name, remote_image_name, image_path):
         CachedExists.clear()
 
-        boxart_url = f"http://thumbnails.libretro.com/{ra_name}/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
-        fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{ra_name.replace(' ', '_')}/master/Named_Boxarts/{remote_image_name}".replace(" ", "%20")
+        image = quote(remote_image_name)
+        boxart_url = f"http://thumbnails.libretro.com/{quote(ra_name)}/Named_Boxarts/{image}"
+        fallback_url = f"https://raw.githubusercontent.com/libretro-thumbnails/{quote(ra_name.replace(' ', '_'))}/master/Named_Boxarts/{image}"
 
         PyUiLogger.get_logger().info(f"BoxartScraper: Downloading {boxart_url}")
-        success = self._download_file(boxart_url, image_path)
-        if not success:
-            PyUiLogger.get_logger().info(f"BoxartScraper: failed {boxart_url}, trying fallback.")
-            if not self._download_file(fallback_url, image_path):
-                PyUiLogger.get_logger().info(f"BoxartScraper: failed {fallback_url}.")
-        return success
+        if self._download_file(boxart_url, image_path):
+            return True
+        PyUiLogger.get_logger().info(f"BoxartScraper: failed {boxart_url}, trying fallback.")
+        if self._download_file(fallback_url, image_path):
+            return True
+        PyUiLogger.get_logger().info(f"BoxartScraper: failed {fallback_url}.")
+        return False
 
     @pauses_idle_shutdown
     def download_boxart_batch(
@@ -637,14 +713,16 @@ class BoxArtScraper:
         roms_and_paths: list[tuple[str, str]],
         max_workers: int = 8,
     ):
+        """
+        Run download_boxart() concurrently for a batch of ROMs.
+
+        roms_and_paths: list of (rom_file_name, image_path) or (rom_file_name, image_path, rom_path);
+        the ROM path lets a signed-in user's box art come from ScreenScraper.
+        """
         if(not self.check_wifi()):
             return
+        self.start_screenscraper()
 
-        """
-        Run download_boxart() concurrently for a batch of ROM/image pairs.
-
-        roms_and_paths: list of (rom_file_name, image_path)
-        """
         self.log_and_display_message(Language.label("scrapingBoxartPatient", "Scraping box art. Please be patient, especially with large libraries!"))
         if not roms_and_paths:
             self.log_and_display_message(
@@ -654,7 +732,7 @@ class BoxArtScraper:
             return
 
         ra_name = self.get_ra_alias(sys_name)
-        if not ra_name:
+        if not ra_name and not (self.screenscraper.ready() and sys_name in SYSTEM_IDS):
             self.log_and_display_message(
                 Language.label("remoteSystemNotFound", "Remote system name not found - unable to download box art for {system}.").replace("{system}", sys_name)
             )
@@ -663,8 +741,8 @@ class BoxArtScraper:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = [
-                executor.submit(self.download_boxart, sys_name, rom_file_name, image_path)
-                for rom_file_name, image_path in roms_and_paths
+                executor.submit(self.download_boxart, sys_name, entry[0], entry[1], entry[2] if len(entry) > 2 else None)
+                for entry in roms_and_paths
             ]
 
             count = 0
@@ -681,7 +759,15 @@ class BoxArtScraper:
                 except Exception as e:
                     PyUiLogger.get_logger().info(f"BoxartScraper: Error in batch download - {e}")
         
-        BoxArtResizer.patch_boxart_list([p for _, p in roms_and_paths])
+        self.report_screenscraper_stop()
+        BoxArtResizer.patch_boxart_list([entry[1] for entry in roms_and_paths])
+
+    @staticmethod
+    def _cancel_pressed() -> bool:
+        # Polled on this, the main, thread: SDL only delivers input to the thread that set up
+        # video, so a watcher thread never saw B on a device.
+        pressed = Controller.controller_interface.get_input(1)
+        return Device.get_device().check_for_button_remap(pressed) == ControllerInput.B
 
     def run_scraper_tasks(self, max_workers, tasks):
         downloaded_files = []
@@ -689,49 +775,50 @@ class BoxArtScraper:
         count = 0
         success_count = 0
         self.cancelled = False
-        
-        watcher_stop = threading.Event()
 
-        def cancelled_watcher():
-            PyUiLogger.get_logger().info("Cancellation watcher started")
-            while not watcher_stop.is_set():
-                Controller.get_input()
-                if Controller.last_input() == ControllerInput.B:
-                    self.cancelled = True
-                    PyUiLogger.get_logger().info(
-                        "BoxartScraper: Scraping cancelled by user."
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            pending = {executor.submit(self.process_rom, *t) for t in tasks}
+
+            while pending:
+                done, pending = wait(pending, timeout=0.05, return_when=FIRST_COMPLETED)
+                for future in done:
+                    count = count +1
+                    self.log_and_display_message(
+                        Language.label("scrapingBoxartProgressFound", "Scraping box art... ({count}/{total}). Found {found} so far.")
+                        .replace("{count}", str(count))
+                        .replace("{total}", str(len(tasks)))
+                        .replace("{found}", str(success_count))
                     )
+                    try:
+                        result = future.result()
+                        if result: 
+                            success_count = success_count +1
+                            downloaded_files.append(result)
+                    except Exception as e:
+                        PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
+                if not self.cancelled and self._cancel_pressed():
+                    self.cancelled = True
+                    PyUiLogger.get_logger().info("BoxartScraper: Scraping cancelled by user.")
+                    self.log_and_display_message(Language.label("scrapingStopping", "Stopping..."))
+                    # games not started never run; the few already downloading finish and keep their art
+                    for future in pending:
+                        future.cancel()
+                    for future in pending:
+                        if future.cancelled():
+                            continue
+                        try:
+                            result = future.result()
+                            if result:
+                                downloaded_files.append(result)
+                        except Exception as e:
+                            PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
                     break
 
-
-        watcher_thread = threading.Thread(
-            target=cancelled_watcher,
-            daemon=True
-        )
-        watcher_thread.start()
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(self.process_rom, *t) for t in tasks]
-
-            for future in as_completed(futures):
-                count = count +1
-                self.log_and_display_message(
-                    Language.label("scrapingBoxartProgressFound", "Scraping box art... ({count}/{total}). Found {found} so far.")
-                    .replace("{count}", str(count))
-                    .replace("{total}", str(len(tasks)))
-                    .replace("{found}", str(success_count))
-                )
-                try:
-                    result = future.result()
-                    if result: 
-                        success_count = success_count +1
-                        downloaded_files.append(result)
-                except Exception as e:
-                    PyUiLogger.get_logger().info(f"BoxartScraper: Error processing a ROM - {e}")
-
-        watcher_stop.set()
-        watcher_thread.join()
-
-        self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
+        self.report_screenscraper_stop()
+        if self.cancelled:
+            self.log_and_display_message(Language.label("scrapingStopped", "Scraping stopped."))
+        else:
+            self.log_and_display_message(Language.label("scrapingComplete", "Scraping complete!"))
         time.sleep(2)
         BoxArtResizer.patch_boxart_list(downloaded_files)
 
@@ -748,7 +835,7 @@ class BoxArtScraper:
         sys_imgs_dir = os.path.join(sys_path, Device.get_device().get_game_images_folder_name())
 
         ra_name = self.get_ra_alias(sys_name)
-        if not ra_name:
+        if not ra_name and not (self.screenscraper.ready() and sys_name in SYSTEM_IDS):
             PyUiLogger.get_logger().info(f"BoxartScraper: Remote system name not found - skipping {sys_name}.")
             return tasks
 
@@ -777,7 +864,7 @@ class BoxArtScraper:
                 if os.path.exists(target_img_dir) and any(f.startswith(rom_name + ".") for f in os.listdir(target_img_dir)):
                     continue
 
-                tasks.append((sys_name, ra_name, sys_imgs_dir, relative_path, file))
+                tasks.append((sys_name, ra_name, sys_imgs_dir, relative_path, file, os.path.join(root, file)))
         return tasks
 
     def check_wifi(self):
@@ -787,7 +874,7 @@ class BoxArtScraper:
 
         if not self._ping("thumbnails.libretro.com"):
             self.log_and_display_message(Language.label("libretroUnavailable", "Libretro thumbnail service unavailable; trying fallback."))
-            if not self._ping("github.com"):
+            if not self._ping("github.com") and not self.screenscraper.ready():
                 self.log_and_display_message(
                     Language.label("libretroGithubUnavailable", "Libretro thumbnail GitHub repo is also currently unavailable. Please try again later.")
                 )
@@ -803,7 +890,8 @@ class BoxArtScraper:
 
         if(not self.check_wifi()):
             return
-        
+        self.start_screenscraper()
+
         tasks = []
         # First, collect all ROM files for all systems
         for sys_dir in [d for d in os.listdir(self.roms_dir) if os.path.isdir(os.path.join(self.roms_dir, d))]:
