@@ -1,8 +1,7 @@
 """Settings > Tasks > Download cheats.
 
 Downloads libretro's cheats.zip once (the set RetroArch's own "Update Cheats" uses), then
-matches each game by name to a cheat file, locally, with the box art scraper's matcher (libretro
-names cheats and thumbnails the same way), and writes the match as
+matches each game by title to a cheat file, locally, and writes the match as
 RetroArch/.retroarch/cheats/<system>/<game>.cht so the in-game menu's Cheats list finds it.
 Games that already have a cheat file are left alone. RetroArch cores only: standalone emulators
 do not read these files.
@@ -33,6 +32,70 @@ TIMEOUT = 30
 NOT_CHEATS = re.compile(r"\(Rumbles?\)", re.IGNORECASE)
 # pre-release builds: their addresses rarely fit the retail game, so used only when nothing else matches
 PRE_RELEASE = re.compile(r"\((Beta|Proto|Prototype|Sample|Demo|Kiosk)\b[^)]*\)", re.IGNORECASE)
+
+_TAGS = re.compile(r"\s*[\(\[][^)\]]*[\)\]]")
+_ROMAN = {"ii": "2", "iii": "3", "iv": "4", "v": "5", "vi": "6", "vii": "7", "viii": "8", "ix": "9", "x": "10"}
+# dropped from titles: articles move ("Castle, The"), and libretro writes "&" as "_"
+_IGNORED = {"the", "a", "an", "and"}
+
+PREFERRED_REGIONS = {
+    "us": ["usa", "world", "europe"],
+    "eu": ["europe", "world", "usa"],
+    "jp": ["japan", "world", "usa"],
+    "wor": ["world", "usa", "europe"],
+}
+
+
+def title_key(name: str) -> str:
+    """A title with tags, case, punctuation and the words above ignored. Cheats only fit the
+    game they were made for, so a match must have the same title: no fuzzy matching."""
+    words = re.findall(r"[a-z0-9]+", _TAGS.sub("", name).lower())
+    # joined without spaces: "Solar Striker" / "SolarStriker", "Ping Pong" / "Pingpong"
+    return "".join(_ROMAN.get(w, w) for w in words if w not in _IGNORED)
+
+
+def _region_rank(name: str, wanted: list) -> int:
+    tags = " ".join(_TAGS.findall(name)).lower()
+    for i, region in enumerate(wanted):
+        if region in tags:
+            return i
+    return len(wanted)
+
+
+def match_cheat(rom_name: str, names: list, spruce_region: str):
+    """The cheat file (without .cht) for a ROM, or None. names: the system's cheat files."""
+    key = title_key(rom_name)
+    if not key:
+        return None
+    same = [n for n in names if title_key(n) == key]
+    if not same and " - " not in _TAGS.sub("", rom_name):
+        # libretro's title may add a subtitle ("Kwirk - He's A-maze-ing!"); only if it is one game
+        same = [n for n in names if title_key(_TAGS.sub("", n).split(" - ")[0]) == key]
+        if len({title_key(n) for n in same}) != 1:
+            return None
+    if not same:
+        return None
+    order = _region_order(rom_name, spruce_region)
+    return min(same, key=lambda n: (bool(PRE_RELEASE.search(n)), _region_rank(n, order), len(n)))
+
+
+def _region_order(rom_name: str, spruce_region) -> list:
+    """Regions named in the ROM's own tags first, then spruce's preferred region."""
+    keys = []
+    for tag in re.findall(r"\(([^()]*)\)", rom_name):
+        for word in tag.split(","):
+            k = {"usa": "us", "europe": "eu", "japan": "jp", "world": "wor"}.get(word.strip().lower())
+            if k and k not in keys:
+                keys.append(k)
+    v = spruce_region.upper() if isinstance(spruce_region, str) else ""
+    keys.append("eu" if "EUR" in v else "jp" if "JAP" in v or v in ("JP", "JPN") else "wor" if "WORLD" in v else "us")
+    order = []
+    for k in keys:
+        for region in PREFERRED_REGIONS[k]:
+            if region not in order:
+                order.append(region)
+    return order
+
 
 # libretro's cheat folders where they differ from its thumbnail folders
 CHEAT_FOLDERS = {
@@ -151,6 +214,7 @@ class CheatDownloader:
                 if file.lower().endswith(".cht"):
                     by_folder.setdefault(folder, []).append(file)
 
+            region = Device.get_device().get_system_config().get_preferred_region()
             systems = Device.get_device().get_game_system_utils().get_active_systems()
             for game_system in systems:
                 if self.cancelled:
@@ -159,9 +223,7 @@ class CheatDownloader:
                 files = by_folder.get(folder) if folder else None
                 if not files:
                     continue
-                # the matcher compares thumbnail names; give it the cheat names in that form
-                every = [f[:-4] + ".png" for f in files if not NOT_CHEATS.search(f)]
-                retail = [c for c in every if not PRE_RELEASE.search(c)]
+                names = [f[:-4] for f in files if not NOT_CHEATS.search(f)]
                 for rom in self._roms(game_system):
                     if self._cancel_pressed():
                         break
@@ -169,9 +231,7 @@ class CheatDownloader:
                     if self._has_cheats(folder, rom_name):
                         already += 1
                         continue
-                    # separate cache keys: the matcher caches its token lists per key
-                    match = (self.scraper.find_image_from_list(game_system.system_name + ":retail", rom_name, retail)
-                             or self.scraper.find_image_from_list(game_system.system_name + ":all", rom_name, every))
+                    match = match_cheat(rom_name, names, region)
                     if not match:
                         continue
                     target_dir = os.path.join(CHEATS_DIR, folder)
@@ -179,7 +239,7 @@ class CheatDownloader:
                     target = os.path.join(target_dir, rom_name + ".cht")
                     tmp = target + ".tmp"
                     with open(tmp, "wb") as out:
-                        out.write(archive.read(folder + "/" + match[:-4] + ".cht"))
+                        out.write(archive.read(folder + "/" + match + ".cht"))
                     os.replace(tmp, target)
                     added += 1
                     self._message(Language.label("cheatsProgress", "{system}: cheats added for {added} games")
