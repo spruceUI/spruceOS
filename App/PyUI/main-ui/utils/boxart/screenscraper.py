@@ -59,6 +59,12 @@ def _load(path: str) -> dict:
         return {}
 
 
+def encode_dev(credentials: dict) -> bytes:
+    """ss.bin's contents for the developer login; _load_dev reads it back."""
+    raw = json.dumps(credentials).encode()
+    return base64.b64encode(bytes(b ^ DEV_KEY[i % len(DEV_KEY)] for i, b in enumerate(raw)))
+
+
 def _load_dev(path: str) -> dict:
     try:
         with open(path, "rb") as f:
