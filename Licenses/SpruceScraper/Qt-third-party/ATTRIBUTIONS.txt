@@ -1,0 +1,500 @@
+Third-party code in the Qt sources Skyscraper was built from (from qt_attribution.json).
+
+Vulkan Memory Allocator 2.2.0
+  in Qt: src/3rdparty/VulkanMemoryAllocator
+  licence: MIT License (MIT)
+  Copyright (c) 2017-2018 Advanced Micro Devices, Inc. All rights reserved.
+  text: VulkanMemoryAllocator-LICENSE.txt
+
+Native Style for Android
+  in Qt: src/3rdparty/android
+  licence: Apache License 2.0 (Apache-2.0)
+  Copyright (C) 2005 The Android Open Source Project
+  text: android-native-style-LICENSE
+
+ANGLE Library chromium/3280
+  in Qt: src/3rdparty/angle
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (C) 2002-2013 The ANGLE Project Authors
+  text: angle-LICENSE
+
+ANGLE: Array Bounds Clamper for WebKit
+  in Qt: src/3rdparty/angle
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 2012 Apple Inc.
+  text: angle-arrayboundsclamper-LICENSE
+
+ANGLE: Murmurhash
+  in Qt: src/3rdparty/angle
+  licence: Public Domain (NONE)
+  MurmurHash3 was written by Austin Appleby, and is placed in the public domain. The author hereby disclaims copyright to this source code.
+
+ANGLE: Systeminfo
+  in Qt: src/3rdparty/angle
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 2009 Apple Inc. All Rights Reserved.
+  text: angle-systeminfo-SYSTEMINFO_LICENSE
+
+ANGLE: trace_event
+  in Qt: src/3rdparty/angle
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2013 The Chromium Authors.
+  text: angle-trace_event-TRACEEVENT_LICENSE
+
+ANGLE: Khronos Headers
+  in Qt: src/3rdparty/angle
+  licence: MIT License (MIT)
+  Copyright (c) 2007-2017 The Khronos Group Inc.
+  text: angle-khronos-KHRONOS_LICENSE
+
+Efficient Binary-Decimal and Decimal-Binary Conversion Routines for IEEE Doubles 3.1.5
+  in Qt: src/3rdparty/double-conversion
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright 2006-2012, the V8 project authors
+  text: doubleconversion-LICENSE
+
+Easing Equations by Robert Penner
+  in Qt: src/3rdparty/easing
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2001 Robert Penner
+  text: easing-LICENSE
+
+forkfd
+  in Qt: src/3rdparty/forkfd
+  licence: MIT License (MIT)
+  Copyright (C) 2016 Intel Corporation
+  Copyright (C) 2015 Klarälvdalens Datakonsult AB, a KDAB Group company, info@kdab.com
+  text: forkfd-LICENSE
+
+FreeBSD strtoll and strtoull 18b29f3fb8abee5d57ed8f4a44f806bec7e0eeff
+  in Qt: src/3rdparty/freebsd
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 1992, 1993 The Regents of the University of California.
+  Copyright (c) 2011 The FreeBSD Foundation
+  text: freebsd-LICENSE
+
+Freetype 2 2.13.3
+  in Qt: src/3rdparty/freetype
+  licence: Freetype Project License or GNU General Public License v2.0 only (FTL OR GPL-2.0)
+  Copyright (c) 2007-2014 Adobe Systems Incorporated
+  Copyright (c) 2004-2024 Albert Chin-A-Young
+  Copyright (c) 2018-2024 Armin Hasitzka, David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2000 Computing Research Labs, New Mexico State University
+  Copyright (c) 1996-2024 David Turner, Robert Wilhelm, Dominik Röttsches, and Werner Lemberg
+  Copyright (c) 2004-2024 David Turner, Robert Wilhelm, Werner Lemberg and George Williams
+  Copyright (c) 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg, and Moazin Khatti
+  Copyright (c) 2008-2024 David Turner, Robert Wilhelm, Werner Lemberg, and suzuki toshiya
+  Copyright (c) 2003-2024 David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2005-2024 David Turner
+  Copyright (c) 2007-2024 Derek Clegg and Michael Toftdal
+  Copyright (c) 2007 Dmitry Timoshkov for Codeweavers
+  Copyright (c) 2001-2015 Francesco Zappa Nardelli
+  Copyright (c) 2005, 2007, 2008, 2013 George Williams
+  Copyright (c) 2013-2024 Google, Inc. Google Author(s) Behdad Esfahbod and Stuart Gill
+  Copyright (c) 2013-2022 Google, Inc.
+  Copyright (c) 2003 Huw D M Davies for Codeweavers
+  Copyright (c) 2010-2024 Joel Klinghed
+  Copyright (c) 1996-2024 Just van Rossum, David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2003-2024 Masatake YAMATO and Redhat K.K.
+  Copyright (c) 2004-2024 Masatake YAMATO, Redhat K.K, David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2019-2024 Nikhil Ramakrishnan, David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2009-2024 Oran Agra and Mickey Gabel
+  Copyright (c) 2007-2024 Rahul Bhalerao <rahul.bhalerao@redhat.com>
+  Copyright (c) 2002-2024 Roberto Alameda
+  Copyright (c) 2015-2024 Werner Lemberg
+  Copyright (c) 2004-2024 suzuki toshiya, Masatake YAMATO, Red Hat K.K., David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2019 nyorain
+  Copyright (c) 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg, George Williams, and Dominik Röttsches
+  Copyright (C) 2009, 2023  Red Hat, Inc.
+  text: freetype-LICENSE.txt
+
+Freetype 2 - zlib
+  in Qt: src/3rdparty/freetype
+  licence: zlib License (Zlib)
+  Copyright (C) 1995-2023 Jean-loup Gailly and Mark Adler
+  text: freetype-zlib-ZLIB-LICENSE.txt
+
+Freetype 2 - Bitmap Distribution Format (BDF) support
+  in Qt: src/3rdparty/freetype
+  licence: MIT License (MIT)
+  Copyright (c) 2000 Computing Research Labs, New Mexico State University
+  Copyright (c) 2001-2014 Francesco Zappa Nardelli
+  text: freetype-bdf-BDF-LICENSE.txt
+
+Freetype 2 - Portable Compiled Format (PCF) support
+  in Qt: src/3rdparty/freetype
+  licence: MIT License and MIT Open Group variant (MIT AND MIT-open-group)
+  Copyright (c) 2001, 2012 David Turner, Robert Wilhelm, and Werner Lemberg
+  Copyright (c) 2000-2014 Francesco Zappa Nardelli
+  Copyright (c) 1990, 1994, 1998 The Open Group
+  text: freetype-pcf-PCF-LICENSE.txt
+
+Gradle wrapper 7.2.0
+  in Qt: src/3rdparty/gradle
+  licence: Apache License 2.0 (Apache-2.0)
+  Copyright (C) 2021 Gradle Inc.
+  text: android-gradle-wrapper-LICENSE
+
+HarfBuzz
+  in Qt: src/3rdparty/harfbuzz
+  licence: MIT License (MIT)
+  Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+  Copyright © 2006  Behdad Esfahbod
+  Copyright © 2005  David Turner
+  Copyright © 2004,2007,2008,2009,2010  Red Hat, Inc.
+  Copyright © 1998-2004  David Turner and Werner Lemberg
+  text: harfbuzz-COPYING
+
+HarfBuzz-NG 11.1.0
+  in Qt: src/3rdparty/harfbuzz-ng
+  licence: MIT License (MIT)
+  Copyright © 2010-2022  Google, Inc.
+  Copyright © 2015-2020  Ebrahim Byagowi
+  Copyright © 2019,2020  Facebook, Inc.
+  Copyright © 2012,2015  Mozilla Foundation
+  Copyright © 2011  Codethink Limited
+  Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+  Copyright © 2009  Keith Stribley
+  Copyright © 2011  Martin Hosken and SIL International
+  Copyright © 2007  Chris Wilson
+  Copyright © 2005,2006,2020,2021,2022,2023  Behdad Esfahbod
+  Copyright © 2004,2007,2008,2009,2010,2013,2021,2022,2023  Red Hat, Inc.
+  Copyright © 1998-2005  David Turner and Werner Lemberg
+  Copyright © 2016  Igalia S.L.
+  Copyright © 2022  Matthias Clasen
+  Copyright © 2018,2021  Khaled Hosny
+  Copyright © 2018,2019,2020  Adobe, Inc
+  Copyright © 2013-2015  Alexei Podtelezhnikov
+  text: harfbuzz-ng-COPYING
+
+IAccessible2 IDL Specification 1.3.0
+  in Qt: src/3rdparty/iaccessible2
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2000, 2006 Sun Microsystems, Inc.
+  Copyright (c) 2006 IBM Corporation
+  Copyright (c) 2007, 2010, 2012, 2013 Linux Foundation
+  IAccessible2 is a trademark of the Linux Foundation. The IAccessible2 mark may be used in accordance with the Linux Foundation Trademark Policy to indicate compliance with the IAccessible2 specification.
+  text: iaccessible2-LICENSE
+
+sRGB color profile icc file
+  in Qt: src/3rdparty/icc
+  licence: International Color Consortium License (ICC License)
+  Copyright International Color Consortium, 2015
+  text: icc-sRGB-color-profile-LICENSE.txt
+
+LibJPEG-turbo 3.1.0
+  in Qt: src/3rdparty/libjpeg
+  licence: Independent JPEG Group License and BSD 3-Clause "New" or "Revised" License (IJG AND BSD-3-Clause)
+  Copyright (C) 2009-2024 D. R. Commander
+  Copyright (C) 2015, 2020 Google, Inc.
+  Copyright (C) 2019-2020 Arm Limited
+  Copyright (C) 2015-2016, 2018 Matthieu Darbois
+  Copyright (C) 2011-2016 Siarhei Siamashka
+  Copyright (C) 2015 Intel Corporation
+  Copyright (C) 2013-2014 Linaro Limited
+  Copyright (C) 2013-2014 MIPS Technologies, Inc.
+  Copyright (C) 2009, 2012 Pierre Ossman for Cendio AB
+  Copyright (C) 2009-2011 Nokia Corporation and/or its subsidiary(-ies)
+  Copyright (C) 1999-2006 MIYASAKA Masaru
+  Copyright (C) 1999 Ken Murchison
+  Copyright (C) 1991-2020 Thomas G. Lane, Guido Vollbeding
+  text: libjpeg-LICENSE
+  text: libjpeg-ijg-license.txt
+
+LibPNG 1.6.47
+  in Qt: src/3rdparty/libpng
+  licence: libpng License and PNG Reference Library version 2 (Libpng AND libpng-2.0)
+  Copyright (c) 1995-2025 The PNG Reference Library Authors
+  Copyright (c) 2000-2025 Cosmin Truta
+  Copyright (c) 1998-2018 Glenn Randers-Pehrson
+  Copyright (c) 1996-1997 Andreas Dilger
+  Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+  Copyright (c) 2000-2017 Simon-Pierre Cadieux
+  Copyright (c) 2000-2017 Eric S. Raymond
+  Copyright (c) 2000-2017 Mans Rullgard
+  Copyright (c) 2000-2017 Gilles Vollant
+  Copyright (c) 2000-2017 James Yu
+  Copyright (c) 2000-2017 Mandar Sahastrabuddhe
+  Copyright (c) 1998-2000 Tom Lane
+  Copyright (c) 1998-2000 Willem van Schaik
+  Copyright (c) 1996-1997 John Bowler
+  Copyright (c) 1996-1997 Kevin Bracey
+  Copyright (c) 1996-1997 Sam Bushell
+  Copyright (c) 1996-1997 Magnus Holmgren
+  Copyright (c) 1996-1997 Greg Roelofs
+  Copyright (c) 1996-1997 Tom Tanner
+  Copyright (c) 1995-1996 Dave Martindale
+  Copyright (c) 1995-1996 Paul Schmidt
+  Copyright (c) 1995-1996 Tim Wegner
+  text: libpng-LICENSE
+
+MD4
+  in Qt: src/3rdparty/md4
+  licence: Public Domain (?)
+  Written by Alexander Peslyak - better known as Solar Designer <solar@openwall.com> - in 2001, and placed in the public domain. There's absolutely no warranty.
+
+MD4C 0.5.2
+  in Qt: src/3rdparty/md4c
+  licence: MIT License (MIT)
+  Copyright © 2016-2024 Martin Mitáš
+  text: md4c-LICENSE.md
+
+MD5
+  in Qt: src/3rdparty/md5
+  licence: Public Domain (?)
+  Written by Colin Plumb in 1993, no copyright is claimed.
+  Ian Jackson <ian@chiark.greenend.org.uk>.
+
+PCRE2 10.45
+  in Qt: src/3rdparty/pcre2
+  licence: BSD 3-clause "New" or "Revised" License with PCRE2 binary-like Packages Exception (LicenseRef-BSD-3-Clause-with-PCRE2-Binary-Like-Packages-Exception)
+  Copyright (c) 1997-2024 University of Cambridge
+  Copyright (c) 2010-2024 Zoltan Herczeg
+  text: pcre2-LICENCE.md
+
+PCRE2 - Stack-less Just-In-Time Compiler 10.45
+  in Qt: src/3rdparty/pcre2
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (c) 2009-2024 Zoltan Herczeg
+  text: pcre2-sljit-LICENCE-SLJIT
+
+Pixman 0.17.12
+  in Qt: src/3rdparty/pixman
+  licence: MIT License (MIT)
+  Copyright © 2009 Nokia Corporation
+  text: pixman-LICENSE
+
+Secure Hash Algorithms SHA-384 and SHA-512
+  in Qt: src/3rdparty/rfc6234
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2011 IETF Trust and the persons identified as authors of the code.
+  text: rfc6234-LICENSE
+
+Secure Hash Algorithm SHA-1
+  in Qt: src/3rdparty/sha1
+  licence: Public Domain (?)
+  Copyright (C) Dominik Reichl <dominik.reichl@t-online.de>
+  Copyright (C) 2016 The Qt Company Ltd
+
+Secure Hash Algorithm SHA-3 - brg_endian https://github.com/BrianGladman/sha/ commit 4b9e13ead2c5b5e41ca27c65de4dd69ae0bac228
+  in Qt: src/3rdparty/sha3
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (c) 1998-2013, Brian Gladman, Worcester, UK. All rights reserved.
+  text: sha3_endian-BRG_ENDIAN_LICENSE
+
+Secure Hash Algorithm SHA-3 - Keccak 3.2
+  in Qt: src/3rdparty/sha3
+  licence: Creative Commons Zero v1.0 Universal (CC0-1.0)
+  Guido Bertoni, Joan Daemen, Michaël Peeters and Gilles Van Assche.
+  To the extent possible under law, the implementers have waived all copyright
+  and related or neighboring rights to the source code in this file.
+  text: sha3_keccak-CC0_LICENSE
+
+SQLite 3.49.1
+  in Qt: src/3rdparty/sqlite
+  licence: SQLite Blessing (blessing)
+  The authors disclaim copyright to the source code. However, a license can be obtained if needed.
+  text: sqlite-blessing.txt
+
+TinyCBOR 0.6.1
+  in Qt: src/3rdparty/tinycbor
+  licence: MIT License (MIT)
+  Copyright (C) 2015-2021 Intel Corporation
+  text: tinycbor-LICENSE
+
+Bitstream Vera Font 1.10
+  in Qt: src/3rdparty/wasm
+  licence: Bitstream Vera Font License (urn:dje:license:bitstream)
+  Copyright (C) 2003 Bitstream,Inc
+  text: vera_font-VERA-LICENSE
+
+DejaVu Fonts 2.37
+  in Qt: src/3rdparty/wasm
+  licence: Bitstream Vera Font License (urn:dje:license:bitstream)
+  Copyright (c) 2003 by Bitstream, Inc
+  Copyright (c) 2006 by Tavmjong Bah
+  (c) American Mathematical Society
+  text: dejayvu-DEJAVU-LICENSE
+
+Wintab API
+  in Qt: src/3rdparty/wintab
+  licence: LCS-Telegraphics License (urn:dje:license:lcs-telegraphics)
+  Copyright 1991-1998 by LCS/Telegraphics.
+  text: wintab-LICENSE.txt
+
+XCB-XInput
+  in Qt: src/3rdparty/xcb
+  licence: MIT License (MIT)
+  Copyright (C) 2001-2006 Bart Massey, Jamey Sharp, and Josh Triplett.
+  Copyright (C) 2006 Peter Hutterer
+  Copyright (C) 2013 Daniel Martin
+  text: xcb-xinput-LICENSE
+
+Data Compression Library (zlib) 1.3.1
+  in Qt: src/3rdparty/zlib
+  licence: zlib License (Zlib)
+  (C) 1995-2024 Jean-loup Gailly and Mark Adler
+  text: zlib-LICENSE
+
+Text Codecs: Big5, Big5-HKSCS
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 2000  Ming-Che Chuang
+  Copyright (C) 2001, 2002  James Su, Turbolinux Inc.
+  Copyright (C) 2002  WU Yi, HancomLinux Inc.
+  Copyright (C) 2001, 2002  Anthony Fok, ThizLinux Laboratory Ltd.
+  text: qbig5codecs-QBIG5CODEC_LICENSE.txt
+
+Text Codec: EUC-JP
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 1999 Serika Kurusugawa.
+  text: qeucjpcodec-QEUCJPCODEC_LICENSE.txt
+
+Text Codec: EUC-KR
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 1999-2000 Mizi Research Inc.
+  text: qeuckrcodec-QEUCKRCODEC_LICENSE.txt
+
+Text Codec: ISO 2022-JP (JIS)
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 1999 Serika Kurusugawa.
+  text: qjiscodec-QJISCODEC_LICENSE.txt
+
+Text Codec: Shift-JIS
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 1999 Serika Kurusugawa.
+  text: qsjiscodec-QSJISCODEC_LICENSE.txt
+
+Text Codec: TSCII
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 2000 Hans Petter Bieker.
+  text: qtsciicodec-QTSCIICODEC_LICENSE.txt
+
+Text Codec: GBK
+  in Qt: src/corelib/codecs
+  licence: BSD 2-clause "Simplified" License (BSD-2-Clause)
+  Copyright (C) 2000 TurboLinux, Inc.  Written by Justin Yu and Sean Chen.
+  Copyright (C) 2001, 2002 Turbolinux, Inc.  Written by James Su.
+  Copyright (C) 2001, 2002 ThizLinux Laboratory Ltd.  Written by Anthony Fok.
+  text: qbkcodec-QBKCODEC_LICENSE.txt
+
+The Public Suffix List 47264b57765919188b9f4144de8d95cf77e1b6dc, fetched on 2025-01-22
+  in Qt: src/corelib/io
+  licence: Mozilla Public License 2.0 (MPL-2.0)
+  The list was originally provided by Jo Hermans <jo.hermans@gmail.com>.
+  It is now maintained on github (https://github.com/publicsuffix/list).
+  text: psl-PSL-LICENSE.txt
+
+QEventDispatcher on macOS
+  in Qt: src/corelib/kernel
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2007-2008, Apple, Inc.
+  text: qeventdispatcher_cf-QEVENTDISPATCHER_CF_LICENSE.txt
+
+Apache Tika MimeType Definitions 019041117149667bc4d18fabf222a0670d407959
+  in Qt: src/corelib/mimetypes/3rdparty
+  licence: Apache License 2.0 (Apache-2.0)
+  Copyright 2011 The Apache Software Foundation
+
+Unicode Character Database (UCD) 26
+  in Qt: src/corelib/text
+  licence: Unicode License Agreement - Data Files and Software (2016) (Unicode-DFS-2016)
+  Copyright (C) 1991-2018 Unicode, Inc.
+  text: unicode-character-database-UNICODE_LICENSE.txt
+
+Unicode Common Locale Data Repository (CLDR) v39
+  in Qt: src/corelib/text
+  licence: Unicode License Agreement - Data Files and Software (2016) (Unicode-DFS-2016)
+  Copyright (C) 1991-2019 Unicode, Inc.
+  text: unicode-cldr-UNICODE_LICENSE.txt
+
+libdus-1 headers dbus-1.13.12
+  in Qt: src/dbus
+  licence: Academic Free License v2.1, or GNU General Public License v2.0 or later (AFL-2.1 OR GPL-2.0-or-later)
+  Copyright (C) 2002, 2003 CodeFactory AB
+  Copyright (C) 2004, 2005 Red Hat, Inc.
+  text: libdbus-1-headers-LIBDBUS-1-LICENSE.txt
+
+OpenGL Headers Revision 27684
+  in Qt: src/gui/opengl
+  licence: MIT License (MIT)
+  Copyright (c) 2013-2014 The Khronos Group Inc.
+  text: opengl-headers-KHRONOS_LICENSE.txt
+
+OpenGL ES 2 Headers Revision 27673
+  in Qt: src/gui/opengl
+  licence: MIT License (MIT)
+  Copyright (c) 2013-2014 The Khronos Group Inc.
+  text: opengl-es2-headers-KHRONOS_LICENSE.txt
+
+Anti-aliasing rasterizer from FreeType 2
+  in Qt: src/gui/painting
+  licence: Freetype Project License or GNU General Public License v2.0 only (FTL or GPL-2.0)
+  Copyright 2000-2016 by David Turner, Robert Wilhelm, and Werner Lemberg.
+  text: grayraster-LICENSE.txt
+
+Smooth Scaling Algorithm
+  in Qt: src/gui/painting
+  licence: BSD 2-clause "Simplified" License and Imlib2 License (BSD-2-Clause AND Imlib2)
+  Copyright (C) 2004, 2005 Daniel M. Duley.
+  (C) Carsten Haitzler and various contributors.
+  (C) Willem Monsuwe <willem@stack.nl>
+  text: smooth-scaling-algorithm-QIMAGETRANSFORM_LICENSE.txt
+
+WebGradients
+  in Qt: src/gui/painting
+  licence: MIT License (MIT)
+  Copyright (c) 2017 itmeo
+  text: webgradients-WEBGRADIENTS_LICENSE.txt
+
+X Server helper
+  in Qt: src/gui/painting
+  licence: X11 License and Historical Permission Notice and Disclaimer (X11 AND HPND)
+  Copyright (c) 1987, 1988 X Consortium
+  Copyright 1987, 1988 by Digital Equipment Corporation, Maynard, Massachusetts.
+  text: xserverhelper-XCONSORTIUM_LICENSE.txt
+
+Adobe Glyph List For New Fonts 1.7
+  in Qt: src/gui/text
+  licence: BSD 3-Clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright 2002, 2003, 2005, 2006, 2008, 2010, 2015 Adobe Systems
+  text: aglfn-AGLFN_LICENSE.txt
+
+Vulkan API Registry 1.0.39
+  in Qt: src/gui/vulkan
+  licence: MIT License (MIT)
+  Copyright (c) 2015-2017 The Khronos Group Inc.
+  text: vulkan-xml-spec-KHRONOS_LICENSE.txt
+
+Cocoa Platform Plugin
+  in Qt: src/plugins/platforms/cocoa
+  licence: BSD 3-clause "New" or "Revised" License (BSD-3-Clause)
+  Copyright (c) 2007-2008, Apple, Inc.
+  text: cocoa-platform-plugin-COCOA_LICENSE.txt
+
+Valgrind 3.14.0
+  in Qt: src/testlib/3rdparty
+  licence: BSD 4-clause "Original" or "Old" License (BSD-4-Clause)
+  Copyright (C) 2000-2017 Julian Seward
+  Copyright (C) 2003-2017 Josef Weidendorfer.
+  text: valgrind-VALGRIND_LICENSE.txt
+
+Cycle
+  in Qt: src/testlib/3rdparty
+  licence: MIT License (MIT)
+  Copyright (c) 2003, 2006 Matteo Frigo
+  Copyright (c) 2003, 2006 Massachusetts Institute of Technology
+  text: cycle-CYCLE_LICENSE.txt
+
+Linux Performance Events 3.7
+  in Qt: src/testlib/3rdparty
+  licence: GNU General Public License v2.0 only with Linux Syscall Note (GPL-2.0 WITH Linux-syscall-note)
+  Copyright (C) 2008-2009, Thomas Gleixner <tglx@linutronix.de>
+  Copyright (C) 2008-2011, Red Hat, Inc., Ingo Molnar
+  Copyright (C) 2008-2011, Red Hat, Inc., Peter Zijlstra
+  text: linuxperf-LINUX_LICENSE.txt

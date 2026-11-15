@@ -1,0 +1,21 @@
+{
+  "label": "Spruce Scraper",
+  "icon": "sprucescraper.png",
+  "launch": "launch.sh",
+  "description": "Download box art for your games from ScreenScraper",
+  "devices": [
+    "MIYOO_FLIP",
+    "TRIMUI_BRICK",
+    "TRIMUI_BRICK_PRO",
+    "TRIMUI_SMART_PRO",
+    "TRIMUI_SMART_PRO_S",
+    "MAGICX_ZERO28",
+    "MAGICX_ZERO40",
+    "MAGICX_XU20",
+    "GKD_PIXEL2",
+    "ANBERNIC_RGXX",
+    "RGB30",
+    "MINILOONG_POCKET1"
+  ],
+  "hideInSimpleMode": false
+}

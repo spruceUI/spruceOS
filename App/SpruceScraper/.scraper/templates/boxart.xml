@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Spruce Scraper: the front box as ScreenScraper has it, scaled to 480 pixels high.
+  PyUI fits box art into 640x480 and converts it to QOI on its next start, so anything larger
+  would only cost card space and conversion time. Skyscraper keeps the aspect ratio when only
+  one side is given (docs/ARTWORK.md).
+-->
+<artwork>
+  <output type="cover" height="480"/>
+</artwork>

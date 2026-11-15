@@ -1,0 +1,21 @@
+name=Skyscraper 3.21.1-spruce1 for Spruce Scraper, glibc 2.33 floor
+built=2026-11-04T22:13:13Z on Linux 7.0.0-42-generic x86_64, Debian GNU/Linux 12 (bookworm)
+recipe=87c83b058b6344da7b14638fc4292b10e4e73569
+toolchain=aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621, sysroot glibc 2.33
+host_cxx=g++ (Debian 12.2.0-14+deb12u1) 12.2.0
+skyscraper=3.21.1 ccd49ae99a13ce037476f1d3cc3b646afca2059e (https://github.com/Gemba/skyscraper.git)
+patch=0001-line-buffered-stdout-and-utf8-file-names.patch 71775400c9f8dcf37da17dcf9eebf3cf87f91fa4fe596ebe799734442ab0757e
+patch=0002-ca-certificates-from-ssl-cert-file.patch 31c38507f8e1025861d1d71c4c0694899b88d6e29722805ef27bdeb2004a64bd
+input=qtbase-everywhere-opensource-src-5.15.19.tar.xz 51e91c73abacab81e64efd01bf95794e79c0e605ad80947a024769f0dd620a32
+input=openssl-3.5.9.tar.gz 603f5602e2eef00d77fbd429d34dcd5822bb301757a1bc9cdb24c670f1eb859a
+input=zlib-1.2.8.tar.gz 36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d
+input=skyscraper-3.21.1-ccd49ae.tar.gz 8f81cbd9f84b707ee107a50febbc3a5d7dc5b4e5d0bdecb00c37b3d6f2237852
+zlib=CHOST=aarch64-none-linux-gnu ./configure (CFLAGS -O2 -fPIC): linked against, not shipped
+openssl_configure=linux-aarch64 --cross-compile-prefix=/tmp/sprucescraper-skyscraper-build/toolchain/bin/aarch64-none-linux-gnu- --prefix=/opt/sprucescraper/openssl --openssldir=/opt/sprucescraper/openssl/ssl --libdir=lib no-shared no-module no-legacy no-afalgeng no-tests no-zlib -Os
+qt_configure=-prefix /opt/sprucescraper/qt5 -extprefix /tmp/sprucescraper-skyscraper-build/stage/qt5 -opensource -confirm-license -release -static -optimize-size -c++std c++17 -device linux-generic-g++ -device-option CROSS_COMPILE=/tmp/sprucescraper-skyscraper-build/toolchain/bin/aarch64-none-linux-gnu- -no-pkg-config -nomake examples -nomake tests -no-widgets -no-opengl -no-egl -no-eglfs -no-gbm -no-kms -no-linuxfb -no-directfb -no-xcb -no-xcb-xlib -no-xkbcommon -no-vulkan -no-evdev -no-libinput -no-mtdev -no-tslib -no-libudev -no-cups -no-fontconfig -qpa minimal -qt-freetype -qt-harfbuzz -qt-pcre -qt-doubleconversion -qt-libpng -qt-libjpeg -no-ico -system-zlib ZLIB_PREFIX=/tmp/sprucescraper-skyscraper-build/stage/zlib -no-dbus -no-glib -no-icu -no-iconv -no-journald -no-syslog -no-zstd -no-sql-db2 -no-sql-ibase -no-sql-mysql -no-sql-oci -no-sql-odbc -no-sql-psql -no-sql-sqlite2 -no-sql-sqlite -no-sql-tds -openssl-linked OPENSSL_PREFIX=/tmp/sprucescraper-skyscraper-build/stage/openssl OPENSSL_LIBS=-lssl -lcrypto -ldl -lpthread -no-feature-gssapi -no-libproxy -no-sctp -no-feature-bearermanagement -no-feature-statx QMAKE_CFLAGS+=-ffile-prefix-map=<work>=/build QMAKE_CXXFLAGS+=-ffile-prefix-map=<work>=/build
+skyscraper_qmake=BUNDLE_QRC=1 PREFIX=/opt/sprucescraper/skyscraper qmake QTPLUGIN.platforms=- QMAKE_CXXFLAGS+=-ffile-prefix-map=<work>=/build skyscraper.pro
+
+Skyscraper: ELF64 AArch64, interpreter /lib/ld-linux-aarch64.so.1
+  needs: libz.so.1 libdl.so.2 libpthread.so.0 libstdc++.so.6 libm.so.6 libgcc_s.so.1 libc.so.6
+  newest versions: CXXABI_1.3.9 GCC_4.2.0 GLIBC_2.33 GLIBCXX_3.4.28 ZLIB_1.2.3.4
+floor: OK (glibc 2.33, GLIBCXX 3.4.28, CXXABI 1.3.12, GCC 7.0.0, zlib 1.2.8)

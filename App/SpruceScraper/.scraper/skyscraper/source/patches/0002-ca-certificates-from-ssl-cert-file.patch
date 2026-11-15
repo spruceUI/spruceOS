@@ -1,0 +1,31 @@
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -31,6 +31,9 @@
+ 
+ #include <QCoreApplication>
+ #include <QDir>
++#ifndef QT_NO_SSL
++#include <QSslConfiguration>
++#endif
+ #include <QTextCodec>
+ #include <QTimer>
+ #include <QtGlobal>
+@@ -166,6 +169,18 @@
+     QCoreApplication app(argc, argv);
+     app.setApplicationVersion(StrTools::getVersionBanner());
+ 
++#ifndef QT_NO_SSL
++    // Spruce Scraper: a handheld's firmware may hold no CA certificates and Qt 5 ignores
++    // SSL_CERT_FILE, so the bundle it names is added for every HTTPS request
++    const QString caFile = qEnvironmentVariable("SSL_CERT_FILE");
++    if (!caFile.isEmpty()) {
++        QSslConfiguration ssl = QSslConfiguration::defaultConfiguration();
++        if (ssl.addCaCertificates(caFile)) {
++            QSslConfiguration::setDefaultConfiguration(ssl);
++        }
++    }
++#endif
++
+     // Get working directory. If user has specified file(s) on command line we
+     // need this.
+     QString currentDir = QDir::currentPath();

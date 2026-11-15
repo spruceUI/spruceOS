@@ -1,0 +1,27 @@
+--- a/src/main.cpp	2026-11-03 21:33:38
++++ b/src/main.cpp	2026-11-03 21:33:38
+@@ -31,9 +31,12 @@
+ 
+ #include <QCoreApplication>
+ #include <QDir>
++#include <QTextCodec>
+ #include <QTimer>
+ #include <QtGlobal>
+ 
++#include <cstdio>
++
+ #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+ #include <signal.h>
+ #elif defined(Q_OS_WIN)
+@@ -155,6 +158,11 @@
+     SetConsoleMode(hOut, dwMode);
+ #endif
+ 
++    // Spruce Scraper: progress lines reach a pipe as each game finishes, and file names are
++    // UTF-8 whatever the locale (handhelds run in "C", where Qt 5 would decode them as ASCII)
++    setvbuf(stdout, nullptr, _IOLBF, 0);
++    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
++
+     QCoreApplication app(argc, argv);
+     app.setApplicationVersion(StrTools::getVersionBanner());
+ 
