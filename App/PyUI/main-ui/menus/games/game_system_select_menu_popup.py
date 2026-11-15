@@ -74,7 +74,7 @@ class GameSystemSelectMenuPopup:
                     rom.get_value().game_system,
                     rom.get_value().rom_file_path
                 )
-                rom_image_list.append((name_without_ext, img_path))
+                rom_image_list.append((name_without_ext, img_path, rom.get_value().rom_file_path))
             
             BoxArtScraper().download_boxart_batch(game_system.system_name, rom_image_list)
 

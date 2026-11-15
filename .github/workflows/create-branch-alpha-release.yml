@@ -109,6 +109,19 @@ jobs:
           7z a -t7z -mx=9 Licenses.7z Licenses/
           rm -rf Licenses/
 
+      - name: ScreenScraper developer credentials
+        env:
+          SS_DEVID: ${{ secrets.SCREENSCRAPER_DEVID }}
+          SS_DEVPASSWORD: ${{ secrets.SCREENSCRAPER_DEVPASSWORD }}
+        run: |
+          # Box art comes from ScreenScraper only for signed-in users of a build that has these.
+          DEV_FILE="App/PyUI/main-ui/utils/boxart/screenscraper_dev.json"
+          if [ -z "$SS_DEVID" ] || [ -z "$SS_DEVPASSWORD" ]; then
+            echo "No ScreenScraper developer credentials; box art stays on libretro."
+            exit 0
+          fi
+          jq -n --arg id "$SS_DEVID" --arg pw "$SS_DEVPASSWORD" '{devid: $id, devpassword: $pw}' > "$DEV_FILE"
+
       - name: Create 7z archive
         run: |
           7z a -t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf- "spruceV${{ steps.get_version.outputs.version }}.7z" * .tmp_update \
