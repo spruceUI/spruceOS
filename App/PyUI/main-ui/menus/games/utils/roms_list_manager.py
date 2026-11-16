@@ -48,8 +48,8 @@ class RomsListManager:
     def add_game(self, rom_info: RomInfo):
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
 
-        if key in self._entries_dict:
-            self.remove_game(rom_info)
+        # In memory only: the save and the rebuild below cover the removal too.
+        self._forget(key)
 
         new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.system_name, rom_info.display_name)
         self._entries.insert(0, new_entry)
@@ -59,13 +59,14 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def remove_game(self, rom_info: RomInfo):
-        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
+        self._forget(self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name))
+        self.save_to_file()
+        self.rom_info_list = self.load_entries_as_rom_info()
+
+    def _forget(self, key):
         entry = self._entries_dict.pop(key, None)
         if entry:
             self._entries = [e for e in self._entries if self._entry_key(e.rom_file_path, e.game_system_name) != key]
-
-        self.save_to_file()
-        self.rom_info_list = self.load_entries_as_rom_info()
 
     def save_to_file(self):
         # Write to a temp file and swap it in. open(..., 'w') truncates
