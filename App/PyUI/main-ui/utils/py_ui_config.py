@@ -273,6 +273,11 @@ class PyUiConfig:
         return cls.get("usbAudioSupportedCmd",None)
 
     @classmethod
+    def get_audio_option_cmd(cls):
+        """Run with an option name; exit status 0 turns that audio option on. None means off."""
+        return cls.get("audioOptionCmd",None)
+
+    @classmethod
     def get_usb_audio_route_path(cls):
         return cls.get("usbAudioRoutePath",None)
 

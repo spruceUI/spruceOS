@@ -30,6 +30,9 @@ class AudioPlayerDelegateSdl2:
     def queue_wav(self, file_path: str):
         Sdl2AudioPlayer.load_wav(file_path, wait=False)
 
+    def set_idle_release(self, enabled: bool):
+        Sdl2AudioPlayer.set_idle_release(enabled)
+
     def audio_release(self):
         Sdl2AudioPlayer.audio_release()
 

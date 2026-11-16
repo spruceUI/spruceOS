@@ -31,6 +31,7 @@
     "volumeCmd":"/mnt/SDCARD/App/PyUI/set-volume.sh",
     "btAudioDeviceCmd":"/mnt/SDCARD/App/PyUI/get-bt-audio-device.sh",
     "usbAudioSupportedCmd":"/mnt/SDCARD/App/PyUI/get-usb-audio-supported.sh",
+    "audioOptionCmd":"/mnt/SDCARD/App/PyUI/get-audio-option.sh",
     "usbAudioRoutePath":"/tmp/usb_audio_route",
     "wifiCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_wifi",
     "bluetoothCmd":"/mnt/SDCARD/spruce/scripts/bin/spruce_bluetooth",

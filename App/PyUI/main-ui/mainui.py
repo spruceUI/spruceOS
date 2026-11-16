@@ -88,6 +88,9 @@ def start_background_threads():
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
 
+    # Asking the device scripts whether to close idle audio runs a script, so not here
+    threading.Thread(target=Device.get_device().apply_audio_idle_release, name="AudioIdle", daemon=True).start()
+
 def run_first_frame_cmd():
     """Let the CFW start work it held back so it would not compete with PyUI's startup."""
     cmd = PyUiConfig.get_first_frame_cmd()
