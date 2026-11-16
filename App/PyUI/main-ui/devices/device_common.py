@@ -859,6 +859,9 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().warning(f"USB audio support check failed: {e}")
             return False
 
+    def defer_startup_audio(self):
+        return self._audio_option("defer-startup")
+
     def apply_audio_idle_release(self):
         # The shell's device_idle_release_audio opts a device in. Only the SDL2 back
         # end keeps a device open, so only it takes the setting.

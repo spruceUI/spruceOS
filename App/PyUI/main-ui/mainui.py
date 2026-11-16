@@ -232,8 +232,7 @@ def main():
             Device.get_device().get_game_system_utils().prefetch_active_systems()
             warm_wifi_status()
 
-        audio_devices = PyUiConfig.get_deferred_startup_audio_devices()
-        defer_audio = main_ui_mode and bool(audio_devices) and Device.supports_device(audio_devices)
+        defer_audio = main_ui_mode and Device.get_device().defer_startup_audio()
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(
                 selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height(),
