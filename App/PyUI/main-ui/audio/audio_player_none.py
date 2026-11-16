@@ -24,5 +24,11 @@ class AudioPlayerNone:
     def load_wav(self,file_path: str):
         pass
 
+    def audio_release(self):
+        pass
+
+    def audio_reclaim(self):
+        pass
+
     def audio_reopen(self):
         pass
