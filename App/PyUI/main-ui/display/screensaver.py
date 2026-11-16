@@ -74,7 +74,8 @@ class ScreenSaver:
         cls._widgets_next_time = now + (60 - (now % 60))
 
     @classmethod
-    def render_if_needed(cls):
+    def seconds_until_next_render(cls):
+        """Seconds until a redraw is due: 0 when one is due now, None when none is scheduled."""
         # Two different clocks on purpose. Frame and box art pacing is "how long
         # since the last one", so it uses the monotonic clock and survives the
         # user setting the time. The widget deadline is an actual wall clock
@@ -82,11 +83,18 @@ class ScreenSaver:
         # time.time() or the clock would stop ticking on the minute.
         elapsed_now = time.monotonic()
         wall_now = time.time()
-        if cls._animation_path and elapsed_now >= cls._animation_next_time:
-            cls.render()
-        elif cls._boxart_next_time and elapsed_now >= cls._boxart_next_time:
-            cls.render()
-        elif cls._widgets_next_time and wall_now >= cls._widgets_next_time:
+        waits = []
+        if cls._animation_path:
+            waits.append(cls._animation_next_time - elapsed_now)
+        if cls._boxart_next_time:
+            waits.append(cls._boxart_next_time - elapsed_now)
+        if cls._widgets_next_time:
+            waits.append(cls._widgets_next_time - wall_now)
+        return max(min(waits), 0) if waits else None
+
+    @classmethod
+    def render_if_needed(cls):
+        if cls.seconds_until_next_render() == 0:
             cls.render()
 
     @classmethod
