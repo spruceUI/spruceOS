@@ -94,7 +94,6 @@ get_core_folder() {
         "race_libretro.so") echo "RACE-$(arch_suffix)" ;;
         "reminiscence_libretro.so") echo "REminiscence" ;;
         "retro8_libretro.so") echo "Retro8" ;;
-        "sameduck_libretro.so") echo "SameDuck" ;;
         "scummvm_libretro.so") echo "ScummVM" ;;
         "snes9x2002_libretro.so") echo "Snes9x 2002" ;;
         "snes9x2005_libretro.so") echo "Snes9x 2005" ;;

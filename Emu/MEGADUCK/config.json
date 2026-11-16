@@ -16,15 +16,6 @@
       ],
       "selected": "Smart",
       "overrides": {}
-    },
-    "Emulator": {
-      "display": "Retroarch Core",
-      "options": [
-        "armgba",
-        "sameduck"
-      ],
-      "selected": "armgba",
-      "overrides": {}
     }
   },
   "sortOrder": 3400,
