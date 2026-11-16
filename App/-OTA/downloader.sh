@@ -620,12 +620,23 @@ while IFS='|' read -r QUEUE_VERSION QUEUE_CHECKSUM QUEUE_LINK QUEUE_SIZE QUEUE_I
         fi
     fi
 
-    # Check free disk space before each download.
-    sdcard_mountpoint="$(mount | grep -m 1 "$SD_MOUNTPOINT" | awk '{print $1}')"
-    sdcard_freespace="$(df -m "$sdcard_mountpoint" | awk 'NR==2{print $4}')"
+    # Check free disk space before each download, where the archive is written. df gets
+    # that path: on the Flip the first "mount" line naming SD_MOUNTPOINT is an overlay.
+    # Available is the 3rd field from the end, so a wrapped df line still parses.
+    sdcard_freespace="$(df -m "$(dirname "$OUTPUT_FILE")" 2>/dev/null | awk 'NR > 1 && NF >= 4 { free = $(NF - 2) } END { print free }')"
     min_install_space=$(((QUEUE_SIZE * 2) + 128))
 
-    if [ "$sdcard_freespace" -lt "$min_install_space" ]; then
+    case "$sdcard_freespace" in
+        '' | *[!0-9]*)
+            log_message "OTA: Could not read the free space in $(dirname "$OUTPUT_FILE"); not checking it"
+            sdcard_freespace=""
+            ;;
+        *)
+            log_message "OTA: Free space on the SD card: $sdcard_freespace MB; $FILENAME needs $min_install_space MB"
+            ;;
+    esac
+
+    if [ -n "$sdcard_freespace" ] && [ "$sdcard_freespace" -lt "$min_install_space" ]; then
         log_message "OTA: Not enough free space on SD card for $FILENAME"
         display_image_and_text "$IMAGE_PATH" 35 25 "Insufficient space on SD card. At least $min_install_space MB of space should be free." 75
         sleep 5

@@ -104,6 +104,7 @@ class BoxArtScraper:
         self._folder_to_system = None  # Lazy map: on-disk ROM folder name -> canonical system name
         self.cancelled = False
         self.screenscraper = ScreenScraper()
+        self._stop_reported = False
     # ==========================================================
     # Helper Methods
     # ==========================================================
@@ -651,13 +652,7 @@ class BoxArtScraper:
         if not url:
             return False
         with self.screenscraper.slot():
-            ok = self._download_file(url, image_path)
-        if ok and self._is_image(image_path):
-            return True
-        # a dropped download or a "NOMEDIA" reply leaves no file behind for libretro to miss
-        if os.path.exists(image_path):
-            os.remove(image_path)
-        return False
+            return self._download_file(url, image_path, accept=self._is_image)
 
     def start_screenscraper(self) -> None:
         """At the start of a run: check the login and size the threads, or fall back to libretro."""
@@ -674,8 +669,9 @@ class BoxArtScraper:
 
     def report_screenscraper_stop(self) -> None:
         reason = self.screenscraper.stopped
-        if reason is None:
+        if reason is None or self._stop_reported:
             return
+        self._stop_reported = True
         messages = {
             LOGIN: Language.label("screenscraperLoginRejected", "ScreenScraper rejected the login. Using libretro box art."),
             QUOTA: Language.label("screenscraperQuota", "Today's ScreenScraper limit is used up. Using libretro box art."),
@@ -721,7 +717,8 @@ class BoxArtScraper:
         """
         if(not self.check_wifi()):
             return
-        self.start_screenscraper()
+        if len(roms_and_paths) > 1:
+            self.start_screenscraper()
 
         self.log_and_display_message(Language.label("scrapingBoxartPatient", "Scraping box art. Please be patient, especially with large libraries!"))
         if not roms_and_paths:
@@ -905,14 +902,16 @@ class BoxArtScraper:
     # File Download
     # ==========================================================
 
-    def _download_file(self, url: str, dest_path: str) -> bool:
+    def _download_file(self, url: str, dest_path: str, accept=None) -> bool:
+        """Download to a temporary file and move it over dest_path only on success, so a failed
+        or rejected download leaves any existing art in place."""
+        tmp_path = dest_path + ".part"
         try:
             import urllib.request
 
             with urllib.request.urlopen(url, timeout=15) as response:
-                with open(dest_path, "wb") as output:
+                with open(tmp_path, "wb") as output:
                     while True:
-                        # Check cancellation
                         if self.cancelled:
                             return False
 
@@ -923,13 +922,15 @@ class BoxArtScraper:
 
                         output.write(chunk)
 
-            return not self.cancelled
+            if self.cancelled or (accept is not None and not accept(tmp_path)):
+                return False
+            os.replace(tmp_path, dest_path)
+            return True
 
         except Exception as e:
             PyUiLogger.get_logger().error(e)
             return False
 
         finally:
-            if self.cancelled or not os.path.exists(dest_path):
-                if os.path.exists(dest_path):
-                    os.remove(dest_path)
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)

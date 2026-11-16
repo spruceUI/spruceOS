@@ -336,15 +336,12 @@ run_retroarch() {
 
 	apply_baseos_ra_overlay
 
-	# Cheats turned on in the in-game menu are saved per game; this re-applies
-	# them at launch. RetroArch takes one --appendconfig, joined with "|".
+	# RetroArch takes one --appendconfig, joined with "|"
 	case "$RA_PARAMS" in
 		*--appendconfig*) RA_PARAMS="${RA_PARAMS}|$RA_DIR/spruce-cheats.cfg" ;;
 		*) RA_PARAMS="${RA_PARAMS} --appendconfig $RA_DIR/spruce-cheats.cfg" ;;
 	esac
 
-	# vulkan_launch.sh systems: the 64-bit build has the Vulkan driver built in,
-	# so it only needs the device's driver stack and vulkan.cfg.
 	case "$RA_BIN" in
 		ra64.*)
 			if [ "$RA_VULKAN" = 1 ] && command -v device_vulkan_env >/dev/null 2>&1 \
@@ -646,6 +643,7 @@ save_custom_n64_controller_profile() {
 		"mupen64plus") 							core_name="Mupen64Plus GLES2" ;;
 		"parallel_n64") 						core_name="ParaLLEl N64" ;;
 		"mupen64plus_next") 					core_name="Mupen64Plus-Next" ;;
+		"armn64") 							core_name="armN64" ;;
 		*) return 0 ;; # if not a known N64 core, do nothing
 	esac
 

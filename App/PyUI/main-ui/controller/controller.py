@@ -1,3 +1,4 @@
+import math
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -55,6 +56,9 @@ class Controller:
     IDLE_AFTER_SECONDS = 1.5
     IDLE_AFTER_FRAMES = 6
     IDLE_FRAME_SECONDS = 1.0
+    # The longest the screensaver sleeps when no redraw is due sooner: its clock
+    # deadline is a wall clock time, and that clock can be set while it sleeps.
+    SCREENSAVER_MAX_WAIT_SECONDS = 1.0
     _redraw_requested = False
     _last_press_time = 0
 
@@ -314,8 +318,13 @@ class Controller:
                 if Controller.still_held_down():
                     time.sleep(POLL_INTERVAL_SECONDS)
                     continue
-                ms = int(POLL_INTERVAL_SECONDS * 1000)
-                inp = Controller.controller_interface.get_input(ms)
+                # Sleep until the next redraw is due, a button or a wake: never
+                # shorter than the old 5 ms poll, never longer than the cap.
+                wait = ScreenSaver.seconds_until_next_render()
+                if wait is None:
+                    wait = Controller.SCREENSAVER_MAX_WAIT_SECONDS
+                wait = min(max(wait, POLL_INTERVAL_SECONDS), Controller.SCREENSAVER_MAX_WAIT_SECONDS)
+                inp = Controller.controller_interface.get_input(math.ceil(wait * 1000))
                 shutdown.checkpoint()
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()

@@ -37,7 +37,7 @@
       "selected": "64-bit",
       "overrides": {}
     },
-    "Emulator_RGB30": {
+    "Emulator_DARKMOSS": {
       "display": "Emulator",
       "devices": [
         "DARKMOSS"
