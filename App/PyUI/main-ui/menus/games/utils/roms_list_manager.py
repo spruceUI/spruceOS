@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,13 @@ def sort_key_for_text(text):
     return lower
 
 
+@lru_cache(maxsize=4096)
+def _resolved_path(rom_file_path: str) -> str:
+    # Path.resolve() asks the card about every folder on the way, so the answer
+    # is kept: every change to a list resolved all of its entries again.
+    return str(Path(rom_file_path).resolve())
+
+
 class RomsListManager:
     def __init__(self, entries_file):
         self.entries_file = entries_file
@@ -43,7 +51,7 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def _entry_key(self, rom_file_path: str, game_system_name: str) -> Tuple[str, str]:
-        return (str(Path(rom_file_path).resolve()), game_system_name)
+        return (_resolved_path(rom_file_path), game_system_name)
 
     def add_game(self, rom_info: RomInfo):
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
