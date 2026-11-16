@@ -21,6 +21,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "ardens": ["Ardens"],
         "arduous": ["Arduous"],
         "armgba": ["armGBA"],
+        "armn64": ["armN64"],
         "armnes": ["armNES"],
         "atari800": ["Atari800"],
         "bk": ["bk"],
