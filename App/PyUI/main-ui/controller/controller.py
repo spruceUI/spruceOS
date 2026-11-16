@@ -1,3 +1,4 @@
+import math
 import time
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
@@ -323,7 +324,7 @@ class Controller:
                 if wait is None:
                     wait = Controller.SCREENSAVER_MAX_WAIT_SECONDS
                 wait = min(max(wait, POLL_INTERVAL_SECONDS), Controller.SCREENSAVER_MAX_WAIT_SECONDS)
-                inp = Controller.controller_interface.get_input(int(wait * 1000))
+                inp = Controller.controller_interface.get_input(math.ceil(wait * 1000))
                 shutdown.checkpoint()
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
