@@ -243,12 +243,6 @@ class PyUiConfig:
         return devices if isinstance(devices, list) else None
 
     @classmethod
-    def get_screensaver_release_audio_devices(cls):
-        """Device names that close the audio device while the screensaver shows. None means off."""
-        devices = cls.get("screensaverReleaseAudioDevices")
-        return devices if isinstance(devices, list) else None
-
-    @classmethod
     def get_backlight_cmd(cls):
         return cls.get("backlightCmd",None)
 

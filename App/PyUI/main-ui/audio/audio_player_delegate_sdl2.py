@@ -33,12 +33,6 @@ class AudioPlayerDelegateSdl2:
     def set_idle_release(self, enabled: bool):
         Sdl2AudioPlayer.set_idle_release(enabled)
 
-    def audio_release(self):
-        Sdl2AudioPlayer.audio_release()
-
-    def audio_reclaim(self):
-        Sdl2AudioPlayer.audio_reclaim()
-
     def audio_reopen(self):
         # The worker reinitialises on this flag: it reopens the output, picking
         # up AUDIODEV, and reloads the menu sounds. A cleanup would drop them.

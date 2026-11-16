@@ -160,22 +160,6 @@ class Sdl2AudioPlayer:
         Sdl2AudioPlayer._idle_release = bool(enabled)
 
     @staticmethod
-    def _worker_running():
-        return bool(Sdl2AudioPlayer._worker_thread) and Sdl2AudioPlayer._running
-
-    @staticmethod
-    def audio_release():
-        """Close the device until audio_reclaim(), unless a sound is playing."""
-        # No worker means the device was never opened: do not start one for this.
-        if Sdl2AudioPlayer._worker_running():
-            Sdl2AudioPlayer._send_cmd("release")
-
-    @staticmethod
-    def audio_reclaim():
-        if Sdl2AudioPlayer._worker_running():
-            Sdl2AudioPlayer._send_cmd("reclaim")
-
-    @staticmethod
     def audio_cleanup():
         if Sdl2AudioPlayer._worker_thread is None or not Sdl2AudioPlayer._running:
             Sdl2AudioPlayer._worker_thread = None
@@ -215,7 +199,7 @@ class Sdl2AudioPlayer:
         loop_channel = None
         loop_music_path = None
         loop_chunk_path = None
-        released_paths = None  # the WAVs to load again, while the device is released
+        released_paths = None  # the WAVs to load again, while the device is closed for idling
 
         def reply_ok(resp_q, ok=True):
             if resp_q:
@@ -404,7 +388,7 @@ class Sdl2AudioPlayer:
 
             try:
                 name = cmd.name
-                if name not in ("init", "preload_wav", "cleanup", "reclaim") and not mixer_open():
+                if name not in ("init", "preload_wav", "cleanup") and not mixer_open():
                     reply_ok(cmd.resp_q, False)
                     continue
                 if name == "init":
@@ -513,18 +497,6 @@ class Sdl2AudioPlayer:
                         reply_ok(cmd.resp_q, False)
                 elif name == "stop_loop":
                     stop_loop_internal()
-                    reply_ok(cmd.resp_q, True)
-                elif name == "release":
-                    # An open device keeps SDL's audio thread writing silence. A sound
-                    # that is still playing (the theme's music, a click) keeps it open.
-                    if not sdlmixer.Mix_Playing(-1) and not sdlmixer.Mix_PlayingMusic():
-                        released_paths = close_audio()
-                    reply_ok(cmd.resp_q, released_paths is not None)
-                elif name == "reclaim":
-                    if released_paths is not None:
-                        chunk_paths = list(wanted_chunks | set(released_paths))
-                        released_paths = None
-                        open_audio(chunk_paths)
                     reply_ok(cmd.resp_q, True)
                 elif name == "cleanup":
                     # stop loops and halt everything (only an open mixer), then wait a bit

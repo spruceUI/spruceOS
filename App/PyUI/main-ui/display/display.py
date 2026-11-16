@@ -141,7 +141,6 @@ class Display:
     _screensaver_lowered_cpu = False
     _screensaver_saved_lumination = None
     _screensaver_dimmed = False
-    _screensaver_released_audio = False
     _problematic_images = set()  # Class-level set to track images that won't load properly
     _problematic_image_keywords = [
         "No such file or directory",
@@ -1377,20 +1376,6 @@ class Display:
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Could not dim backlight for screensaver: {e}")
 
-        # Nothing sounds under a screensaver. Listed devices close the audio device
-        # until it ends; a sound still playing (the theme's music) keeps it open.
-        if cls._screensaver_releases_audio():
-            try:
-                Device.get_device().get_audio_system().audio_release()
-                cls._screensaver_released_audio = True
-            except Exception as e:
-                PyUiLogger.get_logger().warning(f"Could not release audio for screensaver: {e}")
-
-    @staticmethod
-    def _screensaver_releases_audio():
-        devices = PyUiConfig.get_screensaver_release_audio_devices()
-        return bool(devices) and Device.supports_device(devices)
-
     @classmethod
     def restore_from_blank(cls):
         if not cls._screensaver_active:
@@ -1410,13 +1395,6 @@ class Display:
                 Device.get_device().set_cpu_normal()
             except Exception as e:
                 PyUiLogger.get_logger().warning(f"Could not restore CPU after screensaver: {e}")
-
-        if cls._screensaver_released_audio:
-            cls._screensaver_released_audio = False
-            try:
-                Device.get_device().get_audio_system().audio_reclaim()
-            except Exception as e:
-                PyUiLogger.get_logger().warning(f"Could not reclaim audio after screensaver: {e}")
 
         cls._screensaver_active = False
 
