@@ -109,24 +109,24 @@ class RomsListManager:
 
     def _read_entries(self):
         # Missing, empty and unparseable all mean "no list yet". They are
-        # returned as [] rather than raised, so load_from_file reaches
-        # save_to_file and rewrites the file - otherwise a zero byte file
-        # fails to parse on every boot and is never repaired.
+        # returned as None rather than raised, so load_from_file writes a
+        # fresh file - otherwise a zero byte file fails to parse on every
+        # boot and is never repaired.
         if not os.path.exists(self.entries_file):
-            return []
+            return None
 
         try:
             with open(self.entries_file, 'r') as f:
                 contents = f.read()
         except OSError as e:
             PyUiLogger.get_logger().error(f"Unable to read {self.entries_file}: {e}")
-            return []
+            return None
 
         if not contents.strip():
             PyUiLogger.get_logger().warning(
                 f"{self.entries_file} is empty, starting a new list"
             )
-            return []
+            return None
 
         try:
             data = json.loads(contents)
@@ -138,14 +138,14 @@ class RomsListManager:
             PyUiLogger.get_logger().error(
                 f"{self.entries_file} is not valid JSON ({e}), starting a new list"
             )
-            return []
+            return None
 
         if not isinstance(data, list):
             self._back_up_unreadable_file()
             PyUiLogger.get_logger().error(
                 f"{self.entries_file} is not a list, starting a new list"
             )
-            return []
+            return None
 
         return data
 
@@ -162,9 +162,10 @@ class RomsListManager:
     def load_from_file(self):
         try:
             data = self._read_entries()
+            unreadable = data is None
 
             validated_entries = []
-            for entry_data in data:
+            for entry_data in data or []:
                 entry = RomsListEntry(**entry_data)
                 if os.path.exists(entry.rom_file_path):
                     validated_entries.append(entry)
@@ -179,9 +180,10 @@ class RomsListManager:
                 for entry in self._entries
             }
 
-            # Save back the validated list in case some entries were removed,
-            # and to replace a file that could not be read.
-            self.save_to_file()
+            # Save back the validated list if some entries were removed, and to
+            # replace a file that could not be read. An unchanged list stays as it is.
+            if unreadable or len(validated_entries) != len(data):
+                self.save_to_file()
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to load entries: {e}")
