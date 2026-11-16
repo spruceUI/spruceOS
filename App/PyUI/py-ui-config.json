@@ -24,6 +24,7 @@
     "cpuModeCmd":"/mnt/SDCARD/App/PyUI/set-cpu-mode.sh",
     "firstFrameCmd":"/mnt/SDCARD/spruce/scripts/boot/after_first_frame.sh",
     "deferStartupAudioDevices": ["ANBERNIC_RGXX"],
+    "screensaverReleaseAudioDevices": ["TRIMUI_SMART_PRO_S"],
     "backlightCmd":"/mnt/SDCARD/App/PyUI/set-backlight.sh",
     "padRestartedCmd":"/mnt/SDCARD/App/PyUI/restart-pad-readers.sh",
     "inputDaemonRestartCmd":"/mnt/SDCARD/App/PyUI/restart-input-daemon.sh",
