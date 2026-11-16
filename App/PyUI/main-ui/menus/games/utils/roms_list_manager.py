@@ -193,12 +193,25 @@ class RomsListManager:
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
         return key in self._entries_dict
 
+    def _game_system_lookup(self):
+        # Each lookup reads that system's config.json, so one pass over the list
+        # asks once per system, not once per entry.
+        found = {}
+
+        def lookup(system_name):
+            if system_name not in found:
+                found[system_name] = self.game_system_utils.get_game_system_by_name(system_name)
+            return found[system_name]
+
+        return lookup
+
     def load_entries_as_rom_info(self) -> List[RomInfo]:
         rom_info_list: List[RomInfo] = []
+        get_game_system = self._game_system_lookup()
 
         for entry in self._entries:
             try:
-                game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                game_system = get_game_system(entry.game_system_name)
                 if game_system is not None:
                     rom_info_list.append(RomInfo(game_system, entry.rom_file_path, entry.display_name))
             except Exception as e:
@@ -214,9 +227,11 @@ class RomsListManager:
         if display_name_fn is None:
             self._entries.sort(key=lambda entry: (entry.get_sort_key()))
         else:
+            get_game_system = self._game_system_lookup()
+
             def sort_key(entry):
                 try:
-                    game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                    game_system = get_game_system(entry.game_system_name)
                     if game_system is None:
                         return entry.get_sort_key()
                     return sort_key_for_text(display_name_fn(
