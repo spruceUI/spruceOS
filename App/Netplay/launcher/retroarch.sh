@@ -83,8 +83,11 @@ if [ "$SHIM_PLATFORM" != "my282" ] && [ -n "$NETPLAY_SESSION" ] &&
 			REAL_RA="$STASH/$ra32bin"
 			SHIM_PLATFORM=my282
 			# spruce named the 64-bit core; its 32-bit twin ships beside it.
+			# Netplay's own engine cores (Gear-to-Gear Gearsystem) have
+			# their 32-bit build in the my282 override folder.
 			case "$CORE" in
 				*/cores64/*) CORE="${CORE%/cores64/*}/cores/${CORE##*/}" ;;
+				*/cores/override/*/*) CORE="${CORE%/cores/override/*}/cores/override/my282/${CORE##*/}" ;;
 			esac
 			case "$SPRUCE_CORE" in
 				*/cores64/*) SPRUCE_CORE="${SPRUCE_CORE%/cores64/*}/cores/${SPRUCE_CORE##*/}" ;;
@@ -128,7 +131,8 @@ case "$(basename "$CORE")" in
 	fceumm_libretro.so|snes9x_libretro.so|snes9x2005_libretro.so|\
 	mednafen_supafaust_libretro.so|picodrive_libretro.so|pcsx_rearmed_libretro.so|\
 	gpsp_libretro.so|gambatte_libretro.so|mgba_libretro.so|armgba_libretro.so|\
-	genesis_plus_gx_libretro.so|gearsystem_libretro.so) ;;
+	genesis_plus_gx_libretro.so|gearsystem_libretro.so|\
+	gearsystem_link_libretro.so) ;;
 	*) PLATFORM="$SPRUCE_PLATFORM" exec "$REAL_RA" "$@" ;;
 esac
 
