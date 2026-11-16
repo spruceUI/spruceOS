@@ -1,11 +1,14 @@
 #!/bin/sh
 
 case "$1" in
+    defer-startup)
+        FUNCTION="device_defer_startup_audio"
+        ;;
     idle-release)
         FUNCTION="device_idle_release_audio"
         ;;
     *)
-        echo "Usage: $0 {idle-release}" >&2
+        echo "Usage: $0 {defer-startup|idle-release}" >&2
         exit 2
         ;;
 esac
