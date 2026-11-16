@@ -267,10 +267,9 @@ class Sdl2AudioPlayer:
                 PyUiLogger.get_logger().warning(f"Mix_LoadMUS exception for {path}: {e}")
                 return None
 
-        def reinit_audio():
-            """Tear down and reinitialize SDL2 audio (e.g. after sleep/wake kills ALSA)."""
+        def close_audio():
+            """Free every sound and close the device. Returns the WAV paths to load again."""
             nonlocal loop_channel, loop_music_path, loop_chunk_path
-            PyUiLogger.get_logger().warning("Reinitializing SDL2 audio after sleep/wake...")
             loop_channel = None
             loop_music_path = None
             loop_chunk_path = None
@@ -296,17 +295,25 @@ class Sdl2AudioPlayer:
                 sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_AUDIO)
             except Exception:
                 pass
+            return old_chunk_paths
 
+        def open_audio(chunk_paths):
+            """Open the device and load the given WAVs again."""
             ok = worker_init()
 
             if ok:
                 PyUiLogger.get_logger().info("SDL2 audio reinit succeeded.")
                 # Re-preload previously cached WAVs
-                for p in old_chunk_paths:
+                for p in chunk_paths:
                     safe_load_chunk(p)
             else:
                 PyUiLogger.get_logger().warning("SDL2 audio reinit failed.")
             return ok
+
+        def reinit_audio():
+            """Tear down and reinitialize SDL2 audio (e.g. after sleep/wake kills ALSA)."""
+            PyUiLogger.get_logger().warning("Reinitializing SDL2 audio after sleep/wake...")
+            return open_audio(close_audio())
 
         def stop_loop_internal():
             nonlocal loop_channel, loop_music_path, loop_chunk_path
