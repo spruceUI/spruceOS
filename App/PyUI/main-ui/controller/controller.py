@@ -329,6 +329,8 @@ class Controller:
             from display.screensaver import ScreenSaver
             while True:
                 shutdown.checkpoint()
+                if not Controller._screensaver_active:
+                    return False
                 ScreenSaver.render_if_needed()
                 Controller.controller_interface.force_refresh()
                 if Controller.still_held_down():
@@ -342,6 +344,8 @@ class Controller:
                 wait = min(max(wait, POLL_INTERVAL_SECONDS), Controller.SCREENSAVER_MAX_WAIT_SECONDS)
                 inp = Controller.controller_interface.get_input(math.ceil(wait * 1000))
                 shutdown.checkpoint()
+                if not Controller._screensaver_active:
+                    return False
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
                     continue
