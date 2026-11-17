@@ -19,7 +19,6 @@ import sdl2
 
 from menus.main_menu import MainMenu
 from controller.controller import Controller
-from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from display.display import Display
 from themes.theme import Theme
@@ -188,7 +187,7 @@ def show_external_message(message):
     Controller.clear_last_input()
     Controller.clear_input_queue()
 
-    Display.display_message(message)
+    Display.display_message(Language.shell_message(message))
 
     Controller.wait_for_input([
         ControllerInput.A,

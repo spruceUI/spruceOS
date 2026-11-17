@@ -125,12 +125,11 @@ while true; do
                 vibrate_count=$((vibrate_count + 1))
             else
                 if [ "$flag_added" = false ]; then
-                    # On the Mini, starting a writer runs freemma, which clears the running menu.
                     if flag_check "in_menu"; then
-					    show_low_battery_warning &
-					else
-					    flag_add "low_battery" --tmp
-					fi
+                        show_low_battery_warning &
+                    else
+                        flag_add "low_battery" --tmp
+                    fi
                     flag_added=true
                 fi
                 morse_code_sos "false" "." "." "." "-" "-" "-" "." "." "."
