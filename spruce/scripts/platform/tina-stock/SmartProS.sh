@@ -342,8 +342,17 @@ device_init() {
             echo 0 0 0   # tell sendevent to exit
         } | sendevent $EVENT_PATH_VOLUME 
         sleep 3
-        echo 0 > /sys/class/speaker/mute
+        unmute_speaker_in_stream
     ) &
+}
+
+# Writing 0 to the mute file turns the amp on at once; with no stream open, the next
+# stream to close pops. Unmuting while a silent stream plays is quiet.
+unmute_speaker_in_stream() {
+    aplay -q -D Playback -t raw -f S16_LE -r 48000 -c 2 -s 144000 /dev/zero >/dev/null 2>&1 &
+    sleep 0.3
+    echo 0 > /sys/class/speaker/mute
+    wait $!
 }
 
 set_event_arg_for_idlemon() {
