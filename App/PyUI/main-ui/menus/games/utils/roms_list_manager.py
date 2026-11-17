@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import lru_cache
 import json
 import os
 from pathlib import Path
@@ -33,6 +34,13 @@ def sort_key_for_text(text):
     return lower
 
 
+@lru_cache(maxsize=4096)
+def _resolved_path(rom_file_path: str) -> str:
+    # Path.resolve() asks the card about every folder on the way, so the answer
+    # is kept: every change to a list resolved all of its entries again.
+    return str(Path(rom_file_path).resolve())
+
+
 class RomsListManager:
     def __init__(self, entries_file):
         self.entries_file = entries_file
@@ -43,13 +51,13 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def _entry_key(self, rom_file_path: str, game_system_name: str) -> Tuple[str, str]:
-        return (str(Path(rom_file_path).resolve()), game_system_name)
+        return (_resolved_path(rom_file_path), game_system_name)
 
     def add_game(self, rom_info: RomInfo):
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
 
-        if key in self._entries_dict:
-            self.remove_game(rom_info)
+        # In memory only: the save and the rebuild below cover the removal too.
+        self._forget(key)
 
         new_entry = RomsListEntry(rom_info.rom_file_path, rom_info.game_system.system_name, rom_info.display_name)
         self._entries.insert(0, new_entry)
@@ -59,13 +67,14 @@ class RomsListManager:
         self.rom_info_list = self.load_entries_as_rom_info()
 
     def remove_game(self, rom_info: RomInfo):
-        key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
+        self._forget(self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name))
+        self.save_to_file()
+        self.rom_info_list = self.load_entries_as_rom_info()
+
+    def _forget(self, key):
         entry = self._entries_dict.pop(key, None)
         if entry:
             self._entries = [e for e in self._entries if self._entry_key(e.rom_file_path, e.game_system_name) != key]
-
-        self.save_to_file()
-        self.rom_info_list = self.load_entries_as_rom_info()
 
     def save_to_file(self):
         # Write to a temp file and swap it in. open(..., 'w') truncates
@@ -108,24 +117,24 @@ class RomsListManager:
 
     def _read_entries(self):
         # Missing, empty and unparseable all mean "no list yet". They are
-        # returned as [] rather than raised, so load_from_file reaches
-        # save_to_file and rewrites the file - otherwise a zero byte file
-        # fails to parse on every boot and is never repaired.
+        # returned as None rather than raised, so load_from_file writes a
+        # fresh file - otherwise a zero byte file fails to parse on every
+        # boot and is never repaired.
         if not os.path.exists(self.entries_file):
-            return []
+            return None
 
         try:
             with open(self.entries_file, 'r') as f:
                 contents = f.read()
         except OSError as e:
             PyUiLogger.get_logger().error(f"Unable to read {self.entries_file}: {e}")
-            return []
+            return None
 
         if not contents.strip():
             PyUiLogger.get_logger().warning(
                 f"{self.entries_file} is empty, starting a new list"
             )
-            return []
+            return None
 
         try:
             data = json.loads(contents)
@@ -137,14 +146,14 @@ class RomsListManager:
             PyUiLogger.get_logger().error(
                 f"{self.entries_file} is not valid JSON ({e}), starting a new list"
             )
-            return []
+            return None
 
         if not isinstance(data, list):
             self._back_up_unreadable_file()
             PyUiLogger.get_logger().error(
                 f"{self.entries_file} is not a list, starting a new list"
             )
-            return []
+            return None
 
         return data
 
@@ -161,9 +170,10 @@ class RomsListManager:
     def load_from_file(self):
         try:
             data = self._read_entries()
+            unreadable = data is None
 
             validated_entries = []
-            for entry_data in data:
+            for entry_data in data or []:
                 entry = RomsListEntry(**entry_data)
                 if os.path.exists(entry.rom_file_path):
                     validated_entries.append(entry)
@@ -178,9 +188,10 @@ class RomsListManager:
                 for entry in self._entries
             }
 
-            # Save back the validated list in case some entries were removed,
-            # and to replace a file that could not be read.
-            self.save_to_file()
+            # Save back the validated list if some entries were removed, and to
+            # replace a file that could not be read. An unchanged list stays as it is.
+            if unreadable or len(validated_entries) != len(data):
+                self.save_to_file()
 
         except Exception as e:
             PyUiLogger.get_logger().error(f"Failed to load entries: {e}")
@@ -193,12 +204,25 @@ class RomsListManager:
         key = self._entry_key(rom_info.rom_file_path, rom_info.game_system.system_name)
         return key in self._entries_dict
 
+    def _game_system_lookup(self):
+        # Each lookup reads that system's config.json, so one pass over the list
+        # asks once per system, not once per entry.
+        found = {}
+
+        def lookup(system_name):
+            if system_name not in found:
+                found[system_name] = self.game_system_utils.get_game_system_by_name(system_name)
+            return found[system_name]
+
+        return lookup
+
     def load_entries_as_rom_info(self) -> List[RomInfo]:
         rom_info_list: List[RomInfo] = []
+        get_game_system = self._game_system_lookup()
 
         for entry in self._entries:
             try:
-                game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                game_system = get_game_system(entry.game_system_name)
                 if game_system is not None:
                     rom_info_list.append(RomInfo(game_system, entry.rom_file_path, entry.display_name))
             except Exception as e:
@@ -214,9 +238,11 @@ class RomsListManager:
         if display_name_fn is None:
             self._entries.sort(key=lambda entry: (entry.get_sort_key()))
         else:
+            get_game_system = self._game_system_lookup()
+
             def sort_key(entry):
                 try:
-                    game_system = self.game_system_utils.get_game_system_by_name(entry.game_system_name)
+                    game_system = get_game_system(entry.game_system_name)
                     if game_system is None:
                         return entry.get_sort_key()
                     return sort_key_for_text(display_name_fn(
