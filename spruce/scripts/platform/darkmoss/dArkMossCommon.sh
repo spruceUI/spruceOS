@@ -652,7 +652,7 @@ take_screenshot() {
 
     if timeout 15 "$_ff" -hide_banner -loglevel error \
         -f kmsgrab -i - \
-        -vf "hwdownload,format=bgr0,format=rgba" \
+        -vf "hwdownload,format=bgr0,format=rgba${SCREENSHOT_FILTER:+,$SCREENSHOT_FILTER}" \
         -frames:v 1 -update 1 -y "$screenshot_path" >/dev/null 2>&1; then
         return 0
     fi

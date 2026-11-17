@@ -1,7 +1,7 @@
 {
   "N64": {
     "Governor": "Performance",
-    "Emulator_RGB30": "mupen64plus-standalone",
+    "Emulator_DARKMOSS": "mupen64plus-standalone",
     "Emulator_A30": "km_ludicrousn64_2k22_xtreme_amped",
     "raBuild": "64-bit",
     "Emulator_64": "km_ludicrousn64_2k22_xtreme_amped",

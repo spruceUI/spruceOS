@@ -64,7 +64,7 @@
       "selected": "DraStic-trngaje",
       "overrides": {}
     },
-    "Emulator_RGB30": {
+    "Emulator_DARKMOSS": {
       "display": "Emulator",
       "devices": [
         "DARKMOSS",

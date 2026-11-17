@@ -1,6 +1,6 @@
 display_name = "Nintendo - Game Boy Advance / Game Boy Color (armGBA)"
 authors = "Magnominus"
-supported_extensions = "gba|bin|gb|gbc|gb2|gba2"
+supported_extensions = "gba|bin|gb|gbc|gb2|gba2|duck|md0|md1|md2|md20s|md25s"
 corename = "armGBA"
 manufacturer = "Nintendo"
 categories = "Emulator"

@@ -7,6 +7,7 @@ from menus.settings import settings_menu
 from menus.settings.modes_menu import ModesMenu
 from option_select_ui import OptionSelectUI
 from utils.boxart.box_art_scraper import BoxArtScraper
+from utils.cheat_downloader import CheatDownloader
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
 from views.view_type import ViewType
@@ -23,6 +24,10 @@ class TasksMenu(settings_menu.SettingsMenu):
     def scrape_box_art(self,input):
         if(ControllerInput.A == input):
             BoxArtScraper().scrape_boxart()
+
+    def download_cheats(self, input):
+        if(ControllerInput.A == input):
+            CheatDownloader().run()
 
     def launch_modes_menu(self,input):
         if(ControllerInput.A == input):
@@ -43,6 +48,17 @@ class TasksMenu(settings_menu.SettingsMenu):
                         value=self.scrape_box_art
                 )
          )    
+
+        option_list.append(
+                GridOrListEntry(
+                        primary_text=Language.label("downloadCheats", "Download cheats"),
+                        image_path=None,
+                        image_path_selected=None,
+                        description=Language.label("downloadCheatsDesc", "Find RetroArch cheat files for your games"),
+                        icon=None,
+                        value=self.download_cheats
+                )
+         )
 
         if(Device.get_device().supports_image_resizing()):
             option_list.append(

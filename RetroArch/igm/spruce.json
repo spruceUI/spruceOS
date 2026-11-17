@@ -68,6 +68,7 @@
     "show_fps":   "Show FPS",
     "mute":       "Mute",
     "rewind":     "Rewind",
-    "shader":     "Shader"
+    "shader":     "Shader",
+    "cheats":     "Cheats"
   }
 }

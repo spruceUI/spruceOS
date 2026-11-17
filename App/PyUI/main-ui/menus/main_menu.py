@@ -235,6 +235,7 @@ class MainMenu:
 
     def run_main_menu_selection(self):
         if Device.get_device().get_system_config().game_selection_only_mode_enabled():
+            (Path(__file__).resolve().parent.parent.parent / "pyui_gs_trigger").unlink(missing_ok=True)
             from menus.games.just_games_menu import JustGamesMenu
             while(True):
                 JustGamesMenu().run_rom_selection()

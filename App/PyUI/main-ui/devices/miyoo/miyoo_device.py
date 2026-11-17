@@ -16,6 +16,7 @@ from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
 from utils.py_ui_config import PyUiConfig
+from menus.language.language import Language
 
 
 class MiyooDevice(DeviceCommon):
@@ -185,8 +186,8 @@ class MiyooDevice(DeviceCommon):
         time.sleep(0.5)
         joystick = TrimUIJoystick()
         joystick.open()
-        MiyooTrimCommon.run_analog_stick_calibration(self,"Left stick",joystick,"/userdata/joypad.config","L")
-        MiyooTrimCommon.run_analog_stick_calibration(self,"Right stick",joystick,"/userdata/joypad_right.config","R")
+        MiyooTrimCommon.run_analog_stick_calibration(self,Language.label("calibrationLeftStick", "Left stick"),joystick,"/userdata/joypad.config","L")
+        MiyooTrimCommon.run_analog_stick_calibration(self,Language.label("calibrationRightStick", "Right stick"),joystick,"/userdata/joypad_right.config","R")
         subprocess.Popen(["/usr/miyoo/bin/miyoo_inputd"],
                                 stdin=subprocess.DEVNULL,
                                 stdout=subprocess.DEVNULL,

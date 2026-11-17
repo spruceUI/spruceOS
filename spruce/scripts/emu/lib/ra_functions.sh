@@ -336,6 +336,21 @@ run_retroarch() {
 
 	apply_baseos_ra_overlay
 
+	# RetroArch takes one --appendconfig, joined with "|"
+	case "$RA_PARAMS" in
+		*--appendconfig*) RA_PARAMS="${RA_PARAMS}|$RA_DIR/spruce-cheats.cfg" ;;
+		*) RA_PARAMS="${RA_PARAMS} --appendconfig $RA_DIR/spruce-cheats.cfg" ;;
+	esac
+
+	case "$RA_BIN" in
+		ra64.*)
+			if [ "$RA_VULKAN" = 1 ] && command -v device_vulkan_env >/dev/null 2>&1 \
+					&& device_vulkan_env; then
+				RA_PARAMS="${RA_PARAMS}|$RA_DIR/vulkan.cfg"
+			fi
+			;;
+	esac
+
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
 	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
@@ -628,6 +643,7 @@ save_custom_n64_controller_profile() {
 		"mupen64plus") 							core_name="Mupen64Plus GLES2" ;;
 		"parallel_n64") 						core_name="ParaLLEl N64" ;;
 		"mupen64plus_next") 					core_name="Mupen64Plus-Next" ;;
+		"armn64") 							core_name="armN64" ;;
 		*) return 0 ;; # if not a known N64 core, do nothing
 	esac
 

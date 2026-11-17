@@ -16,6 +16,7 @@ from utils.logger import PyUiLogger
 
 from devices.device_common import DeviceCommon
 from utils.py_ui_config import PyUiConfig
+from menus.language.language import Language
 
 
 class RocknixDevice(DeviceCommon):
@@ -70,7 +71,7 @@ class RocknixDevice(DeviceCommon):
         menu_options = rom_info.game_system.game_system_config.get_menu_options()
         selected_core = self.get_selected_emulator(menu_options)
         if(selected_core is None):
-            Display.display_message("No core found", 2_000)
+            Display.display_message(Language.label("noCoreFound", "No core found"), 2_000)
             return
 
         selected_core = "/mnt/SDCARD/RetroArch/.retroarch/cores64/" + selected_core + "_libretro.so"

@@ -28,14 +28,14 @@ class CheevosCacheMenu(settings_menu.SettingsMenu):
     def remove(self, entry):
         Display.display_message(Language.label("removingCheevos", "Removing..."))
 
-        message = "Remove failed"
+        message = Language.label("removeFailed", "Remove failed")
         remove_cmd = PyUiConfig.get_cheevos_remove_cmd()
         try:
             result = subprocess.run([remove_cmd, str(entry.game_id)],
                                     capture_output=True, text=True, timeout=60)
             if result.returncode == 0:
                 CheevosCacheManager.refresh()
-                message = "Removed"
+                message = Language.label("removed", "Removed")
             else:
                 lines = (result.stdout or result.stderr).strip().splitlines()
                 if lines:

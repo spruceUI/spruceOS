@@ -24,6 +24,7 @@ from utils.config_copier import ConfigCopier
 from utils.ffmpeg_image_utils import FfmpegImageUtils
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
+from menus.language.language import Language
 
 class MiyooFlip(MiyooDevice):
     OUTPUT_MIXER = 2
@@ -326,7 +327,7 @@ class MiyooFlip(MiyooDevice):
         shutil.copyfile(zoneinfo_path, localtime_path)
         shutil.copyfile(localtime_path, timezone_path)
 
-        Display.display_message("Timezone updated",2_000)
+        Display.display_message(Language.label("timezoneUpdated", "Timezone updated"),2_000)
         return True
 
     def set_theme(self, theme_path: str):
