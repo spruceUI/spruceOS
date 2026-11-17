@@ -400,6 +400,7 @@
         "Emulator_64": "Emulator (64-bit)",
         "Emulator_Pixel2": "Emulator",
         "RA Build": "RA Build",
+        "RetroArch Build": "RetroArch Build",
         "RA: C-button Mode": "RA: C-button Mode",
         "Stretch to Full Screen": "Stretch to Full Screen",
         "Control Profile": "Control Profile",
@@ -435,6 +436,7 @@
         "RA: auto load state on launch": "RA: auto load state on launch",
         "GB[C/A]: use Perfect Overlays": "GB[C/A]: use Perfect Overlays",
         "Verbose emulator logging": "Verbose emulator logging",
+        "Verbose PyUI logging": "Verbose PyUI logging",
         "Genesis Plus GX: enable widescreen": "Genesis Plus GX: enable widescreen",
         "Enable Samba": "Enable Samba",
         "Enable SSH": "Enable SSH",
@@ -487,7 +489,6 @@
         "Show Rewind toggle": "Show Rewind toggle",
         "Show Shader toggle": "Show Shader toggle",
         "Show Cheats": "Show Cheats",
-        "Shown for games with a .cht file in RetroArch/.retroarch/cheats": "Shown for games with a .cht file in RetroArch/.retroarch/cheats",
         "Wake on lid open": "Wake on lid open",
         "Shoulder LED color": "Shoulder LED color",
         "Shoulder LED brightness": "Shoulder LED brightness",
@@ -516,7 +517,8 @@
         "Tap Menu button action": "Tap Menu button action",
         "Menu button hold Time": "Menu button hold Time",
         "Vibrate on Menu hold": "Vibrate on Menu hold",
-        "RAOfflineProxy": "RAOfflineProxy"
+        "RAOfflineProxy": "RAOfflineProxy",
+        "Show DS firmware boot entries": "Show DS firmware boot entries"
     },
     "governorOptions": {
         "Smart": "Smart",
@@ -585,7 +587,9 @@
         "Fan boost": "Fan boost",
         "Menu": "Menu",
         "Full": "Full",
+        "Incremental": "Incremental",
         "Stable": "Stable",
+        "Nightly": "Nightly",
         "Battery": "Battery",
         "Audio": "Audio",
         "System-specific": "System-specific",
@@ -615,7 +619,27 @@
         "rainbow": "rainbow",
         "rainbow multi": "rainbow multi",
         "Casual": "Casual",
-        "Hardcore": "Hardcore"
+        "Hardcore": "Hardcore",
+        "mono": "mono",
+        "64-bit": "64-bit",
+        "32-bit": "32-bit",
+        "Spruce (per device)": "Spruce (per device)",
+        "Classic (R2 + A, B, X, Y)": "Classic (R2 + A, B, X, Y)",
+        "Action (A, X, Select, R1)": "Action (A, X, Select, R1)",
+        "None": "None",
+        "Antialiasing": "Antialiasing",
+        "Bilinear": "Bilinear",
+        "Subtle Grid": "Subtle Grid",
+        "Chunky Grid": "Chunky Grid",
+        "Extra Chunky": "Extra Chunky",
+        "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ": "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+        "Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ": "Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ",
+        "One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ": "One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ",
+        "One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ": "One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ",
+        "Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ": "Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ",
+        "Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ": "Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ",
+        "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse": "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse",
+        "Off - follow control profile": "Off - follow control profile"
     },
     "runningTask": "Running {name}...",
     "finishedRunningTask": "Finished: {name}",
@@ -743,6 +767,7 @@
         "shut device to enter sleep": "shut device to enter sleep",
         "50% of device RAM; reboot to apply": "50% of device RAM; reboot to apply",
         "reboot to apply": "reboot to apply",
+        "applies on reboot": "applies on reboot",
         "Clockspeed to use for overclocking": "Clockspeed to use for overclocking",
         "caution: high values may freeze device": "caution: high values may freeze device",
         "cooling fan profiles": "cooling fan profiles",
@@ -782,7 +807,9 @@
         "Multi-disc games only": "Multi-disc games only",
         "Not on Miyoo Mini": "Not on Miyoo Mini",
         "seconds before triggering hold action": "seconds before triggering hold action",
-        "when hold action triggered": "when hold action triggered"
+        "when hold action triggered": "when hold action triggered",
+        "off: warnings and errors; on: debug details": "off: warnings and errors; on: debug details",
+        "Shown for games with a .cht file in RetroArch/.retroarch/cheats": "Shown for games with a .cht file in RetroArch/.retroarch/cheats"
     },
     "gameSystems": {
         "MEDIA": "Media"
@@ -876,7 +903,9 @@
         "Spruce Restore": "Spruce Restore",
         "Restore configs & settings from backup": "Restore configs & settings from backup",
         "Boxart Scraper": "Boxart Scraper",
-        "Activity Tracker": "Activity Tracker"
+        "Activity Tracker": "Activity Tracker",
+        "Generic gamepad tester": "Generic gamepad tester",
+        "Two-player netplay with Netplay's own sync": "Two-player netplay with Netplay's own sync"
     },
     "accentColor": {
         "ACCENT COLOR": "ACCENT COLOR",
@@ -1196,6 +1225,7 @@
         "Nightly {final_version} is already installed; it may have been rebuilt since": "Nightly {final_version} is already installed; it may have been rebuilt since",
         "Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device.": "Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device.",
         "Please visit github.com/{repo} to manually download the proper version for your device.": "Please visit github.com/{repo} to manually download the proper version for your device.",
-        "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.": "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card."
+        "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.": "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.",
+        "Theme Previews": "Theme Previews"
     }
 }
