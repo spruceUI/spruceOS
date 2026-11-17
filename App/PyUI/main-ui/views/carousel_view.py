@@ -218,7 +218,7 @@ class CarouselView(View):
                 Display.set_new_bg(bg, is_custom_theme_background=True)
 
         if(self.set_top_bar_text_to_selection) and len(self.options) > 0:
-            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True)
+            Display.clear(self.options[self.selected].get_primary_text(), hide_top_bar_icons=True, bottom_bar_hints=self.get_bottom_bar_hints())
         elif(self.set_bottom_bar_text_to_selection):
             Display.clear(self.top_bar_text, bottom_bar_text=self.options[self.selected].get_primary_text())
         else:
@@ -617,7 +617,7 @@ class CarouselView(View):
 
     def animate_transition_horizontal(self):
         if(not self.skip_next_animation):
-            animation_frames = math.floor(10 // Device.get_device().animation_divisor()) - self.animated_count
+            animation_frames = math.floor(15 // Device.get_device().animation_divisor()) - self.animated_count
             animation_frames = max(animation_frames, 6)
             if Device.get_device().get_system_config().animations_enabled() and animation_frames > 1:
                 render_mode = self.get_img_render_mode()

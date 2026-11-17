@@ -2,6 +2,7 @@ from pathlib import Path
 from menus.settings.wifi_menu import WifiMenu
 
 from display.display import Display
+from menus.language.language import Language
 
 class USBWifiMenu(WifiMenu):
     def __init__(self):
@@ -20,6 +21,7 @@ class USBWifiMenu(WifiMenu):
         if self.adapter_is_connected():
             super().show_wifi_menu()
         else:
-            message = "USB adapter not connected.\n" \
-                    "Connect a compatible adapter to use WiFi."
+            message = Language.label("usbWifiAdapterNotConnected",
+                    "USB adapter not connected.\n"
+                    "Connect a compatible adapter to use WiFi.")
             Display.display_message(message, 5000)

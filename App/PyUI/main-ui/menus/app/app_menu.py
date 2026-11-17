@@ -9,10 +9,11 @@ from display.display import Display
 from menus.app.app_menu_popup import AppMenuPopup
 from menus.app.app_utils import AppUtils
 from menus.app.hidden_apps_manager import AppsManager
+from menus.common.bottom_bar import BottomBarHint
 from menus.language.language import Language
 from themes.theme import Theme
 from utils.activity.activity_tracker import ActivityTracker
-from utils.boxart.box_art_scraper import BoxArtScraper
+from menus.app.box_art_scraper_menu import BoxArtScraperMenu
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
@@ -29,6 +30,12 @@ class AppMenu:
     def save_app_selection(self, selected):
         if(selected.get_selection() is not None):
             PyUiState.set_last_app_selection(selected.get_selection().get_extra_data().get_label())
+
+    def display_label(self, app):
+        label = Language.app_text(app.get_label())
+        if AppsManager.is_hidden(app):
+            return Language.hidden_app_label(label)
+        return label
 
     def handle_app_selection(self, app):
         launch = app.get_launch()
@@ -52,13 +59,13 @@ class AppMenu:
                 icon = AppUtils.get_icon(None,"scraper.png")
                 app_list.append(
                         GridOrListEntry(
-                            primary_text=boxart_scraper_config.get_label() + "(Hidden)" if AppsManager.is_hidden(boxart_scraper_config) else boxart_scraper_config.get_label(),
+                            primary_text=self.display_label(boxart_scraper_config),
                             image_path=None,
                             image_path_selected=None,
                             description=Language.label("scrapeBoxartDesc", "Scrape game boxart"),
                             icon=icon,
                             extra_data=boxart_scraper_config,
-                            value=BoxArtScraper().scrape_boxart
+                            value=BoxArtScraperMenu().run
                         )
                 )
 
@@ -68,7 +75,7 @@ class AppMenu:
                 icon = AppUtils.get_icon(None,"rtc.png")
                 app_list.append(
                         GridOrListEntry(
-                            primary_text=activity_tracker_config.get_label() + "(Hidden)" if AppsManager.is_hidden(activity_tracker_config) else activity_tracker_config.get_label(),
+                            primary_text=self.display_label(activity_tracker_config),
                             image_path=None,
                             image_path_selected=None,
                             description=Language.label("trackAppUsageDesc", "Track app usage"),
@@ -79,6 +86,12 @@ class AppMenu:
                 )
 
                 
+    def _get_bottom_bar_hints(self, selected_entry):
+        hints = [BottomBarHint(ControllerInput.A, Language.label("launchText", "Launch"))]
+        if(not Theme.skip_main_menu()):
+            hints.append(BottomBarHint(ControllerInput.B, Language.label("backText", Theme.back_text())))
+        return hints
+
     def run_app_selection(self) :
         running = True
     
@@ -99,10 +112,10 @@ class AppMenu:
                     icon = AppUtils.get_icon(app.get_folder(),app.get_icon())
                     app_list.append(
                         GridOrListEntry(
-                            primary_text=app.get_label() + "(Hidden)" if AppsManager.is_hidden(app) else app.get_label(),
+                            primary_text=self.display_label(app),
                             image_path=icon,
                             image_path_selected=icon,
-                            description=app.get_description(),
+                            description=Language.app_text(app.get_description()),
                             icon=icon,
                             extra_data=app,
                             value=lambda app=app: self.handle_app_selection(app)
@@ -115,7 +128,7 @@ class AppMenu:
 
             idx = 0
             for app in app_list:
-                if(app.get_primary_text() == last_selected_label):
+                if(app.get_extra_data().get_label() == last_selected_label):
                     selected = Selection(None,None,idx)
                     break
                 idx += 1
@@ -128,6 +141,7 @@ class AppMenu:
                     top_bar_text=Language.apps(), 
                     options=app_list,
                     selected_index=selected.get_index())
+                view.set_bottom_bar_hints_provider(self._get_bottom_bar_hints)
             else:
                 view.set_options(app_list)
             

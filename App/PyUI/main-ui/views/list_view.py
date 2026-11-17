@@ -187,7 +187,7 @@ class ListView(View):
         from display.display import Display as _Display
         if _Display._screensaver_active:
             return
-        Display.clear(self.top_bar_text)
+        Display.clear(self.top_bar_text, bottom_bar_hints=self.get_bottom_bar_hints())
         
         self.adjust_selected_top_bottom_for_overflow()
 

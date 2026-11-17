@@ -169,6 +169,20 @@ jobs:
           print(f"releaseChannel = {channel}")
           PY
 
+      - name: ScreenScraper developer credentials
+        env:
+          SS_DEVID: ${{ secrets.SCREENSCRAPER_DEVID }}
+          SS_DEVPASSWORD: ${{ secrets.SCREENSCRAPER_DEVPASSWORD }}
+        run: |
+          DEV_FILE="App/PyUI/main-ui/utils/boxart/ss.bin"
+          if [ -z "$SS_DEVID" ] || [ -z "$SS_DEVPASSWORD" ]; then
+            echo "No ScreenScraper developer credentials; box art stays on libretro."
+            exit 0
+          fi
+          python3 -B .github/scripts/write_ss_bin.py
+          # not in git, so the OTA manifest only ships it through .ota_extra_files
+          echo "$DEV_FILE" >> .ota_extra_files
+
       - name: Generate OTA diff manifest
         id: ota_diff
         run: |

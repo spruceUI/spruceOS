@@ -45,7 +45,7 @@ def run(game_id: int | None = None) -> None:
     """
     started_at = time.monotonic()
     paths = Paths.from_env()
-    with app_log(paths.log_file):
+    with app_log(paths.log_file, level=host.log_level()):
         logger.info("Opening in PyUI on %s", paths.platform)
         try:
             session(app.AppEnvironment(paths=paths), started_at=started_at, game_id=game_id)
@@ -75,7 +75,7 @@ def session(env: app.AppEnvironment, *, started_at: float, game_id: int | None =
 
 
 @contextlib.contextmanager
-def app_log(log_file: Path) -> Iterator[None]:
+def app_log(log_file: Path, *, level: int) -> Iterator[None]:
     """Log the app to its own file during the block (Spruce's ``Saves/spruce/<app>-*.log``).
 
     The handler sits on the app's top logger, which stops propagating, so the app's records
@@ -83,6 +83,7 @@ def app_log(log_file: Path) -> Iterator[None]:
 
     Args:
         log_file: Destination, e.g. ``Saves/spruce/cheevos-MiyooMini.log``.
+        level: Minimum severity for Cheevos records.
 
     Yields:
         Nothing.
@@ -96,16 +97,16 @@ def app_log(log_file: Path) -> Iterator[None]:
     formatter.converter = time.gmtime
     handler.setFormatter(formatter)
     top = logging.getLogger(APP_LOGGER)
-    level, propagate = top.level, top.propagate
+    previous_level, propagate = top.level, top.propagate
     top.addHandler(handler)
-    top.setLevel(logging.INFO)
+    top.setLevel(level)
     top.propagate = False
     try:
         yield
     finally:
         top.removeHandler(handler)
         handler.close()
-        top.setLevel(level)
+        top.setLevel(previous_level)
         top.propagate = propagate
 
 

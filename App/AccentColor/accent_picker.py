@@ -42,6 +42,12 @@ from utils.py_ui_state import PyUiState  # noqa: E402
 
 import accent_engine as eng  # noqa: E402
 
+
+def tr(text):
+    """English UI text in the PyUI language's "accentColor" section ({placeholders} allowed)."""
+    return Language.translate("accentColor", text)
+
+
 PRESETS = [("White", "#FFFFFF"), ("NextUI Red", "#9B2257"), ("Red", "#E5484D"), ("Orange", "#F28C28"),
            ("Yellow", "#F5C518"), ("Green", "#3DBE6B"), ("Teal", "#1FB5A8"), ("Blue", "#2F7DE1"),
            ("Purple", "#8E5BE8"), ("Pink", "#FF4FA3")]
@@ -131,14 +137,14 @@ class Picker:
 
     # ---------- drawing ----------
     def draw(self):
-        Display.clear("", bottom_bar_text="<> ADJUST   L1/R1 x16   A APPLY   B CANCEL")
+        Display.clear("", bottom_bar_text=tr("<> ADJUST   L1/R1 x16   A APPLY   B CANCEL"))
         W, px = self.W, self.px
         acc = tuple(self.rgb)
         sel = eng.selected_text_color(acc)
         bar_h = Display.get_top_bar_height()
         # cover the Games/Apps/Settings tabs spruce draws in the top bar; this screen has its own title
         Display.render_box(BG, 0, 0, W - px(150), bar_h)
-        Display.render_text("ACCENT COLOR", px(20), bar_h // 2, WHITE, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
+        Display.render_text(tr("ACCENT COLOR"), px(20), bar_h // 2, WHITE, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
         top = bar_h + px(4)
         row_h = px(54)
         y0 = top + px(10)
@@ -163,11 +169,13 @@ class Picker:
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_RIGHT_ALIGNED)
             elif name == "HEX":
                 Display.render_text("HEX", label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
-                Display.render_text(eng.to_hex(acc) + ("   (A to type)" if i == self.row else ""), track_x, cy, color,
+                Display.render_text(eng.to_hex(acc) + ("   " + tr("(A to type)") if i == self.row else ""), track_x, cy, color,
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
             else:
-                Display.render_text("PRESET", label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
-                Display.render_text("< " + PRESETS[self.preset][0] + " >", track_x + px(20), cy, color,
+                label_w, _ = Display.render_text(tr("PRESET"), label_x, cy, color, FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
+                # after the label, which is wider than "PRESET" in some languages
+                value_x = max(track_x + px(20), label_x + label_w + px(8))
+                Display.render_text("< " + tr(PRESETS[self.preset][0]) + " >", value_x, cy, color,
                                     FontPurpose.DESCRIPTIVE_LIST_TITLE, RenderMode.MIDDLE_LEFT_ALIGNED)
 
         # live preview on the right: a list row highlighted in the accent, plus a hint circle
@@ -181,7 +189,7 @@ class Picker:
         d = px(28)
         Display.render_box(acc, pv_x + px(14), pv_y + px(160), d, d)
         Display.render_text("A", pv_x + px(14) + d // 2, pv_y + px(160) + d // 2, sel, FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, RenderMode.MIDDLE_CENTER_ALIGNED)
-        Display.render_text("OPEN", pv_x + px(52), pv_y + px(160) + d // 2, WHITE, FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, RenderMode.MIDDLE_LEFT_ALIGNED)
+        Display.render_text(tr("OPEN"), pv_x + px(52), pv_y + px(160) + d // 2, WHITE, FontPurpose.DESCRIPTIVE_LIST_DESCRIPTION, RenderMode.MIDDLE_LEFT_ALIGNED)
         Display.present()
 
     def draw_progress(self, done, total, label):
@@ -204,23 +212,23 @@ class Picker:
             self.rgb = list(eng.parse_hex(PRESETS[self.preset][1]))
 
     def type_hex(self):
-        text = OnScreenKeyboard().get_input("Hex color (RRGGBB)", eng.to_hex(self.rgb).lstrip("#"))
+        text = OnScreenKeyboard().get_input(tr("Hex color (RRGGBB)"), eng.to_hex(self.rgb).lstrip("#"))
         if text:
             try:
                 self.rgb = list(eng.parse_hex(text))
             except ValueError:
-                Display.display_message("Not a hex color - use 6 digits, e.g. F5C518", 2000)
+                Display.display_message(tr("Not a hex color - use 6 digits, e.g. F5C518"), 2000)
 
     def apply(self):
         # current screen's folder first so the colour you see next is ready soonest
         current = getattr(Theme, "_skin_folder", "skin")
-        self.draw_progress(0, 1, "Applying " + eng.to_hex(self.rgb) + "...")
+        self.draw_progress(0, 1, tr("Applying " + eng.to_hex(self.rgb) + "..."))
         eng.apply_accent(self.theme_dir, self.rgb, folders=[current],
-                         progress=lambda d, t: self.draw_progress(d, t, "Applying " + eng.to_hex(self.rgb) + "..."))
+                         progress=lambda d, t: self.draw_progress(d, t, tr("Applying " + eng.to_hex(self.rgb) + "...")))
         # then every other screen size, so the SD card looks right in other devices too
         others = [f for f in eng.template_folders(self.theme_dir) if f != current]
         eng.apply_accent(self.theme_dir, self.rgb, folders=others,
-                         progress=lambda d, t: self.draw_progress(d, t, "Updating other screen sizes..."))
+                         progress=lambda d, t: self.draw_progress(d, t, tr("Updating other screen sizes...")))
         self.refresh_scaled_copies()
 
     def refresh_scaled_copies(self):
@@ -261,7 +269,7 @@ class Picker:
                 utils.resize_image(src, out, new_w, new_h, preserve_aspect_ratio=keep_aspect)
                 if not os.path.isfile(out):
                     shutil.copyfile(src, out)
-                self.draw_progress(i + 1, len(names), "Updating " + folder + "...")
+                self.draw_progress(i + 1, len(names), tr("Updating " + folder + "..."))
 
     def run(self):
         held_since, last = None, None
@@ -307,14 +315,14 @@ def main():
     log().info("Starting on %s (%s)", os.environ.get("PLATFORM", "unknown"), args.device)
     theme_dir = init(args)
     if not os.path.isfile(os.path.join(theme_dir, "accent", "manifest.json")):
-        Display.display_message("This theme doesn't support Accent Color. Try NextUI Style.", 3500)
+        Display.display_message(tr("This theme doesn't support Accent Color. Try NextUI Style."), 3500)
         return 0
     try:
         applied = Picker(theme_dir).run()
         log().info("Exiting (%s)", "applied" if applied else "cancelled")
     except Exception:
         log().exception("Accent picker failed")
-        Display.display_message("Accent Color hit an error - see Saves/spruce/accentcolor log.", 3500)
+        Display.display_message(tr("Accent Color hit an error - see Saves/spruce/accentcolor log."), 3500)
         return 1
     return 0
 

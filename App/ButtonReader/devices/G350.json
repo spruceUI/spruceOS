@@ -1,0 +1,168 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "G350",
+  "name": "BatleXP G350",
+  "brand": "G350",
+  "models": [
+    "BatleXP G350"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=G350",
+  "cfg": "spruce/scripts/platform/darkmoss/G350.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "GO-Super Gamepad",
+      "by_path": "platform-odroidgo3-joypad-event-joystick",
+      "from": "derived: G350.cfg's header says the pad is \"confirmed against both units' rk3326-*-linux.dts\" (identical product/revision/name and button codes to the A10 Mini's), but not run on a G350 unit itself",
+      "note": "same odroidgo3-joypad driver and node name as the A10 Mini/A10 Mini V4. On the G350 (2026-11-12) the volume keys came on odroidgo3-keys, not here."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "cfg"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "odroidgo3-keys",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "VOL+/- (115/114), measured 2026-11-12"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 706",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 707",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 705",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 708",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "on the G350 the key arrives on odroidgo3-keys (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "measured: button-reader-G350-1.txt (G350 run 1)",
+      "note": "on the G350 the key arrives on odroidgo3-keys (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3",
+      "y": "3 4",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/G350.cfg",
+    "spruce/scripts/platform/darkmoss/G350.sh",
+    "button-reader-G350-1.txt"
+  ],
+  "notes": [
+    "G350 has 2 real analog sticks (DEVICE_NUM_ANALOG_STICKS=2), unlike the A10 Mini/A10 Mini V4 which share this same odroidgo3-joypad driver and the same L3/R3/MENU codes but are stickless: on the G350 those BTN_TRIGGER_HAPPY codes are genuine stick clicks (L3/R3) and an F/MENU button; on the A10 Mini they are plain buttons. No code in this manifest has been independently measured on a running G350."
+  ]
+}

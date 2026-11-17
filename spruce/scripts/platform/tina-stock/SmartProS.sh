@@ -293,6 +293,9 @@ device_init() {
 
     #syslogd -S
 
+    # PyUI reads .asoundrc once; the bluetooth.sh boot below writes it too late.
+    /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME" >/dev/null 2>&1
+
     # load wifi and low power bluetooth modules
     (
         hwclock -s -u

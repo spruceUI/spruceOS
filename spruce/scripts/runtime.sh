@@ -117,9 +117,7 @@ fi
 
 (
     /mnt/SDCARD/spruce/scripts/set_up_swap.sh || true
-    if device_supports_zram; then
-        /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
-    fi
+    /mnt/SDCARD/spruce/scripts/enable_zram.sh || true
 ) &
 
 # Not awaited: the first menu frame does not need the watchdogs up.

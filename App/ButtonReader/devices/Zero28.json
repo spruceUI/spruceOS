@@ -1,0 +1,167 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Zero28",
+  "name": "MagicX Zero 28",
+  "brand": "MagicX",
+  "models": [
+    "MagicX Zero 28"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device selects the model, falls back to Zero28 when absent/unrecognized",
+  "cfg": "spruce/scripts/platform/oakmoss/Zero28.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "mcu",
+      "node": "magicx-input",
+      "from": "measured: the lab capturesZero28-20260921.txt",
+      "note": "simplepad, a UART MCU pad; d-pad/MENU/volume are plain keys, A/B/X/Y and the triggers too, the sticks are joystick axes (js0 on the same node). The capture is the stock MagicX image (2026-09-21), before oakMOSS: node name is resolved by MagicXCommon.sh's oakmoss_resolve_event_paths (match on kernel device name 'magicx-input'), unchanged by the base swap, but a fallback event number could differ"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesZero28-20260921.txt"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 103",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 108",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 105",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 106",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the left stick's click; measured GPIO edge THUMB_L in the 2026-09-21 stock-image capture"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the right stick's click; measured GPIO edge THUMB_R in the 2026-09-21 stock-image capture"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 158",
+      "source": "pad",
+      "from": "cfg",
+      "note": "KEY_BACK; on an older image with MagicX's second codes (OAKMOSS_PAD_RIDERS=1) the same press also sends 353 on A, not on MENU itself"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0 32767",
+      "y": "3 1 32767",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 2 32767",
+      "y": "3 5 32767",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST (unconditional, unlike the XU20's conditional Home); the 2026-09-21 stock-image capture logged one BTN_G GPIO edge (interrupt 202) on the same pin family as the XU20's Home button, but no cfg path ever reads it on this board - needs a hardware check for a real cap/button over it",
+    "FN_SWITCH": "no switch; device_get_switch_position is the oakMOSS no-op stub on MagicX boards (oakmoss_a133p.sh: the TrimUI PH19 pin is L1 here)",
+    "FN_LEFT": "no Fn key separate from L3/R3; none declared",
+    "FN_RIGHT": "no Fn key separate from L3/R3; none declared",
+    "LID": "no lid; not a clamshell, no hall node in this board's tree"
+  },
+  "evidence": [
+    "the lab capturesZero28-20260921.txt",
+    "the lab capturesZero28-20260921-kernel-facts.txt",
+    "spruce/scripts/platform/oakmoss/Zero28.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/MagicXCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b"
+  ],
+  "notes": [
+    "The 2026-09-21 discovery capture is the stock MagicX image, before oakMOSS (task framing): node names (magicx-input, axp2202-pek) are expected to carry over because MagicXCommon.sh resolves them by the same kernel device name, but this has not been re-measured on an oakMOSS build.",
+    "A hardware run should press L3/R3 (stick clicks) and try the G-button pin (if a tester can find it) to settle the HOME question, and should confirm MENU=158 with no rider on a current oakMOSS image."
+  ]
+}

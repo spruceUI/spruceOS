@@ -1,0 +1,179 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "XUMiniM",
+  "name": "MagicX XU Mini M",
+  "brand": "MagicX",
+  "models": [
+    "MagicX XU Mini M"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=XUMiniM",
+  "cfg": "spruce/scripts/platform/darkmoss/XUMiniM.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "MagicX Mini-M Controller",
+      "by_path": "platform-xu10-joypad-event-joystick",
+      "from": "derived: cfg + lab boot evidence (probe.txt) confirms the unit boots this cfg and that its pad answers at /dev/input/event3 in practice, not the literal device name",
+      "note": "xu10-joypad driver on Knulli's rk3326-magicx-mini-m.dtb. On the XU Mini M (2026-11-12) the volume keys came on rg351-keys, not here."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "measured: probe.txt (power key at /dev/input/event0)"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "rg351-keys",
+      "from": "measured: button-reader-XUMiniM-2.txt (XU Mini M run 2)",
+      "note": "VOL+/- (115/114), measured 2026-11-12"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "measured: button-reader-XUMiniM-2.txt (XU Mini M run 2)",
+      "note": "on the XU Mini M the key arrives on rg351-keys (2026-11-12)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "measured: button-reader-XUMiniM-2.txt (XU Mini M run 2)",
+      "note": "on the XU Mini M the key arrives on rg351-keys (2026-11-12)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 1",
+      "y": "3 0 -1",
+      "source": "pad",
+      "from": "measured: button-reader-XUMiniM-1.txt; button-reader-XUMiniM-2.txt; button-reader-XUMiniM-3.txt (XU Mini M runs 1-3, on the Mini Flip's card)",
+      "note": "axes read turned vs. the odroidgo3/singleadc family: X is STICK_RIGHT (axis 1), Y is STICK_DOWN (axis 0); cfg comment claims this was measured on hardware (see notes)",
+      "cfg_differs": "the cfg's STICK_DOWN=\"3 0\" carries no sign; on hardware down reads negative (up positive, as the cfg's SDL map comment says)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws down as negative"
+    },
+    "RIGHT_STICK": {
+      "x": "3 4",
+      "y": "3 3 -1",
+      "source": "pad",
+      "from": "measured: button-reader-XUMiniM-1.txt; button-reader-XUMiniM-2.txt; button-reader-XUMiniM-3.txt (XU Mini M runs 1-3, on the Mini Flip's card)",
+      "note": "same turned convention as the left stick",
+      "cfg_differs": "the cfg's STICK_DOWN_2=\"3 3\" carries no sign; on hardware down reads negative (up positive, as the cfg's SDL map comment says)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws down as negative"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/XUMiniM.cfg",
+    "spruce/scripts/platform/darkmoss/XUMiniM.sh",
+    "probe.txt",
+    "README.md",
+    "button-reader-XUMiniM-1.txt",
+    "button-reader-XUMiniM-2.txt",
+    "button-reader-XUMiniM-3.txt"
+  ],
+  "notes": [
+    "XUMiniM.cfg's own header: \"Pad and panel values are from Knulli's rk3326-magicx-mini-m.dtb; none of it has been read off a running unit yet.\" A lab unit (.82, hostname xumini) has since booted this exact cfg and run Saturn benchmarks (kit-minim), confirming the pad answers at event3 and the power key at event0, but no per-button press capture exists in this workspace.",
+    "Stick axes are swapped versus the A10 Mini/G350/RGB30 family: STICK_UP/DOWN read axis 0 and STICK_LEFT/RIGHT read axis 1 (reversed). The SDL_GAMECONTROLLER_MAP comment in the cfg says this was itself \"measured on hardware,\" which conflicts with the file's own top header calling everything unverified; kept here as the more specific claim, but re-verify on a unit."
+  ]
+}

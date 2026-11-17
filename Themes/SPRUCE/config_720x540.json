@@ -15,7 +15,8 @@
     "hint": {
         "font": "nunwen.ttf",
         "size": 28,
-        "color": "#EBDBB2"
+        "color": "#EBDBB2",
+        "contextbuttons": true
     },
     "currentpage": {
         "font": "nunwen.ttf",

@@ -262,10 +262,70 @@ auto_regen_tmp_update() {
     fi
 }
 
+# The B_* "type code [value]" of a ControllerInput number (PyUI's enum order).
+controller_input_key() {
+    case "$1" in
+        1) echo "$B_A" ;;      2) echo "$B_B" ;;       3) echo "$B_X" ;;      4) echo "$B_Y" ;;
+        5) echo "$B_MENU" ;;   6) echo "$B_HOME" ;;
+        7) echo "$B_UP" ;;     8) echo "$B_DOWN" ;;    9) echo "$B_LEFT" ;;   10) echo "$B_RIGHT" ;;
+        11) echo "$B_L1" ;;    12) echo "$B_L2" ;;     13) echo "$B_L3" ;;
+        14) echo "$B_R1" ;;    15) echo "$B_R2" ;;     16) echo "$B_R3" ;;
+        17) echo "$B_START" ;; 18) echo "$B_SELECT" ;;
+    esac
+}
+
+# The physical buttons that act as ControllerInput $1, one per line. PyUI's Button
+# Remapper saves SYSTEM_JSON .button_mapping as physical -> virtual numbers; a button
+# missing from it keeps its own role. With no button left in that role, the factory one.
+buttons_acting_as() {
+    _role="$1"
+    _physicals="$(jq -r --argjson role "$_role" '
+        (.button_mapping // {}) as $m
+        | range(1; 19)
+        | select(($m[tostring] // .) == $role)' "$SYSTEM_JSON" 2>/dev/null)" || _physicals="$_role"
+    [ -n "$_physicals" ] || _physicals="$_role"
+    for _physical in $_physicals; do
+        _key="$(controller_input_key "$_physical")"
+        case "$_key" in
+            [0-9]*) echo "$_key" ;;
+        esac
+    done
+    unset _role _physicals _physical _key
+}
+
+# 0 when the getevent line $1 is from one of the keys listed in $2.
+line_from_keys() {
+    while IFS= read -r _key; do
+        [ -n "$_key" ] || continue
+        case "$1" in
+            *"key $_key "*|*"key $_key") return 0 ;;
+        esac
+    done <<EOF
+$2
+EOF
+    return 1
+}
+
+# The last line of getevent output file $1 from any key listed in $2.
+last_line_from_keys() {
+    _file="$1"
+    _keys="$2"
+    set --
+    while IFS= read -r _key; do
+        [ -n "$_key" ] && set -- "$@" -e "key $_key"
+    done <<EOF
+$_keys
+EOF
+    [ $# -gt 0 ] || return 0
+    grep -F "$@" "$_file" 2>/dev/null | tail -n 1
+}
+
 confirm() {
     timeout=${1:-0}         # Default to 0 (no timeout)
     timeout_return=${2:-1}  # Default to 1 (usually 'No' or 'Cancel')
     start_time=$(date +%s)
+    confirm_keys="$(buttons_acting_as 1)"
+    cancel_keys="$(buttons_acting_as 2)"
 
     rm -f /tmp/ge_out 2>/dev/null
     
@@ -276,15 +336,12 @@ confirm() {
     RET_VAL=2
     while [ "$RET_VAL" -eq 2 ]; do
         # 1. Check for User Input
-        if line=$(last_key_line /tmp/ge_out "$B_A" "$B_B"); then
-            case "$line" in
-                *"key $B_A"*) 
-                    RET_VAL=0 
-                ;;
-                *"key $B_B"*) 
-                    RET_VAL=1 
-                ;;
-            esac
+        line="$(last_line_from_keys /tmp/ge_out "$confirm_keys
+$cancel_keys")"
+        if line_from_keys "$line" "$confirm_keys"; then
+            RET_VAL=0
+        elif line_from_keys "$line" "$cancel_keys"; then
+            RET_VAL=1
         fi
 
         # 2. Check for Timeout (only if timeout > 0)

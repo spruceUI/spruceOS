@@ -1,0 +1,178 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "MiyooMini",
+  "name": "Miyoo Mini series",
+  "brand": "Miyoo",
+  "models": [
+    "Miyoo Mini",
+    "Miyoo Mini V4",
+    "Miyoo Mini Plus",
+    "Miyoo Mini Flip"
+  ],
+  "family": "miyoomini",
+  "base": "stock (Miyoo)",
+  "soc": "SigmaStar SSD202D",
+  "arch": "armhf",
+  "identify": "helperFunctions.sh: /proc/cpuinfo contains SStar (also the fallback); MINI_MODEL picks the model cfg, which sets SPRUCE_DEVICE_NAME",
+  "cfg": "spruce/scripts/platform/miyoomini/MiyooMini.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "keys": {
+      "kind": "gpio-keys",
+      "node": "soc:gpio_keys",
+      "from": "measured: button-reader-MiyooMini-4.txt",
+      "note": "every button, the volume keys and POWER, polled; the same node on every model (MINI-NODE-MAP-COMPARISON-20261021.md)"
+    },
+    "lid": {
+      "kind": "hall",
+      "node": "hall wake key",
+      "from": "measured: MINI-NODE-MAP-COMPARISON-20261021.md",
+      "note": "hall-mh248 on gpio35; spruce reads the lid through sysfs (hallvalue)"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 29",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "RIGHT": {
+      "code": "1 57",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "TOP": {
+      "code": "1 42",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "LEFT": {
+      "code": "1 56",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "DPAD_UP": {
+      "code": "1 103",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "DPAD_DOWN": {
+      "code": "1 108",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "DPAD_LEFT": {
+      "code": "1 105",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 106",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "L1": {
+      "code": "1 18",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "R1": {
+      "code": "1 20",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "L2": {
+      "code": "1 15",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "R2": {
+      "code": "1 14",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "SELECT": {
+      "code": "1 97",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "START": {
+      "code": "1 28",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "MENU": {
+      "code": "1 1",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt",
+      "models": [
+        "Miyoo Mini Plus",
+        "Miyoo Mini Flip"
+      ]
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: button-reader-MiyooMini-4.txt",
+      "models": [
+        "Miyoo Mini Plus",
+        "Miyoo Mini Flip"
+      ]
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "keys",
+      "cfg_differs": "the cfg holds a placeholder (its own variable name), not a code; measured on the Miyoo Mini Flip  2026-11-11; the other models use the same soc:gpio_keys node, per-button codes not measured there",
+      "from": "measured: the Mini Flip report's node key list (116)"
+    },
+    "LID": {
+      "source": "lid",
+      "models": [
+        "Miyoo Mini Flip"
+      ],
+      "from": "measured: MINI-NODE-MAP-COMPARISON-20261021.md"
+    }
+  },
+  "absent": {
+    "L3": "no sticks",
+    "R3": "no sticks",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "LEFT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none"
+  },
+  "evidence": [
+    "button-reader-MiyooMini-4.txt",
+    "MINI-NODE-MAP-COMPARISON-20261021.md",
+    "the lab capturesMiyooMini-20260921.txt",
+    "controller-matrix.json"
+  ],
+  "notes": [
+    "Volume keys: the Mini Plus and the Mini Flip have them (gpio42/43, MINI-NODE-MAP); the Mini V4 has none (measured, and the tester 2026-10-21); the Mini (V2/V3): derived from PyUI's V1-V4 presets (supports_volume=False), not measured."
+  ]
+}

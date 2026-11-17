@@ -44,7 +44,7 @@ class UserConfig:
                 os.replace(tempname, cls.FILEPATH)
 
             except Exception as e:
-                raise RuntimeError(f"Failed to save config: {e}")
+                PyUiLogger.get_logger().error(f"Failed to save {cls.FILEPATH}: {e}")
 
     @classmethod
     def get_ignore_articles_when_sorting(cls):
@@ -53,4 +53,98 @@ class UserConfig:
     @classmethod
     def set_ignore_articles_when_sorting(cls, value):
         cls.config["ignoreArticlesWhenSorting"] = value
+        cls.save_config()
+
+    @classmethod
+    def show_am_pm(cls):
+        return cls.config.get("showAmPm",True)
+
+    @classmethod
+    def set_show_am_pm(cls, value):
+        cls.config["showAmPm"] = value
+        cls.save_config()
+
+    @classmethod
+    def game_system_sort_mode(cls):
+        return cls.config.get("gameSystemSortMode","SortOrderKey")
+
+    @classmethod
+    def set_game_system_sort_mode(cls, value):
+        cls.config["gameSystemSortMode"] = value
+        cls.save_config()
+
+    @classmethod
+    def game_system_sort_type_priority(cls):
+        return cls.config.get("gameSystemSortTypePrio",1)
+
+    @classmethod
+    def set_game_system_sort_type_priority(cls, value):
+        cls.config["gameSystemSortTypePrio"] = value
+        cls.save_config()
+
+    @classmethod
+    def game_system_sort_brand_priority(cls):
+        return cls.config.get("gameSystemSortBrandPrio",2)
+
+    @classmethod
+    def set_game_system_sort_brand_priority(cls, value):
+        cls.config["gameSystemSortBrandPrio"] = value
+        cls.save_config()
+
+    @classmethod
+    def game_system_sort_year_priority(cls):
+        return cls.config.get("gameSystemSortYearPrio",3)
+    
+    @classmethod
+    def set_game_system_sort_year_priority(cls, value):
+        cls.config["gameSystemSortYearPrio"] = value
+        cls.save_config()
+
+    @classmethod
+    def game_system_sort_name_priority(cls):
+        return cls.config.get("gameSystemSortNamePrio",4)
+    
+    @classmethod
+    def set_game_system_sort_name_priority(cls, value):
+        cls.config["gameSystemSortNamePrio"] = value
+        cls.save_config()
+
+    @classmethod
+    def get_turbo_delay_ms(cls):
+        return cls.config.get("turboDelayMs", 250) / 1000
+
+    @classmethod
+    def set_turbo_delay_ms(cls, delay):
+        cls.config["turboDelayMs"] = delay
+        cls.save_config()
+
+    @classmethod
+    def use_24_hour_clock(cls):
+        return cls.config.get("use24HourClock",False)
+
+    @classmethod
+    def set_use_24_hour_clock(cls, value):
+        cls.config["use24HourClock"] = value
+        cls.save_config()
+
+    @classmethod
+    def show_all_game_systems(cls):
+        return cls.config.get("showAllGameSystems",False)
+
+    @classmethod
+    def set_show_all_game_systems(cls, value):
+        cls.config["showAllGameSystems"] = value
+        cls.save_config()
+
+    @classmethod
+    def sync_time_via_network(cls):
+        # On by default: these handhelds have no battery-backed RTC, so without
+        # this a cold boot sits years in the past and every HTTPS request fails
+        # with "certificate is not yet valid". Off is a real choice though -
+        # some games read the clock, so a user may want it held where they set it.
+        return cls.config.get("syncTimeViaNetwork",True)
+
+    @classmethod
+    def set_sync_time_via_network(cls, value):
+        cls.config["syncTimeViaNetwork"] = value
         cls.save_config()

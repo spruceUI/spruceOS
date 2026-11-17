@@ -17,7 +17,6 @@ from cheevos.core.files import write_text_atomic
 
 logger = logging.getLogger(__name__)
 
-RECENT_DAYS_CHOICES = (7, 30, 90)
 ACHIEVEMENT_SORT_CHOICES = ("order", "unlocked", "locked", "points", "rarity")
 AWARDS_VIEW_CHOICES = ("carousel", "grid", "list")
 
@@ -35,21 +34,11 @@ class DescriptionHiding(Enum):
     ALL = "all"
 
 
-class BadgeScope(Enum):
-    """Which games' badges a sync downloads."""
-
-    ON_DEVICE_AND_RECENT = "on-device-and-recent"
-    ALL = "all"
-    NONE = "none"
-
-
 @dataclass(frozen=True, slots=True)
 class Settings:
     """User-adjustable settings.
 
     Attributes:
-        badge_scope: Which games' badges sync downloads.
-        recent_days: Window that makes a game "recent" (one of 7, 30, 90).
         hide_descriptions: Which locked achievements hide their description (spoilers).
         auto_sync: Sync automatically when the app opens and the network is up.
         game_list_details: The games list shows console and last activity instead of
@@ -60,8 +49,6 @@ class Settings:
             :data:`AWARDS_VIEW_CHOICES`, cycled with Select).
     """
 
-    badge_scope: BadgeScope = BadgeScope.ON_DEVICE_AND_RECENT
-    recent_days: int = 30
     hide_descriptions: DescriptionHiding = DescriptionHiding.OFF
     auto_sync: bool = True
     game_list_details: bool = False
@@ -71,35 +58,6 @@ class Settings:
 
 
 DEFAULTS = Settings()
-
-
-def _badge_scope(raw: object) -> BadgeScope:
-    """Parse a badge scope value.
-
-    Args:
-        raw: Value from JSON.
-
-    Returns:
-        The scope, or the default for anything unrecognised.
-    """
-    try:
-        return BadgeScope(raw)
-    except ValueError:
-        return DEFAULTS.badge_scope
-
-
-def _recent_days(raw: object) -> int:
-    """Parse the recent-window value.
-
-    Args:
-        raw: Value from JSON.
-
-    Returns:
-        One of :data:`RECENT_DAYS_CHOICES`, or the default.
-    """
-    if isinstance(raw, int) and not isinstance(raw, bool) and raw in RECENT_DAYS_CHOICES:
-        return raw
-    return DEFAULTS.recent_days
 
 
 def _flag(raw: object, *, default: bool) -> bool:
@@ -158,8 +116,6 @@ def settings_from_dict(data: dict[str, Any]) -> Settings:
         The settings.
     """
     return Settings(
-        badge_scope=_badge_scope(data.get("badge_scope")),
-        recent_days=_recent_days(data.get("recent_days")),
         hide_descriptions=_hiding(data),
         auto_sync=_flag(data.get("auto_sync"), default=DEFAULTS.auto_sync),
         game_list_details=_flag(data.get("game_list_details"), default=DEFAULTS.game_list_details),
@@ -179,8 +135,6 @@ def settings_to_dict(settings: Settings) -> dict[str, Any]:
         The dict.
     """
     return {
-        "badge_scope": settings.badge_scope.value,
-        "recent_days": settings.recent_days,
         "hide_descriptions": settings.hide_descriptions.value,
         "auto_sync": settings.auto_sync,
         "game_list_details": settings.game_list_details,

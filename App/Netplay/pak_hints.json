@@ -1,0 +1,212 @@
+{
+  "_about": "Hint text for Netplay's menus. Edit the wording freely; keep the keys. A key ending in .<platform> (tg5040, tg5050, my282, my355, h700) replaces the plain key on that platform.",
+  "menu": {
+    "host": "Start a session for the other device to join.",
+    "join": "Find a device that is hosting and join it.",
+    "config": "Cores, settings, debugging, turning Netplay off."
+  },
+  "config": {
+    "nickname": "Name other players see when joining or receiving invites.",
+    "cores": "Which systems play over Netplay on this device.",
+    "settings": "Quick menu, the NextUI icon, Wi-Fi and more.",
+    "debug": "Logs, checks and recovery.",
+    "off": "Remove Netplay's bindings; launches go stock."
+  },
+  "cores": {
+    "base": "Systems in NextUI's base install.",
+    "extras": "NextUI's extras, plus emulators Netplay installs.",
+    "FC": {
+      "available": "Netplay plays FC with the checked core.",
+      "ready": "Shared screen: both devices see one console.",
+      "present": "This FC.pak uses a core Netplay does not drive.",
+      "absent": "No FC.pak on this device."
+    },
+    "GB": {
+      "ready": "Link cable, a Game Boy each.",
+      "available": "Netplay plays GB/GBC with the checked core.",
+      "dual": "Dual instance: both Game Boys on each device.",
+      "present": "This pak uses a core Netplay does not drive.",
+      "absent": "No GB or GBC pak on this device."
+    },
+    "GBA": {
+      "ready": "Link: Wireless Adapter, Pokemon, Advance Wars.",
+    "paired": "mGBA Dual: both consoles on each device.",
+      "available": "Netplay plays GBA with the checked core.",
+      "present": "This GBA.pak uses a core Netplay does not drive.",
+      "absent": "No GBA.pak on this device."
+    },
+    "MD": {
+      "available": "Netplay plays MD with the checked core.",
+      "ready": "Shared screen: both devices see one console.",
+      "present": "This MD.pak uses a core Netplay does not drive.",
+      "absent": "No MD.pak on this device."
+    },
+    "PS": {
+      "available": "Netplay plays PS with the checked core.",
+      "ready": "Shared screen, experimental.",
+      "ready.my282": "Experimental. The A30 cannot pair with others.",
+      "present": "This PS.pak uses a core Netplay does not drive.",
+      "absent": "No PS.pak on this device."
+    },
+    "SFC": {
+      "available": "Netplay plays SFC with the checked core.",
+      "ready": "Shared screen: both devices see one console.",
+      "ready.my282": "Shared screen; pairs with others via Supafaust.",
+      "present": "This SFC.pak uses a core Netplay does not drive.",
+      "absent": "No SFC.pak on this device."
+    },
+    "32X": {
+      "ready": "Shared screen, untested.",
+      "present": "This 32X.pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "DSP": {
+      "ready": "Local wireless: a DS each. Press A to remove.",
+      "off": "Not set up for Netplay. Press A to set it up.",
+      "absent": "Press A to install DSP.pak (DSperate).",
+      "unavailable": "DSperate is not built for this device."
+    },
+    "FDS": {
+      "ready": "Shared screen, untested.",
+      "present": "This FDS.pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "GG": {
+      "available": "Netplay plays Game Gear with the checked core.",
+      "ready": "Shared screen. Gear-to-Gear is not emulated.",
+      "present": "This GG.pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "MGBA": {
+      "instanced": "Instanced link: both GBAs on each device.",
+      "installed": "Netplay uses mGBA only instanced. Press A.",
+      "absent": "Press A to install MGBA.pak for instanced link.",
+      "unavailable": "Instanced mGBA is not built for this device."
+    },
+    "NDS": {
+      "ready": "Local wireless: a DS each. Press A to remove.",
+      "present": "No local wireless yet. Press A to add it.",
+      "unsupported": "This DraStic build is not one Netplay supports.",
+      "absent": "Install NDS from the Pak Store, then add local wireless here.",
+      "unavailable": "DraStic local wireless is not built for this device."
+    },
+    "SEGACD": {
+      "available": "Netplay plays SegaCD with the checked core.",
+      "ready": "Shared screen, untested.",
+      "present": "This pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "SG1000": {
+      "ready": "Shared screen, untested.",
+      "present": "This pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "SMS": {
+      "available": "Netplay plays Master System with the checked core.",
+      "ready": "Shared screen, untested.",
+      "present": "This SMS.pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    },
+    "SUPA": {
+      "ready": "Shared screen, untested.",
+      "present": "This SUPA.pak uses a core Netplay does not drive.",
+      "absent": "Not installed. Add it from NextUI's extras."
+    }
+  },
+  "gambatte": {
+    "dual": {
+      "on": "Both Game Boys on each device; inputs travel.",
+      "off": "One Game Boy each; the cable crosses Wi-Fi.",
+      "unavailable": "No dual-instance core for this device."
+    }
+  },
+  "gba": {
+    "paired": {
+      "on": "Games set to mgba in spruce: both GBAs on each device.",
+      "off": "Games set to mgba in spruce play without Netplay.",
+      "unavailable": "No paired mGBA core for this device."
+    }
+  },
+  "mgba": {
+    "instanced": {
+      "on": "Both GBAs on each device; inputs cross Wi-Fi.",
+      "off": "mGBA games play stock, without Netplay.",
+      "install": "Turning this on installs MGBA.pak first."
+    },
+    "remove": "Put back what MGBA.pak replaced, or remove it."
+  },
+  "remove": {
+    "netplay": {
+      "DSP": "Keep DSP.pak; its games play offline.",
+      "NDS": "NDS.pak gets its own launcher back."
+    },
+    "device": {
+      "DSP": "Delete DSP.pak. Saves and states stay.",
+      "NDS": "Delete NDS.pak and DraStic's settings."
+    },
+    "backup": {
+      "DSP": "Put back the pre-Netplay DSP.pak, saves, states."
+    },
+    "cancel": "Leave it as it is."
+  },
+  "settings": {
+    "quick_menu": {
+      "off": "A Netplay menu over NextUI's menus.",
+      "on": "START opens it. Press A to pick your own buttons.",
+      "custom": "Your buttons open it. Press A to change them.",
+      "needs_varnish": "Turning this on installs Varnish.pak to draw it.",
+      "unavailable": "Needs Varnish.pak, which is not available here."
+    },
+    "icon": {
+      "always": "An N at the bottom, lit while armed.",
+      "session": "An N at the bottom while armed.",
+      "disabled": "No Netplay icon in NextUI.",
+      "needs_varnish": "Turning this on installs Varnish.pak to draw it.",
+      "unavailable": "Needs Varnish.pak, which is not available here."
+    },
+    "compat": {
+      "on": "Netplay's cores when the two builds differ.",
+      "off": "Matching installed cores only."
+    },
+    "gameswitcher": {
+      "on": "Only Netplay in the switcher while armed.",
+      "off": "Netplay stays out of the Game Switcher."
+    },
+    "powersave": {
+      "on": "Lower latency while armed; uses more battery.",
+      "off": "The radio saves power, at some latency."
+    },
+    "adhoc_switch": {
+      "on": "Disconnects from connected Wi-Fi to create Ad Hoc Network on quieter channel.",
+      "off": "Disconnects from connected Wi-Fi to create Ad Hoc Network on quieter channel."
+    },
+    "host_protocol": {
+      "linkplay": "Host for Netplay devices. Joiners pick the protocol up.",
+      "retroarch": "Host for RetroArch netplay (spruce, Onion, muOS...) too."
+    }
+  },
+  "chord": {
+    "intro": "Hold the buttons you want, then let go.",
+    "warning": "Buttons NextUI or a game also uses may do both things.",
+    "refused_system": "MENU, power and volume belong to the system.",
+    "refused_single": "A, B and the D-pad alone would block NextUI's menus.",
+    "refused_axis": "This device reports that button as an axis; pick another.",
+    "refused_many": "Three buttons at most."
+  },
+  "debug": {
+    "force_compat": {
+      "on": "Testing: Netplay's cores even when builds match.",
+      "off": "Netplay's cores only when builds differ."
+    },
+    "verbose_logs": {
+      "on": "A complete log for each game launch.",
+      "off": "Turn on for a complete log per game launch."
+    },
+    "save_backups": {
+      "on": "Keep original saves from the last three game sessions in Netplay/backup.",
+      "off": "Do not snapshot saves before a session starts."
+    },
+    "checks": "Check bindings, paths, cores and networking.",
+    "restore_wifi": "Reconnect to your usual Wi-Fi network."
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "AnbernicXX720480",
+  "name": "Anbernic RG34XXSP",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG34XXSP"
+  ],
+  "family": "h700",
+  "base": "BaseOS",
+  "soc": "Allwinner H700",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: cpuinfo CPU part \"*0xd03*\" (H700) -> reads BASEOS_TARGET from /etc/baseos-release; case \"rg34xxsp\" -> PLATFORM=AnbernicXX720480",
+  "cfg": "spruce/scripts/platform/h700/AnbernicXX720480.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "ANBERNIC-keys",
+      "from": "derived: same ANBERNIC-keys/event1 pad as the other XX buckets (matrix; no own discovery capture for this bucket)",
+      "note": "A/B/X/Y, L1/R1, digital L2/R2, SELECT/START, MENU (plus its KEY_GOTO tap pulse), D-pad hat, stick axes and FF rumble, all on one event1 node (also enumerates as js0). Its EV_KEY bitmask also advertises KEY_ESC/KEY_VOLUMEDOWN/KEY_VOLUMEUP, but those three never actually fire on this node (controller-matrix C2 / RG28XX diagnostic capture). On the RG34XX SP under BaseOS 1.4.0 (2026-11-12) KEY_VOLUMEUP/KEY_VOLUMEDOWN do arrive here, unlike the capture above."
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "dierct-keys-polled",
+      "from": "matrix",
+      "note": "vendor's own typo for the node name, kept verbatim. KEY_VOLUMEUP 115 / KEY_VOLUMEDOWN 114 measured arriving here (not on event1) on RG34XX SP and RG40XX V by the NextUI port, and identified as the volume node in the RG28XX diagnostic capture (controller-matrix event2 entry; matrix: measured on this model (controller-matrix input_nodes.event2 provenance) for this bucket's own node). On the RG34XX SP under BaseOS 1.4.0 (2026-11-12) nothing fired here; the volume keys came on event1 ANBERNIC-keys."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "derived: same axp2202-pek/event0 PMIC node as the other XX buckets (matrix; no own discovery capture for this bucket)"
+    },
+    "lid-sensor": {
+      "kind": "hall",
+      "node": null,
+      "device": "/sys/class/power_supply/axp2202-battery/hallkey",
+      "from": "cfg (LID_STATUS_PATH, LID_CLOSED_VALUE in AnbernicXXCommon.cfg); matrix (lid_watchdog_v2.sh runs only on *sp BASEOS_TARGETs)",
+      "note": "sysfs poll, not an evdev switch; LID_CLOSED_VALUE=0"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 306",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 309",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX720480-1.txt (RG34XX SP run 1, BaseOS 1.4.0)",
+      "note": "on the RG34XX SP under BaseOS 1.4.0 the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled (2026-11-12); the controller matrix (C2) and the NextUI port saw it on dierct-keys-polled"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "measured: button-reader-AnbernicXX720480-1.txt (RG34XX SP run 1, BaseOS 1.4.0)",
+      "note": "on the RG34XX SP under BaseOS 1.4.0 the key arrives on ANBERNIC-keys and nothing on dierct-keys-polled (2026-11-12); the controller matrix (C2) and the NextUI port saw it on dierct-keys-polled"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 2 4096",
+      "y": "3 3 4096",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 4 4096",
+      "y": "3 5 4096",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LID": {
+      "source": "lid-sensor",
+      "from": "cfg (LID_STATUS_PATH); matrix (lid_watchdog_v2.sh on *sp targets)"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=\"DOESNT_EXIST\"; MENU is spruce's home key on this line (matrix)",
+    "FN_SWITCH": "no latching Fn switch on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_LEFT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)",
+    "FN_RIGHT": "no Fn keys distinct from L3/R3 on the Anbernic XX line; cfg exports none (matrix)"
+  },
+  "evidence": [
+    "controller-matrix.json",
+    "h700-baseos-deep-dive.md",
+    "unittest/tests/test_rg28xx_diagnostic.py",
+    "button-reader-AnbernicXX720480-1.txt"
+  ],
+  "notes": [
+    "SPRUCE_DEVICE_NAME is computed at runtime; rg34xxsp is NOT one of the named arms, so it falls to the default arm: SPRUCE_DEVICE_NAME=\"Anbernic RG34XXSP\" (upper-cased BASEOS_TARGET, no space) -- note the mismatch against this file's model name \"RG34XX SP\" (with a space).",
+    "VOL_KEY_WATCHER_PATH/POWER_KEY_WATCHER_PATH/CONTROLLER_KEY_WATCHER_PATH are exported in AnbernicXXCommon.cfg (event0/event2/event1) but nothing in the h700 tree reads them -- dead variables, not evidence for any control's source (grep of spruce/scripts at spruce_ref 0dccf5276b).",
+    "This bucket now covers exactly one model (rg34xxsp); rg34xx and rgsp, which the 2026-09-06 controller-matrix.json/h700-baseos-deep-dive.md still group into AnbernicXX720480, were moved to their own AnbernicXX720480NoStick platform by the current helperFunctions.sh (spruce_ref 0dccf5276b). The old C11 finding (\"no DEVICE_NUM_ANALOG_STICKS arm for rg34xxsp\") looks resolved at this ref: AnbernicXX720480.cfg explicitly exports XX_PAD_LAYOUT=\"2stick\" before sourcing AnbernicXXCommon.cfg, which arms DEVICE_NUM_ANALOG_STICKS=2 from that -- re-verify on hardware before relying on this being fixed everywhere.",
+    "Display: 720x480, DISPLAY_ROTATION=0, 3:2 (AnbernicXX720480.cfg).",
+    "No discovery capture exists for this bucket in the lab captures; pad/power node facts are derived by parity with the rest of the XX line (matrix), except VOL-on-event2, which controller-matrix states was itself measured on this exact model (RG34XX SP) by the NextUI port.",
+    "models are spruce's own SPRUCE_DEVICE_NAME values (AnbernicXXCommon.cfg); Button Reader matches the unit's name against them"
+  ]
+}

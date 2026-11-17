@@ -558,6 +558,7 @@ done
 {
     jq -r '.menuOptions[]?[]? | select(type == "object" and .type == "freeText") | .selected // empty' \
         /mnt/SDCARD/Saves/spruce/spruce-config.json
+    jq -r '.username // empty, .password // empty' /mnt/SDCARD/Saves/spruce/screenscraper.json
     sed -n -e 's/^[[:space:]]*ssid="\(.*\)"[[:space:]]*$/\1/p' \
            -e 's/^[[:space:]]*psk="\(.*\)"[[:space:]]*$/\1/p' \
            -e 's/^[[:space:]]*psk=\([0-9a-fA-F]*\)[[:space:]]*$/\1/p' \
@@ -594,6 +595,11 @@ cfg="$stage/mnt/SDCARD/Saves/spruce/spruce-config.json"
 if [ -f "$cfg" ]; then
     jq '(.menuOptions[]?[]? | select(type == "object" and .type == "freeText" and .selected != "") | .selected) = "<redacted>"' \
         "$cfg" > "$cfg.redacted" 2>/dev/null && mv "$cfg.redacted" "$cfg" || rm -f "$cfg" "$cfg.redacted"
+fi
+ss="$stage/mnt/SDCARD/Saves/spruce/screenscraper.json"
+if [ -f "$ss" ]; then
+    jq 'with_entries(if (.key == "username" or .key == "password") and .value != "" then .value = "<redacted>" else . end)' \
+        "$ss" > "$ss.redacted" 2>/dev/null && mv "$ss.redacted" "$ss" || rm -f "$ss" "$ss.redacted"
 fi
 
 find "$stage" -type f | while IFS= read -r f; do

@@ -9,6 +9,7 @@
     "SYNC_RUNNING_ITEM": "Ігри {done}/{total}",
     "SYNC_RUNNING_RECENT": "Нещодавні досягнення · знайдено {done}",
     "SYNC_RUNNING_IMAGES": "Завантаження зображень {done}/{total}",
+    "SYNC_RUNNING_IMAGES_COUNT": "Завантаження зображень · {done}",
     "SYNC_PHASES": {
         "preflight": "Перевірка з’єднання",
         "profile": "Синхронізація профілю",
@@ -72,7 +73,7 @@
     },
     "AWARDS_NONE": "Ще немає нагород",
     "SETTINGS": "Налаштування",
-    "SETTINGS_SUMMARY": "Значки, синхронізація, API-ключ, про програму",
+    "SETTINGS_SUMMARY": "Значки, синхронізація, API-ключ",
     "NOT_STARTED": "не розпочато",
     "LAST_ACTIVITY": "{console} · {ago}",
     "GAME_NEVER_PLAYED": "{console} · {status}",
@@ -281,19 +282,6 @@
     "PROXY_ONLINE": "онлайн",
     "PROXY_OFFLINE": "офлайн",
     "PROXY_UNKNOWN": "стан невідомий",
-    "BADGE_DOWNLOADS": "Завантаження значків",
-    "BADGE_SCOPES": {
-        "on-device-and-recent": "На пристрої й нещодавні",
-        "all": "Усі ігри",
-        "none": "Лише під час перегляду"
-    },
-    "RECENT_WINDOW": "Нещодавні ігри",
-    "RECENT_DAYS": {
-        "one": "Зіграні за останній {count} день",
-        "few": "Зіграні за останні {count} дні",
-        "many": "Зіграні за останні {count} днів",
-        "other": "Зіграні за останні {count} днів"
-    },
     "HIDE_LOCKED": "Приховати опис заблокованих",
     "HIDE_LOCKED_MODES": {
         "off": "Вимкнено",
@@ -311,7 +299,7 @@
     "SYNC_NOW": "Синхронізувати зараз",
     "SYNC_NOW_HINT": "Отримати зміни з останньої синхронізації",
     "DOWNLOAD_ALL": "Завантажити всі ігри",
-    "DOWNLOAD_ALL_HINT": "Для роботи офлайн · близько секунди на гру",
+    "DOWNLOAD_ALL_HINT": "Досягнення й значки для перегляду офлайн",
     "DOWNLOAD_ALL_STOP": "Зупинити завантаження всіх ігор",
     "DOWNLOAD_ALL_STOP_HINT": "Уже завантажене залишиться",
     "DOWNLOAD_ALL_STOPPED": "Зупинено. Уже завантажене залишається.",
@@ -320,15 +308,11 @@
     "API_KEY_SET": "Задано (закінчується на {tail})",
     "CLEAR_IMAGES": "Очистити кеш зображень",
     "CLEAR_IMAGES_SIZE": "Займає {size} · за потреби завантажаться знову",
+    "IMAGE_CACHE": "Кеш зображень",
+    "CANCEL": "Скасувати",
+    "CLEAR_IMAGES_ASK": "Видалити завантажені значки, іконки й аватари?",
+    "CLEAR_IMAGES_EFFECT": "Прогрес у досягненнях збережеться. Зображення завантажаться знову за потреби.",
     "IMAGES_CLEARED": "Кеш зображень очищено.",
-    "ABOUT": "Про програму",
-    "ABOUT_HINT": "Версія, ліцензія та подяки",
-    "ABOUT_TEXT": [
-        "Ачівки {version} · хаб RetroAchievements для SpruceOS",
-        "Ліцензія MIT · Copyright (c) 2026 Andrii Balakhtar",
-        "Дані, значки й іконки ігор: RetroAchievements.org (не афілійовано)",
-        "Екрани намальовано за допомогою PyUI · Copyright (c) 2025 Christopher Jacobs, використано згідно з його ліцензією"
-    ],
     "SETUP": "Налаштувати Ачівки",
     "NO_USERNAME": "Спершу увійдіть у RetroAchievements: Налаштування Spruce > RetroAchievements або в RetroArch. Потім знову відкрийте Ачівки.",
     "KEY_NEEDED": "Ачівкам потрібен ваш ключ Web API від RetroAchievements.",

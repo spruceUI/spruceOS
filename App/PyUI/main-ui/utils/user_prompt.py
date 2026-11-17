@@ -3,13 +3,14 @@
 from controller.controller import Controller
 from controller.controller_inputs import ControllerInput
 from display.display import Display
+from menus.language.language import Language
 
 
 class UserPrompt():
 
     @staticmethod
     def prompt_yes_no(title, messages):
-        messages.extend(["","A = Yes, B = No"])
+        messages.extend(["",Language.label("yesNoPrompt", "A = Yes, B = No")])
         while(True):
             Display.clear(title)
             Display.display_message_multiline(messages)

@@ -52,6 +52,7 @@ ENTER_KEY = "Enter key"  # Start after RA rejected the key; A on the setup scree
 SYNC_RUNNING_ITEM = "Games {done}/{total}"
 SYNC_RUNNING_RECENT = "Recent unlocks · {done} found"
 SYNC_RUNNING_IMAGES = "Downloading images {done}/{total}"
+SYNC_RUNNING_IMAGES_COUNT = "Downloading images · {done}"
 SYNC_PHASES = {
     "preflight": "Checking connection",
     "profile": "Syncing profile",
@@ -93,7 +94,7 @@ AWARDS_EVENTS = Plural(one="{count} event", other="{count} events")
 AWARDS_SITE = Plural(other="{count} site")
 AWARDS_NONE = "No awards yet"
 SETTINGS = "Settings"
-SETTINGS_SUMMARY = "Badges, sync, API key, about"
+SETTINGS_SUMMARY = "Badges, sync, API key"
 
 # --- games ------------------------------------------------------------------------------------
 NOT_STARTED = "not started"
@@ -274,14 +275,6 @@ PROXY_OFFLINE = "offline"
 PROXY_UNKNOWN = "status unknown"
 
 # --- settings ---------------------------------------------------------------------------------
-BADGE_DOWNLOADS = "Badge downloads"
-BADGE_SCOPES = {
-    "on-device-and-recent": "On-device and recent games",
-    "all": "All games",
-    "none": "Only while browsing",
-}
-RECENT_WINDOW = "Recent games"
-RECENT_DAYS = Plural(one="Played in the last {count} day", other="Played in the last {count} days")
 HIDE_LOCKED = "Hide locked descriptions"
 HIDE_LOCKED_MODES = {"off": "Off", "story": "Story only", "all": "All"}
 HIDE_LOCKED_HINTS = {
@@ -295,7 +288,7 @@ OFF = "Off"
 SYNC_NOW = "Sync now"
 SYNC_NOW_HINT = "Fetch what changed since the last sync"
 DOWNLOAD_ALL = "Download every game"
-DOWNLOAD_ALL_HINT = "For offline use · about a second per game"
+DOWNLOAD_ALL_HINT = "Achievements and badges for offline use"
 DOWNLOAD_ALL_STOP = "Stop downloading every game"
 DOWNLOAD_ALL_STOP_HINT = "Keep what's downloaded so far"
 DOWNLOAD_ALL_STOPPED = "Stopped. What's downloaded so far stays."
@@ -304,15 +297,11 @@ API_KEY = "Web API key"
 API_KEY_SET = "Set (ends with {tail})"
 CLEAR_IMAGES = "Clear image cache"
 CLEAR_IMAGES_SIZE = "{size} used · images download again when needed"
+IMAGE_CACHE = "Image cache"
+CANCEL = "Cancel"
+CLEAR_IMAGES_ASK = "Delete downloaded badges, icons, and avatars?"
+CLEAR_IMAGES_EFFECT = "Achievement progress stays saved. Images redownload as needed."
 IMAGES_CLEARED = "Image cache cleared."
-ABOUT = "About"
-ABOUT_HINT = "Version, license and credits"
-ABOUT_TEXT = (
-    "Cheevos {version} · RetroAchievements hub for SpruceOS",
-    "MIT License · Copyright (c) 2026 Andrii Balakhtar",
-    "Data, badges and game icons: RetroAchievements.org (not affiliated)",
-    "Screens drawn with PyUI · Copyright (c) 2025 Christopher Jacobs, used under its license",
-)
 
 # --- setup ------------------------------------------------------------------------------------
 SETUP = "Set up Cheevos"

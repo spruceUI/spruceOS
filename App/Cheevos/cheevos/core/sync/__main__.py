@@ -15,8 +15,8 @@ import time
 
 from cheevos.core.errors import ConfigError
 from cheevos.core.net import is_online
-from cheevos.core.settings import BadgeScope, load_settings
-from cheevos.core.sync.engine import SyncEngine, SyncOptions
+from cheevos.core.sync.engine import SyncEngine
+from cheevos.core.sync.options import BadgeScope, SyncOptions
 from cheevos.core.sync.progress import ProgressTracker
 from cheevos.core.sync.session import load_credentials, open_sync_deps
 from cheevos.platform.paths import Paths
@@ -53,23 +53,25 @@ def main(argv: list[str] | None = None) -> int:
         ``0`` when the sync finished, ``1`` otherwise.
     """
     parser = argparse.ArgumentParser(prog="python -m cheevos.core.sync")
-    parser.add_argument("--full", action="store_true", help="download every game's details")
-    parser.add_argument("--scope", choices=[scope.value for scope in BadgeScope], default=None)
+    parser.add_argument(
+        "--full", action="store_true", help="download every game's details and badges"
+    )
+    parser.add_argument(
+        "--scope",
+        choices=[scope.value for scope in BadgeScope],
+        default=BadgeScope.ON_DEVICE_AND_RECENT.value,
+        help="badge download scope for a normal sync",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s: %(message)s")
 
     paths = Paths.from_env()
-    settings = load_settings(paths.settings_file)
     try:
         credentials = load_credentials(paths)
     except ConfigError as exc:
         logger.error("%s", exc)  # noqa: TRY400 — expected configuration problem, no traceback
         return 1
-    options = SyncOptions(
-        full=args.full,
-        badge_scope=BadgeScope(args.scope) if args.scope else settings.badge_scope,
-        recent_days=settings.recent_days,
-    )
+    options = SyncOptions(full=args.full, badge_scope=BadgeScope(args.scope))
     deps = open_sync_deps(paths, credentials)
     tracker = ProgressTracker()
     done = threading.Event()

@@ -503,7 +503,7 @@ device_wifi_forget_all() {
     wpa_forget_all_networks
 }
 
-# runtime.sh runs enable_zram.sh only where this answers 0; a kernel without zram says 1
+# enable_zram.sh exits early where this answers non-zero; a kernel without zram says 1
 device_supports_zram() {
     return 0
 }

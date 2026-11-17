@@ -69,6 +69,22 @@ get_config_path() {
     echo "$SYSTEM_JSON"
 }
 
+device_get_fw_version() {
+    _baseos_version="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '\r' | sed 's/^"//;s/"$//')"
+    if [ -n "$_baseos_version" ]; then
+        echo "BaseOS $_baseos_version"
+    else
+        echo "Unknown"
+    fi
+}
+
+# Boot to game skips PyUI, so the saved backlight is applied at boot rather than by PyUI.
+restore_backlight() {
+    _level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$_level" in ''|*[!0-9]*) return 0 ;; esac
+    apply_backlight "$_level"
+}
+
 # One firstboot flag for the whole XX family rather than one per model. These
 # devices differ only in screen and shell, so a card moved from an RG SP to a
 # CubeXX has nothing left to set up - re-running the lane would only replay the
@@ -472,6 +488,8 @@ anbernic_xx_common_init() {
 
     runtime_mounts_anbernic_34xxsp
 
+    restore_backlight
+
     stage_ra_autoconfig
 
     add_spruce_system_user
@@ -701,8 +719,8 @@ get_volume_level() {
     jq -r '.vol' "$SYSTEM_JSON"
 }
 
-# Same ioctl and scale as PyUI's _set_lumination_to_config
-set_backlight() {
+# Apply the same ioctl and scale as the former PyUI H700 device class.
+apply_backlight() {
     level="$1"
     [ "$level" -lt 0 ] && level=0
     [ "$level" -gt 10 ] && level=10
@@ -717,6 +735,13 @@ try:
 finally:
     os.close(fd)
 "
+}
+
+set_backlight() {
+    level="$1"
+    [ "$level" -lt 0 ] && level=0
+    [ "$level" -gt 10 ] && level=10
+    apply_backlight "$level" || return
     tmp="$SYSTEM_JSON.tmp.$$"
     jq ".backlight = $level" "$SYSTEM_JSON" > "$tmp" && mv "$tmp" "$SYSTEM_JSON" || rm -f "$tmp"
 }
@@ -740,6 +765,12 @@ try:
 finally:
     os.close(fd)
 "
+}
+
+turn_on_screen() {
+    _level="$(jq -r '.backlight // empty' "$SYSTEM_JSON" 2>/dev/null)"
+    case "$_level" in ''|*[!0-9]*) _level=5 ;; esac
+    apply_backlight "$_level"
 }
 
 send_menu_button_to_retroarch() {

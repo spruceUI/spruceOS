@@ -547,6 +547,9 @@ class Theme():
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     font = os.path.join(cls._path,cls._data["list"]["font"]) 
+                case FontPurpose.BOTTOM_BAR_HINT:
+                    hint = cls._data.get("hint") if isinstance(cls._data.get("hint"), dict) else {}
+                    font = os.path.join(cls._path, hint.get("font", cls._data["list"]["font"]))
                 case FontPurpose.GRID_ONE_ROW:
                     font = os.path.join(cls._path,cls._data["grid"]["font"]) 
                 case FontPurpose.GRID_MULTI_ROW:
@@ -596,6 +599,9 @@ class Theme():
                     return cls._data.get("batteryPercentFontSize", cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     return cls._data["list"].get("size", int(24*cls._default_multiplier))
+                case FontPurpose.BOTTOM_BAR_HINT:
+                    hint = cls._data.get("hint") if isinstance(cls._data.get("hint"), dict) else {}
+                    return hint.get("size", cls._data["list"].get("size", int(24*cls._default_multiplier)))
                 case FontPurpose.GRID_ONE_ROW:
                     return cls._data.get("gridSingleRowFontSize", cls._data["grid"].get("grid1x4", cls._data["grid"].get("size",int(25*cls._default_multiplier))))
                 case FontPurpose.GRID_MULTI_ROW:
@@ -654,6 +660,8 @@ class Theme():
                     cls._data["batteryPercentFontSize"] = size
                 case FontPurpose.ON_SCREEN_KEYBOARD:
                     pass
+                case FontPurpose.BOTTOM_BAR_HINT:
+                    cls._data.setdefault("hint", {})["size"] = size
                 case FontPurpose.GRID_ONE_ROW:
                     cls._data["gridSingleRowFontSize"] = size
                 case FontPurpose.GRID_MULTI_ROW:
@@ -702,6 +710,11 @@ class Theme():
                     else:
                         return cls.text_color(FontPurpose.TOP_BAR_TEXT)
                 case FontPurpose.ON_SCREEN_KEYBOARD:
+                    return cls.hex_to_color(cls._data["grid"]["color"])
+                case FontPurpose.BOTTOM_BAR_HINT:
+                    hint = cls._data.get("hint") if isinstance(cls._data.get("hint"), dict) else {}
+                    if hint.get("color"):
+                        return cls.hex_to_color(hint["color"])
                     return cls.hex_to_color(cls._data["grid"]["color"])
                 case FontPurpose.GRID_ONE_ROW:
                     return cls.hex_to_color(cls._data["grid"]["color"])
@@ -1661,6 +1674,20 @@ class Theme():
     def show_bottom_bar_buttons(cls):
         return cls._data.get("showBottomBarButtons", True)
         
+    @classmethod
+    def context_buttons_enabled(cls):
+        hint = cls._data.get("hint")
+        if not isinstance(hint, dict):
+            return False
+        return hint.get("contextbuttons") is True
+
+    @classmethod
+    def context_icon(cls, button):
+        if not cls.context_buttons_enabled():
+            return None
+        name = getattr(button, "name", str(button)).lower()
+        return cls._asset(f"context-{name}.png") or cls._asset(f"context-{name}.qoi")
+
     @classmethod
     def set_show_bottom_bar_buttons(cls, value):
         cls._data["showBottomBarButtons"] = value

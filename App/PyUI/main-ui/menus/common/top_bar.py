@@ -1,6 +1,7 @@
 from datetime import datetime
 import time
 from devices.device import Device
+from devices.miyoo.user_config import UserConfig
 from display.font_purpose import FontPurpose
 from display.render_mode import RenderMode
 from menus.language.language import Language
@@ -172,9 +173,9 @@ class TopBar:
     @staticmethod
     def get_current_time_hhmm():
         local_time = datetime.fromtimestamp(time.time())  # Uses system clock & local TZ
-        if(PyUiConfig.use_24_hour_clock()):
+        if(UserConfig.use_24_hour_clock()):
             return local_time.strftime("%H:%M")
-        elif(PyUiConfig.show_am_pm()):
+        elif(UserConfig.show_am_pm()):
             return local_time.strftime("%I:%M %p") 
         else:
             return local_time.strftime("%I:%M") 

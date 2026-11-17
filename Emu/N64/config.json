@@ -17,7 +17,7 @@
       "selected": "Performance",
       "overrides": {}
     },
-    "Emulator_RGB30": {
+    "Emulator_DARKMOSS": {
       "display": "Emulator",
       "devices": [
         "DARKMOSS"
@@ -26,10 +26,14 @@
         "mupen64plus-standalone",
         "mupen64plus-pow2",
         "km_ludicrousn64_2k22_xtreme_amped",
-        "mupen64plus_next"
+        "mupen64plus_next",
+        "armn64"
       ],
       "selected": "mupen64plus-standalone",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_A30": {
       "display": "Emulator",
@@ -74,10 +78,14 @@
         "parallel_n64",
         "mupen64plus_next",
         "mupen64plus-standalone",
-        "mupen64plus-pow2"
+        "mupen64plus-pow2",
+        "armn64"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "64-bit"
+      }
     },
     "Emulator_32": {
       "display": "Emulator32",
@@ -92,7 +100,10 @@
         "mupen64plus"
       ],
       "selected": "km_ludicrousn64_2k22_xtreme_amped",
-      "overrides": {}
+      "overrides": {},
+      "dependsOn": {
+        "raBuild": "32-bit"
+      }
     },
     "controlMode": {
       "display": "RA: C-button Mode",

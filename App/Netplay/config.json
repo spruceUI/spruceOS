@@ -1,0 +1,9 @@
+{
+  "label": "Netplay",
+  "icon": "netplay.png",
+  "launch": "launch.sh",
+  "pyuiEntry": "spruce_ui.pyui:run",
+  "description": "Two-player netplay with Netplay's own sync",
+  "devices": ["TRIMUI_A133P", "TRIMUI_SMART_PRO_S", "MIYOO_FLIP", "MIYOO_A30", "MIYOO_MINI_FAMILY", "ANBERNIC_RGXX", "DARKMOSS"],
+  "hideInSimpleMode": false
+}

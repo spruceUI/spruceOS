@@ -2,7 +2,7 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device.
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven ENV_VAR device.
 [ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
 
 runifnecessary() {
@@ -60,8 +60,11 @@ case "$PLATFORM" in
 # Brick / BrickPro / SmartPro / SmartProS
 ############################################################
     "Brick" | "BrickPro" | "SmartPro" | "SmartProS" )
-        tinymix set 9 1
-        tinymix set 1 0
+        # MinUI's "match stock audio": swaps L/R, which the Smart Pro S does not need
+        if [ "$PLATFORM" != "SmartProS" ]; then
+            tinymix set 9 1
+            tinymix set 1 0
+        fi
 
         cd /usr/trimui/bin
 
@@ -76,7 +79,7 @@ case "$PLATFORM" in
         else
             DEVICE="TRIMUI_SMART_PRO"
         fi
-        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -184,6 +187,8 @@ case "$PLATFORM" in
         else
             DEVICE="ANBERNIC_RGXX640480"
         fi
+
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
 
         "$PYUI_BIN" \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \
@@ -357,7 +362,7 @@ case "$PLATFORM" in
         cd /usr/magicx/bin
         export PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         # Every oakMOSS cfg sets PYUI_ENV_DEVICE=true: PyUI has no other device class for these boards.
-        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="SPRUCE"
+        [ "$PYUI_ENV_DEVICE" = "true" ] && DEVICE="ENV_VAR"
 
         cmd="/mnt/SDCARD/spruce/flip/bin/MainUI \
             /mnt/SDCARD/App/PyUI/main-ui/mainui.py \

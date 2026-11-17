@@ -120,3 +120,8 @@ vibrate() {
             ;;
     esac
 }
+
+# This inputd has no cal_update; it only reads joypad*.config at startup.
+apply_stick_calibration() {
+    restart_trimui_inputd
+}

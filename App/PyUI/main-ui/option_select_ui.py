@@ -11,6 +11,7 @@ from controller.controller_inputs import ControllerInput
 
 from devices.device import Device
 from display.display import Display
+from menus.language.language import Language
 from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from views.grid_or_list_entry import GridOrListEntry
@@ -165,19 +166,19 @@ class OptionSelectUI:
         if icons is None:
             icons = {}
 
-        def run_action(val):
+        def run_action(val, name):
             if exit_after_running:
                 Display.deinit_display()
                 os.sync()
                 subprocess.run(val, shell=True)
                 sys.exit(0)
             elif execute_immediately:
-                Display.display_message(f"Executing: {val}")
+                Display.display_message(Language.running_task(name))
                 subprocess.run(val, shell=True)
                 Controller.clear_input_queue()
                 Display.reinitialize()
                 Display.display_message(
-                    f"Finished Running {val}",
+                    Language.finished_running_task(name),
                     duration_ms=2000,
                 )
             else:
@@ -200,8 +201,8 @@ class OptionSelectUI:
                     if isinstance(val, str):
                         # Leaf node
                         option_value = (
-                            lambda controller_input=None, v=val:
-                            run_action(v)
+                            lambda controller_input=None, v=val, k=key:
+                            run_action(v, Language.option_list_text(k))
                             if controller_input == ControllerInput.A
                             else None
                         )
@@ -229,10 +230,10 @@ class OptionSelectUI:
 
                 option_list.append(
                     GridOrListEntry(
-                        primary_text=key,
+                        primary_text=Language.option_list_text(key),
                         value=option_value,
                         image_path=img_path,
-                        description=desc_text,
+                        description=Language.option_list_text(desc_text),
                         icon=icon,
                     )
                 )
@@ -294,7 +295,7 @@ class OptionSelectUI:
         selected = Selection(None, None, 0)
         view = ViewCreator.create_view(
             view_type=view_type,
-            top_bar_text=title,
+            top_bar_text=Language.option_list_text(title),
             options=option_list,
             selected_index=selected.get_index(),
         )
@@ -325,12 +326,12 @@ class OptionSelectUI:
                         sys.exit(0)
 
                     elif execute_immediately:
-                        Display.display_message(f"Executing: {val}")
+                        Display.display_message(Language.running_task(Language.option_list_text(key)))
                         subprocess.run(val, shell=True)
                         Controller.clear_input_queue()
                         Display.reinitialize()
                         Display.display_message(
-                            f"Finished Running {val}",
+                            Language.finished_running_task(Language.option_list_text(key)),
                             duration_ms=1000,
                         )
 

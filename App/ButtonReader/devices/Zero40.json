@@ -1,0 +1,165 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Zero40",
+  "name": "MagicX Zero 40",
+  "brand": "MagicX",
+  "models": [
+    "MagicX Zero 40"
+  ],
+  "family": "oakmoss",
+  "base": "oakMOSS",
+  "soc": "Allwinner A133P",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /usr/magicx present (the oakMOSS marker); /usr/magicx/device = zero40",
+  "cfg": "spruce/scripts/platform/oakmoss/Zero40.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "mcu",
+      "node": "magicx-input",
+      "from": "measured: the lab capturesZero40-20260921.txt",
+      "note": "simplepad, a UART MCU pad (see Zero28). The capture is the stock MagicX image (2026-09-21), before oakMOSS."
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "axp2202-pek",
+      "from": "measured: the lab capturesZero40-20260921.txt"
+    },
+    "touch": {
+      "kind": "touch",
+      "node": "axs_ts",
+      "from": "measured: the lab capturesZero40-20260921.txt",
+      "note": "axs15205 driver (OAKMOSS_TOUCH_MODULE); not autoloaded, device_init's oakmoss_load_touch loads it once the board has settled, so the node can appear late/not at all if the load fails"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 103",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 108",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 105",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 106",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg",
+      "note": "the (one) stick's click; measured GPIO edge THUMB_L in the 2026-09-21 stock-image capture, and PASS as 'L3 / Brick FN1' in the 2026-10-30 concurrent Brick+Zero40 hardware test (RESULTS.md)"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 158",
+      "source": "pad",
+      "from": "cfg",
+      "note": "KEY_BACK; on an older image with MagicX's second codes (OAKMOSS_PAD_RIDERS=1) the same press also sends 353 on A, not on MENU itself"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 1 -32767",
+      "y": "3 0 32767",
+      "source": "pad",
+      "from": "cfg",
+      "note": "axes are swapped vs the Zero 28 (horizontal is -ABS_Y, vertical ABS_X per the cfg comment); measured GPIO click THUMB_L confirms a stick is physically present"
+    }
+  },
+  "absent": {
+    "R3": "one stick, no right-stick click: the Zero 40 has only one physical stick: no THUMB_R GPIO interrupt in the 2026-09-21 capture (unlike the Zero 28's, which has one), MagicXCommon.sh's stage_ra_autoconfig explicitly stages the 'onestick' RetroArch profile for this PLATFORM, its SDL_GAMECONTROLLERCONFIG binds no rightstick, and the 2026-10-30 hardware test's own prompt text says 'Brick FN2 (no R3 on the Zero 40)' while still marking the row PASS only for the Brick side. Kept here because the cfg still defines the code and nothing has proven the key never fires; treat as unconfirmed, most likely absent.",
+    "HOME": "cfg B_HOME=DOESNT_EXIST (unconditional, unlike the XU20's conditional Home); the 2026-09-21 stock-image capture also logged one BTN_G GPIO edge (interrupt 201) on the same pin family as the XU20's Home button, but no cfg path reads it on this board - needs a hardware check for a real cap/button over it",
+    "RIGHT_STICK": "cfg DEVICE_NUM_ANALOG_STICKS=2 names a second stick, but this is contradicted in the same commit: MagicXCommon.sh's stage_ra_autoconfig stages the 'onestick' RetroArch autoconfig variant for Zero40 specifically (comment: 'the Zero 40 one [stick]'), its SDL_GAMECONTROLLERCONFIG binds no rightstick, and the 2026-09-21 discovery capture's GPIO interrupt table has no THUMB_R line at all (not just a zero count - the line is absent, consistent with the IRQ never being registered on this board's DT). Treated as absent on the strength of that three-way agreement; DEVICE_NUM_ANALOG_STICKS=2 looks like a stale/copy-pasted value from Zero28.cfg. Needs a hardware check.",
+    "FN_SWITCH": "no switch; device_get_switch_position is the oakMOSS no-op stub on MagicX boards (oakmoss_a133p.sh: the TrimUI PH19 pin is L1 here)",
+    "FN_LEFT": "no Fn key separate from L3/R3; none declared",
+    "FN_RIGHT": "no Fn key separate from L3/R3; none declared",
+    "LID": "no lid; not a clamshell, no hall node in this board's tree"
+  },
+  "evidence": [
+    "the lab capturesZero40-20260921.txt",
+    "the lab capturesZero40-20260921-kernel-facts.txt",
+    "RESULTS.md",
+    "spruce/scripts/platform/oakmoss/Zero40.cfg @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/MagicXCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakMOSSCommon.sh @ 0dccf5276b",
+    "spruce/scripts/platform/oakmoss/oakmoss_a133p.sh @ 0dccf5276b",
+    "spruce/scripts/helperFunctions.sh @ 0dccf5276b"
+  ],
+  "notes": [
+    "DEVICE_NUM_ANALOG_STICKS=2 vs the one-stick evidence is the open item for this board; see the R3 and RIGHT_STICK entries. A hardware run should specifically try to move a non-existent right stick and press R3 and report what (if anything) Button Reader sees.",
+    "The 2026-09-21 discovery capture predates oakMOSS; node names are expected to carry over by name match but have not been re-measured on an oakMOSS build, except for the 2026-10-30 concurrent test which did run on oakMOSS and matched every code it checked."
+  ]
+}

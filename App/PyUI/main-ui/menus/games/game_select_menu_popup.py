@@ -29,6 +29,7 @@ from views.view_type import ViewType
 
 
 from menus.language.language import Language
+from menus.common.bottom_bar import BottomBarHint
 
 class GameSelectMenuPopup:
     def __init__(self):
@@ -106,12 +107,12 @@ class GameSelectMenuPopup:
                 [PyUiConfig.get_cache_cheevos_cmd(), rom_info.rom_file_path],
                 capture_output=True, text=True, timeout=180)
             lines = (result.stdout or result.stderr).strip().splitlines()
-            message = lines[-1] if lines else "No response"
+            message = Language.translate("shellMessages", lines[-1]) if lines else Language.label("noResponse", "No response")
             if result.returncode == 0:
                 CheevosCacheManager.refresh()
         except Exception as e:
             PyUiLogger.get_logger().error(f"cache-rom failed: {e}")
-            message = "Failed"
+            message = Language.label("failed", "Failed")
         Display.display_message(message, duration_ms=2500)
 
     def download_boxart(self, input, rom_info : RomInfo):
@@ -124,7 +125,7 @@ class GameSelectMenuPopup:
                 rom_info.game_system,
                 rom_info.rom_file_path
             )
-            rom_image_list.append((name_without_ext, img_path))
+            rom_image_list.append((name_without_ext, img_path, rom_info.rom_file_path))
             
             BoxArtScraper().download_boxart_batch(rom_info.game_system.system_name, rom_image_list)
 
@@ -194,7 +195,7 @@ class GameSelectMenuPopup:
            and Device.get_device().get_system_config().use_custom_gameswitcher_path()):
             if(CustomGameSwitcherListManager.contains_game(rom_info)):
                 popup_options.append(GridOrListEntry(
-                    primary_text=Language.remove_gameswitcher_game() if use_full_text else "+/- GameSwitcher",
+                    primary_text=Language.remove_gameswitcher_game() if use_full_text else Language.label("shortToggleGameSwitcher", "+/- GameSwitcher"),
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
                     description=None,
@@ -203,7 +204,7 @@ class GameSelectMenuPopup:
                 ))
             else:
                 popup_options.append(GridOrListEntry(
-                    primary_text=Language.add_gameswitcher_game() if use_full_text else "+/- GameSwitcher",
+                    primary_text=Language.add_gameswitcher_game() if use_full_text else Language.label("shortToggleGameSwitcher", "+/- GameSwitcher"),
                     image_path=Theme.settings(),
                     image_path_selected=Theme.settings_selected(),
                     description=None,
@@ -214,7 +215,7 @@ class GameSelectMenuPopup:
 
         if(FavoritesManager.is_favorite(rom_info)):        
             popup_options.append(GridOrListEntry(
-                primary_text=Language.remove_favorite() if use_full_text else "+/- Favorite",
+                primary_text=Language.remove_favorite() if use_full_text else Language.label("shortToggleFavorite", "+/- Favorite"),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -223,7 +224,7 @@ class GameSelectMenuPopup:
             ))
         else:
             popup_options.append(GridOrListEntry(
-                primary_text=Language.add_favorite() if use_full_text else "+/- Favorite",
+                primary_text=Language.add_favorite() if use_full_text else Language.label("shortToggleFavorite", "+/- Favorite"),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -233,7 +234,7 @@ class GameSelectMenuPopup:
             
         
         popup_options.append(GridOrListEntry(
-            primary_text=Language.add_remove_collection() if use_full_text else "+/- Collection",
+            primary_text=Language.add_remove_collection() if use_full_text else Language.label("shortToggleCollection", "+/- Collection"),
             image_path=Theme.settings(),
             image_path_selected=Theme.settings_selected(),
             description=None,
@@ -243,7 +244,7 @@ class GameSelectMenuPopup:
 
         if(RecentsManager.is_recent(rom_info)):        
             popup_options.append(GridOrListEntry(
-                primary_text=Language.remove_recents() if use_full_text else "- Recents",
+                primary_text=Language.remove_recents() if use_full_text else Language.label("shortRemoveRecents", "- Recents"),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -281,7 +282,7 @@ class GameSelectMenuPopup:
         if(PyUiConfig.get_cache_cheevos_cmd()
            and "True" == CfwSystemConfig.get_selected_value("RetroAchievements Settings", "enableOfflineProxy")):
             popup_options.append(GridOrListEntry(
-                primary_text=Language.label("cacheCheevos", "Cache Achievements") if use_full_text else "Cache Cheevos",
+                primary_text=Language.label("cacheCheevos", "Cache Achievements") if use_full_text else Language.label("shortCacheCheevos", "Cache Cheevos"),
                 image_path=Theme.settings(),
                 image_path_selected=Theme.settings_selected(),
                 description=None,
@@ -332,6 +333,10 @@ class GameSelectMenuPopup:
             selected_index=0,
             cols=Theme.popup_menu_cols(),
             rows=Theme.popup_menu_rows())
+        popup_view.set_bottom_bar_hints_provider(lambda entry: [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("closeText", "Close")),
+        ])
 
 
         while (popup_selection := popup_view.get_selection(select_controller_inputs=[ControllerInput.A, ControllerInput.MENU])):

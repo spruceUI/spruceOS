@@ -101,7 +101,7 @@ case "$PLATFORM" in
         PYSDL2_DLL_PATH="$(oakmoss_pyui_sdl_dir)"
         export PYSDL2_DLL_PATH
         PYTHON="/mnt/SDCARD/spruce/flip/bin/MainUI"
-        # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the SPRUCE device, below.
+        # The oakMOSS cfgs set PYUI_ENV_DEVICE=true: the ENV_VAR device, below.
         ;;
     *)
         log_message "Accent Color: platform $PLATFORM is not supported yet"
@@ -110,10 +110,10 @@ case "$PLATFORM" in
         ;;
 esac
 
-# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven SPRUCE device, as in PyUI's launch.sh.
+# A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven ENV_VAR device, as in PyUI's launch.sh.
 if [ "$PYUI_ENV_DEVICE" = "true" ]; then
     . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
-    ACCENT_PYUI_DEVICE="SPRUCE"
+    ACCENT_PYUI_DEVICE="ENV_VAR"
 fi
 
 [ -n "$PYTHON" ] || PYTHON="$(get_python_path)"

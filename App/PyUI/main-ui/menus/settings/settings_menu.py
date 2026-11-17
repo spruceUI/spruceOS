@@ -9,6 +9,7 @@ from views.grid_or_list_entry import GridOrListEntry
 from views.selection import Selection
 from views.view_creator import ViewCreator
 from views.view_type import ViewType, get_next_view_type
+from menus.common.bottom_bar import BottomBarHint
 from abc import ABC, abstractmethod
 
 
@@ -19,6 +20,12 @@ class SettingsMenu(ABC):
     @abstractmethod
     def build_options_list(self):
         pass
+
+    def get_bottom_bar_hints(self, selected_entry):
+        return [
+            BottomBarHint(ControllerInput.A, Language.label("selectText", "Select")),
+            BottomBarHint(ControllerInput.B, Language.label("backText", "Back")),
+        ]
 
     def reload_options(self):
         # Figure out in sub settings menus when this actually needs to change 
@@ -43,6 +50,7 @@ class SettingsMenu(ABC):
                     top_bar_text=Language.settings(), 
                     options=option_list,
                     selected_index=selected.get_index())
+                list_view.set_bottom_bar_hints_provider(self.get_bottom_bar_hints)
                 self.theme_changed = False
             else:
                 list_view.set_options(option_list)

@@ -40,7 +40,7 @@ class DeviceCommon(AbstractDevice):
         from controller.controller import Controller
         while(True):
             PyUiLogger.get_logger().info("Prompting for shutdown")
-            Display.clear("Power")
+            Display.clear(Language.label("powerTitle", "Power"))
             Display.render_text_centered(Language.label("powerDownPrompt", "Would you like to power down?"),self.screen_width()//2, self.screen_height()//2,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
             if(self.reboot_cmd() is not None):
                 Display.render_text_centered(Language.label("powerDownOptionsWithReboot", "A = Power Down, X = Reboot, B = Cancel"),self.screen_width() //2, self.screen_height()//2+100,Theme.text_color(FontPurpose.LIST), purpose=FontPurpose.LIST)
@@ -1072,6 +1072,9 @@ class DeviceCommon(AbstractDevice):
         """
         return [self.get_device_name()]
 
+    # TODO this and the below are NOT device common. This is spruce specific
+    # And does not apply to ROCKNIX or MUOS -- need to remove but that
+    # Will break some things on spruce so might take some time
     def get_emulator_arch(self, menu_options: dict, rom_file_path=None):
         """The Emulator_64/Emulator_32 key matching the RA build, or None if this device lacks that key."""
         ra_build = menu_options.get("raBuild")

@@ -1,0 +1,168 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "RG353M",
+  "name": "Anbernic RG353M",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG353M"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd05 (RK3566) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=RG353M",
+  "cfg": "spruce/scripts/platform/darkmoss/RG353M.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "retrogame_joypad",
+      "by_path": "platform-singleadc-joypad-event-joystick",
+      "from": "cfg",
+      "note": "same singleadc-joypad driver/ids as the RGB30"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "cfg (comment: \"rk805 pwrkey event0, adc-keys event1, gpio-keys event2 (the volume rocker), retrogame_joypad event3\")"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys",
+      "from": "derived: same board as the RGB30, whose gpio-keys volume node is measured (matrix)"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default; the Standard/Swapped setting is read at boot (see notes)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default; the Standard/Swapped setting is read at boot (see notes)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 2",
+      "y": "3 3",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/RG353M.cfg",
+    "spruce/scripts/platform/darkmoss/RG353M.sh"
+  ],
+  "notes": [
+    "RG353M.cfg's own header comment still reads \"Powkiddy RGB30 (RK3566, 720x720) on dArkMoss\" (copy-paste left over from the RGB30.cfg this file is otherwise a byte-for-byte duplicate of, aside from the Anbernic branding and a fixed, non-conditional MENU/L3/R3): a documentation quirk, not a hardware fact. RG353M.sh likewise still describes the RGB30's rumble/LED hardware verbatim.",
+    "Unlike the plain RGB30, this cfg gives MENU its own fixed code (1 316) with L3 (1 317) and R3 (1 318) staying independent stick clicks - the same fix RGB20SX.cfg applies - rather than RGB30's jq-conditional stick-click-doubles-as-MENU. No code here has been independently measured on an RG353M unit; it is inherited from the RGB30 board 1:1.",
+    "Volume rocker may be hardware-swapped on some units; RG353M.cfg carries the RGB30's same Button Settings > Volume buttons \"Swapped\" runtime override (B_VOLUP/DOWN become 1 114/1 115 instead of the dArkMossCommon default 1 115/1 114)."
+  ]
+}

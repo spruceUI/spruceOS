@@ -115,6 +115,7 @@ class Display:
     background_texture = None
     top_bar_text = None
     bottom_bar_text = None
+    bottom_bar_hints = None
     _add_index_last_args = None
     is_custom_theme_background = None
     _glyph_cache = {}
@@ -519,7 +520,8 @@ class Display:
               hide_top_bar_icons = False,
               bottom_bar_text = None,
               render_bottom_bar_icons_and_images = True,
-              force_top_and_bottom_bar = False):
+              force_top_and_bottom_bar = False,
+              bottom_bar_hints = None):
         cls.top_bar_text = top_bar_text
         cls._frame_draws.append(("clear", cls.bg_path, cls.is_custom_theme_background,
                                  cls.bg_canvas, cls.background_texture))
@@ -537,8 +539,9 @@ class Display:
 
         if not Theme.render_top_and_bottom_bar_last() or force_top_and_bottom_bar:
             cls.top_bar.render_top_bar(cls.top_bar_text,hide_top_bar_icons)
-            cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
+            cls.bottom_bar.render_bottom_bar(bottom_bar_text, render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images, bottom_bar_hints=bottom_bar_hints)
         cls.bottom_bar_text = bottom_bar_text
+        cls.bottom_bar_hints = bottom_bar_hints
 
     @classmethod
     def _log(cls, msg):
@@ -1201,11 +1204,12 @@ class Display:
 
             if Theme.render_top_and_bottom_bar_last():
                 cls.top_bar.render_top_bar(cls.top_bar_text)
-                cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text)
+                cls.bottom_bar.render_bottom_bar(cls.bottom_bar_text, bottom_bar_hints=cls.bottom_bar_hints)
                 if cls._add_index_last_args is not None:
                     cls.add_index_text(*cls._add_index_last_args)
                     cls._add_index_last_args = None
                 cls.bottom_bar_text = None
+                cls.bottom_bar_hints = None
 
             cls._copy_canvas_to_window(fade)
             cls.pace_frame()
@@ -1277,18 +1281,29 @@ class Display:
         image_height = int(usable_height * (height_percent / 100))
         image_y = int(image_y_percent / 100 * usable_height) + padding
         text_y = int(text_y_percent / 100 * usable_height) + padding
-        cls.render_image(
-            image_path,
-            Device.get_device().screen_width() // 2,
-            image_y,
-            RenderMode.TOP_CENTER_ALIGNED,
-            Device.get_device().screen_width(),
-            image_height
-        )
-        cls.write_message_multiline_starting_height_specified(
-            cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
-            text_y
-        )
+        lines = cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True)
+
+        # A message too long for the space under text_y would run into the bottom bar:
+        # start it higher, and shrink the image if the text then reaches it.
+        _, line_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+        line_step = line_h + int(5 * Device.get_device().screen_height() / 480)
+        text_h = (len(lines) - 1) * line_step + line_h if lines else 0
+        text_bottom = min(padding + usable_height, Device.get_device().screen_height())
+        if text_y + text_h > text_bottom:
+            text_y = max(padding, text_bottom - text_h)
+            gap = int(10 * Device.get_device().screen_height() / 480)
+            image_height = min(image_height, text_y - gap - image_y)
+
+        if image_height > 0:
+            cls.render_image(
+                image_path,
+                Device.get_device().screen_width() // 2,
+                image_y,
+                RenderMode.TOP_CENTER_ALIGNED,
+                Device.get_device().screen_width(),
+                image_height
+            )
+        cls.write_message_multiline_starting_height_specified(lines, text_y)
 
     @classmethod
     def after_next_present(cls, callback):
@@ -1541,6 +1556,17 @@ class Display:
                     RenderMode.BOTTOM_RIGHT_ALIGNED
                 )
 
+
+    @classmethod
+    def get_font_baseline_offset(cls, purpose):
+        # Pixels from a text texture's bottom up to its baseline, where the
+        # bottoms of capital glyphs sit. (TTF_FontDescent is not this: it is
+        # signed, and includes how far descenders reach below the baseline.)
+        try:
+            font = cls.fonts[purpose].font
+            return int(sdl2.sdlttf.TTF_FontHeight(font) - sdl2.sdlttf.TTF_FontAscent(font))
+        except Exception:
+            return 0
 
     @classmethod
     def get_current_top_bar_title(cls):

@@ -336,6 +336,21 @@ run_retroarch() {
 
 	apply_baseos_ra_overlay
 
+	# RetroArch takes one --appendconfig, joined with "|"
+	case "$RA_PARAMS" in
+		*--appendconfig*) RA_PARAMS="${RA_PARAMS}|$RA_DIR/spruce-cheats.cfg" ;;
+		*) RA_PARAMS="${RA_PARAMS} --appendconfig $RA_DIR/spruce-cheats.cfg" ;;
+	esac
+
+	case "$RA_BIN" in
+		ra64.*)
+			if [ "$RA_VULKAN" = 1 ] && command -v device_vulkan_env >/dev/null 2>&1 \
+					&& device_vulkan_env; then
+				RA_PARAMS="${RA_PARAMS}|$RA_DIR/vulkan.cfg"
+			fi
+			;;
+	esac
+
 	# Prevent SDL2 from applying Xbox 360 gamecontroller mapping to the
 	# MIYOO Pad1 virtual joypad (shares vendor:product 045e:028e with Xbox).
 	# Without this, SDL2 remaps buttons incorrectly (e.g. X→L1, Y→R1).
@@ -413,6 +428,8 @@ get_cached_core_path() {
 transfer_save(){
 	cached_core_folder="$1"
 	current_core_folder="$2"
+	# Ensure if its first time swapping to this emu that the folder exists
+	mkdir -p "/mnt/SDCARD/Saves/saves/$current_core_folder"
 
 	KEEP_SAVES_BETWEEN_CORES="$(get_config_value '.menuOptions."Emulator Settings".keepSavesBetweenCores.selected' "Prompt")"
 	if [ "$KEEP_SAVES_BETWEEN_CORES" = "Always" ]; then
@@ -626,6 +643,7 @@ save_custom_n64_controller_profile() {
 		"mupen64plus") 							core_name="Mupen64Plus GLES2" ;;
 		"parallel_n64") 						core_name="ParaLLEl N64" ;;
 		"mupen64plus_next") 					core_name="Mupen64Plus-Next" ;;
+		"armn64") 							core_name="armN64" ;;
 		*) return 0 ;; # if not a known N64 core, do nothing
 	esac
 
@@ -669,4 +687,31 @@ set_pokedaisy_panel() {
 		log_message "Failed to set PokeDaisy panel in $opt_file"
 		return 1
 	fi
+}
+
+# Sets or adds `key = "value"` in Azahar's core config. The match is anchored so that
+# e.g. video_rotation never touches a longer key that ends in the same text.
+set_azahar_cfg_value() {
+	cfg="/mnt/SDCARD/RetroArch/.retroarch/config/Azahar/Azahar.cfg"
+	key="$1"
+	value="$2"
+	mkdir -p "$(dirname "$cfg")"
+	touch "$cfg"
+	if grep -q "^${key}[[:space:]]*=" "$cfg"; then
+		sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$cfg"
+	else
+		[ -s "$cfg" ] && [ -n "$(tail -c 1 "$cfg")" ] && echo >> "$cfg"
+		echo "${key} = \"${value}\"" >> "$cfg"
+	fi
+}
+
+set_rotation_for_miniloong_vulkan() {
+	[ "$PLATFORM" = "Miniloong" ] || return 0
+	set_azahar_cfg_value video_rotation 1
+	set_azahar_cfg_value aspect_ratio_index 10
+}
+
+reset_rotation_for_miniloong_vulkan() {
+	set_azahar_cfg_value video_rotation 0
+	set_azahar_cfg_value aspect_ratio_index 22
 }

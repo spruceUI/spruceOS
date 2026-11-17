@@ -4,8 +4,22 @@ from abc import ABC
 
 
 class View(ABC):
+    bottom_bar_hints_provider = None
+
     def __init__(self):
         pass
+
+    def set_bottom_bar_hints_provider(self, provider):
+        self.bottom_bar_hints_provider = provider
+
+    def get_bottom_bar_hints(self):
+        provider = self.bottom_bar_hints_provider
+        if provider is None:
+            return None
+        if callable(provider):
+            get_selected = getattr(self, "get_selected_option", None)
+            return provider(get_selected() if get_selected is not None else None)
+        return provider
 
     def is_alphabetized(self,options: list):
         texts = [opt.get_primary_text() for opt in options]

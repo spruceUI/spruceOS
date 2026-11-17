@@ -1,0 +1,155 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "E5Plus",
+  "name": "GameMT E5 Plus",
+  "brand": "GameMT",
+  "models": [
+    "GameMT E5 Plus"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd05 (RK3566) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=E5Plus",
+  "cfg": "spruce/scripts/platform/darkmoss/E5Plus.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "retrogame_joypad",
+      "by_path": "platform-singleadc-joypad-event-joystick",
+      "from": "cfg",
+      "note": "FF_RUMBLE-capable singleadc-joypad; same pad ids as the RGB30"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "cfg (E5Plus.cfg comment: \"rk805 pwrkey event0, adc-keys event1 ..., retrogame_joypad event2, rk-headset event3\")"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 316",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "cfg",
+      "note": "ABS_X/ABS_Y"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3",
+      "y": "3 4",
+      "source": "pad",
+      "from": "cfg",
+      "note": "ABS_RX/ABS_RY; the dArkMoss kernel swaps and inverts this stick into that axis order (cfg comment), not independently measured"
+    }
+  },
+  "absent": {
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "VOL_UP": "cfg B_VOLUP=DOESNT_EXIST",
+    "VOL_DOWN": "cfg B_VOLDOWN=DOESNT_EXIST",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/E5Plus.cfg",
+    "spruce/scripts/platform/darkmoss/E5Plus.sh"
+  ],
+  "notes": [
+    "E5Plus.cfg's own header: \"Built from the dArkMoss device tree ..., not yet read off a running unit: everything marked UNVERIFIED wants checking.\" Every code and node here is cfg-level, not measured.",
+    "No volume keys: B_VOLUP/B_VOLDOWN are DOESNT_EXIST because the side adc-keys line sits at 0V on this unit (reads as a stuck VOLUMEUP); spruce instead binds SELECT+R3 = volume up, SELECT+L3 = volume down (E5Plus.cfg comment). Not a Button Reader control; noted for a tester who expects a working rocker.",
+    "Audio path (AUDIO_PATH_SPK/HP) is UNVERIFIED and may be inverted, per the same cfg comment; unrelated to buttons but worth knowing if a hardware run also checks sound."
+  ]
+}

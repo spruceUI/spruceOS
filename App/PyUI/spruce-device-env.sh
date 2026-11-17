@@ -1,5 +1,5 @@
 #!/bin/sh
-# The spruce side of PyUI's env-driven SPRUCE device (main-ui/devices/env/env_var_device.py).
+# The spruce side of PyUI's env-driven ENV_VAR device (main-ui/devices/env/env_var_device.py).
 # launch.sh sources this when the platform cfg sets PYUI_ENV_DEVICE=true. Every variable
 # EnvVarDevice reads that the cfg has not set itself is filled in from spruce's own exports:
 #   SCREEN_WIDTH/HEIGHT/ROTATION      DISPLAY_WIDTH/HEIGHT/ROTATION
@@ -17,6 +17,7 @@
 #   CHARGE_STATUS_PATH                $BATTERY/status, unless the cfg sets CHARGE_STATUS_CMD
 #   SUPPORTS_WIFI                     wifi_available_on_device, unless the cfg sets CHECK_WIFI_SUPPORT_CMD
 #   BACKLIGHT_CMD                     set-backlight.sh, if the device defines apply_backlight
+#   APPLY_STICK_CALIBRATION           apply-stick-calibration.sh, if it defines apply_stick_calibration
 #   VOL_UP/DOWN_CMD                   spruce/scripts/step-volume.sh up/down (volume_up/volume_down)
 #   CONTRAST/SATURATION/BRIGHTNESS/HUE_CMD  set-display.sh, if it defines apply_display_<setting>
 #   FW_VERSION                        device_get_fw_version, if defined
@@ -125,6 +126,8 @@ for _setting in contrast saturation brightness hue; do
     command -v "apply_display_$_setting" >/dev/null 2>&1 &&
         spruce_env_default "$(echo "$_setting" | tr a-z A-Z)_CMD" "/mnt/SDCARD/App/PyUI/set-display.sh $_setting"
 done
+command -v apply_stick_calibration >/dev/null 2>&1 &&
+    spruce_env_default APPLY_STICK_CALIBRATION "/mnt/SDCARD/App/PyUI/apply-stick-calibration.sh"
 command -v device_get_fw_version >/dev/null 2>&1 &&
     spruce_env_default FW_VERSION "$(device_get_fw_version)"
 
@@ -138,3 +141,5 @@ spruce_env_default COLLECTIONS_PATH "/mnt/SDCARD/Collections/"
 spruce_env_default STATE_PATH "/mnt/SDCARD/Saves/pyui-state.json"
 
 unset _button _buttons _rest _setting
+
+spruce_env_default ROM_SETUP "MIYOO"

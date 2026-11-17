@@ -335,10 +335,10 @@ class MuosDevice(DeviceCommon):
                 with open(startup_path, "w") as f:
                     f.write("lastapp\n")
                 
-                Display.display_message("Last muOS launched App will launch on startup",2000)
+                Display.display_message(Language.label("muosLastAppOnStartup", "Last muOS launched App will launch on startup"),2000)
             except OSError as e:
                 PyUiLogger.get_logger().warning(f"Failed to write to {startup_path}: {e}")
-                Display.display_message("Error updating startup script",2000)
+                Display.display_message(Language.label("errorUpdatingStartupScript", "Error updating startup script"),2000)
 
 
     def get_extra_settings_options(self):

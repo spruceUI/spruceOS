@@ -1,0 +1,171 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "RGB30",
+  "name": "Powkiddy RGB30",
+  "brand": "Powkiddy",
+  "models": [
+    "Powkiddy RGB30"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3566",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd05 (RK3566) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=RGB30 (or, pre-stamp images, the HW_DEVICE fallback)",
+  "cfg": "spruce/scripts/platform/darkmoss/RGB30.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "retrogame_joypad",
+      "by_path": "platform-singleadc-joypad-event-joystick",
+      "from": "matrix"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk805 pwrkey",
+      "from": "matrix"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": "gpio-keys",
+      "from": "matrix",
+      "note": "event1 adc-keys reports only a phantom 114 and is rejected by the resolver"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "L3": {
+      "code": "1 317",
+      "source": "pad",
+      "from": "matrix",
+      "note": "doubles as MENU in the default Button Settings > Menu button = L3 setting"
+    },
+    "R3": {
+      "code": "1 318",
+      "source": "pad",
+      "from": "matrix",
+      "note": "plain stick click by default; becomes MENU instead of L3 if Button Settings > Menu button is set to R3"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30's rocker is standard: RGB30-4 (2026-11-12) read + as 115 and - as 114 on Standard; runs 1-3's reversed readings were the buttons pressed the other way round (tester)"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg",
+      "note": "dArkMossCommon.cfg default; RGB30.cfg swaps B_VOLUP/B_VOLDOWN when Button Settings > Volume buttons is Swapped (some units have the rocker fitted the other way round). The lab RGB30's rocker is standard: RGB30-4 (2026-11-12) read + as 115 and - as 114 on Standard; runs 1-3's reversed readings were the buttons pressed the other way round (tester)"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "matrix"
+    },
+    "LEFT_STICK": {
+      "x": "3 0",
+      "y": "3 1",
+      "source": "pad",
+      "from": "matrix"
+    },
+    "RIGHT_STICK": {
+      "x": "3 3",
+      "y": "3 4",
+      "source": "pad",
+      "from": "measured: button-reader-RGB30-1.txt; button-reader-RGB30-2.txt (RGB30 runs 1-2)",
+      "cfg_differs": "the cfg names STICK_RIGHT_2 \"3 2\" (ABS_Z, which this pad lacks) and STICK_DOWN_2 \"3 3\" (ABS_RX, which is across); on hardware right gives ABS_RX (3) and down ABS_RY (4)",
+      "over_cfg": "measured (2026-11-12); spruce keeps its cfg lines, so Button Reader expects and draws these axes instead"
+    }
+  },
+  "absent": {
+    "MENU": "no Menu button on the RGB30 (tester 2026-11-12; no input on the step in RGB30-1/2); RGB30.cfg's B_MENU reuses L3's code (317) per Button Settings > Menu button",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "FN_SWITCH": "none (matrix)",
+    "FN_LEFT": "none (matrix)",
+    "FN_RIGHT": "none (matrix)",
+    "LID": "none (matrix)"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/RGB30.cfg",
+    "spruce/scripts/platform/darkmoss/RGB30.sh",
+    "controller-matrix.json",
+    "button-reader-RGB30-1.txt",
+    "button-reader-RGB30-2.txt"
+  ],
+  "notes": [
+    "No dedicated MENU button: by default a tap of L3 (1 317) is both L3 and MENU (Button Settings > Menu button, default L3); the alternative setting swaps this so R3 (1 318) is MENU instead and L3 stays a plain stick click. The code/source below is the default (L3) branch; the other stick click (R3 by default) is a plain click with no MENU role.",
+    "Volume rocker may be hardware-swapped on some units; Button Settings > Volume buttons \"Swapped\" flips B_VOLUP/DOWN to 1 114/1 115 instead of the dArkMossCommon default 1 115/1 114 used below.",
+    "No rumble motor from the factory (the PWM and FF_RUMBLE are present for a solder mod); unrelated to Button Reader but may confuse a tester expecting feedback."
+  ]
+}

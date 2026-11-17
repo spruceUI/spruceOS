@@ -1,10 +1,8 @@
 {
     "theme": "SPRUCE",
     "themeDir": "/mnt/SDCARD/Themes/",
-    "turboDelayMs": 250,
     "enableButtonWatchers": false,
     "mainMenuTitle": "spruceOS",
-    "gameSystemSortMode": "SortOrderKey",
     "includeStockOsLaunchOption": false,
     "allowPyUiGameSwitcher": true,
     "mimicMiyooMainUiMode": true,

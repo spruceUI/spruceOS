@@ -1,0 +1,149 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "Pixel2DarkMoss",
+  "name": "GKD Pixel 2",
+  "brand": "GKD",
+  "models": [
+    "GKD Pixel 2"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326S",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=Pixel2DarkMoss",
+  "cfg": "spruce/scripts/platform/darkmoss/Pixel2DarkMoss.cfg",
+  "spruce_ref": "0dccf5276b",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "pixel2_joypad",
+      "by_path": "platform-gamekiddy-joypad-event-joystick",
+      "from": "cfg",
+      "note": "gamekiddy-joypad driver; the same by-path EVENT_PATH as the twig Pixel2.cfg's pad"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": null,
+      "from": "cfg",
+      "note": "dArkMossCommon.sh finds the rk817 pwrkey node by name at boot"
+    },
+    "vol": {
+      "kind": "gpio-keys",
+      "node": null,
+      "from": "cfg",
+      "note": "dArkMossCommon.sh finds the gpio-keys node by its KEY_VOLUMEUP/DOWN capability bits at boot; cfg's static EVENT_PATH_VOLUME=EVENT_PATH_POWER is only the pre-resolution fallback"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "1 544",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "1 545",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "1 546",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "1 547",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "SELECT": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "MENU": {
+      "code": "1 704",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "VOL_UP": {
+      "code": "1 115",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "VOL_DOWN": {
+      "code": "1 114",
+      "source": "vol",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "L3": "cfg B_L3=DOESNT_EXIST",
+    "R3": "cfg B_R3=DOESNT_EXIST",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "LEFT_STICK": "no analog stick (DEVICE_NUM_ANALOG_STICKS=0); STICK_* are DOESNT_EXIST in the cfg",
+    "RIGHT_STICK": "0 sticks (DEVICE_NUM_ANALOG_STICKS=0)",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none on this cfg (B_L3/B_R3=DOESNT_EXIST here); see the notes on the twig Pixel2.cfg conflict",
+    "FN_RIGHT": "none on this cfg (B_L3/B_R3=DOESNT_EXIST here); see the notes on the twig Pixel2.cfg conflict",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/Pixel2DarkMoss.cfg",
+    "spruce/scripts/platform/darkmoss/Pixel2DarkMoss.sh"
+  ],
+  "notes": [
+    "Boot, sound and rumble were seen on a unit 2026-10-27 (cfg header), but no per-button press capture exists in this workspace, so codes here are cfg-level.",
+    "B_L3/B_R3 are DOESNT_EXIST here, but the twig Pixel2.cfg (same physical GKD Pixel 2, same gamekiddy-joypad EVENT_PATH) declares B_L3=1 317/B_R3=1 318 with a comment that they \"also log left/right fnkey stuff.\" Kept per this platform's own cfg (the newer of the two, dated 2026-10-27 boot evidence); not reconciled. A hardware run on this dArkMoss image should check whether 317/318 ever fire before trusting either side."
+  ]
+}

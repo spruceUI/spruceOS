@@ -15,10 +15,12 @@ import logging
 import threading
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
+from itertools import islice
 
 from cheevos.core.awards import award_image, gallery
 from cheevos.core.clock import network_clock
 from cheevos.core.errors import (
+    ApiPayloadError,
     AuthError,
     CheevosError,
     NetworkError,
@@ -27,7 +29,6 @@ from cheevos.core.errors import (
 )
 from cheevos.core.models import RECENT_UNLOCK_COUNT, GameProgress
 from cheevos.core.ra_client.client import RaClient
-from cheevos.core.settings import BadgeScope
 from cheevos.core.storage.data_cache import DataCache
 from cheevos.core.storage.media_cache import MediaCache, avatar_key, badge_key, icon_key
 from cheevos.core.storage.recent_feed import RecentFeed, RecentFeedCache, library_fingerprint
@@ -37,11 +38,11 @@ from cheevos.core.sync.options import (
     LAST_SYNC_KEY,
     RATE_LIMIT_PAUSE,
     RATE_LIMITED_UNTIL_KEY,
+    BadgeScope,
     SyncOptions,
 )
 from cheevos.core.sync.planner import (
     DAY,
-    badge_game_ids,
     merge_library,
     plan_detail_fetches,
     working_set,
@@ -51,6 +52,7 @@ from cheevos.core.sync.progress import Failure, Phase, ProgressTracker, SyncStat
 logger = logging.getLogger(__name__)
 
 MEDIA_BATCH = 25  # images per transaction: few commits on the SD's dirsync FAT32
+MEDIA_PLAN_BATCH = 200  # full-library images planned at once: bounded RAM, short CPU bursts
 
 
 class SyncCancelledError(Exception):
@@ -132,12 +134,15 @@ class SyncEngine:
         self._tracker.reset()
         try:
             self._preflight()
+            if options.full:
+                self._deps.data.set_meta(FULL_SINCE_KEY, str(int(self._clock())))
             self._sync_profile()
             games = self._sync_library()
             self._sync_awards()  # first: the Awards screen is complete before the details
             self._sync_recent(games)
             self._sync_details(games, options)
-            self._sync_media(games, options)
+            pending_full = self._deps.data.get_meta(FULL_SINCE_KEY) is not None
+            self._sync_media(games, BadgeScope.ALL if pending_full else options.badge_scope)
         except (SyncCancelledError, RequestCancelledError):
             logger.info("Sync cancelled")
             self._tracker.finish(Phase.CANCELLED, at=self._clock())
@@ -281,13 +286,10 @@ class SyncEngine:
             options: Sync options (``full`` starts "Download every game").
         """
         now = int(self._clock())
-        if options.full:
-            self._deps.data.set_meta(FULL_SINCE_KEY, str(now))
         pending_full = self._deps.data.get_meta(FULL_SINCE_KEY)
         wanted = None
         if pending_full is None:
-            recent_since = now - options.recent_days * DAY
-            wanted = working_set(games, on_device=self._deps.on_device(), recent_since=recent_since)
+            wanted = working_set(games, on_device=self._deps.on_device(), now=now)
         plan = plan_detail_fetches(
             games,
             self._deps.data.detail_states(),
@@ -338,41 +340,59 @@ class SyncEngine:
         self._deps.data.save_awards(counts, awards)
         sync_events(self._deps.client, self._deps.data, awards, int(self._clock()), self._cancel)
 
-    def _sync_media(self, games: list[GameProgress], options: SyncOptions) -> None:
+    def _sync_media(self, games: list[GameProgress], scope: BadgeScope) -> None:
         """Download missing images: avatar, game icons, and badges for the badge scope.
 
         Args:
             games: Merged library.
-            options: Sync options (badge scope).
+            scope: Which games' badges to download.
         """
         self._check_cancel()
-        wanted = dict(self._media_wanted(games, options))
+        images = self._media_wanted(games, scope)
+        if scope is BadgeScope.ALL:
+            self._tracker.phase(Phase.MEDIA)
+            while wanted := dict(islice(images, MEDIA_PLAN_BATCH)):
+                self._check_cancel()
+                self._fetch_images(wanted, self._deps.media.missing(wanted))
+            return
+        wanted = dict(images)
         missing = self._deps.media.missing(wanted)
         self._tracker.phase(Phase.MEDIA, total=len(missing))
+        self._fetch_images(wanted, missing)
+
+    def _fetch_images(self, wanted: dict[str, str], missing: list[str]) -> None:
+        """Fetch missing images and keep completed downloads if the sync stops.
+
+        Args:
+            wanted: Image paths by cache key.
+            missing: Cache keys to download in order.
+        """
         batch: list[tuple[str, bytes]] = []
-        for key in missing:
-            self._check_cancel()
-            try:
-                batch.append((key, self._deps.client.media(wanted[key])))
-            except NetworkError:
-                self._deps.media.put_many(batch)
-                raise
-            except CheevosError as exc:  # e.g. a badge RA no longer serves: skip it
-                logger.warning("Skipping image %s: %s", key, exc)
-            self._tracker.advance(media=True)
-            if len(batch) >= MEDIA_BATCH:
-                self._deps.media.put_many(batch)
-                batch = []
-        self._deps.media.put_many(batch)
+        try:
+            for key in missing:
+                self._check_cancel()
+                try:
+                    batch.append((key, self._deps.client.media(wanted[key])))
+                except ApiPayloadError as exc:  # e.g. a badge RA no longer serves: skip it
+                    logger.warning("Skipping image %s: %s", key, exc)
+                self._tracker.advance(media=True)
+                if len(batch) >= MEDIA_BATCH:
+                    self._deps.media.put_many(batch)
+                    batch.clear()
+        except (SyncCancelledError, RequestCancelledError, NetworkError):
+            self._deps.media.put_many(batch)
+            raise
+        if batch:
+            self._deps.media.put_many(batch)
 
     def _media_wanted(
-        self, games: list[GameProgress], options: SyncOptions
+        self, games: list[GameProgress], scope: BadgeScope
     ) -> Iterator[tuple[str, str]]:
         """List the images this sync should have, as ``(cache key, media path)``.
 
         Args:
             games: Merged library.
-            options: Sync options (badge scope).
+            scope: Which games' badges to download.
 
         Yields:
             Cache key and media-host path pairs.
@@ -384,7 +404,7 @@ class SyncEngine:
             if game.image_icon:
                 yield icon_key(game.game_id), game.image_icon
         yield from self._award_images()
-        for game_id in self._badge_games(games, options):
+        for game_id in self._badge_games(games, scope):
             detail = self._deps.data.game_detail(game_id)
             for achievement in detail.achievements if detail else ():
                 locked = not achievement.unlocked
@@ -392,7 +412,7 @@ class SyncEngine:
                 path = f"/Badge/{achievement.badge_name}{suffix}.png"
                 yield badge_key(achievement.badge_name, locked=locked), path
         feed = RecentFeedCache(self._deps.data).load()
-        if feed is not None and options.badge_scope is not BadgeScope.NONE:
+        if feed is not None and scope is not BadgeScope.NONE:
             for entry in feed.entries:
                 achievement = entry.achievement
                 yield (
@@ -414,22 +434,19 @@ class SyncEngine:
                 if path:
                     yield key, path
 
-    def _badge_games(self, games: list[GameProgress], options: SyncOptions) -> list[int]:
-        """Select the games whose badges belong in the cache for the configured scope.
+    def _badge_games(self, games: list[GameProgress], scope: BadgeScope) -> list[int]:
+        """Select the games whose badges belong in the cache.
 
         Args:
             games: Merged library.
-            options: Sync options.
+            scope: Which games' badges to download.
 
         Returns:
-            Game IDs.
+            Game IDs in library order.
         """
-        if options.badge_scope is BadgeScope.NONE:
+        if scope is BadgeScope.NONE:
             return []
-        recent_since = int(self._clock()) - options.recent_days * DAY
-        return badge_game_ids(
-            games,
-            on_device=self._deps.on_device(),
-            include_all=options.badge_scope is BadgeScope.ALL,
-            recent_since=recent_since,
-        )
+        if scope is BadgeScope.ALL:
+            return [game.game_id for game in games]
+        wanted = working_set(games, on_device=self._deps.on_device(), now=int(self._clock()))
+        return [game.game_id for game in games if game.game_id in wanted]

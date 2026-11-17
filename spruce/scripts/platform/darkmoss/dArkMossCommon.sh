@@ -32,7 +32,7 @@ device_init() {
     set_backlight "$(get_backlight_level)"
     darkmoss_wifi_up
     /mnt/SDCARD/spruce/scripts/bluetooth.sh boot &
-    darkmoss_debug_dump
+    darkmoss_debug_dump &
     clear_stale_pmic_power_en &
 }
 
@@ -652,7 +652,7 @@ take_screenshot() {
 
     if timeout 15 "$_ff" -hide_banner -loglevel error \
         -f kmsgrab -i - \
-        -vf "hwdownload,format=bgr0,format=rgba" \
+        -vf "hwdownload,format=bgr0,format=rgba${SCREENSHOT_FILTER:+,$SCREENSHOT_FILTER}" \
         -frames:v 1 -update 1 -y "$screenshot_path" >/dev/null 2>&1; then
         return 0
     fi
@@ -768,17 +768,13 @@ darkmoss_shutdown_logo() {
   #####################
 
 darkmoss_drm_holders() {
-    for _fd in /proc/[0-9]*/fd/*; do
+    find /proc/[0-9]*/fd -lname '/dev/dri/*' 2>/dev/null | while read -r _fd; do
         _tgt="$(readlink "$_fd" 2>/dev/null)" || continue
-        case "$_tgt" in
-            /dev/dri/*)
-                _pid="${_fd#/proc/}"
-                _pid="${_pid%%/*}"
-                _cmd="$(tr '\0' ' ' < "/proc/$_pid/cmdline" 2>/dev/null)"
-                [ -z "$_cmd" ] && _cmd="[$(cat "/proc/$_pid/comm" 2>/dev/null)]"
-                echo "  pid $_pid ($_cmd) -> $_tgt"
-                ;;
-        esac
+        _pid="${_fd#/proc/}"
+        _pid="${_pid%%/*}"
+        _cmd="$(tr '\0' ' ' < "/proc/$_pid/cmdline" 2>/dev/null)"
+        [ -z "$_cmd" ] && _cmd="[$(cat "/proc/$_pid/comm" 2>/dev/null)]"
+        echo "  pid $_pid ($_cmd) -> $_tgt"
     done
 }
 
