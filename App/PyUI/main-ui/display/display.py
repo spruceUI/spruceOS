@@ -1281,18 +1281,29 @@ class Display:
         image_height = int(usable_height * (height_percent / 100))
         image_y = int(image_y_percent / 100 * usable_height) + padding
         text_y = int(text_y_percent / 100 * usable_height) + padding
-        cls.render_image(
-            image_path,
-            Device.get_device().screen_width() // 2,
-            image_y,
-            RenderMode.TOP_CENTER_ALIGNED,
-            Device.get_device().screen_width(),
-            image_height
-        )
-        cls.write_message_multiline_starting_height_specified(
-            cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True),
-            text_y
-        )
+        lines = cls.split_message(text, FontPurpose.LIST, clip_to_device_width=True)
+
+        # A message too long for the space under text_y would run into the bottom bar:
+        # start it higher, and shrink the image if the text then reaches it.
+        _, line_h = Display.get_text_dimensions(FontPurpose.LIST, "W")
+        line_step = line_h + int(5 * Device.get_device().screen_height() / 480)
+        text_h = (len(lines) - 1) * line_step + line_h if lines else 0
+        text_bottom = min(padding + usable_height, Device.get_device().screen_height())
+        if text_y + text_h > text_bottom:
+            text_y = max(padding, text_bottom - text_h)
+            gap = int(10 * Device.get_device().screen_height() / 480)
+            image_height = min(image_height, text_y - gap - image_y)
+
+        if image_height > 0:
+            cls.render_image(
+                image_path,
+                Device.get_device().screen_width() // 2,
+                image_y,
+                RenderMode.TOP_CENTER_ALIGNED,
+                Device.get_device().screen_width(),
+                image_height
+            )
+        cls.write_message_multiline_starting_height_specified(lines, text_y)
 
     @classmethod
     def after_next_present(cls, callback):

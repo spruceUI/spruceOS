@@ -209,7 +209,9 @@ class Language:
 
         Keys may contain {placeholders}: "Now downloading {name}!" matches
         "Now downloading Foo!" and the captured text is substituted into the
-        translation. Unknown text is returned unchanged."""
+        translation, itself translated when it is a known text (a script may
+        pass a whole sentence as the argument). Unknown text is returned
+        unchanged."""
         if not text or not isinstance(text, str):
             return text
         entries = cls._data.get(section)
@@ -222,7 +224,7 @@ class Language:
             if match:
                 result = translation
                 for index, name in enumerate(names):
-                    result = result.replace("{" + name + "}", match.group(f"p{index}"))
+                    result = result.replace("{" + name + "}", cls.translate(section, match.group(f"p{index}")))
                 return result
         return text
 
@@ -236,7 +238,7 @@ class Language:
                     continue
                 parts = re.split(r"\{(\w+)\}", key)
                 if not "".join(parts[0::2]).strip():
-                    continue  # placeholders only: would match any text
+                    continue  # placeholders only: would match (and re-translate) any text
                 regex = ""
                 names = []
                 for i, part in enumerate(parts):
@@ -255,6 +257,13 @@ class Language:
                         logger.warning(f"Bad translation template in {section}: {key}")
             cls._template_cache[section] = templates
         return templates
+
+    @classmethod
+    def shell_message(cls, text):
+        """Text a shell script sent to be shown (display helpers, -msgDisplay).
+        Scripts send English; shellMessages maps it, {placeholders} standing
+        in for the parts the script fills in."""
+        return cls.translate("shellMessages", text)
 
     @classmethod
     def option_list_text(cls, text):
