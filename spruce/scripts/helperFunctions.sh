@@ -263,7 +263,7 @@ auto_regen_tmp_update() {
     fi
 }
 
-# The B_* "type code [value]" of a ControllerInput number (PyUI's enum order).
+# The B_* "type code [value]" (or Miyoo Mini key name) of a ControllerInput number (PyUI's enum order).
 controller_input_key() {
     case "$1" in
         1) echo "$B_A" ;;      2) echo "$B_B" ;;       3) echo "$B_X" ;;      4) echo "$B_Y" ;;
@@ -277,7 +277,7 @@ controller_input_key() {
 
 # The physical buttons that act as ControllerInput $1, one per line. PyUI's Button
 # Remapper saves SYSTEM_JSON .button_mapping as physical -> virtual numbers; a button
-# missing from it keeps its own role. With no button left in that role, the factory one.
+# missing from it keeps its own role. With no usable button left in that role, the factory one.
 buttons_acting_as() {
     _role="$1"
     _physicals="$(jq -r --argjson role "$_role" '
@@ -285,13 +285,23 @@ buttons_acting_as() {
         | range(1; 19)
         | select(($m[tostring] // .) == $role)' "$SYSTEM_JSON" 2>/dev/null)" || _physicals="$_role"
     [ -n "$_physicals" ] || _physicals="$_role"
+    _found=""
     for _physical in $_physicals; do
         _key="$(controller_input_key "$_physical")"
+        # Skip buttons a board lacks; keep key codes and Miyoo Mini key names alike.
         case "$_key" in
-            [0-9]*) echo "$_key" ;;
+            ""|DOESNT_EXIST) ;;
+            *) echo "$_key"; _found=1 ;;
         esac
     done
-    unset _role _physicals _physical _key
+    if [ -z "$_found" ]; then
+        _key="$(controller_input_key "$_role")"
+        case "$_key" in
+            ""|DOESNT_EXIST) ;;
+            *) echo "$_key" ;;
+        esac
+    fi
+    unset _role _physicals _physical _key _found
 }
 
 # 0 when the getevent line $1 is from one of the keys listed in $2.
@@ -327,6 +337,8 @@ confirm() {
     start_time=$(date +%s)
     confirm_keys="$(buttons_acting_as 1)"
     cancel_keys="$(buttons_acting_as 2)"
+    [ -n "$confirm_keys" ] && [ -n "$cancel_keys" ] ||
+        log_message "confirm: no usable A or B key (B_A='$B_A' B_B='$B_B'); only the timeout ends this prompt"
 
     rm -f /tmp/ge_out 2>/dev/null
     

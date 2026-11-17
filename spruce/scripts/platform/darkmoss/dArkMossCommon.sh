@@ -637,9 +637,6 @@ vibrate() {
 # fb0 is a dead shim under DRM, so grab the KMS plane. spruce/bin/ffmpeg is the
 # static build with the kmsgrab demuxer (bin64/ffmpeg has none) and starts in
 # 76ms against Debian's 2.3s; Debian's stays as the fallback.
-# SCREENSHOT_VF (platform cfg, optional): an ffmpeg filter applied to the grab.
-# kmsgrab reads the plane as the panel scans it, so a panel that is mounted
-# rotated (the RG351P: "transpose=clock") needs its picture turned back.
 take_screenshot() {
     screenshot_path="$1"
     [ -n "$screenshot_path" ] || return 1
@@ -655,7 +652,7 @@ take_screenshot() {
 
     if timeout 15 "$_ff" -hide_banner -loglevel error \
         -f kmsgrab -i - \
-        -vf "hwdownload,format=bgr0${SCREENSHOT_VF:+,$SCREENSHOT_VF},format=rgba" \
+        -vf "hwdownload,format=bgr0,format=rgba${SCREENSHOT_FILTER:+,$SCREENSHOT_FILTER}" \
         -frames:v 1 -update 1 -y "$screenshot_path" >/dev/null 2>&1; then
         return 0
     fi

@@ -1,8 +1,10 @@
 # Netplay for NextUI and Spruce
 
-Two-player LAN multiplayer between handhelds: shared-screen games, GB/GBC and
-GBA linking, and experimental Nintendo DS local wireless. Connect through the
-same Wi-Fi network or a handheld-hosted `netplay-XXXX` network where supported.
+Two-player LAN multiplayer between handhelds: shared-screen games, GB/GBC,
+GBA and Game Gear linking, and experimental Nintendo DS local wireless. Connect
+through the same Wi-Fi network, a handheld-hosted `netplay-XXXX` network where
+supported, or a USB-C cable between two Bricks (an RG35XX H can be the host
+end).
 Network quality matters; an ad hoc network is not necessarily faster than a
 house access point. Internet matchmaking is not implemented.
 
@@ -36,7 +38,8 @@ Settings, saves, logs and backups live outside it: NextUI state in
 ## Play
 
 1. Open Netplay, complete onboarding, and choose **Host** on one device.
-   Choose the current Wi-Fi network or create an ad hoc network if offered.
+   Choose the current Wi-Fi network, create an ad hoc network if offered, or
+   **Host over USB cable** (then **Join over USB cable** on the other device).
 2. Choose **Join** on the other device and select the host.
 3. Exit the app and launch your games through the firmware's normal menu.
 4. Use **X** in Netplay to end an active session. Wi-Fi is restored as needed.
@@ -67,7 +70,8 @@ choose cores. Every device and firmware pairing is worked out in
 | FC/NES, FDS | FCEUmm | Shared screen |
 | SFC/SNES | Supafaust, then Snes9x | Shared screen |
 | MD/Genesis, Sega CD, 32X | PicoDrive | Shared screen |
-| Master System, Game Gear | Genesis Plus GX (64-bit spruce pairs), Gearsystem, then PicoDrive | Shared screen |
+| Game Gear | Gearsystem with Gear-to-Gear (Netplay's build, every device), then Gearsystem, PicoDrive for older peers | Link cable (each player their own Game Gear), else shared screen |
+| Master System | Genesis Plus GX (64-bit spruce pairs), Gearsystem, then PicoDrive | Shared screen |
 | GB/GBC | Gambatte Dual, then Gambatte | Dual: both consoles on each device. Otherwise a link cable over the network |
 | GBA | armGBA Together (A30 and up), armGBA Separate, mGBA Dual (64-bit), then gpSP | See below |
 | PlayStation | PCSX ReARMed | Shared screen; not between a 64-bit NextUI device and a 32-bit one |
