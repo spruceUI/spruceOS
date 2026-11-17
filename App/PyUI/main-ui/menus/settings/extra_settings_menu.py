@@ -69,6 +69,9 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
                 PyUiConfig.set_language(lang)
                 Language.load()
                 Display.clear_text_cache()
+                # Rebuild this screen and the one before it: their titles were
+                # set in the old language when they were first drawn.
+                self.theme_changed = True
 
     def launch_game_art_display_settings(self,input):
         if(ControllerInput.A == input):
