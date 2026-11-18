@@ -4,6 +4,12 @@
   "iconsel": "gamate_sel.png",
   "themecolor": "FFFF00",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "requiredfiles": [
+    [
+      "/mnt/SDCARD/BIOS/gamate_bios_umc.bin",
+      "/mnt/SDCARD/BIOS/gamate_bios_bit.bin"
+    ]
+  ],
   "extlist": "gam|zip|7z|bin",
   "launchlist": [],
   "menuOptions": {
