@@ -540,6 +540,16 @@ case "$PLATFORM" in
             mini_logo_fail "Image is too detailed to fit. Try a simpler image."
         fi
 
+        # Some original Minis (BoyaMicro chips) can't be written from Linux: test-write a spare block first
+        if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI" ]; then
+            _out="$(./checkwrite.elf 2>&1)"
+            _rc=$?
+            log_message "BootLogo: checkwrite: $_out"
+            if [ "$_rc" -ne 0 ]; then
+                mini_logo_fail "This Mini's flash can't be written here. Boot logo not changed."
+            fi
+        fi
+
         show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
         _out="$(./logowrite.elf 2>&1)"
         _rc=$?
