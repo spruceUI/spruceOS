@@ -555,6 +555,7 @@ case "$PLATFORM" in
                     if [ "$_rc" -eq 0 ]; then
                         mini_logo_fail "Couldn't write the new logo. The original logo was put back."
                     fi
+                    cp backup.img "$DIR/mtd3-backup.img"
                     mini_logo_fail "Writing the boot logo failed and the original could not be put back. Please ask for help on Discord."
                     ;;
             esac
