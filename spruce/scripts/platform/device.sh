@@ -700,6 +700,19 @@ device_usb_audio_supported() {
     return 1
 }
 
+# PyUI opens its mixer after its first frame is drawn, not before it. Default: off.
+# PyUI asks through App/PyUI/get-audio-option.sh, like the idle release below.
+device_defer_startup_audio() {
+    return 1
+}
+
+# PyUI closes its audio device after an idle spell with nothing playing (SDL keeps an
+# open device's thread writing silence) and reopens it for the next sound. A board turns
+# this on after a listen test for pops; PyUI asks through App/PyUI/get-audio-option.sh.
+device_idle_release_audio() {
+    return 1
+}
+
 # The connected audio device's MAC, if any.
 bt_connected_audio_mac() {
     pidof bluetoothd >/dev/null 2>&1 || return 1

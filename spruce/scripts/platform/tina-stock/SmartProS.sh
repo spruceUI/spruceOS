@@ -142,6 +142,11 @@ volume_up() {
     fi
 }
 
+# A listen test heard no pop when PyUI closed its audio device and opened it again.
+device_idle_release_audio() {
+    return 0
+}
+
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up

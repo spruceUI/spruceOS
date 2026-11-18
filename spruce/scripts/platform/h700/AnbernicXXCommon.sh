@@ -1207,6 +1207,11 @@ device_usb_audio_supported() {
     [ "$ASOUND_SPRUCE_PCMS" = 1 ]
 }
 
+# PyUI draws its first menu while the audio worker opens the mixer.
+device_defer_startup_audio() {
+    return 0
+}
+
 # Named outputs, so PyUI can return to the speaker. The stock default is an unnamed
 # hooks block that differs per model, so spruce_speaker is that block, renamed.
 ASOUND_SPRUCE_PCMS=1

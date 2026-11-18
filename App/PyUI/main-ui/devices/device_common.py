@@ -859,6 +859,29 @@ class DeviceCommon(AbstractDevice):
             PyUiLogger.get_logger().warning(f"USB audio support check failed: {e}")
             return False
 
+    def defer_startup_audio(self):
+        return self._audio_option("defer-startup")
+
+    def apply_audio_idle_release(self):
+        # The shell's device_idle_release_audio opts a device in. Only the SDL2 back
+        # end keeps a device open, so only it takes the setting.
+        if self._audio_option("idle-release"):
+            set_idle_release = getattr(self.get_audio_system(), "set_idle_release", None)
+            if set_idle_release:
+                set_idle_release(True)
+                PyUiLogger.get_logger().info("Idle audio device release on")
+
+    def _audio_option(self, option):
+        cmd = PyUiConfig.get_audio_option_cmd()
+        if not cmd:
+            return False
+        try:
+            return subprocess.run([cmd, option], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                  timeout=10).returncode == 0
+        except Exception as e:
+            PyUiLogger.get_logger().warning(f"Audio option {option} check failed: {e}")
+            return False
+
     def refresh_audio_route(self):
         threading.Thread(target=self._refresh_audio_route, name="AudioRoute", daemon=True).start()
 
