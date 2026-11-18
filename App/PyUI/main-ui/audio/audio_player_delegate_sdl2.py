@@ -30,6 +30,9 @@ class AudioPlayerDelegateSdl2:
     def queue_wav(self, file_path: str):
         Sdl2AudioPlayer.load_wav(file_path, wait=False)
 
+    def set_idle_release(self, enabled: bool):
+        Sdl2AudioPlayer.set_idle_release(enabled)
+
     def audio_reopen(self):
         # The worker reinitialises on this flag: it reopens the output, picking
         # up AUDIODEV, and reloads the menu sounds. A cleanup would drop them.

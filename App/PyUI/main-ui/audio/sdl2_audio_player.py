@@ -5,6 +5,7 @@ import sdl2
 import sdl2.sdlmixer as sdlmixer
 import threading
 import queue
+import time
 from typing import Optional
 from utils.logger import PyUiLogger
 from utils.time_logger import log_timing
@@ -27,6 +28,11 @@ class Sdl2AudioPlayer:
     _initialized = False
     _init_failed = False
     _current_volume = 128  # 0..128
+
+    # An open device keeps SDL's audio thread writing silence, so an opted-in device
+    # closes it once nothing has played for this long; the next command opens it again.
+    IDLE_RELEASE_SEC = 10.0
+    _idle_release = False
 
     # Worker-owned resources (only touched by worker thread)
     # chunk_map: path -> Mix_Chunk pointer, music_map: path -> Mix_Music pointer
@@ -150,6 +156,10 @@ class Sdl2AudioPlayer:
         Sdl2AudioPlayer._send_cmd("stop_loop")
 
     @staticmethod
+    def set_idle_release(enabled: bool):
+        Sdl2AudioPlayer._idle_release = bool(enabled)
+
+    @staticmethod
     def audio_cleanup():
         if Sdl2AudioPlayer._worker_thread is None or not Sdl2AudioPlayer._running:
             Sdl2AudioPlayer._worker_thread = None
@@ -189,6 +199,7 @@ class Sdl2AudioPlayer:
         loop_channel = None
         loop_music_path = None
         loop_chunk_path = None
+        released_paths = None  # the WAVs to load again, while the device is closed for idling
 
         def reply_ok(resp_q, ok=True):
             if resp_q:
@@ -267,10 +278,9 @@ class Sdl2AudioPlayer:
                 PyUiLogger.get_logger().warning(f"Mix_LoadMUS exception for {path}: {e}")
                 return None
 
-        def reinit_audio():
-            """Tear down and reinitialize SDL2 audio (e.g. after sleep/wake kills ALSA)."""
+        def close_audio():
+            """Free every sound and close the device. Returns the WAV paths to load again."""
             nonlocal loop_channel, loop_music_path, loop_chunk_path
-            PyUiLogger.get_logger().warning("Reinitializing SDL2 audio after sleep/wake...")
             loop_channel = None
             loop_music_path = None
             loop_chunk_path = None
@@ -296,17 +306,25 @@ class Sdl2AudioPlayer:
                 sdl2.SDL_QuitSubSystem(sdl2.SDL_INIT_AUDIO)
             except Exception:
                 pass
+            return old_chunk_paths
 
+        def open_audio(chunk_paths):
+            """Open the device and load the given WAVs again."""
             ok = worker_init()
 
             if ok:
                 PyUiLogger.get_logger().info("SDL2 audio reinit succeeded.")
                 # Re-preload previously cached WAVs
-                for p in old_chunk_paths:
+                for p in chunk_paths:
                     safe_load_chunk(p)
             else:
                 PyUiLogger.get_logger().warning("SDL2 audio reinit failed.")
             return ok
+
+        def reinit_audio():
+            """Tear down and reinitialize SDL2 audio (e.g. after sleep/wake kills ALSA)."""
+            PyUiLogger.get_logger().warning("Reinitializing SDL2 audio after sleep/wake...")
+            return open_audio(close_audio())
 
         def stop_loop_internal():
             nonlocal loop_channel, loop_music_path, loop_chunk_path
@@ -342,6 +360,7 @@ class Sdl2AudioPlayer:
         Sdl2AudioPlayer._initialized = init_ok
         Sdl2AudioPlayer._init_failed = not init_ok
 
+        last_active = time.monotonic()
         # main worker loop
         while Sdl2AudioPlayer._running:
             try:
@@ -350,8 +369,22 @@ class Sdl2AudioPlayer:
                 # Check if device requested audio reinit (e.g. A30 after sleep/wake)
                 if os.path.exists("/tmp/audio_reinit_needed"):
                     os.remove("/tmp/audio_reinit_needed")
-                    reinit_audio()
+                    # A released device stays closed: its next open uses the new route.
+                    if released_paths is None:
+                        reinit_audio()
+                if (released_paths is None and Sdl2AudioPlayer._idle_release
+                        and time.monotonic() - last_active > Sdl2AudioPlayer.IDLE_RELEASE_SEC
+                        and mixer_open() and not sdlmixer.Mix_Playing(-1) and not sdlmixer.Mix_PlayingMusic()):
+                    released_paths = close_audio()
+                    PyUiLogger.get_logger().info("Audio device closed while idle")
                 continue
+
+            # A command after an idle close opens the device first; a failed open is tried
+            # again on the next one. A volume change needs no device: the open applies it.
+            if released_paths is not None and cmd.name not in ("set_volume", "cleanup"):
+                if open_audio(list(wanted_chunks | set(released_paths))):
+                    released_paths = None
+            last_active = time.monotonic()
 
             try:
                 name = cmd.name

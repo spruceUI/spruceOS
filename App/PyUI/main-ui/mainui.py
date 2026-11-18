@@ -88,6 +88,9 @@ def start_background_threads():
     audio_route_thread = threading.Thread(target=Device.get_device().watch_audio_route, name="AudioRoute", daemon=True)
     audio_route_thread.start()
 
+    # Asking the device scripts whether to close idle audio runs a script, so not here
+    threading.Thread(target=Device.get_device().apply_audio_idle_release, name="AudioIdle", daemon=True).start()
+
 def run_first_frame_cmd():
     """Let the CFW start work it held back so it would not compete with PyUI's startup."""
     cmd = PyUiConfig.get_first_frame_cmd()
@@ -229,8 +232,7 @@ def main():
             Device.get_device().get_game_system_utils().prefetch_active_systems()
             warm_wifi_status()
 
-        audio_devices = PyUiConfig.get_deferred_startup_audio_devices()
-        defer_audio = main_ui_mode and bool(audio_devices) and Device.supports_device(audio_devices)
+        defer_audio = main_ui_mode and Device.get_device().defer_startup_audio()
         with log_timing("Theme initialization", PyUiLogger.get_logger()):    
             Theme.init(
                 selected_theme, Device.get_device().screen_width(), Device.get_device().screen_height(),
