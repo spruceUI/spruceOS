@@ -100,6 +100,7 @@ get_core_folder() {
         "snes9x2005_plus_libretro.so") echo "Snes9x 2005 Plus" ;;
         "snes9x2010_libretro.so") echo "Snes9x 2010" ;;
         "snes9x_libretro.so") echo "Snes9x" ;;
+        "superwhizkid_libretro.so") echo "superwhizkid" ;;
         "squirreljme_libretro.so") echo "SquirrelJME" ;;
         "stella2014_libretro.so") echo "Stella 2014" ;;
         "swanstation_libretro.so") echo "SwanStation" ;;
