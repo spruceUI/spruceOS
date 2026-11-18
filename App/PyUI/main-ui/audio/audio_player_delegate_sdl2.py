@@ -36,6 +36,9 @@ class AudioPlayerDelegateSdl2:
     def audio_reopen(self):
         # The worker reinitialises on this flag: it reopens the output, picking
         # up AUDIODEV, and reloads the menu sounds. A cleanup would drop them.
+        # With file events on, the request goes to the worker as a command instead.
+        if Sdl2AudioPlayer.request_reinit():
+            return
         flag = Path("/tmp/audio_reinit_needed")
         flag.touch()
         for _ in range(30):
