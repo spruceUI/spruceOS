@@ -83,7 +83,7 @@ class SettingsMenu(ABC):
             )
             if new_value is None:  # cancelled: keep the current value
                 return
-            PyUiLogger.get_logger().info(f"Updating {entry_name} to {new_value}")
+            PyUiLogger.get_logger().info(f"Updating {entry_name}")
             update_value(category, entry_name, new_value)
 
 
