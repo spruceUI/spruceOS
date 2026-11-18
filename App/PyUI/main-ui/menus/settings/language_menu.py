@@ -20,12 +20,13 @@ class LanguageMenu():
         parent_dir = os.path.dirname(base_dir)
         lang_dir = os.path.join(parent_dir, "lang")
 
-        language_entries = []
-
-        for filename in os.listdir(lang_dir):
-            language_entries.append(os.path.splitext(os.path.basename(filename))[0])
-
-        return language_entries
+        # Only the language files: a card written from a Mac also has a hidden
+        # ._<name>.json next to each one, which would show as a second entry.
+        return sorted(
+            os.path.splitext(filename)[0]
+            for filename in os.listdir(lang_dir)
+            if filename.endswith(".json") and not filename.startswith(".")
+        )
 
 
     def ask_user_for_language(self):
