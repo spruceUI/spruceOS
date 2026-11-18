@@ -490,13 +490,7 @@ case "$PLATFORM" in
         # upgrade), stored upside down like the framebuffer. Eggs' logotweak
         # tools (as in MinUI and sprigUI) read them, rebuild the partition
         # around the unit's own header, and write it back with a read-back check.
-        if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI" ]; then
-            log_message "BootLogo: not flashing an original Mini (some SPI chips can't be written from Linux)"
-            show_bootlogo_error "This Mini's boot logo can't be changed here. Boot logo not changed."
-            exit 1
-        fi
-        WORK="/tmp/minilogo"
-        BACKUP="$DIR/mtd3-backup.img"
+        WORK="$DIR/minilogo"
         mini_logo_fail() {
             show_bootlogo_error "$1"
             cd "$DIR" || exit 1
@@ -515,12 +509,9 @@ case "$PLATFORM" in
             mini_logo_fail "Couldn't read this Mini's boot logo. Boot logo not changed."
         fi
 
-        if [ ! -f "$BACKUP" ]; then
-            dd if=/dev/mtd3 of=backup.img bs=65536 count=2 2>/dev/null
-            if [ "$(wc -c < backup.img)" != "131072" ] || [ "$(dd if=backup.img bs=1 count=5 2>/dev/null)" != "SSTAR" ]; then
-                mini_logo_fail "Couldn't back up the boot logo. Boot logo not changed."
-            fi
-            cp backup.img "$BACKUP"
+        dd if=/dev/mtd3 of=backup.img bs=65536 count=2 2>/dev/null
+        if [ "$(wc -c < backup.img)" != "131072" ] || [ "$(dd if=backup.img bs=1 count=5 2>/dev/null)" != "SSTAR" ]; then
+            mini_logo_fail "Couldn't back up the boot logo. Boot logo not changed."
         fi
 
         _dims="$(ffmpeg -hide_banner -i image1.jpg 2>&1 | sed -n 's/.*Video:.*, \([0-9][0-9]*x[0-9][0-9]*\).*/\1/p' | head -n 1)"
@@ -557,7 +548,7 @@ case "$PLATFORM" in
             case "$_out" in
                 *Erasing*)
                     # Past its checks, so mtd3 may already be erased: put the backup back
-                    cp "$BACKUP" logo.img
+                    cp backup.img logo.img
                     _out="$(./logowrite.elf 2>&1)"
                     _rc=$?
                     log_message "BootLogo: restoring the backup: $_out"
