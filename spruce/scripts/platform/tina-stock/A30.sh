@@ -235,7 +235,7 @@ device_exit_sleep() {
         [ -n "$ENHANCE_SETTINGS" ] && echo "$ENHANCE_SETTINGS" > "$DISPLAY_ENHANCE_PATH" 2>/dev/null
     fi
 
-    touch /tmp/audio_reinit_needed
+    pyui_audio_reopen
     clear_wake_alarm "$WAKE_ALARM_PATH"
     # Suspend switches the codec DAC mixer inputs off; nothing turns them back on.
     amixer cset name='DACL Mixer AIF1DA0L Switch' on >/dev/null 2>&1

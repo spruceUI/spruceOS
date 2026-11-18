@@ -1,18 +1,15 @@
 PyUI file events
 ================
 
-Some PyUI threads wait for a file to change:
+Some PyUI threads wait for a settings file to change:
   - each device's config watcher, which shows the volume or brightness overlay
     when spruce's hotkey scripts write the system JSON;
-  - the shared-config watcher, which follows timezone changes;
-  - the SDL2 audio worker, which reopens its output when
-    /tmp/audio_reinit_needed appears (after a Bluetooth route change, or the
-    A30 waking from sleep).
+  - the shared-config watcher, which follows timezone changes.
 
-By default each of them looks every 0.2 seconds (the timezone watcher every 3),
-so PyUI wakes about 10 times a second with nothing to do. With file events on,
-one thread waits on Linux inotify instead and wakes only when a watched file
-changes.
+By default each of them looks every 0.2 seconds (the timezone watcher every 3).
+With file events on, one thread waits on Linux inotify instead and wakes only
+when a watched file changes. (The audio worker needs no watcher: spruce asks it
+to reopen its output with a signal, see audio_reopen_readme.txt.)
 
 Turning it on
 -------------
@@ -37,10 +34,6 @@ What changes when it is on
   - Every 5 seconds the thread also checks each watched file's inode, size and
     mtime, so a change inotify cannot see (a write through mmap, say) still
     shows up.
-  - The audio worker sleeps on its command queue. The watcher turns the flag
-    into a "reinit" command, and PyUI's own route changes send that command
-    directly instead of creating the flag. With the idle close on, the worker
-    wakes only when the close is due.
 
 If inotify is unavailable (no symbol in libc, the kernel built without it, or
 a folder that cannot be watched), that watcher falls back to looking every

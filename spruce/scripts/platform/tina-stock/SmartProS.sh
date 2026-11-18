@@ -147,7 +147,7 @@ device_idle_release_audio() {
     return 0
 }
 
-# PyUI's file watchers and audio worker wait on inotify instead of a 0.2 s timer.
+# PyUI's settings-file watchers wait on inotify instead of a 0.2 s timer.
 device_pyui_file_events() {
     return 0
 }
