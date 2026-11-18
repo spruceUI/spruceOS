@@ -1,0 +1,8 @@
+logoread, logomake and logowrite (App/BootLogo/miyoomini) are the Miyoo Mini
+logo tweaking tools by Eggs, as packaged in MinUI by Shaun Inman (used with
+permission) and in sprigUI.
+https://github.com/shauninman/MinUI/tree/main/workspace/miyoomini/other/logotweak
+
+checkwrite (App/BootLogo/miyoomini/checkwrite.elf) is from Easy LogoTweak by
+schmurtzm, used with permission.
+https://github.com/schmurtzm/Miyoo-Mini-easy-logotweak

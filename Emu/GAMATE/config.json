@@ -1,0 +1,34 @@
+{
+  "label": "Gamate",
+  "icon": "gamate.png",
+  "iconsel": "gamate_sel.png",
+  "themecolor": "FFFF00",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "requiredfiles": [
+    [
+      "/mnt/SDCARD/BIOS/gamate_bios_umc.bin",
+      "/mnt/SDCARD/BIOS/gamate_bios_bit.bin"
+    ]
+  ],
+  "extlist": "gam|zip|7z|bin",
+  "launchlist": [],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 500,
+  "brand": "Bit Corporation",
+  "type": "handheld",
+  "releaseYear": 1990,
+  "default_emulator": "superwhizkid",
+  "scaling_min_freq": 408000,
+  "alternativeFolderNames": ["superwhizkid", "bitcorporation", "puzzy"]
+}

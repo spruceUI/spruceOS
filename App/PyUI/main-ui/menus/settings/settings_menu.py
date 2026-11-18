@@ -81,7 +81,9 @@ class SettingsMenu(ABC):
                 title_text=display_name or entry_name,
                 starting_text=str(current_value)
             )
-            PyUiLogger.get_logger().info(f"Updating {entry_name} to {new_value}")
+            if new_value is None:  # cancelled: keep the current value
+                return
+            PyUiLogger.get_logger().info(f"Updating {entry_name}")
             update_value(category, entry_name, new_value)
 
 
@@ -165,10 +167,12 @@ class SettingsMenu(ABC):
                 selected_value = CfwSystemConfig.get_selected_value(category,name)
                 type = option.get('type')
                 if "freeText" == type:
+                    # Older PyUI saved a cancelled keyboard as null: show it as blank, not "None".
+                    text_value = "" if selected_value is None else str(selected_value)
                     option_list.append(
                         GridOrListEntry(
                             primary_text=display_name,
-                            value_text=str(selected_value),
+                            value_text=text_value,
                             image_path=None,
                             image_path_selected=None,
                             description=description,
@@ -177,7 +181,7 @@ class SettingsMenu(ABC):
                                 input_value, 
                                 entry_name=name, 
                                 category=category,
-                                current_value=selected_value,
+                                current_value=text_value,
                                 update_value=CfwSystemConfig.set_menu_option,
                                 display_name=display_name
                                 : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value, display_name)

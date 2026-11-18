@@ -1,7 +1,7 @@
 {
   "label": "3DS",
-  "icon": "dsi.png",
-  "iconsel": "dsi_sel.png",
+  "icon": "3ds.png",
+  "iconsel": "3ds_sel.png",
   "themecolor": "AA1111",
   "launch": "../../spruce/scripts/emu/vulkan_launch.sh",
   "requiredfiles": [],

@@ -422,6 +422,7 @@
         "Emulator_64": "Emulador (64 bits)",
         "Emulator_Pixel2": "Emulador",
         "RA Build": "Versió de RA",
+        "RetroArch Build": "Versió de RetroArch",
         "RA: C-button Mode": "RA: mode dels botons C",
         "Stretch to Full Screen": "Estira a pantalla completa",
         "Control Profile": "Perfil de control",
@@ -457,6 +458,7 @@
         "RA: auto load state on launch": "RA: carrega l'estat en iniciar",
         "GB[C/A]: use Perfect Overlays": "GB[C/A]: usa Perfect Overlays",
         "Verbose emulator logging": "Registre detallat de l'emulador",
+        "Verbose PyUI logging": "Registre detallat de PyUI",
         "Genesis Plus GX: enable widescreen": "Genesis Plus GX: activa la pantalla panoràmica",
         "Enable Samba": "Activa Samba",
         "Enable SSH": "Activa SSH",
@@ -508,7 +510,6 @@
         "Show Rewind toggle": "Mostra: Commuta el rebobinat",
         "Show Shader toggle": "Mostra: Commuta el shader",
         "Show Cheats": "Mostra: Trucs",
-        "Shown for games with a .cht file in RetroArch/.retroarch/cheats": "Es mostra als jocs amb un fitxer .cht a RetroArch/.retroarch/cheats",
         "Wake on lid open": "Desperta en obrir la tapa",
         "Shoulder LED color": "Color dels LED dels botons superiors",
         "Shoulder LED brightness": "Brillantor dels LED dels botons superiors",
@@ -538,7 +539,8 @@
         "Tap Menu button action": "Acció en prémer el botó Menú",
         "Menu button hold Time": "Temps per mantenir premut el botó Menú",
         "Vibrate on Menu hold": "Vibra en mantenir premut Menú",
-        "RAOfflineProxy": "RAOfflineProxy"
+        "RAOfflineProxy": "RAOfflineProxy",
+        "Show DS firmware boot entries": "Mostra el firmware a la llista de DS"
     },
     "governorOptions": {
         "Smart": "Intel·ligent",
@@ -684,6 +686,7 @@
         "shut device to enter sleep": "tanca el dispositiu per suspendre'l",
         "50% of device RAM; reboot to apply": "50% de la RAM del dispositiu; cal reiniciar",
         "reboot to apply": "cal reiniciar",
+        "applies on reboot": "cal reiniciar",
         "Clockspeed to use for overclocking": "Freqüència per a l'overclock",
         "caution: high values may freeze device": "compte: els valors alts poden penjar el dispositiu",
         "cooling fan profiles": "perfils del ventilador",
@@ -723,7 +726,9 @@
         "Multi-disc games only": "Només jocs de diversos discs",
         "Not on Miyoo Mini": "No disponible a la Miyoo Mini",
         "seconds before triggering hold action": "segons abans d'activar l'acció de mantenir premut",
-        "when hold action triggered": "quan s'activa l'acció de mantenir premut"
+        "when hold action triggered": "quan s'activa l'acció de mantenir premut",
+        "off: warnings and errors; on: debug details": "desactivat: avisos i errors; activat: detalls de depuració",
+        "Shown for games with a .cht file in RetroArch/.retroarch/cheats": "Es mostra als jocs amb un fitxer .cht a RetroArch/.retroarch/cheats"
     },
     "menuOptionValues": {
         "Off": "Desactivat",
@@ -763,7 +768,9 @@
         "Fan boost": "Ventilador al màxim",
         "Menu": "Menú",
         "Full": "Completa",
+        "Incremental": "Incremental",
         "Stable": "Estable",
+        "Nightly": "Nightly",
         "Battery": "Bateria",
         "Audio": "Àudio",
         "System-specific": "Segons el sistema",
@@ -797,7 +804,27 @@
         "TEXT_ABOVE_IMAGE": "Text a sobre de la imatge",
         "TEXT_BELOW_IMAGE": "Text a sota de la imatge",
         "Casual": "Casual",
-        "Hardcore": "Hardcore"
+        "Hardcore": "Hardcore",
+        "mono": "monocrom",
+        "64-bit": "64 bits",
+        "32-bit": "32 bits",
+        "Spruce (per device)": "Spruce (segons el dispositiu)",
+        "Classic (R2 + A, B, X, Y)": "Clàssic (R2 + A, B, X, Y)",
+        "Action (A, X, Select, R1)": "Acció (A, X, Select, R1)",
+        "None": "Cap",
+        "Antialiasing": "Antialiàsing",
+        "Bilinear": "Bilineal",
+        "Subtle Grid": "Graella subtil",
+        "Chunky Grid": "Graella gruixuda",
+        "Extra Chunky": "Graella molt gruixuda",
+        "Racing - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ": "Curses - A-ⓧ B-ⓞ L1-ⓧ R1-ⓞ",
+        "Racing II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ": "Curses II - B-ⓧ A-ⓞ R1-ⓧ L1-ⓞ",
+        "One-hand - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ": "Una mà - A-ⓧ B-ⓞ L1-ⓧ L2-ⓞ",
+        "One-hand II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ": "Una mà II - B-ⓧ A-ⓞ L2-ⓧ L1-ⓞ",
+        "Doubled - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ": "Doble - A-ⓧ B-ⓞ Y-ⓧ X-ⓞ",
+        "Doubled II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ": "Doble II - B-ⓧ A-ⓞ X-ⓧ Y-ⓞ",
+        "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse": "Activat - A-ⓧ B-ⓞ X-Esc SELECT-Ratolí",
+        "Off - follow control profile": "Desactivat - segueix el perfil de control"
     },
     "gameSystems": {
         "MEDIA": "Multimèdia"
@@ -898,7 +925,9 @@
         "Spruce Restore": "Restauració de spruce",
         "Restore configs & settings from backup": "Restaura la configuració des d'una còpia de seguretat",
         "Boxart Scraper": "Descàrrega de caràtules",
-        "Activity Tracker": "Registre d'activitat"
+        "Activity Tracker": "Registre d'activitat",
+        "Generic gamepad tester": "Provador de comandaments genèric",
+        "Two-player netplay with Netplay's own sync": "Joc en xarxa per a dos amb la sincronització de Netplay"
     },
     "accentColor": {
         "ACCENT COLOR": "COLOR D'ACCENT",
@@ -1218,6 +1247,7 @@
         "Nightly {final_version} is already installed; it may have been rebuilt since": "La nightly {final_version} ja està instal·lada; potser s'ha tornat a compilar des de llavors",
         "Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device.": "Visita github.com/spruceUI/dArkMoss per descarregar manualment la imatge adequada per al dispositiu.",
         "Please visit github.com/{repo} to manually download the proper version for your device.": "Visita github.com/{repo} per descarregar manualment la versió adequada per al dispositiu.",
-        "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.": "Visita github.com/spruceUI/oakMOSS per descarregar la imatge per al dispositiu i gravar-la a la targeta de sistema."
+        "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.": "Visita github.com/spruceUI/oakMOSS per descarregar la imatge per al dispositiu i gravar-la a la targeta de sistema.",
+        "Theme Previews": "el paquet de previsualitzacions de temes"
     }
 }

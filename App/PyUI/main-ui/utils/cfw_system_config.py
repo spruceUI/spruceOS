@@ -78,8 +78,10 @@ class CfwSystemConfig():
                 try:
                     command = shlex.split(change_cmd)
                     subprocess.run(command + [str(selected_value)], check=True)
+                except subprocess.CalledProcessError as e:
+                    PyUiLogger.get_logger().error(f"Command failed: {change_cmd} -> exit {e.returncode}")
                 except Exception as e:
-                    PyUiLogger.get_logger().error(f"Command failed: {change_cmd} -> {e}")
+                    PyUiLogger.get_logger().error(f"Command failed: {change_cmd} -> {type(e).__name__}")
             cls.reload_config()
         else:
             # Optional: log or raise if not found

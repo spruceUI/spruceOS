@@ -93,7 +93,7 @@ ORIG_LOGO_PATH="$LOGO_PATH"
 # there (a stock CubeXX has a 720x720 panel but a 640x480 bootlogo.bmp), and the
 # ffprobe below is a 32-bit binary that cannot run under BaseOS.
 case "$PLATFORM" in
-    Anbernic*|Pixel2|Miniloong) SKIP_GENERIC_CONVERT=1 ;;
+    Anbernic*|Pixel2|Miniloong|MiyooMini) SKIP_GENERIC_CONVERT=1 ;;
     *)                SKIP_GENERIC_CONVERT=0 ;;
 esac
 
@@ -484,6 +484,96 @@ case "$PLATFORM" in
         sync
         cd "$DIR" || exit 1
         rm -rf "$WORK" /tmp/bin
+        ;;
+    "MiyooMini")
+        # The 128 KB mtd3 partition holds three JPEGs (boot, upgrade, super
+        # upgrade), stored upside down like the framebuffer. Eggs' logotweak
+        # tools (as in MinUI and sprigUI) read them, rebuild the partition
+        # around the unit's own header, and write it back with a read-back check.
+        WORK="$DIR/minilogo"
+        mini_logo_fail() {
+            show_bootlogo_error "$1"
+            cd "$DIR" || exit 1
+            rm -rf "$WORK"
+            exit 1
+        }
+        rm -rf "$WORK"
+        mkdir -p "$WORK"
+        cp "$DIR"/miyoomini/*.elf "$WORK"/ && chmod +x "$WORK"/*.elf
+        cd "$WORK" || exit 1
+
+        _out="$(./logoread.elf 2>&1)"
+        _rc=$?
+        log_message "BootLogo: logoread: $_out"
+        if [ "$_rc" -ne 0 ] || [ ! -s image1.jpg ] || [ ! -s image2.jpg ] || [ ! -s image3.jpg ]; then
+            mini_logo_fail "Couldn't read this Mini's boot logo. Boot logo not changed."
+        fi
+
+        dd if=/dev/mtd3 of=backup.img bs=65536 count=2 2>/dev/null
+        if [ "$(wc -c < backup.img)" != "131072" ] || [ "$(dd if=backup.img bs=1 count=5 2>/dev/null)" != "SSTAR" ]; then
+            mini_logo_fail "Couldn't back up the boot logo. Boot logo not changed."
+        fi
+
+        _dims="$(ffmpeg -hide_banner -i image1.jpg 2>&1 | sed -n 's/.*Video:.*, \([0-9][0-9]*x[0-9][0-9]*\).*/\1/p' | head -n 1)"
+        TW="${_dims%x*}"
+        TH="${_dims#*x}"
+        case "$TW:$TH" in
+            *[!0-9:]*|:*|*:) TW="$DISPLAY_WIDTH"; TH="$DISPLAY_HEIGHT" ;;
+        esac
+        log_message "BootLogo: current boot logo is ${TW}x${TH}"
+
+        # The three images must fit 128 KB together: lower the JPEG quality until logomake accepts it
+        _made=0
+        for _q in 2 3 4 6 8 10 13 16 20 25 31; do
+            if ! ffmpeg -y -i "$ORIG_LOGO_PATH" -vf "scale='if(gt(iw/ih,$TW/$TH),$TW,-1)':'if(gt(iw/ih,$TW/$TH),-1,$TH)',pad=$TW:$TH:($TW-iw)/2:($TH-ih)/2:black,hflip,vflip,format=yuvj420p" \
+                -c:v mjpeg -huffman default -q:v "$_q" -fflags +bitexact -flags:v +bitexact -frames:v 1 -update 1 image1.jpg > /dev/null 2>&1; then
+                mini_logo_fail "Cannot convert image. Cancelling boot logo swap."
+            fi
+            rm -f logo.img
+            if ./logomake.elf > /dev/null 2>&1 && [ "$(wc -c < logo.img)" = "131072" ]; then
+                _made=1
+                log_message "BootLogo: logo.img built at JPEG quality $_q ($(wc -c < image1.jpg) byte boot image)"
+                break
+            fi
+        done
+        if [ "$_made" != "1" ]; then
+            mini_logo_fail "Image is too detailed to fit. Try a simpler image."
+        fi
+
+        # Some original Minis (BoyaMicro chips) can't be written from Linux: test-write a spare block first
+        if [ "$(get_miyoo_mini_variant)" = "MIYOO_MINI" ]; then
+            _out="$(./checkwrite.elf 2>&1)"
+            _rc=$?
+            log_message "BootLogo: checkwrite: $_out"
+            if [ "$_rc" -ne 0 ]; then
+                mini_logo_fail "This Mini's flash can't be written here. Boot logo not changed."
+            fi
+        fi
+
+        show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
+        _out="$(./logowrite.elf 2>&1)"
+        _rc=$?
+        log_message "BootLogo: logowrite: $_out"
+        if [ "$_rc" -ne 0 ]; then
+            case "$_out" in
+                *Erasing*)
+                    # Past its checks, so mtd3 may already be erased: put the backup back
+                    cp backup.img logo.img
+                    _out="$(./logowrite.elf 2>&1)"
+                    _rc=$?
+                    log_message "BootLogo: restoring the backup: $_out"
+                    if [ "$_rc" -eq 0 ]; then
+                        mini_logo_fail "Couldn't write the new logo. The original logo was put back."
+                    fi
+                    cp backup.img "$DIR/mtd3-backup.img"
+                    mini_logo_fail "Writing the boot logo failed and the original could not be put back. Please ask for help on Discord."
+                    ;;
+            esac
+            mini_logo_fail "Couldn't write the boot logo. Boot logo not changed."
+        fi
+        sync
+        cd "$DIR" || exit 1
+        rm -rf "$WORK"
         ;;
     "Pixel2")
         show_bootlogo_message "$IMAGE_PATH" "Updating boot logo, please wait..."
