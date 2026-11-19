@@ -216,6 +216,16 @@ case "$PLATFORM" in
     "Anbernic"*)
         export_sdl_gamecontroller_map positional
         ;;
+    "RG351P")
+        # The RG351P's OSH PB pad has no usable entry in the runtime's mapping
+        # database (shoulders and Select/Start land on the wrong inputs), so it
+        # gets the cfg's map, positional for the same reason as the XX line.
+        export_sdl_gamecontroller_map positional
+        # Godot's default 15 ms output latency is shorter than one period of
+        # the base's dmix (1024 frames at 44.1 kHz), so it underruns and
+        # crackles on the RK3326. 100 ms keeps the buffer full.
+        GODOT_OPTS="${GODOT_OPTS:+$GODOT_OPTS }--audio-output-latency 100"
+        ;;
     *)
         export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
         ;;
