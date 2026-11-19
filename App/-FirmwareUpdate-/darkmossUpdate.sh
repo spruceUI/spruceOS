@@ -6,13 +6,15 @@
 # own apply.sh inside. Nothing on TF1 knows how to update itself, but spruce
 # runs as root on a writable rootfs here, so this fetches the payload, checks
 # it against the release's SHA256SUMS, runs its applier, and reboots.
+# A platform cfg can point it at another release with DARKMOSS_UPDATE_REPO and
+# DARKMOSS_UPDATE_TAG (see dArkMossCommon.cfg); by default it is spruceUI/dArkMoss's latest.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/runtimeHelper.sh
 
 SD_ROOT="/mnt/SDCARD"
-API="https://api.github.com/repos/spruceUI/dArkMoss/releases/latest"
-MANUAL_HELP="Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device."
+API="$(darkmoss_release_api)"
+MANUAL_HELP="Please visit github.com/$(darkmoss_update_repo) to manually download the proper image for your device."
 UNIT="$(darkmoss_unit)"
 
 bail() {
@@ -40,7 +42,11 @@ else
         bail "Could not reach GitHub to look for a dArkMoss update. Please try again later."
     fi
 
-    LATEST="$(jq -r '.tag_name // empty' /tmp/darkmoss_release.json | sed 's/^[vV]//')"
+    if [ -n "$DARKMOSS_UPDATE_TAG" ]; then
+        LATEST="$(darkmoss_release_version /tmp/darkmoss_release.json)"
+    else
+        LATEST="$(jq -r '.tag_name // empty' /tmp/darkmoss_release.json | sed 's/^[vV]//')"
+    fi
     ASSET_NAME="$(jq -r --arg t "dArkMoss_${UNIT}_" '.assets[]? | select(.name | startswith($t) and endswith(".dmupd")) | .name' /tmp/darkmoss_release.json | head -n 1)"
     ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/darkmoss_release.json | head -n 1)"
     ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/darkmoss_release.json | head -n 1)"
@@ -49,6 +55,10 @@ else
     if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
         bail "dArkMoss ${LATEST:-latest} has no update file for this device ($UNIT), so it has to be installed by hand.\n\n$MANUAL_HELP"
     fi
+
+    # With a fixed tag the version comes only from the asset name: an
+    # unreadable one cannot be compared, and the tag gives no fallback.
+    [ -z "$DARKMOSS_UPDATE_TAG" ] || [ -n "$LATEST" ] || bail "Could not read the dArkMoss release version. $MANUAL_HELP"
 
     if [ -n "$INSTALLED" ]; then
         _have="$(printf '%s' "$INSTALLED" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')"
@@ -62,16 +72,23 @@ else
     fi
 fi
 
-# The payload is downloaded to TF2 and unpacked onto TF1's rootfs.
+# The payload is downloaded to TF2 and unpacked onto TF1's rootfs. On a
+# single-card unit (DARKMOSS_SINGLE_CARD=1) both are partitions of TF1.
+_sd_name="spruce card"
+_root_name="dArkMoss card"
+if [ "${DARKMOSS_SINGLE_CARD:-0}" = "1" ]; then
+    _sd_name="SPRUCEOS partition"
+    _root_name="system partition"
+fi
 FREE_MB="$(df -m "$SD_ROOT" | awk 'END {print $4}')"
 NEED_MB=$(( (${ASSET_SIZE:-0} / 1048576) + 50 ))
 if [ "${FREE_MB:-0}" -lt "$NEED_MB" ]; then
-    bail "Not enough free space on the spruce card for the dArkMoss update: ${NEED_MB} MiB needed, ${FREE_MB} MiB free."
+    bail "Not enough free space on the ${_sd_name} for the dArkMoss update: ${NEED_MB} MiB needed, ${FREE_MB} MiB free."
 fi
 ROOT_FREE_MB="$(df -m / | awk 'END {print $4}')"
 ROOT_NEED_MB=$(( (${ASSET_SIZE:-0} / 1048576) * 3 + 100 ))
 if [ "${ROOT_FREE_MB:-0}" -lt "$ROOT_NEED_MB" ]; then
-    bail "Not enough free space on the dArkMoss card to install the update: ${ROOT_NEED_MB} MiB needed, ${ROOT_FREE_MB} MiB free."
+    bail "Not enough free space on the ${_root_name} to install the update: ${ROOT_NEED_MB} MiB needed, ${ROOT_FREE_MB} MiB free."
 fi
 
 if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
@@ -124,6 +141,10 @@ rm -f "$SD_ROOT/$ASSET_NAME"
 sync
 
 if [ "$APPLY_RC" -ne 0 ]; then
+    # Reflashing the image recreates the SPRUCEOS partition, so on one card it wipes spruce too.
+    if [ "${DARKMOSS_SINGLE_CARD:-0}" = "1" ]; then
+        bail "The dArkMoss update did not complete; spruce.log on the SPRUCEOS drive has the details. Before reflashing, copy everything off the SPRUCEOS drive: reflashing dArkMoss erases this whole card, spruce included."
+    fi
     bail "The dArkMoss update did not complete; spruce.log has the details. If the device no longer boots, reflash the dArkMoss image on TF1. Your spruce card is unaffected."
 fi
 

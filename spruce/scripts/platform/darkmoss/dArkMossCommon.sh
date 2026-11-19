@@ -239,13 +239,70 @@ local_fw_update_file() {
     ls /mnt/SDCARD/dArkMoss_"$(darkmoss_unit)"_*.dmupd 2>/dev/null | sort | tail -n 1
 }
 
+# Where updates come from. A platform cfg may set DARKMOSS_UPDATE_REPO (default
+# spruceUI/dArkMoss) and DARKMOSS_UPDATE_TAG (default empty: /releases/latest),
+# for a unit whose image is released from another repo or under a fixed tag.
+darkmoss_update_repo() {
+    echo "${DARKMOSS_UPDATE_REPO:-spruceUI/dArkMoss}"
+}
+
+darkmoss_release_api() {
+    if [ -n "$DARKMOSS_UPDATE_TAG" ]; then
+        echo "https://api.github.com/repos/$(darkmoss_update_repo)/releases/tags/$DARKMOSS_UPDATE_TAG"
+    else
+        echo "https://api.github.com/repos/$(darkmoss_update_repo)/releases/latest"
+    fi
+}
+
+# x.y.z of the release in GitHub release JSON file $1: its tag when that is a
+# version, else the version in this unit's dArkMoss_<UNIT>_<ver>.dmupd asset
+# name (a fixed tag such as "rg351p" is not one). Status 1 when neither is.
+darkmoss_release_version() {
+    _dmu_v="$(jq -r '.tag_name // empty' "$1" 2>/dev/null | sed 's/^[vV]//')"
+    if printf '%s\n' "$_dmu_v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+        echo "$_dmu_v"
+        return 0
+    fi
+    _dmu_unit="$(darkmoss_unit)"
+    _dmu_v="$(jq -r --arg t "dArkMoss_${_dmu_unit}_" '.assets[]? | select(.name | startswith($t) and endswith(".dmupd")) | .name' "$1" 2>/dev/null \
+        | head -n 1 | sed "s/^dArkMoss_${_dmu_unit}_//; s/\\.dmupd\$//; s/^[vV]//")"
+    if printf '%s\n' "$_dmu_v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+        echo "$_dmu_v"
+        return 0
+    fi
+    return 1
+}
+
+# Latest release version from DARKMOSS_UPDATE_REPO/DARKMOSS_UPDATE_TAG, or
+# status 1 when offline, unreachable or unparseable. Only for a fixed tag.
+darkmoss_latest_version() {
+    [ -n "$DARKMOSS_UPDATE_TAG" ] || return 1
+    wifi_available_on_device || return 1
+    [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" = "1" ] || return 1
+    # Same 3 tries as github_latest_version: this runs at boot, often before
+    # WiFi (a slow USB dongle on some units) has associated.
+    for _dmu_try in 1 2 3; do
+        if curl -sf -m 20 -o /tmp/darkmoss_latest.json "$(darkmoss_release_api)" &&
+            darkmoss_release_version /tmp/darkmoss_latest.json; then
+            return 0
+        fi
+        [ "$_dmu_try" -lt 3 ] && sleep 20
+    done
+    return 1
+}
+
 check_if_fw_needs_update() {
     _have="$(darkmoss_installed_version)"
     if [ -z "$_have" ]; then
         echo "true"
         return
     fi
-    _want="$(github_latest_version spruceUI/dArkMoss)" || _want="$TARGET_DARKMOSS_VERSION"
+    if [ -n "$DARKMOSS_UPDATE_TAG" ]; then
+        _want="$(darkmoss_latest_version)" || _want="$TARGET_DARKMOSS_VERSION"
+    else
+        _want="$(github_latest_version spruceUI/dArkMoss)" || _want="$TARGET_DARKMOSS_VERSION"
+    fi
+    [ -n "$_want" ] || { echo "false"; return; }
     version_older_than "$_have" "$_want" && echo "true" || echo "false"
 }
 

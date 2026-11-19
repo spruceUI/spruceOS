@@ -158,12 +158,14 @@ only where needed.
 
   - DSperate generally shares configs by control layout. Dedicated configs in
     `Emu/NDS/dsperate-configs/` are used where a device or mode needs different
-    settings: A30 has its own rendering and performance settings; V10, RGB30
-    and RG351P need different hotkeys because they lack a menu/guide button; Zero40 needs
-    touchscreen settings; Pixel2 needs settings for its inverted buttons; and
-    Tate mode uses a rotated-screen config. For a new device, add a dedicated
-    config only if its controls, display, touch, or hotkeys cannot use an
-    existing one, and wire it into `spruce/scripts/emu/lib/dsperate_functions.sh`.
+    settings: A30 has its own rendering and performance settings; V10 and RGB30
+    need different hotkeys because they lack a menu/guide button; RG351P has
+    its own config based on RGB30's, without the L3 stylus tap because L3 is
+    its default spruce menu button; Zero40 needs touchscreen settings; Pixel2
+    needs settings for its inverted buttons; and Tate mode uses a rotated-screen
+    config. For a new device, add a dedicated config only if its controls,
+    display, touch, or hotkeys cannot use an existing one, and wire it into
+    `spruce/scripts/emu/lib/dsperate_functions.sh`.
 
   - Update the relevant existing `Emu/<SYSTEM>/config.json` device lists or
     mappings when required; Check for `PLATFORM` checks in the scripts found in `spruce\scripts\emu\lib` and add new cases where needed. 

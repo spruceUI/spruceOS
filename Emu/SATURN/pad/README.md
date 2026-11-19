@@ -37,6 +37,7 @@ The libretro core's Saturn layout:
 | Miniloong | retrogame_joypad | measured (2026-10-15) |
 | RGB30, RGB30-R3, RGB20SX | retrogame_joypad | computed: the Miniloong's pad ids |
 | A10Mini | GO-Super Gamepad | computed |
+| RG351P, RG351P-R3 | OpenSimHardware OSH PB Controller | computed (name CRC 0x5827), matches ROCKNIX es_input.cfg; hand-written 2026-11-19 (`unverified-2026-11-19`) |
 
 "Computed" means the cfg's SDL map GUID with SDL's name CRC (CRC-16/ARC of the evdev name) in bytes 2-3. That rule
 gives the measured GUID on every pad measured so far. The Pixel 2 has no SDL map, so it has no table. The G350
