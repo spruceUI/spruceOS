@@ -62,6 +62,16 @@ set_port_abxy_scheme() {
     else
         export_sdl_gamecontroller_map
     fi
+
+    # RG351P: the db's stock OSH PB row is label-named (a = East = marked A),
+    # the opposite of the convention the two db files assume. Swap in the row
+    # just exported for this Controller Mode so _FILE readers agree with the env.
+    if [ "$PLATFORM" = "RG351P" ] && [ -n "$SDL_GAMECONTROLLERCONFIG" ]; then
+        _db="$PM_DIR/gamecontrollerdb.txt"
+        grep -v '^03000000091200000031000011010000,' "$_db" > "$_db.tmp" 2>/dev/null
+        printf '%s\n' "$SDL_GAMECONTROLLERCONFIG" >> "$_db.tmp" && mv "$_db.tmp" "$_db"
+        unset _db
+    fi
 }
 
 run_port() {
