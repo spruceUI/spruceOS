@@ -111,6 +111,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "snes9x": ["Snes9x"],
         "squirreljme": ["SquirrelJME"],
         "stella2014": ["Stella 2014"],
+        "superwhizkid": ["superwhizkid"],
         "swanstation": ["SwanStation"],
         "tgbdual": ["TGB Dual"],
         "theodore": ["theodore"],
