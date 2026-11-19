@@ -503,13 +503,14 @@ set_default_ra_hotkeys() {
 # defined and before any emulator starts. A lock directory keeps two runs
 # apart; the flag is only set once every step is done, so a step that could
 # not run yet is tried again at the next boot.
-# v2: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
-# (pause menu items overlap); only the untouched old value is changed.
-RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v2"
+# v3: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
+# (pause menu items overlap), and -4 still did; only an untouched old value
+# (-1, or -4 from the v2 fix) is changed.
+RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v3"
 _rg351p_migrate_v2() {
     _m2live="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-RG351P.ini"
-    if [ -f "$_m2live" ] && grep -qx 'UIScaleFactor = -1' "$_m2live"; then
-        sed 's/^UIScaleFactor = -1$/UIScaleFactor = -4/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
+    if [ -f "$_m2live" ] && grep -Eqx 'UIScaleFactor = -(1|4)' "$_m2live"; then
+        sed -E 's/^UIScaleFactor = -(1|4)$/UIScaleFactor = -6/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
             [ -s "$_m2live.tmp" ] && mv -f "$_m2live.tmp" "$_m2live" &&
             log_message "$PLATFORM: PPSSPP UI scale lowered to fit the screen (one-time fix)" ||
             { rm -f "$_m2live.tmp"; return 0; }
