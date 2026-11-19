@@ -95,6 +95,9 @@ def initialize_device(device, main_ui_mode):
     elif "POWKIDDY_V10" == device:
         from devices.darkmoss.v10 import V10
         Device.init(V10(device))
+    elif "ANBERNIC_RG351P" == device:
+        from devices.darkmoss.rg351p import RG351P
+        Device.init(RG351P(device))
     elif "GKD_PIXEL2_DARKMOSS" == device:
         from devices.darkmoss.pixel2 import Pixel2DarkMoss
         Device.init(Pixel2DarkMoss(device))

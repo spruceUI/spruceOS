@@ -229,6 +229,19 @@ load_drastic_configs() {
 	CFG_DIR="$EMU_DIR/config"
 	RES_DIR="$EMU_DIR/resources"
 	cp -f "$(platform_path "$CFG_DIR/drastic-%s.cfg")" "$CFG_DIR/drastic.cfg"
+	# RG351P: DraStic's menu follows Button Settings > Menu button (b8 = L3 is
+	# 1032, b9 = R3 is 1033); the other stick click is the stylus press. Rewritten
+	# every launch, so the copy save_drastic_configs keeps stays right either way.
+	if [ "$PLATFORM" = "RG351P" ]; then
+		case "$B_MENU" in
+			"1 313") _dr_m=1033 _dr_t=1032 ;;
+			*)       _dr_m=1032 _dr_t=1033 ;;
+		esac
+		sed -i -e "s/^\(controls_b\[CONTROL_INDEX_MENU\] = \).*/\1$_dr_m/" \
+			-e "s/^\(controls_b\[CONTROL_INDEX_UI_EXIT\] = \).*/\1$_dr_m/" \
+			-e "s/^\(controls_b\[CONTROL_INDEX_TOUCH_CURSOR_PRESS\] = \).*/\1$_dr_t/" \
+			"$CFG_DIR/drastic.cfg"
+	fi
 	_steward="$(platform_path "$RES_DIR/settings_%s.json")"
 	[ -f "$_steward" ] && cp "$_steward" "$RES_DIR/settings.json"
 	sync

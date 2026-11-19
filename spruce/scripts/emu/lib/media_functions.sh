@@ -48,7 +48,8 @@ run_gvu() {
 	# Miyoo Mini family: display is physically upside-down (spruceOS reports rot=0)
 	# Miniloong: DRM hands GVU the 720x960 portrait mode; its Brick backend
 	# transposes the landscape canvas when told 90 or 270.
-	if [ "$PLATFORM" = "Miniloong" ]; then
+	# RG351P: same portrait panel (320x480 fb0, fbcon rotate:3).
+	if [ "$PLATFORM" = "Miniloong" ] || [ "$PLATFORM" = "RG351P" ]; then
 		export GVU_DISPLAY_ROTATION=270
 	fi
 

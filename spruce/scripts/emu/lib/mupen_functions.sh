@@ -205,6 +205,29 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 					--set "CoreEvents[Joy Mapping Mute]=J0B11/B3" \
 					--set "CoreEvents[Joy Mapping Speed Limiter Toggle]=J0B11/B9"
 				;;
+			"RG351P")
+				# OSH PB pad, raw SDL: A b0 B b1 X b2 Y b3 L1 b4 R1 b5 START b6
+				# SELECT b7 L3 b8 R3 b9. The shared cfg's Xbox-numbered J0B8 chords
+				# would land on L3+SELECT (stop) and L3+START (speed limiter) here;
+				# give the fleet's MENU chords on the menu click (L3, or R3 per
+				# Button Settings, B_MENU from RG351P.cfg).
+				case "$B_MENU" in
+					"1 313") _mupen_hk=9 ;;
+					*) _mupen_hk=8 ;;
+				esac
+				set -- "$@" \
+					--set "CoreEvents[Joy Mapping Stop]=J0B$_mupen_hk/B6" \
+					--set "CoreEvents[Joy Mapping Save State]=J0B$_mupen_hk/B5" \
+					--set "CoreEvents[Joy Mapping Load State]=J0B$_mupen_hk/B4" \
+					--set "CoreEvents[Joy Mapping Increment Slot]=J0B$_mupen_hk/H0V2" \
+					--set "CoreEvents[Joy Mapping Reset]=J0B$_mupen_hk/B1" \
+					--set "CoreEvents[Joy Mapping Screenshot]=J0B$_mupen_hk/B3" \
+					--set "CoreEvents[Joy Mapping Pause]=J0B$_mupen_hk/B2" \
+					--set "CoreEvents[Joy Mapping Mute]=J0B$_mupen_hk/B0" \
+					--set "CoreEvents[Joy Mapping Speed Limiter Toggle]=J0B$_mupen_hk/B7"
+				export EMU_OVERLAY_BTNMAP="a=0,b=1,l1=4,r1=5,menu=$_mupen_hk,select=7,up=-1,down=-1,left=-1,right=-1"
+				export EMU_OVERLAY_BTNLABELS="A,B,X,Y,L1,R1,Start,Select,L3,R3,L2,R2"
+				;;
 		esac
 		case "$PLATFORM" in
 			"A30")
@@ -295,7 +318,7 @@ with zipfile.ZipFile(sys.argv[1]) as z:
 	export M64P_AUTOLOAD=1
 	export EMU_OVERLAY_ROMFILE="$ROM_FILE"
 	case "$PLATFORM" in
-		"Anbernic"* | XUMiniM) export_sdl_gamecontroller_map positional ;;
+		"Anbernic"* | XUMiniM | RG351P) export_sdl_gamecontroller_map positional ;;
 	esac
 	treat_dpad_as_analog
 	./mupen64plus \

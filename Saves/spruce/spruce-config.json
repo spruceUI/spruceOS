@@ -169,7 +169,7 @@
                 "selected": "L2+R2+Y"
             },
             "menuButton": {
-                "devices": ["RGB30", "POWKIDDY_V10"],
+                "devices": ["RGB30", "POWKIDDY_V10", "ANBERNIC_RG351P"],
                 "display": "Menu button",
                 "description": "Which stick click opens the menu",
                 "options": [

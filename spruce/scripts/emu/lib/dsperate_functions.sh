@@ -46,6 +46,15 @@ seed_dsperate_config() {
 			log_message "DSperate: seeded $_cfg"
 		fi
 	done
+
+	if [ "$PLATFORM" = "RG351P" ]; then
+		for _cfg in rg351p.ini rg351p-tate.ini; do
+			if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
+				cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
+				log_message "DSperate: seeded $_cfg"
+			fi
+		done
+	fi
 }
 
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
@@ -246,6 +255,10 @@ run_dsperate() {
 					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
 					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini"
 
+				elif [ "$PLATFORM" = "RG351P" ]; then
+					# RG351P: rgb30.ini without the L3 stylus tap, since L3 is its spruce menu button
+					_config_path="/mnt/SDCARD/Saves/dsperate/rg351p.ini"
+
 				elif [ "$PLATFORM" = "Zero40" ]; then
 					# Z40 gets its own config to accommodate its unique touchscreen
 					_config_path="/mnt/SDCARD/Saves/dsperate/zero40.ini"
@@ -259,6 +272,10 @@ run_dsperate() {
 		if [ "$TATE_MODE" = "true" ]; then
 			export DS_ROTATE=270
 			_config_path="/mnt/SDCARD/Saves/dsperate/tate.ini"
+		fi
+		# RG351P: tate.ini without the L3 stylus tap, since L3 is its spruce menu button
+		if [ "$TATE_MODE" = "true" ] && [ "$PLATFORM" = "RG351P" ]; then
+			_config_path="/mnt/SDCARD/Saves/dsperate/rg351p-tate.ini"
 		fi
 
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"

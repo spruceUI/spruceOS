@@ -1,0 +1,155 @@
+{
+  "schema": "spruce-button-reader-device/1",
+  "platform": "RG351P",
+  "name": "Anbernic RG351P",
+  "brand": "Anbernic",
+  "models": [
+    "Anbernic RG351P"
+  ],
+  "family": "darkmoss",
+  "base": "dArkMoss",
+  "soc": "Rockchip RK3326",
+  "arch": "aarch64",
+  "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=RG351P (stamped by dArkMoss's rg351p unit)",
+  "cfg": "spruce/scripts/platform/darkmoss/RG351P.cfg",
+  "spruce_ref": "74ff750d51",
+  "face_print": "nintendo",
+  "sources": {
+    "pad": {
+      "kind": "joypad",
+      "node": "OpenSimHardware OSH PB Controller",
+      "match": [
+        "OpenSimHardware OSH PB Controller*"
+      ],
+      "from": "cfg",
+      "note": "an internal USB HID pad (1209:3100) behind a 05e3:0608 hub, not a kernel platform pad driver: no fixed by-path link, RG351P.cfg finds it by name; d-pad on a hat"
+    },
+    "power": {
+      "kind": "pmic",
+      "node": "rk8xx_pwrkey",
+      "from": "derived: RG351P.cfg comment; not captured on hardware"
+    }
+  },
+  "controls": {
+    "BOTTOM": {
+      "code": "1 305",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT": {
+      "code": "1 304",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "TOP": {
+      "code": "1 306",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "LEFT": {
+      "code": "1 307",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_UP": {
+      "code": "3 17 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_DOWN": {
+      "code": "3 17 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_LEFT": {
+      "code": "3 16 -1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "DPAD_RIGHT": {
+      "code": "3 16 1",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L1": {
+      "code": "1 308",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R1": {
+      "code": "1 309",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L2": {
+      "code": "1 314",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "R2": {
+      "code": "1 315",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "L3": {
+      "code": "1 312",
+      "source": "pad",
+      "from": "cfg",
+      "note": "left stick click; no Menu button: whichever stick click Button Settings > Menu button selects (L3 by default, or R3) is MENU, and RG351P.cfg sets that click's B_L3/B_R3 to DOESNT_EXIST because the kernel autorepeats the HID pad and a held click's repeats would cancel its own menu press",
+      "cfg_differs": "B_L3 is DOESNT_EXIST under the default Menu button = L3 setting (the click is B_MENU then); the click itself sends 1 312"
+    },
+    "R3": {
+      "code": "1 313",
+      "source": "pad",
+      "from": "cfg",
+      "note": "right stick click; no Menu button: whichever stick click Button Settings > Menu button selects (L3 by default, or R3) is MENU, and RG351P.cfg sets that click's B_L3/B_R3 to DOESNT_EXIST because the kernel autorepeats the HID pad and a held click's repeats would cancel its own menu press",
+      "cfg_differs": "B_R3 is DOESNT_EXIST when Button Settings > Menu button is R3 (the click is B_MENU then); the click itself sends 1 313"
+    },
+    "SELECT": {
+      "code": "1 311",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "START": {
+      "code": "1 310",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "POWER": {
+      "code": "1 116",
+      "source": "power",
+      "from": "cfg"
+    },
+    "LEFT_STICK": {
+      "x": "3 2",
+      "y": "3 3",
+      "source": "pad",
+      "from": "cfg"
+    },
+    "RIGHT_STICK": {
+      "x": "3 4",
+      "y": "3 5",
+      "source": "pad",
+      "from": "cfg"
+    }
+  },
+  "absent": {
+    "MENU": "no Menu button: RG351P.cfg's B_MENU reuses L3's code (1 312) by default, or R3's (1 313) when Button Settings > Menu button is R3; SELECT+START also opens the PyUI menu",
+    "HOME": "cfg B_HOME=DOESNT_EXIST",
+    "VOL_UP": "no volume key: volume is a hardware wheel after the rk817 codec; the cfg's B_VOLUP=1 115 is a placeholder nothing reports (kept so buttons_watchdog.sh makes no SELECT+click volume chords)",
+    "VOL_DOWN": "no volume key: volume is a hardware wheel after the rk817 codec; the cfg's B_VOLDOWN=1 114 is a placeholder nothing reports (kept so buttons_watchdog.sh makes no SELECT+click volume chords)",
+    "FN_SWITCH": "none",
+    "FN_LEFT": "none",
+    "FN_RIGHT": "none",
+    "LID": "none"
+  },
+  "evidence": [
+    "spruce/scripts/platform/darkmoss/RG351P.cfg",
+    "spruce/scripts/platform/darkmoss/RG351P.sh"
+  ],
+  "notes": [
+    "No dedicated MENU button: by default the left stick click (1 312) is MENU (Button Settings > Menu button, default L3) and RG351P.cfg sets B_L3=DOESNT_EXIST; set to R3, the right stick click (1 313) is MENU and B_R3=DOESNT_EXIST instead. The L3/R3 steps expect the click's own code either way. SELECT+START also opens the PyUI menu.",
+    "No volume keys: the volume wheel works in hardware after the codec and sends no input event; spruce keeps the codec at full (RG351P.sh's set_volume).",
+    "Button codes come from ArkOS's RG351P EmulationStation config (es_input.cfg), per RG351P.cfg's header, not from a Button Reader capture on this device."
+  ]
+}
