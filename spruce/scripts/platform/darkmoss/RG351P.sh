@@ -312,17 +312,86 @@ RG351P_PAD_INPUT_FILE="/tmp/rg351p_pad_input"
 RG351P_REARM_GEN_FILE="/tmp/rg351p_rearm_gen"
 RG351P_REARM_LOCK="/tmp/rg351p_rearm.lock"
 
-_rg351p_pad_input_id() {
-    for _dir in /sys/class/input/event*; do
-        _name=""
-        read -r _name 2>/dev/null < "$_dir/device/name"
-        [ "$_name" = "$RG351P_PAD_NAME" ] || continue
-        _id="$(readlink -f "$_dir/device" 2>/dev/null)"
-        [ -n "$_id" ] || continue
-        echo "${_id##*/}"
-        return 0
+# Pad proxy (rg351p_padproxy.py): the pad loses power in suspend and comes back
+# as a new input device on every wake, and programs that open it once (vtree,
+# Songo, most SDL apps) keep the dead one. The proxy grabs the real pad and
+# mirrors it into a virtual one with the same name and IDs that never goes
+# away; a runtime udev rule hides the real pad from joystick scans meanwhile.
+# The virtual device's phys is "rg351p-padproxy". Supervised by a shell loop
+# that removes the rule whenever the proxy exits, so a crash can never leave
+# games without a joystick; it gives up after 5 quick failures in a row.
+RG351P_PADPROXY="/mnt/SDCARD/spruce/scripts/platform/darkmoss/rg351p_padproxy.py"
+RG351P_PADPROXY_PID="/tmp/rg351p_padproxy.pid"
+RG351P_PADPROXY_LOG="/mnt/SDCARD/Saves/spruce/rg351p-padproxy.log"
+RG351P_PADPROXY_PHYS="rg351p-padproxy"
+RG351P_PADPROXY_RULE="/run/udev/rules.d/99-rg351p-padproxy.rules"
+
+_rg351p_padproxy_alive() {
+    _rg351p_pp=""
+    read -r _rg351p_pp 2>/dev/null < "$RG351P_PADPROXY_PID"
+    [ -n "$_rg351p_pp" ] && kill -0 "$_rg351p_pp" 2>/dev/null
+}
+
+_rg351p_padproxy_start() {
+    _rg351p_padproxy_alive && return 0
+    [ -x /usr/bin/python3 ] && [ -e /dev/uinput ] && [ -f "$RG351P_PADPROXY" ] || return 1
+    : > "$RG351P_PADPROXY_LOG" 2>/dev/null
+    (
+        trap '' HUP
+        _fails=0
+        while [ "$_fails" -lt 5 ]; do
+            _t0=$(date +%s)
+            /usr/bin/python3 -I "$RG351P_PADPROXY" >> "$RG351P_PADPROXY_LOG" 2>&1
+            rm -f "$RG351P_PADPROXY_RULE"
+            udevadm control --reload 2>/dev/null
+            udevadm trigger --action=change --subsystem-match=input 2>/dev/null
+            if [ $(( $(date +%s) - _t0 )) -lt 60 ]; then _fails=$((_fails + 1)); else _fails=0; fi
+            echo "padproxy exited, restart $_fails/5" >> "$RG351P_PADPROXY_LOG"
+            sleep 2
+        done
+        rm -f "$RG351P_PADPROXY_PID"
+    ) </dev/null >/dev/null 2>&1 &
+    echo $! > "$RG351P_PADPROXY_PID"
+    log_message "$PLATFORM: pad proxy started"
+}
+
+# The pad's event node: the proxy's virtual one when it exists, else the real.
+_rg351p_find_pad_node() {
+    _rg351p_real=""
+    for _rg351p_d in /sys/class/input/event*; do
+        _rg351p_n=""
+        read -r _rg351p_n 2>/dev/null < "$_rg351p_d/device/name"
+        [ "$_rg351p_n" = "$RG351P_PAD_NAME" ] || continue
+        _rg351p_ph=""
+        read -r _rg351p_ph 2>/dev/null < "$_rg351p_d/device/phys"
+        if [ "$_rg351p_ph" = "$RG351P_PADPROXY_PHYS" ]; then
+            echo "/dev/input/${_rg351p_d##*/}"
+            return 0
+        fi
+        [ -n "$_rg351p_real" ] || _rg351p_real="/dev/input/${_rg351p_d##*/}"
+    done
+    [ -n "$_rg351p_real" ] && echo "$_rg351p_real"
+}
+
+_rg351p_padproxy_node_up() {
+    case "$(_rg351p_find_pad_node)" in
+        /dev/input/event*) ;;
+        *) return 1 ;;
+    esac
+    for _rg351p_d in /sys/class/input/event*; do
+        _rg351p_ph=""
+        read -r _rg351p_ph 2>/dev/null < "$_rg351p_d/device/phys"
+        [ "$_rg351p_ph" = "$RG351P_PADPROXY_PHYS" ] && return 0
     done
     return 1
+}
+
+_rg351p_pad_input_id() {
+    _node="$(_rg351p_find_pad_node)"
+    [ -n "$_node" ] || return 1
+    _id="$(readlink -f "/sys/class/input/${_node##*/}/device" 2>/dev/null)"
+    [ -n "$_id" ] || return 1
+    echo "${_id##*/}"
 }
 
 _rg351p_rearm_bump() {
@@ -362,15 +431,17 @@ resolve_pad_node() {
         sleep 0.25
         _i=$((_i + 1))
     done
-    _pad=""
-    for _dir in /sys/class/input/event*; do
-        _name=""
-        read -r _name 2>/dev/null < "$_dir/device/name"
-        if [ "$_name" = "$RG351P_PAD_NAME" ]; then
-            _pad="/dev/input/${_dir##*/}"
-            break
-        fi
-    done
+    # Boot (not a re-arm): start the proxy before anything opens the pad, and
+    # give it up to 5 s to bring up the virtual node.
+    if [ "$1" != "rearm" ] && _rg351p_padproxy_start; then
+        _i=0
+        while [ "$_i" -lt 20 ] && ! _rg351p_padproxy_node_up; do
+            sleep 0.25
+            _i=$((_i + 1))
+        done
+        _rg351p_padproxy_node_up || log_message "$PLATFORM: pad proxy has no virtual pad yet, using the real one"
+    fi
+    _pad="$(_rg351p_find_pad_node)"
     if [ -n "$_pad" ]; then
         export EVENT_PATH_READ_INPUTS_SPRUCE="$_pad"
         export EVENT_PATH_SEND_TO_RA_AND_PPSSPP="$_pad"
@@ -408,6 +479,12 @@ _rg351p_rearm_pad_readers() {
     fi
     sleep 0.3
     _rg351p_rearm_stale "$_gen" && return 0
+
+    # With the proxy up, every reader holds the virtual pad, which never left.
+    if _rg351p_padproxy_alive && _rg351p_padproxy_node_up; then
+        log_message "$PLATFORM: pad proxy kept the controls across the sleep"
+        return 0
+    fi
 
     _before=""
     read -r _before 2>/dev/null < "$RG351P_PAD_INPUT_FILE"
@@ -503,14 +580,14 @@ set_default_ra_hotkeys() {
 # defined and before any emulator starts. A lock directory keeps two runs
 # apart; the flag is only set once every step is done, so a step that could
 # not run yet is tried again at the next boot.
-# v3: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
-# (pause menu items overlap), and -4 still did; only an untouched old value
-# (-1, or -4 from the v2 fix) is changed.
-RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v3"
+# v4: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
+# (pause menu items overlap), and -4 and -6 still did; only an untouched old
+# value (-1, or -4/-6 from earlier fixes) is changed.
+RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v4"
 _rg351p_migrate_v2() {
     _m2live="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-RG351P.ini"
-    if [ -f "$_m2live" ] && grep -Eqx 'UIScaleFactor = -(1|4)' "$_m2live"; then
-        sed -E 's/^UIScaleFactor = -(1|4)$/UIScaleFactor = -6/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
+    if [ -f "$_m2live" ] && grep -Eqx 'UIScaleFactor = -(1|4|6)' "$_m2live"; then
+        sed -E 's/^UIScaleFactor = -(1|4|6)$/UIScaleFactor = -8/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
             [ -s "$_m2live.tmp" ] && mv -f "$_m2live.tmp" "$_m2live" &&
             log_message "$PLATFORM: PPSSPP UI scale lowered to fit the screen (one-time fix)" ||
             { rm -f "$_m2live.tmp"; return 0; }

@@ -14,22 +14,38 @@ from utils.logger import PyUiLogger
 PAD_NAME = "OpenSimHardware OSH PB Controller"
 
 
+# spruce's pad proxy (spruce/scripts/platform/darkmoss/rg351p_padproxy.py)
+# mirrors the pad into a virtual device with this phys, which survives the
+# pad's re-enumeration on every wake; the real pad is grabbed meanwhile.
+PROXY_PHYS = "rg351p-padproxy"
+
+
 def find_pad_node():
-    """The pad is a USB device with no fixed by-path link: find it by name."""
+    """The pad is a USB device with no fixed by-path link: find it by name,
+    preferring the proxy's virtual pad over the real one."""
     try:
         entries = sorted(os.listdir("/sys/class/input"))
     except OSError:
         return None
+    real = None
     for entry in entries:
         if not entry.startswith("event"):
             continue
         try:
             with open(f"/sys/class/input/{entry}/device/name") as f:
-                if f.read().strip() == PAD_NAME:
-                    return f"/dev/input/{entry}"
+                if f.read().strip() != PAD_NAME:
+                    continue
         except OSError:
             continue
-    return None
+        try:
+            with open(f"/sys/class/input/{entry}/device/phys") as f:
+                if f.read().strip() == PROXY_PHYS:
+                    return f"/dev/input/{entry}"
+        except OSError:
+            pass
+        if real is None:
+            real = f"/dev/input/{entry}"
+    return real
 
 
 def wait_for_pad_node(tries=25, interval=0.2):
