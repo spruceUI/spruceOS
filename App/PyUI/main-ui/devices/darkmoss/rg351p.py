@@ -2,6 +2,7 @@ import fcntl
 import glob
 import os
 import struct
+import threading
 import time
 
 from controller.controller_inputs import ControllerInput
@@ -22,7 +23,10 @@ PROXY_PHYS = "rg351p-padproxy"
 
 def find_pad_node():
     """The pad is a USB device with no fixed by-path link: find it by name,
-    preferring the proxy's virtual pad over the real one."""
+    preferring the proxy's virtual pad over the real one. The proxy creates
+    its virtual pad before it grabs the real one, so the real pad is returned
+    only while it is ungrabbed (proxy not started, restarting or given up);
+    RG351PKeyWatcher moves to the virtual pad once it appears."""
     try:
         entries = sorted(os.listdir("/sys/class/input"))
     except OSError:
@@ -46,6 +50,14 @@ def find_pad_node():
         if real is None:
             real = f"/dev/input/{entry}"
     return real
+
+
+def _is_proxy_node(node):
+    try:
+        with open(f"/sys/class/input/{os.path.basename(node)}/device/phys") as f:
+            return f.read().strip() == PROXY_PHYS
+    except OSError:
+        return False
 
 
 def wait_for_pad_node(tries=25, interval=0.2):
@@ -178,6 +190,9 @@ class RG351PKeyMappingProvider(V10KeyMappingProvider):
         return super().get_mapped_events(key_event)
 
 
+_FD_SWAP_LOCK = threading.Lock()
+
+
 class RG351PKeyWatcher(KeyWatcherController):
     """KeyWatcherController that follows the USB pad by name.
 
@@ -189,8 +204,41 @@ class RG351PKeyWatcher(KeyWatcherController):
     open; after that the pad is found by name only, so a stale eventN now
     held by another input device (a keyboard plugged in during sleep) is
     never opened. If the pad is missing when PyUI starts, the input thread
-    waits for it instead of exiting.
+    waits for it instead of exiting. A follower thread moves to the proxy's
+    virtual pad whenever it (re)appears while the real pad is held, since the
+    proxy then grabs the real pad and its fd never sees another event.
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        threading.Thread(target=self._follow_proxy, daemon=True).start()
+
+    def _follow_proxy(self):
+        # Runs for good: every later proxy restart needs it again. One listdir
+        # every 2 s while idle.
+        while True:
+            time.sleep(2.0)
+            fd = self.fd
+            if fd is None:
+                continue  # poll_keyboard's own wait opens event_path (proxy first)
+            try:
+                node = find_pad_node()
+                if not node or not _is_proxy_node(node):
+                    continue
+                if os.fstat(fd).st_rdev == os.stat(node).st_rdev:
+                    continue
+                new = os.open(node, os.O_RDONLY)
+            except OSError:
+                continue
+            PyUiLogger.get_logger().info(f"RG351P: moving to pad proxy at {node}")
+            # The setter opens before closing and clears held keys, chord and
+            # thumb state. Stick ranges stay: the virtual pad copies the real
+            # pad's absinfo.
+            self.fd = new
+            try:
+                os.write(self._signal_write_fd, b"\0")  # wake select() onto the new fd
+            except OSError:
+                pass
 
     @property
     def fd(self):
@@ -204,8 +252,11 @@ class RG351PKeyWatcher(KeyWatcherController):
         # stick or hat has none. The old fd is closed only after the new one
         # exists, so select() can never be handed a reused number. The base
         # constructor's first assignment (old is None) runs before lock exists.
-        old = self.__dict__.get("_fd")
-        self.__dict__["_fd"] = value
+        # The swap is atomic: the proxy follower and the input thread's reopen
+        # may both assign, and must never both close the same old fd.
+        with _FD_SWAP_LOCK:
+            old = self.__dict__.get("_fd")
+            self.__dict__["_fd"] = value
         if old is None or value is None or old == value:
             return
         try:
