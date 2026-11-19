@@ -128,13 +128,17 @@ $ESUDO mkdir -p "${CONFDIR}"
 # Setup volume indicator
 USE_SONGO_VOL_TCP_SERVER="1" # Set to "0" to disable the volume overlay, might need to disable for pixel 2
 
-if [ -f /mnt/SDCARD/spruce/twig ]; then
+# RG351P: volume is an analog wheel after the codec, and no device node reports
+# volume keys, so the listener could only sit on the power key for nothing.
+if [ -f /mnt/SDCARD/spruce/twig ] || [ "$PLATFORM" = "RG351P" ]; then
 	USE_SONGO_VOL_TCP_SERVER="0"
 fi
 
 SONGO_CFW_NAME="Spruce"
 
-sh "${GAMEDIR}/runtime/volume-indicator/setup_vol_indicator" "${SONGO_CFW_NAME}"
+if [ "$PLATFORM" != "RG351P" ]; then
+	sh "${GAMEDIR}/runtime/volume-indicator/setup_vol_indicator" "${SONGO_CFW_NAME}"
+fi
 
 export SONGO_CFW_NAME
 export USE_SONGO_VOL_TCP_SERVER
@@ -253,7 +257,15 @@ if [ "$CURRENT_BRIGHTNESS" = "0" ]; then
     "$SONGO_SET_BRIGHTNESS_PATH" "$INITIAL_BRIGHTNESS"
 fi
 
-if [[ "$SONGO_CFW_NAME" != "NONE" ]]; then
+# Songo's TYPE2 blank writes only bl_power=1, so the check above misses it, and
+# darkmoss PyUI does not re-apply the backlight at start.
+if [ "$PLATFORM" = "RG351P" ] && [ "$BL_TYPE" = "TYPE2" ] && [ -n "$SYSFS_BL_POWER" ]; then
+    for _blp in $SYSFS_BL_POWER; do
+        [ "$(cat "$_blp" 2>/dev/null)" != "0" ] && echo 0 > "$_blp" 2>/dev/null
+    done
+fi
+
+if [[ "$SONGO_CFW_NAME" != "NONE" ]] && [ "$PLATFORM" != "RG351P" ]; then
 	# Teardown volume indicator
 	sh "${GAMEDIR}/runtime/volume-indicator/teardown_vol_indicator" "${SONGO_CFW_NAME}"
 fi
