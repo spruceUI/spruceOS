@@ -1,0 +1,7 @@
+superwhizkid_audio_output = "speaker"
+superwhizkid_bios = "umc"
+superwhizkid_flicker_reduction = "1"
+superwhizkid_lcd_ghosting = "3"
+superwhizkid_palette = "accurate"
+superwhizkid_skip_intro = "off"
+superwhizkid_tap_latch = "on"
