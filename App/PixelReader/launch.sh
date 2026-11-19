@@ -48,9 +48,17 @@ else
 			;;
         "darkmoss"|"oakmoss")
 			export LD_LIBRARY_PATH=/mnt/SDCARD/spruce/h700/lib64:$LD_LIBRARY_PATH
+			# The RG351P has no guide button, gptokeyb's default hotkey; use
+			# L3 so hotkey+Start still kills reader.
+			[ "$PLATFORM" = "RG351P" ] && export HOTKEY=l3
 			;;
 	esac
-	/mnt/SDCARD/spruce/bin64/gptokeyb -k "reader" -c "./reader.gptk" &
+	if [ "$PLATFORM" = "RG351P" ]; then
+		# No guide button: this map puts ESC on the stick clicks.
+		/mnt/SDCARD/spruce/bin64/gptokeyb -k "reader" -c "./readerRG351P.gptk" &
+	else
+		/mnt/SDCARD/spruce/bin64/gptokeyb -k "reader" -c "./reader.gptk" &
+	fi
 fi
 
 cd $(dirname "$0")

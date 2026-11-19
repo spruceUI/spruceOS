@@ -46,6 +46,15 @@ seed_dsperate_config() {
 			log_message "DSperate: seeded $_cfg"
 		fi
 	done
+
+	if [ "$PLATFORM" = "RG351P" ]; then
+		for _cfg in rg351p.ini rg351p-tate.ini; do
+			if [ ! -f "${_cfg_dir}/${_cfg}" ] && [ -f "${_src_dir}/${_cfg}" ]; then
+				cp -f "${_src_dir}/${_cfg}" "${_cfg_dir}/${_cfg}"
+				log_message "DSperate: seeded $_cfg"
+			fi
+		done
+	fi
 }
 
 # Hand DSperate the spruce RetroAchievements sign-in as a username + token
@@ -246,6 +255,10 @@ run_dsperate() {
 					# RGB30 gets its own config because it doesn't have a menu/guide button to use as "mod"
 					_config_path="/mnt/SDCARD/Saves/dsperate/rgb30.ini"
 
+				elif [ "$PLATFORM" = "RG351P" ]; then
+					# RG351P: rgb30.ini without the L3 stylus tap, since L3 is its spruce menu button
+					_config_path="/mnt/SDCARD/Saves/dsperate/rg351p.ini"
+
 				elif [ "$PLATFORM" = "Zero40" ]; then
 					# Z40 gets its own config to accommodate its unique touchscreen
 					_config_path="/mnt/SDCARD/Saves/dsperate/zero40.ini"
@@ -259,6 +272,31 @@ run_dsperate() {
 		if [ "$TATE_MODE" = "true" ]; then
 			export DS_ROTATE=270
 			_config_path="/mnt/SDCARD/Saves/dsperate/tate.ini"
+		fi
+		# RG351P: tate.ini without the L3 stylus tap, since L3 is its spruce menu button
+		if [ "$TATE_MODE" = "true" ] && [ "$PLATFORM" = "RG351P" ]; then
+			_config_path="/mnt/SDCARD/Saves/dsperate/rg351p-tate.ini"
+		fi
+		# RG351P: a tap on the stick click that is spruce's menu (Button Settings)
+		# opens DSperate's pause menu, and the default mic = leftstick must not
+		# fake a DS mic blow on every menu press. Tate needs a pad modifier: the
+		# pad has no guide button. Also updates live copies seeded before this.
+		if [ "$PLATFORM" = "RG351P" ] && [ -f "$_config_path" ]; then
+			case "$B_MENU" in
+				"1 313") _ds_menu=rightstick ;;
+				*) _ds_menu=leftstick ;;
+			esac
+			# Only inside [padhotkeys]: [audio] has its own "mic = false".
+			for _k in "pause.alt = $_ds_menu" "mic = none"; do
+				_key="$(echo "${_k%% =*}" | sed 's/\./\\./g')"
+				if sed -n '/^\[padhotkeys\]/,/^\[/p' "$_config_path" | grep -q "^$_key[[:space:]]*="; then
+					sed -i "/^\[padhotkeys\]/,/^\[/s/^$_key[[:space:]]*=.*/$_k/" "$_config_path"
+				else
+					sed -i "/^\[padhotkeys\]/a $_k" "$_config_path"
+				fi
+			done
+			sed -n '/^\[padhotkeys\]/,/^\[/p' "$_config_path" | grep -q '^modifier[[:space:]]*=' ||
+				sed -i '/^\[padhotkeys\]/a modifier = back' "$_config_path"
 		fi
 
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"

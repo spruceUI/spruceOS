@@ -23,6 +23,7 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         "armgba": ["armGBA"],
         "armn64": ["armN64"],
         "armnes": ["armNES"],
+        "armsnes": ["armSNES"],
         "atari800": ["Atari800"],
         "bk": ["bk"],
         "bluemsx": ["blueMSX"],

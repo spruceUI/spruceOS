@@ -141,6 +141,8 @@ EOF
 			Flip|Brick*|SmartPro|Zero*|XU20) export PICO8_IGM_HIDE_SCANCODE=41 ;;
 		esac
 
+		# RG351P: keep RG351P.cfg's default SDL_GAMECONTROLLERCONFIG (a = South); the label-named map would swap O and X.
+
 		# use_wget is 1, so PICO-8 shells out to wget for every cart fetch.
 		# spruce/bin64/wget is first on PATH but is linked against
 		# libpcre.so.1, which the RGB30's dArkMoss base does not ship - it

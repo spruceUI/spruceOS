@@ -44,6 +44,9 @@ else
 
     if [ "$PLATFORM" = "Pixel2" ]; then
         /mnt/SDCARD/spruce/bin64/gptokeyb -c "./galleryPixel2.gptk" &
+    elif [ "$PLATFORM" = "RG351P" ]; then
+        # No guide button: this map puts the ESC exit on the stick clicks.
+        /mnt/SDCARD/spruce/bin64/gptokeyb -c "./galleryRG351P.gptk" &
     else
         /mnt/SDCARD/spruce/bin64/gptokeyb -c "./gallery.gptk" &
     fi

@@ -95,6 +95,13 @@ run_ppsspp() {
 			export SDL_VIDEODRIVER=mali
 			export_sdl_gamecontroller_map positional
 			;;
+		# The RG351P's pad is a USB HID controller SDL may know by its label
+		# names (A = the right-hand button); register the positional map so
+		# Cross sits on the bottom button and the controls-*.ini hotkeys read
+		# as on the rest of the fleet, as for the Anbernic XX line above.
+		"RG351P")
+			export_sdl_gamecontroller_map positional
+			;;
 	esac
 
 	# accommodate both relative and absolute paths for PPSSPP bin location

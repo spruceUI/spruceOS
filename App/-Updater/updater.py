@@ -12,7 +12,7 @@ The downloader creates:
     /mnt/SDCARD/App/-OTA/tmp/ota_queue
 
 Each queue line has:
-    VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE|FROM
+    VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE|FROM[|BASE]
 
 FROM is the version the archive must be applied on top of (older queues
 without it are still accepted, but their chain cannot be validated).
@@ -22,6 +22,10 @@ on top of any nightly derived from it. After a nightly install the stable
 base is recorded in NIGHTLY_BASE_FILE and the full nightly version as an
 empty root marker /mnt/SDCARD/<base>-<date> (the file get_version_complex()
 in helperFunctions.sh reads); both are removed again by any stable install.
+
+BASE (DIFF_NIGHTLY only, optional): the stable the target nightly was built
+from, when the package (the previous-stable diff) applies on an older FROM.
+It is recorded as the new nightly base instead of FROM.
 
 TYPE is:
     FULL
@@ -569,9 +573,10 @@ def load_queue():
 
                 parts = line.split("|")
 
-                # VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE[|FROM]
-                # FROM is the version this archive must be applied on.
-                if len(parts) not in (6, 7):
+                # VERSION|CHECKSUM|LINK|SIZE|INFO|TYPE[|FROM[|BASE]]
+                # FROM is the version this archive must be applied on;
+                # BASE the stable a nightly diff's target was built from.
+                if len(parts) not in (6, 7, 8):
 
                     raise ValueError(
                         f"Invalid queue entry on line "
@@ -587,7 +592,8 @@ def load_queue():
                     update_type
                 ) = parts[:6]
 
-                from_version = parts[6] if len(parts) == 7 else ""
+                from_version = parts[6] if len(parts) >= 7 else ""
+                nightly_base = parts[7] if len(parts) == 8 else ""
 
                 if not re.fullmatch(
                     r"[0-9a-fA-F]{32}",
@@ -611,6 +617,16 @@ def load_queue():
                         f"{line_number}"
                     )
 
+                if nightly_base and (
+                    update_type != "DIFF_NIGHTLY"
+                    or not from_version
+                ):
+
+                    raise ValueError(
+                        f"BASE is only valid on a DIFF_NIGHTLY "
+                        f"entry with FROM, line {line_number}"
+                    )
+
                 filename = os.path.basename(link)
 
                 if not filename:
@@ -628,6 +644,7 @@ def load_queue():
                     "info": info,
                     "type": update_type,
                     "from": from_version,
+                    "nightly_base": nightly_base,
                     "filename": filename,
                     "path": f"{SD_ROOT}/{filename}"
                 })
@@ -720,14 +737,14 @@ def is_nightly_update(update):
 def record_nightly_base(updates):
     """
     After a successful update, remember which stable release the
-    installed nightly derives from (FROM of the last queue entry), or
-    forget it when a stable release was installed.
+    installed nightly derives from (BASE of the last queue entry, else its
+    FROM), or forget it when a stable release was installed.
     """
 
     last = updates[-1]
 
     base = (
-        version_base(last["from"])
+        version_base(last["nightly_base"] or last["from"])
         if is_nightly_update(last)
         else ""
     )
@@ -826,8 +843,8 @@ def validate_incremental_chain(
     on top of the installed version, else None.
 
     A device that runs a nightly (installed_nightly_base set) can only
-    take a nightly diff generated from that same stable release; the
-    stable chain never applies on top of a nightly.
+    take a nightly diff whose FROM or BASE is that base; the stable chain
+    never applies on top of a nightly.
 
     Accepts an installed version that is one of the chain's targets:
     that is a re-run after an interrupted attempt, and re-applying
@@ -872,10 +889,19 @@ def validate_incremental_chain(
 
     if installed_nightly_base:
 
+        # A previous-stable diff (BASE set) covers every path touched since
+        # FROM, so it also applies on a nightly of BASE: the re-run after a
+        # failed restore, when the package already wrote BASE as the base.
+        applies_on = {
+            version_base(value)
+            for value in (base, updates[0]["nightly_base"])
+            if value
+        }
+
         if (
             updates[0]["type"] != "DIFF_NIGHTLY"
             or not base
-            or version_base(base) != installed_nightly_base
+            or installed_nightly_base not in applies_on
         ):
 
             return (
@@ -883,6 +909,15 @@ def validate_incremental_chain(
                 f"{installed_nightly_base}; only a nightly update "
                 f"built from that release can be applied. "
                 "Run 'Check for Updates' again."
+            )
+
+        # Not FROM, so it is BASE: the re-run described above.
+        if installed_nightly_base != version_base(base):
+
+            log.warning(
+                f"Installed nightly already records base "
+                f"{installed_nightly_base} (previous attempt was "
+                f"interrupted); re-applying the {base} diff."
             )
 
         return None
