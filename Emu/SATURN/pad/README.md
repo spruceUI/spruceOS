@@ -1,9 +1,11 @@
 # Saturn standalone pad seeds
 
-**UNVERIFIED.** Every file here was generated from the boards' platform cfgs without a check on a device. The user
+**UNVERIFIED.** Every file here (but the RG351P tables, below) was generated from the boards' platform cfgs without a check on a device. The user
 asked for this on 2026-10-16: "ship an auto-generated control map without verification for test purposes to kick off
 the control audit in a later phase". Each keymap entry carries `"spruce_generated": "unverified-2026-10-16"`. Drop
-the tag from a table once a device run has confirmed it.
+the tag from a table once a device run has confirmed it. The RG351P tables (`es-`/`keymap-RG351P[-R3]`) were written
+by hand on 2026-11-19 and are tagged `unverified-2026-11-19`; `gen_saturn_pads.py` does not produce them, so leave
+them out of `--check` until the generator learns the OSH PB pad (hat d-pad).
 
 ## What the files do
 
@@ -46,4 +48,4 @@ and XU Mini M are left out on purpose (user, 2026-10-16: "Leave out everywhere",
 ## Regenerating
 
 `docs/research/saturn-controls-20261015/scheme/gen_saturn_pads.py <spruceOS tree>` in the CFW/Spruce wrapper writes
-these files from the cfgs (`--check` compares). `scheme/test_seed.sh` tests the launch step under busybox.
+these files from the cfgs (`--check` compares), all but the hand-written RG351P tables. `scheme/test_seed.sh` tests the launch step under busybox.

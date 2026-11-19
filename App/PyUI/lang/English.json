@@ -1118,11 +1118,15 @@
         "dArkMoss {latest} has no update file for this device ({unit}), so it has to be installed by hand.\n\n{manual_help}": "dArkMoss {latest} has no update file for this device ({unit}), so it has to be installed by hand.\n\n{manual_help}",
         "Not enough free space on the spruce card for the dArkMoss update: {need_mb} MiB needed, {free_mb} MiB free.": "Not enough free space on the spruce card for the dArkMoss update: {need_mb} MiB needed, {free_mb} MiB free.",
         "Not enough free space on the dArkMoss card to install the update: {root_need_mb} MiB needed, {root_free_mb} MiB free.": "Not enough free space on the dArkMoss card to install the update: {root_need_mb} MiB needed, {root_free_mb} MiB free.",
+        "Not enough free space on the SPRUCEOS partition for the dArkMoss update: {need_mb} MiB needed, {free_mb} MiB free.": "Not enough free space on the SPRUCEOS partition for the dArkMoss update: {need_mb} MiB needed, {free_mb} MiB free.",
+        "Not enough free space on the system partition to install the update: {root_need_mb} MiB needed, {root_free_mb} MiB free.": "Not enough free space on the system partition to install the update: {root_need_mb} MiB needed, {root_free_mb} MiB free.",
+        "Could not read the dArkMoss release version. {manual_help}": "Could not read the dArkMoss release version. {manual_help}",
         "Please charge your device to at least 15%, or plug it in, then try again.": "Please charge your device to at least 15%, or plug it in, then try again.",
         "The dArkMoss update could not be downloaded. Please try again later.": "The dArkMoss update could not be downloaded. Please try again later.",
         "The downloaded dArkMoss update was damaged in transit and has been deleted. Please try again.": "The downloaded dArkMoss update was damaged in transit and has been deleted. Please try again.",
         "{asset_name} is not a dArkMoss update and has been deleted.\n\n{manual_help}": "{asset_name} is not a dArkMoss update and has been deleted.\n\n{manual_help}",
         "The dArkMoss update did not complete; spruce.log has the details. If the device no longer boots, reflash the dArkMoss image on TF1. Your spruce card is unaffected.": "The dArkMoss update did not complete; spruce.log has the details. If the device no longer boots, reflash the dArkMoss image on TF1. Your spruce card is unaffected.",
+        "The dArkMoss update did not complete; spruce.log on the SPRUCEOS drive has the details. Before reflashing, copy everything off the SPRUCEOS drive: reflashing dArkMoss erases this whole card, spruce included.": "The dArkMoss update did not complete; spruce.log on the SPRUCEOS drive has the details. Before reflashing, copy everything off the SPRUCEOS drive: reflashing dArkMoss erases this whole card, spruce included.",
         "{value1} is on the card (you have oakMOSS {installed}).\n\nPress A to restart and install it, or B to cancel.": "{value1} is on the card (you have oakMOSS {installed}).\n\nPress A to restart and install it, or B to cancel.",
         "Your device will now restart and install the update: do not power it off while it shows Updating.": "Your device will now restart and install the update: do not power it off while it shows Updating.",
         "Your oakMOSS {installed} is already the latest release. Press A to close.": "Your oakMOSS {installed} is already the latest release. Press A to close.",
@@ -1225,6 +1229,7 @@
         "Nightly {final_version} is already installed; it may have been rebuilt since": "Nightly {final_version} is already installed; it may have been rebuilt since",
         "Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device.": "Please visit github.com/spruceUI/dArkMoss to manually download the proper image for your device.",
         "Please visit github.com/{repo} to manually download the proper version for your device.": "Please visit github.com/{repo} to manually download the proper version for your device.",
+        "Please visit github.com/{repo} to manually download the proper image for your device.": "Please visit github.com/{repo} to manually download the proper image for your device.",
         "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.": "Please visit github.com/spruceUI/oakMOSS to download the image for your device and write it to the system card.",
         "Theme Previews": "Theme Previews"
     }

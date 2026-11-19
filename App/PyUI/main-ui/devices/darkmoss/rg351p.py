@@ -1,4 +1,5 @@
 import fcntl
+import glob
 import os
 import struct
 import time
@@ -176,6 +177,37 @@ class RG351PKeyWatcher(KeyWatcherController):
     """
 
     @property
+    def fd(self):
+        return self.__dict__.get("_fd")
+
+    @fd.setter
+    def fd(self, value):
+        # Every reopen (the base class's after ENODEV/EIO as well as the wait
+        # below) closes the dead fd and forgets what was held: the release
+        # events the kernel sends on disconnect never reach a dead fd, and a
+        # stick or hat has none. The old fd is closed only after the new one
+        # exists, so select() can never be handed a reused number. The base
+        # constructor's first assignment (old is None) runs before lock exists.
+        old = self.__dict__.get("_fd")
+        self.__dict__["_fd"] = value
+        if old is None or value is None or old == value:
+            return
+        try:
+            os.close(old)
+        except OSError:
+            pass
+        lock = self.__dict__.get("lock")
+        if lock is not None:
+            with lock:
+                self.held_controller_inputs.clear()
+        provider = self.mapping_provider
+        if hasattr(provider, "reset_chord_state"):
+            provider.reset_chord_state()
+        thumbs = getattr(provider, "thumb_pressed_as", None)
+        if thumbs is not None:
+            thumbs.clear()
+
+    @property
     def event_path(self):
         # "" makes os.open raise FileNotFoundError, which every caller
         # already treats as "not there yet, retry".
@@ -233,9 +265,12 @@ class RG351P(V10):
             PyUiLogger.get_logger().info(f"{self.device_name}: joypad '{PAD_NAME}' at {node}")
             return node
         PyUiLogger.get_logger().error(
-            f"{self.device_name}: no '{PAD_NAME}' input device, trying {self.JOYPAD_NODE}"
+            f"{self.device_name}: no '{PAD_NAME}' input device yet, waiting for it"
         )
-        return self.JOYPAD_NODE
+        # Never a numbered node: event2 may belong to another input device,
+        # which would never fail with ENODEV and so never hand over to the
+        # pad. "" leaves fd None and the watcher thread waits for the pad by name.
+        return ""
 
     def _button_mappings(self):
         key_mappings = {}
@@ -291,8 +326,14 @@ class RG351P(V10):
         )
 
     def supports_wifi(self):
-        # The radio is a USB dongle that may or may not be plugged in. The
-        # shell decides whether one is present; PyUI only shows the answer.
+        # The radio is a USB dongle that may or may not be plugged in. The top
+        # bar asks this every frame, so check sysfs as RG351P.sh's
+        # device_has_wifi_radio does and only ask the shell (which may also
+        # have marked the session radio-less) while WiFi is switched on.
+        if not (glob.glob("/sys/class/net/*/phy80211") or glob.glob("/sys/class/net/*/wireless")):
+            return False
+        if not self.is_wifi_enabled():
+            return True
         return self._wifi_status().get("radio", "1") == "1"
 
     # The internal output's volume is a hardware wheel after the codec: the

@@ -12,7 +12,7 @@
   "arch": "aarch64",
   "identify": "helperFunctions.sh: /proc/cpuinfo part 0xd04 (RK3326) + /etc/os-release OS_NAME=DARKMOSS, SPRUCE_PLATFORM=RG351P (stamped by dArkMoss's rg351p unit)",
   "cfg": "spruce/scripts/platform/darkmoss/RG351P.cfg",
-  "spruce_ref": "9764a0428c",
+  "spruce_ref": "74ff750d51",
   "face_print": "nintendo",
   "sources": {
     "pad": {

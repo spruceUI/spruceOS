@@ -214,9 +214,22 @@ _rg351p_pwm() {
     echo "$_chip/pwm0"
 }
 
+# Off in an order that is low whatever polarity the PWM was left in: disable
+# (polarity can only change then), polarity normal, duty 0, disable.
 _rg351p_motor_off() {
+    echo 0 2>/dev/null > "$1/enable"
+    echo normal 2>/dev/null > "$1/polarity"
     echo 0 2>/dev/null > "$1/duty_cycle"
     echo 0 2>/dev/null > "$1/enable"
+}
+
+# For wake: off only if pwm0 is exported. A PWM nothing has exported (rumble
+# never ran since boot) is left alone, since exporting it gives the reset
+# "inversed" polarity.
+_rg351p_motor_safe_off() {
+    _rg351p_c="${RG351P_PWM_CHIP:-/sys/class/pwm/pwmchip0}"
+    [ -d "$_rg351p_c/pwm0" ] || return 0
+    _rg351p_motor_off "$_rg351p_c/pwm0"
 }
 
 vibrate() {
@@ -375,11 +388,20 @@ _rg351p_rearm_pad_readers() {
     _gen="$1"
 
     # Let sleep_helper.sh finish first (its idle_watchdog.sh start included).
+    # Its directory still being there is this wake's sleep_helper being slow
+    # (a hung bluealsad, aplay): a new sleep can only begin after it is
+    # removed, and every later wake bumps the generation. So wait on it, up
+    # to 60 s, and give up early only for a newer wake.
     _w=0
-    while [ -d /tmp/sleep_helper_started ] && [ "$_w" -lt 60 ]; do
+    while [ -d /tmp/sleep_helper_started ] && [ "$_w" -lt 240 ]; do
+        [ "$(cat "$RG351P_REARM_GEN_FILE" 2>/dev/null)" = "$_gen" ] || return 0
         sleep 0.25
         _w=$((_w + 1))
     done
+    if [ -d /tmp/sleep_helper_started ]; then
+        log_message "$PLATFORM: sleep_helper still running 60 s after wake, pad readers not restarted"
+        return 0
+    fi
     sleep 0.3
     _rg351p_rearm_stale "$_gen" && return 0
 
@@ -420,7 +442,10 @@ _rg351p_rearm_pad_readers() {
     # readers this wake needs are started on the current node.
     _w=0
     until mkdir "$RG351P_REARM_LOCK" 2>/dev/null; do
-        [ "$_w" -lt 20 ] || return 0
+        if [ "$_w" -ge 20 ]; then
+            log_message "$PLATFORM: pad re-arm lock still held after 5 s, pad readers not restarted"
+            return 0
+        fi
         sleep 0.25
         _w=$((_w + 1))
         _rg351p_rearm_stale "$_gen" && return 0
@@ -439,7 +464,7 @@ _rg351p_rearm_pad_readers() {
 
 device_exit_sleep() {
     darkmoss_exit_sleep
-    _p="$(_rg351p_pwm)" && _rg351p_motor_off "$_p"
+    _rg351p_motor_safe_off
     _gen="$(_rg351p_rearm_bump)"
     _rg351p_rearm_pad_readers "$_gen" </dev/null >/dev/null 2>&1 &
 }
