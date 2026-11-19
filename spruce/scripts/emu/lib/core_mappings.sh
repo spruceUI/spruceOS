@@ -13,6 +13,7 @@ get_core_folder() {
         "armgba_libretro.so") echo "armGBA" ;;
         "armn64_libretro.so") echo "armN64" ;;
         "armnes_libretro.so") echo "armNES" ;;
+        "armsnes_libretro.so") echo "armSNES" ;;
         "arduous_libretro.so") echo "Arduous" ;;
         "atari800_libretro.so") echo "Atari800" ;;
         "bk_libretro.so") echo "bk" ;;
