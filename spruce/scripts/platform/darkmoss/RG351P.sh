@@ -580,17 +580,30 @@ set_default_ra_hotkeys() {
 # defined and before any emulator starts. A lock directory keeps two runs
 # apart; the flag is only set once every step is done, so a step that could
 # not run yet is tried again at the next boot.
-# v4: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
-# (pause menu items overlap), and -4 and -6 still did; only an untouched old
-# value (-1, or -4/-6 from earlier fixes) is changed.
-RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v4"
+# v5: PPSSPP fix-ups a new default alone does not reach (live copies are only
+# seeded when missing):
+# - UIScaleFactor: the V10's -1 overflows the 480x320 panel (pause menu items
+#   overlap), and -4 and -6 still did; only an untouched old value changes.
+# - controls: a live copy that still puts PSP L/R on pad buttons 7/8
+#   (10-194/10-195, an older layout) has them on the wrong buttons; this pad's
+#   L1/R1 are 10-193/10-192. Reset to the default.
+RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v5"
 _rg351p_migrate_v2() {
-    _m2live="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-RG351P.ini"
+    _m2dir="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM"
+    _m2live="$_m2dir/ppsspp-RG351P.ini"
     if [ -f "$_m2live" ] && grep -Eqx 'UIScaleFactor = -(1|4|6)' "$_m2live"; then
         sed -E 's/^UIScaleFactor = -(1|4|6)$/UIScaleFactor = -8/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
             [ -s "$_m2live.tmp" ] && mv -f "$_m2live.tmp" "$_m2live" &&
             log_message "$PLATFORM: PPSSPP UI scale lowered to fit the screen (one-time fix)" ||
             { rm -f "$_m2live.tmp"; return 0; }
+    fi
+    _m2ctl="$_m2dir/controls-RG351P.ini"
+    _m2def="/mnt/SDCARD/Emu/PSP/default_configs/SYSTEM/controls-RG351P.ini"
+    if [ -f "$_m2ctl" ] && [ -f "$_m2def" ] &&
+        grep -Eq '^(L = .*10-194|R = .*10-195)([,:]|$)' "$_m2ctl"; then
+        cp -f "$_m2def" "$_m2ctl" &&
+            log_message "$PLATFORM: PPSSPP controls reset to the default, L/R were on buttons 7/8 (one-time fix)" ||
+            return 0
     fi
     mkdir -p "${RG351P_MIGRATE2_FLAG%/*}" && touch "$RG351P_MIGRATE2_FLAG"
 }

@@ -121,7 +121,7 @@ def create_virtual(pad_fd):
     centre = {a: (lo + hi) // 2 for a, (_, lo, hi, _, _, _) in absinfo.items()}
     log("virtual pad created: %d buttons, %d axes, id %04x:%04x:%04x:%04x"
         % (len(keys), len(axes), bustype, vendor, product, version))
-    return ufd, centre
+    return ufd, centre, axes
 
 def emit(ufd, etype, code, value):
     os.write(ufd, EVENT.pack(0, 0, etype, code, value))
@@ -136,6 +136,23 @@ def release_all(ufd, held, axes, centre):
     emit(ufd, EV_SYN, SYN_REPORT, 0)
     held.clear()
     axes.clear()
+
+def sync_axes(pfd, ufd, axis_list, axes):
+    """Copy the real pad's current axis values. A new uinput device starts
+    with every axis at 0 (both sticks pushed up-left on this pad) and a stick
+    at rest sends nothing, so without this the virtual sticks stay pushed
+    until moved: RetroArch's menu fought the "held" stick and games saw a
+    stuck direction. Also run on every re-attach after a wake."""
+    for a in axis_list:
+        buf = bytearray(24)
+        try:
+            fcntl.ioctl(pfd, EVIOCGABS(a), buf)
+        except OSError:
+            continue
+        value = struct.unpack("6i", buf)[0]
+        axes[a] = value
+        emit(ufd, EV_ABS, a, value)
+    emit(ufd, EV_SYN, SYN_REPORT, 0)
 
 def udev(*args):
     subprocess.run(["udevadm"] + list(args), stdout=subprocess.DEVNULL,
@@ -159,6 +176,7 @@ def retag(present):
 def main():
     ufd = None
     centre = {}
+    axis_list = []
     held, axes = set(), {}
 
     def stop(*_):
@@ -187,7 +205,7 @@ def main():
             # Rules first, so the virtual pad is a joystick from its first udev event.
             retag(True)
             try:
-                ufd, centre = create_virtual(pfd)
+                ufd, centre, axis_list = create_virtual(pfd)
             except OSError as e:
                 log("cannot create the virtual pad: %s" % e)
                 os.close(pfd)
@@ -195,6 +213,7 @@ def main():
                 time.sleep(2)
                 continue
             udev("settle", "-t", "5")
+        sync_axes(pfd, ufd, axis_list, axes)
         log("mirroring %s" % path)
         while True:
             try:
