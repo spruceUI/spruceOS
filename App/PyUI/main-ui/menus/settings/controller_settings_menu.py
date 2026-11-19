@@ -8,6 +8,8 @@ from views.grid_or_list_entry import GridOrListEntry
 from menus.language.language import Language
 
 class ControllerSettingsMenu(settings_menu.SettingsMenu):
+    SETTINGS_NAME = "Button Settings"
+
     def __init__(self):
         super().__init__()
 
@@ -93,6 +95,6 @@ class ControllerSettingsMenu(settings_menu.SettingsMenu):
             ))
 
         option_list.extend(
-            self.build_options_list_from_related_config_categories(Language.controller_settings())
+            self.build_options_list_from_related_config_categories(ControllerSettingsMenu.SETTINGS_NAME)
         )
         return option_list
