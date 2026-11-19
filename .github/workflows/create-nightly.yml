@@ -115,6 +115,56 @@ jobs:
           echo "version=${TAG_NAME#v}" >> "$GITHUB_OUTPUT"
           echo "sha=${BASE_SHA}" >> "$GITHUB_OUTPUT"
 
+      # A nightly built before the last stable release records the stable before
+      # it as its base. A second OTA package from that release (PREV below and in
+      # the feed) takes it across; with no outputs here it needs the full archive.
+      - name: Find the stable release before the last one
+        id: stable_before_last
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          LAST_TAG="${{ steps.previous_stable.outputs.tag }}"
+          VERSION="${{ steps.get_version.outputs.version }}"
+
+          # Same rule as update-ota-on-publish.yml: the highest published stable
+          # version below LAST_TAG, in version order.
+          STABLE_TAGS="$(gh api \
+            "repos/spruceUI/spruceOS/releases?per_page=100" \
+            --jq '.[] | select(.draft == false and .prerelease == false) | .tag_name')"
+
+          PREV_TAG="$(printf '%s\n' "$STABLE_TAGS" \
+            | grep -E '^v[0-9]+(\.[0-9]+)*$' \
+            | sort -uV \
+            | grep -x -F -B1 -- "$LAST_TAG" \
+            | head -n 1 || true)"
+
+          # LAST_TAG is the oldest release: grep -B1 had no line before it.
+          if [ "$PREV_TAG" = "$LAST_TAG" ]; then
+            PREV_TAG=""
+          fi
+
+          # Without the second package, nightlies of an older stable take the full update.
+          if [ -z "$PREV_TAG" ]; then
+            echo "::warning::No stable release found before ${LAST_TAG}; building one OTA package only."
+            exit 0
+          fi
+
+          PREV_SHA="$(git rev-list -n 1 "$PREV_TAG" 2>/dev/null || true)"
+          if [ -z "$PREV_SHA" ]; then
+            echo "::warning::Could not resolve ${PREV_TAG} to a commit; building one OTA package only."
+            exit 0
+          fi
+
+          PREV_ARCHIVE="spruceOTA-${PREV_TAG}-to-v${VERSION}.7z"
+          echo "Stable release before ${LAST_TAG}: ${PREV_TAG} (${PREV_SHA}), second OTA package ${PREV_ARCHIVE}"
+
+          echo "tag=${PREV_TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "sha=${PREV_SHA}" >> "$GITHUB_OUTPUT"
+          echo "archive=${PREV_ARCHIVE}" >> "$GITHUB_OUTPUT"
+          printf 'release_note=Nightlies built while `%s` was the latest stable take `%s` instead: it contains all changes from `%s`, so they cross the new stable release without a full update.\n' \
+            "$PREV_TAG" "$PREV_ARCHIVE" "$PREV_TAG" >> "$GITHUB_OUTPUT"
+
       - name: Write nightly markers
         run: |
           # Every nightly package (full and diff) carries the stable release it
@@ -247,26 +297,8 @@ jobs:
       - name: Generate OTA diff manifest
         id: ota_diff
         run: |
-          BASE_SHA="${{ steps.previous_stable.outputs.sha }}"
           HEAD_SHA="${{ steps.current_commit.outputs.sha }}"
-
-          echo "=========================================="
-          echo "Generating OTA diff"
-          echo "=========================================="
-          echo "Base stable release: ${{ steps.previous_stable.outputs.tag }}"
-          echo "Base SHA:            ${BASE_SHA}"
-          echo "Development SHA:     ${HEAD_SHA}"
-          echo ""
-
-          OTA_MANIFEST=".ota_manifest"
-          OTA_DELETE=".ota_delete"
-          OTA_FILES=".ota_files"
-
-          rm -f "$OTA_MANIFEST" "$OTA_DELETE" "$OTA_FILES"
-
-          touch "$OTA_MANIFEST"
-          touch "$OTA_DELETE"
-          touch "$OTA_FILES"
+          VERSION="${{ steps.get_version.outputs.version }}"
 
           # Files excluded from the full release archive should also be
           # excluded from the OTA package.
@@ -315,171 +347,209 @@ jobs:
             esac
           }
 
-          RAW_ADD="$(mktemp)"
-          RAW_DEL="$(mktemp)"
+          # generate_manifest <base tag> <base sha> <dir> writes .ota_manifest,
+          # .ota_delete and .ota_files into <dir> for a package from <base> to HEAD.
+          generate_manifest() {
+            local BASE_TAG="$1" BASE_SHA="$2" OTA_DIR="$3"
+            local OTA_MANIFEST OTA_DELETE OTA_FILES RAW_ADD RAW_DEL MISSING
 
-          # The package must bring ANY installation derived from the base
-          # release to HEAD - not only the base release itself. A nightly
-          # device may carry files that Development changed and later
-          # reverted, or added and later removed; a plain tree diff between
-          # base and HEAD never mentions those. So the frame of reference is
-          # every path touched since the base (history) united with every
-          # path that differs from it (tree): paths present at HEAD are
-          # shipped (restoring base content where needed), paths absent at
-          # HEAD are deleted.
-          #
-          # --no-renames intentionally causes a rename to appear as a delete
-          # of the old path plus an add of the new path, which is exactly
-          # what the OTA updater needs.
-          {
-            git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA"
-            git log --no-renames --name-only --format= -z "${BASE_SHA}..${HEAD_SHA}"
-          } |
-          sort -z -u |
-          while IFS= read -r -d '' FILE; do
+            echo "=========================================="
+            echo "Generating OTA diff from ${BASE_TAG}"
+            echo "=========================================="
+            echo "Base stable release: ${BASE_TAG}"
+            echo "Base SHA:            ${BASE_SHA}"
+            echo "Development SHA:     ${HEAD_SHA}"
+            echo ""
 
-            if [ -z "$FILE" ]; then
-              continue
-            fi
+            mkdir -p "$OTA_DIR"
+            OTA_MANIFEST="$OTA_DIR/.ota_manifest"
+            OTA_DELETE="$OTA_DIR/.ota_delete"
+            OTA_FILES="$OTA_DIR/.ota_files"
 
-            if is_excluded "$FILE"; then
-              continue
-            fi
+            rm -f "$OTA_MANIFEST" "$OTA_DELETE" "$OTA_FILES"
 
-            OUT_PATH="$(translate_path "$FILE")"
+            touch "$OTA_MANIFEST"
+            touch "$OTA_DELETE"
+            touch "$OTA_FILES"
 
-            if git cat-file -e "${HEAD_SHA}:${FILE}" 2>/dev/null; then
-              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
-            elif [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
-              # A removed input of a generated file means the generated
-              # file changed, not that it was removed.
-              printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
-            else
-              printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
-            fi
+            RAW_ADD="$(mktemp)"
+            RAW_DEL="$(mktemp)"
 
-          done
+            # The package must bring ANY installation derived from the base
+            # release to HEAD - not only the base release itself. A nightly
+            # device may carry files that Development changed and later
+            # reverted, or added and later removed; a plain tree diff between
+            # base and HEAD never mentions those. So the frame of reference is
+            # every path touched since the base (history) united with every
+            # path that differs from it (tree): paths present at HEAD are
+            # shipped (restoring base content where needed), paths absent at
+            # HEAD are deleted.
+            #
+            # --no-renames intentionally causes a rename to appear as a delete
+            # of the old path plus an add of the new path, which is exactly
+            # what the OTA updater needs.
+            {
+              git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA"
+              git log --no-renames --name-only --format= -z "${BASE_SHA}..${HEAD_SHA}"
+            } |
+            sort -z -u |
+            while IFS= read -r -d '' FILE; do
 
-          # A full archive re-creates every tracked flag file (the first-boot
-          # lock for each platform, run_upgrades.lock), which the device
-          # consumes at runtime; that is how a full update re-arms the
-          # first-boot lane. Ship the same tracked flag files in every OTA
-          # package so an incremental update re-arms exactly what a full
-          # update would, without the updater needing per-platform knowledge.
-          git ls-tree -r --name-only "$HEAD_SHA" -- spruce/flags |
-          while IFS= read -r FLAG_FILE; do
-            [ -z "$FLAG_FILE" ] && continue
-            if is_excluded "$FLAG_FILE"; then
-              continue
-            fi
-            printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
-          done
-
-          # Generated files that must travel in every package (nightly
-          # markers, commit log), listed by an earlier step in .ota_extra_files.
-          if [ -f .ota_extra_files ]; then
-            while IFS= read -r EXTRA_FILE; do
-              if [ -n "$EXTRA_FILE" ] && [ -f "$EXTRA_FILE" ]; then
-                printf '%s\n' "$EXTRA_FILE" >> "$RAW_ADD"
+              if [ -z "$FILE" ]; then
+                continue
               fi
-            done < .ota_extra_files
-          fi
 
-          sort -u "$RAW_ADD" > "$OTA_FILES"
-          sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
+              if is_excluded "$FILE"; then
+                continue
+              fi
 
-          # Every packaged path must exist as a regular file NOW. A path that
-          # is missing here would silently drop out of the archive.
-          MISSING=0
-          while IFS= read -r OTA_PATH; do
-            [ -z "$OTA_PATH" ] && continue
-            if [ ! -f "$OTA_PATH" ]; then
-              echo "ERROR: manifest path does not exist at packaging time: $OTA_PATH"
-              MISSING=1
+              OUT_PATH="$(translate_path "$FILE")"
+
+              if git cat-file -e "${HEAD_SHA}:${FILE}" 2>/dev/null; then
+                printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+              elif [ "$OUT_PATH" != "$FILE" ] && [ -e "$OUT_PATH" ]; then
+                # A removed input of a generated file means the generated
+                # file changed, not that it was removed.
+                printf '%s\n' "$OUT_PATH" >> "$RAW_ADD"
+              else
+                printf '%s\n' "$OUT_PATH" >> "$RAW_DEL"
+              fi
+
+            done
+
+            # A full archive re-creates every tracked flag file (the first-boot
+            # lock for each platform, run_upgrades.lock), which the device
+            # consumes at runtime; that is how a full update re-arms the
+            # first-boot lane. Ship the same tracked flag files in every OTA
+            # package so an incremental update re-arms exactly what a full
+            # update would, without the updater needing per-platform knowledge.
+            git ls-tree -r --name-only "$HEAD_SHA" -- spruce/flags |
+            while IFS= read -r FLAG_FILE; do
+              [ -z "$FLAG_FILE" ] && continue
+              if is_excluded "$FLAG_FILE"; then
+                continue
+              fi
+              printf '%s\n' "$FLAG_FILE" >> "$RAW_ADD"
+            done
+
+            # Generated files that must travel in every package (nightly
+            # markers, commit log), listed by an earlier step in .ota_extra_files.
+            if [ -f .ota_extra_files ]; then
+              while IFS= read -r EXTRA_FILE; do
+                if [ -n "$EXTRA_FILE" ] && [ -f "$EXTRA_FILE" ]; then
+                  printf '%s\n' "$EXTRA_FILE" >> "$RAW_ADD"
+                fi
+              done < .ota_extra_files
             fi
-          done < "$OTA_FILES"
 
-          if [ "$MISSING" -ne 0 ]; then
-            echo "Refusing to build an OTA archive with missing payload."
-            exit 1
-          fi
+            sort -u "$RAW_ADD" > "$OTA_FILES"
+            sort -u "$RAW_DEL" | grep -vxF -f "$OTA_FILES" > "$OTA_DELETE" || true
 
-          echo ""
-          echo "Changed files:"
-          if [ -s "$OTA_FILES" ]; then
-            cat "$OTA_FILES"
-          else
-            echo "(none)"
-          fi
+            # Every packaged path must exist as a regular file NOW. A path that
+            # is missing here would silently drop out of the archive.
+            MISSING=0
+            while IFS= read -r OTA_PATH; do
+              [ -z "$OTA_PATH" ] && continue
+              if [ ! -f "$OTA_PATH" ]; then
+                echo "ERROR: manifest path does not exist at packaging time: $OTA_PATH"
+                MISSING=1
+              fi
+            done < "$OTA_FILES"
 
-          echo ""
-          echo "Deleted files:"
-          if [ -s "$OTA_DELETE" ]; then
-            cat "$OTA_DELETE"
-          else
-            echo "(none)"
-          fi
+            if [ "$MISSING" -ne 0 ]; then
+              echo "Refusing to build an OTA archive with missing payload."
+              exit 1
+            fi
 
-          # Add metadata to the beginning of the manifest.
-          {
-            echo "# spruceOS OTA manifest"
-            echo "# From stable release: ${{ steps.previous_stable.outputs.tag }}"
-            echo "# From SHA: $BASE_SHA"
-            echo "# To nightly version: ${{ steps.get_version.outputs.version }}"
-            echo "# To SHA: $HEAD_SHA"
             echo ""
-            echo "# Files to add/update:"
-            cat "$OTA_FILES"
+            echo "Changed files:"
+            if [ -s "$OTA_FILES" ]; then
+              cat "$OTA_FILES"
+            else
+              echo "(none)"
+            fi
+
             echo ""
-            echo "# Deleted files are listed in .ota_delete"
-          } > "$OTA_MANIFEST"
+            echo "Deleted files:"
+            if [ -s "$OTA_DELETE" ]; then
+              cat "$OTA_DELETE"
+            else
+              echo "(none)"
+            fi
 
-          rm -f "$RAW_ADD" "$RAW_DEL"
+            # Add metadata to the beginning of the manifest.
+            {
+              echo "# spruceOS OTA manifest"
+              echo "# From stable release: ${BASE_TAG}"
+              echo "# From SHA: $BASE_SHA"
+              echo "# To nightly version: ${VERSION}"
+              echo "# To SHA: $HEAD_SHA"
+              echo ""
+              echo "# Files to add/update:"
+              cat "$OTA_FILES"
+              echo ""
+              echo "# Deleted files are listed in .ota_delete"
+            } > "$OTA_MANIFEST"
 
-          echo "manifest=${OTA_MANIFEST}" >> "$GITHUB_OUTPUT"
-          echo "delete_list=${OTA_DELETE}" >> "$GITHUB_OUTPUT"
-          echo "file_list=${OTA_FILES}" >> "$GITHUB_OUTPUT"
+            rm -f "$RAW_ADD" "$RAW_DEL"
+          }
+
+          # The package from the last stable release. Its lists stay at the
+          # repository root, where they have always been.
+          generate_manifest "${{ steps.previous_stable.outputs.tag }}" "${{ steps.previous_stable.outputs.sha }}" .
+
+          echo "manifest=.ota_manifest" >> "$GITHUB_OUTPUT"
+          echo "delete_list=.ota_delete" >> "$GITHUB_OUTPUT"
+          echo "file_list=.ota_files" >> "$GITHUB_OUTPUT"
+
+          # The second package, from the stable before last (when there is one).
+          # Its lists go to .ota_prev/, which no archive picks up: the full
+          # archive names its dot-directories one by one.
+          PREV_TAG="${{ steps.stable_before_last.outputs.tag }}"
+          rm -rf .ota_prev
+
+          if [ -n "$PREV_TAG" ]; then
+            echo ""
+            generate_manifest "$PREV_TAG" "${{ steps.stable_before_last.outputs.sha }}" .ota_prev
+          fi
 
       - name: Create OTA archive
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
-          PREVIOUS_VERSION="${{ steps.previous_stable.outputs.tag }}"
+          OTA_7Z_OPTS=(-t7z -m0=lzma2:d=16m -mx=7 -ms=off -mf-)
 
-          OTA_ARCHIVE="spruceOTA-${PREVIOUS_VERSION}-to-v${VERSION}.7z"
+          # create_ota_archive <list dir> <archive>: .ota_manifest and .ota_delete
+          # from <list dir> go to the archive ROOT, where the updater reads them, then
+          # every path in <list dir>/.ota_files (relative to the repository root).
+          create_ota_archive() {
+            local LIST_DIR="$1" OTA_ARCHIVE="$2"
+            local ARCHIVE_PATH="$PWD/$OTA_ARCHIVE"
 
-          echo "Creating OTA archive: ${OTA_ARCHIVE}"
+            echo "Creating OTA archive: ${OTA_ARCHIVE}"
+            rm -f "$ARCHIVE_PATH"
 
-          # Build a temporary 7z list containing:
-          #   - the manifest
-          #   - the delete list
-          #   - every changed/added file
-          OTA_7Z_LIST="$(mktemp)"
+            (cd "$LIST_DIR" && 7z a "${OTA_7Z_OPTS[@]}" "$ARCHIVE_PATH" .ota_manifest .ota_delete)
 
-          printf '%s\n' ".ota_manifest" >> "$OTA_7Z_LIST"
-          printf '%s\n' ".ota_delete" >> "$OTA_7Z_LIST"
+            if [ -s "$LIST_DIR/.ota_files" ]; then
+              7z a "${OTA_7Z_OPTS[@]}" "$ARCHIVE_PATH" @"$LIST_DIR/.ota_files"
+            fi
 
-          if [ -s ".ota_files" ]; then
-            cat ".ota_files" >> "$OTA_7Z_LIST"
+            echo ""
+            echo "OTA archive created:"
+            ls -lh "$OTA_ARCHIVE"
+
+            echo ""
+            echo "Archive contents:"
+            7z l "$OTA_ARCHIVE"
+          }
+
+          create_ota_archive . "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${VERSION}.7z"
+
+          PREV_ARCHIVE="${{ steps.stable_before_last.outputs.archive }}"
+          if [ -n "$PREV_ARCHIVE" ]; then
+            echo ""
+            create_ota_archive .ota_prev "$PREV_ARCHIVE"
           fi
-
-          7z a \
-            -t7z \
-            -m0=lzma2:d=16m \
-            -mx=7 \
-            -ms=off \
-            -mf- \
-            "$OTA_ARCHIVE" \
-            @"$OTA_7Z_LIST"
-
-          rm -f "$OTA_7Z_LIST"
-
-          echo ""
-          echo "OTA archive created:"
-          ls -lh "$OTA_ARCHIVE"
-
-          echo ""
-          echo "Archive contents:"
-          7z l "$OTA_ARCHIVE"
 
       - name: Create 7z archive
         run: |
@@ -527,6 +597,8 @@ jobs:
             Base stable commit:
             `${{ steps.previous_stable.outputs.sha }}`
 
+            ${{ steps.stable_before_last.outputs.release_note }}
+
             Development commit:
             `${{ steps.current_commit.outputs.sha }}`
 
@@ -561,6 +633,10 @@ jobs:
 
           # Smallest first: the OTA diff is what most devices take.
           upload "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+          PREV_ARCHIVE="${{ steps.stable_before_last.outputs.archive }}"
+          if [ -n "$PREV_ARCHIVE" ]; then
+            upload "$PREV_ARCHIVE"
+          fi
           upload "spruceV${{ steps.get_version.outputs.version }}.7z"
 
       # The upload can fail after the release exists. Publishing a feed that
@@ -573,8 +649,11 @@ jobs:
         run: |
           for asset in \
             "spruceV${{ steps.get_version.outputs.version }}.7z" \
-            "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z"
+            "spruceOTA-${{ steps.previous_stable.outputs.tag }}-to-v${{ steps.get_version.outputs.version }}.7z" \
+            "${{ steps.stable_before_last.outputs.archive }}"
           do
+            # Empty when this run built no second OTA package.
+            [ -n "$asset" ] || continue
             state="$(gh api "repos/spruceUI/spruceOSNightlies/releases/tags/${{ steps.get_version.outputs.tag }}" \
               --jq ".assets[] | select(.name == \"${asset}\") | .state")"
             if [ "$state" != "uploaded" ]; then
@@ -607,6 +686,15 @@ jobs:
           echo "Stable -> nightly diff checksum: $DIFF_CHECKSUM"
           echo "Stable -> nightly diff size: ${DIFF_SIZE_MB} MB"
 
+          # Stable before last -> nightly OTA diff, when one was built
+          PREV_DIFF_ARCHIVE="${{ steps.stable_before_last.outputs.archive }}"
+          if [ -n "$PREV_DIFF_ARCHIVE" ]; then
+            PREV_DIFF_CHECKSUM=$(md5sum "$PREV_DIFF_ARCHIVE" | cut -d' ' -f1)
+            PREV_DIFF_SIZE_MB=$(ls -l --block-size=1M "$PREV_DIFF_ARCHIVE" | awk '{print $5}')
+            echo "Stable before last -> nightly diff checksum: $PREV_DIFF_CHECKSUM"
+            echo "Stable before last -> nightly diff size: ${PREV_DIFF_SIZE_MB} MB"
+          fi
+
           # Function to update OTA file
           update_ota_file() {
               local file="$1"
@@ -614,8 +702,8 @@ jobs:
               content=$(cat "$file")
 
               # Remove existing nightly variables.
-              # Only one stable -> nightly diff is needed because every
-              # nightly is generated from the current stable release.
+              # Every nightly is generated from the current stable release;
+              # the second diff only serves nightlies of the one before it.
               echo "$content" | grep -v "^NIGHTLY_" > "$file"
 
               # Full nightly release
@@ -639,6 +727,17 @@ jobs:
               echo "NIGHTLY_DIFF_CHECKSUM=$DIFF_CHECKSUM" >> "$file"
               echo "NIGHTLY_DIFF_SIZE_IN_MB=$DIFF_SIZE_MB" >> "$file"
               echo "NIGHTLY_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/${{ steps.get_version.outputs.tag }}/${DIFF_ARCHIVE}" >> "$file"
+
+              # Stable before last -> nightly OTA diff, for nightlies still based on
+              # it. No key contains NIGHTLY_VERSION= or RELEASE_VERSION=: the
+              # boot-time checker of older clients matches those without an anchor.
+              if [ -n "$PREV_DIFF_ARCHIVE" ]; then
+                  echo "NIGHTLY_PREV_DIFF_BASE_VERSION=${{ steps.stable_before_last.outputs.version }}" >> "$file"
+                  echo "NIGHTLY_PREV_DIFF_VERSION=${{ steps.get_version.outputs.version }}" >> "$file"
+                  echo "NIGHTLY_PREV_DIFF_CHECKSUM=$PREV_DIFF_CHECKSUM" >> "$file"
+                  echo "NIGHTLY_PREV_DIFF_SIZE_IN_MB=$PREV_DIFF_SIZE_MB" >> "$file"
+                  echo "NIGHTLY_PREV_DIFF_LINK=https://github.com/spruceUI/spruceOSNightlies/releases/download/${{ steps.get_version.outputs.tag }}/${PREV_DIFF_ARCHIVE}" >> "$file"
+              fi
           }
 
           # Update both OTA files
