@@ -199,12 +199,11 @@ set_dram_governor() {
 # force-feedback device on the pad, so darkmoss_vibrate's rumble tool has
 # nothing to talk to: drive the PWM through sysfs.
 #
-# Polarity has to be set to "normal" first. The 4.4 Rockchip driver reports
-# the reset register's polarity, "inversed", for a PWM nothing has claimed, and
-# inversed, duty 0 is high all the time and even a disabled PWM idles high:
-# that left the motor running nonstop after the first buzz (seen on hardware,
-# from the Game Switcher's hold vibration). Polarity can only be changed while
-# the PWM is disabled. Normal, both "duty 0" and "disabled" are low.
+# The 4.4 Rockchip driver reports "inversed" for this PWM and does not let
+# sysfs change it, so work in whichever polarity it reports, as AmberELEC does
+# on this board: with "inversed" the duty cycle is the low time, a disabled
+# PWM idles high (motor on), and off is enabled with duty = period; with
+# "normal" off is duty 0, disabled. Never leave an inversed PWM disabled.
 RG351P_PWM_PERIOD=1000000
 _rg351p_pwm() {
     _chip="${RG351P_PWM_CHIP:-/sys/class/pwm/pwmchip0}"
@@ -214,18 +213,31 @@ _rg351p_pwm() {
     echo "$_chip/pwm0"
 }
 
-# Off in an order that is low whatever polarity the PWM was left in: disable
-# (polarity can only change then), polarity normal, duty 0, disable.
-_rg351p_motor_off() {
-    echo 0 2>/dev/null > "$1/enable"
-    echo normal 2>/dev/null > "$1/polarity"
-    echo 0 2>/dev/null > "$1/duty_cycle"
-    echo 0 2>/dev/null > "$1/enable"
+_rg351p_pwm_inversed() {
+    [ "$(cat "$1/polarity" 2>/dev/null)" = "inversed" ]
 }
 
-# For wake: off only if pwm0 is exported. A PWM nothing has exported (rumble
-# never ran since boot) is left alone, since exporting it gives the reset
-# "inversed" polarity.
+# Duty $2 (0..period) as the motor's on-fraction, in either polarity.
+_rg351p_motor_set() {
+    _rg351p_d="$2"
+    _rg351p_pwm_inversed "$1" && _rg351p_d=$((RG351P_PWM_PERIOD - $2))
+    # period before duty_cycle: the kernel refuses a duty longer than the period.
+    echo "$RG351P_PWM_PERIOD" 2>/dev/null > "$1/period"
+    echo "$_rg351p_d" 2>/dev/null > "$1/duty_cycle"
+    echo 1 2>/dev/null > "$1/enable"
+}
+
+_rg351p_motor_off() {
+    if _rg351p_pwm_inversed "$1"; then
+        _rg351p_motor_set "$1" 0
+    else
+        echo 0 2>/dev/null > "$1/duty_cycle"
+        echo 0 2>/dev/null > "$1/enable"
+    fi
+}
+
+# For wake: off only if pwm0 is exported (rumble never ran since boot
+# otherwise, and the dtb leaves the pin low).
 _rg351p_motor_safe_off() {
     _rg351p_c="${RG351P_PWM_CHIP:-/sys/class/pwm/pwmchip0}"
     [ -d "$_rg351p_c/pwm0" ] || return 0
@@ -252,14 +264,6 @@ vibrate() {
     [ -n "$duration" ] || duration="$tier_duration"
 
     _pwm="$(_rg351p_pwm)" || return 0
-    echo 0 2>/dev/null > "$_pwm/enable"
-    echo normal 2>/dev/null > "$_pwm/polarity"
-    if [ "$(cat "$_pwm/polarity" 2>/dev/null)" != "normal" ]; then
-        # Never drive a motor whose off level is unknown.
-        log_message "$PLATFORM: pwm0 polarity is not normal, no vibration"
-        _rg351p_motor_off "$_pwm"
-        return 0
-    fi
     # In a subshell with a trap, so the motor goes off however the buzz ends:
     # a TERM/INT/HUP (killall of the calling script) interrupts the wait and
     # still turns it off. The sleep runs in the background and is waited for,
@@ -267,10 +271,7 @@ vibrate() {
     (
         trap '_rg351p_motor_off "$_pwm"' EXIT
         trap 'exit 1' INT TERM HUP
-        # period before duty_cycle: the kernel refuses a duty longer than the period.
-        echo "$RG351P_PWM_PERIOD" 2>/dev/null > "$_pwm/period"
-        echo "$duty" 2>/dev/null > "$_pwm/duty_cycle"
-        echo 1 2>/dev/null > "$_pwm/enable"
+        _rg351p_motor_set "$_pwm" "$duty"
         sleep "$(awk -v ms="$duration" 'BEGIN { printf "%.3f", ms / 1000 }')" &
         wait $!
     )
@@ -378,6 +379,9 @@ resolve_pad_node() {
         _rg351p_pad_input_id > "$RG351P_PAD_INPUT_FILE" 2>/dev/null || rm -f "$RG351P_PAD_INPUT_FILE"
     else
         log_message "$PLATFORM: no joypad node found - controls will be dead"
+    fi
+    if [ "$1" != "rearm" ] && [ ! -f "$RG351P_MIGRATE2_FLAG" ]; then
+        _rg351p_migrate_v2
     fi
     if [ "$1" != "rearm" ] && [ ! -f "$RG351P_MIGRATE_FLAG" ]; then
         _rg351p_migrate_v1
@@ -499,6 +503,20 @@ set_default_ra_hotkeys() {
 # defined and before any emulator starts. A lock directory keeps two runs
 # apart; the flag is only set once every step is done, so a step that could
 # not run yet is tried again at the next boot.
+# v2: PPSSPP's UI at the V10's UIScaleFactor -1 overflows the 480x320 panel
+# (pause menu items overlap); only the untouched old value is changed.
+RG351P_MIGRATE2_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v2"
+_rg351p_migrate_v2() {
+    _m2live="/mnt/SDCARD/Saves/.config/ppsspp/PSP/SYSTEM/ppsspp-RG351P.ini"
+    if [ -f "$_m2live" ] && grep -qx 'UIScaleFactor = -1' "$_m2live"; then
+        sed 's/^UIScaleFactor = -1$/UIScaleFactor = -4/' "$_m2live" > "$_m2live.tmp" 2>/dev/null &&
+            [ -s "$_m2live.tmp" ] && mv -f "$_m2live.tmp" "$_m2live" &&
+            log_message "$PLATFORM: PPSSPP UI scale lowered to fit the screen (one-time fix)" ||
+            { rm -f "$_m2live.tmp"; return 0; }
+    fi
+    mkdir -p "${RG351P_MIGRATE2_FLAG%/*}" && touch "$RG351P_MIGRATE2_FLAG"
+}
+
 RG351P_MIGRATE_FLAG="/mnt/SDCARD/Saves/flags/.rg351p_migrate_v1"
 RG351P_OLD_PPSSPP_L='L = 1-45,10-192,10-194'
 _rg351p_migrate_v1() {
