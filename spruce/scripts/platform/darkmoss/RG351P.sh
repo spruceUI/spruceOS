@@ -307,15 +307,20 @@ vibrate() {
 # newer wake superseded it or a new sleep began (sleep_helper's directory is
 # back), and the restart itself runs under a lock directory, so overlapping
 # re-arms never start two sets of watchdogs.
-# Songo#5's Godot runtime draws through its own librga (RGA rotates the
-# picture for this portrait panel) and keeps animating; one suspended with a
-# rotation job in flight came back with a frozen picture while its audio
-# thread kept playing. Pause it across a sleep like the emulators
-# (signal_emulators STOP/CONT); save_poweroff also closes it like one.
-case " $EMU_PROCESSES " in
-    *" sbc_4_3_rcv12 "*) ;;
-    *) EMU_PROCESSES="$EMU_PROCESSES sbc_4_3_rcv12" ;;
-esac
+# Standalone programs that keep running on their own: Songo#5's Godot runtime
+# (sbc_4_3_rcv12, which draws through the system libSDL2, the odroidgoa KMSDRM
+# build that rotates each frame for this portrait panel with an RGA blit; it
+# has no librga of its own), ScummVM, GameTank, BigPEmu, XRoar and the media
+# players. They are paused across a sleep like the emulators (signal_emulators
+# STOP/CONT), so a timed wake does not run them in the dark, and save_poweroff
+# now sends them CONT, then TERM, then KILL like the emulators.
+for _p in sbc_4_3_rcv12 scummvm.64 GameTankEmulator bigpemu xroar gvu ffplay; do
+    case " $EMU_PROCESSES " in
+        *" $_p "*) ;;
+        *) EMU_PROCESSES="$EMU_PROCESSES $_p" ;;
+    esac
+done
+unset _p
 
 RG351P_PAD_NAME="OpenSimHardware OSH PB Controller"
 RG351P_PAD_INPUT_FILE="/tmp/rg351p_pad_input"
@@ -328,8 +333,9 @@ RG351P_REARM_LOCK="/tmp/rg351p_rearm.lock"
 # mirrors it into a virtual one with the same name and IDs that never goes
 # away; a runtime udev rule hides the real pad from joystick scans meanwhile.
 # The virtual device's phys is "rg351p-padproxy". Supervised by a shell loop
-# that removes the rule whenever the proxy exits, so a crash can never leave
-# games without a joystick; it gives up after 5 quick failures in a row.
+# that restarts it with the rule kept, and gives up after 5 quick failures in a
+# row; only that give-up removes the rule, so games never stay without a
+# joystick.
 RG351P_PADPROXY="/mnt/SDCARD/spruce/scripts/platform/darkmoss/rg351p_padproxy.py"
 RG351P_PADPROXY_PID="/tmp/rg351p_padproxy.pid"
 RG351P_PADPROXY_LOG="/mnt/SDCARD/Saves/spruce/rg351p-padproxy.log"
@@ -342,6 +348,59 @@ _rg351p_padproxy_alive() {
     [ -n "$_rg351p_pp" ] && kill -0 "$_rg351p_pp" 2>/dev/null
 }
 
+# A proxy restart or give-up, or a proxy that came up after boot's wait, moved
+# the pad node: put spruce's readers (the watchdogs' getevents, idlemon) on the
+# current one. $1 is how many seconds to wait for the virtual node first (0:
+# do not wait, after a give-up). Boot's launch_common_startup_watchdogs_v2
+# starts the readers the first time, so this waits for them (up to a minute)
+# and leaves a wake to that wake's re-arm. Same lock as the re-arm.
+_rg351p_padproxy_follow() {
+    _i=0
+    while [ "$_i" -lt $(( $1 * 4 )) ] && ! _rg351p_padproxy_node_up; do
+        sleep 0.25
+        _i=$((_i + 1))
+    done
+    _i=0
+    until pgrep -f /mnt/SDCARD/spruce/scripts/menubutton_watchdog.sh >/dev/null 2>&1; do
+        [ "$_i" -ge 240 ] && return 0
+        sleep 0.25
+        _i=$((_i + 1))
+    done
+    sleep 0.5
+    [ -d /tmp/sleep_helper_started ] && return 0
+    _now="$(_rg351p_pad_input_id)"
+    _rec=""
+    read -r _rec 2>/dev/null < "$RG351P_PAD_INPUT_FILE"
+    [ -n "$_now" ] && [ "$_now" != "$_rec" ] || return 0
+    _w=0
+    until mkdir "$RG351P_REARM_LOCK" 2>/dev/null; do
+        [ "$_w" -ge 20 ] && return 0
+        sleep 0.25
+        _w=$((_w + 1))
+    done
+    # Another follower or a re-arm may have moved the readers while this one
+    # waited for the lock: check again, so they are not restarted twice.
+    _rec=""
+    read -r _rec 2>/dev/null < "$RG351P_PAD_INPUT_FILE"
+    _now="$(_rg351p_pad_input_id)"
+    if [ -z "$_now" ] || [ "$_now" = "$_rec" ]; then
+        rmdir "$RG351P_REARM_LOCK" 2>/dev/null
+        return 0
+    fi
+    log_message "$PLATFORM: pad node moved to $_now, restarting the pad readers"
+    echo "$_now" > "$RG351P_PAD_INPUT_FILE"
+    resolve_pad_node rearm
+    resolve_key_event_node
+    rm -f /tmp/menubtn /tmp/menubtn_cancelled
+    killall -q idlemon 2>/dev/null
+    restart_pad_readers
+    rmdir "$RG351P_REARM_LOCK" 2>/dev/null
+}
+
+# The hide rule stays while the proxy restarts: a crash then only removes the
+# virtual pad, and the restarted proxy's new one is added while the real pad is
+# still hidden, so RetroArch puts it back on port 1. Only a give-up shows the
+# real pad again. Every restart is followed by _rg351p_padproxy_follow.
 _rg351p_padproxy_start() {
     _rg351p_padproxy_alive && return 0
     [ -x /usr/bin/python3 ] && [ -e /dev/uinput ] && [ -f "$RG351P_PADPROXY" ] || return 1
@@ -349,17 +408,34 @@ _rg351p_padproxy_start() {
     (
         trap '' HUP
         _fails=0
+        _first=1
         while [ "$_fails" -lt 5 ]; do
+            [ "$_first" = 1 ] || _rg351p_padproxy_follow 10 </dev/null >/dev/null 2>&1 &
+            _first=0
             _t0=$(date +%s)
-            /usr/bin/python3 -I "$RG351P_PADPROXY" >> "$RG351P_PADPROXY_LOG" 2>&1
-            rm -f "$RG351P_PADPROXY_RULE"
-            udevadm control --reload 2>/dev/null
-            udevadm trigger --action=change --subsystem-match=input 2>/dev/null
+            # Ahead of the games it feeds, so a busy core does not delay the pad.
+            if command -v nice >/dev/null 2>&1; then
+                nice -n -10 /usr/bin/python3 -I "$RG351P_PADPROXY" >> "$RG351P_PADPROXY_LOG" 2>&1
+            else
+                /usr/bin/python3 -I "$RG351P_PADPROXY" >> "$RG351P_PADPROXY_LOG" 2>&1
+            fi
             if [ $(( $(date +%s) - _t0 )) -lt 60 ]; then _fails=$((_fails + 1)); else _fails=0; fi
             echo "padproxy exited, restart $_fails/5" >> "$RG351P_PADPROXY_LOG"
             sleep 2
         done
+        # Giving up: show the real pad to joystick scans again. Running SDL
+        # programs, RetroArch and Godot ignore a "change", so re-announce it.
+        rm -f "$RG351P_PADPROXY_RULE"
+        udevadm control --reload 2>/dev/null
+        udevadm trigger --action=change --subsystem-match=input 2>/dev/null
+        for _d in /sys/class/input/event*; do
+            _n=""
+            read -r _n 2>/dev/null < "$_d/device/name"
+            [ "$_n" = "$RG351P_PAD_NAME" ] && udevadm trigger --action=add "$_d" 2>/dev/null
+        done
+        echo "padproxy gave up; real pad re-announced" >> "$RG351P_PADPROXY_LOG"
         rm -f "$RG351P_PADPROXY_PID"
+        _rg351p_padproxy_follow 0
     ) </dev/null >/dev/null 2>&1 &
     echo $! > "$RG351P_PADPROXY_PID"
     log_message "$PLATFORM: pad proxy started"
@@ -442,14 +518,23 @@ resolve_pad_node() {
         _i=$((_i + 1))
     done
     # Boot (not a re-arm): start the proxy before anything opens the pad, and
-    # give it up to 5 s to bring up the virtual node.
+    # give it up to 15 s to bring up the virtual node, less if it gives up.
     if [ "$1" != "rearm" ] && _rg351p_padproxy_start; then
         _i=0
-        while [ "$_i" -lt 20 ] && ! _rg351p_padproxy_node_up; do
+        while [ "$_i" -lt 60 ] && ! _rg351p_padproxy_node_up && _rg351p_padproxy_alive; do
             sleep 0.25
             _i=$((_i + 1))
         done
-        _rg351p_padproxy_node_up || log_message "$PLATFORM: pad proxy has no virtual pad yet, using the real one"
+        if _rg351p_padproxy_node_up; then
+            # The node exists before udevd has tagged it a joystick (and the
+            # real pad is already hidden); let the proxy's udev events finish.
+            udevadm settle -t 3 2>/dev/null
+        else
+            # Readers started now get the real pad, which the proxy grabs once
+            # it is up: move them to the virtual pad when it appears.
+            log_message "$PLATFORM: pad proxy has no virtual pad yet, using the real one"
+            _rg351p_padproxy_follow 60 </dev/null >/dev/null 2>&1 &
+        fi
     fi
     _pad="$(_rg351p_find_pad_node)"
     if [ -n "$_pad" ]; then
@@ -490,8 +575,14 @@ _rg351p_rearm_pad_readers() {
     sleep 0.3
     _rg351p_rearm_stale "$_gen" && return 0
 
-    # With the proxy up, every reader holds the virtual pad, which never left.
-    if _rg351p_padproxy_alive && _rg351p_padproxy_node_up; then
+    # With the readers already on the proxy's virtual pad, which never left,
+    # nothing moved. Readers started on the real (grabbed) pad after a slow
+    # proxy at boot, or left on a virtual pad a proxy restart destroyed, are
+    # recorded under another input device: the loop below then breaks at once
+    # and they are restarted on the current node.
+    _rec=""
+    read -r _rec 2>/dev/null < "$RG351P_PAD_INPUT_FILE"
+    if _rg351p_padproxy_node_up && [ -n "$_rec" ] && [ "$(_rg351p_pad_input_id)" = "$_rec" ]; then
         log_message "$PLATFORM: pad proxy kept the controls across the sleep"
         return 0
     fi
@@ -553,8 +644,33 @@ _rg351p_rearm_pad_readers() {
     rmdir "$RG351P_REARM_LOCK" 2>/dev/null
 }
 
+# dArkMossCommon.sh's device_enter_sleep; keep it in sync. It first records
+# bl_power: suspend and resume power the panel down and up again, so after the
+# wake bl_power no longer says whether Songo had blanked it.
+device_enter_sleep() {
+    cat /sys/class/backlight/backlight/bl_power > /tmp/rg351p_blp_sleep 2>/dev/null
+    IDLE_TIMEOUT="$1"
+    log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
+    save_sleep_info "$IDLE_TIMEOUT" || return 1
+    set_wake_alarm "$IDLE_TIMEOUT" "$WAKE_ALARM_PATH" || return 1
+    # The base's sleep hook restores the brightness it saw before suspend, and
+    # resume thaws the game: a timed wake would light the panel and run the game
+    # until save_poweroff closes it. Only a manual wake restores both.
+    signal_emulators STOP
+    echo 0 > "$DEVICE_BACKLIGHT_PATH"
+    trigger_device_sleep
+}
+
 device_exit_sleep() {
+    _blp="$(cat /tmp/rg351p_blp_sleep 2>/dev/null)"
+    rm -f /tmp/rg351p_blp_sleep
     darkmoss_exit_sleep
+    # Songo#5's own screen-off (TYPE2 set_brightness 0) sets only bl_power=1,
+    # which apply_backlight clears: the panel would light under a Songo that
+    # still thinks it is dark. Leave it dark; Songo's own wake relights it.
+    if [ "$_blp" = 1 ] && pgrep -x sbc_4_3_rcv12 >/dev/null 2>&1; then
+        echo 1 > /sys/class/backlight/backlight/bl_power 2>/dev/null
+    fi
     _rg351p_motor_safe_off
     _gen="$(_rg351p_rearm_bump)"
     _rg351p_rearm_pad_readers "$_gen" </dev/null >/dev/null 2>&1 &
@@ -582,6 +698,49 @@ set_default_ra_hotkeys() {
         "input_state_slot_decrease_btn = \"nul\"" \
         "input_state_slot_increase_btn = \"nul\"" \
         "input_toggle_slowmotion_btn = \"nul\""
+}
+
+# The stick click that is spruce's menu button (B_MENU, RG351P.cfg) must not
+# also press L3/R3 in the game: player 1's L3/R3 binds follow the Menu button
+# setting at every launch (the pad's autoconfig leaves both clicks unbound, so
+# a "nul" here is no bind at all). Only written when they differ. The rest is
+# dArkMossCommon.sh's setup_for_retroarch; keep it in sync.
+setup_for_retroarch() {
+    _rg351p_racfg="$(platform_path "/mnt/SDCARD/Saves/ra-configs/retroarch-%s.cfg")"
+    if [ "$B_MENU" = "1 313" ]; then
+        _rg351p_l3='input_player1_l3_btn = "23"'
+        _rg351p_r3='input_player1_r3_btn = "nul"'
+    else
+        _rg351p_l3='input_player1_l3_btn = "nul"'
+        _rg351p_r3='input_player1_r3_btn = "24"'
+    fi
+    if [ -f "$_rg351p_racfg" ] &&
+        ! { grep -qxF "$_rg351p_l3" "$_rg351p_racfg" && grep -qxF "$_rg351p_r3" "$_rg351p_racfg"; }; then
+        update_ra_config_file_with_new_setting "$_rg351p_racfg" "$_rg351p_l3" "$_rg351p_r3" >/dev/null
+    fi
+    unset _rg351p_racfg _rg351p_l3 _rg351p_r3
+
+    case "$CORE" in
+        uae4arm)      export LD_LIBRARY_PATH="$EMU_DIR:$LD_LIBRARY_PATH" ;;
+        easyrpg)      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib-Flip" ;;
+        yabasanshiro) export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EMU_DIR/lib64" ;;
+    esac
+
+    case "$RA_BIN" in
+        ra32.*)
+            export CORE_DIR="$RA_DIR/.retroarch/cores"
+            export GLIBC_TUNABLES=glibc.rtld.execstack=2
+            ;;
+        *)      export CORE_DIR="$RA_DIR/.retroarch/cores64" ;;
+    esac
+
+    if [ -f "$EMU_DIR/${CORE}_libretro.so" ]; then
+        export CORE_PATH="$EMU_DIR/${CORE}_libretro.so"
+    else
+        export CORE_PATH="$CORE_DIR/${CORE}_libretro.so"
+    fi
+
+    echo "$RA_BIN"
 }
 
 # One-time fix-ups of settings an earlier RG351P build left on the card, which
