@@ -198,11 +198,24 @@ class KeyWatcherController(ControllerInterface):
                             "Keyboard device became unavailable (errno=%d), retrying in 1s",
                             e.errno,
                         )
+                        # The device is gone (e.g. a USB pad re-enumerated after
+                        # resume), so its releases will never arrive: drop what
+                        # it had held or those keys stay "held" forever.
+                        with self.lock:
+                            self.held_controller_inputs.clear()
                         time.sleep(1.0)  
                         try:
                             fd_tmp = os.open(self.event_path, os.O_RDONLY)
                             if fd_tmp is not None and fd_tmp > 0:
+                                old_fd = self.fd
                                 self.fd = fd_tmp
+                                # Close the dead fd only once replaced, so a failed
+                                # reopen never leaves self.fd naming a reused number.
+                                if old_fd is not None and old_fd != fd_tmp:
+                                    try:
+                                        os.close(old_fd)
+                                    except OSError:
+                                        pass
                         except OSError as e:
                             pass
                         continue
