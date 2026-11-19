@@ -307,6 +307,16 @@ vibrate() {
 # newer wake superseded it or a new sleep began (sleep_helper's directory is
 # back), and the restart itself runs under a lock directory, so overlapping
 # re-arms never start two sets of watchdogs.
+# Songo#5's Godot runtime draws through its own librga (RGA rotates the
+# picture for this portrait panel) and keeps animating; one suspended with a
+# rotation job in flight came back with a frozen picture while its audio
+# thread kept playing. Pause it across a sleep like the emulators
+# (signal_emulators STOP/CONT); save_poweroff also closes it like one.
+case " $EMU_PROCESSES " in
+    *" sbc_4_3_rcv12 "*) ;;
+    *) EMU_PROCESSES="$EMU_PROCESSES sbc_4_3_rcv12" ;;
+esac
+
 RG351P_PAD_NAME="OpenSimHardware OSH PB Controller"
 RG351P_PAD_INPUT_FILE="/tmp/rg351p_pad_input"
 RG351P_REARM_GEN_FILE="/tmp/rg351p_rearm_gen"

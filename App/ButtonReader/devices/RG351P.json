@@ -121,8 +121,8 @@
       "from": "cfg"
     },
     "LEFT_STICK": {
-      "x": "3 2",
-      "y": "3 3",
+      "x": "3 2 -1",
+      "y": "3 3 -1",
       "source": "pad",
       "from": "cfg"
     },
