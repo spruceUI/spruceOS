@@ -128,13 +128,17 @@ $ESUDO mkdir -p "${CONFDIR}"
 # Setup volume indicator
 USE_SONGO_VOL_TCP_SERVER="1" # Set to "0" to disable the volume overlay, might need to disable for pixel 2
 
-if [ -f /mnt/SDCARD/spruce/twig ]; then
+# RG351P: volume is an analog wheel after the codec, and no device node reports
+# volume keys, so the listener could only sit on the power key for nothing.
+if [ -f /mnt/SDCARD/spruce/twig ] || [ "$PLATFORM" = "RG351P" ]; then
 	USE_SONGO_VOL_TCP_SERVER="0"
 fi
 
 SONGO_CFW_NAME="Spruce"
 
-sh "${GAMEDIR}/runtime/volume-indicator/setup_vol_indicator" "${SONGO_CFW_NAME}"
+if [ "$PLATFORM" != "RG351P" ]; then
+	sh "${GAMEDIR}/runtime/volume-indicator/setup_vol_indicator" "${SONGO_CFW_NAME}"
+fi
 
 export SONGO_CFW_NAME
 export USE_SONGO_VOL_TCP_SERVER
@@ -216,6 +220,16 @@ case "$PLATFORM" in
     "Anbernic"*)
         export_sdl_gamecontroller_map positional
         ;;
+    "RG351P")
+        # The RG351P's OSH PB pad has no usable entry in the runtime's mapping
+        # database (shoulders and Select/Start land on the wrong inputs), so it
+        # gets the cfg's map, positional for the same reason as the XX line.
+        export_sdl_gamecontroller_map positional
+        # Godot's default 15 ms output latency is shorter than one period of
+        # the base's dmix (1024 frames at 44.1 kHz), so it underruns and
+        # crackles on the RK3326. 100 ms keeps the buffer full.
+        GODOT_OPTS="${GODOT_OPTS:+$GODOT_OPTS }--audio-output-latency 100"
+        ;;
     *)
         export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
         ;;
@@ -243,7 +257,15 @@ if [ "$CURRENT_BRIGHTNESS" = "0" ]; then
     "$SONGO_SET_BRIGHTNESS_PATH" "$INITIAL_BRIGHTNESS"
 fi
 
-if [[ "$SONGO_CFW_NAME" != "NONE" ]]; then
+# Songo's TYPE2 blank writes only bl_power=1, so the check above misses it, and
+# darkmoss PyUI does not re-apply the backlight at start.
+if [ "$PLATFORM" = "RG351P" ] && [ "$BL_TYPE" = "TYPE2" ] && [ -n "$SYSFS_BL_POWER" ]; then
+    for _blp in $SYSFS_BL_POWER; do
+        [ "$(cat "$_blp" 2>/dev/null)" != "0" ] && echo 0 > "$_blp" 2>/dev/null
+    done
+fi
+
+if [[ "$SONGO_CFW_NAME" != "NONE" ]] && [ "$PLATFORM" != "RG351P" ]; then
 	# Teardown volume indicator
 	sh "${GAMEDIR}/runtime/volume-indicator/teardown_vol_indicator" "${SONGO_CFW_NAME}"
 fi

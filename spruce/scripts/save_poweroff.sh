@@ -152,14 +152,14 @@ attempt_to_close_emu_gracefully() {
 close_gracefully_ppsspp() {
     {
         # send autosave hot key
-        echo 1 314 1 # SELECT down
-        echo 1 311 1 # R1 down
-        echo 1 311 0 # R1 up
-        echo 1 314 0 # SELECT up
+        echo 1 ${PPSSPP_AUTOSAVE_SELECT:-314} 1 # SELECT down
+        echo 1 ${PPSSPP_AUTOSAVE_R1:-311} 1     # R1 down
+        echo 1 ${PPSSPP_AUTOSAVE_R1:-311} 0     # R1 up
+        echo 1 ${PPSSPP_AUTOSAVE_SELECT:-314} 0 # SELECT up
         echo 0 0 0   # tell sendevent to exit
     } | sendevent $EVENT_PATH_SEND_TO_RA_AND_PPSSPP || \
     log_message "Warning: sendevent failed during PPSSPP autosave"
-    sleep 1
+    sleep "${PPSSPP_AUTOSAVE_WAIT:-1}"
     killall -q -15 PPSSPPSDL_TrimUI 2>/dev/null
     killall -q -15 PPSSPPSDL_$PLATFORM $PSP_BIN 2>/dev/null
 }

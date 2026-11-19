@@ -153,11 +153,14 @@ migrate_standalone_data() {
 
 # A board's pad map (UNVERIFIED, generated from its platform cfg's SDL map for the DC controls audit): Flycast v2.7
 # drops triggers SDL maps to buttons. Copied only when absent, so a map saved in Flycast's own menu stays.
+# FLYCAST_PAD_REFRESH=1 (a board's opt-in) also replaces an untouched seed that differs from the table: Flycast's
+# own save drops comment lines, so only a file still headed "; UNVERIFIED pad map for " is spruce's.
 install_flycast_pad_mapping() {
 	for f in "$FLYCAST_DEFAULTS/flycast/pads/$FLYCAST_PAD_MAP"/SDL_*.cfg; do
 		[ -f "$f" ] || continue
 		dst="${XDG_CONFIG_HOME:-/mnt/SDCARD/Emu/DC/config}/flycast/mappings/${f##*/}"
-		[ -e "$dst" ] || { mkdir -p "${dst%/*}" && cp "$f" "$dst"; }
+		if [ ! -e "$dst" ]; then mkdir -p "${dst%/*}" && cp "$f" "$dst"
+		elif [ "$FLYCAST_PAD_REFRESH" = 1 ] && head -n1 "$dst" | grep -q '^; UNVERIFIED pad map for ' && ! cmp -s "$f" "$dst"; then cp -f "$f" "$dst"; fi
 	done
 }
 

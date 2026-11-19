@@ -141,11 +141,7 @@ EOF
 			Flip|Brick*|SmartPro|Zero*|XU20) export PICO8_IGM_HIDE_SCANCODE=41 ;;
 		esac
 
-		# The RG351P's OSH PB pad is in no shipped sdl_controllers.* profile:
-		# hand PICO-8 the label-named map from RG351P.cfg, as the Anbernic branch does.
-		case "$PLATFORM" in
-			RG351P) export_sdl_gamecontroller_map ;;
-		esac
+		# RG351P: keep RG351P.cfg's default SDL_GAMECONTROLLERCONFIG (a = South); the label-named map would swap O and X.
 
 		# use_wget is 1, so PICO-8 shells out to wget for every cart fetch.
 		# spruce/bin64/wget is first on PATH but is linked against

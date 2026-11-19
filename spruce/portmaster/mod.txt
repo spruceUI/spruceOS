@@ -34,4 +34,16 @@ Anbernic*)
         return 0
     }
     ;;
+RG351P)
+    # 480x320 panel: follow the ArkOS/ROCKNIX RG351P/M convention so ports
+    # that branch on these pick their low-res path. control.txt defines
+    # get_controls after sourcing the spruce control.txt hook, so it can only
+    # be overridden here.
+    param_device="anbernic"
+    get_controls() {
+      LOWRES="Y"
+      ANALOGSTICKS=$ANALOG_STICKS
+      sdl_controllerconfig="$SDL_GAMECONTROLLERCONFIG"
+    }
+    ;;
 esac
