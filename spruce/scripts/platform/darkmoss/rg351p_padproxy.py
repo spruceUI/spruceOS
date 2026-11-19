@@ -24,9 +24,12 @@ PHYS = b"rg351p-padproxy"
 RULE = "/run/udev/rules.d/99-rg351p-padproxy.rules"
 RULE_TEXT = (
     "# spruce rg351p_padproxy.py: the real pad is mirrored by a virtual one;\n"
-    "# hide the real one from joystick scans while that runs.\n"
+    "# hide the real one from joystick scans while that runs, and make sure\n"
+    "# the virtual one (keyboard keys included, like the real pad) is a joystick.\n"
     'SUBSYSTEM=="input", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="3100", '
     'ENV{ID_INPUT_JOYSTICK}="", ENV{ID_INPUT_KEYBOARD}="", ENV{ID_INPUT_KEY}=""\n'
+    'SUBSYSTEM=="input", ATTRS{phys}=="rg351p-padproxy", '
+    'ENV{ID_INPUT_JOYSTICK}="1", ENV{ID_INPUT_KEYBOARD}="", ENV{ID_INPUT_KEY}=""\n'
 )
 
 EV_SYN, EV_KEY, EV_ABS = 0, 1, 3
@@ -85,7 +88,11 @@ def open_pad(path):
     return fd
 
 def create_virtual(pad_fd):
-    keys = [k for k in bits(pad_fd, EV_KEY, KEY_CNT) if k >= 0x100]   # buttons only
+    # Every key the real pad declares, its keyboard collection's keys included:
+    # RetroArch's udev driver numbers buttons from the lowest key code, so the
+    # pad's 15 keyboard keys put its buttons at 15-26, which its autoconfig
+    # and spruce's RetroArch binds expect.
+    keys = bits(pad_fd, EV_KEY, KEY_CNT)
     axes = bits(pad_fd, EV_ABS, ABS_CNT)
     absinfo = {}
     for a in axes:
@@ -177,14 +184,17 @@ def main():
             time.sleep(0.5)
             continue
         if ufd is None:
+            # Rules first, so the virtual pad is a joystick from its first udev event.
+            retag(True)
             try:
                 ufd, centre = create_virtual(pfd)
             except OSError as e:
                 log("cannot create the virtual pad: %s" % e)
                 os.close(pfd)
+                retag(False)
                 time.sleep(2)
                 continue
-            retag(True)
+            udev("settle", "-t", "5")
         log("mirroring %s" % path)
         while True:
             try:
