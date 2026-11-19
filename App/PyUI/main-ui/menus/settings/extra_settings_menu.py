@@ -89,7 +89,7 @@ class ExtraSettingsMenu(settings_menu.SettingsMenu):
 
     def is_excluded_setting(self,category):
         merged_settings_names = (
-            Language.controller_settings(),
+            ControllerSettingsMenu.SETTINGS_NAME,
             GameSwitcherSettingsMenu.SETTINGS_NAME,
         )
         return any(
