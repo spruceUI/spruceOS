@@ -277,6 +277,27 @@ run_dsperate() {
 		if [ "$TATE_MODE" = "true" ] && [ "$PLATFORM" = "RG351P" ]; then
 			_config_path="/mnt/SDCARD/Saves/dsperate/rg351p-tate.ini"
 		fi
+		# RG351P: a tap on the stick click that is spruce's menu (Button Settings)
+		# opens DSperate's pause menu, and the default mic = leftstick must not
+		# fake a DS mic blow on every menu press. Tate needs a pad modifier: the
+		# pad has no guide button. Also updates live copies seeded before this.
+		if [ "$PLATFORM" = "RG351P" ] && [ -f "$_config_path" ]; then
+			case "$B_MENU" in
+				"1 313") _ds_menu=rightstick ;;
+				*) _ds_menu=leftstick ;;
+			esac
+			# Only inside [padhotkeys]: [audio] has its own "mic = false".
+			for _k in "pause.alt = $_ds_menu" "mic = none"; do
+				_key="$(echo "${_k%% =*}" | sed 's/\./\\./g')"
+				if sed -n '/^\[padhotkeys\]/,/^\[/p' "$_config_path" | grep -q "^$_key[[:space:]]*="; then
+					sed -i "/^\[padhotkeys\]/,/^\[/s/^$_key[[:space:]]*=.*/$_k/" "$_config_path"
+				else
+					sed -i "/^\[padhotkeys\]/a $_k" "$_config_path"
+				fi
+			done
+			sed -n '/^\[padhotkeys\]/,/^\[/p' "$_config_path" | grep -q '^modifier[[:space:]]*=' ||
+				sed -i '/^\[padhotkeys\]/a modifier = back' "$_config_path"
+		fi
 
 		export LD_LIBRARY_PATH="$EMU_DIR/lib64:$LD_LIBRARY_PATH"
 		# DSperate_flip_lib holds PyUI's SDL2 under the SONAME the loader wants:
