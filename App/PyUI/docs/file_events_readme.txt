@@ -13,15 +13,17 @@ to reopen its output with a signal, see audio_reopen_readme.txt.)
 
 Turning it on
 -------------
-PyUI reads one environment variable at startup:
+FileWatcher (devices/utils/file_watcher.py) reads one environment variable:
 
-  PYUI_FILE_EVENTS=1    use inotify
-  anything else         look every 0.2 s, as before
+  FILE_WATCH_EVENT_TYPE=INOTIFY    use inotify (inotify_file_watcher.py)
+  anything else                    look every 0.2 s, as before
+                                   (polling_file_watcher.py)
 
-spruce's launch.sh sets it from the device scripts: device_pyui_file_events in
-spruce/scripts/platform/device.sh returns 1 (off). A device turns it on by
-defining the function in its own platform file to return 0, after a test on
-that device. Today only the TrimUI Smart Pro S (tina-stock/SmartProS.sh) does.
+spruce's launch.sh sets it to INOTIFY or POLLING from the device scripts:
+device_pyui_file_events in spruce/scripts/platform/device.sh returns 1 (off).
+A device turns it on by defining the function in its own platform file to
+return 0, after a test on that device. Today the TrimUI Smart Pro S
+(tina-stock/SmartProS.sh) and the Miniloong (darkmoss/Miniloong.sh) do.
 
 What changes when it is on
 --------------------------

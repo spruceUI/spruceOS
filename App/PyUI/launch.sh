@@ -6,7 +6,7 @@
 [ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
 
 # The device scripts choose whether PyUI's file watchers wait on inotify (device.sh).
-if device_pyui_file_events; then export PYUI_FILE_EVENTS=1; else unset PYUI_FILE_EVENTS; fi
+if device_pyui_file_events; then export FILE_WATCH_EVENT_TYPE=INOTIFY; else export FILE_WATCH_EVENT_TYPE=POLLING; fi
 
 runifnecessary() {
     a=$(pgrep "$1")

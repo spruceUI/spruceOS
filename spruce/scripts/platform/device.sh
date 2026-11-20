@@ -714,7 +714,7 @@ device_idle_release_audio() {
 }
 
 # PyUI's settings-file watchers sleep until inotify reports a change, instead of looking
-# every 0.2 s. Default: off. launch.sh exports PYUI_FILE_EVENTS=1 when on.
+# every 0.2 s. Default: off. launch.sh exports FILE_WATCH_EVENT_TYPE (INOTIFY or POLLING).
 device_pyui_file_events() {
     return 1
 }
