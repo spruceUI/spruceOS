@@ -27,7 +27,7 @@ from utils.logger import PyUiLogger
 from utils.py_ui_config import PyUiConfig
 from utils.py_ui_state import PyUiState
 from utils.time_logger import log_timing
-from utils import shutdown
+from utils import audio_reopen_signal, shutdown
 
 
 
@@ -90,6 +90,9 @@ def start_background_threads():
 
     # Asking the device scripts whether to close idle audio runs a script, so not here
     threading.Thread(target=Device.get_device().apply_audio_idle_release, name="AudioIdle", daemon=True).start()
+
+    # spruce asks for a reopen of the audio output with SIGWINCH (a new route, the A30 waking)
+    audio_reopen_signal.listen(Device.get_device().get_audio_system().audio_reopen)
 
 def run_first_frame_cmd():
     """Let the CFW start work it held back so it would not compete with PyUI's startup."""

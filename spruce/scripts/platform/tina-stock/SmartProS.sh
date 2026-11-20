@@ -147,6 +147,11 @@ device_idle_release_audio() {
     return 0
 }
 
+# PyUI's settings-file watchers wait on inotify instead of a 0.2 s timer.
+device_pyui_file_events() {
+    return 0
+}
+
 send_virtual_key_L3() {
     {
         echo $B_MENU 0 # MENU up

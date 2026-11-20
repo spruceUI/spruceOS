@@ -34,6 +34,9 @@ class Sdl2AudioPlayer:
     IDLE_RELEASE_SEC = 10.0
     _idle_release = False
 
+    # The worker sleeps on its queue between commands. A reopen of the output is a "reinit"
+    # command: audio_reopen(), which spruce asks for with SIGWINCH (utils/audio_reopen_signal.py).
+
     # Worker-owned resources (only touched by worker thread)
     # chunk_map: path -> Mix_Chunk pointer, music_map: path -> Mix_Music pointer
     # NOTE: these are stored and freed only in worker
@@ -158,6 +161,18 @@ class Sdl2AudioPlayer:
     @staticmethod
     def set_idle_release(enabled: bool):
         Sdl2AudioPlayer._idle_release = bool(enabled)
+        # A worker asleep on its queue works out again when to wake.
+        q = Sdl2AudioPlayer._cmd_q
+        if Sdl2AudioPlayer._running and q is not None:
+            q.put(_Cmd("nudge"))
+
+    @staticmethod
+    def request_reinit():
+        """Reopen the output through the worker, picking up AUDIODEV. False when it is not running."""
+        if not Sdl2AudioPlayer._running:
+            return False
+        Sdl2AudioPlayer._send_cmd("reinit", expect_reply=True)
+        return True
 
     @staticmethod
     def audio_cleanup():
@@ -361,22 +376,31 @@ class Sdl2AudioPlayer:
         Sdl2AudioPlayer._init_failed = not init_ok
 
         last_active = time.monotonic()
+        idle_due = last_active + Sdl2AudioPlayer.IDLE_RELEASE_SEC
         # main worker loop
         while Sdl2AudioPlayer._running:
+            # Nothing to look for between commands: sleep until an idle close could be due.
+            timeout = None
+            if released_paths is None and Sdl2AudioPlayer._idle_release and mixer_open():
+                timeout = max(0.0, idle_due - time.monotonic())
             try:
-                cmd: _Cmd = Sdl2AudioPlayer._cmd_q.get(timeout=0.2)
+                cmd: _Cmd = Sdl2AudioPlayer._cmd_q.get(timeout=timeout)
             except queue.Empty:
-                # Check if device requested audio reinit (e.g. A30 after sleep/wake)
-                if os.path.exists("/tmp/audio_reinit_needed"):
-                    os.remove("/tmp/audio_reinit_needed")
-                    # A released device stays closed: its next open uses the new route.
-                    if released_paths is None:
-                        reinit_audio()
                 if (released_paths is None and Sdl2AudioPlayer._idle_release
                         and time.monotonic() - last_active > Sdl2AudioPlayer.IDLE_RELEASE_SEC
-                        and mixer_open() and not sdlmixer.Mix_Playing(-1) and not sdlmixer.Mix_PlayingMusic()):
-                    released_paths = close_audio()
-                    PyUiLogger.get_logger().info("Audio device closed while idle")
+                        and mixer_open()):
+                    if not sdlmixer.Mix_Playing(-1) and not sdlmixer.Mix_PlayingMusic():
+                        released_paths = close_audio()
+                        PyUiLogger.get_logger().info("Audio device closed while idle")
+                    else:
+                        idle_due = time.monotonic() + 1.0  # look again while it plays
+                continue
+
+            if cmd.name == "nudge":
+                continue
+            if cmd.name == "reinit":
+                # A released device stays closed: its next open uses the new route.
+                reply_ok(cmd.resp_q, reinit_audio() if released_paths is None else True)
                 continue
 
             # A command after an idle close opens the device first; a failed open is tried
@@ -385,6 +409,7 @@ class Sdl2AudioPlayer:
                 if open_audio(list(wanted_chunks | set(released_paths))):
                     released_paths = None
             last_active = time.monotonic()
+            idle_due = last_active + Sdl2AudioPlayer.IDLE_RELEASE_SEC
 
             try:
                 name = cmd.name

@@ -713,6 +713,12 @@ device_idle_release_audio() {
     return 1
 }
 
+# PyUI's settings-file watchers sleep until inotify reports a change, instead of looking
+# every 0.2 s. Default: off. launch.sh exports FILE_WATCH_EVENT_TYPE (INOTIFY or POLLING).
+device_pyui_file_events() {
+    return 1
+}
+
 # The connected audio device's MAC, if any.
 bt_connected_audio_mac() {
     pidof bluetoothd >/dev/null 2>&1 || return 1
