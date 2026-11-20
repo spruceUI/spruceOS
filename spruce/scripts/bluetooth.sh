@@ -73,10 +73,10 @@ connections() {
     list_devices | awk 'BEGIN { FS = "\t" } $3 == 1 { print $1 }'
 }
 
-# PyUI reads $HOME/.asoundrc and reopens its output when the flag appears.
+# PyUI reads $HOME/.asoundrc when it reopens its output.
 route_audio() {
     /mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
-    touch /tmp/audio_reinit_needed
+    pyui_audio_reopen
 }
 
 # Routing follows the links, not the commands: a change is acted on once it has held

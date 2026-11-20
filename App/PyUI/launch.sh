@@ -5,6 +5,9 @@
 # A platform cfg with PYUI_ENV_DEVICE=true runs PyUI as the env-driven ENV_VAR device.
 [ "$PYUI_ENV_DEVICE" = "true" ] && . /mnt/SDCARD/App/PyUI/spruce-device-env.sh
 
+# The device scripts choose whether PyUI's file watchers wait on inotify (device.sh).
+if device_pyui_file_events; then export FILE_WATCH_EVENT_TYPE=INOTIFY; else export FILE_WATCH_EVENT_TYPE=POLLING; fi
+
 runifnecessary() {
     a=$(pgrep "$1")
     if [ "$a" = "" ] ; then

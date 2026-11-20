@@ -37,6 +37,11 @@ set_event_arg_for_idlemon() {
     EVENT_ARG="-e $EVENT_PATH_READ_INPUTS_SPRUCE"
 }
 
+# PyUI's settings-file watchers wait on inotify instead of a 0.2 s timer.
+device_pyui_file_events() {
+    return 0
+}
+
   ###################
 #####   RGB LED   #####
   ###################

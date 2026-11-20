@@ -1015,6 +1015,14 @@ stop_pyui_message_writer() {
     freemma >/dev/null 2>&1 # where a device has it (the Miyoo Mini)
 }
 
+# Ask the PyUI menu to reopen its audio output (a new route, or after sleep). SIGWINCH is
+# ignored by default, so PyUI's helper modes and a menu still starting don't notice.
+pyui_audio_reopen() {
+    for _pyui_pid in $(pgrep -f '/App/PyUI/main-ui/[m]ainui[.]py'); do
+        kill -s WINCH "$_pyui_pid" 2>/dev/null
+    done
+}
+
 display_message() {
     local message="$1"
     [ -z "$message" ] && return 0
