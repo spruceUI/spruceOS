@@ -44,9 +44,10 @@ class ThemeSettingsTopAndBottomBar(ThemeSettingsMenuCommon):
         )
 
         option_list.append(
-            self.build_enabled_disabled_entry(Language.label("showBottomBarButtons", "Show Bottom Bar Buttons"),
-                                              Theme.show_bottom_bar_buttons,
-                                              Theme.set_show_bottom_bar_buttons)
+            self.build_defined_list_entry(Language.label("showBottomBarButtons", "Show Bottom Bar Buttons"),
+                                          ["Off", "On", "Contextual"],
+                                          Theme.bottom_bar_buttons_mode,
+                                          Theme.set_show_bottom_bar_buttons)
         )
 
         option_list.append(

@@ -1672,14 +1672,24 @@ class Theme():
 
     @classmethod
     def show_bottom_bar_buttons(cls):
-        return cls._data.get("showBottomBarButtons", True)
+        return cls.bottom_bar_buttons_mode() != "Off"
+
+    @classmethod
+    def bottom_bar_buttons_mode(cls):
+        value = cls._data.get("showBottomBarButtons", True)
+        # Keep existing boolean theme preferences compatible with the three modes.
+        if value is False:
+            return "Off"
+        if isinstance(value, str) and value.lower() in ("off", "on", "contextual"):
+            return value.capitalize()
+        return "On"
         
     @classmethod
     def context_buttons_enabled(cls):
         hint = cls._data.get("hint")
         if not isinstance(hint, dict):
             return False
-        return hint.get("contextbuttons") is True
+        return cls.bottom_bar_buttons_mode() == "Contextual" and hint.get("contextbuttons") is True
 
     @classmethod
     def context_icon(cls, button):
