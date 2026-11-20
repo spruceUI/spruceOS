@@ -6,6 +6,7 @@ corename = "mGBA"
 license = "MPLv2.0"
 permissions = ""
 categories = "Emulator"
+display_version = "0.10-dev"
 
 # Hardware Information
 manufacturer = "Nintendo"
@@ -14,7 +15,7 @@ systemid = "game_boy_advance"
 
 # Libretro Features
 supports_no_game = "false"
-database = "Nintendo - Game Boy|Nintendo - Game Boy Color|Nintendo - Game Boy Advance|Nintendo - Game Boy Advance (e-Cards)"
+database = "Nintendo - Game Boy|Nintendo - Game Boy Color|Nintendo - Game Boy Advance"
 savestate = "true"
 savestate_features = "deterministic"
 cheats = "true"
