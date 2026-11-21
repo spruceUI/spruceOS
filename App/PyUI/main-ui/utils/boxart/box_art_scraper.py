@@ -184,6 +184,7 @@ class BoxArtScraper:
             "PC98": "NEC - PC-98",
             "PCE": "NEC - PC Engine - TurboGrafx 16",
             "PCECD": "NEC - PC Engine CD - TurboGrafx-CD",
+            "PCFX": "NEC - PC-FX",
             "POKE": "Nintendo - Pokemon Mini",
             "PS": "Sony - PlayStation",
             "PSP": "Sony - PlayStation Portable",

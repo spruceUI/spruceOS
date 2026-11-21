@@ -1,0 +1,4 @@
+PC-FX requires a BIOS. Put pcfx.rom in /BIOS on the SD card.
+
+PC-FX BIOS v1.00 (2 Sep 1994)
+MD5: 08e36edbea28a017f79f8d4f7ff9b6d7

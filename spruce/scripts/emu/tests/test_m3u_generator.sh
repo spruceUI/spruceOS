@@ -53,6 +53,7 @@ run_case VIC20 d71 Disk
 run_case X68000 d88 Disk
 run_case DOS img Disk
 run_case PCECD cue Disc
+run_case PCFX toc Disc
 run_case MD iso Disc
 
 roms="$sdcard/Roms/SEGACD"

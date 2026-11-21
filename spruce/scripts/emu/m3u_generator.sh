@@ -12,6 +12,7 @@ case "$SYSTEM" in
     COLECO|CPC|MSX) DISC_EXTS="dsk" ;;
     COMMODORE|VIC20) DISC_EXTS="d64|d6z|d71|d7z|d80|d81|d82|d8z|g64|g6z|g41|g4z|x64|x6z|nib|nbz|d2m|d4m" ;;
     DOS) DISC_EXTS="cue|chd|iso|img|ima|vhd" ;;
+    PCFX) DISC_EXTS="cue|ccd|toc|chd" ;;
     X68000) DISC_EXTS="dim|img|d88|88d|hdm|dup|2hd|xdf|hdf" ;;
     *) DISC_EXTS="cue|gdi|chd|pbp|iso|cdi|ccd|mds" ;;
 esac

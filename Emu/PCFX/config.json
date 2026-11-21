@@ -1,0 +1,34 @@
+{
+  "label": "PC-FX",
+  "icon": "pcfx.png",
+  "iconsel": "pcfx_sel.png",
+  "themecolor": "EA483F",
+  "launch": "../../spruce/scripts/emu/standard_launch.sh",
+  "extlist": "m3u|cue|ccd|toc|chd",
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh",
+      "launchInPyUI": true
+    }
+  ],
+  "menuOptions": {
+    "Governor": {
+      "display": "CPU Mode",
+      "options": [
+        "Smart",
+        "Performance",
+        "Overclock"
+      ],
+      "selected": "Smart",
+      "overrides": {}
+    }
+  },
+  "sortOrder": 6800,
+  "brand": "NEC",
+  "type": "homeconsole",
+  "releaseYear": 1994,
+  "default_emulator": "mednafen_pcfx",
+  "scaling_min_freq": 1008000,
+  "alternativeFolderNames": ["PC-FX"]
+}
