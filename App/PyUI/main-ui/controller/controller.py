@@ -287,6 +287,22 @@ class Controller:
         Controller.get_input_called_again = False
         return Controller.last_controller_input
 
+    @staticmethod
+    def wake_from_screensaver():
+        if not Controller._screensaver_active:
+            return
+
+        from display.display import Display
+        from display.screensaver import ScreenSaver
+
+        ScreenSaver.clear_cache()
+        Display.restore_from_blank()
+
+        Controller._screensaver_active = False
+        Controller.last_controller_input = None
+        Controller.last_input_time = time.monotonic()
+        Controller.screensaver_input_tracking_time = time.monotonic()
+        Controller.controller_interface.clear_input_queue()
 
     @staticmethod
     def get_input(timeout=-2, called_from_check_for_hotkey=False):
@@ -313,6 +329,8 @@ class Controller:
             from display.screensaver import ScreenSaver
             while True:
                 shutdown.checkpoint()
+                if not Controller._screensaver_active:
+                    return False
                 ScreenSaver.render_if_needed()
                 Controller.controller_interface.force_refresh()
                 if Controller.still_held_down():
@@ -326,6 +344,8 @@ class Controller:
                 wait = min(max(wait, POLL_INTERVAL_SECONDS), Controller.SCREENSAVER_MAX_WAIT_SECONDS)
                 inp = Controller.controller_interface.get_input(math.ceil(wait * 1000))
                 shutdown.checkpoint()
+                if not Controller._screensaver_active:
+                    return False
                 if inp is not None and time.monotonic() < Controller._screensaver_ignore_input_until:
                     Controller.controller_interface.clear_input_queue()
                     continue

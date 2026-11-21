@@ -19,7 +19,7 @@ from devices.desktop.desktop_script import ScriptError, parse_script
 SD_ROOT = "/mnt/SDCARD/"
 # Keys of py-ui-config.json that are left out on the desktop: the CFW's scripts and lists of
 # them. Every key ending in "Cmd" is dropped too.
-CFW_SCRIPT_KEYS = ("aboutEntries", "cfwTasks")
+CFW_SCRIPT_KEYS = ("aboutEntries", "cfwTasks", "externalMessagePath")
 
 # PyUI runs in a child process, which tells desktop.py how it ended by its exit status. PyUI
 # exits by itself whenever it wants to be started again - after a theme change, a theme
