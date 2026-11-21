@@ -4,8 +4,17 @@
 
 ICON_PATH="/mnt/SDCARD/Themes/SPRUCE/icons/app/gamelist.png"
 ROMS_DIR="/mnt/SDCARD/Roms"
-DISC_EXTS="cue|gdi|chd|pbp|iso|dsk"
 SYSTEM="$(echo "$1" | cut -d'/' -f5)"
+
+case "$SYSTEM" in
+    AMIGA) DISC_EXTS="cue|ccd|chd|iso|adf|adz|dms|fdi|ipf|hdf|hdz" ;;
+    ATARIST) DISC_EXTS="st|msa|stx|dim|ipf" ;;
+    COLECO|CPC|MSX) DISC_EXTS="dsk" ;;
+    COMMODORE|VIC20) DISC_EXTS="d64|d6z|d71|d7z|d80|d81|d82|d8z|g64|g6z|g41|g4z|x64|x6z|nib|nbz|d2m|d4m" ;;
+    DOS) DISC_EXTS="cue|chd|iso|img|ima|vhd" ;;
+    X68000) DISC_EXTS="dim|img|d88|88d|hdm|dup|2hd|xdf|hdf" ;;
+    *) DISC_EXTS="cue|gdi|chd|pbp|iso|cdi|ccd|mds" ;;
+esac
 
 generate_cues() {
     cd "$ROMS_DIR"
@@ -30,14 +39,16 @@ generate_cues() {
 start_pyui_message_writer
 display_image_and_text "$ICON_PATH" "Generating M3Us... this shouldn't take longer than a few seconds."
 
-generate_cues # generate any missing cue sheets
+case "$SYSTEM" in
+    AMIGA|ATOMISWAVE|DC|NAOMI|NEOCD|PCECD|PS|SATURN|SEGACD) generate_cues ;;
+esac
 
 FULLPATH="$ROMS_DIR/$SYSTEM"
 
 if [ -d "$FULLPATH" ]; then
     cd "$FULLPATH"
     # Redump/No-Intro (revisionless)
-    find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "*([Dd][Ii][Ss][KkCc] 1).*[$DISC_EXTS]" | while read -r line; do
+    find . -maxdepth 1 -type f -iname "*([Dd][Ii][Ss][KkCc] 1).*" | grep -iE "\\.($DISC_EXTS)$" | while read -r line; do
         FILENAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@ ([Dd][Ii][Ss][KkCc] 1)@@g')"
         DIRNAME=".${FILENAME%"${FILENAME##*[![:space:]]}"}" # remove spaces at the end
         SEARCH_NAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@([Dd][Ii][Ss][KkCc] 1)@([Dd][Ii][Ss][KkCc] ?)@g')"
@@ -46,11 +57,11 @@ if [ -d "$FULLPATH" ]; then
         mkdir -p "$DIRNAME"
 
         find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
-        find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sed -e 's/^//' | sort > "$FILENAME.m3u"  # create playlist of discs
+        find "$DIRNAME" -type f -iname "$SEARCH_NAME*.*" | grep -iE "\\.($DISC_EXTS)$" | sort > "$FILENAME.m3u"  # create playlist of discs
     done
 
     # Redump/No-Intro (with revisions)
-    find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "*([Dd][Ii][Ss][KkCc] 1) *.*[$DISC_EXTS]" | while read -r line; do
+    find . -maxdepth 1 -type f -iname "*([Dd][Ii][Ss][KkCc] 1) *.*" | grep -iE "\\.($DISC_EXTS)$" | while read -r line; do
         FILENAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@ ([Dd][Ii][Ss][KkCc] 1)@@g')"
         DIRNAME=".${FILENAME%"${FILENAME##*[![:space:]]}"}" # remove spaces at the end
         SEARCH_NAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@([Dd][Ii][Ss][KkCc] 1)@([Dd][Ii][Ss][KkCc] ?)@g')"
@@ -59,11 +70,11 @@ if [ -d "$FULLPATH" ]; then
         mkdir -p "$DIRNAME"
 
         find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
-        find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sort > "$FILENAME.m3u" # create playlist of discs
+        find "$DIRNAME" -type f -iname "$SEARCH_NAME*.*" | grep -iE "\\.($DISC_EXTS)$" | sort > "$FILENAME.m3u" # create playlist of discs
     done
 
     # TOSEC
-    find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "*([Dd][Ii][Ss][KkCc] 1 of ?).*[$DISC_EXTS]" | while read -r line; do
+    find . -maxdepth 1 -type f -iname "*([Dd][Ii][Ss][KkCc] 1 of ?).*" | grep -iE "\\.($DISC_EXTS)$" | while read -r line; do
         FILENAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@([Dd][Ii][Ss][KkCc] 1 of .*)@@g')"
         DIRNAME=".${FILENAME%"${FILENAME##*[![:space:]]}"}" # remove spaces at the end
         SEARCH_NAME="$(echo "${line%.*}" | sed 's@./@@g' | sed 's@([Dd][Ii][Ss][KkCc] 1 of@([Dd][Ii][Ss][KkCc] ? of@g')"
@@ -72,7 +83,7 @@ if [ -d "$FULLPATH" ]; then
         mkdir -p "$DIRNAME"
 
         find . -maxdepth 1 ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*" -exec mv -n -- '{}' "$DIRNAME" \; # move discs + tracks to directory
-        find "$DIRNAME" ! -iname '*.m3u' -type f -iname "$SEARCH_NAME*.*[$DISC_EXTS]" | sort > "$FILENAME.m3u" # create playlist of discs
+        find "$DIRNAME" -type f -iname "$SEARCH_NAME*.*" | grep -iE "\\.($DISC_EXTS)$" | sort > "$FILENAME.m3u" # create playlist of discs
     done
 else
     echo "Directory $FULLPATH does not exist."

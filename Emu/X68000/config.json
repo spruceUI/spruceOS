@@ -5,7 +5,13 @@
   "themecolor": "d02026",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
   "extlist": "dim|zip|img|m3u|7z|d88|88d|hdm|dup|2hd|xdf|hdf|cmd",
-  "launchlist": [],
+  "launchlist": [
+    {
+      "name": "Generate M3U playlists for multi-disc games",
+      "launch": "/mnt/SDCARD/spruce/scripts/emu/m3u_generator.sh",
+      "launchInPyUI": true
+    }
+  ],
   "menuOptions": {
     "Governor": {
       "display": "CPU Mode",

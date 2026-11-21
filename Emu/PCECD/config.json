@@ -4,7 +4,7 @@
   "iconsel": "pcecd_sel.png",
   "themecolor": "EA483F",
   "launch": "../../spruce/scripts/emu/standard_launch.sh",
-  "extlist": "iso|img|chd|pce|ccd|cue|zip|7z",
+  "extlist": "m3u|iso|img|chd|pce|ccd|cue|zip|7z",
   "launchlist": [
     {
       "name": "Generate M3U playlists for multi-disc games",
