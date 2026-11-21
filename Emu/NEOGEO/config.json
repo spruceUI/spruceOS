@@ -55,10 +55,7 @@
   "default_emulator": "fbalpha2012",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": [
-    "NG",
-    "ng",
-    "NeoGeo",
-    "neogeo"
+    "NG"
   ],
   "ignoreList": [
     "neogeo.zip",

@@ -110,10 +110,7 @@
   "default_emulator": "DSperate",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": [
-    "nds",
     "DS",
-    "ds",
-    "nintendods",
-    "NINTENDODS"
+    "nintendods"
   ]
 }

@@ -49,9 +49,7 @@
   "default_emulator": "freej2me_plus",
   "scaling_min_freq": 1008000,
   "alternativeFolderNames": [
-    "j2me",
     "java",
-    "JAVA",
     "midp",
     "mobile"
   ]

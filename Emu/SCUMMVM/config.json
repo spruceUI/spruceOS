@@ -105,7 +105,5 @@
   "releaseYear": 2001,
   "default_emulator": "scummvm",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": [
-    "scummvm"
-  ]
+  "alternativeFolderNames": []
 }

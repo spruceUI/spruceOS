@@ -54,5 +54,5 @@
   "releaseYear": 2023,
   "default_emulator": "gametank",
   "scaling_min_freq": 1008000,
-  "alternativeFolderNames": ["gametank","libgametank","gt"]
+  "alternativeFolderNames": ["libgametank","gt"]
 }

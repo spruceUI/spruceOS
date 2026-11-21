@@ -67,9 +67,7 @@
   "default_emulator": "virtualjaguar",
   "scaling_min_freq": 1008000,
   "alternativeFolderNames": [
-    "jaguar",
     "Atari Jaguar",
-    "jag",
-    "JAG"
+    "jag"
   ]
 }

@@ -58,5 +58,5 @@
   "releaseYear": 2001,
   "default_emulator": "armgba",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": ["GAMEBOYADVANCE","gameboyadvance","gba","agb","AGB"]
+  "alternativeFolderNames": ["GAMEBOYADVANCE","agb"]
 }

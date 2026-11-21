@@ -58,5 +58,5 @@
   "releaseYear": 1998,
   "default_emulator": "gambatte",
   "scaling_min_freq": 312000,
-  "alternativeFolderNames": ["GAMEBOYCOLOR","gameboycolor","gbc","cgb","CGB"]
+  "alternativeFolderNames": ["GAMEBOYCOLOR","cgb"]
 }

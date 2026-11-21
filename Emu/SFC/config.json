@@ -60,12 +60,8 @@
   "default_emulator": "chimerasnes",
   "scaling_min_freq": 816000,
   "alternativeFolderNames": [
-    "sfc",
     "SNES",
-    "snes",
     "supernes",
-    "SUPERNES",
-    "SUPERFAMICOM",
-    "superfamicom"
+    "SUPERFAMICOM"
   ]
 }

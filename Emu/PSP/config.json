@@ -36,10 +36,7 @@
     "OAKMOSS_A133P"
   ],
   "alternativeFolderNames": [
-    "psp",
     "ppsspp",
-    "PPSSPP",
-    "playstationportable",
-    "PLAYSTATIONPORTABLE"
+    "playstationportable"
   ]
 }

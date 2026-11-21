@@ -148,10 +148,7 @@
   "default_emulator": "yabasanshiro-libretro",
   "scaling_min_freq": 1008000,
   "alternativeFolderNames": [
-    "saturn",
     "segasaturn",
-    "SEGASATURN",
-    "ss",
-    "SS"
+    "ss"
   ]
 }

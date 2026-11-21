@@ -85,10 +85,7 @@
   "releaseYear": 1971,
   "default_emulator": "fbneo",
   "scaling_min_freq": 816000,
-  "alternativeFolderNames": [
-    "arcade",
-    "Arcade"
-  ],
+  "alternativeFolderNames": [],
   "ignoreList": [
     "neogeo.zip",
     "neocdz.zip",
