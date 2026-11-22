@@ -10,12 +10,13 @@ case "$PLATFORM" in
     Flip|SmartProS)          export PYSDL2_DLL_PATH="/mnt/SDCARD/Persistent/portmaster/lib/" ;;
     Brick|SmartPro|BrickPro) export PYSDL2_DLL_PATH="/mnt/SDCARD/spruce/brick/sdl2" ;;
     Anbernic*)               export PYSDL2_DLL_PATH="/mnt/SDCARD/App/PyUI/dll-mali" ;;
-    RGB30|Miniloong|A10Mini|A10MiniV4|XUMiniM|G350|V10|RG351P|RG353M|E5Plus|Pixel2DarkMoss) export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
 esac
 
-case "$PLATFORM" in
-    RGB30|Miniloong|A10Mini|A10MiniV4|XUMiniM|G350|V10|RG351P|RG353M|E5Plus|Pixel2DarkMoss) ;;
-    *) export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
+# dArkMoss boards (every platform cfg under platform/darkmoss) use the base
+# image's system SDL2 and tools; everything else gets spruce's flip/bin.
+case "$PLATFORM_FAMILY" in
+    darkmoss) export PYSDL2_DLL_PATH="/usr/lib/aarch64-linux-gnu" ;;
+    *)        export PATH="/mnt/SDCARD/spruce/flip/bin:$PATH" ;;
 esac
 
 case "$PLATFORM" in
@@ -24,9 +25,10 @@ case "$PLATFORM" in
         ;;
     Anbernic*)
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/mnt/SDCARD/spruce/h700/ports-lib64"
-        export_sdl_gamecontroller_map positional
-        ;;
-    RGB30|Miniloong|A10Mini|A10MiniV4|XUMiniM|G350|V10|RG351P|Pixel2DarkMoss)
-        export_sdl_gamecontroller_map positional
         ;;
 esac
+
+# The GUI speaks SDL's own vocabulary (a = the South button), so a board whose
+# platform cfg exports SDL_GAMECONTROLLER_MAP gets it positional. The function
+# does nothing where no map is exported, so this needs no device list.
+export_sdl_gamecontroller_map positional
