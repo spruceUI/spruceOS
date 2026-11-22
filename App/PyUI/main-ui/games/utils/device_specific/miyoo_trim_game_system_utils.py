@@ -155,9 +155,10 @@ class MiyooTrimGameSystemUtils(GameSystemUtils):
         paths = []
         for base_path in self.roms_paths:
             for folder in folder_names:
-                full_path = os.path.join(base_path, folder)
-                if CachedExists.exists(full_path):
-                    paths.append(full_path)
+                for match in CachedExists.matches_ignore_case(base_path, folder):
+                    full_path = os.path.join(base_path, match)
+                    if full_path not in paths:
+                        paths.append(full_path)
 
         return paths
     
