@@ -41,6 +41,13 @@ class CachedExists:
         return filename in files
 
     @classmethod
+    def matches_ignore_case(cls, directory: str, filename: str) -> list[str]:
+        directory = os.path.normpath(directory)
+        cls.exists(os.path.join(directory, filename))
+        lowered = filename.lower()
+        return sorted(f for f in cls._dir_cache.get(directory, ()) if f.lower() == lowered)
+
+    @classmethod
     def invalidate_dir(cls, directory: str):
         """Invalidate a single directory cache."""
         directory = os.path.normpath(directory)
