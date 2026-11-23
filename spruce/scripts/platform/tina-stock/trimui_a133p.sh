@@ -85,6 +85,20 @@ device_bluetooth_supported() {
     return 0
 }
 
+# Attach again only after sleep powered the XR829's Bluetooth off.
+device_bluetooth_radio_up() {
+    [ -d /sys/class/bluetooth/hci0 ] && return 0
+    echo 1 > /sys/class/rfkill/rfkill0/state
+    echo 1 > /proc/bluetooth/sleep/btwrite
+    bt_spawn /usr/bin/hciattach -n ttyS1 xradio
+}
+
+device_bluetooth_power_off() {
+    killall hciattach 2>/dev/null
+    echo 0 > /proc/bluetooth/sleep/btwrite
+    echo 0 > /sys/class/rfkill/rfkill0/state
+}
+
 prepare_for_pyui_launch(){
     rm -f /tmp/trimui_inputd/input_no_dpad
     rm -f /tmp/trimui_inputd/input_dpad_to_joystick

@@ -48,6 +48,7 @@ device_enter_sleep() {
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
 
     wifi_request suspend --wait
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh sleep
     # Whichever driver is the radio comes out for the suspend: a USB dongle's
     # module (it is reloaded by enable_wifi on the way back, after the resume
     # wait usb_wifi_note_sleep arms) or the onboard one.
@@ -75,6 +76,7 @@ device_exit_sleep(){
         # suspend, so this has to run whenever the user wants WiFi - the
         # system json is that answer, exactly as at boot.
         wifi_request apply --wait
+        a133p_bluetooth_wake
         return 0
     fi
     modprobe xradio_wlan
@@ -86,6 +88,12 @@ device_exit_sleep(){
         done
     fi
     wifi_request apply --wait
+    a133p_bluetooth_wake
+}
+
+# WiFi first on the shared chip; in the background so the wake is not held up.
+a133p_bluetooth_wake() {
+    ( ( /mnt/SDCARD/spruce/scripts/bluetooth.sh apply ) & ) </dev/null >/dev/null 2>&1
 }
 
 get_current_volume() {

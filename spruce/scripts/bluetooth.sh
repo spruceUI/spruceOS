@@ -9,6 +9,7 @@
 #   apply     make the radio match the saved .bluetooth setting
 #   boot      apply once WiFi has connected (WiFi first on shared radios)
 #   suspend   disconnect everything, without changing the setting (poweroff)
+#   sleep     disconnect and power the radio off, without changing the setting; apply on wake
 #   status    key=value lines: radio, setting, state, connected, connected_icon, audio
 #   scan      look for devices for a few seconds, then list them
 #   devices   list the devices known now, without looking
@@ -329,6 +330,12 @@ case "$1" in
         device_bluetooth_supported && wait_for_wifi
         apply_setting ;;
     suspend) device_bluetooth_supported && disconnect_all ;;
+    sleep)
+        device_bluetooth_supported || exit 0
+        stop_watch
+        disconnect_all
+        device_bluetooth_down
+        device_bluetooth_power_off ;;
     status)  show_status ;;
     scan)    scan_devices ;;
     devices) list_devices ;;
@@ -336,5 +343,5 @@ case "$1" in
     forget)  forget_device "$2" ;;
     forget-all) forget_all ;;
     disconnect) disconnect_device "$2" ;;
-    *)       echo "usage: bluetooth.sh apply|boot|suspend|status|scan|devices|pair <address>|forget <address>|forget-all|disconnect <address>" >&2; exit 2 ;;
+    *)       echo "usage: bluetooth.sh apply|boot|suspend|sleep|status|scan|devices|pair <address>|forget <address>|forget-all|disconnect <address>" >&2; exit 2 ;;
 esac

@@ -523,6 +523,11 @@ device_bluetooth_radio_down() {
     hciconfig hci0 down 2>/dev/null
 }
 
+# Cut the controller's power for sleep, where radio_down leaves it powered.
+device_bluetooth_power_off() {
+    :
+}
+
 device_bluetoothd_start() {
     /etc/bluetooth/bluetoothd start
 }
