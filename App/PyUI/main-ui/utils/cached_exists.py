@@ -12,6 +12,7 @@ class CachedExists:
     """
 
     _dir_cache: Dict[str, Set[str]] = {}
+    _dir_cache_lower: Dict[str, Dict[str, list[str]]] = {}
 
     @classmethod
     def exists(cls, path: str) -> bool:
@@ -43,17 +44,24 @@ class CachedExists:
     @classmethod
     def matches_ignore_case(cls, directory: str, filename: str) -> list[str]:
         directory = os.path.normpath(directory)
-        cls.exists(os.path.join(directory, filename))
-        lowered = filename.lower()
-        return sorted(f for f in cls._dir_cache.get(directory, ()) if f.lower() == lowered)
+        lower = cls._dir_cache_lower.get(directory)
+        if lower is None:
+            cls.exists(os.path.join(directory, filename))
+            lower = {}
+            for f in sorted(cls._dir_cache.get(directory, ())):
+                lower.setdefault(f.lower(), []).append(f)
+            cls._dir_cache_lower[directory] = lower
+        return lower.get(filename.lower(), [])
 
     @classmethod
     def invalidate_dir(cls, directory: str):
         """Invalidate a single directory cache."""
         directory = os.path.normpath(directory)
         cls._dir_cache.pop(directory, None)
+        cls._dir_cache_lower.pop(directory, None)
 
     @classmethod
     def clear(cls):
         """Clear all cached directories."""
         cls._dir_cache.clear()
+        cls._dir_cache_lower.clear()
