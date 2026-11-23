@@ -42,6 +42,7 @@ TZ_PROVIDERS = (
     ("http://ipwho.is/?fields=timezone.id", "jsonid"),
     ("https://ipapi.co/timezone", "text"),
     ("https://ipinfo.io/timezone", "text"),
+    ("https://api.internetdata.io/myip", "jsonloc"),
     ("http://worldtimeapi.org/api/ip", "json"),
 )
 ZONE_NAME = re.compile(r"^[A-Za-z0-9_+-]+(/[A-Za-z0-9_+-]+)+$")
@@ -195,6 +196,8 @@ def zone_from(url, kind):
         zone = body.strip().splitlines()[0].strip() if body.strip() else ""
     else:
         data = json.loads(body)
+        if kind == "jsonloc":
+            data = data.get("location") or {}
         zone = data.get("timezone")
         if kind == "jsonid":
             zone = zone.get("id") if isinstance(zone, dict) else None
