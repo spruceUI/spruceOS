@@ -626,10 +626,19 @@ version_older_than() {
       "$(printf '%s' "$2" | awk -F. '{printf "%d%03d%03d", $1, $2, $3}')" ] 2>/dev/null
 }
 
-# The GitHub project this device's BaseOS build comes from, by its BASEOS_TARGET.
+# BASEOS_$1 from BaseOS, or FLIPBASE_$1 from FlipBase, BaseOS-my355's successor.
+baseos_field() {
+    if [ -f /etc/flipbase-release ]; then
+        sed -n "s/^FLIPBASE_$1=//p" /etc/flipbase-release
+    else
+        sed -n "s/^BASEOS_$1=//p" /etc/baseos-release 2>/dev/null
+    fi | tr -d '"'
+}
+
+# The GitHub project this device's BaseOS build comes from, by its target.
 baseos_repo() {
-    case "$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')" in
-        my355) echo "apommel/baseos-my355" ;;
+    case "$(baseos_field TARGET)" in
+        my355) echo "apommel/FlipBase" ;;
         *) echo "pvaibhav/BaseOS" ;;
     esac
 }
@@ -637,15 +646,16 @@ baseos_repo() {
 # "true" when the installed BaseOS is older than the latest release of its project
 # (TARGET_BASEOS_VERSION from the platform cfg offline). Unreadable: "false".
 baseos_fw_needs_update() {
-    _have="$(sed -n 's/^BASEOS_VERSION=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
+    _have="$(baseos_field VERSION)"
     _want="$(github_latest_version "$(baseos_repo)")" || _want="$TARGET_BASEOS_VERSION"
     baseos_version_older "$_have" "$_want" && echo "true" || echo "false"
 }
 
 # A .bosupd for this model put at the root of the card by hand.
 baseos_local_update_file() {
-    _target="$(sed -n 's/^BASEOS_TARGET=//p' /etc/baseos-release 2>/dev/null | tr -d '"')"
-    [ -n "$_target" ] && ls /mnt/SDCARD/baseos-"$_target"-*.bosupd 2>/dev/null | sort | tail -n 1
+    _target="$(baseos_field TARGET)"
+    [ -n "$_target" ] && ls /mnt/SDCARD/baseos-"$_target"-*.bosupd \
+        /mnt/SDCARD/flipbase-"$_target"-*.bosupd 2>/dev/null | sort | tail -n 1
 }
 
 # True when BaseOS version $1 is older than $2: by x.y.z, and a pre-release (1.2.0-beta.1)

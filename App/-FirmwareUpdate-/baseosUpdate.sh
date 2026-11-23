@@ -12,10 +12,6 @@
 
 SD_ROOT="/mnt/SDCARD"
 
-baseos_field() {
-    sed -n "s/^$1=//p" /etc/baseos-release 2>/dev/null | tr -d '"'
-}
-
 bail() {
     log_and_display_message "$1"
     sleep 6
@@ -25,13 +21,15 @@ bail() {
 # No network is the normal case on a model with no built-in radio, so say what
 # to do about it rather than just refusing.
 dongle_bail() {
-    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or put the baseos-$TARGET .bosupd from github.com/$REPO at the root of this card and run this app again.\n\nPress A to close."
+    bail "This device needs a USB WiFi dongle to download updates. Plug one in and enable WiFi, or put the .bosupd from github.com/$REPO at the root of this card and run this app again.\n\nPress A to close."
 }
 
-INSTALLED="$(baseos_field BASEOS_VERSION)"
-TARGET="$(baseos_field BASEOS_TARGET)"
+INSTALLED="$(baseos_field VERSION)"
+TARGET="$(baseos_field TARGET)"
+OS_NAME=BaseOS
+[ -f /etc/flipbase-release ] && OS_NAME=FlipBase
 case "$TARGET" in
-    "") bail "Could not tell which BaseOS build this device runs, so there is nothing safe to download." ;;
+    "") bail "Could not tell which $OS_NAME build this device runs, so there is nothing safe to download." ;;
     my355)
         DONE_MSG="Your device will now reboot to install the update, then restart once finished."
         ;;
@@ -49,7 +47,7 @@ log_message "baseosUpdate.sh: installed $INSTALLED, target $TARGET"
 LOCAL="$(local_fw_update_file)"
 if [ -n "$LOCAL" ]; then
     log_message "baseosUpdate.sh: found $LOCAL"
-    log_and_display_message "$(basename "$LOCAL") is on the card (you have BaseOS $INSTALLED).\n\nPress A to install it now, or B to cancel."
+    log_and_display_message "$(basename "$LOCAL") is on the card (you have $OS_NAME $INSTALLED).\n\nPress A to install it now, or B to cancel."
     confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
     if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
         bail "Please charge your device to at least 15%, or plug it in, then try again."
@@ -61,7 +59,7 @@ if [ -n "$LOCAL" ]; then
     exit 0
 fi
 
-log_and_display_message "BaseOS $INSTALLED is installed. Checking for a newer one. Press A to continue."
+log_and_display_message "$OS_NAME $INSTALLED is installed. Checking for a newer one. Press A to continue."
 acknowledge
 
 if ! device_wifi_is_available; then
@@ -70,11 +68,11 @@ elif [ "$(jq -r '.wifi' "$SYSTEM_JSON" 2>/dev/null)" != "1" ]; then
     bail "WiFi is off, so the update cannot be downloaded. Please enable WiFi from spruce settings and try again."
 fi
 if ! curl -sf -m 20 -o /tmp/baseos_release.json "$API"; then
-    bail "Could not reach GitHub to look for a BaseOS update. Please try again later."
+    bail "Could not reach GitHub to look for a $OS_NAME update. Please try again later."
 fi
 
 LATEST="$(jq -r '.tag_name // empty' /tmp/baseos_release.json | sed 's/^v//')"
-ASSET_NAME="$(jq -r --arg t "baseos-${TARGET}-" '.assets[]? | select(.name | startswith($t) and endswith(".bosupd")) | .name' /tmp/baseos_release.json | head -n 1)"
+ASSET_NAME="$(jq -r --arg t "$TARGET" '.assets[]? | select(.name | (startswith("baseos-" + $t + "-") or startswith("flipbase-" + $t + "-")) and endswith(".bosupd")) | .name' /tmp/baseos_release.json | head -n 1)"
 ASSET_URL="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
 ASSET_SIZE="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .size' /tmp/baseos_release.json | head -n 1)"
 SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_download_url' /tmp/baseos_release.json | head -n 1)"
@@ -82,7 +80,7 @@ SUMS_URL="$(jq -r '.assets[]? | select(.name == "SHA256SUMS") | .browser_downloa
 ASSET_DIGEST="$(jq -r --arg n "$ASSET_NAME" '.assets[]? | select(.name == $n) | .digest // empty' /tmp/baseos_release.json | head -n 1 | sed -n 's/^sha256://p')"
 
 if [ -z "$ASSET_NAME" ] || [ -z "$ASSET_URL" ]; then
-    bail "BaseOS ${LATEST:-latest} has no update file for this model ($TARGET), so it has to be installed by hand.\n\n$MANUAL_HELP"
+    bail "$OS_NAME ${LATEST:-latest} has no update file for this model ($TARGET), so it has to be installed by hand.\n\n$MANUAL_HELP"
 fi
 
 # An update file only applies on top of a BaseOS new enough to look for one. Status 1 = not
@@ -91,7 +89,7 @@ if [ -n "$INSTALLED" ]; then
     baseos_version_older "$INSTALLED" "$LATEST"
     if [ $? -eq 1 ]; then
         hide_fw_app
-        log_and_display_message "Your installed BaseOS $INSTALLED is already the latest version. Press A to close."
+        log_and_display_message "Your installed $OS_NAME $INSTALLED is already the latest version. Press A to close."
         acknowledge
         exit 0
     fi
@@ -100,19 +98,19 @@ fi
 FREE_MB="$(df -m "$SD_ROOT" | awk 'END {print $4}')"
 NEED_MB=$(( (${ASSET_SIZE:-0} / 1048576) + 50 ))
 if [ "${FREE_MB:-0}" -lt "$NEED_MB" ]; then
-    bail "Not enough free space for the BaseOS update: ${NEED_MB} MiB needed, ${FREE_MB} MiB free."
+    bail "Not enough free space for the $OS_NAME update: ${NEED_MB} MiB needed, ${FREE_MB} MiB free."
 fi
 
 if [ "$(device_get_battery_percent)" -lt 15 ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
     bail "Please charge your device to at least 15%, or plug it in, then try again."
 fi
 
-log_and_display_message "BaseOS $LATEST is available (you have $INSTALLED).\n\nPress A to download and install it now, or B to cancel."
+log_and_display_message "$OS_NAME $LATEST is available (you have $INSTALLED).\n\nPress A to download and install it now, or B to cancel."
 confirm || { log_message "baseosUpdate.sh: user cancelled"; exit 0; }
 
 if ! download_and_display_progress "$ASSET_URL" "$SD_ROOT/$ASSET_NAME" "$ASSET_NAME" "$ASSET_SIZE"; then
     rm -f "$SD_ROOT/$ASSET_NAME"
-    bail "The BaseOS update could not be downloaded. Please try again later."
+    bail "The $OS_NAME update could not be downloaded. Please try again later."
 fi
 
 # A truncated or corrupt update file is worse than none: BaseOS would try to
@@ -132,7 +130,7 @@ fi
 if [ -n "$WANT" ]; then
     if [ "$(sha256sum "$SD_ROOT/$ASSET_NAME" | cut -d' ' -f1)" != "$WANT" ]; then
         rm -f "$SD_ROOT/$ASSET_NAME"
-        bail "The downloaded BaseOS update was damaged in transit and has been deleted. Please try again."
+        bail "The downloaded $OS_NAME update was damaged in transit and has been deleted. Please try again."
     fi
     log_message "baseosUpdate.sh: checksum ok for $ASSET_NAME ($WANT_FROM, sha256 $WANT)"
 else
@@ -141,6 +139,6 @@ fi
 
 sync
 
-log_and_display_message "BaseOS $LATEST is ready to install. $DONE_MSG"
+log_and_display_message "$OS_NAME $LATEST is ready to install. $DONE_MSG"
 sleep 8
 /mnt/SDCARD/spruce/scripts/save_poweroff.sh --reboot
