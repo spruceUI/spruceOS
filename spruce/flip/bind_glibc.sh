@@ -1,7 +1,18 @@
 #!/bin/sh
 
+# Only over an older glibc: a newer one's libraries need its own glibc and libstdc++.
+glibc_minor() {
+	grep -ao 'release version 2\.[0-9]*' "$1" 2>/dev/null | head -n 1 | sed 's/.*2\.//'
+}
+SYSTEM=$(glibc_minor /usr/lib/libc.so.6)
+OURS=$(glibc_minor /mnt/SDCARD/spruce/flip/muOS/lib/libc.so.6)
+if [ -n "$SYSTEM" ] && [ -n "$OURS" ] && [ "$SYSTEM" -ge "$OURS" ]; then
+	echo "bind_glibc: system glibc 2.$SYSTEM is not older than 2.$OURS, skipped"
+	exit 0
+fi
+
 # Bind over the system's copy, but only where the system has one: a bind needs an
-# existing target, and BaseOS-my355 lacks some of these names (libanl.so.1, for one).
+# existing target, and BaseOS-my355 and FlipBase lack some of these names (libanl.so.1, for one).
 SKIPPED=""
 bind_lib() {
 	if [ -e "$2" ]; then
