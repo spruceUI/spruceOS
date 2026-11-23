@@ -36,22 +36,21 @@ class CachedExists:
         except (FileNotFoundError, NotADirectoryError, PermissionError):
             # Cache negative result to avoid re-hitting disk
             cls._dir_cache[directory] = set()
+            cls._dir_cache_lower[directory] = {}
             return False
 
+        lower: Dict[str, list[str]] = {}
+        for f in files:
+            lower.setdefault(f.lower(), []).append(f)
         cls._dir_cache[directory] = files
+        cls._dir_cache_lower[directory] = lower
         return filename in files
 
     @classmethod
     def matches_ignore_case(cls, directory: str, filename: str) -> list[str]:
         directory = os.path.normpath(directory)
-        lower = cls._dir_cache_lower.get(directory)
-        if lower is None:
-            cls.exists(os.path.join(directory, filename))
-            lower = {}
-            for f in sorted(cls._dir_cache.get(directory, ())):
-                lower.setdefault(f.lower(), []).append(f)
-            cls._dir_cache_lower[directory] = lower
-        return lower.get(filename.lower(), [])
+        cls.exists(os.path.join(directory, filename))
+        return cls._dir_cache_lower.get(directory, {}).get(filename.lower(), [])
 
     @classmethod
     def invalidate_dir(cls, directory: str):
