@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Set
+from typing import Dict, List
 
 
 class CachedExists:
@@ -11,8 +11,25 @@ class CachedExists:
     - Shared cache across the entire process
     """
 
-    _dir_cache: Dict[str, Set[str]] = {}
-    _dir_cache_lower: Dict[str, Dict[str, list[str]]] = {}
+    # directory -> lowercased name -> names as they are on disk
+    _dir_cache: Dict[str, Dict[str, List[str]]] = {}
+
+    @classmethod
+    def _names(cls, directory: str) -> Dict[str, List[str]]:
+        cached = cls._dir_cache.get(directory)
+        if cached is not None:
+            return cached
+
+        names: Dict[str, List[str]] = {}
+        try:
+            for f in os.listdir(directory):
+                names.setdefault(f.lower(), []).append(f)
+        except (FileNotFoundError, NotADirectoryError, PermissionError):
+            # Cache negative result to avoid re-hitting disk
+            pass
+
+        cls._dir_cache[directory] = names
+        return names
 
     @classmethod
     def exists(cls, path: str) -> bool:
@@ -25,42 +42,19 @@ class CachedExists:
         if not directory or not filename:
             return os.path.exists(path)
 
-        # Cache hit
-        cached = cls._dir_cache.get(directory)
-        if cached is not None:
-            return filename in cached
-
-        # Cache miss: list directory once
-        try:
-            files = set(os.listdir(directory))
-        except (FileNotFoundError, NotADirectoryError, PermissionError):
-            # Cache negative result to avoid re-hitting disk
-            cls._dir_cache[directory] = set()
-            cls._dir_cache_lower[directory] = {}
-            return False
-
-        lower: Dict[str, list[str]] = {}
-        for f in files:
-            lower.setdefault(f.lower(), []).append(f)
-        cls._dir_cache[directory] = files
-        cls._dir_cache_lower[directory] = lower
-        return filename in files
+        return filename in cls._names(directory).get(filename.lower(), ())
 
     @classmethod
-    def matches_ignore_case(cls, directory: str, filename: str) -> list[str]:
-        directory = os.path.normpath(directory)
-        cls.exists(os.path.join(directory, filename))
-        return cls._dir_cache_lower.get(directory, {}).get(filename.lower(), [])
+    def matches_ignore_case(cls, directory: str, filename: str) -> List[str]:
+        return cls._names(os.path.normpath(directory)).get(filename.lower(), [])
 
     @classmethod
     def invalidate_dir(cls, directory: str):
         """Invalidate a single directory cache."""
         directory = os.path.normpath(directory)
         cls._dir_cache.pop(directory, None)
-        cls._dir_cache_lower.pop(directory, None)
 
     @classmethod
     def clear(cls):
         """Clear all cached directories."""
         cls._dir_cache.clear()
-        cls._dir_cache_lower.clear()
