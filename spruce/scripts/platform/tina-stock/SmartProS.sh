@@ -435,6 +435,7 @@ device_exit_sleep(){
         done
     fi
     wifi_request apply --wait
+    ( ( /mnt/SDCARD/spruce/scripts/bluetooth.sh apply ) & ) </dev/null >/dev/null 2>&1
     device_run_tsps_blobs
     device_run_thermal_process
     (
@@ -453,6 +454,7 @@ device_enter_sleep() {
     IDLE_TIMEOUT="$1"
     log_message "Entering sleep w/ IDLE_TIMEOUT of $IDLE_TIMEOUT"
     wifi_request suspend --wait
+    /mnt/SDCARD/spruce/scripts/bluetooth.sh sleep
 
     save_cores_online
     cores_online 0
