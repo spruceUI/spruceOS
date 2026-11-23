@@ -67,7 +67,7 @@ class MiyooFlip(MiyooDevice):
         }
         
         os.environ["SDL_VIDEODRIVER"] = "KMSDRM"
-        os.environ["SDL_RENDER_DRIVER"] = "kmsdrm"
+        os.environ["SDL_RENDER_DRIVER"] = "opengles2"
         os.environ["KMSDRM_DEVICE"] = "/dev/dri/card0"
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_DRIVER, b"opengles2")
         sdl2.SDL_SetHint(sdl2.SDL_HINT_RENDER_OPENGL_SHADERS, b"1")
