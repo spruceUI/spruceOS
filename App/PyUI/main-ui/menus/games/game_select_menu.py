@@ -28,5 +28,11 @@ class GameSelectMenu(RomsMenuCommon):
             PyUiState.set_in_game_selection_screen(False)
         return return_value
 
+    def _selection_state_key(self, page_name):
+        # Each folder remembers its own last game; page_name stays the system name for display
+        if(self.subfolder):
+            return f"{page_name}::{self.subfolder}"
+        return page_name
+
     def prefer_savestate_screenshot(self):
         return Device.get_device().get_system_config().use_savestate_screenshots(GAME_SELECT)

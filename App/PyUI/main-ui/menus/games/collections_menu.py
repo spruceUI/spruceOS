@@ -57,7 +57,7 @@ class CollectionsMenu(RomsMenuCommon):
         else:
             super()._menu_pressed(selection,rom_list)
 
-    def _check_for_last_subfolder_existance(self, last_subfolder, rom_list):
+    def _check_for_last_subfolder_existance(self, state_key, last_subfolder, rom_list):
         if(last_subfolder == ''):
             return None
         elif(getattr(self, 'subfolder', '') == last_subfolder):
@@ -68,9 +68,10 @@ class CollectionsMenu(RomsMenuCommon):
                 PyUiLogger.get_logger().info(f"collection: {collection}")
                 if collection == last_subfolder:
                     self._load_collection_menu(RomInfo(None, collection, is_collection=True))
+                    # Backed out of the reopened collection, so highlight it
                     PyUiState.set_last_game_selection(
-                        "Collections",
-                        '',
+                        state_key,
+                        collection,
                         getattr(self, 'subfolder', '') or ''
                     )
             return None
