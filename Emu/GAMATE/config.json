@@ -17,7 +17,8 @@
       "display": "Retroarch Core",
       "options": [
         "superwhizkid",
-        "gamate"
+        "gamate",
+        "armnes"
       ],
       "selected": "superwhizkid",
       "overrides": {}
