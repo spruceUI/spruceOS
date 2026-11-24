@@ -41,6 +41,7 @@ get_core_folder() {
         "fuse_libretro.so") echo "Fuse" ;;
         "gambatte_libretro.so") echo "Gambatte" ;;
         "gametank_libretro.so") echo "GameTank" ;;
+        "gamate_libretro.so") echo "Gamate" ;;
         "gearboy_libretro.so") echo "Gearboy" ;;
         "gearcoleco_libretro.so") echo "Gearcoleco" ;;
         "gearsystem_libretro.so") echo "Gearsystem" ;;
