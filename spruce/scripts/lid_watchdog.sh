@@ -37,31 +37,27 @@ while true; do
     # Read current lid state (1 = open, 0 = closed)
     current_state=$(device_lid_open)
 
-    # check lid sleep spruce setting
-    lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
+    # Only read the setting for a close not yet handled: each read is a jq fork,
+    # costly to repeat every 0.5s on a single-core device. (While shut and not
+    # acted on - charging, or disabled - this stays true and re-reads each loop.)
+    if [ "$current_state" = "0" ] && [ "$close_handled" = "0" ]; then
+        lid_sleep_enabled="$(get_config_value '.menuOptions."System Settings".enableLidSensor.selected' "True")"
 
-    case "$lid_sleep_enabled" in
-        "True")
-            # Detect lid close only
-            if [ "$current_state" = "0" ] && [ "$close_handled" = "0" ]; then
+        case "$lid_sleep_enabled" in
+            "True")
                 close_handled=1
                 launch_sleep_helper_once
                 current_state=$(device_lid_open)
-            fi
-            ;;
-        "Only when unplugged")
-            # Detect lid close and charging state
-            if [ "$current_state" = "0" ] && [ "$close_handled" = "0" ] && [ "$(device_get_charging_status)" = "Discharging" ]; then
-                close_handled=1
-                launch_sleep_helper_once
-                current_state=$(device_lid_open)
-            fi
-            ;;
-        "False")
-            # li'l extra sleep
-            sleep 1
-            ;;
-    esac
+                ;;
+            "Only when unplugged")
+                if [ "$(device_get_charging_status)" = "Discharging" ]; then
+                    close_handled=1
+                    launch_sleep_helper_once
+                    current_state=$(device_lid_open)
+                fi
+                ;;
+        esac
+    fi
 
     # An open lid arms the next close, whether or not this one was acted on.
     [ "$current_state" = "1" ] && close_handled=0
