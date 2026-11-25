@@ -1,0 +1,49 @@
+#!/bin/sh
+# Bind-mounted over wpctl / pactl by default/setup.sh (which fills in __CHAI__
+# and __DIR__). Runs the real binary, and if the call set the default sink's
+# volume or mute, passes the new volume to chai notify-volume. Fires even when
+# the value didn't change (eg: vol up while already maxed).
+
+CHAI="__CHAI__"
+DIR="__DIR__"
+ORIG="$DIR/$(basename "$0").orig"
+
+IS_SET=0
+IS_DEFAULT=0
+for arg in "$@"; do
+	case "$arg" in
+		set-volume | set-mute | set-sink-volume | set-sink-mute) IS_SET=1 ;;
+		@DEFAULT_AUDIO_SINK@ | @DEFAULT_SINK@) IS_DEFAULT=1 ;;
+	esac
+done
+
+# Fast path for everything else (info, list, get-volume, inspect...)
+if [ "$IS_SET" = "0" ] || [ "$IS_DEFAULT" = "0" ]; then
+	exec "$ORIG" "$@"
+fi
+
+"$ORIG" "$@"
+RC=$?
+
+# Muted reports as 0
+get_volume() {
+	if [ -x "$DIR/wpctl.orig" ]; then
+		"$DIR/wpctl.orig" get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null |
+			awk '/Volume:/ { v = int(($2 * 100) + 0.5); if (/MUTED/) v = 0; print v; exit }'
+	elif [ -x "$DIR/pactl.orig" ]; then
+		if "$DIR/pactl.orig" get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -q 'yes'; then
+			echo 0
+			return
+		fi
+		"$DIR/pactl.orig" get-sink-volume @DEFAULT_SINK@ 2>/dev/null |
+			awk '{ for (i = 1; i <= NF; i++) if ($i ~ /%$/) { sub(/%/, "", $i); print $i; exit } }'
+	fi
+}
+
+# Don't hold up the caller (eg: a hold-to-repeat loop)
+(
+	VAL=$(get_volume)
+	[ -n "$VAL" ] && "$CHAI" notify-volume "$VAL" 100
+) </dev/null >/dev/null 2>&1 &
+
+exit $RC

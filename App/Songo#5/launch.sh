@@ -1,276 +1,155 @@
 #!/bin/bash
-# PORTMASTER: songo5.zip, Songo5.sh
+# Songo #5 for spruce: App/Songo#5/launch.sh, run by spruce's menu (config.json).
+# The same songo5/ port as the PortMaster release, launched without PortMaster.
+#
+# The app folder's name has a "#" in it, so quote every path built from it.
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-set_smart
+# spruce sets its performance CPU mode to launch an app. Stay in it while Songo
+# boots and only then drop to smart. Does nothing if Songo has already exited,
+# so it can't override the CPU mode of whatever runs next.
+SMART_DELAY_SEC=8
+( sleep "$SMART_DELAY_SEC"; kill -0 "$$" 2>/dev/null && set_smart ) </dev/null >/dev/null 2>&1 &
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 GAMEDIR="$SCRIPT_DIR/songo5"
 
 runtime="sbc_4_3_rcv12"
 pck_filename="Songo5.pck"
-#gptk_filename="songo5.gptk"
 
-# Logging.
-#
-# Process substitution needs /dev/fd, which BaseOS on the Anbernic XX line does
-# not have. bash then fails the redirect, prints "cannot open /dev/fd/63" - and
-# *continues*, with stdout still pointing wherever it did before. The result is
-# a zero-byte log.txt and every echo below thrown away, which is exactly the
-# state that hid the lid-suppression failure. Fall back to a plain redirect.
+# Logging. Process substitution needs /dev/fd, which BaseOS on the Anbernic XX
+# line doesn't have: bash prints "cannot open /dev/fd/63" and carries on with
+# stdout unchanged, leaving an empty log. Fall back to a plain redirect.
 > "$GAMEDIR/log.txt"
 if [ -e /dev/fd ]; then
-    exec > >(tee "$GAMEDIR/log.txt") 2>&1
+	exec > >(tee "$GAMEDIR/log.txt") 2>&1
 else
-    exec >> "$GAMEDIR/log.txt" 2>&1
+	exec >> "$GAMEDIR/log.txt" 2>&1
 fi
 
-# Theoretically the mount should only exist once, the loop is on the off chance
-# something goes horribly wrong. Its important to be sure its unmounted or else
-# closing the lid of the clamshell will be ignored after the app exit, until
-# system restart at least.
-#
-# The first node is the Flip's. The XX clamshells expose the lid somewhere else
-# entirely - see device_lid_open in AnbernicXXCommon.sh - so check both.
-unmount_hall_overrides() {
-    local TARGET MOUNTED
-    # Why the override was dropped, for the log: "app exit" or the signal name.
-    local REASON="${1:-app exit}"
-    for TARGET in /sys/devices/platform/hall-mh248/hallvalue \
-                  /sys/class/power_supply/axp2202-battery/hallkey; do
-        [ -e "$TARGET" ] || continue
-
-        # /proc/mounts records the canonical path, not the one that was mounted.
-        # The XX node is reached through a /sys/class symlink, so the mount shows
-        # up as /sys/devices/platform/soc/twi5/.../hallkey and a literal
-        # comparison never matched - the override stayed mounted until the next
-        # reboot, which is precisely the state this exists to prevent.
-        MOUNTED="$(readlink -f "$TARGET" 2>/dev/null || echo "$TARGET")"
-
-        while grep -q " $MOUNTED " /proc/mounts 2>/dev/null; do
-            if umount -l "$TARGET" 2>/dev/null; then
-                echo "Unmounted hallkey override: $TARGET ($REASON)"
-                log_message "Songo: lid suppression released on $TARGET ($REASON)"
-            else
-                echo "Failed to unmount: $TARGET"
-                break
-            fi
-        done
-    done
-}
-
-# Songo suppresses the lid itself by bind-mounting runtime/hall_override/hallkey
-# - a file containing "1", meaning open - over the hall sensor node, so anything
-# polling the lid keeps seeing it open while music plays. On the XX line that
-# never takes effect: the app logs its override source as "/hall_override/hallkey",
-# having resolved the directory prefix to nothing, so the mount source does not
-# exist. spruce's lid_watchdog.sh then reads the real sensor and suspends
-# mid-song.
-#
-# Do it here instead, for the whole session. Killing the watchdog is not an
-# alternative: launch_startup_watchdogs runs once from runtime.sh before the main
-# loop rather than on each return to the menu, so a killed lid watchdog would
-# stay dead until reboot.
-#
-# Scoped to Anbernic deliberately. The same prefix bug presumably affects the
-# Flip, but that device works today and this is not the session to find out
-# otherwise.
-# The override is staged in /tmp rather than mounted straight out of the app
-# folder, because BusyBox mount truncates a source path at the first "#" - and
-# this app is installed in a directory called "Songo#5". It reports
-#   mounting /mnt/SDCARD/App/Songo on ... failed: No such file or directory
-# which reads like a missing file rather than a mangled argument. The same mount
-# from a hash-free path succeeds. This is the likeliest reason Songo's own
-# suppression never took effect here either.
-# A trap handler runs and then lets the script carry on - it does not exit. So a
-# stray SIGTERM here silently drops the lid override while Songo keeps playing,
-# and the lid starts suspending mid-song with nothing to show for it. Record the
-# signal itself, not just the unmount, so that case is identifiable after the
-# fact rather than inferred.
-on_hall_signal() {
-    log_message "Songo: caught $1 - releasing lid suppression, launch.sh keeps running"
-    unmount_hall_overrides "$1"
-}
-
-XX_HALL_NODE="/sys/class/power_supply/axp2202-battery/hallkey"
-XX_HALL_SRC="/tmp/songo_hall_override"
-case "$PLATFORM" in
-    "Anbernic"*)
-        if [ -e "$XX_HALL_NODE" ] && [ -f "$GAMEDIR/runtime/hall_override/hallkey" ]; then
-            # Clear anything a previous crash left behind before stacking a new one
-            unmount_hall_overrides
-            if ! cp "$GAMEDIR/runtime/hall_override/hallkey" "$XX_HALL_SRC" 2>&1; then
-                log_message "Songo: could not stage hall override at $XX_HALL_SRC"
-            fi
-            # Keep mount's stderr, and mirror the outcome to spruce.log: this
-            # app's own log is the first thing to go missing when something is
-            # wrong with the launcher's stdout, and a silent failure here means
-            # the lid suspends mid-song with nothing to show for it.
-            MOUNT_ERR="$(mount -o bind "$XX_HALL_SRC" "$XX_HALL_NODE" 2>&1)"
-            if [ $? -eq 0 ]; then
-                echo "Lid suppressed for this session: $XX_HALL_NODE"
-                log_message "Songo: lid suppressed via bind mount on $XX_HALL_NODE"
-                trap 'on_hall_signal SIGINT' INT
-                trap 'on_hall_signal SIGTERM' TERM
-            else
-                echo "Could not suppress lid: bind mount failed: $MOUNT_ERR"
-                log_message "Songo: lid suppression FAILED: mount -o bind $XX_HALL_SRC $XX_HALL_NODE: $MOUNT_ERR"
-            fi
-        fi
-        ;;
-esac
+# PortMaster's CFW_NAME and DEVICE_NAME aren't set under spruce. spruce's
+# PLATFORM stands in for DEVICE_NAME, which Songo and the checks below read.
+export DEVICE_NAME="${DEVICE_NAME:-$PLATFORM}"
+echo "spruce platform: ${PLATFORM}"
 
 # Create directory for save files
 CONFDIR="$GAMEDIR/conf/"
-$ESUDO mkdir -p "${CONFDIR}"
+mkdir -p "${CONFDIR}"
 
-# Setup volume indicator
-USE_SONGO_VOL_TCP_SERVER="1" # Set to "0" to disable the volume overlay, might need to disable for pixel 2
+# songo_conf_set / songo_conf_default, for writing to songo.conf (which Songo
+# reads from beside its runtime)
+source "${GAMEDIR}/runtime/songo_conf.sh"
 
-# RG351P: volume is an analog wheel after the codec, and no device node reports
-# volume keys, so the listener could only sit on the power key for nothing.
-if [ -f /mnt/SDCARD/spruce/twig ] || [ "$PLATFORM" = "RG351P" ]; then
-	USE_SONGO_VOL_TCP_SERVER="0"
-fi
-
+# The strategy folder the controls runtime scripts use
 SONGO_CFW_NAME="Spruce"
-
-if [ "$PLATFORM" != "RG351P" ]; then
-	sh "${GAMEDIR}/runtime/volume-indicator/setup_vol_indicator" "${SONGO_CFW_NAME}"
-fi
-
 export SONGO_CFW_NAME
-export USE_SONGO_VOL_TCP_SERVER
 
-# Set up brightness commands (Based on IncognitoMans approach)
-export SYSFS_BL_BRIGHTNESS="$(find /sys/class/backlight/*/ -name brightness 2>/dev/null | head -n 1)"
-export SYSFS_BL_COMMAND="$(find /sys/kernel/debug/dispdbg/ -name command 2>/dev/null | head -n 1)"
+# CHAI: makes sure "chai" is a command, spruce's own or the retrofit for it.
+# Godot (DeviceOS) uses it for brightness, battery and idle suppression.
+# CHAI_RETRO_DIR tells it where it is, which it can't work out itself outside bash.
+if [ -f "${GAMEDIR}/chai_retrofit/chai_entry.sh" ]; then
+	# BusyBox mount cuts a source path at its "#", so the lid mount out of
+	# App/Songo#5 would fail and the lid would suspend mid-song. Use a hash-free path.
+	ln -sfn "${GAMEDIR}/chai_retrofit" /tmp/songo_chai
+	CHAI_RETRO_DIR=/tmp/songo_chai
+	source "${CHAI_RETRO_DIR}/chai_entry.sh"
+fi
 
-if [ -n "${SYSFS_BL_BRIGHTNESS}" ]; then
-  echo "Backlight TYPE2 detected! setting path/type."
-  export BL_TYPE="TYPE2"
-  export SYSFS_BL_POWER="$(find /sys/class/backlight/*/ -name bl_power )"
-  export SYSFS_BL_MAX="$(find /sys/class/backlight/*/ -name max_brightness 2>/dev/null | head -n 1)"
-elif [ -n "${SYSFS_BL_COMMAND}" ]; then
-  echo "Backlight TYPE1 detected! setting path/type."
-  export BL_TYPE="TYPE1"
-  export SYSFS_BL_NAME="$(find /sys/kernel/debug/dispdbg/ -name name 2>/dev/null | head -n 1)"
-  export SYSFS_BL_PARAM="$(find /sys/kernel/debug/dispdbg/ -name param 2>/dev/null | head -n 1)"
-  export SYSFS_BL_START="$(find /sys/kernel/debug/dispdbg/ -name start 2>/dev/null | head -n 1)"
-  export BL_COMMAND="setbl"
-  export BL_NAME="lcd0"
+# Volume indicator: chai runs the subscriber on every volume change, and it
+# passes the volume to Godot's listener, which Songo starts when songo.conf's
+# volume_tcp_server is 1. Off on twig, and on the RG351P, whose volume is an
+# analog wheel no input node reports. The subscriber is added every launch;
+# songo.conf only records the result on the first (see songo_conf.sh).
+SONGO_VOL_SUBSCRIBER="${GAMEDIR}/runtime/chai_volume_subscriber.sh"
+if [ ! -f /mnt/SDCARD/spruce/twig ] && [ "$PLATFORM" != "RG351P" ] && chai add-volume-subscriber "$SONGO_VOL_SUBSCRIBER" 2>/dev/null; then
+	songo_conf_set volume_tcp_server 1
 else
-  echo "Backlight objects not found!"
-  export BL_TYPE="UNKNOWN"
+	songo_conf_set volume_tcp_server 0
 fi
 
-DEFAULT_GET_BRIGHTNESS_PATH="${GAMEDIR}/runtime/brightness/default/get_brightness"
-DEFAULT_SET_BRIGHTNESS_PATH="${GAMEDIR}/runtime/brightness/default/set_brightness"
-SONGO_GET_BRIGHTNESS_PATH="$DEFAULT_GET_BRIGHTNESS_PATH"
-SONGO_SET_BRIGHTNESS_PATH="$DEFAULT_SET_BRIGHTNESS_PATH"
-NO_BRIGHT_FADE_AVAILABLE='0'
-
-# The XX line is TYPE1 but takes the default getter, not the spruce one: the
-# spruce getter needs either DEVICE_BACKLIGHT_PATH, which AnbernicXXCommon.cfg
-# leaves empty, or current_backlight(), which no Anbernic ${PLATFORM}.sh file
-# defines - so there it would fail through to a hard-coded 155. The default
-# getter reads /sys/class/disp, which on these devices is live, so the
-# staleness the spruce getter exists to work around does not apply.
-if [[ "$PLATFORM" != Anbernic* ]] && [[ "$BL_TYPE" = "TYPE1" ]] && [[ -e "${GAMEDIR}/runtime/brightness/${SONGO_CFW_NAME}/get_brightness" ]]; then
-	# Type 2 updates the stored get value when cfw adjusts brightness, so for type 1 we have to explicitly check if
-	# brightness has been adjusted by the user
-	SONGO_GET_BRIGHTNESS_PATH="${GAMEDIR}/runtime/brightness/${SONGO_CFW_NAME}/get_brightness"
+# Screen fades need a brightness chai can read back, otherwise Songo fades an
+# overlay instead (songo.conf's no_bright_fade_available, first launch only)
+if songo_conf_building; then
+	case "$(chai get-brightness 2>/dev/null)" in
+		'' | *[!0-9]*) songo_conf_set no_bright_fade_available 1 ;;
+		*) songo_conf_set no_bright_fade_available 0 ;;
+	esac
 fi
 
-if [ "$BL_TYPE" = "UNKNOWN" ]; then
-	NO_BRIGHT_FADE_AVAILABLE='1'
-fi
+# Find a music player left playing by "Quit with Music" for Songo to pick back
+# up, and set up the next one
+source "${GAMEDIR}/runtime/background_play/setup_env.sh"
 
-INITIAL_BRIGHTNESS="$("$SONGO_GET_BRIGHTNESS_PATH")"
+# Set up controls
+source "${GAMEDIR}/runtime/controls/setup_env.sh"
 
-if [ -z "$INITIAL_BRIGHTNESS" ]; then
-    echo "Failed to read initial brightness" >&2
-    INITIAL_BRIGHTNESS=50  # fallback value if needed
-fi
+# songo.conf's values are all written: don't work them out again on later
+# launches (delete songo_configs_built to)
+songo_conf_mark_built
 
-export SONGO_GET_BRIGHTNESS_PATH
-export SONGO_SET_BRIGHTNESS_PATH
-export NO_BRIGHT_FADE_AVAILABLE
-
-cd $GAMEDIR
-
+cd "$GAMEDIR"
 
 # Set the XDG environment variables for config & savefiles
 export XDG_DATA_HOME="$CONFDIR"
-# $sdl_controllerconfig is a PortMaster variable and is empty under spruce, so
-# on most devices this exports nothing and SDL falls back to its built-in
-# mapping database. The Anbernic XX line is not in that database: every H700
-# model reports the same GUID under the name "ANBERNIC-keys", so without a
-# mapping the runtime sees an unrecognised joystick and no button does anything.
-# AnbernicXXCommon.cfg carries the map and export_sdl_gamecontroller_map
-# publishes it.
-#
-# Positional, matching Gallery, PixelReader and FileManagement. The map in the
-# cfg is label-named - "a" is the button silk-screened A, which on these
-# Nintendo-layout pads is the East one - while SDL's own vocabulary, which this
-# runtime speaks, puts "a" on the South button. Without the swap every binding
-# lands one button over.
+
+# The Anbernic XX line isn't in SDL's built-in mapping database (every H700
+# model reports the same GUID as "ANBERNIC-keys"), so spruce's cfg carries the
+# map. Positional, as the runtime speaks SDL's vocabulary where "a" is the
+# South button, matching spruce's other apps.
 case "$PLATFORM" in
-    "Anbernic"*)
-        export_sdl_gamecontroller_map positional
-        ;;
-    "RG351P")
-        # The RG351P's OSH PB pad has no usable entry in the runtime's mapping
-        # database (shoulders and Select/Start land on the wrong inputs), so it
-        # gets the cfg's map, positional for the same reason as the XX line.
-        export_sdl_gamecontroller_map positional
-        # Godot's default 15 ms output latency is shorter than one period of
-        # the base's dmix (1024 frames at 44.1 kHz), so it underruns and
-        # crackles on the RK3326. 100 ms keeps the buffer full.
-        GODOT_OPTS="${GODOT_OPTS:+$GODOT_OPTS }--audio-output-latency 100"
-        ;;
-    *)
-        export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
-        ;;
+	"Anbernic"*) export_sdl_gamecontroller_map positional ;;
+	"RG351P")
+		# The OSH PB pad has no usable entry in the runtime's mapping database
+		export_sdl_gamecontroller_map positional
+		# Godot's default 15 ms output latency underruns the base's dmix
+		# (1024 frames at 44.1 kHz) and crackles on the RK3326
+		GODOT_OPTS="${GODOT_OPTS:+$GODOT_OPTS }--audio-output-latency 100"
+		;;
 esac
 
 echo "XDG_DATA_HOME"
-echo $XDG_DATA_HOME
+echo "$XDG_DATA_HOME"
 
-export SONGO_BINARIES_DIR="$GAMEDIR/runtime"
 export SONGO_DIR_TIP="On Spruce I suggest making a MUSIC folder in /mnt/SDCARD/"
 
-#$GPTOKEYB "$GAMEDIR/runtime/$runtime" -c "$GAMEDIR/$gptk_filename" &
+# On KMSDRM only: rotates touch input on GLES3 (the picture is left alone), and
+# both the picture and touch on Vulkan. Devices without touch are unaffected
+export SONGODOT_KMSDRM_ROTATION="270"
 
-# Might need to uncomment this, keep it around for now
-# sleep 0.6 # For TSP only, do not move/modify this line.
-# pm_platform_helper "$GAMEDIR/runtime/$runtime"
+# Compatibility on GLES3, which the sbc runtime's "opengl3" driver creates. Its
+# "opengl3_es" sets up no GL context and segfaults.
+GODOT_OPTS="$GODOT_OPTS --rendering-method gl_compatibility --rendering-driver opengl3"
+# The .pck's path is absolute: Godot opens it again for every file it loads, and
+# its directory scans change the working directory for a moment, so a thread
+# loading just then wouldn't find a relative one
+"$GAMEDIR/runtime/$runtime" $GODOT_OPTS --main-pack "$GAMEDIR/gamedata/$pck_filename"
 
-LD_LIBRARY_PATH="$GAMEDIR/runtime/ffmpeg:$LD_LIBRARY_PATH" "$GAMEDIR/runtime/$runtime" $GODOT_OPTS --main-pack "gamedata/$pck_filename"
+# Cleanup
 
-# Clean up after app close
-# Revert brightness if app crashes or brighntess ends up as zero for any reason
-CURRENT_BRIGHTNESS="$("$SONGO_GET_BRIGHTNESS_PATH")"
-if [ "$CURRENT_BRIGHTNESS" = "0" ]; then
-    echo "Brightness is 0, restoring to $INITIAL_BRIGHTNESS"
-    "$SONGO_SET_BRIGHTNESS_PATH" "$INITIAL_BRIGHTNESS"
+chai remove-volume-subscriber "$SONGO_VOL_SUBSCRIBER" 2>/dev/null
+
+# Undo the retrofit's setup (volume listener). Nothing to undo with native chai.
+if command -v chai_retrofit_teardown >/dev/null 2>&1; then
+	chai_retrofit_teardown
 fi
 
-# Songo's TYPE2 blank writes only bl_power=1, so the check above misses it, and
-# darkmoss PyUI does not re-apply the backlight at start.
-if [ "$PLATFORM" = "RG351P" ] && [ "$BL_TYPE" = "TYPE2" ] && [ -n "$SYSFS_BL_POWER" ]; then
-    for _blp in $SYSFS_BL_POWER; do
-        [ "$(cat "$_blp" 2>/dev/null)" != "0" ] && echo 0 > "$_blp" 2>/dev/null
-    done
+# Turn idle suppression off in case Songo crashed while music was playing.
+# Always, even after "Quit with Music" left the music player running: it's
+# only on while Songo is open, and Songo turns it back on when it picks the
+# player up again.
+chai set-idle-suppression 0 2>/dev/null
+
+# Fix brightness if app crashed when at 0
+if [ "$(chai get-brightness 2>/dev/null)" = "0" ]; then
+	echo "Backlight left at 0, restoring to half brightness"
+	chai set-brightness 128 2>/dev/null
 fi
 
-if [[ "$SONGO_CFW_NAME" != "NONE" ]] && [ "$PLATFORM" != "RG351P" ]; then
-	# Teardown volume indicator
-	sh "${GAMEDIR}/runtime/volume-indicator/teardown_vol_indicator" "${SONGO_CFW_NAME}"
+# RG351P: a blank through bl_power alone gets past the check above, and dArkMoss
+# PyUI doesn't re-apply the backlight when it starts
+if [ "$PLATFORM" = "RG351P" ]; then
+	for _blp in /sys/class/backlight/*/bl_power; do
+		[ "$(cat "$_blp" 2>/dev/null)" != "0" ] && echo 0 > "$_blp" 2>/dev/null
+	done
 fi
-
-unmount_hall_overrides "app exit"
-
-# Might need to add this back in
-# pm_finish

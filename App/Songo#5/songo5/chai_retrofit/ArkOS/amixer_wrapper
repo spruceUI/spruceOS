@@ -1,0 +1,44 @@
+#!/bin/sh
+# Bind-mounted over amixer by ArkOS/setup.sh (which fills in __CHAI__ and
+# __DIR__). Runs the real amixer, and if the call set the Playback or Master
+# control (ogage's volume keys, dArkOS's volume.sh, mute toggles), passes the
+# new volume to chai notify-volume. Fires even when the value didn't change
+# (eg: vol up while already maxed).
+
+CHAI="__CHAI__"
+ORIG="__DIR__/amixer.orig"
+
+IS_SET=0
+CONTROL=
+for arg in "$@"; do
+	case "$arg" in
+		set | sset | cset) IS_SET=1 ;;
+		# ogage switches outputs with "'Playback Path'" (quotes included), which
+		# doesn't match here
+		Playback | Master) CONTROL="$arg" ;;
+	esac
+done
+
+# Fast path for everything else (sget, contents, the output path...)
+if [ "$IS_SET" = "0" ] || [ -z "$CONTROL" ]; then
+	exec "$ORIG" "$@"
+fi
+
+"$ORIG" "$@"
+RC=$?
+
+# Don't hold up the caller (eg: ogage while a volume key is held)
+(
+	# "Mono: Playback 52 [69%] [on]" or "Front Left: Playback 20 [68%] [-10dB] [on]".
+	# Muted reports as 0.
+	VAL=$("$ORIG" sget "$CONTROL" 2>/dev/null | awk '
+		match($0, /\[[0-9]+%\]/) {
+			v = substr($0, RSTART + 1, RLENGTH - 3)
+			if ($0 ~ /\[off\]/) v = 0
+			print v
+			exit
+		}')
+	[ -n "$VAL" ] && "$CHAI" notify-volume "$VAL" 100
+) </dev/null >/dev/null 2>&1 &
+
+exit $RC

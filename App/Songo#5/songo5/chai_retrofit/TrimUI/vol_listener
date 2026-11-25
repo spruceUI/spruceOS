@@ -1,0 +1,53 @@
+#!/bin/sh
+# CHAI retrofit volume listener (TrimUI stock firmware and CrossMix)
+#
+# Usage: vol_listener <chai command>
+# Runs "<chai command> notify-volume VOLUME 100" after each volume change.
+#
+# TrimUI's firmware owns the volume keys and writes each new 0-20 level to
+# /tmp/system/set_volume (the same file the Spruce profile watches on the
+# Brick). Uses inotifywait when the system has one, otherwise checks the
+# file every 0.2 s. The level only changes between presses, so presses at
+# the min/max aren't reported.
+
+CHAI="$1"
+
+SET_VOLUME_DIR=/tmp/system
+SET_VOLUME_FILE="$SET_VOLUME_DIR/set_volume"
+
+# Exits quietly when this firmware doesn't write the file
+[ -d "$SET_VOLUME_DIR" ] || exit 0
+
+# Kill whatever we're waiting on when chai_teardown kills us
+CHILD=
+trap '[ -n "$CHILD" ] && kill "$CHILD" 2>/dev/null; exit 0' TERM INT
+
+LAST=
+read -r LAST <"$SET_VOLUME_FILE" 2>/dev/null
+
+check() {
+	VAL=
+	read -r VAL <"$SET_VOLUME_FILE" 2>/dev/null
+	[ "$VAL" = "$LAST" ] && return 0
+	LAST="$VAL"
+	case "$VAL" in '' | *[!0-9]*) return 0 ;; esac
+	[ "$VAL" -gt 20 ] && return 0
+	"$CHAI" notify-volume $((VAL * 5)) 100
+}
+
+INOTIFYWAIT=$(command -v inotifywait 2>/dev/null)
+
+while true; do
+	# Each wait runs in the background so the TERM trap can run straight away
+	if [ -n "$INOTIFYWAIT" ]; then
+		"$INOTIFYWAIT" -q -e modify -e close_write -e moved_to "$SET_VOLUME_DIR" >/dev/null 2>&1 &
+	else
+		sleep 0.2 &
+	fi
+	CHILD=$!
+	# inotifywait exits 0 on an event. Anything else (no inotify, the folder
+	# went away) would spin this loop, so fall back to polling.
+	wait "$CHILD" || INOTIFYWAIT=
+	CHILD=
+	check
+done

@@ -1,0 +1,50 @@
+{
+	"name": "Spruco#5",
+	"rootDir": "Spruce",
+	"version": "1.0",
+	"author": "a fella",
+	"co_authors": ["Robot (AI)"],
+	"ai_usage": 3,
+	"description": "Songo dressed up as spruceOS. Made for our friends at spruceUI.",
+	"components": {
+		"background_root": "background_root/background_root.tscn",
+		"header": "header/header.tscn",
+		"main_menu": "main_menu/main_menu.tscn",
+		"footer": "footer/footer.tscn",
+		"main_song_view": "main_song_view/main_song_view.tscn",
+		"song_follow": "song_follow/song_follow.tscn",
+		"collection_button": "collection_button/collection_button.tscn",
+		"collection_header": "collection_header/collection_header.tscn"
+	},
+	"tags": ["dark", "minimal"],
+	"settings": {
+		"selection_color": {
+			"values": ["d65d0e", "d7b45f", "689d6a", "cc241d", "458588", "b16286"],
+			"labels": ["Orange", "Yellow", "Green", "Red", "Blue", "Purple"],
+			"default": "d65d0e",
+			"display_name": "Selection Color",
+			"dependents": ["background_root", "main_menu", "main_song_view", "song_follow", "collection_header", "collection_button"],
+			"description": "The edge of the selected row, the progress bar and other highlights."
+		},
+		"icon_colors": {
+			"values": ["spruce", "yellow", "green", "selection"],
+			"labels": ["Yellow & Green", "Yellow", "Green", "Selection Color"],
+			"default": "spruce",
+			"display_name": "Menu Icon Colors",
+			"dependents": ["main_menu"],
+			"description": "What the focused main menu icon lights up in. spruce alternates yellow and green."
+		},
+		"show_clock": {
+			"values": [true, false],
+			"default": true,
+			"display_name": "Show Clock",
+			"dependents": ["header"]
+		},
+		"battery_percentage": {
+			"values": [true, false],
+			"default": true,
+			"display_name": "Battery Percentage",
+			"dependents": ["header"]
+		}
+	}
+}

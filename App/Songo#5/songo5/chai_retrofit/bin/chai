@@ -1,0 +1,7 @@
+#!/bin/sh
+# Stand-in "chai" command. chai_entry.sh puts this folder on PATH when the
+# CFW doesn't ship a chai of its own, so apps can always just run "chai".
+# Forwards to the retrofit profile chai_entry.sh picked.
+
+CHAI_RETRO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+exec sh "$CHAI_RETRO_DIR/${CHAI_RETROFIT_PROFILE:-default}/chai.sh" "$@"

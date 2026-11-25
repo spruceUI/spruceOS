@@ -1,0 +1,248 @@
+[gd_resource type="Theme" load_steps=20 format=3]
+
+[ext_resource type="FontVariation" path="res://theme_dev/themes_raw/Spruce/assets/font_regular.tres" id="1_font"]
+
+[sub_resource type="StyleBoxFlat" id="Button_normal"]
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+bg_color = Color(0.313726, 0.286275, 0.270588, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Button_focus"]
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+bg_color = Color(0.113725, 0.12549, 0.129412, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.839216, 0.364706, 0.054902, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="ListButton_normal"]
+content_margin_left = 10.0
+content_margin_top = 2.0
+content_margin_right = 10.0
+content_margin_bottom = 2.0
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 0)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ListButton_focus"]
+content_margin_left = 10.0
+content_margin_top = 2.0
+content_margin_right = 10.0
+content_margin_bottom = 2.0
+bg_color = Color(0.113725, 0.12549, 0.129412, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.839216, 0.364706, 0.054902, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="ListPanel_panel"]
+
+[sub_resource type="StyleBoxFlat" id="SongoPanel_panel"]
+content_margin_left = 15.0
+content_margin_top = 10.0
+content_margin_right = 15.0
+content_margin_bottom = 10.0
+bg_color = Color(0.235294, 0.219608, 0.211765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.313726, 0.286275, 0.270588, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="GrayInput_panel"]
+content_margin_left = 8.0
+content_margin_top = 2.0
+content_margin_right = 8.0
+content_margin_bottom = 2.0
+bg_color = Color(0.313726, 0.286275, 0.270588, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="Settings_normal"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.235294, 0.219608, 0.211765, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.235294, 0.219608, 0.211765, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="Settings_focus"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.113725, 0.12549, 0.129412, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.839216, 0.364706, 0.054902, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="Settings_disabled"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.235294, 0.219608, 0.211765, 0.5)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="SettingsLabel_normal"]
+
+[sub_resource type="StyleBoxFlat" id="Scroll_rail"]
+content_margin_left = 6.0
+bg_color = Color(0.235294, 0.219608, 0.211765, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Scroll_grabber"]
+content_margin_left = 6.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.486275, 0.435294, 0.392157, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Scroll_grabber_highlight"]
+content_margin_left = 6.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.839216, 0.364706, 0.054902, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[resource]
+CollectionOptions/constants/list_bottom_fade = 16
+CollectionOptions/constants/list_top_fade = 16
+CollectionOptions/constants/vertical_layout = 1
+Button/colors/font_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/font_focus_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/font_hover_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/font_hover_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/font_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/icon_focus_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/colors/icon_normal_color = Color(0.921569, 0.858824, 0.698039, 1)
+Button/colors/icon_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+Button/fonts/font = ExtResource("1_font")
+Button/styles/focus = SubResource("Button_focus")
+Button/styles/hover = SubResource("Button_normal")
+Button/styles/normal = SubResource("Button_normal")
+Button/styles/pressed = SubResource("Button_focus")
+ItemList/fonts/font = ExtResource("1_font")
+Label/colors/font_color = Color(0.984314, 0.945098, 0.780392, 1)
+Label/fonts/font = ExtResource("1_font")
+ListButton/base_type = &"Button"
+ListButton/colors/font_color = Color(0.984314, 0.945098, 0.780392, 1)
+ListButton/colors/font_focus_color = Color(0.984314, 0.945098, 0.780392, 1)
+ListButton/colors/font_hover_color = Color(0.984314, 0.945098, 0.780392, 1)
+ListButton/colors/font_hover_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+ListButton/colors/font_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+ListButton/colors/icon_focus_color = Color(0.843137, 0.705882, 0.372549, 1)
+ListButton/colors/icon_hover_color = Color(0.486275, 0.435294, 0.392157, 1)
+ListButton/colors/icon_normal_color = Color(0.486275, 0.435294, 0.392157, 1)
+ListButton/styles/focus = SubResource("ListButton_focus")
+ListButton/styles/hover = SubResource("ListButton_normal")
+ListButton/styles/normal = SubResource("ListButton_normal")
+ListButton/styles/pressed = SubResource("ListButton_focus")
+ListButtonOuterMargin/base_type = &"MarginContainer"
+ListButtonOuterMargin/constants/margin_bottom = 1
+ListButtonOuterMargin/constants/margin_left = 0
+ListButtonOuterMargin/constants/margin_right = 0
+ListButtonOuterMargin/constants/margin_top = 1
+ListPanelContainer/base_type = &"PanelContainer"
+ListPanelContainer/styles/panel = SubResource("ListPanel_panel")
+ListSectionInnerMargin/base_type = &"MarginContainer"
+ListSectionInnerMargin/constants/margin_bottom = 0
+ListSectionInnerMargin/constants/margin_left = 0
+ListSectionInnerMargin/constants/margin_right = 0
+ListSectionInnerMargin/constants/margin_top = 0
+ListSectionOuterMargin/base_type = &"MarginContainer"
+ListSectionOuterMargin/constants/margin_bottom = 16
+ListSectionOuterMargin/constants/margin_left = 0
+ListSectionOuterMargin/constants/margin_right = 4
+ListSectionOuterMargin/constants/margin_top = 16
+SongoGrayInputPanel/base_type = &"PanelContainer"
+SongoGrayInputPanel/styles/panel = SubResource("GrayInput_panel")
+SongoPanel/base_type = &"PanelContainer"
+SongoPanel/styles/panel = SubResource("SongoPanel_panel")
+SongoSettingsButton/base_type = &"Button"
+SongoSettingsButton/colors/font_color = Color(0.921569, 0.858824, 0.698039, 1)
+SongoSettingsButton/colors/font_disabled_color = Color(0.486275, 0.435294, 0.392157, 1)
+SongoSettingsButton/colors/font_focus_color = Color(0.984314, 0.945098, 0.780392, 1)
+SongoSettingsButton/colors/font_hover_color = Color(0.921569, 0.858824, 0.698039, 1)
+SongoSettingsButton/colors/font_hover_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+SongoSettingsButton/colors/font_pressed_color = Color(0.984314, 0.945098, 0.780392, 1)
+SongoSettingsButton/colors/icon_focus_color = Color(0.843137, 0.705882, 0.372549, 1)
+SongoSettingsButton/colors/icon_normal_color = Color(0.921569, 0.858824, 0.698039, 1)
+SongoSettingsButton/fonts/font = ExtResource("1_font")
+SongoSettingsButton/styles/disabled = SubResource("Settings_disabled")
+SongoSettingsButton/styles/focus = SubResource("Settings_focus")
+SongoSettingsButton/styles/hover = SubResource("Settings_normal")
+SongoSettingsButton/styles/normal = SubResource("Settings_normal")
+SongoSettingsButton/styles/pressed = SubResource("Settings_focus")
+SongoSettingsLabel/base_type = &"Label"
+SongoSettingsLabel/colors/font_color = Color(0.984314, 0.945098, 0.780392, 1)
+SongoSettingsLabel/colors/font_shadow_color = Color(0, 0, 0, 0)
+SongoSettingsLabel/fonts/font = ExtResource("1_font")
+SongoSettingsLabel/styles/normal = SubResource("SettingsLabel_normal")
+SpruceDim/base_type = &"Label"
+SpruceDim/colors/font_color = Color(0.486275, 0.435294, 0.392157, 1)
+SpruceSoft/base_type = &"Label"
+SpruceSoft/colors/font_color = Color(0.921569, 0.858824, 0.698039, 1)
+VScrollBar/styles/grabber = SubResource("Scroll_grabber")
+VScrollBar/styles/grabber_highlight = SubResource("Scroll_grabber_highlight")
+VScrollBar/styles/grabber_pressed = SubResource("Scroll_grabber_highlight")
+VScrollBar/styles/scroll = SubResource("Scroll_rail")
+VScrollBar/styles/scroll_focus = SubResource("Scroll_rail")

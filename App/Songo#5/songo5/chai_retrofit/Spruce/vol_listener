@@ -1,0 +1,64 @@
+#!/bin/sh
+# CHAI retrofit volume listener (Spruce)
+#
+# Usage: vol_listener <chai command>
+# Runs "<chai command> notify-volume VOLUME 100" after each volume change.
+
+CHAI="$1"
+
+. /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+
+# Spruce volume is a 0-20 step
+notify() {
+	case "$1" in '' | *[!0-9]*) return 0 ;; esac
+	[ "$1" -gt 20 ] && return 0
+	"$CHAI" notify-volume $(($1 * 5)) 100
+}
+
+# TrimUI's A133P firmware owns the volume keys where the device config sets no
+# EVENT_PATH_VOLUME (eg: the Brick): they never reach spruce's input device, and
+# the firmware writes each new 0-20 level to /tmp/system/set_volume instead.
+# Watch that file, as spruce's volume_sync_watchdog.sh does.
+SET_VOLUME_DIR=/tmp/system
+SET_VOLUME_FILE="$SET_VOLUME_DIR/set_volume"
+INOTIFYWAIT=/mnt/SDCARD/spruce/bin64/inotifywait
+
+if [ -z "$EVENT_PATH_VOLUME" ] && [ -d "$SET_VOLUME_DIR" ]; then
+	LAST="$(cat "$SET_VOLUME_FILE" 2>/dev/null)"
+	changed() {
+		# sleep_helper mutes through the same file on the way into sleep
+		[ -e /tmp/sleep_helper_started ] && return 0
+		VAL="$(cat "$SET_VOLUME_FILE" 2>/dev/null)"
+		[ "$VAL" = "$LAST" ] && return 0
+		LAST="$VAL"
+		notify "$VAL"
+	}
+	if [ -x "$INOTIFYWAIT" ]; then
+		"$INOTIFYWAIT" -m -q -e modify -e close_write -e moved_to \
+			--format '%f' "$SET_VOLUME_DIR" 2>/dev/null | while read -r FNAME; do
+			[ "$FNAME" = "set_volume" ] && changed
+		done
+	else
+		while true; do
+			changed
+			sleep 0.15
+		done
+	fi
+	exit 0
+fi
+
+EVENTS="$EVENT_PATH_READ_INPUTS_SPRUCE"
+# Prefer the dedicated volume device if there is one
+[ -n "$EVENT_PATH_VOLUME" ] && [ -c "$EVENT_PATH_VOLUME" ] && EVENTS="$EVENT_PATH_VOLUME"
+
+getevent $EVENTS | while read -r line; do
+	case "$line" in
+		*"key "*"$B_VOLDOWN"* | *"key "*"$B_VOLUP"*)
+			(
+				# Give Spruce a moment to apply the press
+				sleep 0.1
+				notify "$(get_volume_level)"
+			) &
+			;;
+	esac
+done

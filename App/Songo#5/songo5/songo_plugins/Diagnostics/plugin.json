@@ -1,0 +1,9 @@
+{
+	"name": "Diagnostics",
+	"rootDir": "Diagnostics",
+	"version": "0.1",
+	"author": "Songo#5",
+	"description": "An on-screen overlay showing how much CPU and RAM Songo is using, and its frame rate. Choose what it shows and where from its page in Settings.",
+	"entry": "plugin.gd",
+	"settings_scene_path": "settings/diagnostics_settings_page.tscn"
+}

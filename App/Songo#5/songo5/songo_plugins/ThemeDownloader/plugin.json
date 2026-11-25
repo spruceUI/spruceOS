@@ -1,0 +1,9 @@
+{
+	"name": "Theme Downloader",
+	"rootDir": "ThemeDownloader",
+	"version": "0.1",
+	"author": "Songo#5",
+	"description": "Browse and download the themes at songo-player.github.io/Songo-5-Themes, and delete downloaded ones, from its page in Settings. Apply downloaded themes from UI and Customization.",
+	"entry": "plugin.gd",
+	"settings_scene_path": "settings/theme_downloader_page.tscn"
+}

@@ -1,0 +1,9 @@
+{
+	"name": "Web Radio",
+	"rootDir": "WebRadio",
+	"version": "0.1",
+	"author": "Songo#5",
+	"description": "Internet radio stations from github.com/mikepierce/internet-radio-streams. In the song view, left/right switches between a station's streams.",
+	"entry": "plugin.gd",
+	"settings_scene_path": "settings/web_radio_settings_page.tscn"
+}
