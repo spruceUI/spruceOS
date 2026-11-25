@@ -4,14 +4,24 @@
 
 case "$PLATFORM" in
 Anbernic*)
-    # gptokeyb needs dll-mali (only build that classifies the pad).
-    GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
-    GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH $controlfolder/gptokeyb $ESUDOKILL"
+    # gptokeyb needs dll-mali (only build that classifies the pad), and the pad map written for it.
+    GPTOKEYB2="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH SDL_GAMECONTROLLERCONFIG=$SDL_GAMECONTROLLERCONFIG LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
+    GPTOKEYB="$ESUDO env LD_LIBRARY_PATH=/mnt/SDCARD/App/PyUI/dll-mali:$LD_LIBRARY_PATH SDL_GAMECONTROLLERCONFIG=$SDL_GAMECONTROLLERCONFIG $controlfolder/gptokeyb $ESUDOKILL"
 
     # Keyboard-driven ports (gptokeyb -c) need the vendor SDL2; pad-driven ones need dll-mali.
     # Must run before the port sources its runtime (love.txt bakes LD_LIBRARY_PATH in).
     if grep -qE '\$GPTOKEYB2?[^&|;]*[[:space:]]-c[[:space:]]' "$0" 2>/dev/null; then
         export LD_LIBRARY_PATH="/mnt/SDCARD/spruce/h700/lib64/sdl2:$LD_LIBRARY_PATH"
+        # The pad map is numbered for dll-mali, which puts three phantom keys (ESC, VOL-, VOL+)
+        # first; the vendor SDL2 counts the pad from b0. Shift it for ports that read the pad too.
+        if [ -n "$SDL_GAMECONTROLLERCONFIG" ]; then
+            SDL_GAMECONTROLLERCONFIG="$(printf '%s' "$SDL_GAMECONTROLLERCONFIG" | awk -F, -v OFS=, '{
+                for (i = 1; i <= NF; i++)
+                    if (match($i, /:b[0-9]+$/) && substr($i, RSTART + 2) + 0 >= 3)
+                        $i = substr($i, 1, RSTART + 1) (substr($i, RSTART + 2) - 3)
+                print }')"
+            export SDL_GAMECONTROLLERCONFIG
+        fi
     fi
 
     # Point SDL at gptokeyb's uinput keyboard once it appears.
