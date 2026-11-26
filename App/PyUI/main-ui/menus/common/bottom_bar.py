@@ -32,7 +32,7 @@ class BottomBar:
 
             if(bottom_bar_text is not None):
                 self.render_bottom_bar_text(bottom_bar_text)
-            elif(render_bottom_bar_icons_and_images):
+            elif(render_bottom_bar_icons_and_images and Theme.show_bottom_bar_buttons()):
                 if(Theme.context_buttons_enabled()):
                     self.render_context_bottom_bar(self._resolve_hints(bottom_bar_hints))
                 else:

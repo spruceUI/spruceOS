@@ -1692,9 +1692,7 @@ class Theme():
 
     @classmethod
     def context_buttons_enabled(cls):
-        # Off keeps the theme's own bar style, icons without labels
-        mode = cls.bottom_bar_buttons_mode()
-        return mode == "Contextual" or (mode == "Off" and cls._theme_has_context_buttons())
+        return cls.bottom_bar_buttons_mode() == "Contextual"
 
     @classmethod
     def context_icon(cls, button):
