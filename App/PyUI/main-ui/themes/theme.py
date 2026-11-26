@@ -590,6 +590,16 @@ class Theme():
         return os.path.join(base_dir, "themes", "font.ttf")
 
     @classmethod
+    def get_symbol_font(cls):
+        """The theme's own button-glyph font ("symbolFont"), laid out like promptfont.ttf;
+        None when the theme has none."""
+        name = cls._data.get("symbolFont")
+        if not name:
+            return None
+        path = os.path.join(cls._path, name)
+        return path if os.path.exists(path) else None
+
+    @classmethod
     def get_font_size(cls, font_purpose : FontPurpose):
         try:
             match font_purpose:

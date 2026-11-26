@@ -112,9 +112,10 @@ class Display:
     debug = False
     renderer = None
     fonts = {}
-    # Cache key for the bundled symbol font inside cls.fonts. Not a FontPurpose: themes
-    # do not pick it, the renderer hardwires it.
+    # Cache keys for the symbol fonts inside cls.fonts, not FontPurposes: the bundled
+    # promptfont, and the theme's own "symbolFont" when it has one
     SYMBOL_FONT_KEY = "promptfont"
+    THEME_SYMBOL_FONT_KEY = "promptfont:theme"
     bg_canvas = None
     render_canvas = None
     bg_path = ""
@@ -837,47 +838,72 @@ class Display:
             return 0
         return maxy.value
 
-    @classmethod
-    def _promptfont(cls):
-        """Open the bundled symbol font once, sized so its capitals match the list font's:
-        a button glyph keeps the same size next to the words it labels in every theme.
+    _symbol_font_failures = set()
 
-        promptfont.ttf (SIL OFL - see Licenses/fonts/promptfont.txt). Hardwired: themes
-        must not re-skin button/key glyphs, and it is the only bundled font that carries
-        every glyph codepoint the prompts use.
-        """
-        font = cls.fonts.get(cls.SYMBOL_FONT_KEY)
+    @classmethod
+    def _open_symbol_font(cls, key, path):
+        """Open a symbol font once, sized so its capitals match the list font's: a button
+        glyph keeps the same size next to the words it labels in every theme."""
+        font = cls.fonts.get(key)
         if font is not None:
             return font
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "utils", "promptfont.ttf")
-
-        def open_at(size):
-            ttf = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"), size)
-            if not ttf:
-                raise RuntimeError(
-                    f"Could not load font {path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
-            return ttf
-
         size = Theme.get_font_size(FontPurpose.LIST)
-        ttf = open_at(size)
+        ttf = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"), size)
+        if not ttf:
+            raise RuntimeError(
+                f"Could not load font {path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
         list_cap = cls._cap_height(cls.fonts[FontPurpose.LIST].font)
         symbol_cap = cls._cap_height(ttf)
         if list_cap and symbol_cap and list_cap != symbol_cap:
-            sdl2.sdlttf.TTF_CloseFont(ttf)
-            ttf = open_at(max(1, round(size * list_cap / symbol_cap)))
+            scaled = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"),
+                                              max(1, round(size * list_cap / symbol_cap)))
+            if scaled:
+                sdl2.sdlttf.TTF_CloseFont(ttf)
+                ttf = scaled
         font = LoadedFont(ttf, sdl2.sdlttf.TTF_FontHeight(ttf), path)
-        cls.fonts[cls.SYMBOL_FONT_KEY] = font
+        cls.fonts[key] = font
         return font
 
     @classmethod
-    def render_symbol_run(cls, text, x, y, color):
-        """Draw one run of UI glyphs with the bundled symbol font."""
-        cls._frame_draws.append(("text", text, x, y, color, cls.SYMBOL_FONT_KEY,
+    def _bundled_symbol_font(cls):
+        """promptfont.ttf (SIL OFL - see Licenses/fonts/promptfont.txt), which carries every
+        glyph codepoint the prompts use."""
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "utils", "promptfont.ttf")
+        return cls._open_symbol_font(cls.SYMBOL_FONT_KEY, path)
+
+    @classmethod
+    def _theme_symbol_font(cls):
+        """The theme's "symbolFont", or None. It must use promptfont's codepoints: a font
+        that merely has U+21D3 has an arrow there, not the A button."""
+        path = Theme.get_symbol_font()
+        if not path or path in cls._symbol_font_failures:
+            return None
+        try:
+            return cls._open_symbol_font(cls.THEME_SYMBOL_FONT_KEY, path)
+        except RuntimeError as e:
+            PyUiLogger.get_logger().warning(f"Theme symbolFont unusable, using promptfont: {e}")
+            cls._symbol_font_failures.add(path)
+            return None
+
+    @classmethod
+    def _symbol_font_for(cls, run):
+        """(cache key, font) for a glyph run: the theme's symbol font when it has every glyph
+        of the run, else the bundled one."""
+        theme_font = cls._theme_symbol_font()
+        if theme_font is not None and all(
+                cls._font_has_glyph(theme_font.font, ch) for ch in run if not ch.isspace()):
+            return cls.THEME_SYMBOL_FONT_KEY, theme_font
+        return cls.SYMBOL_FONT_KEY, cls._bundled_symbol_font()
+
+    @classmethod
+    def render_symbol_run(cls, text, x, y, color, key):
+        """Draw one run of UI glyphs with the symbol font cached under key."""
+        cls._frame_draws.append(("text", text, x, y, color, key,
                                  RenderMode.TOP_LEFT_ALIGNED, None, None, None))
-        return cls.render_text_using_font(cls._promptfont(), text, x, y, color,
-                                          cls.SYMBOL_FONT_KEY, RenderMode.TOP_LEFT_ALIGNED)
+        return cls.render_text_using_font(cls.fonts[key], text, x, y, color,
+                                          key, RenderMode.TOP_LEFT_ALIGNED)
 
     @classmethod
     def _gap_between(cls, left, right, tight, group):
@@ -903,7 +929,7 @@ class Display:
     def render_centered_line(cls, line, center_x, y, color):
         # A centered row of text and UI glyphs: a plain string, or the (is_symbol, run)
         # segments symbols.button_labels() and the Konami line are built from. Glyph runs
-        # draw with the bundled symbol font, tight to the words they label
+        # draw with a symbol font (the theme's or the bundled one), tight to the words they label
         # (SYMBOL_TIGHT_GAP_PX) and further apart from the next button group
         # (SYMBOL_GROUP_GAP_PX); the rest draws with the list font. A plain line takes the
         # single-render path, so the common case costs one isinstance and nothing else.
@@ -913,28 +939,31 @@ class Display:
         if len(segments) == 1 and not segments[0][0]:
             Display.render_text_centered(segments[0][1], center_x, y, color, purpose=FontPurpose.LIST)
             return
-        symbol_font = cls._promptfont()
-        # Both runs draw from their texture's top: shift the glyphs by the difference in
-        # ascent so they stand on the list font's baseline
-        symbol_dy = (sdl2.sdlttf.TTF_FontAscent(cls.fonts[FontPurpose.LIST].font)
-                     - sdl2.sdlttf.TTF_FontAscent(symbol_font.font))
+        list_ascent = sdl2.sdlttf.TTF_FontAscent(cls.fonts[FontPurpose.LIST].font)
         scale = max(1, Device.get_device().screen_height() // 480)
         tight = SYMBOL_TIGHT_GAP_PX * scale
         group = SYMBOL_GROUP_GAP_PX * scale
-        widths = []
+        # Per run: width, and for a glyph run its font key and vertical shift. Both runs
+        # draw from their texture's top, so a glyph moves by the difference in ascent to
+        # stand on the list font's baseline.
+        runs = []
         for is_symbol, run in segments:
-            run_w, _ = (cls.get_text_dimensions_using_font(symbol_font.font, run) if is_symbol
-                        else cls.get_text_dimensions(FontPurpose.LIST, run))
-            widths.append(run_w)
+            if is_symbol:
+                key, font = cls._symbol_font_for(run)
+                run_w, _ = cls.get_text_dimensions_using_font(font.font, run)
+                runs.append((run_w, key, list_ascent - sdl2.sdlttf.TTF_FontAscent(font.font)))
+            else:
+                run_w, _ = cls.get_text_dimensions(FontPurpose.LIST, run)
+                runs.append((run_w, None, 0))
         # The gap before a run, from the pair it follows. No gap before the first.
         gaps = [0]
         for left, right in zip(segments, segments[1:]):
             gaps.append(cls._gap_between(left, right, tight, group))
-        x = center_x - (sum(widths) + sum(gaps)) // 2
-        for (is_symbol, run), run_w, gap in zip(segments, widths, gaps):
+        x = center_x - (sum(w for w, _, _ in runs) + sum(gaps)) // 2
+        for (is_symbol, run), (run_w, key, dy), gap in zip(segments, runs, gaps):
             x += gap
             if is_symbol:
-                cls.render_symbol_run(run, x, y + symbol_dy, color)
+                cls.render_symbol_run(run, x, y + dy, color, key)
             else:
                 cls.render_text(run, x, y, color, FontPurpose.LIST,
                                 RenderMode.TOP_LEFT_ALIGNED)
