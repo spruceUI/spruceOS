@@ -135,6 +135,7 @@ enable_spruce_context_buttons() {
     for _cfg in /mnt/SDCARD/Themes/SPRUCE/config*.json \
         /mnt/SDCARD/Saves/spruce/theme_backups/SPRUCE/config*.json; do
         [ -f "$_cfg" ] || continue
+        jq -e '.hint.contextbuttons == true' "$_cfg" >/dev/null 2>&1 && continue
 
         _tmp="$(mktemp "${_cfg}.tmp.XXXXXX")" || {
             log_message "Failed to create temporary file for $_cfg"

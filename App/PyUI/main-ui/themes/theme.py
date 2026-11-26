@@ -1701,7 +1701,12 @@ class Theme():
         if not cls.context_buttons_enabled():
             return None
         name = getattr(button, "name", str(button)).lower()
-        return cls._asset(f"context-{name}.png") or cls._asset(f"context-{name}.qoi")
+        # A theme without its own button images borrows the stock theme's
+        for find in (cls._asset, cls._stock_asset):
+            icon = find(f"context-{name}.png") or find(f"context-{name}.qoi")
+            if icon:
+                return icon
+        return None
 
     @classmethod
     def set_show_bottom_bar_buttons(cls, value):

@@ -85,6 +85,8 @@ class BottomBar:
             text_w = 0
             if(show_text and hint.label):
                 text_w, _ = Display.get_text_dimensions(FontPurpose.BOTTOM_BAR_HINT, hint.label)
+            if not icon_w and not text_w:
+                continue
             width = icon_w + (space_w if icon_w and text_w else 0) + text_w + between_w
             entries.append((hint, icon, icon_w, icon_h, text_w, width))
 
