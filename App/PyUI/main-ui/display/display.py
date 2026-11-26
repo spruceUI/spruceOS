@@ -829,10 +829,18 @@ class Display:
     def render_text_centered(cls, text, x, y, color, purpose: FontPurpose):
         return cls.render_text(text, x, y, color, purpose, RenderMode.TOP_CENTER_ALIGNED)
 
+    @staticmethod
+    def _cap_height(font):
+        """Height of a capital H above the baseline, in px; 0 if the font has none."""
+        minx, maxx, miny, maxy, advance = (ctypes.c_int() for _ in range(5))
+        if sdl2.sdlttf.TTF_GlyphMetrics(font, ord("H"), *(ctypes.byref(v) for v in (minx, maxx, miny, maxy, advance))):
+            return 0
+        return maxy.value
+
     @classmethod
     def _promptfont(cls):
-        """Open the bundled symbol font once, at the list font's size so a glyph sits on
-        the same baseline as the words it labels.
+        """Open the bundled symbol font once, sized so its capitals match the list font's:
+        a button glyph keeps the same size next to the words it labels in every theme.
 
         promptfont.ttf (SIL OFL - see Licenses/fonts/promptfont.txt). Hardwired: themes
         must not re-skin button/key glyphs, and it is the only bundled font that carries
@@ -844,11 +852,21 @@ class Display:
         path = os.path.join(
             os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
             "utils", "promptfont.ttf")
+
+        def open_at(size):
+            ttf = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"), size)
+            if not ttf:
+                raise RuntimeError(
+                    f"Could not load font {path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+            return ttf
+
         size = Theme.get_font_size(FontPurpose.LIST)
-        ttf = sdl2.sdlttf.TTF_OpenFont(str(path).encode("utf-8"), size)
-        if not ttf:
-            raise RuntimeError(
-                f"Could not load font {path} : {sdl2.sdlttf.TTF_GetError().decode('utf-8')}")
+        ttf = open_at(size)
+        list_cap = cls._cap_height(cls.fonts[FontPurpose.LIST].font)
+        symbol_cap = cls._cap_height(ttf)
+        if list_cap and symbol_cap and list_cap != symbol_cap:
+            sdl2.sdlttf.TTF_CloseFont(ttf)
+            ttf = open_at(max(1, round(size * list_cap / symbol_cap)))
         font = LoadedFont(ttf, sdl2.sdlttf.TTF_FontHeight(ttf), path)
         cls.fonts[cls.SYMBOL_FONT_KEY] = font
         return font
@@ -896,6 +914,10 @@ class Display:
             Display.render_text_centered(segments[0][1], center_x, y, color, purpose=FontPurpose.LIST)
             return
         symbol_font = cls._promptfont()
+        # Both runs draw from their texture's top: shift the glyphs by the difference in
+        # ascent so they stand on the list font's baseline
+        symbol_dy = (sdl2.sdlttf.TTF_FontAscent(cls.fonts[FontPurpose.LIST].font)
+                     - sdl2.sdlttf.TTF_FontAscent(symbol_font.font))
         scale = max(1, Device.get_device().screen_height() // 480)
         tight = SYMBOL_TIGHT_GAP_PX * scale
         group = SYMBOL_GROUP_GAP_PX * scale
@@ -912,7 +934,7 @@ class Display:
         for (is_symbol, run), run_w, gap in zip(segments, widths, gaps):
             x += gap
             if is_symbol:
-                cls.render_symbol_run(run, x, y, color)
+                cls.render_symbol_run(run, x, y + symbol_dy, color)
             else:
                 cls.render_text(run, x, y, color, FontPurpose.LIST,
                                 RenderMode.TOP_LEFT_ALIGNED)
