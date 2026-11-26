@@ -129,6 +129,29 @@ migrate_pokedaisy_selection() {
     done
 }
 
+enable_spruce_context_buttons() {
+    # Theme backups are copied over the installed configs after upgrades run.
+    # Migrate both so restoring customizations keeps the new context buttons.
+    for _cfg in /mnt/SDCARD/Themes/SPRUCE/config*.json \
+        /mnt/SDCARD/Saves/spruce/theme_backups/SPRUCE/config*.json; do
+        [ -f "$_cfg" ] || continue
+        jq -e '.hint.contextbuttons == true' "$_cfg" >/dev/null 2>&1 && continue
+
+        _tmp="$(mktemp "${_cfg}.tmp.XXXXXX")" || {
+            log_message "Failed to create temporary file for $_cfg"
+            _upgrade_warnings=1
+            continue
+        }
+        if cp -p "$_cfg" "$_tmp" && jq '.hint.contextbuttons = true' "$_cfg" > "$_tmp" && mv -f "$_tmp" "$_cfg"; then
+            log_message "Enabled context buttons in $_cfg"
+        else
+            rm -f "$_tmp"
+            log_message "Failed to enable context buttons in $_cfg"
+            _upgrade_warnings=1
+        fi
+    done
+}
+
 # Emulator_RGB30 was renamed Emulator_DARKMOSS. A restore copies selections by
 # key, so the old key in a backup would be dropped and the choice lost.
 rename_darkmoss_emulator_key() {
@@ -155,6 +178,7 @@ rename_darkmoss_emulator_key() {
 }
 
 _upgrade_warnings=0
+enable_spruce_context_buttons
 if ! update_shader_presets; then
     log_message "Failed to update shader presets"
     _upgrade_warnings=1

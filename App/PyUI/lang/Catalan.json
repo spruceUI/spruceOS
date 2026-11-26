@@ -733,6 +733,7 @@
     "menuOptionValues": {
         "Off": "Desactivat",
         "On": "Activat",
+        "Contextual": "Contextual",
         "Disabled": "Desactivat",
         "Default": "Per defecte",
         "Custom": "Personalitzat",

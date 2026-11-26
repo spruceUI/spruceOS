@@ -32,7 +32,7 @@ class BottomBar:
 
             if(bottom_bar_text is not None):
                 self.render_bottom_bar_text(bottom_bar_text)
-            elif(render_bottom_bar_icons_and_images):
+            elif(render_bottom_bar_icons_and_images and Theme.show_bottom_bar_buttons()):
                 if(Theme.context_buttons_enabled()):
                     self.render_context_bottom_bar(self._resolve_hints(bottom_bar_hints))
                 else:
@@ -85,7 +85,9 @@ class BottomBar:
             text_w = 0
             if(show_text and hint.label):
                 text_w, _ = Display.get_text_dimensions(FontPurpose.BOTTOM_BAR_HINT, hint.label)
-            width = icon_w + (space_w + text_w if text_w else 0) + between_w
+            if not icon_w and not text_w:
+                continue
+            width = icon_w + (space_w if icon_w and text_w else 0) + text_w + between_w
             entries.append((hint, icon, icon_w, icon_h, text_w, width))
 
         available_width = Device.get_device().screen_width() - x_padding - 10
@@ -100,7 +102,8 @@ class BottomBar:
                     self.back_icon_w, self.back_icon_h = icon_w, icon_h
             x_offset += icon_w
             if(show_text and hint.label):
-                x_offset += space_w
+                if icon_w:
+                    x_offset += space_w
                 Display.render_text(hint.label,
                                     x_offset,
                                     bottom_y,

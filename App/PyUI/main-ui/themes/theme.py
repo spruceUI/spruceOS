@@ -1672,21 +1672,39 @@ class Theme():
 
     @classmethod
     def show_bottom_bar_buttons(cls):
-        return cls._data.get("showBottomBarButtons", True)
-        
+        return cls.bottom_bar_buttons_mode() != "Off"
+
+    @classmethod
+    def bottom_bar_buttons_mode(cls):
+        value = cls._data.get("showBottomBarButtons", True)
+        # Keep existing boolean theme preferences compatible with the three modes.
+        if value is False:
+            return "Off"
+        if isinstance(value, str) and value.lower() in ("off", "on", "contextual"):
+            return value.capitalize()
+        # Unset or true: themes that ship context buttons default to them
+        return "Contextual" if cls._theme_has_context_buttons() else "On"
+
+    @classmethod
+    def _theme_has_context_buttons(cls):
+        hint = cls._data.get("hint")
+        return isinstance(hint, dict) and hint.get("contextbuttons") is True
+
     @classmethod
     def context_buttons_enabled(cls):
-        hint = cls._data.get("hint")
-        if not isinstance(hint, dict):
-            return False
-        return hint.get("contextbuttons") is True
+        return cls.bottom_bar_buttons_mode() == "Contextual"
 
     @classmethod
     def context_icon(cls, button):
         if not cls.context_buttons_enabled():
             return None
         name = getattr(button, "name", str(button)).lower()
-        return cls._asset(f"context-{name}.png") or cls._asset(f"context-{name}.qoi")
+        # A theme without its own button images borrows the stock theme's
+        for find in (cls._asset, cls._stock_asset):
+            icon = find(f"context-{name}.png") or find(f"context-{name}.qoi")
+            if icon:
+                return icon
+        return None
 
     @classmethod
     def set_show_bottom_bar_buttons(cls, value):
