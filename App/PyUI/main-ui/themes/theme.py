@@ -1682,14 +1682,19 @@ class Theme():
             return "Off"
         if isinstance(value, str) and value.lower() in ("off", "on", "contextual"):
             return value.capitalize()
-        return "On"
-        
+        # Unset or true: themes that ship context buttons default to them
+        return "Contextual" if cls._theme_has_context_buttons() else "On"
+
+    @classmethod
+    def _theme_has_context_buttons(cls):
+        hint = cls._data.get("hint")
+        return isinstance(hint, dict) and hint.get("contextbuttons") is True
+
     @classmethod
     def context_buttons_enabled(cls):
-        hint = cls._data.get("hint")
-        if not isinstance(hint, dict):
-            return False
-        return cls.bottom_bar_buttons_mode() == "Contextual" and hint.get("contextbuttons") is True
+        # Off keeps the theme's own bar style, icons without labels
+        mode = cls.bottom_bar_buttons_mode()
+        return mode == "Contextual" or (mode == "Off" and cls._theme_has_context_buttons())
 
     @classmethod
     def context_icon(cls, button):
