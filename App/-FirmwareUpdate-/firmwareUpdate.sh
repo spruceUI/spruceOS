@@ -16,7 +16,7 @@ FW_DIR="/mnt/SDCARD/spruce/FIRMWARE_UPDATE"
 FREE_SPACE="$(df -m /mnt/SDCARD | awk '{print $4}' | tail -n 1)"
 
 # BaseOS (Anbernic XX, Miyoo Flip) updates itself from a .bosupd file at the root of the card.
-[ -f /etc/baseos-release ] && exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
+{ [ -f /etc/baseos-release ] || [ -f /etc/flipbase-release ]; } && exec /mnt/SDCARD/App/-FirmwareUpdate-/baseosUpdate.sh
 
 unsupported_device() {
 	log_and_display_message "The firmware updater app does not currently support the ${BRAND} ${SPRUCE_DEVICE_NAME:-$PLATFORM}."
