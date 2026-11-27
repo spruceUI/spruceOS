@@ -121,7 +121,7 @@ class Display:
     _glyph_cache = {}
     _glyph_is_provided = None
     _glyph_supports_32bit = False
-    _glyph_advances = {} # font purpose -> GlyphAdvances of its font
+    _glyph_advances = {} # (font purpose, uses fallback font) -> GlyphAdvances of that font
     
     _last_frame_time = 0
     _after_present = []
@@ -720,6 +720,8 @@ class Display:
 
     @classmethod
     def requires_fallback_font(cls, text, purpose):
+        if not text or text.isascii():
+            return False
         primary_font = cls.fonts[purpose]
         if all(
             cls._font_has_glyph(primary_font.font, char)
@@ -732,7 +734,7 @@ class Display:
     @classmethod
     def render_text(cls, text, x, y, color, purpose: FontPurpose,
                     render_mode=RenderMode.TOP_LEFT_ALIGNED,
-                    crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=False):
+                    crop_w=None, crop_h=None, alpha=None, allow_fallback_font_for_missing_glyphs=True):
         #with log_timing("Display.render_text", PyUiLogger.get_logger()):    
             cls._frame_draws.append(("text", text, x, y, color, purpose, render_mode,
                                      crop_w, crop_h, alpha, allow_fallback_font_for_missing_glyphs))
@@ -1452,7 +1454,7 @@ class Display:
         return cls._cached_space_dimensions
     
     @classmethod
-    def get_text_dimensions(cls, purpose, text="A", allow_fallback_font_for_missing_glyphs=False):
+    def get_text_dimensions(cls, purpose, text="A", allow_fallback_font_for_missing_glyphs=True):
         if allow_fallback_font_for_missing_glyphs and cls.requires_fallback_font(text, purpose):
             return cls.get_text_dimensions_using_font(cls.fallback_fonts[purpose].font, text)
         else:
@@ -1474,12 +1476,12 @@ class Display:
     # widths matter.
     @classmethod
     def get_text_width_from_glyphs(cls, purpose, text):
-        width = sum(map(cls._get_glyph_advances(purpose).__getitem__, text))
+        width = sum(map(cls._get_glyph_advances(purpose, text).__getitem__, text))
         return int(width * Device.get_device().get_text_width_measurement_multiplier())
 
     @classmethod
     def count_chars_that_fit(cls, purpose, text, max_width):
-        advances = cls._get_glyph_advances(purpose)
+        advances = cls._get_glyph_advances(purpose, text)
         max_width /= Device.get_device().get_text_width_measurement_multiplier()
         width = 0
         for index, char in enumerate(text):
@@ -1489,11 +1491,13 @@ class Display:
         return len(text)
 
     @classmethod
-    def _get_glyph_advances(cls, purpose):
-        font = cls.fonts[purpose].font
-        advances = cls._glyph_advances.get(purpose)
+    def _get_glyph_advances(cls, purpose, text=""):
+        fallback = bool(text) and cls.requires_fallback_font(text, purpose)
+        font = (cls.fallback_fonts if fallback else cls.fonts)[purpose].font
+        key = (purpose, fallback)
+        advances = cls._glyph_advances.get(key)
         if advances is None or advances.font is not font:
-            advances = cls._glyph_advances[purpose] = GlyphAdvances(font)
+            advances = cls._glyph_advances[key] = GlyphAdvances(font)
         return advances
 
     @classmethod
