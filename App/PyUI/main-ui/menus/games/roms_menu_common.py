@@ -228,7 +228,7 @@ class RomsMenuCommon(ABC):
     def _get_menu_button_game_options(self, selection, rom_list):
         return self.popup_menu.get_game_options(selection, self.get_additional_menu_options(), rom_list, use_full_text=True)
 
-    def _check_for_last_subfolder_existance(self, state_key, last_subfolder, rom_list):
+    def _check_for_last_subfolder_existance(self, page_name, folder, last_subfolder, rom_list):
         if (
             last_subfolder and
             getattr(self, 'subfolder', '') != last_subfolder and
@@ -241,13 +241,13 @@ class RomsMenuCommon(ABC):
             if(return_value is not None and return_value != ControllerInput.B):
                 return return_value
             # Backed out of the reopened folder, so highlight it
-            PyUiState.set_last_game_selection(state_key, last_subfolder, getattr(self, 'subfolder', '') or '')
+            PyUiState.set_last_game_selection(page_name, last_subfolder, getattr(self, 'subfolder', '') or '', folder=folder)
 
     def default_to_last_game_selection(self):
         return True
 
-    def _selection_state_key(self, page_name):
-        return page_name
+    def _selection_folder(self):
+        return None
 
     def _restore_selection_after_rom_deletion(self, page_name, rom_list, selected_index):
         if len(rom_list) > 1:
@@ -256,9 +256,10 @@ class RomsMenuCommon(ABC):
                 next_index = selected_index - 1
             next_game = rom_list[next_index].get_value()
             PyUiState.set_last_game_selection(
-                self._selection_state_key(page_name),
+                page_name,
                 next_game.rom_file_path,
-                getattr(self, 'subfolder', '') or ''
+                getattr(self, 'subfolder', '') or '',
+                folder=self._selection_folder()
             )
             return
 
@@ -276,16 +277,16 @@ class RomsMenuCommon(ABC):
         selected = Selection(None,None,0)
         view = None
         rom_list_generation = RomListVerifier.generation()
-        state_key = self._selection_state_key(page_name)
-        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(state_key)
+        folder = self._selection_folder()
+        last_game_file_path, last_subfolder = PyUiState.get_last_game_selection(page_name, folder=folder)
 
-        last_subfolder = self._check_for_last_subfolder_existance(state_key, last_subfolder, rom_list)
+        last_subfolder = self._check_for_last_subfolder_existance(page_name, folder, last_subfolder, rom_list)
 
         if(last_subfolder is not None):
             return last_subfolder
 
         # Backing out of a reopened folder or collection updates what to highlight
-        last_game_file_path, _ = PyUiState.get_last_game_selection(state_key)
+        last_game_file_path, _ = PyUiState.get_last_game_selection(page_name, folder=folder)
 
         if(self.default_to_last_game_selection()):
             for index, entry in enumerate(rom_list):
@@ -315,24 +316,27 @@ class RomsMenuCommon(ABC):
             if(selected is not None and (selected.get_selection() is not None or ControllerInput.B == selected.get_input())):
                 if(ControllerInput.A == selected.get_input()):
                     PyUiState.set_last_game_selection(
-                        state_key,
+                        page_name,
                         selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
                     )
 
                     if(selected.get_selection().get_value().is_collection):
                         PyUiState.set_last_game_selection(
-                            state_key,
+                            page_name,
                             "Collection",
-                            selected.get_selection().get_value().rom_file_path
+                            selected.get_selection().get_value().rom_file_path,
+                            folder=folder
                         )
                         
                         self._load_collection_menu(selected.get_selection().get_value())
                         
                         PyUiState.set_last_game_selection(
-                            state_key,
+                            page_name,
                             selected.get_selection().get_value().rom_file_path,
-                            getattr(self, 'subfolder', '') or ''
+                            getattr(self, 'subfolder', '') or '',
+                            folder=folder
                         )
                             
                     elif(self.launched_via_special_case(selected.get_selection().get_value())):
@@ -341,18 +345,20 @@ class RomsMenuCommon(ABC):
                     elif(os.path.isdir(selected.get_selection().get_value().rom_file_path)):
                         # If the selected item is a directory, open it
                         PyUiState.set_last_game_selection(
-                            state_key,
+                            page_name,
                             "",
-                            selected.get_selection().get_value().rom_file_path
+                            selected.get_selection().get_value().rom_file_path,
+                            folder=folder
                         )
                         return_value = self._run_subfolder_menu(selected.get_selection().get_value())
                         if(return_value is not None and return_value != ControllerInput.B):
                             return return_value
                         else:
                             PyUiState.set_last_game_selection(
-                            state_key,
+                            page_name,
                             selected.get_selection().get_value().rom_file_path,
-                            getattr(self, 'subfolder', '') or ''
+                            getattr(self, 'subfolder', '') or '',
+                            folder=folder
                         )
 
                     else:
@@ -360,8 +366,9 @@ class RomsMenuCommon(ABC):
                         self.run_game(selected.get_selection().get_value())
                 elif(ControllerInput.X == selected.get_input() and not self.support_only_game_launching):
                     PyUiState.set_last_game_selection(
-                        state_key, selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
+                        page_name, selected.get_selection().get_value().rom_file_path,
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
                     )
                     selected_index = selected.get_index()
                     gen_additional_game_options = lambda selected=selected.get_selection().get_value(), rom_list=rom_list, self=self: self._get_menu_button_game_options(selected, rom_list)
@@ -377,8 +384,9 @@ class RomsMenuCommon(ABC):
                     rom_list = self._get_rom_list()
                 elif(ControllerInput.MENU == selected.get_input() and not self.support_only_game_launching):
                     PyUiState.set_last_game_selection(
-                        state_key, selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
+                        page_name, selected.get_selection().get_value().rom_file_path,
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
                     )
                     prev_view = Theme.get_game_selection_view_type()
                     self._menu_pressed(selected.get_selection().get_value(), rom_list)
@@ -393,9 +401,10 @@ class RomsMenuCommon(ABC):
                     #What is happening on muOS where this is becoming None?
                     if(selected is not None and selected.get_selection() is not None and selected.get_selection().get_value() is not None):
                         PyUiState.set_last_game_selection(
-                            state_key,
+                            page_name,
                             selected.get_selection().get_value().rom_file_path,
-                            getattr(self, 'subfolder', '') or ''
+                            getattr(self, 'subfolder', '') or '',
+                            folder=folder
                         )
 
                     return ControllerInput.B
@@ -404,16 +413,18 @@ class RomsMenuCommon(ABC):
                     view = self.create_view(page_name,rom_list,selected)
                 elif(Theme.skip_main_menu() and ControllerInput.L1 == selected.get_input()):
                     PyUiState.set_last_game_selection(
-                        state_key,
+                        page_name,
                         selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
                     )
                     return ControllerInput.L1
                 elif(Theme.skip_main_menu() and ControllerInput.R1 == selected.get_input()):
                     PyUiState.set_last_game_selection(
-                        state_key,
+                        page_name,
                         selected.get_selection().get_value().rom_file_path,
-                        getattr(self, 'subfolder', '') or ''
+                        getattr(self, 'subfolder', '') or '',
+                        folder=folder
                     )
                     return ControllerInput.R1
 
