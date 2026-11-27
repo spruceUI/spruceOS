@@ -17,4 +17,16 @@ log_message "Starting WiFi and RAOfflineProxy (${1:-first frame})"
 # logs in to it. Not gated on WiFi, since achievements are earned offline.
 # Backgrounded: stopping a disabled proxy runs its Python backend.
 raproxy_apply &
+
+# Read PyUI's CJK fallback font into the page cache so its first use is not a cold
+# SD read. Not on the Minis: with 128 MB the cache would be evicted before use.
+if [ "$PLATFORM_FAMILY" != "miyoomini" ]; then
+    case "$(get_ui_language)" in
+        "Chinese (S)"|"Chinese (T)"|Japanese|Korean)
+            font="$(jq -r '.fallbackFontPath // empty' /mnt/SDCARD/App/PyUI/py-ui-config.json 2>/dev/null)"
+            [ -f "$font" ] && cat "$font" >/dev/null 2>&1 &
+            ;;
+    esac
+fi
+
 wifi_request apply
