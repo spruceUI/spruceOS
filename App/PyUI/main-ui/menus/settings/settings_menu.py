@@ -115,7 +115,8 @@ class SettingsMenu(ABC):
 
     def replace_dynamic_text_in_description(self, description):
         if(description):
-            description = description.format(ip_addr=Device.get_device().get_ip_addr_text())
+            description = description.format(ip_addr=Device.get_device().get_ip_addr_text(),
+                                            hostname=Device.get_device().get_hostname_text())
         return description
 
 

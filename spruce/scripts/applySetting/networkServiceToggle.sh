@@ -18,6 +18,8 @@
 . /mnt/SDCARD/spruce/scripts/network/syncthingFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/hostnameFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/mdnsFunctions.sh
 
 SERVICE="$1"
 ENABLED="$2"
@@ -153,5 +155,6 @@ echo "$$" >"$LOCK/pid"
 trap 'rm -rf "$LOCK"' EXIT INT TERM
 
 apply_toggle
+[ "$SERVICE" = "raproxy" ] || sync_mdns_process
 start_darkhttpd_process
 exit 0

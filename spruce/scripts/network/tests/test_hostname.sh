@@ -155,4 +155,24 @@ check "default device_set_hostname" "spruce-flip" "$(env -i PATH="$PATH" sh -c "
     . '$script_dir/../platform/device.sh'
     device_set_hostname spruce-flip")"
 
+# wifi.sh apply_spruce_hostname: extracted (wifi.sh is not sourceable in isolation). A running
+# mdnsd owns the state file, so it is written only when none is running.
+sed -n '/^apply_spruce_hostname() {/,/^}/p' "$script_dir/wifi.sh" > "$test_dir/apply_host.sh"
+apply_host() {
+    printf 'spruce-flip-2\n' > "$test_dir/state"
+    env -i PATH="$PATH" HOSTNAME_STATE_FILE="$test_dir/state" T_RUNNING="$1" sh -c "
+        get_spruce_hostname() { echo spruce-flip; }
+        device_set_hostname() { echo \"set \$1\"; }
+        pgrep() { [ \"\$*\" = '-x mdnsd' ] && [ \"\$T_RUNNING\" = 1 ]; }
+        . '$test_dir/apply_host.sh'
+        apply_spruce_hostname
+        echo \"exported \$SPRUCE_HOSTNAME\""
+}
+check "apply hostname, mdnsd running: calls" "set spruce-flip
+exported spruce-flip" "$(apply_host 1)"
+check "apply hostname, mdnsd running: state kept" "spruce-flip-2" "$(cat "$test_dir/state")"
+check "apply hostname, no mdnsd: calls" "set spruce-flip
+exported spruce-flip" "$(apply_host 0)"
+check "apply hostname, no mdnsd: state written" "spruce-flip" "$(cat "$test_dir/state")"
+
 echo "PASS"

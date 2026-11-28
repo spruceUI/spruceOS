@@ -586,7 +586,7 @@
         "Network Settings": {
             "enableSamba": {
                 "display": "Enable Samba",
-                "description": "smb://{ip_addr}/SDCARD (user/pass=spruce/happygaming)",
+                "description": "smb://{hostname}.local/SDCARD or {ip_addr} (user/pass=spruce/happygaming)",
                 "options":[
                     "True",
                     "False"
@@ -596,7 +596,7 @@
             },
             "enableSSH": {
                 "display": "Enable SSH",
-                "description": "ssh spruce@{ip_addr} (password=happygaming)",
+                "description": "ssh spruce@{hostname}.local or {ip_addr} (password=happygaming)",
                 "options":[
                     "True",
                     "False"
@@ -606,7 +606,7 @@
             },
             "enableSyncthing": {
                 "display": "Enable Syncthing",
-                "description": "http://{ip_addr}:8384",
+                "description": "http://{hostname}.local:8384 or {ip_addr}:8384",
                 "options":[
                     "True",
                     "False"
@@ -616,7 +616,7 @@
             },
             "enableSFTPGo": {
                 "display": "Enable WiFi File Transfer",
-                "description": "http://{ip_addr}:8080",
+                "description": "http://{hostname}.local:8080 or {ip_addr}:8080",
                 "options":[
                     "True",
                     "False"

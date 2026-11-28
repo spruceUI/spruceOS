@@ -96,7 +96,9 @@ apply_spruce_hostname() {
     SPRUCE_HOSTNAME="$(get_spruce_hostname)"
     export SPRUCE_HOSTNAME
     device_set_hostname "$SPRUCE_HOSTNAME"
-    printf '%s\n' "$SPRUCE_HOSTNAME" > "$HOSTNAME_STATE_FILE" 2>/dev/null
+    # A running mdnsd owns the file (-w) and may have settled on NAME-2; don't overwrite that.
+    pgrep -x mdnsd >/dev/null 2>&1 ||
+        printf '%s\n' "$SPRUCE_HOSTNAME" > "$HOSTNAME_STATE_FILE" 2>/dev/null
 }
 
 enable_wifi() {

@@ -7,6 +7,8 @@
 . /mnt/SDCARD/spruce/scripts/network/darkhttpdFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/raproxyFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/timeFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/hostnameFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/mdnsFunctions.sh
 
 SFTP_SERVICE_NAME=$(get_sftp_service_name)
 SSH_SERVICE_NAME=$(get_ssh_service_name)
@@ -83,6 +85,9 @@ connect_services() {
 	sync_system_time
 	# After the clock: the HTTPS providers in the chain need it right.
 	sync_timezone_from_network
+
+	# mDNS responder, so <name>.local reaches the services below
+	sync_mdns_process
 
 	# Samba check
 	if [ "$samba_enabled" = "True" ]; then
@@ -162,6 +167,8 @@ disconnect_services() {
 			esac
 		fi
 	done
+
+	stop_mdns_process
 
 }
 
