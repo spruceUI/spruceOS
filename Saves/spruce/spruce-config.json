@@ -1287,7 +1287,7 @@
                 "selected": "False"
             },
             "enableLidSensor": {
-                "devices": ["MIYOO_FLIP", "MIYOO_MINI_FLIP"],
+                "devices": ["MIYOO_FLIP", "MIYOO_MINI_FLIP", "ANBERNIC_RGXX_LID_WAKE"],
                 "display": "Enable Lid Sensor",
                 "description":"shut device to enter sleep",
                 "options":[
