@@ -516,7 +516,7 @@ apply_setting() {
     disable_wifi
     record_state off
     if [ "$was_on" = 1 ]; then
-        sh /mnt/SDCARD/spruce/scripts/networkservices.sh off </dev/null >/dev/null 2>&1 &
+        sh /mnt/SDCARD/spruce/scripts/network/networkservices.sh off </dev/null >/dev/null 2>&1 &
     fi
 }
 
