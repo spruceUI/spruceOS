@@ -26,12 +26,16 @@ check "only punctuation" "" "$(normalize_hostname "!!!")"
 check "truncate to 63" "$a63" "$(normalize_hostname "$a70")"
 check "strip dash after truncation" "$a62" "$(normalize_hostname "${a62}-b")"
 
-# model_host FAMILY [VAR=value ...]: run get_model_hostname and get_spruce_hostname in a clean env
+# Stub get_config_value: TEST_SOURCE answers hostnameSource, TEST_USER_NAME answers hostname.
+CFG_STUB='get_config_value() { case "$1" in *hostnameSource*) printf "%s" "$TEST_SOURCE";; *) printf "%s" "$TEST_USER_NAME";; esac; }'
+
+# model_host FAMILY [VAR=value ...]: run get_model_hostname and get_spruce_hostname (source spruce)
+# in a clean env
 model_host() {
     expected="$1"
     shift
     for fn in get_model_hostname get_spruce_hostname; do
-        actual="$(env -i PATH="$PATH" "$@" sh -c ". '$script_dir/hostnameFunctions.sh'; $fn")"
+        actual="$(env -i PATH="$PATH" TEST_SOURCE=spruce "$@" sh -c ". '$script_dir/hostnameFunctions.sh'; $CFG_STUB; $fn")"
         check "$fn $*" "$expected" "$actual"
     done
 }
@@ -52,6 +56,63 @@ model_host spruce-smartpros PLATFORM_FAMILY=tina-stock PLATFORM=SmartProS
 model_host spruce PLATFORM= PLATFORM_FAMILY=
 
 check "state file default" "/tmp/spruce_hostname" "$(env -i PATH="$PATH" sh -c ". '$script_dir/hostnameFunctions.sh'; echo \"\$HOSTNAME_STATE_FILE\"")"
+
+# user_host EXPECTED [VAR=value ...]: get_spruce_hostname with source Custom and name $TEST_USER_NAME
+user_host() {
+    expected="$1"
+    shift
+    actual="$(env -i PATH="$PATH" TEST_SOURCE=Custom "$@" sh -c ". '$script_dir/hostnameFunctions.sh'; $CFG_STUB; get_spruce_hostname")"
+    check "user name $*" "$expected" "$actual"
+}
+
+user_host living-room TEST_USER_NAME="Living Room"
+user_host spruce-flip PLATFORM_FAMILY=tina-stock PLATFORM=Flip TEST_USER_NAME="!!!"
+user_host spruce-flip PLATFORM_FAMILY=tina-stock PLATFORM=Flip TEST_USER_NAME="   "
+user_host spruce-flip PLATFORM_FAMILY=tina-stock PLATFORM=Flip TEST_USER_NAME=
+
+# source_host EXPECTED SOURCE NAME: get_spruce_hostname in one shell that shares the capture file
+# $test_dir/captured and the kernel name file $test_dir/kernel (a model of spruce-flip).
+source_host() {
+    env -i PATH="$PATH" PLATFORM_FAMILY=tina-stock PLATFORM=Flip \
+        DEVICE_HOSTNAME_FILE="$test_dir/captured" KERNEL_HOSTNAME_FILE="$test_dir/kernel" \
+        TEST_SOURCE="$1" TEST_USER_NAME="$2" sh -c ". '$script_dir/hostnameFunctions.sh'; $CFG_STUB; get_spruce_hostname"
+}
+fresh_boot() { rm -f "$test_dir/captured"; printf '%s\n' "$1" > "$test_dir/kernel"; }
+
+check "device file default" "/tmp/spruce_device_hostname" "$(env -i PATH="$PATH" sh -c ". '$script_dir/hostnameFunctions.sh'; echo \"\$DEVICE_HOSTNAME_FILE\"")"
+check "kernel file default" "/proc/sys/kernel/hostname" "$(env -i PATH="$PATH" sh -c ". '$script_dir/hostnameFunctions.sh'; echo \"\$KERNEL_HOSTNAME_FILE\"")"
+
+fresh_boot "Miyoo Flip"
+check "device: normalised firmware name" "miyoo-flip" "$(source_host Device "")"
+check "device: captured file" "miyoo-flip" "$(cat "$test_dir/captured")"
+printf 'spruce-flip\n' > "$test_dir/kernel"
+check "device: second call uses the file" "miyoo-flip" "$(source_host Device "")"
+check "missing source is Device" "miyoo-flip" "$(source_host "" "")"
+check "unknown source is Device" "miyoo-flip" "$(source_host Bogus "")"
+check "device ignores custom name" "miyoo-flip" "$(source_host Device "Living Room")"
+check "spruce: model name despite custom name" "spruce-flip" "$(source_host spruce "Living Room")"
+check "custom: custom name" "living-room" "$(source_host Custom "Living Room")"
+check "custom: empty falls back to model" "spruce-flip" "$(source_host Custom "")"
+
+# The firmware name is recorded whatever the source, so a later switch to Device still finds it.
+fresh_boot "Miyoo Flip"
+check "custom first" "living-room" "$(source_host Custom "Living Room")"
+printf 'living-room\n' > "$test_dir/kernel"
+check "switch to Device after Custom" "miyoo-flip" "$(source_host Device "Living Room")"
+fresh_boot "Miyoo Flip"
+check "spruce first" "spruce-flip" "$(source_host spruce "")"
+printf 'spruce-flip\n' > "$test_dir/kernel"
+check "switch to Device after spruce" "miyoo-flip" "$(source_host Device "")"
+
+for fw in localhost "(none)" none localhost-localdomain "" "!!!"; do
+    fresh_boot "$fw"
+    check "device: firmware '$fw' uses model" "spruce-flip" "$(source_host Device "")"
+    check "device: firmware '$fw' captured once" "spruce-flip" "$(cat "$test_dir/captured")"
+    printf 'real\n' > "$test_dir/kernel"
+    check "device: firmware '$fw' stays captured" "spruce-flip" "$(source_host Device "")"
+done
+rm -f "$test_dir/kernel" "$test_dir/captured"
+check "device: no kernel file uses model" "spruce-flip" "$(source_host Device "")"
 
 # device_start_dhcp_client: stub udhcpc (prints args) and pgrep (not running), then source device.sh
 dhcp_args() {

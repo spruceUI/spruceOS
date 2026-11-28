@@ -624,6 +624,24 @@
                 "selected":"False",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/networkServiceToggle.sh sftpgo"
             },
+            "hostnameSource": {
+                "display": "Device name",
+                "description": "{hostname}.local",
+                "options":[
+                    "Device",
+                    "spruce",
+                    "Custom"
+                ],
+                "selected":"Device",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/hostname.sh"
+            },
+            "hostname": {
+                "display": "Custom device name",
+                "description": "Used when Device name is Custom",
+                "type": "freeText",
+                "selected": "",
+                "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/hostname.sh name"
+            },
             "enableNetworkADB": {
                 "devices": ["MIYOO_MINI_PLUS", "MIYOO_MINI_FLIP"],
                 "display": "Enable network ADB",

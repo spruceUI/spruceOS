@@ -36,6 +36,7 @@ get_config_value() {
         *enableSFTPGo*) echo "$T_SFTPGO" ;;
         *enableSyncthing*) echo "$T_SYNCTHING" ;;
         *enableOfflineProxy*) echo "$T_RAPROXY" ;;
+        *hostnameSource*) echo spruce ;;
     esac
 }
 iface_has_address() { [ "$1" = wlan0 ] && [ "$T_CONNECTED" = 1 ]; }
