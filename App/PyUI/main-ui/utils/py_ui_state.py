@@ -86,15 +86,21 @@ class PyUiState:
         cls.save()
 
     @classmethod
-    def get_last_game_selection(cls, page_name):
-        return cls._data.get(page_name, {}).get("lastGameSelection", None), cls._data.get(page_name, {}).get("subfolder", None)
+    def get_last_game_selection(cls, page_name, folder=None):
+        entry = cls._data.get(page_name, {})
+        if(folder is not None):
+            entry = entry.get("folders", {}).get(folder, {})
+        return entry.get("lastGameSelection", None), entry.get("subfolder", None)
         
     @classmethod
-    def set_last_game_selection(cls, page_name, value, subfolder):
+    def set_last_game_selection(cls, page_name, value, subfolder, folder=None):
         if page_name not in cls._data:
             cls._data[page_name] = {}
-        cls._data[page_name]["lastGameSelection"] = value
-        cls._data[page_name]["subfolder"] = subfolder
+        entry = cls._data[page_name]
+        if(folder is not None):
+            entry = entry.setdefault("folders", {}).setdefault(folder, {})
+        entry["lastGameSelection"] = value
+        entry["subfolder"] = subfolder
         cls.save()
 
     @classmethod
