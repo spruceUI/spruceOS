@@ -20,12 +20,23 @@
 #   run_pico8
 #   load_pico8_control_profile
 
+seed_pico8_data() {
+    PICO8_HOME="/mnt/SDCARD/Saves"
+    PICO8_SEED="$EMU_DIR/.lexaloffle"
+    PICO8_DATA="$PICO8_HOME/.lexaloffle"
+
+    if [ ! -d "$PICO8_DATA" ] && [ -d "$PICO8_SEED" ]; then
+        mkdir -p "$PICO8_HOME" && cp -a "$PICO8_SEED" "$PICO8_HOME/"
+    fi
+}
+
 run_pico8() {
     # send signal USR2 to joystickinput to switch to KEYBOARD MODE
 	# this allows joystick to be used as DPAD in MainUI
 	killall -q -USR2 joystickinput
 
-	export HOME="$EMU_DIR"
+	seed_pico8_data
+	export HOME="$PICO8_HOME"
 	export PATH="$PATH:/mnt/SDCARD/BIOS"
 
 	STRETCH="$(jq -r '.menuOptions.Stretch.selected' "$EMU_JSON_PATH")"
@@ -38,8 +49,8 @@ run_pico8() {
 		SCALING=""
 	fi
 
-	cd "$HOME"
-	/mnt/SDCARD/spruce/scripts/asound-setup.sh
+	cd "$EMU_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$EMU_DIR"
 
 	if [ "$PLATFORM" = "A30" ]; then
 		export SDL_VIDEODRIVER=mali
@@ -47,7 +58,8 @@ run_pico8() {
 		PICO8_BINARY="pico8_dyn"
 		# Sound after sleep: pcmreopen (pico8-spruce) reopens the device, which it cannot do under dmix.
 		export LD_PRELOAD="$EMU_DIR/libpcmreopen.so${LD_PRELOAD:+:$LD_PRELOAD}"
-		cat > "$HOME/.asoundrc" <<EOF
+		PICO8_ASOUND="$EMU_DIR/.asoundrc"
+		cat > "$PICO8_ASOUND" <<EOF
 pcm.pico8 {
     type softvol
     slave.pcm "plughw:sndcodec,0"
@@ -57,6 +69,7 @@ pcm.pico8 {
     resolution 256
 }
 EOF
+		export ALSA_CONFIG_PATH="$PICO8_ASOUND"
 		export AUDIODEV=pico8
 		sed 's|^transform_screen 0$|transform_screen 135|' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
 		sed 's/^button_keys.*/button_keys 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0/' "$HOME/.lexaloffle/pico-8/config.txt" > "$HOME/.lexaloffle/pico-8/config.txt.tmp" && mv "$HOME/.lexaloffle/pico-8/config.txt.tmp" "$HOME/.lexaloffle/pico-8/config.txt"
@@ -115,8 +128,8 @@ EOF
 		# dll-mali finds the pad because it carries NextUI's H700 joystick
 		# classification patch, which exists because these pads report no
 		# ABS_X/ABS_Y for stock heuristics to latch onto.
-		[ -f "$HOME/lib-h700/libsdl_sensor_shim.so" ] && \
-			export LD_PRELOAD="$HOME/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
+		[ -f "$EMU_DIR/lib-h700/libsdl_sensor_shim.so" ] && \
+			export LD_PRELOAD="$EMU_DIR/lib-h700/libsdl_sensor_shim.so${LD_PRELOAD:+:$LD_PRELOAD}"
 
 		# None of the shipped sdl_controllers.* profiles cover
 		# ANBERNIC-keys, so without this PICO-8 would see the pad but have
@@ -191,30 +204,31 @@ EOF
 }
 
 load_pico8_control_profile() {
-	export HOME="$EMU_DIR"
-	P8_DIR="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8"
+	seed_pico8_data
+	export HOME="$PICO8_HOME"
+	P8_DIR="$PICO8_DATA/pico-8"
 	CONTROL_PROFILE="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
 	STEWARD_MODE="$(jq -r '.menuOptions.stewardMode.selected' "$EMU_JSON_PATH")"
 
 	case "$PLATFORM" in
 		"A30")
 			if [ "$STEWARD_MODE" = "On - A-ⓧ B-ⓞ X-Esc SELECT-Mouse" ]; then
-				export LD_LIBRARY_PATH="$HOME"/lib-stew:$LD_LIBRARY_PATH
+				export LD_LIBRARY_PATH="$EMU_DIR"/lib-stew:$LD_LIBRARY_PATH
 			else
-				export LD_LIBRARY_PATH="$HOME"/lib-cine:$LD_LIBRARY_PATH
+				export LD_LIBRARY_PATH="$EMU_DIR"/lib-cine:$LD_LIBRARY_PATH
 			fi
 			;;
 		"Flip")
-			export LD_LIBRARY_PATH="$HOME"/lib-Flip:$LD_LIBRARY_PATH
+			export LD_LIBRARY_PATH="$EMU_DIR"/lib-Flip:$LD_LIBRARY_PATH
 			;;
 		"MiyooMini")
-			export LD_LIBRARY_PATH="$HOME"/lib-MiyooMini:$LD_LIBRARY_PATH
+			export LD_LIBRARY_PATH="$EMU_DIR"/lib-MiyooMini:$LD_LIBRARY_PATH
 			;;
 		"Brick"* | "SmartPro" | "Zero"* | "XU20" | "V90S" | "V20")
-			export LD_LIBRARY_PATH="$HOME"/lib-a133p:$LD_LIBRARY_PATH
+			export LD_LIBRARY_PATH="$EMU_DIR"/lib-a133p:$LD_LIBRARY_PATH
 			;;
 		"SmartProS")
-			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$HOME"/lib-a133p
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:"$EMU_DIR"/lib-a133p
 			;;
 		"Pixel2")
 			export LD_LIBRARY_PATH=/usr/lib:$LD_LIBRARY_PATH

@@ -83,7 +83,6 @@ log_message "Backup file will be: $seven_z_file"
 # Things being backed up:
 # - spruce emulator and system configs
 # - modified theme configs
-# - PICO-8 config and carts
 # - Drastic saves and configs
 # - Flycast standalone configs
 # - RetroArch main configs
@@ -95,7 +94,6 @@ log_message "Backup file will be: $seven_z_file"
 folders="
 /mnt/SDCARD/App/FileManagement/config.ini
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
-/mnt/SDCARD/Emu/PICO8/.lexaloffle
 /mnt/SDCARD/Emu/DC/config
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32

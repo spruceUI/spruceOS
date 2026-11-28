@@ -220,6 +220,21 @@ migrate_n64_custom_remap() {
     log_message "N64 remap migration: copied Custom.rmp into Saves"
 }
 
+# PICO-8 writes its configuration, downloaded carts, and Splore metadata under
+# .lexaloffle. Keep that mutable directory in Saves; the Emu copy is now only
+# the seed for new installations.
+migrate_pico8_data() {
+    _old_data="/mnt/SDCARD/Emu/PICO8/.lexaloffle"
+    _new_data="/mnt/SDCARD/Saves/.lexaloffle"
+
+    [ -d "$_new_data" ] && return 0
+    [ -d "$_old_data" ] || return 0
+
+    mkdir -p "${_new_data%/*}" || return 1
+    cp -a "$_old_data" "$_new_data" || return 1
+    log_message "PICO-8 data migration: copied .lexaloffle into Saves"
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -239,6 +254,10 @@ if ! migrate_ssh_host_keys; then
 fi
 if ! migrate_n64_custom_remap; then
     log_message "Failed to migrate the custom N64 remap"
+    _upgrade_warnings=1
+fi
+if ! migrate_pico8_data; then
+    log_message "Failed to migrate PICO-8 data"
     _upgrade_warnings=1
 fi
 

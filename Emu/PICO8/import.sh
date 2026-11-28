@@ -2,9 +2,9 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-BBS_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/bbs"
+BBS_PATH="/mnt/SDCARD/Saves/.lexaloffle/pico-8/bbs"
 ROM_PATH="/mnt/SDCARD/Roms/PICO8"
-FAVE_PATH="/mnt/SDCARD/Emu/PICO8/.lexaloffle/pico-8/favourites.txt"
+FAVE_PATH="/mnt/SDCARD/Saves/.lexaloffle/pico-8/favourites.txt"
 SPRUCE_LOGO="/mnt/SDCARD/spruce/imgs/tree_sm_close_crop.png"
 
 start_pyui_message_writer
