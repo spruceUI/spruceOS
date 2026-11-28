@@ -234,7 +234,10 @@ class RealtimeMessageNetworkListener:
 
         except Exception:
             self.logger.error(f"Invalid JSON received: {raw_message}", exc_info=True)
-            Display.display_message(Language.shell_message(raw_message))
+            Display.display_message(
+                Language.shell_message(raw_message),
+                render_bottom_bar_icons_and_images=False,
+            )
             return
 
         try:
@@ -250,7 +253,7 @@ class RealtimeMessageNetworkListener:
                 if args:
                     image_path = args[0]
                     self.logger.info(f"Rendering image from path: {image_path}")
-                    Display.display_image(image_path)
+                    Display.display_image(image_path, render_bottom_bar_icons_and_images=False)
                 else:
                     self.logger.error("RENDER_IMAGE missing args")
 
@@ -259,7 +262,7 @@ class RealtimeMessageNetworkListener:
                     image_path = args[0]
                     text = Language.shell_message(args[1])
                     self.logger.info(f"Rendering image: {image_path} with text: {text}")
-                    Display.clear("")
+                    Display.clear("", render_bottom_bar_icons_and_images=False)
                     Display.render_image_and_text(
                         image_path=image_path,
                         text=text,
@@ -276,7 +279,7 @@ class RealtimeMessageNetworkListener:
                     text = Language.shell_message(args[0])
                     percentage = self._parse_percentage(args[1])
                     self.logger.info(f"Rendering text: {text} w/ percentage bar: {percentage}%")
-                    Display.clear("")
+                    Display.clear("", render_bottom_bar_icons_and_images=False)
                     Display.write_message_multiline(
                         Display.split_message(text, FontPurpose.LIST, clip_to_device_width=True), 
                         Device.get_device().screen_height()*0.35
@@ -303,14 +306,14 @@ class RealtimeMessageNetworkListener:
                 if args:
                     msg = Language.shell_message(" ".join(str(a) for a in args))
                     self.logger.info(f"Displaying message: {msg}")
-                    Display.display_message(msg)
+                    Display.display_message(msg, render_bottom_bar_icons_and_images=False)
                 else:
                     self.logger.error("MESSAGE missing args")
 
             else:
                 msg = Language.shell_message(" ".join(str(a) for a in args) if args else cmd)
                 self.logger.info(f"Displaying message: {msg}")
-                Display.display_message(msg)
+                Display.display_message(msg, render_bottom_bar_icons_and_images=False)
 
         except Exception:
             self.logger.error(f"Error processing command: {cmd} with args: {args}", exc_info=True)

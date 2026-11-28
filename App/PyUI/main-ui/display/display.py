@@ -1648,8 +1648,9 @@ class Display:
 
 
     @classmethod
-    def display_message_multiline(cls,split_message, duration_ms=0):
-        Display.clear("")        
+    def display_message_multiline(cls, split_message, duration_ms=0,
+                                  render_bottom_bar_icons_and_images=True):
+        Display.clear("", render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
         cls.write_message_multiline(split_message, Device.get_device().screen_height()//2)
         Display.present()
         # Sleep for the specified duration in milliseconds
@@ -1681,13 +1682,19 @@ class Display:
 
 
     @classmethod
-    def display_message(cls,message, duration_ms=0):
+    def display_message(cls, message, duration_ms=0,
+                        render_bottom_bar_icons_and_images=True):
         split_message = Display.split_message(message, FontPurpose.LIST,clip_to_device_width=True)
-        cls.display_message_multiline(split_message,duration_ms)
+        cls.display_message_multiline(
+            split_message,
+            duration_ms,
+            render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images,
+        )
         
     @classmethod
-    def display_image(cls,image_path, duration_ms=0):
-        Display.clear("")
+    def display_image(cls, image_path, duration_ms=0,
+                      render_bottom_bar_icons_and_images=True):
+        Display.clear("", render_bottom_bar_icons_and_images=render_bottom_bar_icons_and_images)
         Display.render_image(image_path,Device.get_device().screen_width()//2,Device.get_device().screen_height()//2,RenderMode.MIDDLE_CENTER_ALIGNED)
         Display.present()
         # Sleep for the specified duration in milliseconds
