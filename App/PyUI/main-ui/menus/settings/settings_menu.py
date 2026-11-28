@@ -1,8 +1,10 @@
+import os
 import sys
 from controller.controller_inputs import ControllerInput
 from devices.device import Device
 from display.on_screen_keyboard import OnScreenKeyboard
 from menus.language.language import Language
+from themes.theme import Theme
 from utils.cfw_system_config import CfwSystemConfig
 from utils.logger import PyUiLogger
 from views.grid_or_list_entry import GridOrListEntry
@@ -187,6 +189,21 @@ class SettingsMenu(ABC):
                                 : self.onscreen_keyboard_option(category, entry_name, input_value, current_value, update_value, display_name)
                         )
                     )
+                elif self.theme_overrides(option.get('themeOverrideFile')):
+                    option_list.append(
+                        GridOrListEntry(
+                            primary_text=display_name,
+                            value_text=Language.label("setByTheme", "Set by theme"),
+                            image_path=None,
+                            image_path_selected=None,
+                            description=Language.label(
+                                "setByThemeDescription",
+                                "Your current theme controls this setting."
+                            ),
+                            icon=None,
+                            value=lambda input_value: None
+                        )
+                    )
                 else:
                     option_list.append(
                                     GridOrListEntry(
@@ -207,6 +224,10 @@ class SettingsMenu(ABC):
                             )
                         )
         return option_list
+
+    def theme_overrides(self, file_name):
+        theme_path = Theme.get_theme_path()
+        return bool(file_name and theme_path and os.path.isfile(os.path.join(theme_path, file_name)))
 
     @classmethod
     def related_config_categories(cls, settings_name):
