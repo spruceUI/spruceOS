@@ -28,7 +28,9 @@ mdnsd -i wlan0 -H "$NAME" -p /tmp/mdnsd.pid -w /tmp/spruce_hostname /tmp/mdns
   answers nothing.
 - **Daemonizes.** Yes, by default. `-n` keeps it in the foreground and logs
   to stdout/stderr. When daemonized it logs to syslog only.
-- **Process name.** `pgrep -x mdnsd`.
+- **Finding it.** By path: `pgrep -f /mnt/SDCARD/spruce/bin64/mdns/mdnsd`
+  (or `bin/`), keeping only pids whose argv[0] is that path. Some firmware
+  busybox `pgrep -x mdnsd` finds nothing while it runs (RGSP).
 - **Stopping.** `SIGTERM` sends goodbye packets and exits. `SIGHUP` re-reads
   the service directory.
 - **Settled name.** `-w FILE` (a spruce patch) writes the host name in use

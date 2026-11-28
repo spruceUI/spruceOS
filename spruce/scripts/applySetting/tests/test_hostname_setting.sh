@@ -19,17 +19,31 @@ log_message() { :; }
 get_config_value() { jq -r "\${1} // \"\$2\"" "$cfg"; }
 device_set_hostname() { echo "device_set_hostname \$1" >>"$calls"; }
 network_is_connected() { echo network_is_connected >>"$calls"; }
+device_manages_own_wifi() { [ -f "$test_dir/own_wifi" ]; }
+sleep() { :; }
 EOF2
-cat >"$sdcard/spruce/scripts/network/mdnsFunctions.sh" <<EOF2
+# The real avahi path; the mdnsd side is recorded.
+cat "$script_dir/../network/mdnsFunctions.sh" - >"$sdcard/spruce/scripts/network/mdnsFunctions.sh" <<EOF2
 mdns_is_running() { [ -f "$test_dir/running" ]; }
 restart_mdns_process() { echo restart_mdns_process >>"$calls"; }
+stop_mdns_process() { echo stop_mdns_process >>"$calls"; }
 EOF2
+# Fake firmware avahi-daemon: running (--check) while avahi_up exists.
+cat >"$test_dir/avahi-daemon" <<EOF2
+#!/bin/sh
+[ "\$1" = --check ] && { [ -f "$test_dir/avahi_up" ]; exit; }
+echo "avahi \$*" >>"$calls"
+if [ "\$1" = -k ]; then rm -f "$test_dir/avahi_up"; else : >"$test_dir/avahi_up"; fi
+EOF2
+chmod +x "$test_dir/avahi-daemon"
 cp "$script_dir/../network/hostnameFunctions.sh" "$sdcard/spruce/scripts/network/"
 sed "s@/mnt/SDCARD@$sdcard@g" "$script_dir/hostname.sh" >"$test_dir/hostname.sh"
 
 export HOSTNAME_STATE_FILE="$test_dir/state"
 export DEVICE_HOSTNAME_FILE="$test_dir/device_name"
 export KERNEL_HOSTNAME_FILE="$test_dir/kernel_name"
+export AVAHI_BIN="$test_dir/avahi-daemon"
+export AVAHI_NAME_FILE="$test_dir/avahi_name"
 
 check() {
     [ "$3" = "$2" ] || { echo "FAIL: $1: expected '$2', got '$3'"; exit 1; }
@@ -43,7 +57,8 @@ prep() {
     jq --arg v "$2" --arg s "${4:-Custom}" '.menuOptions."Network Settings".hostname.selected = $v
         | .menuOptions."Network Settings".hostnameSource.selected = $s' \
         "$repo/Saves/spruce/spruce-config.json" >"$cfg"
-    rm -f "$calls" "$test_dir/running" "$HOSTNAME_STATE_FILE" "$DEVICE_HOSTNAME_FILE"
+    rm -f "$calls" "$test_dir/running" "$HOSTNAME_STATE_FILE" "$DEVICE_HOSTNAME_FILE" \
+        "$test_dir/avahi_up" "$test_dir/own_wifi" "$AVAHI_NAME_FILE"
     printf 'firmware-box\n' >"$KERNEL_HOSTNAME_FILE"
     : >"$calls"
     if [ "$3" = 1 ]; then : >"$test_dir/running"; fi
@@ -112,5 +127,27 @@ jq '.menuOptions."Network Settings".hostnameSource.selected = "Device"' "$cfg" >
 : >"$calls"
 sh "$test_dir/hostname.sh" Device
 check "runtime switch: Device applies firmware name" "device_set_hostname firmware-box" "$(cat "$calls")"
+
+# Firmware avahi-daemon running: restarted once to announce the new name, no mdnsd.
+avahi_restart="avahi -k
+avahi --daemonize --no-drop-root --no-proc-title"
+prep "avahi" "My Brick!" 0
+: >"$test_dir/avahi_up"
+sh "$test_dir/hostname.sh" name "My Brick!"
+check "avahi: calls" "device_set_hostname my-brick
+stop_mdns_process
+$avahi_restart" "$(cat "$calls")"
+check "avahi: announced name" "my-brick" "$(cat "$AVAHI_NAME_FILE")"
+check "avahi: state file" "my-brick" "$(cat "$HOSTNAME_STATE_FILE")"
+: >"$calls"
+sh "$test_dir/hostname.sh" name "My Brick!"
+check "avahi, same name again: not restarted" "device_set_hostname my-brick
+stop_mdns_process" "$(cat "$calls")"
+# Devices that manage their own WiFi leave avahi alone.
+prep "avahi, own wifi" "My Brick!" 0
+: >"$test_dir/avahi_up"; : >"$test_dir/own_wifi"
+sh "$test_dir/hostname.sh" name "My Brick!"
+check "avahi, own wifi: calls" "device_set_hostname my-brick" "$(cat "$calls")"
+check "avahi, own wifi: still running" "yes" "$([ -f "$test_dir/avahi_up" ] && echo yes || echo no)"
 
 echo "PASS"

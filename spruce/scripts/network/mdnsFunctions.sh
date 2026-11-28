@@ -11,6 +11,13 @@ fi
 MDNS_SERVICE_DIR="${MDNS_SERVICE_DIR:-/tmp/mdns}"
 MDNS_PID_FILE="${MDNS_PID_FILE:-/tmp/mdnsd.pid}"
 MDNS_START_LOCK="${MDNS_START_LOCK:-/tmp/mdnsd_starting}"
+MDNS_PROC_DIR="${MDNS_PROC_DIR:-/proc}"
+
+# Some firmware runs its own responder, avahi-daemon (the RGSP's publishes the kernel hostname).
+AVAHI_BIN="${AVAHI_BIN:-/usr/sbin/avahi-daemon}"
+AVAHI_FLAGS="${AVAHI_FLAGS:---daemonize --no-drop-root --no-proc-title}"
+# The name avahi was last started with by spruce. Missing: it still has the firmware's boot name.
+AVAHI_NAME_FILE="${AVAHI_NAME_FILE:-/tmp/spruce_avahi_hostname}"
 
 # Only worth answering as <name>.local while something is listening to reach.
 # networkservices.sh has already read the four settings; reuse them rather than run jq again.
@@ -28,8 +35,64 @@ mdns_services_wanted() {
     return 1
 }
 
+# Pids of our mdnsd. By path: the firmware busybox "pgrep -x mdnsd" does not find it (RGSP).
+# "pgrep -f <path>" alone is too loose - anything carrying the path further along its arguments
+# matches, and stop kills what this prints - so keep only pids whose argv[0] is the binary.
+mdns_pids() {
+    for _pid in $(pgrep -f "$MDNS_BIN" 2>/dev/null); do
+        [ "$(tr '\0' '\n' <"$MDNS_PROC_DIR/$_pid/cmdline" 2>/dev/null | head -n 1)" = "$MDNS_BIN" ] &&
+            echo "$_pid"
+    done
+}
+
 mdns_is_running() {
-    pgrep -x mdnsd >/dev/null 2>&1
+    [ -n "$(mdns_pids)" ]
+}
+
+# avahi's own check (as BaseOS's baseos-mdns does), so busybox pgrep plays no part.
+avahi_is_running() {
+    [ -x "$AVAHI_BIN" ] && "$AVAHI_BIN" --check >/dev/null 2>&1
+}
+
+# Wait up to 2 s for avahi to exit.
+_avahi_wait_gone() {
+    _waited=0
+    while avahi_is_running && [ "$_waited" -lt 20 ]; do
+        sleep 0.1
+        _waited=$((_waited + 1))
+    done
+}
+
+# avahi reads the kernel hostname only at start, so restart it when the name it announces is not
+# the spruce one. It is the firmware's: never stopped for good, only restarted.
+# $1: the spruce name, when the caller already has it.
+announce_via_avahi() {
+    _name="${1:-$(get_spruce_hostname)}"
+    echo "$_name" >"$HOSTNAME_STATE_FILE"
+    read -r _announced 2>/dev/null <"$AVAHI_NAME_FILE" || _announced=""
+    [ "$_announced" = "$_name" ] && return 0
+
+    log_message "Restarting avahi-daemon to announce $_name.local..."
+    "$AVAHI_BIN" -k >/dev/null 2>&1
+    # A start while the old one still runs fails, so wait for it to go.
+    _avahi_wait_gone
+    if avahi_is_running; then
+        # Still the old name, but still answering; the next sync tries again.
+        log_message "avahi-daemon did not exit; not restarting it"
+        return 0
+    fi
+    # shellcheck disable=SC2086 # AVAHI_FLAGS is a list of words
+    if ! "$AVAHI_BIN" $AVAHI_FLAGS; then
+        log_message "avahi-daemon failed to start; retrying"
+        _avahi_wait_gone
+        # shellcheck disable=SC2086
+        if ! "$AVAHI_BIN" $AVAHI_FLAGS; then
+            log_message "avahi-daemon failed to start again"
+            return 0
+        fi
+    fi
+    echo "$_name" >"$AVAHI_NAME_FILE"
+    log_message "avahi-daemon restarted as $_name.local"
 }
 
 start_mdns_process() {
@@ -68,7 +131,7 @@ stop_mdns_process() {
     if mdns_is_running; then
         log_message "Shutting down mDNS responder..."
         # shellcheck disable=SC2046
-        kill $(pgrep -x mdnsd)
+        kill $(mdns_pids)
         # Wait for it to go, or a restart's start would see it and do nothing.
         _waited=0
         while mdns_is_running && [ "$_waited" -lt 20 ]; do
@@ -77,7 +140,7 @@ stop_mdns_process() {
         done
         if mdns_is_running; then
             # shellcheck disable=SC2046
-            kill -9 $(pgrep -x mdnsd)
+            kill -9 $(mdns_pids)
         fi
         # The file outlives mdnsd; don't leave a renamed (NAME-2) value behind.
         get_spruce_hostname >"$HOSTNAME_STATE_FILE"
@@ -87,6 +150,12 @@ stop_mdns_process() {
 sync_mdns_process() {
     if device_manages_own_wifi; then
         stop_mdns_process
+        return 0
+    fi
+    # Never a second responder beside the firmware's; have it announce the spruce name instead.
+    if avahi_is_running; then
+        stop_mdns_process
+        announce_via_avahi
         return 0
     fi
     # The link, not the internet: mdnsd binds -i wlan0 and mDNS never leaves the LAN.

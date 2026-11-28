@@ -72,6 +72,7 @@ fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 . /mnt/SDCARD/spruce/scripts/network/hostnameFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/mdnsFunctions.sh
 
 # --- read-only commands ------------------------------------------------------
 # Everything PyUI shows about WiFi comes from these, so it never has to know
@@ -97,7 +98,7 @@ apply_spruce_hostname() {
     export SPRUCE_HOSTNAME
     device_set_hostname "$SPRUCE_HOSTNAME"
     # A running mdnsd owns the file (-w) and may have settled on NAME-2; don't overwrite that.
-    pgrep -x mdnsd >/dev/null 2>&1 ||
+    mdns_is_running ||
         printf '%s\n' "$SPRUCE_HOSTNAME" > "$HOSTNAME_STATE_FILE" 2>/dev/null
 }
 

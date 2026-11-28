@@ -219,12 +219,17 @@ check "default device_set_hostname" "spruce-flip" "$(env -i PATH="$PATH" sh -c "
 # wifi.sh apply_spruce_hostname: extracted (wifi.sh is not sourceable in isolation). A running
 # mdnsd owns the state file, so it is written only when none is running.
 sed -n '/^apply_spruce_hostname() {/,/^}/p' "$script_dir/wifi.sh" > "$test_dir/apply_host.sh"
+# pgrep as the RGSP's busybox: "-x mdnsd" finds nothing, only the binary's path does.
+mkdir -p "$test_dir/proc/4242"
+printf '%s\0-i\0wlan0\0' "$test_dir/mdnsd" > "$test_dir/proc/4242/cmdline"
 apply_host() {
     printf 'spruce-flip-2\n' > "$test_dir/state"
-    env -i PATH="$PATH" HOSTNAME_STATE_FILE="$test_dir/state" T_RUNNING="$1" sh -c "
+    env -i PATH="$PATH" HOSTNAME_STATE_FILE="$test_dir/state" T_RUNNING="$1" \
+        MDNS_BIN="$test_dir/mdnsd" MDNS_PROC_DIR="$test_dir/proc" sh -c "
         get_spruce_hostname() { echo spruce-flip; }
         device_set_hostname() { echo \"set \$1\"; }
-        pgrep() { [ \"\$*\" = '-x mdnsd' ] && [ \"\$T_RUNNING\" = 1 ]; }
+        pgrep() { [ \"\$*\" = \"-f \$MDNS_BIN\" ] && [ \"\$T_RUNNING\" = 1 ] && echo 4242; }
+        . '$script_dir/mdnsFunctions.sh'
         . '$test_dir/apply_host.sh'
         apply_spruce_hostname
         echo \"exported \$SPRUCE_HOSTNAME\""

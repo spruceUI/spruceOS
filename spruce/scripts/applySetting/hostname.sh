@@ -28,5 +28,12 @@ echo "$name" >"$HOSTNAME_STATE_FILE"
 
 # Only a running responder needs telling; it announces the new name when restarted.
 # No network check here: this runs on PyUI's UI thread, and the restart's sync checks the link.
-mdns_is_running && restart_mdns_process
+# The firmware's avahi-daemon: restart it with the kernel hostname set above (as
+# sync_mdns_process would, without recomputing the name). Own-WiFi devices leave it alone.
+if ! device_manages_own_wifi && avahi_is_running; then
+    stop_mdns_process
+    announce_via_avahi "$name"
+elif mdns_is_running; then
+    restart_mdns_process
+fi
 exit 0
