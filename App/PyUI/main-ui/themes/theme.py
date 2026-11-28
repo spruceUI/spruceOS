@@ -391,7 +391,12 @@ class Theme():
         return cls._asset("bg-grid-s.qoi")
     
     @classmethod
-    def keyboard_entry_bg(cls): return cls._asset("bg-list-l.qoi")
+    def keyboard_entry_bg(cls):
+        # The on-screen keyboard input bar is scaled to key height, while the
+        # descriptive-list selected row is stretched to its row height. Let
+        # themes ship a differently shaped asset for each; existing themes
+        # without the new file keep the old shared highlight.
+        return cls._asset("bg-keyboard-entry.qoi") or cls._asset("bg-list-l.qoi")
     
     @classmethod
     def key_bg(cls): return cls._asset("bg-btn-01-n.qoi")
