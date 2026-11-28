@@ -151,11 +151,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Define the path for the .lastUpdate file
-last_update_file="$APP_DIR/.lastUpdate"
-
 kill_network_services
-rm -f "$last_update_file" # wipe this so we can restore it and see what version the backup was made on
 
 # Actual restore process
 log_message "Starting actual restore process..."

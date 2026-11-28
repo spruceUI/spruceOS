@@ -250,6 +250,34 @@ migrate_flycast_config() {
     log_message "Flycast config migration: copied configuration into Saves"
 }
 
+# vtree's config is user state. Leave the copy in App/FileManagement as the
+# shipped seed and carry an existing edited copy into Saves.
+migrate_filemanager_config() {
+    _old_config="/mnt/SDCARD/App/FileManagement/config.ini"
+    _new_config="/mnt/SDCARD/Saves/filemanager/config.ini"
+
+    [ -f "$_new_config" ] && return 0
+    [ -f "$_old_config" ] || return 0
+
+    mkdir -p "${_new_config%/*}" || return 1
+    cp -p "$_old_config" "$_new_config" || return 1
+    log_message "File manager config migration: copied config.ini into Saves"
+}
+
+# The upgrade version stamp is user state. Move the legacy copy out of the App
+# tree so future spruce updates cannot remove it.
+migrate_last_update() {
+    _old_stamp="/mnt/SDCARD/App/spruceRestore/.lastUpdate"
+    _new_stamp="/mnt/SDCARD/Saves/spruce/.lastUpdate"
+
+    [ -f "$_new_stamp" ] && return 0
+    [ -f "$_old_stamp" ] || return 0
+
+    mkdir -p "${_new_stamp%/*}" || return 1
+    mv "$_old_stamp" "$_new_stamp" || return 1
+    log_message "Upgrade version migration: moved .lastUpdate into Saves"
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -277,6 +305,14 @@ if ! migrate_pico8_data; then
 fi
 if ! migrate_flycast_config; then
     log_message "Failed to migrate Flycast configuration"
+    _upgrade_warnings=1
+fi
+if ! migrate_filemanager_config; then
+    log_message "Failed to migrate file manager configuration"
+    _upgrade_warnings=1
+fi
+if ! migrate_last_update; then
+    log_message "Failed to migrate the upgrade version stamp"
     _upgrade_warnings=1
 fi
 

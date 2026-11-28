@@ -91,8 +91,6 @@ log_message "Backup file will be: $seven_z_file"
 
 # Define the folders to backup
 folders="
-/mnt/SDCARD/App/FileManagement/config.ini
-/mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32
 /mnt/SDCARD/Emu/NDS/backup-64

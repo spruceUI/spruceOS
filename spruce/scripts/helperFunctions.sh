@@ -870,7 +870,7 @@ read_only_check() {
 
 run_upgrade_scripts() {
     UPGRADE_SCRIPTS_DIR="/mnt/SDCARD/App/spruceRestore/UpgradeScripts"
-    last_update_file="/mnt/SDCARD/App/spruceRestore/.lastUpdate"
+    last_update_file="/mnt/SDCARD/Saves/spruce/.lastUpdate"
 
     if [ -f "$last_update_file" ]; then
         current_version=$(grep "spruce_version=" "$last_update_file" | cut -d'=' -f2 | tr -d '\r\n')

@@ -24,9 +24,18 @@ restore_x_and_y_buttons() {
 killall -q idlemon 2>/dev/null
 killall -q idle_watchdog.sh 2>/dev/null
 
-export HOME="$(dirname "$0")"
-cd "$HOME"
-/mnt/SDCARD/spruce/scripts/asound-setup.sh "$HOME"
+APP_DIR="$(dirname "$0")"
+FILEMANAGER_HOME="/mnt/SDCARD/Saves/filemanager"
+
+# Keep the shipped config as a seed and let vtree write its settings under
+# Saves, where updates do not replace them.
+if [ ! -f "$FILEMANAGER_HOME/config.ini" ] && [ -f "$APP_DIR/config.ini" ]; then
+    mkdir -p "$FILEMANAGER_HOME" && cp "$APP_DIR/config.ini" "$FILEMANAGER_HOME/config.ini"
+fi
+
+export HOME="$FILEMANAGER_HOME"
+cd "$APP_DIR"
+/mnt/SDCARD/spruce/scripts/asound-setup.sh "$APP_DIR"
 
 LOG_PATH="/mnt/SDCARD/Saves/spruce/vtree-${PLATFORM}.log"
 
@@ -62,7 +71,7 @@ esac
 
 case "$PLATFORM" in
     "A30")
-        export LD_LIBRARY_PATH="$HOME/lib-A30:$LD_LIBRARY_PATH"
+        export LD_LIBRARY_PATH="$APP_DIR/lib-A30:$LD_LIBRARY_PATH"
         killall -q -USR2 joystickinput
         ./vtree.a30 --rotate=3 >"$LOG_PATH" 2>&1
         killall -q -USR2 joystickinput
