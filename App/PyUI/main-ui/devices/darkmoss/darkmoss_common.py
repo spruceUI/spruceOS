@@ -1,9 +1,12 @@
+import platform
 import subprocess
 
 from utils.logger import PyUiLogger
 
 PANEL_DRM_TOOL = "/usr/local/bin/panel_drm_tool"
 PANEL_PROPERTIES = ("brightness", "contrast", "saturation", "hue")
+# The rk3326 4.4 kernel lists the panel colour properties but rejects every set.
+RK3326_PANEL_CALIBRATION = not platform.release().startswith("4.")
 
 
 def darkmoss_fw_version():

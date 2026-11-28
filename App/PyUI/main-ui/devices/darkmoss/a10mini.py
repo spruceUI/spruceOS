@@ -1,4 +1,5 @@
 from devices.darkmoss.darkmoss_device import DarkmossDevice
+from devices.darkmoss.darkmoss_common import RK3326_PANEL_CALIBRATION
 
 
 class A10Mini(DarkmossDevice):
@@ -6,8 +7,7 @@ class A10Mini(DarkmossDevice):
 
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo3-joypad-event-joystick"
     SYSTEM_JSON_NAME = "a10mini-system.json"
-    # The 4.4 kernel lists the panel colour properties but rejects every set.
-    PANEL_CALIBRATION = False
+    PANEL_CALIBRATION = RK3326_PANEL_CALIBRATION
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1
     START_KEY = 705
     MENU_KEY = 708    # F5

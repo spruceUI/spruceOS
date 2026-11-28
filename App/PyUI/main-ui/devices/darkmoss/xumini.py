@@ -2,6 +2,7 @@ from controller.controller_inputs import ControllerInput
 from controller.key_watcher_controller import HorizontalStickAxis, VerticalStickAxis
 from devices.darkmoss.darkmoss_device import DarkmossDevice
 from devices.darkmoss.darkmoss_key_mapping_provider import DarkmossKeyMappingProvider
+from devices.darkmoss.darkmoss_common import RK3326_PANEL_CALIBRATION
 
 
 class XuMiniMKeyMappingProvider(DarkmossKeyMappingProvider):
@@ -29,8 +30,7 @@ class XuMiniM(DarkmossDevice):
 
     JOYPAD_NODE = "/dev/input/by-path/platform-xu10-joypad-event-joystick"
     SYSTEM_JSON_NAME = "xumini-system.json"
-    # The 4.4 kernel lists the panel colour properties but rejects every set.
-    PANEL_CALIBRATION = False
+    PANEL_CALIBRATION = RK3326_PANEL_CALIBRATION
     MENU_KEY = 704  # BTN_TRIGGER_HAPPY1, a real button here
     # The rk3326 base has no softvol Master and a 0-100 backlight: use the py-ui-config scripts.
     VOLUME_BACKLIGHT_CMDS = True

@@ -3,6 +3,7 @@ from controller.key_state import KeyState
 from controller.key_watcher_controller_dataclasses import InputResult, KeyEvent
 from devices.darkmoss.darkmoss_device import DarkmossDevice
 from devices.darkmoss.darkmoss_key_mapping_provider import DarkmossKeyMappingProvider
+from devices.darkmoss.darkmoss_common import RK3326_PANEL_CALIBRATION
 
 
 class V10KeyMappingProvider(DarkmossKeyMappingProvider):
@@ -76,8 +77,7 @@ class V10(DarkmossDevice):
 
     JOYPAD_NODE = "/dev/input/by-path/platform-odroidgo2-joypad-event-joystick"
     SYSTEM_JSON_NAME = "v10-system.json"
-    # The 4.4 kernel lists the panel colour properties but rejects every set.
-    PANEL_CALIBRATION = False
+    PANEL_CALIBRATION = RK3326_PANEL_CALIBRATION
     SELECT_KEY = 704  # BTN_TRIGGER_HAPPY1, the "-" button
     START_KEY = 709   # BTN_TRIGGER_HAPPY6, the "+" button
     L2_KEY = 706
