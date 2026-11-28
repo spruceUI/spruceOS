@@ -278,6 +278,21 @@ migrate_last_update() {
     log_message "Upgrade version migration: moved .lastUpdate into Saves"
 }
 
+# Yaba Sanshiro keeps its standalone settings and battery RAM together under
+# .yabasanshiro. Preserve an existing directory before future updates replace
+# the Emu copy with the seed.
+migrate_yabasanshiro_data() {
+    _old_data="/mnt/SDCARD/Emu/SATURN/.yabasanshiro"
+    _new_data="/mnt/SDCARD/Saves/.yabasanshiro"
+
+    [ -d "$_new_data" ] && return 0
+    [ -d "$_old_data" ] || return 0
+
+    mkdir -p "${_new_data%/*}" || return 1
+    cp -a "$_old_data" "$_new_data" || return 1
+    log_message "Yaba Sanshiro migration: copied .yabasanshiro into Saves"
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -313,6 +328,10 @@ if ! migrate_filemanager_config; then
 fi
 if ! migrate_last_update; then
     log_message "Failed to migrate the upgrade version stamp"
+    _upgrade_warnings=1
+fi
+if ! migrate_yabasanshiro_data; then
+    log_message "Failed to migrate Yaba Sanshiro data"
     _upgrade_warnings=1
 fi
 

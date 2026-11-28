@@ -87,7 +87,6 @@ log_message "Backup file will be: $seven_z_file"
 # - RetroArch main configs
 # - RetroArch core configs
 # - RetroArch overlays (excluding specific folders)
-# - Yabasanshiro standalone configs
 
 # Define the folders to backup
 folders="
@@ -112,7 +111,6 @@ folders="
 /mnt/SDCARD/Emu/NDS/resources/settings_Flip.json
 /mnt/SDCARD/Emu/NDS/resources/settings_MiyooMini.json
 /mnt/SDCARD/Emu/NDS/resources/settings_Pixel2.json
-/mnt/SDCARD/Emu/SATURN/.yabasanshiro
 /mnt/SDCARD/RetroArch/igm.json
 /mnt/SDCARD/RetroArch/igm_items.json
 /mnt/SDCARD/RetroArch/.retroarch/config

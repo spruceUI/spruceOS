@@ -11,13 +11,24 @@
 # Provides:
 #   run_yabasanshiro
 
+seed_yabasanshiro_data() {
+	YABA_HOME="/mnt/SDCARD/Saves"
+	YABA_SEED="$EMU_DIR/.yabasanshiro"
+	YABA_DATA="$YABA_HOME/.yabasanshiro"
+
+	if [ ! -d "$YABA_DATA" ] && [ -d "$YABA_SEED" ]; then
+		mkdir -p "$YABA_HOME" && cp -a "$YABA_SEED" "$YABA_HOME/"
+	fi
+}
+
 run_yabasanshiro() {
 	export LD_LIBRARY_PATH=$EMU_DIR/lib64:$LD_LIBRARY_PATH
-	export HOME="$EMU_DIR"
-	cd "$HOME"
-	/mnt/SDCARD/spruce/scripts/asound-setup.sh
+	seed_yabasanshiro_data
+	export HOME="$YABA_HOME"
+	cd "$EMU_DIR"
+	/mnt/SDCARD/spruce/scripts/asound-setup.sh "$EMU_DIR"
 	SATURN_BIOS="/mnt/SDCARD/BIOS/saturn_bios.bin"
-	KEYMAP_FILE="/mnt/SDCARD/Emu/SATURN/.yabasanshiro/keymapv2.json"
+	KEYMAP_FILE="$YABA_DATA/keymapv2.json"
 	YABASANSHIRO="./yabasanshiro"
 	case "$PLATFORM" in
 		"Flip")

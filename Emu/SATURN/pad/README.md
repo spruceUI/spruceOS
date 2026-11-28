@@ -20,8 +20,9 @@ A board opts in by exporting `SATURN_PAD_TABLE` from its platform cfg. At each l
   stay;
 - replaces the pad's entry in `es_temporaryinput.cfg` with `es-<table>.xml`.
 
-This folder is not in spruceBackup, so updates refresh it. The live `keymapv2.json` is backed up, and
-"Reset YabaSanshiro config" restores it from `default_configs`. The next launch re-seeds the board's entry.
+This folder is not in spruceBackup, so updates refresh it. The live `keymapv2.json` is in
+`Saves/.yabasanshiro`, and "Reset YabaSanshiro config" restores it from `default_configs`.
+The next launch re-seeds the board's entry.
 
 ## Layout
 
