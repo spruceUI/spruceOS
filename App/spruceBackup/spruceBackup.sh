@@ -96,8 +96,6 @@ folders="
 /mnt/SDCARD/App/FileManagement/config.ini
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
 /mnt/SDCARD/Emu/PICO8/.lexaloffle
-/mnt/SDCARD/Emu/.emu_setup/n64_controller/Custom.rmp
-/mnt/SDCARD/Emu/N64/remaps/Custom.rmp
 /mnt/SDCARD/Emu/DC/config
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32

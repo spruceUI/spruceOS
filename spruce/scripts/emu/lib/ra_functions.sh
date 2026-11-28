@@ -589,18 +589,27 @@ backup_rac_creds_to_spruce_cfg() {
 
 load_n64_controller_profile() {
 	profile="$(jq -r '.menuOptions.controlMode.selected' "$EMU_JSON_PATH")"
+	remap_source=""
 	case "$profile" in
 		*"Spruce"*) profile_name="$(basename "$(platform_path "/mnt/SDCARD/Emu/N64/remaps/Spruce-%s.rmp")" .rmp)" ;;	# the board's own layout
 		*"Classic"*) profile_name="Classic" ;;
 		*"Action"*) profile_name="Action" ;;
-		*"Custom"*) return 0 ;;	# don't overwrite the remap if Custom is selected
+		*"Custom"*)
+			remap_source="/mnt/SDCARD/Saves/n64/Custom.rmp"
+			remap_seed="/mnt/SDCARD/Emu/N64/remaps/Custom.rmp"
+			if [ ! -f "$remap_source" ] && [ -f "$remap_seed" ]; then
+				mkdir -p "$(dirname "$remap_source")"
+				cp "$remap_seed" "$remap_source"
+			fi
+			;;
 		*) return 0 ;; # exit early if jq fails or config is broken
 	esac
 
 	SRC="/mnt/SDCARD/Emu/N64/remaps"
 	DST="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
-	if [ ! -f "${SRC}/${profile_name}.rmp" ]; then
-		log_message "N64 controls: no ${profile_name}.rmp, core remaps left as they are"
+	[ -n "$remap_source" ] || remap_source="${SRC}/${profile_name}.rmp"
+	if [ ! -f "$remap_source" ]; then
+		log_message "N64 controls: no $remap_source, core remaps left as they are"
 		return 0
 	fi
 
@@ -609,7 +618,7 @@ load_n64_controller_profile() {
 		dirname="$(basename "$dir")"
 		case "$dirname" in
 			*"n64"*|*"N64"*)
-				cp -f "${SRC}/${profile_name}.rmp" "${dir}/${dirname}.rmp"
+				cp -f "$remap_source" "${dir}/${dirname}.rmp"
 				case "$profile_name" in Spruce-*) n64_override_deadzone "$dirname" ;; esac
 			;;
 			*) ;; # if core display name doesn't have N64 in it, do nothing.
@@ -634,7 +643,7 @@ save_custom_n64_controller_profile() {
 		* ) return 0 ;; # exit function early; no need to back up remap
 	esac
 
-	REMAP_BACKUP="/mnt/SDCARD/Emu/N64/remaps/Custom.rmp"
+	REMAP_LIVE="/mnt/SDCARD/Saves/n64/Custom.rmp"
 	REMAP_DIR="/mnt/SDCARD/RetroArch/.retroarch/config/remaps"
 
 	case "$CORE" in
@@ -647,7 +656,8 @@ save_custom_n64_controller_profile() {
 		*) return 0 ;; # if not a known N64 core, do nothing
 	esac
 
-	cp -f "${REMAP_DIR}/${core_name}/${core_name}.rmp" "$REMAP_BACKUP"
+	mkdir -p "$(dirname "$REMAP_LIVE")"
+	cp -f "${REMAP_DIR}/${core_name}/${core_name}.rmp" "$REMAP_LIVE"
 }
 
 seed_pokedaisy_ini() {

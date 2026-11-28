@@ -206,6 +206,20 @@ migrate_ssh_host_keys() {
     done
 }
 
+# Custom N64 remaps used to overwrite their shipped seed. Carry the restored
+# user copy into Saves before future updates replace the seed.
+migrate_n64_custom_remap() {
+    _old_remap="/mnt/SDCARD/Emu/N64/remaps/Custom.rmp"
+    _new_remap="/mnt/SDCARD/Saves/n64/Custom.rmp"
+
+    [ -f "$_new_remap" ] && return 0
+    [ -f "$_old_remap" ] || return 0
+
+    mkdir -p "${_new_remap%/*}" || return 1
+    cp -p "$_old_remap" "$_new_remap" || return 1
+    log_message "N64 remap migration: copied Custom.rmp into Saves"
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -221,6 +235,10 @@ for _system in DC N64 NDS PS SATURN; do
 done
 if ! migrate_ssh_host_keys; then
     log_message "Failed to migrate SSH host keys"
+    _upgrade_warnings=1
+fi
+if ! migrate_n64_custom_remap; then
+    log_message "Failed to migrate the custom N64 remap"
     _upgrade_warnings=1
 fi
 
