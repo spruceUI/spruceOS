@@ -61,10 +61,11 @@ _set_scummvm_platform() {
 			;;
 	esac
 
-	# Copy default config if user config doesn't exist yet (for all platforms)
+	# Seed live configs from the shipped originals only when absent, preserving
+	# each player's scanned games and preferences across spruce updates.
 	for target in a30 anbernic brick brickpro flip mini pixel2 tsp tsps; do
 		T_PATH="/mnt/SDCARD/Saves/.config/scummvm-$target/scummvm.ini"
-		S_PATH="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$target/scummvm.ini"
+		S_PATH="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$target.ini"
 
 		if [ ! -f "$T_PATH" ] && [ -f "$S_PATH" ]; then
 			mkdir -p "$(dirname "$T_PATH")"

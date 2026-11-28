@@ -20,7 +20,7 @@ case "$PLATFORM" in
     *)            SCUMMVM_TARGET="flip" ;;
 esac
 LIVE_INI="/mnt/SDCARD/Saves/.config/scummvm-$SCUMMVM_TARGET/scummvm.ini"
-SHIPPED_INI="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$SCUMMVM_TARGET/scummvm.ini"
+SHIPPED_INI="/mnt/SDCARD/Emu/SCUMMVM/.config/scummvm-$SCUMMVM_TARGET.ini"
 
 log_message "Resetting ScummVM config to default ($SCUMMVM_TARGET)."
 mkdir -p "${LIVE_INI%/*}"
