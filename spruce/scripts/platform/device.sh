@@ -824,7 +824,26 @@ device_extra_wifi_setup() {
 # running" guard lives in the hook rather than the caller because the check is
 # client-specific.
 device_start_dhcp_client() {
-    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -b -t 5 -T 3
+    pgrep -f "udhcpc.*wlan0" >/dev/null || run_udhcpc_with_hostname -i wlan0 -b -t 5 -T 3
+}
+
+# Runs udhcpc with the hostname option. A udhcpc without -x support exits 1, so
+# retry once without it rather than leave wifi with no IP. Returns the last status.
+run_udhcpc_with_hostname() {
+    # shellcheck disable=SC2086 # intentional: SPRUCE_HOSTNAME is [a-z0-9-] only
+    udhcpc "$@" ${SPRUCE_HOSTNAME:+-x hostname:$SPRUCE_HOSTNAME}
+    udhcpc_rc=$?
+    if [ "$udhcpc_rc" -eq 1 ] && [ -n "${SPRUCE_HOSTNAME:-}" ]; then
+        log_message "udhcpc rejected -x hostname:$SPRUCE_HOSTNAME; retrying without it"
+        udhcpc "$@"
+        udhcpc_rc=$?
+    fi
+    return "$udhcpc_rc"
+}
+
+# Sets the kernel hostname (enable_wifi calls it before starting DHCP).
+device_set_hostname() {
+    hostname "$1" 2>/dev/null
 }
 
 device_stop_dhcp_client() {

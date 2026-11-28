@@ -497,7 +497,7 @@ device_wifi_watchdog_enabled() {
 
 # The Mini's udhcpc needs its own script to set the address
 device_start_dhcp_client() {
-    pgrep -f "udhcpc.*wlan0" >/dev/null || udhcpc -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3
+    pgrep -f "udhcpc.*wlan0" >/dev/null || run_udhcpc_with_hostname -i wlan0 -s /etc/init.d/udhcpc.script -b -t 5 -T 3
 }
 
 # The V4 and Mini Flip panel, as the model overlay states it

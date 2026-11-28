@@ -555,6 +555,28 @@ class DeviceCommon(AbstractDevice):
             return Language.label("wifiStatusNoNetwork", "No network selected")
         return Language.label("wifiStatusConnecting", "Connecting")
 
+    def get_hostname_text(self) -> str:
+        try:
+            with open("/tmp/spruce_hostname") as f:
+                name = f.read().strip()
+            if name:
+                return name
+        except Exception:
+            pass
+        cached = getattr(self, "_hostname_fallback", None)
+        if cached is None:
+            cached = "spruce"
+            try:
+                result = subprocess.run(
+                    ["sh", "-c", ". /mnt/SDCARD/spruce/scripts/helperFunctions.sh; "
+                     ". /mnt/SDCARD/spruce/scripts/network/hostnameFunctions.sh; get_spruce_hostname"],
+                    capture_output=True, text=True, stdin=subprocess.DEVNULL, timeout=5)
+                cached = result.stdout.strip() or "spruce"
+            except Exception:
+                pass
+            self._hostname_fallback = cached
+        return cached
+
     def get_ip_addr_text(self):
         if not self.is_wifi_enabled():
             return Language.label("wifiStatusOff", "Off")
@@ -936,6 +958,7 @@ class DeviceCommon(AbstractDevice):
     def get_about_info_entries(self):
         about_info_entries = []
         about_info_entries.append( (Language.label("aboutIpAddress", "IP Address"), self.get_ip_addr_text()) )
+        about_info_entries.append( (Language.label("aboutDeviceName", "Device name"), self.get_hostname_text()) )
         about_info_entries.append( (Language.label("aboutMacAddress", "Mac Address"), self.get_mac_address()) )
         about_info_entries.append( (Language.label("aboutFwVersion", "FW Version"),self.get_fw_version()) )
         about_info_entries.extend(self.get_device_specific_about_info_entries())

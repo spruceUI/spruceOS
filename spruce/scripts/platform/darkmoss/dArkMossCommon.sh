@@ -402,6 +402,17 @@ device_stop_dhcp_client() {
     return 0
 }
 
+# The repo says both "NetworkManager" (this file's header) and "connman" (wifi.sh,
+# RGB30) for this host, and never confirms hostnamectl exists, hence the guard
+# and hostname(1) fallback. --transient is deliberate: it must not write /etc/hostname.
+device_set_hostname() {
+    if command -v hostnamectl >/dev/null 2>&1; then
+        hostnamectl --transient set-hostname "$1" 2>/dev/null
+    else
+        hostname "$1" 2>/dev/null
+    fi
+}
+
 # nmcli's error output echoes the password back, so none of it is kept. The
 # network is also saved to the card's wpa_supplicant.conf, where every other
 # spruce device keeps it, so the password travels with the card and a fresh

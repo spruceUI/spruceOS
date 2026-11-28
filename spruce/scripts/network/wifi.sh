@@ -71,6 +71,7 @@ if [ "$READ_ONLY" = 0 ] && [ "$WAIT" = 0 ] && [ "$WORKER" = 0 ]; then
 fi
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
+. /mnt/SDCARD/spruce/scripts/network/hostnameFunctions.sh
 
 # --- read-only commands ------------------------------------------------------
 # Everything PyUI shows about WiFi comes from these, so it never has to know
@@ -88,6 +89,14 @@ start_wpa_supplicant() {
         [ "$_try" -ge 5 ] && return 1
         sleep 1
     done
+}
+
+# Decide the name, export it for DHCP/networkservices, set the kernel hostname, record it.
+apply_spruce_hostname() {
+    SPRUCE_HOSTNAME="$(get_spruce_hostname)"
+    export SPRUCE_HOSTNAME
+    device_set_hostname "$SPRUCE_HOSTNAME"
+    printf '%s\n' "$SPRUCE_HOSTNAME" > "$HOSTNAME_STATE_FILE" 2>/dev/null
 }
 
 enable_wifi() {
@@ -127,6 +136,7 @@ enable_wifi() {
     # the Anbernic XX line made by running dhclient beside udhcpc.
     if device_manages_own_wifi; then
         log_message "Host OS manages WiFi; not starting wpa_supplicant or a DHCP client"
+        apply_spruce_hostname
         /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
         device_extra_wifi_setup
         return 0
@@ -201,6 +211,7 @@ enable_wifi() {
         start_wpa_supplicant
         log_message "Launching wpa_supplicant"
     fi
+    apply_spruce_hostname
     device_start_dhcp_client
     /mnt/SDCARD/spruce/scripts/network/networkservices.sh &
     log_message "WiFi turned on"
