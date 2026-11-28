@@ -148,10 +148,6 @@ stop_mdns_process() {
 }
 
 sync_mdns_process() {
-    if device_manages_own_wifi; then
-        stop_mdns_process
-        return 0
-    fi
     # Never a second responder beside the firmware's; have it announce the spruce name instead.
     if avahi_is_running; then
         stop_mdns_process

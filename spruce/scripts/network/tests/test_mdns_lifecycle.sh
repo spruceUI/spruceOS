@@ -140,11 +140,12 @@ run "samba on, ssh off, running" 0 0
 reset; T_SSH=True; T_CONNECTED=0
 run "ssh on, not connected" 0 0
 
+# Devices that manage their own WiFi (dArkMoss, Pixel 2) get the responder too.
 reset; T_SSH=True; T_OWN_WIFI=1
-run "ssh on, own wifi" 0 0
+run "ssh on, own wifi" 1 0
 
-reset; T_SSH=True; T_OWN_WIFI=1; T_RUNNING=1
-run "own wifi, running" 0 1
+reset; T_OWN_WIFI=1; T_RUNNING=1
+run "own wifi, all off, running" 0 1
 
 reset; T_RAPROXY=True
 run "only raproxy on" 0 0
@@ -290,10 +291,10 @@ reset; : >"$test_dir/avahi_up"; echo 2 >"$test_dir/avahi_fail"
 run "avahi start fails twice" 0 0
 check "avahi start fails twice: two tries" "2" "$(grep -c '^avahi failed' "$LOG")"
 check "avahi start fails twice: no name file" "no" "$([ -f "$AVAHI_NAME_FILE" ] && echo yes || echo no)"
-# Devices that manage their own WiFi: no responder work, avahi untouched.
+# Own WiFi with a firmware avahi: announced through it, no mdnsd.
 reset; T_SSH=True; T_OWN_WIFI=1; : >"$test_dir/avahi_up"
 run "avahi, own wifi" 0 0
-check "avahi, own wifi: untouched" "" "$(grep '^avahi' "$LOG" || true)"
+check "avahi, own wifi: restarted" "yes" "$(grep -q '^avahi' "$LOG" && echo yes || echo no)"
 # No avahi binary: a process merely named like it does not count.
 reset; T_SSH=True; : >"$test_dir/avahi_up"
 AVAHI_BIN="$test_dir/missing-avahi-daemon"

@@ -158,11 +158,12 @@ check "avahi: state file" "my-brick" "$(cat "$HOSTNAME_STATE_FILE")"
 sh "$test_dir/hostname.sh" name "My Brick!"
 check "avahi, same name again: not restarted" "device_set_hostname my-brick
 stop_mdns_process" "$(cat "$calls")"
-# Devices that manage their own WiFi leave avahi alone.
+# Devices that manage their own WiFi announce through avahi too.
 prep "avahi, own wifi" "My Brick!" 0
 : >"$test_dir/avahi_up"; : >"$test_dir/own_wifi"
 sh "$test_dir/hostname.sh" name "My Brick!"
-check "avahi, own wifi: calls" "device_set_hostname my-brick" "$(cat "$calls")"
-check "avahi, own wifi: still running" "yes" "$([ -f "$test_dir/avahi_up" ] && echo yes || echo no)"
+check "avahi, own wifi: calls" "device_set_hostname my-brick
+stop_mdns_process
+$avahi_restart" "$(cat "$calls")"
 
 echo "PASS"

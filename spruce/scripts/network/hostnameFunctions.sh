@@ -60,7 +60,7 @@ get_firmware_hostname() {
     fi
     _fw_name="$(normalize_hostname "$(head -n 1 "$KERNEL_HOSTNAME_FILE" 2>/dev/null)")"
     case "$_fw_name" in
-        none | localhost | localhost-localdomain) _fw_name="" ;;
+        none | localhost | localhost-localdomain | localhostlocaldomain) _fw_name="" ;;
     esac
     echo "$_fw_name" >"$FIRMWARE_HOSTNAME_FILE" 2>/dev/null
     echo "$_fw_name"

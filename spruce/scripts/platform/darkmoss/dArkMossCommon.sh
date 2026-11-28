@@ -402,15 +402,10 @@ device_stop_dhcp_client() {
     return 0
 }
 
-# The repo says both "NetworkManager" (this file's header) and "connman" (wifi.sh,
-# RGB30) for this host, and never confirms hostnamectl exists, hence the guard
-# and hostname(1) fallback. --transient is deliberate: it must not write /etc/hostname.
+# Not hostnamectl --transient: the image's static /etc/hostname outranks a
+# transient name, so the kernel name would not change.
 device_set_hostname() {
-    if command -v hostnamectl >/dev/null 2>&1; then
-        hostnamectl --transient set-hostname "$1" 2>/dev/null
-    else
-        hostname "$1" 2>/dev/null
-    fi
+    hostname "$1" 2>/dev/null
 }
 
 # nmcli's error output echoes the password back, so none of it is kept. The

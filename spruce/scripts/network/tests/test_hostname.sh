@@ -109,7 +109,7 @@ check "then spruce" "spruce-flip" "$(source_host spruce "")"
 printf 'spruce-flip\n' > "$test_dir/kernel"
 check "back to firmware" "miyoo-flip" "$(source_host firmware "")"
 
-for fw in localhost "(none)" none localhost-localdomain "" "!!!"; do
+for fw in localhost "(none)" none localhost-localdomain localhost.localdomain "" "!!!"; do
     fresh_boot "$fw"
     check "firmware: firmware '$fw' uses device" "flip" "$(source_host firmware "")"
     check "firmware: firmware '$fw' captured empty" "yes:" "$([ -f "$test_dir/captured" ] && echo yes):$(cat "$test_dir/captured")"
