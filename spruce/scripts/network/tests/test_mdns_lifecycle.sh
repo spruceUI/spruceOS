@@ -14,10 +14,11 @@ MDNS_START_LOCK="$test_dir/starting"
 MDNS_PROC_DIR="$test_dir/proc"
 AVAHI_BIN="$test_dir/avahi-daemon"
 AVAHI_NAME_FILE="$test_dir/avahi_name"
+FIRMWARE_HOSTNAME_FILE="$test_dir/firmware_name"
 PLATFORM_FAMILY=other
 PLATFORM=Test
 export HOSTNAME_STATE_FILE MDNS_BIN MDNS_SERVICE_DIR MDNS_PID_FILE MDNS_START_LOCK MDNS_PROC_DIR \
-    AVAHI_BIN AVAHI_NAME_FILE PLATFORM_FAMILY PLATFORM
+    AVAHI_BIN AVAHI_NAME_FILE FIRMWARE_HOSTNAME_FILE PLATFORM_FAMILY PLATFORM
 
 # 4242 is mdnsd; 4343 is a shell that only mentions its path, which "pgrep -f" also finds.
 mkdir -p "$MDNS_PROC_DIR/4242" "$MDNS_PROC_DIR/4343"

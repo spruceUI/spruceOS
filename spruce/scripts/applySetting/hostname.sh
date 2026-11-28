@@ -11,7 +11,7 @@ SPRUCE_CFG=/mnt/SDCARD/Saves/spruce/spruce-config.json
 HOSTNAME_PATH='.menuOptions."Network Settings".hostname.selected'
 
 # Custom device name only: put the normalised name in place of what was typed, so the setting
-# shows what is really used (empty when nothing valid remains, which means the model default).
+# shows what is really used (empty when nothing valid remains, which means the device name).
 if [ "$1" = name ]; then
     typed="$(normalize_hostname "$2")"
     if [ "$typed" != "$2" ]; then

@@ -628,16 +628,17 @@
                 "display": "Device name",
                 "description": "{hostname}.local",
                 "options":[
-                    "Device",
+                    "device",
                     "spruce",
-                    "Custom"
+                    "firmware",
+                    "custom"
                 ],
-                "selected":"Device",
+                "selected":"device",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/hostname.sh"
             },
             "hostname": {
                 "display": "Custom device name",
-                "description": "Used when Device name is Custom",
+                "description": "Used when Device name is custom",
                 "type": "freeText",
                 "selected": "",
                 "changeCmd": "/mnt/SDCARD/spruce/scripts/applySetting/hostname.sh name"

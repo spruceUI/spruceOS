@@ -5,7 +5,7 @@
 
 HOSTNAME_STATE_FILE="${HOSTNAME_STATE_FILE:-/tmp/spruce_hostname}"
 MAGICX_DEVICE_FILE="${MAGICX_DEVICE_FILE:-/usr/magicx/device}"
-DEVICE_HOSTNAME_FILE="${DEVICE_HOSTNAME_FILE:-/tmp/spruce_device_hostname}"
+FIRMWARE_HOSTNAME_FILE="${FIRMWARE_HOSTNAME_FILE:-/tmp/spruce_firmware_hostname}"
 KERNEL_HOSTNAME_FILE="${KERNEL_HOSTNAME_FILE:-/proc/sys/kernel/hostname}"
 
 # Lowercase, spaces to '-', keep [a-z0-9-], strip edge '-', truncate to 63.
@@ -14,7 +14,8 @@ normalize_hostname() {
         sed 's/^-*//; s/-*$//' | cut -c1-63 | sed 's/-*$//'
 }
 
-get_model_hostname() {
+# The model key, e.g. flip, rgsp, miniflip; empty when detection failed.
+get_model_key() {
     case "${PLATFORM_FAMILY:-}" in
         miyoomini)
             case "${MINI_MODEL:-}" in
@@ -29,44 +30,64 @@ get_model_hostname() {
         oakmoss) key="$(head -n 1 "$MAGICX_DEVICE_FILE" 2>/dev/null | tr -d '\r')" ;;
         *) key="${PLATFORM:-}" ;;
     esac
-    key="$(normalize_hostname "$key")"
-    if [ -z "$key" ]; then
+    normalize_hostname "$key"
+}
+
+# Device: the model key, or spruce when there is none.
+get_device_name() {
+    _key="$(get_model_key)"
+    echo "${_key:-spruce}"
+}
+
+# spruce: spruce-<model key>, or spruce when there is none.
+get_spruce_model_hostname() {
+    _key="$(get_model_key)"
+    if [ -z "$_key" ]; then
         echo "spruce"
     else
-        echo "spruce-$key"
+        echo "spruce-$_key"
     fi
 }
 
-# The firmware's own hostname, captured once per boot (by the first get_spruce_hostname call,
-# whatever the source, which precedes device_set_hostname) so later calls still see it after
-# spruce has changed the kernel name.
-get_device_hostname() {
-    if [ -s "$DEVICE_HOSTNAME_FILE" ]; then
-        head -n 1 "$DEVICE_HOSTNAME_FILE"
+# The firmware's own hostname, normalised; empty when it has none. Captured once per boot (by the
+# first get_spruce_hostname call, whatever the source, which precedes device_set_hostname) so later
+# calls still see it after spruce has changed the kernel name. The file existing marks the capture,
+# so an empty capture is not retried.
+get_firmware_hostname() {
+    if [ -f "$FIRMWARE_HOSTNAME_FILE" ]; then
+        head -n 1 "$FIRMWARE_HOSTNAME_FILE"
         return
     fi
-    _device_name="$(normalize_hostname "$(head -n 1 "$KERNEL_HOSTNAME_FILE" 2>/dev/null)")"
-    case "$_device_name" in
-        "" | none | localhost | localhost-localdomain) _device_name="$(get_model_hostname)" ;;
+    _fw_name="$(normalize_hostname "$(head -n 1 "$KERNEL_HOSTNAME_FILE" 2>/dev/null)")"
+    case "$_fw_name" in
+        none | localhost | localhost-localdomain) _fw_name="" ;;
     esac
-    echo "$_device_name" >"$DEVICE_HOSTNAME_FILE" 2>/dev/null
-    echo "$_device_name"
+    echo "$_fw_name" >"$FIRMWARE_HOSTNAME_FILE" 2>/dev/null
+    echo "$_fw_name"
 }
 
-# Device name setting: Device (the firmware's name, the default), spruce (the model name) or
-# Custom (the typed name, the model name while empty).
+# Device name setting, the name in use: device (the model name, the default), firmware (the
+# firmware's name, the device name when it has none), spruce (spruce-<model>) or custom (the typed
+# name, the device name while empty).
 get_spruce_hostname() {
-    get_device_hostname >/dev/null
+    _fw_name="$(get_firmware_hostname)"
     case "$(get_config_value '.menuOptions."Network Settings".hostnameSource.selected' "")" in
-        spruce) get_model_hostname ;;
-        Custom)
+        firmware)
+            if [ -n "$_fw_name" ]; then
+                echo "$_fw_name"
+            else
+                get_device_name
+            fi
+            ;;
+        spruce) get_spruce_model_hostname ;;
+        custom)
             _user_name="$(normalize_hostname "$(get_config_value '.menuOptions."Network Settings".hostname.selected' "")")"
             if [ -n "$_user_name" ]; then
                 echo "$_user_name"
             else
-                get_model_hostname
+                get_device_name
             fi
             ;;
-        *) get_device_hostname ;;
+        *) get_device_name ;;
     esac
 }
