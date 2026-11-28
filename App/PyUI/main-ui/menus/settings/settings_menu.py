@@ -198,8 +198,8 @@ class SettingsMenu(ABC):
                             image_path_selected=None,
                             description=Language.label(
                                 "setByThemeDescription",
-                                "Your theme sets these. Pick a theme without {file} to choose."
-                            ).format(file=option.get('themeOverrideFile')),
+                                "Your current theme controls this setting."
+                            ),
                             icon=None,
                             value=lambda input_value: None
                         )

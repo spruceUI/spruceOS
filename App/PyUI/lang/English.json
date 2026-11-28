@@ -347,7 +347,7 @@
     "forgetText": "Forget",
     "toggleOverrideText": "Toggle Override",
     "setByTheme": "Set by theme",
-    "setByThemeDescription": "Your theme sets these. Pick a theme without {file} to choose.",
+    "setByThemeDescription": "Your current theme controls this setting.",
     "cloudflareOfflineAborting": "Cloudflare ping failed; device is offline. Aborting.",
     "scrapingBoxartPatient": "Scraping box art. Please be patient, especially with large libraries!",
     "scrapingComplete": "Scraping complete!",
