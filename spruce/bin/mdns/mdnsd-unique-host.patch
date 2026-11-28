@@ -1,0 +1,214 @@
+diff --git a/libmdnsd/mdnsd.c b/libmdnsd/mdnsd.c
+index 060055c..2eb312c 100644
+--- a/libmdnsd/mdnsd.c
++++ b/libmdnsd/mdnsd.c
+@@ -196,6 +196,36 @@ static size_t _rr_len(mdns_answer_t *rr)
+ }
+ 
+ /* Compares new rdata with known a, painfully */
++static bool _a_match(struct resource *r, mdns_answer_t *a);
++
++/* spruce: true if any of our records for r's name/type has r's rdata */
++static bool _r_match_any(mdns_daemon_t *d, struct resource *r)
++{
++	mdns_record_t *x;
++
++	for (x = _r_next(d, NULL, r->name, r->type); x; x = _r_next(d, x, r->name, r->type)) {
++		if (_a_match(r, &x->rr))
++			return true;
++	}
++
++	return false;
++}
++
++/* spruce: unique host address record with someone else's rdata for it */
++static mdns_record_t *_host_conflict(mdns_daemon_t *d, struct resource *r)
++{
++	mdns_record_t *x;
++
++	if (!r->name || (r->type != QTYPE_A && r->type != QTYPE_AAAA))
++		return NULL;
++
++	x = _r_next(d, NULL, r->name, r->type);
++	if (!x || !x->unique || _r_match_any(d, r))
++		return NULL;
++
++	return x;
++}
++
+ static bool _a_match(struct resource *r, mdns_answer_t *a)
+ {
+ 	if (!a->name)
+@@ -1147,6 +1177,37 @@ int mdnsd_in(mdns_daemon_t *d, struct message *m, const inet_addr_t *from)
+ 		return 0;
+ 
+ 	if (m->header.qr == 0) {
++		/*
++		 * spruce: simultaneous probe (RFC 6762 s8.2), simplified.  If
++		 * another host probes for a host name we are still probing with
++		 * different rdata, the side with the lexicographically lower
++		 * address renames instead of deferring and re-probing.
++		 */
++		for (i = 0; m->ns && i < m->nscount; i++) {
++			struct resource *ns = &m->ns[i];
++			int cmp;
++
++			r = _host_conflict(d, ns);
++			if (!r || r->unique >= 5)
++				continue;
++
++			if (ns->type == QTYPE_A)
++				cmp = memcmp(&ns->known.a.ip, &r->rr.ip, 4);
++			else
++				cmp = memcmp(&ns->known.aaaa.ip6, &r->rr.ip6, 16);
++			if (cmp <= 0)
++				continue;
++
++			if (!did_addr_refresh) {
++				did_addr_refresh = true;
++				_refresh_local_addrs(d, true);
++			}
++			if (_is_local(d, from))
++				continue;
++			_conflict(d, r);
++			break;
++		}
++
+ 		/* Process each query */
+ 		for (i = 0; i < m->qdcount; i++) {
+ 			mdns_record_t *r_start, *r_next;
+@@ -1253,6 +1314,15 @@ int mdnsd_in(mdns_daemon_t *d, struct message *m, const inet_addr_t *from)
+ 			if (_is_local(d, from))
+ 				continue;
+ 			_conflict(d, r);
++		} else if (m->an[i].ttl && (r = _host_conflict(d, &m->an[i]))) {
++			/* spruce: RFC 6762 s9, another host claims our host name */
++			if (!did_addr_refresh) {
++				did_addr_refresh = true;
++				_refresh_local_addrs(d, true);
++			}
++			if (_is_local(d, from))
++				continue;
++			_conflict(d, r);
+ 		}
+ 
+ 		if (d->received_callback)
+@@ -1761,6 +1831,7 @@ static int _update_addresses_for_host(mdns_daemon_t *d, const char *host, unsign
+ {
+ 	mdns_record_t *r;
+ 	mdns_record_t *cur;
++	mdns_record_t *tmpl = NULL;
+ 	unsigned long ttl = 120; /* default TTL if none exists */
+ 	char buf6[INET6_ADDRSTRLEN];
+ 
+@@ -1773,6 +1844,9 @@ static int _update_addresses_for_host(mdns_daemon_t *d, const char *host, unsign
+ 		const mdns_answer_t *data = mdnsd_record_data(r);
+ 		if (data && data->ttl)
+ 			ttl = data->ttl;
++		/* spruce: caller made the host record unique, keep it so */
++		if (r->unique)
++			tmpl = r;
+ 	}
+ 
+ 	/* For each desired address, check if there's a matching existing record */
+@@ -1802,7 +1876,12 @@ static int _update_addresses_for_host(mdns_daemon_t *d, const char *host, unsign
+ 		}
+ 		if (!found) {
+ 			/* Create new record for this address */
+-			mdns_record_t *nr = mdnsd_shared(d, host, type, ttl);
++			mdns_record_t *nr;
++
++			if (tmpl)
++				nr = mdnsd_unique(d, host, type, ttl, tmpl->conflict, tmpl->arg);
++			else
++				nr = mdnsd_shared(d, host, type, ttl);
+ 			if (!nr)
+ 				continue;
+ 			if (type == QTYPE_A) {
+diff --git a/src/conf.c b/src/conf.c
+index 6e47e1b..1ad9ccd 100644
+--- a/src/conf.c
++++ b/src/conf.c
+@@ -301,6 +301,21 @@ int conf_init(struct iface *iface, const char *path, const char *hostnm)
+ 		strlcpy(&hostname[hlen], suffix, sizeof(hostname) - hlen);
+ 	}
+ 
++	/* spruce: publish the name in use, atomically, for scripts */
++	if (hostfn) {
++		char tmp[PATH_MAX];
++		FILE *fp;
++
++		snprintf(tmp, sizeof(tmp), "%s.tmp", hostfn);
++		fp = fopen(tmp, "w");
++		if (fp) {
++			fprintf(fp, "%s\n", hostname);
++			if (fclose(fp) == 0)
++				rename(tmp, hostfn);
++		}
++	}
++	NOTE("%s: using host name %s", iface->ifname, hostname);
++
+ 	if (stat(path, &st)) {
+ 		if (ENOENT == errno)
+ 			ERR("Services directory %s, missing or unconfigured.", path);
+diff --git a/src/mdnsd.c b/src/mdnsd.c
+index b837e17..fe5f563 100644
+--- a/src/mdnsd.c
++++ b/src/mdnsd.c
+@@ -55,6 +55,7 @@ static volatile sig_atomic_t running = 1;
+ static volatile sig_atomic_t reload = 0;
+ static const char *prognm      = PACKAGE_NAME;
+ char *hostnm      = NULL;
++char *hostfn      = NULL;
+ static char *ifname      = NULL;
+ static const char *path        = NULL;
+ static const char *pidfn       = PACKAGE_NAME;
+@@ -321,7 +322,7 @@ static int usage(int code)
+ #ifdef HAVE_SO_BINDTODEVICE
+ 	       "[-i IFACE] "
+ #endif
+-	       "[-l LEVEL] [-p FILE] [-t TTL] [-u USER] [PATH]\n"
++	       "[-l LEVEL] [-p FILE] [-t TTL] [-u USER] [-w FILE] [PATH]\n"
+ 	       "\n"
+ 	       "Options:\n"
+ 	       "    -g GROUP  Group to drop privileges to after start\n"
+@@ -337,6 +338,7 @@ static int usage(int code)
+ 	       "    -t TTL    Set TTL of mDNS packets, default: 1 (link-local only)\n"
+ 	       "    -u USER   User to drop privileges to after start\n"
+ 	       "    -v        Show program version and support information\n"
++	       "    -w FILE   Write the host name in use to FILE, updated on rename\n"
+ 	       "\n"
+ 	       "Arguments:\n"
+ 	       "    PATH      Path to mDNS-SD .service files, default: /etc/mdns.d\n",
+@@ -372,7 +374,7 @@ int main(int argc, char *argv[])
+ #ifdef HAVE_SO_BINDTODEVICE
+ 			   "i:"
+ #endif
+-			   "l:np:st:u:v?")) != EOF) {
++			   "l:np:st:u:vw:?")) != EOF) {
+ 		switch (c) {
+ 		case 'g':
+ 			groupname = optarg;
+@@ -421,6 +423,10 @@ int main(int argc, char *argv[])
+ 			username = optarg;
+ 			break;
+ 
++		case 'w':
++			hostfn = optarg;
++			break;
++
+ 		case 'v':
+ 			printf("%s %s\n"
+ 			       "\n"
+diff --git a/src/mdnsd.h b/src/mdnsd.h
+index aeff6f6..9138e57 100644
+--- a/src/mdnsd.h
++++ b/src/mdnsd.h
+@@ -85,6 +85,7 @@ void          iface_init(char *ifname);
+ void          iface_exit(void);
+ 
+ /* conf.c */
++extern char *hostfn;
+ int conf_init(struct iface *iface, const char *path, const char *hostnm);
+ 
+ /* replacement functions for systems that don't have them  */

@@ -128,7 +128,22 @@ runtime_mounts_a133p() {
 # Use a separate session to survive launcher exit.
 device_start_dhcp_client() {
     pgrep -f "udhcpc.*wlan0" >/dev/null && return 0
-    setsid udhcpc -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
+    if [ -n "${SPRUCE_HOSTNAME:-}" ]; then
+        # -f never returns on success, so a function can't do the retry; exit 1 means -x was rejected
+        setsid sh -c '
+            name=$1; shift
+            udhcpc "$@" -x "hostname:$name"
+            rc=$?
+            if [ "$rc" -eq 1 ]; then
+                echo "udhcpc rejected -x hostname:$name; retrying without it"
+                udhcpc "$@"
+                rc=$?
+            fi
+            exit "$rc"
+        ' sh "$SPRUCE_HOSTNAME" -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
+    else
+        setsid udhcpc -i wlan0 -f -t 5 -T 3 </dev/null >/tmp/spruce-dhcp.log 2>&1 &
+    fi
     return 0
 }
 
