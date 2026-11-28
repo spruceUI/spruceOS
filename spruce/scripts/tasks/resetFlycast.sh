@@ -2,15 +2,16 @@
 
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
-# Standalone only: an update restores the player's Emu/DC/config (spruceBackup), so this release's defaults live in
-# Emu/DC/default_configs, outside it. RetroArch's Flycast files and the DC/NAOMI/Atomiswave menu picks are left alone.
+# Standalone only: user configuration lives in Saves/flycast, seeded from
+# Emu/DC/default_configs. RetroArch's Flycast files and the DC/NAOMI/Atomiswave menu picks are left alone.
 DEF="/mnt/SDCARD/Emu/DC/default_configs"
-LIVE_CFG="/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg"
+LIVE_CFG="/mnt/SDCARD/Saves/flycast/emu.cfg"
 DEFAULT_CFG="$DEF/flycast/emu.cfg"
-LIVE_MAP="/mnt/SDCARD/Emu/DC/config/flycast/mappings/SDL_Xbox 360 Controller.cfg"
+LIVE_MAP="/mnt/SDCARD/Saves/flycast/mappings/SDL_Xbox 360 Controller.cfg"
 DEFAULT_MAP="$DEF/flycast/mappings/SDL_Xbox 360 Controller.cfg"
 
 log_message "Resetting Flycast config to default."
+mkdir -p "${LIVE_MAP%/*}"
 [ -e "$DEFAULT_CFG" ] && cp -f "$DEFAULT_CFG" "$LIVE_CFG"
 [ -e "$DEFAULT_CFG" ] || log_message "Reset Flycast config: $DEFAULT_CFG does not exist, nothing restored"
 [ -e "$DEFAULT_MAP" ] && cp -f "$DEFAULT_MAP" "$LIVE_MAP"

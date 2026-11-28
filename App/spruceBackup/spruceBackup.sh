@@ -84,7 +84,6 @@ log_message "Backup file will be: $seven_z_file"
 # - spruce emulator and system configs
 # - modified theme configs
 # - Drastic saves and configs
-# - Flycast standalone configs
 # - RetroArch main configs
 # - RetroArch core configs
 # - RetroArch overlays (excluding specific folders)
@@ -94,7 +93,6 @@ log_message "Backup file will be: $seven_z_file"
 folders="
 /mnt/SDCARD/App/FileManagement/config.ini
 /mnt/SDCARD/App/spruceRestore/.lastUpdate
-/mnt/SDCARD/Emu/DC/config
 /mnt/SDCARD/Emu/NDS/backup
 /mnt/SDCARD/Emu/NDS/backup-32
 /mnt/SDCARD/Emu/NDS/backup-64

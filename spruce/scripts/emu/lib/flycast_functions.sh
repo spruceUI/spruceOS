@@ -23,12 +23,13 @@ FLYCAST_SA_DATA="${FLYCAST_SA_DATA:-/mnt/SDCARD/Saves/saves/Flycast-standalone}"
 FLYCAST_BIOS_SRC="${FLYCAST_BIOS_SRC:-/mnt/SDCARD/BIOS/dc}"
 FLYCAST_BIOS_VIEW="${FLYCAST_BIOS_VIEW:-/tmp/flycast-bios}"
 FLYCAST_DEFAULTS="${FLYCAST_DEFAULTS:-/mnt/SDCARD/Emu/DC/default_configs}"
+FLYCAST_CONFIG_HOME="${FLYCAST_CONFIG_HOME:-/mnt/SDCARD/Saves}"
 # The one card set: the libretro core's cards in BIOS/dc, the only place it keeps them with shared VMUs.
 FLYCAST_VMU_DIR="${FLYCAST_VMU_DIR:-/mnt/SDCARD/BIOS/dc}"
 
 set_ui_scale() {
 
-	CFG=/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg
+	CFG="$FLYCAST_CONFIG_HOME/flycast/emu.cfg"
 
 	case "$PLATFORM" in
 		"Flip") SCALING=70 ;;
@@ -44,7 +45,7 @@ set_ui_scale() {
 # FLYCAST_CHEEVOS_ARGS gets the RAOfflineProxy host as -config settings, which are not
 # saved, so emu.cfg never keeps a proxy address. The proxy only serves softcore.
 configure_flycast_cheevos() {
-	CFG=/mnt/SDCARD/Emu/DC/config/flycast/emu.cfg
+	CFG="$FLYCAST_CONFIG_HOME/flycast/emu.cfg"
 	FLYCAST_CHEEVOS_ARGS=""
 	rac_mode="$(get_config_value '.menuOptions."RetroAchievements Settings".modeToggle.selected' "Manual")"
 	rac_user="$(get_config_value '.menuOptions."RetroAchievements Settings".username.selected' "")"
@@ -158,20 +159,30 @@ migrate_standalone_data() {
 install_flycast_pad_mapping() {
 	for f in "$FLYCAST_DEFAULTS/flycast/pads/$FLYCAST_PAD_MAP"/SDL_*.cfg; do
 		[ -f "$f" ] || continue
-		dst="${XDG_CONFIG_HOME:-/mnt/SDCARD/Emu/DC/config}/flycast/mappings/${f##*/}"
+		dst="${XDG_CONFIG_HOME:-$FLYCAST_CONFIG_HOME}/flycast/mappings/${f##*/}"
 		if [ ! -e "$dst" ]; then mkdir -p "${dst%/*}" && cp "$f" "$dst"
 		elif [ "$FLYCAST_PAD_REFRESH" = 1 ] && head -n1 "$dst" | grep -q '^; UNVERIFIED pad map for ' && ! cmp -s "$f" "$dst"; then cp -f "$f" "$dst"; fi
 	done
 }
 
+seed_flycast_config() {
+	local seed="$FLYCAST_DEFAULTS/flycast"
+	local live="$FLYCAST_CONFIG_HOME/flycast"
+
+	if [ ! -d "$live" ] && [ -d "$seed" ]; then
+		mkdir -p "$FLYCAST_CONFIG_HOME" && cp -a "$seed" "$FLYCAST_CONFIG_HOME/"
+	fi
+}
+
 run_flycast_standalone() {
 
+	seed_flycast_config
 	set_ui_scale
 
 	export HOME="/mnt/SDCARD/Emu/DC"
 	export XDG_DATA_HOME="$FLYCAST_SA_DATA"
 	export FLYCAST_BIOS_PATH="$FLYCAST_BIOS_VIEW"
-	export XDG_CONFIG_HOME="/mnt/SDCARD/Emu/DC/config"
+	export XDG_CONFIG_HOME="$FLYCAST_CONFIG_HOME"
 	export LD_LIBRARY_PATH="$HOME/lib64:$LD_LIBRARY_PATH"
 
 	mkdir -p "$HOME/bios"

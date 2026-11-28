@@ -235,6 +235,21 @@ migrate_pico8_data() {
     log_message "PICO-8 data migration: copied .lexaloffle into Saves"
 }
 
+# Flycast's standalone configuration is user state. The Emu directory now
+# contains only defaults for new installations, so carry an existing live copy
+# into Saves before a later update replaces the old location.
+migrate_flycast_config() {
+    _old_config="/mnt/SDCARD/Emu/DC/config/flycast"
+    _new_config="/mnt/SDCARD/Saves/flycast"
+
+    [ -d "$_new_config" ] && return 0
+    [ -d "$_old_config" ] || return 0
+
+    mkdir -p "${_new_config%/*}" || return 1
+    cp -a "$_old_config" "$_new_config" || return 1
+    log_message "Flycast config migration: copied configuration into Saves"
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -258,6 +273,10 @@ if ! migrate_n64_custom_remap; then
 fi
 if ! migrate_pico8_data; then
     log_message "Failed to migrate PICO-8 data"
+    _upgrade_warnings=1
+fi
+if ! migrate_flycast_config; then
+    log_message "Failed to migrate Flycast configuration"
     _upgrade_warnings=1
 fi
 
