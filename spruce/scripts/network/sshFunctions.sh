@@ -3,7 +3,9 @@
 . /mnt/SDCARD/spruce/scripts/helperFunctions.sh
 
 SSH_DIR="/mnt/SDCARD/spruce/bin/SSH"
-SSH_KEYS="/mnt/SDCARD/spruce/etc/ssh/keys"
+# Host keys are device state, not part of the spruce install. Keeping them in
+# Saves prevents updates from changing the server fingerprint.
+SSH_KEYS="/mnt/SDCARD/Saves/ssh/keys"
 SSH_SERVICE_NAME=$(get_ssh_service_name)
 
 dropbear_keygen() {

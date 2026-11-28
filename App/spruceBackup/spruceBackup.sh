@@ -81,8 +81,6 @@ seven_z_file="$BACKUP_DIR/backups/spruceBackup_${timestamp}.7z"
 log_message "Backup file will be: $seven_z_file"
 
 # Things being backed up:
-# - Syncthing config
-# - SSH keys
 # - spruce emulator and system configs
 # - modified theme configs
 # - PICO-8 config and carts
@@ -132,8 +130,6 @@ folders="
 /mnt/SDCARD/Saves/spruce/backups/spruce-config.json
 /mnt/SDCARD/Saves/spruce/emu_backups
 /mnt/SDCARD/Saves/spruce/theme_backups
-/mnt/SDCARD/spruce/bin/Syncthing/config
-/mnt/SDCARD/spruce/etc/ssh/keys
 "
 
 log_message "Folders to backup: $folders"

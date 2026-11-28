@@ -177,6 +177,35 @@ rename_darkmoss_emulator_key() {
     done
 }
 
+# SSH host keys used to live beside the installed spruce payload. Move them
+# into Saves so updates preserve the device's SSH host fingerprint. Never
+# replace keys that were already generated in the new location.
+migrate_ssh_host_keys() {
+    _old_keys="/mnt/SDCARD/spruce/etc/ssh/keys"
+    _new_keys="/mnt/SDCARD/Saves/ssh/keys"
+
+    for _key_name in dropbear_rsa_host_key dropbear_ed25519_host_key; do
+        [ -f "$_old_keys/$_key_name" ] || continue
+
+        if [ -e "$_new_keys/$_key_name" ]; then
+            log_message "SSH key migration: keeping existing $_new_keys/$_key_name"
+            continue
+        fi
+
+        if ! mkdir -p "$_new_keys"; then
+            log_message "SSH key migration: could not create $_new_keys"
+            return 1
+        fi
+
+        if mv "$_old_keys/$_key_name" "$_new_keys/$_key_name"; then
+            log_message "SSH key migration: moved $_key_name into Saves"
+        else
+            log_message "SSH key migration: failed to move $_key_name into Saves"
+            return 1
+        fi
+    done
+}
+
 _upgrade_warnings=0
 enable_spruce_context_buttons
 if ! update_shader_presets; then
@@ -190,6 +219,10 @@ migrate_pokedaisy_selection GBA pokedaisy_gba
 for _system in DC N64 NDS PS SATURN; do
     rename_darkmoss_emulator_key "$_system"
 done
+if ! migrate_ssh_host_keys; then
+    log_message "Failed to migrate SSH host keys"
+    _upgrade_warnings=1
+fi
 
 # -------------------- UPGRADE COMPLETION --------------------
 if [ "$_upgrade_warnings" -eq 0 ]; then
